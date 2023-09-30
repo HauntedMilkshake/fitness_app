@@ -1,0 +1,28 @@
+<?xml version="1.0" encoding="utf-8"?>
+<menu xmlns:android="http://schemas.android.com/apk/res/android">
+    <item
+        android:id="@+id/profile"
+        android:enabled="true"
+        android:icon="@drawable/ic_bottom_nav_home"
+        android:title="@string/profile"/>
+    <item
+        android:id="@+id/history"
+        android:enabled="true"
+        android:icon="@drawable/ic_bottom_nav_home"
+        android:title="@string/history"/>
+    <item
+        android:id="@+id/workout"
+        android:enabled="true"
+        android:icon="@drawable/ic_bottom_nav_home"
+        android:title="@string/workout"/>
+    <item
+        android:id="@+id/exercise"
+        android:enabled="true"
+        android:icon="@drawable/ic_bottom_nav_home"
+        android:title="@string/exercise"/>
+    <item
+        android:id="@+id/measures"
+        android:enabled="true"
+        android:icon="@drawable/ic_bottom_nav_home"
+        android:title="@string/measure" />
+</menu>

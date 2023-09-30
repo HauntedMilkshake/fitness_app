@@ -1,0 +1,11 @@
+<resources>
+    <string name="app_name">fitness_app</string>
+<!-- Strings used for bottom navigation   -->
+    <string name="profile">Profile</string>
+    <string name="history">History</string>
+    <string name="workout">Workout</string>
+    <string name="exercise">Exercise</string>
+    <string name="measure">Measures</string>
+<!-- Strings used for nav graph fragment labeling   -->
+    <string name="login">Log in</string>
+</resources>
