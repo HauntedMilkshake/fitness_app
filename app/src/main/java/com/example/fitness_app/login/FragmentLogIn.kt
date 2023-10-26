@@ -5,7 +5,10 @@ import android.view.LayoutInflater
 import android.view.View
 import android.view.ViewGroup
 import androidx.fragment.app.Fragment
+import androidx.navigation.fragment.findNavController
+import com.example.fitness_app.R
 import com.example.fitness_app.databinding.FragmentLogInBinding
+import com.example.fitness_app.hideBottomNav
 
 class FragmentLogIn: Fragment() {
     private var _binding: FragmentLogInBinding? = null
@@ -14,16 +17,23 @@ class FragmentLogIn: Fragment() {
         _binding = FragmentLogInBinding.inflate(inflater, container, false)
         return binding.root
     }
+    override fun onStart() {
+        super.onStart()
+        requireActivity().hideBottomNav()
+    }
     override fun onViewCreated(view: View, savedInstanceState: Bundle?) {
         super.onViewCreated(view, savedInstanceState)
-
-        //for hiding the navbar, haven't tested it
-//        val view = requireActivity().findViewById<BottomNavigationView>(R.id.nav_view)
-//
-//        val fab = requireActivity().findViewById<FloatingActionButton>(R.id.fab)
-//        fab.visibility = View.GONE
-//        view.visibility = View.GONE
-
+        binding.apply {
+            forgotPassword.setOnClickListener {
+                // TODO: forgot password xd
+            }
+            logInButton.setOnClickListener {
+                findNavController().navigate(R.id.login_to_home)
+            }
+            createAccount.setOnClickListener {
+                findNavController().navigate(R.id.login_to_signup)
+            }
+        }
     }
     override fun onDestroyView() {
         super.onDestroyView()

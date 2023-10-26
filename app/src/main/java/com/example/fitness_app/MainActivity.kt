@@ -1,6 +1,7 @@
 package com.example.fitness_app
 
 import android.os.Bundle
+import android.view.View
 import androidx.activity.ComponentActivity
 import androidx.activity.compose.setContent
 import androidx.appcompat.app.AppCompatActivity
@@ -11,6 +12,7 @@ import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.tooling.preview.Preview
+import androidx.fragment.app.FragmentActivity
 import androidx.navigation.findNavController
 import androidx.navigation.ui.AppBarConfiguration
 import androidx.navigation.ui.navigateUp
@@ -38,5 +40,16 @@ class MainActivity : AppCompatActivity() {
         val navController = findNavController(R.id.nav_host_fragment)
         return navController.navigateUp(appBarConfiguration)
                 || super.onSupportNavigateUp()
+    }
+
+}
+fun FragmentActivity.hideBottomNav(){
+    findViewById<BottomNavigationView>(R.id.bottom_navigation).apply {
+        visibility = View.GONE
+    }
+}
+fun FragmentActivity.showBottomNav(){
+    findViewById<BottomNavigationView>(R.id.bottom_navigation).apply {
+        visibility = View.VISIBLE
     }
 }

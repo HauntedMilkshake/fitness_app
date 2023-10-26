@@ -1,11 +1,26 @@
 <resources>
     <string name="app_name">fitness_app</string>
-<!-- Strings used for bottom navigation   -->
+    <!-- Strings used for bottom navigation   -->
     <string name="profile">Profile</string>
     <string name="history">History</string>
     <string name="workout">Workout</string>
     <string name="exercise">Exercise</string>
     <string name="measure">Measures</string>
-<!-- Strings used for nav graph fragment labeling   -->
-    <string name="login">Log in</string>
+    <!-- Strings used for nav graph fragment labeling   -->
+    <string name="login">Login</string>
+    <string name="register">Sign up</string>
+    <string name="home">Home</string>
+    <!-- Strings that are shared   -->
+    <string name="email_text_field_hint">Email</string>
+    <string name="password_text_field_hint">Password</string>
+    <string name="forgot_password">Forgot password?</string>
+    <string name="password_helper_text">Use a password with numbers</string>
+    <string name="username_text">Username</string>
+    <!-- Strings used for welcome fragment-->
+    <string name="welcome_text">Strong</string>
+    <string name="motivational_quote">For a stronger version of yourself</string>
+    <!-- Strings used for nav log in fragment   -->
+    <string name="no_account_text">No account? Sign up here!</string>
+    <!-- String used for signup fragment   -->
+    <string name="already_have_account_text">Already have an account? Log in here!</string>
 </resources>

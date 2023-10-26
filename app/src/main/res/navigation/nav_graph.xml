@@ -3,13 +3,52 @@
     xmlns:app="http://schemas.android.com/apk/res-auto"
     xmlns:tools="http://schemas.android.com/tools"
     android:id="@+id/nav_graph"
-    app:startDestination="@id/log_in">
+    app:startDestination="@id/welcome">
+
+    <fragment
+        android:id="@+id/welcome"
+        android:name="com.example.fitness_app.welcome.FragmentWelcome"
+        android:label="@string/welcome_text"
+        tools:layout="@layout/fragment_welcome">
+        <action
+            android:id="@+id/welcome_to_login"
+            app:destination="@id/log_in"/>
+        <action
+            android:id="@+id/welcome_to_signup"
+            app:destination="@id/signup"/>
+    </fragment>
+
     <fragment
         android:id="@+id/log_in"
         android:name="com.example.fitness_app.login.FragmentLogIn"
         android:label="@string/login"
-        tools:layout="@layout/fragment_log_in"
-        >
+        tools:layout="@layout/fragment_log_in">
+        <action
+            android:id="@+id/login_to_signup"
+            app:destination="@id/signup">
+        </action>
+        <action
+            android:id="@+id/login_to_home"
+            app:destination="@id/home">
+        </action>
+    </fragment>
+
+    <fragment
+        android:id="@+id/signup"
+        android:name="com.example.fitness_app.signup.FragmentSignup"
+        android:label="@string/register"
+        tools:layout="@layout/fragment_sign_up">
+        <action
+            android:id="@+id/signup_to_login"
+            app:destination="@id/log_in">
+        </action>
+    </fragment>
+
+    <fragment
+        android:id="@+id/home"
+        android:name="com.example.fitness_app.profile.FragmentHome"
+        android:label="@string/home"
+        tools:layout="@layout/fragment_home">
     </fragment>
 
 </navigation>
