@@ -41,6 +41,7 @@
         android:layout_height="wrap_content"
         android:text="@string/register"
         android:layout_marginBottom="20dp"
+        app:cornerRadius="20dp"
         app:layout_constraintBottom_toTopOf="@+id/log_in_button"
         app:layout_constraintEnd_toEndOf="parent"
         app:layout_constraintStart_toStartOf="parent" />
@@ -51,6 +52,7 @@
         android:layout_height="wrap_content"
         android:text="@string/login"
         android:layout_marginBottom="100dp"
+        app:cornerRadius="20dp"
         app:layout_constraintBottom_toBottomOf="parent"
         app:layout_constraintEnd_toEndOf="parent"
         app:layout_constraintStart_toStartOf="parent" />
