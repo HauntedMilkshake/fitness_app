@@ -5,6 +5,7 @@ import android.view.LayoutInflater
 import android.view.View
 import android.view.ViewGroup
 import androidx.fragment.app.Fragment
+import androidx.navigation.fragment.findNavController
 import com.example.fitness_app.databinding.FragmentHomeBinding
 import com.example.fitness_app.showBottomNav
 
@@ -25,6 +26,7 @@ class FragmentHome : Fragment() {
 
     override fun onViewCreated(view: View, savedInstanceState: Bundle?) {
         super.onViewCreated(view, savedInstanceState)
+        findNavController().popBackStack(findNavController().currentDestination!!.id, false)
 
     }
 

@@ -4,6 +4,7 @@
     xmlns:tools="http://schemas.android.com/tools"
     android:id="@+id/nav_graph"
     app:startDestination="@id/welcome">
+<!--  app:popUpTo="@id/favFragment"             app:popUpToInclusive="true"             app:popUpToSaveState="true"  -->
 
     <fragment
         android:id="@+id/welcome"
@@ -49,6 +50,46 @@
         android:name="com.example.fitness_app.profile.FragmentHome"
         android:label="@string/home"
         tools:layout="@layout/fragment_home">
+        <action
+            android:id="@+id/home_to_history"
+            app:destination="@id/history">
+        </action>
+        <action
+            android:id="@+id/home_to_workout"
+            app:destination="@id/workout">
+        </action>
+        <action
+            android:id="@+id/home_to_exercises"
+            app:destination="@+id/exercises">
+        </action>
+        <action
+            android:id="@+id/measures"
+            app:destination="@+id/measures">
+        </action>
+    </fragment>
+
+    <fragment
+        android:id="@+id/history"
+        android:name="com.example.fitness_app.history.FragmentHistory"
+        tools:layout="@layout/fragment_history">
+    </fragment>
+
+    <fragment
+        android:id="@+id/workout"
+        android:name="com.example.fitness_app.workout.FragmentWorkout"
+        tools:layout="@layout/fragment_workout">
+    </fragment>
+
+    <fragment
+        android:id="@+id/measures"
+        android:name="com.example.fitness_app.measures.FragmentMeasures"
+        tools:layout="@layout/fragment_measures">
+    </fragment>
+
+    <fragment
+        android:id="@+id/exercises"
+        android:name="com.example.fitness_app.exercise.FragmentExercises"
+        tools:layout="@layout/fragment_exercises">
     </fragment>
 
 </navigation>

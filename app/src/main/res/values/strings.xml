@@ -18,7 +18,7 @@
     <string name="username_text">Username</string>
     <!-- Strings used for welcome fragment-->
     <string name="welcome_text">Strong</string>
-    <string name="motivational_quote">For a stronger version of yourself</string>
+    <string name="motivational_quote">For a stronger version of yourself!</string>
     <!-- Strings used for nav log in fragment   -->
     <string name="no_account_text">No account? Sign up here!</string>
     <!-- String used for signup fragment   -->
