@@ -29,6 +29,7 @@ class FragmentLogIn: Fragment() {
             }
             logInButton.setOnClickListener {
                 findNavController().navigate(R.id.login_to_home)
+
             }
             createAccount.setOnClickListener {
                 findNavController().navigate(R.id.login_to_signup)

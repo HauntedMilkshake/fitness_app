@@ -87,7 +87,6 @@
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
             android:inputType="numberPassword"
-
             />
 
     </com.google.android.material.textfield.TextInputLayout>
@@ -98,8 +97,8 @@
         android:layout_height="wrap_content"
         android:text="@string/register"
         android:layout_marginTop="20dp"
-        android:backgroundTint="@color/test"
-        app:cornerRadius="20dp"
+        android:backgroundTint="@color/text"
+        app:cornerRadius="15dp"
         app:layout_constraintEnd_toEndOf="parent"
         app:layout_constraintStart_toStartOf="parent"
         app:layout_constraintTop_toBottomOf="@+id/password_field" />

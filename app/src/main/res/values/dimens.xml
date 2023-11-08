@@ -1,0 +1,7 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <dimen name="original_text_size">16sp</dimen>
+    <dimen name="enlarged_text_size">24sp</dimen>
+    <dimen name="appbar_elevation">100dp</dimen>
+
+</resources>

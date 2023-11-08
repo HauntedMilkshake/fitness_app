@@ -8,9 +8,6 @@
     <color name="black">#FF000000</color>
     <color name="white">#FFFFFFFF</color>
     <color name="background">#4C4E52</color>
-
-    <color name="text">#E0D8DE</color>
-    <color name="test">#89909F</color>
-    <color name="test2">#034C3C</color>
-    <color name="blob">#808080</color>
+    <color name="shadow">#000000</color>
+    <color name="text">#808080</color>
 </resources>

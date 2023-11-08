@@ -23,45 +23,30 @@ class FragmentHome : Fragment() {
         _binding = FragmentHomeBinding.inflate(inflater, container, false)
         return binding.root
     }
-
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
         requireActivity().showBottomNav()
     }
-
     override fun onViewCreated(view: View, savedInstanceState: Bundle?) {
         super.onViewCreated(view, savedInstanceState)
-        Log.d("BACKBUTTON", allowBackPressed.toString())
         findNavController().popBackStack(findNavController().currentDestination!!.id, false)
-//        val callback = object : OnBackPressedCallback(true) {
-//            override fun handleOnBackPressed() {
-//                if (allowBackPressed) {
-//                    findNavController().popBackStack()
-//                }
+        //TODO fix it so we can actually pop the backstack once we are logged
+//        binding.apply {
+//            topBar.apply {
+//                addOnOffsetChangedListener(AppBarLayout.OnOffsetChangedListener() { _, verticalOffset ->
+//                    profileText.setTextSize(TypedValue.COMPLEX_UNIT_SP, resources.getDimension(R.dimen.original_text_size) + ( (resources.getDimension(R.dimen.enlarged_text_size) - resources.getDimension(R.dimen.original_text_size) ) * -verticalOffset / totalScrollRange.toFloat()))
+//                    elevation = if(verticalOffset == 0){
+//                        4f
+//                    }else{
+//                        0f
+//                    }
+//                })
 //            }
 //        }
-        binding.apply {
-            topBar.addOnOffsetChangedListener(AppBarLayout.OnOffsetChangedListener() { _, verticalOffset ->
-//                profileText.setTextSize(TypedValue.COMPLEX_UNIT_PX, originalTextSize + (enlargedTextSize - originalTextSize) * scrollPercentage)
-                topBar.elevation = if(verticalOffset == 0){
-                    4f
-                }else{
-                    0f
-                }
-            })
-        }
 //        requireActivity().onBackPressedDispatcher.addCallback(viewLifecycleOwner, callback)
-
     }
-
     override fun onResume() {
         super.onResume()
         allowBackPressed = true
     }
-
-//    override fun onPause() {
-//        super.onPause()
-//        allowBackPressed = false
-//    }
-
 }
