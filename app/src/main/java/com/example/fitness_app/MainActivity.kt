@@ -35,6 +35,11 @@ class MainActivity : AppCompatActivity() {
         val bottomNav = findViewById<BottomNavigationView>(R.id.bottom_navigation)
 
         bottomNav?.setupWithNavController(navController)
+//        bottomNav.setOnItemSelectedListener { item ->
+//            for(i in 0 .. bottomNav.menu.size()){
+//                bottomNav.menu.getItem(i).icon.colorFilter
+//            }
+//        }
     }
     override fun onSupportNavigateUp(): Boolean {
         val navController = findNavController(R.id.nav_host_fragment)
