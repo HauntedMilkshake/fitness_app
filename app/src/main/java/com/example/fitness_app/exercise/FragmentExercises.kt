@@ -16,5 +16,23 @@ class FragmentExercises: Fragment() {
     }
     override fun onViewCreated(view: View, savedInstanceState: Bundle?) {
         super.onViewCreated(view, savedInstanceState)
+        binding.apply {
+            searchIcon.setOnClickListener {
+                exerciseText.visibility = View.GONE
+                searchIcon.visibility = View.GONE
+                settingsDots.visibility = View.GONE
+                removeSearchBar.visibility = View.VISIBLE
+                searchBar.visibility = View.VISIBLE
+            }
+            removeSearchBar.setOnClickListener {
+                if(searchBar.visibility == View.VISIBLE){
+                    exerciseText.visibility = View.VISIBLE
+                    searchIcon.visibility = View.VISIBLE
+                    settingsDots.visibility = View.VISIBLE
+                    searchBar.visibility = View.INVISIBLE
+                    removeSearchBar.visibility = View.GONE
+                }
+            }
+        }
     }
 }
