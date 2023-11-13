@@ -1,18 +1,14 @@
-package com.example.fitness_app.profile
+package com.example.fitness_app.home
 
 import android.os.Bundle
-import android.util.Log
-import android.util.TypedValue
 import android.view.LayoutInflater
 import android.view.View
 import android.view.ViewGroup
-import androidx.activity.OnBackPressedCallback
 import androidx.fragment.app.Fragment
 import androidx.navigation.fragment.findNavController
 import com.example.fitness_app.R
 import com.example.fitness_app.databinding.FragmentHomeBinding
 import com.example.fitness_app.showBottomNav
-import com.google.android.material.appbar.AppBarLayout
 
 class FragmentHome : Fragment() {
     private var _binding: FragmentHomeBinding? = null
@@ -44,6 +40,11 @@ class FragmentHome : Fragment() {
 //            }
 //        }
 //        requireActivity().onBackPressedDispatcher.addCallback(viewLifecycleOwner, callback)
+        binding.apply {
+            settings.setOnClickListener {
+                findNavController().navigate(R.id.home_to_settings)
+            }
+        }
     }
     override fun onResume() {
         super.onResume()

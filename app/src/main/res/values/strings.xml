@@ -33,4 +33,29 @@
     <string name="start_empty_workout_text">start an empty workout</string>
     <string name="my_templates_text">my templates</string>
     <string name="searchbar_hint">Dumbell press</string>
+    <!-- Strings used for settings fragment   -->
+    <string name="settings_text">Settings</string>
+    <string name="edit_text">Edit</string>
+    <string name="units_and_locale_text">Units and Localization</string>
+    <string name="language_text">Language</string>
+    <string name="weight_text">Weight</string>
+    <string name="distance_text">Distance</string>
+    <string name="size_text">Size</string>
+    <string name="general_text">General</string>
+    <string name="sound_effects_text">Sound effects</string>
+    <string name="no_rest_timer_included_text">Doesn\'t include timer alert</string>
+    <string name="keep_screen_on_during_workout_text">Keep screen on during workout</string>
+    <string name="available_bars_text">Available bars</string>
+    <string name="available_plates_text">Available plates</string>
+    <string name="theme_text">Theme</string>
+    <string name="rest_timer_text">Rest timer</string>
+    <string name="timer_increment_value_text">Timer increment value</string>
+    <string name="vibrate_upon_finish_text">Vibrate upon finish</string>
+    <string name="auto_full_screen_text">Auto full screen</string>
+    <string name="sound_text">Sound</string>
+    <string name="show_update_template">Show update template</string>
+    <string name="contact_and_support_text">Contact and support</string>
+    <string name="bug_report_text">Bug report</string>
+    <string name="github_text">Github</string>
+    <string name="tribute_text">Tribute</string>
 </resources>

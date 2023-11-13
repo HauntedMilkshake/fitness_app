@@ -47,7 +47,7 @@
 
     <fragment
         android:id="@+id/home"
-        android:name="com.example.fitness_app.profile.FragmentHome"
+        android:name="com.example.fitness_app.home.FragmentHome"
         android:label="@string/home"
         tools:layout="@layout/fragment_home">
         <action
@@ -63,8 +63,12 @@
             app:destination="@+id/exercises">
         </action>
         <action
-            android:id="@+id/measures"
+            android:id="@+id/home_to_measures"
             app:destination="@+id/measures">
+        </action>
+        <action
+            android:id="@+id/home_to_settings"
+            app:destination="@+id/settings">
         </action>
     </fragment>
 
@@ -90,6 +94,15 @@
         android:id="@+id/exercises"
         android:name="com.example.fitness_app.exercise.FragmentExercises"
         tools:layout="@layout/fragment_exercises">
+    </fragment>
+    <fragment
+        android:id="@+id/settings"
+        android:name="com.example.fitness_app.profile.FragmentProfile"
+        tools:layout="@layout/fragment_profile">
+        <action
+            android:id="@+id/settings_to_home"
+            app:destination="@+id/home"></action>
+
     </fragment>
 
 </navigation>
