@@ -32,17 +32,27 @@ class FragmentWelcome: Fragment() {
         super.onViewCreated(view, savedInstanceState)
         binding.apply {
             entry.setOnClickListener {
-                    it.startAnimation(ScaleAnimation(0f, 20f, 0f, 20f, Animation.RELATIVE_TO_SELF, 0.5f, Animation.RELATIVE_TO_SELF, 0.5f).apply { duration = 1500 })
+                if(welcomeText.visibility != View.VISIBLE) {
+                    it.startAnimation(
+                        ScaleAnimation(
+                            0f,
+                            20f,
+                            0f,
+                            20f,
+                            Animation.RELATIVE_TO_SELF,
+                            0.5f,
+                            Animation.RELATIVE_TO_SELF,
+                            0.5f
+                        ).apply { duration = 1500 })
                     it.postDelayed({
                         welcomeText.visibility = View.VISIBLE
                         underWelcomeText.visibility = View.VISIBLE
                         registerButton.visibility = View.VISIBLE
                         logInButton.visibility = View.VISIBLE
+                        //todo fix background color
                         root.setBackgroundColor(R.color.background)
                     }, 1500)
-
-                it.visibility = View.GONE
-
+                }
             }
             logInButton.setOnClickListener{
                 findNavController().navigate(R.id.welcome_to_login)

@@ -12,7 +12,7 @@
         android:text="@string/register"
         android:textSize="40sp"
         android:textColor="#E0D8DE"
-        android:layout_marginTop="150dp"
+        android:layout_marginTop="115dp"
         app:layout_constraintEnd_toEndOf="parent"
         app:layout_constraintStart_toStartOf="parent"
         app:layout_constraintTop_toTopOf="parent" />
@@ -37,8 +37,6 @@
             android:id="@+id/username_field_text"
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
-            android:inputType="numberPassword"
-
             />
 
     </com.google.android.material.textfield.TextInputLayout>
@@ -85,23 +83,41 @@
         <com.google.android.material.textfield.TextInputEditText
             android:id="@+id/password_field_text"
             android:layout_width="match_parent"
-            android:layout_height="wrap_content"
-            android:inputType="numberPassword"
-            />
+            android:layout_height="wrap_content" />
+    </com.google.android.material.textfield.TextInputLayout>
 
+    <com.google.android.material.textfield.TextInputLayout
+        android:id="@+id/confirm_password_field"
+        android:layout_width="250dp"
+        android:layout_height="wrap_content"
+        android:hint="@string/confirm_password_text"
+        app:boxCornerRadiusBottomEnd="15dp"
+        app:boxCornerRadiusBottomStart="15dp"
+        app:boxCornerRadiusTopEnd="15dp"
+        app:boxCornerRadiusTopStart="15dp"
+        app:endIconMode="password_toggle"
+        app:errorEnabled="true"
+        app:layout_constraintEnd_toEndOf="parent"
+        app:layout_constraintStart_toStartOf="parent"
+        app:layout_constraintTop_toBottomOf="@+id/password_field"
+        app:startIconDrawable="@drawable/ic_password">
+        <com.google.android.material.textfield.TextInputEditText
+            android:id="@+id/confirm_password_field_text"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content" />
     </com.google.android.material.textfield.TextInputLayout>
 
     <com.google.android.material.button.MaterialButton
         android:id="@+id/register_button"
         android:layout_width="240dp"
         android:layout_height="wrap_content"
-        android:text="@string/register"
-        android:layout_marginTop="20dp"
         android:backgroundTint="@color/text"
+        android:text="@string/register"
         app:cornerRadius="15dp"
+        android:layout_marginTop="15dp"
         app:layout_constraintEnd_toEndOf="parent"
         app:layout_constraintStart_toStartOf="parent"
-        app:layout_constraintTop_toBottomOf="@+id/password_field" />
+        app:layout_constraintTop_toBottomOf="@+id/confirm_password_field" />
 
     <TextView
         android:id="@+id/already_have_account"

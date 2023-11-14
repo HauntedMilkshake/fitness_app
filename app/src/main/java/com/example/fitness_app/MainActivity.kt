@@ -35,10 +35,8 @@ class MainActivity : AppCompatActivity() {
         val bottomNav = findViewById<BottomNavigationView>(R.id.bottom_navigation)
 
         bottomNav?.setupWithNavController(navController)
-//        bottomNav.setOnItemSelectedListener { item ->
-//            for(i in 0 .. bottomNav.menu.size()){
-//                bottomNav.menu.getItem(i).icon.colorFilter
-//            }
+//        onBackPressedDispatcher.addCallback(this){
+//
 //        }
     }
     override fun onSupportNavigateUp(): Boolean {
@@ -46,6 +44,7 @@ class MainActivity : AppCompatActivity() {
         return navController.navigateUp(appBarConfiguration)
                 || super.onSupportNavigateUp()
     }
+
 
 }
 fun FragmentActivity.hideBottomNav(){
@@ -58,3 +57,4 @@ fun FragmentActivity.showBottomNav(){
         visibility = View.VISIBLE
     }
 }
+
