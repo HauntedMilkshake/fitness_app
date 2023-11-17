@@ -8,7 +8,7 @@
 
     <fragment
         android:id="@+id/welcome"
-        android:name="com.example.fitness_app.welcome.FragmentWelcome"
+        android:name="bg.zahov.app.welcome.FragmentWelcome"
         android:label="@string/welcome_text"
         tools:layout="@layout/fragment_welcome">
         <action
@@ -21,7 +21,7 @@
 
     <fragment
         android:id="@+id/log_in"
-        android:name="com.example.fitness_app.login.FragmentLogIn"
+        android:name="bg.zahov.app.login.FragmentLogIn"
         android:label="@string/login"
         tools:layout="@layout/fragment_log_in">
         <action
@@ -36,7 +36,7 @@
 
     <fragment
         android:id="@+id/signup"
-        android:name="com.example.fitness_app.signup.FragmentSignup"
+        android:name="bg.zahov.app.signup.FragmentSignup"
         android:label="@string/register"
         tools:layout="@layout/fragment_sign_up">
         <action
@@ -47,7 +47,7 @@
 
     <fragment
         android:id="@+id/home"
-        android:name="com.example.fitness_app.home.FragmentHome"
+        android:name="bg.zahov.app.home.FragmentHome"
         android:label="@string/home"
         tools:layout="@layout/fragment_home">
         <action
@@ -74,30 +74,30 @@
 
     <fragment
         android:id="@+id/history"
-        android:name="com.example.fitness_app.history.FragmentHistory"
+        android:name="bg.zahov.app.history.FragmentHistory"
         tools:layout="@layout/fragment_history">
     </fragment>
 
     <fragment
         android:id="@+id/workout"
-        android:name="com.example.fitness_app.workout.FragmentWorkout"
+        android:name="bg.zahov.app.data.FragmentWorkout"
         tools:layout="@layout/fragment_workout">
     </fragment>
 
     <fragment
         android:id="@+id/measures"
-        android:name="com.example.fitness_app.measures.FragmentMeasures"
+        android:name="bg.zahov.app.measures.FragmentMeasures"
         tools:layout="@layout/fragment_measures">
     </fragment>
 
     <fragment
         android:id="@+id/exercises"
-        android:name="com.example.fitness_app.exercise.FragmentExercises"
+        android:name="bg.zahov.app.exercise.FragmentExercises"
         tools:layout="@layout/fragment_exercises">
     </fragment>
     <fragment
         android:id="@+id/settings"
-        android:name="com.example.fitness_app.profile.FragmentProfile"
+        android:name="bg.zahov.app.profile.FragmentProfile"
         tools:layout="@layout/fragment_profile">
         <action
             android:id="@+id/settings_to_home"
