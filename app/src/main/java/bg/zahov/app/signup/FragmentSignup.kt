@@ -12,7 +12,6 @@ import androidx.navigation.fragment.findNavController
 import bg.zahov.app.hideBottomNav
 import bg.zahov.fitness.app.R
 import bg.zahov.fitness.app.databinding.FragmentSignUpBinding
-import com.example.app.signup.SignupViewModel
 
 class FragmentSignup : Fragment() {
     private var _binding: FragmentSignUpBinding? = null

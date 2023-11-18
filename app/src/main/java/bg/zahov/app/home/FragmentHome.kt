@@ -5,6 +5,7 @@ import android.view.LayoutInflater
 import android.view.View
 import android.view.ViewGroup
 import androidx.fragment.app.Fragment
+import androidx.fragment.app.viewModels
 import androidx.navigation.fragment.findNavController
 import bg.zahov.app.showBottomNav
 import bg.zahov.fitness.app.R
@@ -13,6 +14,7 @@ import bg.zahov.fitness.app.databinding.FragmentHomeBinding
 class FragmentHome : Fragment() {
     private var _binding: FragmentHomeBinding? = null
     private val binding get() = _binding!!
+    private val homeViewModel: HomeViewModel by viewModels()
     private var allowBackPressed: Boolean = false
     override fun onCreateView(
         inflater: LayoutInflater, container: ViewGroup?, savedInstanceState: Bundle?): View {
@@ -43,6 +45,12 @@ class FragmentHome : Fragment() {
         binding.apply {
             settings.setOnClickListener {
                 findNavController().navigate(R.id.home_to_settings)
+            }
+            homeViewModel.userName.observe(viewLifecycleOwner){
+                profileName.text = it
+            }
+            homeViewModel.userWorkouts.observe(viewLifecycleOwner){
+                numberOfWorkouts.text = it.toString()
             }
         }
     }

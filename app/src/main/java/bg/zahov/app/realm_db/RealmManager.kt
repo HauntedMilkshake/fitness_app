@@ -3,8 +3,14 @@ package bg.zahov.app.realm_db
 import android.util.Log
 import io.realm.kotlin.Realm
 import io.realm.kotlin.RealmConfiguration
-import io.realm.kotlin.types.RealmObject
-import kotlinx.coroutines.runBlocking
+import io.realm.kotlin.ext.query
+import kotlinx.coroutines.CoroutineScope
+import kotlinx.coroutines.Dispatchers
+import kotlinx.coroutines.Job
+import kotlinx.coroutines.coroutineScope
+import kotlinx.coroutines.launch
+import kotlinx.coroutines.suspendCancellableCoroutine
+import kotlin.coroutines.resumeWithException
 
 class RealmManager private constructor() {
 
@@ -20,21 +26,76 @@ class RealmManager private constructor() {
 
     private var realmInstance: Realm? = null
 
-    fun createRealm(userId: String) {
+    private fun getConfig(userId: String): RealmConfiguration.Builder {
+        val config = RealmConfiguration.Builder(setOf(User::class, Workout::class, Exercise::class, Sets::class))
+        config.schemaVersion(1)
+        config.deleteRealmIfMigrationNeeded()
+        config.name("$userId.realm")
+        return config
+    }
+    suspend fun createRealm(userId: String, uName: String) {
         try {
-            val config = RealmConfiguration.Builder(setOf(User::class, Workout::class, Exercise::class, Sets::class))
-            config.schemaVersion(1)
-            config.deleteRealmIfMigrationNeeded()
-            config.name("$userId.realm")
-            realmInstance = Realm.open(config.build())
+            realmInstance = Realm.open(getConfig(userId).build())
+            realmInstance?.write {
+                copyToRealm(User().apply {
+                    username = uName
+                    numberOfWorkouts = 0
+                })
+            }
         } catch (e: Exception) {
             Log.e("Realm start error", e.toString())
+        } finally {
+            //might be redundant based on docs
+            realmInstance?.close()
+        }
+    }
+    private suspend fun <T> withRealm(userId: String, block: suspend (Realm) -> T): T {
+        return suspendCancellableCoroutine { cancellableContinuation ->
+            val realmConfig = getConfig(userId).build()
+
+            val job = Job()
+
+                val realm = Realm.open(realmConfig)
+                cancellableContinuation.invokeOnCancellation {
+                    job.cancel()
+                    realm.close()
+                }
+
+                CoroutineScope(Dispatchers.IO + job).launch {
+                        val result = block(realm)
+                        cancellableContinuation.resume(result){
+                            cancellableContinuation.resumeWithException(it)
+                        }
+                }
         }
     }
 
-//    fun <T : RealmObject> createInRealm(objectToCopyRealm: T) {
-//        realmInstance?.write {
-//            copyToRealm(objectToCopyRealm)
+
+    suspend fun getUsernameAndNumberOfWorkouts(userId: String): Pair<String, Int>? {
+        return withRealm(userId) { realm ->
+           val user =  realm.query<User>().first().find()
+            user?.let {
+                Pair(it.username.orEmpty(), it.numberOfWorkouts ?: 0)
+            }
+        }
+    }
+
+    //template for async finding all objects of a type(eg all workouts of a user when needed) needs small adjutments
+//    suspend fun getUserInformation(userId: String): AnythingThatAUserHasALotOf?{
+//        withRealm(userId){ realm ->
+//            val userFlow: Flow<ResultsChange<User>> = realm.query<User>().asFlow()
+//            val asyncCall: Deferred<Unit> = coroutineScope{
+//                async {
+//                    userFlow.collect{ results ->
+//                        when(results){
+//                            is InitialResults<User> ->{
+//                                return results.list
+//                            }
+//                        }
+//                    }
+//                }
+//            }
 //        }
 //    }
 }
+

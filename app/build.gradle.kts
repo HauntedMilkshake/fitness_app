@@ -58,6 +58,7 @@ android {
 
 dependencies {
 
+    implementation("io.realm:realm-android-kotlin-extensions:10.10.0")
     implementation("com.google.firebase:firebase-auth-ktx:22.2.0")
     implementation("androidx.core:core-ktx:1.12.0")
     implementation("androidx.appcompat:appcompat:1.6.1")
@@ -82,6 +83,5 @@ dependencies {
     debugImplementation("androidx.compose.ui:ui-test-manifest")
     implementation("io.realm.kotlin:library-base:1.11.0")
     implementation("io.realm.kotlin:library-sync:1.11.0")
-    implementation("org.jetbrains.kotlinx:kotlinx-coroutines-core:1.7.0")
-
+    implementation("org.jetbrains.kotlinx:kotlinx-coroutines-android:1.7.0")
 }

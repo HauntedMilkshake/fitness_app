@@ -4,9 +4,11 @@ import android.widget.Toast
 import androidx.lifecycle.LiveData
 import androidx.lifecycle.MutableLiveData
 import androidx.lifecycle.ViewModel
+import androidx.lifecycle.viewModelScope
 import bg.zahov.app.realm_db.RealmManager
 import com.google.firebase.auth.FirebaseAuth
 import com.google.firebase.database.FirebaseDatabase
+import kotlinx.coroutines.launch
 
 class SignupViewModel: ViewModel() {
     private val auth: FirebaseAuth = FirebaseAuth.getInstance()
@@ -20,9 +22,11 @@ class SignupViewModel: ViewModel() {
         auth.createUserWithEmailAndPassword(email, password)
             .addOnCompleteListener { task ->
                 if (task.isSuccessful) {
-                    callback(true, null)
-                    _isAuthenticated.postValue(true)
-                    RealmManager.RealmProcessor.createRealm(userName)
+                    viewModelScope.launch {
+                        callback(true, null)
+                        _isAuthenticated.postValue(true)
+                        RealmManager.getInstance().createRealm(userId = auth.currentUser!!.uid, uName = userName)
+                    }
                 } else {
                     callback(false, task.exception?.message)
                 }
