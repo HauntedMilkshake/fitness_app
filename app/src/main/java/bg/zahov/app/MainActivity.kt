@@ -1,9 +1,12 @@
 package bg.zahov.app
 
 import android.os.Bundle
+import android.util.Log
 import android.view.View
+import androidx.activity.viewModels
 import androidx.appcompat.app.AppCompatActivity
 import androidx.fragment.app.FragmentActivity
+import androidx.lifecycle.Observer
 import androidx.navigation.findNavController
 import androidx.navigation.ui.AppBarConfiguration
 import androidx.navigation.ui.navigateUp
@@ -16,6 +19,7 @@ class MainActivity : AppCompatActivity() {
 
     private lateinit var appBarConfiguration: AppBarConfiguration
     private lateinit var binding: ActivityMainBinding
+    private val authViewModel: AuthViewModel by viewModels()
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
         binding = ActivityMainBinding.inflate(layoutInflater)
@@ -26,9 +30,22 @@ class MainActivity : AppCompatActivity() {
         val bottomNav = findViewById<BottomNavigationView>(R.id.bottom_navigation)
 
         bottomNav?.setupWithNavController(navController)
-//        onBackPressedDispatcher.addCallback(this){
-//
-//        }
+
+        authViewModel.isAuthenticated.observe(this, Observer { isAuthenticated ->
+            Log.d("isAuth", isAuthenticated.toString())
+
+            val currentDestinationId = navController.currentDestination?.id
+
+            when {
+                isAuthenticated && currentDestinationId != R.id.log_in -> {
+                    navController.navigate(R.id.welcome_to_home)
+                }
+                !isAuthenticated && currentDestinationId != R.id.welcome -> {
+                    navController.navigate(R.id.welcome)
+                }
+            }
+        })
+
     }
     override fun onSupportNavigateUp(): Boolean {
         val navController = findNavController(R.id.nav_host_fragment)
@@ -48,4 +65,3 @@ fun FragmentActivity.showBottomNav(){
         visibility = View.VISIBLE
     }
 }
-

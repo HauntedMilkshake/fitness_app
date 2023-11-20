@@ -23,7 +23,7 @@
     <string name="no_account_text">No account? Sign up here!</string>
     <!-- String used for signup fragment   -->
     <string name="already_have_account_text">Already have an account? Log in here!</string>
-    <string name="confirm_password_text">Confirm Password</string>
+    <string name="confirm_password_text">Confirm <Password></Password></string>
     <!-- Strings used for profile fragment   -->
     <string name="top_bar_text">Profile</string>
     <string name="dashboard">Dashboard</string>
@@ -45,18 +45,17 @@
     <string name="general_text">General</string>
     <string name="sound_effects_text">Sound effects</string>
     <string name="no_rest_timer_included_text">Doesn\'t include timer alert</string>
-    <string name="keep_screen_on_during_workout_text">Keep screen on during workout</string>
-    <string name="available_bars_text">Available bars</string>
-    <string name="available_plates_text">Available plates</string>
     <string name="theme_text">Theme</string>
     <string name="rest_timer_text">Rest timer</string>
     <string name="timer_increment_value_text">Timer increment value</string>
     <string name="vibrate_upon_finish_text">Vibrate upon finish</string>
-    <string name="auto_full_screen_text">Auto full screen</string>
     <string name="sound_text">Sound</string>
     <string name="show_update_template">Show update template</string>
     <string name="contact_and_support_text">Contact and support</string>
     <string name="bug_report_text">Bug report</string>
     <string name="github_text">Github</string>
     <string name="tribute_text">Tribute</string>
+    <string name="sign_out_button_text">Sign out</string>
+    <string name="switch_on">on</string>
+    <string name="switch_off">off</string>
 </resources>

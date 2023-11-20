@@ -17,6 +17,11 @@
         <action
             android:id="@+id/welcome_to_signup"
             app:destination="@id/signup"/>
+        <action
+            android:id="@+id/welcome_to_home"
+            app:destination="@+id/home"
+            app:popUpTo="@id/welcome"
+            app:popUpToInclusive="true"/>
     </fragment>
 
     <fragment
@@ -101,7 +106,10 @@
         tools:layout="@layout/fragment_profile">
         <action
             android:id="@+id/settings_to_home"
-            app:destination="@+id/home"></action>
+            app:destination="@+id/home"/>
+        <action
+            android:id="@+id/settings_to_welcome"
+            app:destination="@+id/welcome"/>
 
     </fragment>
 

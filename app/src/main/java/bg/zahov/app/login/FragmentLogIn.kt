@@ -1,6 +1,7 @@
 package bg.zahov.app.login
 
 import android.os.Bundle
+import android.util.Log
 import android.view.LayoutInflater
 import android.view.View
 import android.view.ViewGroup
@@ -58,11 +59,9 @@ class FragmentLogIn: Fragment() {
                 }
 
                 loginViewModel.login(email, password) { success, errorMessage ->
+                    Log.d("goingToHome", "WE ARE HERE ${success.toString()}")
                     if(success){
-                        //should be fixed because this doesn't cover the case where the user clicks on already have an account and we need to input the
-                        //username when an account is first created then we need to query it here just in case
-                        //might be an option to do it in the profile viewmodel as well
-                        findNavController().navigate(R.id.login_to_home, bundleOf("user-name" to arguments?.getString("user-name")))
+                        findNavController().navigate(R.id.login_to_home)
                     }else{
                         Toast.makeText(requireContext(), errorMessage, Toast.LENGTH_SHORT).show()
                     }
