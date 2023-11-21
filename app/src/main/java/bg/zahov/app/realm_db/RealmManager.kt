@@ -27,12 +27,20 @@ class RealmManager private constructor() {
     private var realmInstance: Realm? = null
 
     private fun getConfig(userId: String): RealmConfiguration.Builder {
-        val config = RealmConfiguration.Builder(setOf(User::class, Workout::class, Exercise::class, Sets::class))
+        val config = RealmConfiguration.Builder(
+            setOf(
+                User::class,
+                Workout::class,
+                Exercise::class,
+                Sets::class
+            )
+        )
         config.schemaVersion(1)
         config.deleteRealmIfMigrationNeeded()
         config.name("$userId.realm")
         return config
     }
+
     suspend fun createRealm(userId: String, uName: String) {
         try {
             realmInstance = Realm.open(getConfig(userId).build())
@@ -49,33 +57,34 @@ class RealmManager private constructor() {
             realmInstance?.close()
         }
     }
+
     private suspend fun <T> withRealm(userId: String, block: suspend (Realm) -> T): T {
         return suspendCancellableCoroutine { cancellableContinuation ->
             val realmConfig = getConfig(userId).build()
 
             val job = Job()
 
-                val realm = Realm.open(realmConfig)
-                cancellableContinuation.invokeOnCancellation {
-                    job.cancel()
-                    realm.close()
-                }
+            val realm = Realm.open(realmConfig)
+            cancellableContinuation.invokeOnCancellation {
+                job.cancel()
+                realm.close()
+            }
 
-                CoroutineScope(Dispatchers.IO + job).launch {
-                        val result = block(realm)
-                        cancellableContinuation.resume(result){
-                            cancellableContinuation.resumeWithException(it)
-                        }
+            CoroutineScope(Dispatchers.IO + job).launch {
+                val result = block(realm)
+                cancellableContinuation.resume(result) {
+                    cancellableContinuation.resumeWithException(it)
                 }
+            }
         }
     }
 
-
-    suspend fun getUsernameAndNumberOfWorkouts(userId: String): Pair<String, Int>? {
+    suspend fun getUserInformationForProfileFragment(userId: String): Triple<String, Int, List<Workout>>? {
         return withRealm(userId) { realm ->
-           val user =  realm.query<User>().first().find()
+            val user = realm.query<User>().first().find()
             user?.let {
-                Pair(it.username.orEmpty(), it.numberOfWorkouts ?: 0)
+                //TODO retrieval of workouts should be done via flow for efficiency
+                Triple(it.username.orEmpty(), it.numberOfWorkouts ?: 0, it.workouts.toList())
             }
         }
     }

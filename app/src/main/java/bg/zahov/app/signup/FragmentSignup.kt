@@ -53,7 +53,7 @@ class FragmentSignup : Fragment() {
 
                 authViewModel.signUp(username, email, password) { success, errorMessage ->
                     if (success) {
-                        findNavController().navigate(R.id.signup_to_login, bundleOf("user-name" to username))
+                        findNavController().navigate(R.id.signup_to_home)
                     } else {
                         Toast.makeText(requireContext(), errorMessage, Toast.LENGTH_SHORT).show()
                     }

@@ -58,4 +58,7 @@
     <string name="sign_out_button_text">Sign out</string>
     <string name="switch_on">on</string>
     <string name="switch_off">off</string>
+    <!--  Strings used for create exercise fragment    -->
+    <string name="new_exercise_placeholder_text">new exercise</string>
+    <string name="add_name_hint">Add name</string>
 </resources>

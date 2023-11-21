@@ -32,13 +32,15 @@ class MainActivity : AppCompatActivity() {
         bottomNav?.setupWithNavController(navController)
 
         authViewModel.isAuthenticated.observe(this, Observer { isAuthenticated ->
-            Log.d("isAuth", isAuthenticated.toString())
 
             val currentDestinationId = navController.currentDestination?.id
 
             when {
                 isAuthenticated && currentDestinationId != R.id.log_in -> {
                     navController.navigate(R.id.welcome_to_home)
+                }
+                isAuthenticated && currentDestinationId == R.id.signup ->{
+                    navController.navigate(R.id.signup_to_home)
                 }
                 !isAuthenticated && currentDestinationId != R.id.welcome -> {
                     navController.navigate(R.id.welcome)
