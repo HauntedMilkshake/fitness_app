@@ -1,4 +1,4 @@
-package bg.zahov.app.profile
+package bg.zahov.app.settings
 
 import android.os.Bundle
 import android.view.LayoutInflater
@@ -9,14 +9,14 @@ import androidx.fragment.app.viewModels
 import androidx.navigation.fragment.findNavController
 import bg.zahov.app.hideBottomNav
 import bg.zahov.fitness.app.R
-import bg.zahov.fitness.app.databinding.FragmentProfileBinding
+import bg.zahov.fitness.app.databinding.FragmentSettingsBinding
 
-class FragmentProfile: Fragment() {
-    private var _binding: FragmentProfileBinding? = null
+class FragmentSettings: Fragment() {
+    private var _binding: FragmentSettingsBinding? = null
     private val binding get() = _binding!!
-    private val profileViewModel: ProfileViewModel by viewModels()
+    private val settingsViewModel: SettingsViewModel by viewModels()
     override fun onCreateView(inflater: LayoutInflater, container: ViewGroup?, savedInstanceState: Bundle?): View? {
-        _binding = FragmentProfileBinding.inflate(inflater, container, false)
+        _binding = FragmentSettingsBinding.inflate(inflater, container, false)
         return binding.root
     }
 
@@ -29,9 +29,19 @@ class FragmentProfile: Fragment() {
         super.onViewCreated(view, savedInstanceState)
         binding.apply {
             signOutButton.setOnClickListener {
-                profileViewModel.logout()
+                settingsViewModel.logout()
                 findNavController().navigate(R.id.settings_to_welcome)
             }
+        }
+    }
+    //TODO(populate the fields with appropirate text)
+    private fun initDefaultSettingsViews(){
+        binding.apply {
+        }
+    }
+    private fun initSwtichDefaultSettingsViews(){
+        binding.apply {
+
         }
     }
 }

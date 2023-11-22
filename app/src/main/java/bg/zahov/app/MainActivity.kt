@@ -36,11 +36,8 @@ class MainActivity : AppCompatActivity() {
             val currentDestinationId = navController.currentDestination?.id
 
             when {
-                isAuthenticated && currentDestinationId != R.id.log_in -> {
+                isAuthenticated && currentDestinationId == R.id.welcome ->{
                     navController.navigate(R.id.welcome_to_home)
-                }
-                isAuthenticated && currentDestinationId == R.id.signup ->{
-                    navController.navigate(R.id.signup_to_home)
                 }
                 !isAuthenticated && currentDestinationId != R.id.welcome -> {
                     navController.navigate(R.id.welcome)

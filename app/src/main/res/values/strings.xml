@@ -41,7 +41,6 @@
     <string name="language_text">Language</string>
     <string name="weight_text">Weight</string>
     <string name="distance_text">Distance</string>
-    <string name="size_text">Size</string>
     <string name="general_text">General</string>
     <string name="sound_effects_text">Sound effects</string>
     <string name="no_rest_timer_included_text">Doesn\'t include timer alert</string>
@@ -58,6 +57,8 @@
     <string name="sign_out_button_text">Sign out</string>
     <string name="switch_on">on</string>
     <string name="switch_off">off</string>
+    <string name="advanced_settings_text">Advanced settings</string>
+    <string name="popup_exampel_title">Popup title</string>
     <!--  Strings used for create exercise fragment    -->
     <string name="new_exercise_placeholder_text">new exercise</string>
     <string name="add_name_hint">Add name</string>
