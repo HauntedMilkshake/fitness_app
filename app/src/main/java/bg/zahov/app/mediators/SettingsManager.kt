@@ -41,7 +41,7 @@ class SettingsManager(application: Application) {
 
     private val _theme = MutableLiveData(Theme.valueOf(sharedPreferences.getString(PERSISTENCE_THEME, Theme.Dark.name) ?: Theme.Dark.name))
 
-    private val _restTimer = MutableLiveData(TimeUnit.MILLISECONDS.toSeconds(sharedPreferences.getLong(PERSISTENCE_REST_TIMER, TimeUnit.MINUTES.toMillis(0.5))))
+    private val _restTimer = MutableLiveData((sharedPreferences.getInt(PERSISTENCE_REST_TIMER, 30)))
 
     private val _vibration = MutableLiveData(sharedPreferences.getBoolean(PERSISTENCE_VIBRATION, true))
 
@@ -51,7 +51,7 @@ class SettingsManager(application: Application) {
 
     private val _sync = MutableLiveData(sharedPreferences.getBoolean(PERSISTENCE_SYNC, true))
 
-    private val _fit = MutableLiveData(sharedPreferences.getBoolean(PERSISTENCE_FIT, true))
+    private val _fit = MutableLiveData(sharedPreferences.getBoolean(PERSISTENCE_FIT, false))
 
     fun getSettings(): Settings{
         return Settings(
@@ -60,12 +60,12 @@ class SettingsManager(application: Application) {
             distance = Units.valueOf(sharedPreferences.getString(PERSISTENCE_DISTANCE, Units.Normal.name) ?: Units.Normal.name),
             soundEffects = sharedPreferences.getBoolean(PERSISTENCE_SOUND_EFFECTS, true),
             theme = Theme.valueOf(sharedPreferences.getString(PERSISTENCE_THEME, Theme.Dark.name) ?: Theme.Dark.name),
-            restTimer = TimeUnit.MILLISECONDS.toSeconds(sharedPreferences.getLong(PERSISTENCE_REST_TIMER, TimeUnit.MINUTES.toMillis(1/2))),
+            restTimer = sharedPreferences.getInt(PERSISTENCE_REST_TIMER, 30),
             vibration = sharedPreferences.getBoolean(PERSISTENCE_VIBRATION, true),
             soundSettings = Sound.valueOf(sharedPreferences.getString(PERSISTENCE_SOUND_SETTINGS, Sound.SOUND_1.name) ?: Sound.SOUND_1.name),
             updateTemplate = sharedPreferences.getBoolean(PERSISTENCE_UPDATE_TEMPLATE, true),
             sync = sharedPreferences.getBoolean(PERSISTENCE_SYNC, true),
-            fit = sharedPreferences.getBoolean(PERSISTENCE_FIT, true)
+            fit = sharedPreferences.getBoolean(PERSISTENCE_FIT, false)
         )
     }
     fun setLanguage(language: Language) {
@@ -94,8 +94,8 @@ class SettingsManager(application: Application) {
         _theme.value = theme
     }
 
-    fun setRestTimer(seconds: Long) {
-        sharedPreferences.edit().putLong(PERSISTENCE_REST_TIMER, TimeUnit.SECONDS.toMillis(seconds)).apply()
+    fun setRestTimer(seconds: Int) {
+        sharedPreferences.edit().putInt(PERSISTENCE_REST_TIMER, seconds).apply()
         _restTimer.value = seconds
     }
 

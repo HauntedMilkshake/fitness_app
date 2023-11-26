@@ -4,12 +4,20 @@
     android:layout_height="wrap_content"
     android:background="@color/background">
     <com.google.android.material.textview.MaterialTextView
-        android:id="@+id/title"
+        android:id="@+id/titleTextView"
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
         android:textSize="16sp"
         android:textColor="@color/white"
-        android:textStyle="bold"
         android:layout_marginTop="10dp"
         android:layout_marginStart="10dp"/>
+    <com.google.android.material.textview.MaterialTextView
+        android:id="@+id/subtitleTextView"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:textSize="12sp"
+        android:textColor="@color/text"
+        android:layout_marginTop="6dp"
+        android:layout_alignStart="@+id/titleTextView"
+        android:layout_below="@+id/titleTextView" />
 </RelativeLayout>
