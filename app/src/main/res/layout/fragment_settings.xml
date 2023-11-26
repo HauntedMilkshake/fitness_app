@@ -180,7 +180,7 @@
         android:id="@+id/theme_settings"
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
-        android:layout_marginTop="15dp" />
+        android:layout_marginTop="10dp" />
 
     <View
         android:id="@+id/third_segment_seperator"
@@ -217,12 +217,13 @@
         android:id="@+id/sound_settings"
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
-        android:layout_marginTop="15dp" />
+        android:layout_marginTop="10dp" />
 
     <View
         android:id="@+id/fourth_segment_seperator"
         android:layout_width="match_parent"
         android:layout_height="1dp"
+        android:layout_marginTop="15dp"
         android:background="@color/teal_700"
         android:elevation="4dp" />
 

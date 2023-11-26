@@ -3,5 +3,6 @@
     <dimen name="original_text_size">16sp</dimen>
     <dimen name="enlarged_text_size">24sp</dimen>
     <dimen name="appbar_elevation">100dp</dimen>
-
+    <dimen name="popup_width">160dp</dimen>
+    <dimen name="popup_height">160dp</dimen>
 </resources>

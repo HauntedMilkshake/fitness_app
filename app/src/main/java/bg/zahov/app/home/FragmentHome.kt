@@ -37,7 +37,7 @@ class FragmentHome : Fragment() {
             homeViewModel.userName.observe(viewLifecycleOwner){
                 profileName.text = it
             }
-            homeViewModel.userWorkouts.observe(viewLifecycleOwner){
+            homeViewModel.numberOfWorkouts.observe(viewLifecycleOwner){
                 numberOfWorkouts.text = it.toString()
             }
         }

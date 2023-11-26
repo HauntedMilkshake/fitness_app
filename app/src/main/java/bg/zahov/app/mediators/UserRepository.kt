@@ -1,4 +1,4 @@
-package bg.zahov.app.repositories
+package bg.zahov.app.mediators
 
 import bg.zahov.app.realm_db.RealmManager
 import bg.zahov.app.realm_db.Workout
