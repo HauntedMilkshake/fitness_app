@@ -4,9 +4,8 @@ import androidx.lifecycle.LiveData
 import androidx.lifecycle.MutableLiveData
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
-import bg.zahov.app.realm_db.RealmManager
 import bg.zahov.app.realm_db.Workout
-import bg.zahov.app.repositories.UserRepository
+import bg.zahov.app.mediators.UserRepository
 import com.google.firebase.auth.FirebaseAuth
 import kotlinx.coroutines.launch
 
