@@ -1,5 +1,7 @@
 package bg.zahov.app.settings
 
+import android.content.Intent
+import android.net.Uri
 import android.os.Bundle
 import android.view.LayoutInflater
 import android.view.View
@@ -44,16 +46,17 @@ class FragmentSettings: Fragment() {
                 findNavController().navigate(R.id.settings_to_home)
             }
             resetSettings.setOnClickListener {
-                //TODO(reset settings)
+                settingsViewModel.resetSettings()
+                settingsViewModel.refreshSettings()
             }
             editProfile.setOnClickListener {
-                //TODO(Go to another fragment)
+                findNavController().navigate(R.id.settings_to_edit_profile)
             }
             github.setOnClickListener {
-                //TODO(Go to github)
+                openLink("https://github.com/HauntedMilkshake/fitness_app")
             }
             bugReport.setOnClickListener {
-                //TODO()
+                openLink("https://github.com/HauntedMilkshake/fitness_app/issues")
             }
         }
         initDefaultSettingsViews()
@@ -79,5 +82,9 @@ class FragmentSettings: Fragment() {
 
                 }
         }
+    }
+    private fun openLink(link: String){
+        val intent = Intent(Intent.ACTION_VIEW, Uri.parse(link))
+        startActivity(intent)
     }
 }

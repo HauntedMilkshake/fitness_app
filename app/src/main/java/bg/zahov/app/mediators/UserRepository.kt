@@ -16,4 +16,10 @@ class UserRepository private constructor(){
     suspend fun getUserHomeInfo(userId: String): Triple<String, Int, List<Workout>> {
         return realmInstance.getUserInformationForProfileFragment(userId)!!
     }
+    suspend fun getUsername(userId: String): String? {
+        return realmInstance.getUsername(userId)
+    }
+    suspend fun changeUserName(userId:String, newUserName: String){
+        realmInstance.changeUserName(userId, newUserName)
+    }
 }

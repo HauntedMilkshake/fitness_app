@@ -1,6 +1,5 @@
 package bg.zahov.app.data
 
-import java.util.concurrent.TimeUnit
 
 data class Settings(
     val language: Language = Language.English,
@@ -13,5 +12,5 @@ data class Settings(
     val soundSettings: Sound = Sound.SOUND_1,
     val updateTemplate: Boolean = true,
     val sync: Boolean = true,
-    val fit: Boolean = true
+    val fit: Boolean = false
 )

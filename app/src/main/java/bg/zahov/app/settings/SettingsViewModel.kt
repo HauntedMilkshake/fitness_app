@@ -92,4 +92,7 @@ class SettingsViewModel(application: Application): AndroidViewModel(application)
     fun refreshSettings(){
         _settings.value = settingsManager.getSettings()
     }
+    fun resetSettings(){
+        settingsManager.resetSettings()
+    }
 }

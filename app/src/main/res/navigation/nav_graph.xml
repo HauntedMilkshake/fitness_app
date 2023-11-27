@@ -120,7 +120,17 @@
             app:destination="@+id/welcome"
             app:popUpTo="@id/welcome"
             app:popUpToInclusive="true"/>
-
+        <action
+            android:id="@+id/settings_to_edit_profile"
+            app:destination="@+id/edit_profile" />
+    </fragment>
+    <fragment
+        android:id="@+id/edit_profile"
+        android:name="bg.zahov.app.editProfile.FragmentEditProfile"
+        tools:layout="@layout/fragment_edit_profile">
+        <action
+            android:id="@+id/edit_profile_to_settings"
+            app:destination="@+id/settings" />
     </fragment>
 
 </navigation>

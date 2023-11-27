@@ -62,4 +62,7 @@
     <!--  Strings used for create exercise fragment    -->
     <string name="new_exercise_placeholder_text">new exercise</string>
     <string name="add_name_hint">Add name</string>
+    <!-- Strings used for edit profile fragment   -->
+    <string name="edit_profile_text"> Edit profile</string>
+    <string name="reset_password_text">Reset password</string>
 </resources>

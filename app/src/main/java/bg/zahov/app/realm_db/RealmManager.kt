@@ -41,6 +41,7 @@ class RealmManager private constructor() {
         return config
     }
 
+    //TODO(Fix issue where if we haven't gone through signup we don't have realm file(should be fixed when firestore sync is added)
     suspend fun createRealm(userId: String, uName: String) {
         try {
             realmInstance = Realm.open(getConfig(userId).build())
@@ -85,6 +86,25 @@ class RealmManager private constructor() {
             user?.let {
                 //TODO retrieval of workouts should be done via flow for efficiency
                 Triple(it.username.orEmpty(), it.numberOfWorkouts ?: 0, it.workouts.toList())
+            }
+        }
+    }
+    suspend fun changeUserName(userId: String, newUserName: String){
+        withRealm(userId){
+            val user = it.query<User>().find().first()
+            it.write {
+                findLatest(user)?.let{liveUser ->
+                    liveUser.username = newUserName
+                }
+            }
+        }
+    }
+    suspend fun getUsername(userId: String): String? {
+        return withRealm(userId){realm ->
+            val user = realm.query<User>().first().find()
+            user?.let{
+                Log.d("Username", it.username!!)
+                it.username
             }
         }
     }

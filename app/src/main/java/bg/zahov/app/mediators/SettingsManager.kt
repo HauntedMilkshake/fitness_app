@@ -123,4 +123,17 @@ class SettingsManager(application: Application) {
         sharedPreferences.edit().putBoolean(PERSISTENCE_FIT, enable).apply()
         _fit.value = enable
     }
+    fun resetSettings(){
+        setLanguage(Language.English)
+        setWeight(Units.Normal)
+        setDistance(Units.Normal)
+        setSoundEffects(true)
+        setTheme(Theme.Dark)
+        setRestTimer(30)
+        setVibration(true)
+        setSoundSettings(Sound.SOUND_1)
+        setUpdateTemplate(true)
+        setSync(true)
+        setFit(false)
+    }
 }
