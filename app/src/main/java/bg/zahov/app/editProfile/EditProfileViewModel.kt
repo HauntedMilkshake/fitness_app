@@ -1,5 +1,7 @@
 package bg.zahov.app.editProfile
 
+import android.util.Log
+import android.widget.Toast
 import androidx.lifecycle.LiveData
 import androidx.lifecycle.MutableLiveData
 import androidx.lifecycle.ViewModel
@@ -29,6 +31,21 @@ class EditProfileViewModel: ViewModel() {
     fun changeUserName(newUserName: String){
         viewModelScope.launch {
             repo.changeUserName(auth.uid!!, newUserName)
+        }
+    }
+    //TODO(Validate email before updating it)
+    fun changeEmail(newEmail: String){
+        auth.signInWithEmailAndPassword(auth.currentUser!!.email!! , auth.uid!!).addOnCompleteListener { task->
+            if(task.isSuccessful){
+                auth.currentUser!!.updateEmail(newEmail).addOnCompleteListener {
+                    if(task.isSuccessful){
+                      Log.d("YAY", "Email changed")
+                    }else{
+
+                    }
+                }
+            }
+
         }
     }
 }

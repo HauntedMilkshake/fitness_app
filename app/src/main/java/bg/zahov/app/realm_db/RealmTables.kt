@@ -21,7 +21,8 @@ class Workout: RealmObject{
     var exercises: RealmList<Exercise> = realmListOf()
 }
 class Exercise: RealmObject{
-    var type: String? = null
+    var bodyPart: String? = null
+    var category: String? = null
     var exerciseName: String? = null
     var sets: RealmList<Sets> = realmListOf()
 }

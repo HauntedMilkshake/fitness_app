@@ -31,6 +31,8 @@ class FragmentExercises: Fragment() {
                     settingsDots.visibility = View.VISIBLE
                     searchBar.visibility = View.INVISIBLE
                     removeSearchBar.visibility = View.GONE
+
+                    searchBar.setQuery("search exercises", true)
                 }
             }
         }

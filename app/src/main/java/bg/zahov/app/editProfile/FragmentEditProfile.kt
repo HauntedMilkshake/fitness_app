@@ -47,6 +47,7 @@ class FragmentEditProfile: Fragment() {
                     Toast.makeText(requireContext(), "Cannot have empty fields", Toast.LENGTH_SHORT).show()
                 }else{
                     editProfileViewModel.changeUserName(usernameFieldText.text.toString())
+                    editProfileViewModel.changeEmail(emailFieldText.text.toString())
                 }
             }
         }
