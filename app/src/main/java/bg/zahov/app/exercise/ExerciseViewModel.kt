@@ -44,6 +44,5 @@ class ExerciseViewModel(application: Application): AndroidViewModel(application)
             }
         }
     }
-    fun
 
 }
