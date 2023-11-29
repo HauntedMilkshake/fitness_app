@@ -11,6 +11,7 @@ class User: RealmObject {
     var username: String? = null
     var numberOfWorkouts: Int? = null
     var workouts: RealmList<Workout> = realmListOf()
+    var customExercises: RealmList<Exercise> = realmListOf()
 }
 class Workout: RealmObject{
     var duration: Double? = null

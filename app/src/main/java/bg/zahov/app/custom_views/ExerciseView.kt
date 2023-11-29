@@ -9,12 +9,7 @@ import android.widget.PopupWindow
 import android.widget.RadioButton
 import android.widget.RadioGroup
 import android.widget.RelativeLayout
-import bg.zahov.app.data.Language
-import bg.zahov.app.data.Settings
-import bg.zahov.app.data.Sound
-import bg.zahov.app.data.Theme
-import bg.zahov.app.data.Units
-import bg.zahov.app.settings.SettingsViewModel
+import bg.zahov.app.exercise.ExerciseViewModel
 import bg.zahov.fitness.app.R
 import com.google.android.material.textview.MaterialTextView
 
@@ -26,16 +21,16 @@ class ExerciseView @JvmOverloads constructor(
     init {
         inflate(context, R.layout.radio_group_exercise_create_view, this)
     }
-    fun initViewInformation(title: String, radioOptions: List<String>) {
+    fun initViewInformation(title: String, radioOptions: List<String>, exerciseVm: ExerciseViewModel) {
         val titleTextView: MaterialTextView = findViewById(R.id.titleTextView)
 
         titleTextView.text = title
 
         setOnClickListener {
-            showPopupWindow(title, radioOptions)
+            showPopupWindow(title, radioOptions, exerciseVm)
         }
     }
-    private fun showPopupWindow(title: String, radioOptions: List<String>) {
+    private fun showPopupWindow(title: String, radioOptions: List<String>, exerciseVm: ExerciseViewModel) {
         val popupView: View = LayoutInflater.from(context).inflate(R.layout.settings_popup, null)
         val popupTitleTextView: MaterialTextView = popupView.findViewById(R.id.popupTitleTextView)
         val radioGroup: RadioGroup = popupView.findViewById(R.id.radioGroup)
@@ -50,6 +45,9 @@ class ExerciseView @JvmOverloads constructor(
             radioGroup.addView(radioButton)
 
         }
+
+
+
         radioGroup.setOnCheckedChangeListener { _, index ->
             val radioButton = radioGroup.findViewById<RadioButton>(index)
             val selectedOption = radioButton.text.toString()

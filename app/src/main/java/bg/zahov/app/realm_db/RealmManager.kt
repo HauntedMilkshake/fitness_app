@@ -108,6 +108,14 @@ class RealmManager private constructor() {
             }
         }
     }
+    suspend fun addExercise(userId: String, newExercise: Exercise){
+        withRealm(userId){realm ->
+            val user = realm.query<User>().first().find()
+            user?.let{
+                it.customExercises.add(newExercise)
+            }
+        }
+    }
 
     //template for async finding all objects of a type(eg all workouts of a user when needed) needs small adjutments
 //    suspend fun getUserInformation(userId: String): AnythingThatAUserHasALotOf?{

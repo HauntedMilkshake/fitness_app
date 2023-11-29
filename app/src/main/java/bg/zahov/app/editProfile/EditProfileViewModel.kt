@@ -33,7 +33,6 @@ class EditProfileViewModel: ViewModel() {
             repo.changeUserName(auth.uid!!, newUserName)
         }
     }
-    //TODO(Validate email before updating it)
     fun changeEmail(newEmail: String){
         auth.signInWithEmailAndPassword(auth.currentUser!!.email!! , auth.uid!!).addOnCompleteListener { task->
             if(task.isSuccessful){

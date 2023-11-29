@@ -43,7 +43,7 @@ class FragmentEditProfile: Fragment() {
                 //TODO(add && statement to check if the username/email are worth writing to the db at all
                 //TODO(change email in firebase auth)
                 //TODO(currently update works however it needs to reload fragment for changes to be registered)
-                if(usernameFieldText.text.isNullOrEmpty() || emailFieldText.text.isNullOrEmpty()){
+                if(usernameFieldText.text.isNullOrEmpty() || emailFieldText.text.isNullOrEmpty() || isEmailNotValid(emailFieldText.text.toString()) ){
                     Toast.makeText(requireContext(), "Cannot have empty fields", Toast.LENGTH_SHORT).show()
                 }else{
                     editProfileViewModel.changeUserName(usernameFieldText.text.toString())
@@ -52,4 +52,6 @@ class FragmentEditProfile: Fragment() {
             }
         }
     }
+    private fun isEmailNotValid(email: String) = !Regex("^\\S+@\\S+\\.\\S+$").matches(email)
+
 }
