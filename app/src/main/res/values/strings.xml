@@ -1,4 +1,4 @@
-<resources>
+<resources xmlns:tools="http://schemas.android.com/tools">
     <string name="app_name">fitness_app</string>
     <!-- Strings used for bottom navigation   -->
     <string name="profile">Profile</string>
@@ -63,6 +63,7 @@
     <string name="new_exercise_placeholder_text">new exercise</string>
     <string name="add_name_hint">Add name</string>
     <!-- Strings used for edit profile fragment   -->
+    <string name="create_exercise" tools:ignore="ExtraTranslation">Create exercise</string>
     <string name="edit_profile_text"> Edit profile</string>
     <string name="reset_password_text">Reset password</string>
 </resources>

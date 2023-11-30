@@ -1,11 +1,25 @@
 package bg.zahov.app.exercise
 
+import android.animation.Animator
+import android.animation.AnimatorListenerAdapter
+import android.animation.ObjectAnimator
+import android.animation.PropertyValuesHolder
+import android.app.AlertDialog
 import android.os.Bundle
 import android.view.LayoutInflater
 import android.view.View
 import android.view.ViewGroup
+import android.widget.FrameLayout
+import android.widget.PopupMenu
+import android.widget.PopupWindow
+import android.widget.TextView
+import androidx.cardview.widget.CardView
+import androidx.core.view.ViewCompat
 import androidx.fragment.app.Fragment
+import androidx.navigation.fragment.findNavController
+import bg.zahov.fitness.app.R
 import bg.zahov.fitness.app.databinding.FragmentExercisesBinding
+import com.google.android.material.textview.MaterialTextView
 
 class FragmentExercises: Fragment() {
     private var _binding: FragmentExercisesBinding? = null
@@ -35,6 +49,46 @@ class FragmentExercises: Fragment() {
                     searchBar.setQuery("search exercises", true)
                 }
             }
+            settingsDots.setOnClickListener {
+                val scaleAnimation = ObjectAnimator.ofPropertyValuesHolder(it, PropertyValuesHolder.ofFloat("scaleX", 1.2f), PropertyValuesHolder.ofFloat("scaleY", 1.2f))
+                scaleAnimation.duration = 200
+                scaleAnimation.repeatCount = 1
+                scaleAnimation.repeatMode = ObjectAnimator.REVERSE
+
+                scaleAnimation.start()
+
+                showCustomLayout()
+            }
         }
+    }
+    private fun showCustomLayout() {
+        val inflater = LayoutInflater.from(requireContext())
+        val customView = inflater.inflate(R.layout.simple_popup, null)
+        val textView = customView.findViewById<MaterialTextView>(R.id.create_exercise_view)
+
+        val fadeIn = ObjectAnimator.ofFloat(customView, "alpha", 0f, 1f)
+        fadeIn.duration = 300
+
+        fadeIn.addListener(object : AnimatorListenerAdapter() {
+            override fun onAnimationStart(animation: Animator) {
+                customView.visibility = View.VISIBLE
+            }
+        })
+
+        fadeIn.start()
+
+        val popupWindow = PopupWindow(
+            customView,
+            ViewGroup.LayoutParams.WRAP_CONTENT,
+            ViewGroup.LayoutParams.WRAP_CONTENT,
+            true
+        )
+
+        textView.setOnClickListener {
+            findNavController().navigate(R.id.exercise_to_create_exercise)
+            popupWindow.dismiss()
+        }
+
+        popupWindow.showAsDropDown(binding.settingsDots, 80 , 70)
     }
 }

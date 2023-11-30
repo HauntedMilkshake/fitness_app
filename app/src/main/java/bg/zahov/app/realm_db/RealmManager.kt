@@ -1,6 +1,8 @@
 package bg.zahov.app.realm_db
 
 import android.util.Log
+import com.google.firebase.auth.FirebaseAuth
+import com.google.firebase.firestore.FirebaseFirestore
 import io.realm.kotlin.Realm
 import io.realm.kotlin.RealmConfiguration
 import io.realm.kotlin.ext.query
@@ -10,10 +12,12 @@ import kotlinx.coroutines.Job
 import kotlinx.coroutines.coroutineScope
 import kotlinx.coroutines.launch
 import kotlinx.coroutines.suspendCancellableCoroutine
+import kotlinx.coroutines.sync.Mutex
+import kotlinx.coroutines.sync.withLock
+import java.io.File
 import kotlin.coroutines.resumeWithException
 
 class RealmManager private constructor() {
-
     companion object {
         @Volatile
         private var instance: RealmManager? = null
@@ -23,8 +27,9 @@ class RealmManager private constructor() {
                 instance ?: RealmManager().also { instance = it }
             }
     }
-
     private var realmInstance: Realm? = null
+    private val database = FirebaseFirestore.getInstance()
+    private val realmMutex = Mutex()
 
     private fun getConfig(userId: String): RealmConfiguration.Builder {
         val config = RealmConfiguration.Builder(
@@ -44,12 +49,14 @@ class RealmManager private constructor() {
     //TODO(Fix issue where if we haven't gone through signup we don't have realm file(should be fixed when firestore sync is added)
     suspend fun createRealm(userId: String, uName: String) {
         try {
-            realmInstance = Realm.open(getConfig(userId).build())
-            realmInstance?.write {
-                copyToRealm(User().apply {
-                    username = uName
-                    numberOfWorkouts = 0
-                })
+            realmMutex.withLock{
+                realmInstance = Realm.open(getConfig(userId).build())
+                realmInstance?.write {
+                    copyToRealm(User().apply {
+                        username = uName
+                        numberOfWorkouts = 0
+                    })
+                }
             }
         } catch (e: Exception) {
             Log.e("Realm start error", e.toString())
@@ -65,6 +72,7 @@ class RealmManager private constructor() {
 
             val job = Job()
 
+
             val realm = Realm.open(realmConfig)
             cancellableContinuation.invokeOnCancellation {
                 job.cancel()
@@ -72,21 +80,41 @@ class RealmManager private constructor() {
             }
 
             CoroutineScope(Dispatchers.IO + job).launch {
-                val result = block(realm)
-                cancellableContinuation.resume(result) {
-                    cancellableContinuation.resumeWithException(it)
+                realmMutex.withLock{
+                    if (!File(realmConfig.path).exists()) { //would be good to get this out in a different function
+//                        if(FirebaseAuth.getInstance().currentUser == null){
+                        database.collection("users").document(FirebaseAuth.getInstance().currentUser!!.uid).get()
+                            .addOnSuccessListener { document ->
+                                if(document.exists()){
+                                    launch{
+                                    createRealm(userId, document.getString("username")!!)
+                                    }
+                                }
+                            }
+                            .addOnFailureListener { exception ->
+                                Log.e("Firestore", "Error getting document", exception)
+                            }
+//                    }
+                    // If it doesn't exist, create the Realm
+                }
+                    val result = block(realm)
+                    cancellableContinuation.resume(result) {
+                        cancellableContinuation.resumeWithException(it)
+                    }
                 }
             }
         }
     }
-
-    suspend fun getUserInformationForProfileFragment(userId: String): Triple<String, Int, List<Workout>>? {
+//TODO(Sync to firestore is needed asap literally)
+    suspend fun getUserInformationForProfileFragment(userId: String): Triple<String?, Int, List<Workout>> {
         return withRealm(userId) { realm ->
-            val user = realm.query<User>().first().find()
-            user?.let {
+            val user = realm.query<User>().find().first()
+
+            user.let {
                 //TODO retrieval of workouts should be done via flow for efficiency
-                Triple(it.username.orEmpty(), it.numberOfWorkouts ?: 0, it.workouts.toList())
+                Triple(it.username!!, it.numberOfWorkouts!!, it.workouts.toList())
             }
+                //?: Triple(null, 0, listOf())
         }
     }
     suspend fun changeUserName(userId: String, newUserName: String){
@@ -101,8 +129,8 @@ class RealmManager private constructor() {
     }
     suspend fun getUsername(userId: String): String? {
         return withRealm(userId){realm ->
-            val user = realm.query<User>().first().find()
-            user?.let{
+            val user = realm.query<User>().find().first()
+            user.let{
                 Log.d("Username", it.username!!)
                 it.username
             }
@@ -110,12 +138,21 @@ class RealmManager private constructor() {
     }
     suspend fun addExercise(userId: String, newExercise: Exercise){
         withRealm(userId){realm ->
-            val user = realm.query<User>().first().find()
-            user?.let{
-                it.customExercises.add(newExercise)
+            val user = realm.query<User>().find().first()
+            realm.write {
+                findLatest(user)?.let { liveUser ->
+                    liveUser.customExercises.add(newExercise)
+                    Log.d("Success", "Added new exercise to db")
+                }
             }
         }
     }
+//    suspend fun syncToRealm(){
+//
+//    }
+//    suspend fun updateRealmFromSync(){
+//
+//    }
 
     //template for async finding all objects of a type(eg all workouts of a user when needed) needs small adjutments
 //    suspend fun getUserInformation(userId: String): AnythingThatAUserHasALotOf?{

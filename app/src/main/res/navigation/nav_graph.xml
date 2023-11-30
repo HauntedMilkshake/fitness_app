@@ -107,6 +107,9 @@
         android:id="@+id/exercises"
         android:name="bg.zahov.app.exercise.FragmentExercises"
         tools:layout="@layout/fragment_exercises">
+        <action
+            android:id="@+id/exercise_to_create_exercise"
+            app:destination="@+id/create_exercise"></action>
     </fragment>
     <fragment
         android:id="@+id/settings"
@@ -131,6 +134,11 @@
         <action
             android:id="@+id/edit_profile_to_settings"
             app:destination="@+id/settings" />
+    </fragment>
+    <fragment
+        android:id="@+id/create_exercise"
+        android:name="bg.zahov.app.exercise.FragmentAddExercise"
+        tools:layout="@layout/fragment_new_exercise">
     </fragment>
 
 </navigation>

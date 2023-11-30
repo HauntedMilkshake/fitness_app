@@ -25,11 +25,13 @@ class HomeViewModel : ViewModel() {
     //TODO(If the user is opted out of sync and this error isn't fixed we need to log him out however logging back in crashes)
     init {
         viewModelScope.launch {
-            repo.getUserHomeInfo(auth.currentUser!!.uid).let {
-                _userName.postValue(it.first!!)
-                _numberOfWorkouts.postValue(it.second!!)
-                _userWorkouts.postValue(it.third!!)
-            }
+                repo.getUserHomeInfo(auth.currentUser!!.uid).let { result ->
+                    result.first?.let{
+                        _userName.postValue(it)
+                        _numberOfWorkouts.postValue(result.second!!)
+                        _userWorkouts.postValue(result.third!!)
+                    } ?: auth.signOut()
+                }
         }
     }
 }

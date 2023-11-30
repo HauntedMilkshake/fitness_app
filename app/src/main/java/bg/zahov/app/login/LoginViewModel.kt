@@ -7,11 +7,11 @@ import com.google.firebase.auth.FirebaseAuth
 
 class LoginViewModel: ViewModel() {
     private val auth: FirebaseAuth = FirebaseAuth.getInstance()
-    private val _isAuthenticated = MutableLiveData<Boolean>()
-    val isAuthenticated: LiveData<Boolean> get() = _isAuthenticated
+//    private val _isAuthenticated = MutableLiveData<Boolean>()
+//    val isAuthenticated: LiveData<Boolean> get() = _isAuthenticated
 
     init {
-        _isAuthenticated.value = false
+//        _isAuthenticated.value = false
     }
 
     fun login(email: String, password: String, callback: (Boolean, String?) -> Unit) {
@@ -19,7 +19,7 @@ class LoginViewModel: ViewModel() {
             .addOnCompleteListener { task ->
                 if (task.isSuccessful) {
                     callback(true, null)
-                    _isAuthenticated.postValue(true)
+//                    _isAuthenticated.postValue(true)
                 } else {
                     callback(false, task.exception?.message)
                 }
