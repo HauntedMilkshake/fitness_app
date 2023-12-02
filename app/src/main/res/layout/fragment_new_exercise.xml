@@ -67,7 +67,7 @@
         app:layout_constraintTop_toBottomOf="@id/top_bar" />
 
     <com.google.android.material.textfield.TextInputLayout
-        android:id="@+id/email_field"
+        android:id="@+id/exercise_name_field"
         android:layout_width="250dp"
         android:layout_height="wrap_content"
         android:hint="@string/add_name_hint"
@@ -92,7 +92,7 @@
         android:layout_marginTop="15dp"
         app:layout_constraintEnd_toEndOf="parent"
         app:layout_constraintStart_toStartOf="parent"
-        app:layout_constraintTop_toBottomOf="@+id/email_field" />
+        app:layout_constraintTop_toBottomOf="@+id/exercise_name_field" />
 
     <bg.zahov.app.custom_views.ExerciseView
         android:id="@+id/body_part"

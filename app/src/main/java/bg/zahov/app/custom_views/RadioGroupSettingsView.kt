@@ -1,6 +1,5 @@
 package bg.zahov.app.custom_views
 
-import android.animation.AnimatorInflater
 import android.animation.ObjectAnimator
 import android.animation.ValueAnimator
 import android.content.Context
@@ -69,7 +68,7 @@ class RadioGroupSettingsView @JvmOverloads constructor(
 
         popupTitleTextView.text = title
 
-        radioOptions.forEachIndexed { index, item ->
+        radioOptions.forEachIndexed { index, _ ->
             val radioButton = RadioButton(context)
             val currOption = radioOptions[index]
             radioButton.text = currOption

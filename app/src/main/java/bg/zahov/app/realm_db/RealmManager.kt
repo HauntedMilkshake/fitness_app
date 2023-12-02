@@ -109,7 +109,7 @@ class RealmManager private constructor() {
     suspend fun getUserInformationForProfileFragment(userId: String): Triple<String?, Int, List<Workout>> {
         return withRealm(userId) { realm ->
             val user = realm.query<User>().find().first()
-
+                // list is empty
             user.let {
                 //TODO retrieval of workouts should be done via flow for efficiency
                 Triple(it.username!!, it.numberOfWorkouts!!, it.workouts.toList())
@@ -144,6 +144,13 @@ class RealmManager private constructor() {
                     liveUser.customExercises.add(newExercise)
                     Log.d("Success", "Added new exercise to db")
                 }
+            }
+        }
+    }
+    suspend fun getUserExercises(userId: String): List<Exercise>{
+        return withRealm(userId){realm ->
+            realm.query<User>().find().first().let{
+                it.customExercises
             }
         }
     }

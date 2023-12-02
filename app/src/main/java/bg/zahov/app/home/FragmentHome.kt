@@ -44,6 +44,7 @@ class FragmentHome : Fragment() {
     }
     override fun onResume() {
         super.onResume()
+        requireActivity().showBottomNav()
         allowBackPressed = true
     }
 }

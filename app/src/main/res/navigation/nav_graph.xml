@@ -55,7 +55,7 @@
             android:id="@+id/signup_to_home"
             app:destination="@id/home"
             app:popUpTo="@id/welcome"
-            app:popUpToInclusive="true"></action>
+            app:popUpToInclusive="true" />
     </fragment>
 
     <fragment
@@ -109,7 +109,7 @@
         tools:layout="@layout/fragment_exercises">
         <action
             android:id="@+id/exercise_to_create_exercise"
-            app:destination="@+id/create_exercise"></action>
+            app:destination="@+id/create_exercise" />
     </fragment>
     <fragment
         android:id="@+id/settings"

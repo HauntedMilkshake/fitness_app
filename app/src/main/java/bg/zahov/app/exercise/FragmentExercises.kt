@@ -16,7 +16,10 @@ import android.widget.TextView
 import androidx.cardview.widget.CardView
 import androidx.core.view.ViewCompat
 import androidx.fragment.app.Fragment
+import androidx.fragment.app.viewModels
 import androidx.navigation.fragment.findNavController
+import androidx.recyclerview.widget.LinearLayoutManager
+import bg.zahov.app.realm_db.Exercise
 import bg.zahov.fitness.app.R
 import bg.zahov.fitness.app.databinding.FragmentExercisesBinding
 import com.google.android.material.textview.MaterialTextView
@@ -24,13 +27,30 @@ import com.google.android.material.textview.MaterialTextView
 class FragmentExercises: Fragment() {
     private var _binding: FragmentExercisesBinding? = null
     private val binding get() = _binding!!
+    private val exerciseViewModel: ExerciseViewModel by viewModels()
     override fun onCreateView(inflater: LayoutInflater, container: ViewGroup?, savedInstanceState: Bundle?): View {
         _binding = FragmentExercisesBinding.inflate(inflater, container, false)
+        exerciseViewModel.refreshUserExercises()
         return binding.root
     }
     override fun onViewCreated(view: View, savedInstanceState: Bundle?) {
         super.onViewCreated(view, savedInstanceState)
         binding.apply {
+
+            val exerciseAdapter = ExerciseAdapter().apply {
+                itemClickListener = object : ExerciseAdapter.ItemClickListener<Exercise>{
+                    override fun onItemClicked(item: Exercise, itemPosition: Int, clickedView: View) {
+                        //navigate to a new fragment
+                    }
+                }
+            }
+            exercisesRecyclerView.apply {
+                layoutManager = LinearLayoutManager(requireContext())
+                adapter = exerciseAdapter
+            }
+            exerciseViewModel.userExercises.observe(viewLifecycleOwner){
+                exerciseAdapter.updateItems(it)
+            }
             searchIcon.setOnClickListener {
                 exerciseText.visibility = View.GONE
                 searchIcon.visibility = View.GONE
@@ -90,5 +110,10 @@ class FragmentExercises: Fragment() {
         }
 
         popupWindow.showAsDropDown(binding.settingsDots, 80 , 70)
+    }
+
+    override fun onResume() {
+        super.onResume()
+        exerciseViewModel.refreshUserExercises()
     }
 }

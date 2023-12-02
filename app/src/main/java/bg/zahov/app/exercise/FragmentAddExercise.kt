@@ -1,13 +1,16 @@
 package bg.zahov.app.exercise
 
 import android.os.Bundle
+import android.util.Log
 import android.view.LayoutInflater
 import android.view.View
 import android.view.ViewGroup
 import androidx.fragment.app.Fragment
 import androidx.fragment.app.viewModels
+import androidx.navigation.fragment.findNavController
 import bg.zahov.app.data.BodyPart
 import bg.zahov.app.data.Category
+import bg.zahov.app.realm_db.Exercise
 import bg.zahov.fitness.app.databinding.FragmentNewExerciseBinding
 
 class FragmentAddExercise: Fragment() {
@@ -27,7 +30,9 @@ class FragmentAddExercise: Fragment() {
         initViews()
         binding.apply {
             confirm.setOnClickListener {
-                addExerciseViewModel.addExercise(exerciseFieldText.text.toString())
+                Log.d("TEXT", "TEXT: ${exerciseNameField.editText!!.text!!}")
+                addExerciseViewModel.addExercise(exerciseNameField.editText!!.text!!.toString())
+
             }
         }
     }

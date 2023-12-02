@@ -7,6 +7,7 @@ import android.view.View
 import android.view.ViewGroup
 import android.view.animation.Animation
 import android.view.animation.ScaleAnimation
+import androidx.core.content.ContextCompat
 import androidx.fragment.app.Fragment
 import androidx.navigation.fragment.findNavController
 import bg.zahov.app.hideBottomNav
@@ -48,7 +49,7 @@ class FragmentWelcome: Fragment() {
                         registerButton.visibility = View.VISIBLE
                         logInButton.visibility = View.VISIBLE
                         //todo fix background color
-                        root.setBackgroundColor(R.color.background)
+                        root.setBackgroundColor(ContextCompat.getColor(requireContext(), R.color.background))
                     }, 1500)
                 }
             }

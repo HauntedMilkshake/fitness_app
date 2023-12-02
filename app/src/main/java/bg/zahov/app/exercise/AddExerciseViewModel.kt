@@ -1,8 +1,10 @@
 package bg.zahov.app.exercise
 
 import android.app.Application
+import android.util.Log
 import android.widget.Toast
 import androidx.lifecycle.AndroidViewModel
+import androidx.lifecycle.LiveData
 import androidx.lifecycle.MutableLiveData
 import androidx.lifecycle.viewModelScope
 import bg.zahov.app.data.BodyPart
@@ -20,7 +22,6 @@ class AddExerciseViewModel(application: Application): AndroidViewModel(applicati
     //might not even need this to be a live data
     private val _bodyPart = MutableLiveData<String>()
     private val _category = MutableLiveData<String>()
-    private val _title = MutableLiveData<String>()
     //will be used later for checking sync option
     private val storage = SettingsManager.getInstance(application)
     //might make it boolean or return a callback to know if we have successfully added an exercise
@@ -34,11 +35,12 @@ class AddExerciseViewModel(application: Application): AndroidViewModel(applicati
                     realm.addExercise(it,Exercise().apply {
                         bodyPart = _bodyPart.value
                         category = _category.value
-                        exerciseName = _title.value
+                        exerciseName = exerciseTitle
                         sets = realmListOf()
                     })
                 }
             }
+            Toast.makeText(getApplication(), "Successfully added a new exercise", Toast.LENGTH_SHORT).show()
         }
     }
     fun buildExercise(title: String, info: String){

@@ -100,7 +100,7 @@
     </com.google.android.material.textfield.TextInputLayout>
 
     <com.google.android.material.textfield.TextInputLayout
-        android:id="@+id/email_field"
+        android:id="@+id/exercise_name_field"
         android:layout_width="350dp"
         android:layout_height="wrap_content"
         android:layout_marginTop="20dp"
@@ -131,6 +131,6 @@
         android:text="@string/reset_password_text"
         app:layout_constraintEnd_toEndOf="parent"
         app:layout_constraintStart_toStartOf="parent"
-        app:layout_constraintTop_toBottomOf="@+id/email_field" />
+        app:layout_constraintTop_toBottomOf="@+id/exercise_name_field" />
 
 </androidx.constraintlayout.widget.ConstraintLayout>
