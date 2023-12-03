@@ -4,7 +4,7 @@ import androidx.lifecycle.LiveData
 import androidx.lifecycle.MutableLiveData
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
-import bg.zahov.app.mediators.UserRepository
+import bg.zahov.app.repository.UserRepository
 import bg.zahov.app.realm_db.Workout
 import com.google.firebase.auth.FirebaseAuth
 import kotlinx.coroutines.launch
@@ -25,7 +25,7 @@ class HomeViewModel : ViewModel() {
     //TODO(If the user is opted out of sync and this error isn't fixed we need to log him out however logging back in crashes)
     init {
         viewModelScope.launch {
-                repo.getUserHomeInfo(auth.currentUser!!.uid).let { result ->
+                repo.getUserHomeInfo().let { result ->
                     result.first?.let{
                         _userName.postValue(it)
                         _numberOfWorkouts.postValue(result.second!!)

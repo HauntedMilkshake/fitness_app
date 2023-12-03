@@ -46,8 +46,7 @@ class FragmentSettings: Fragment() {
                 findNavController().navigate(R.id.settings_to_home)
             }
             resetSettings.setOnClickListener {
-                settingsViewModel.resetSettings()
-                settingsViewModel.refreshSettings()
+                settingsViewModel.getSettings()
             }
             editProfile.setOnClickListener {
                 findNavController().navigate(R.id.settings_to_edit_profile)
@@ -66,15 +65,14 @@ class FragmentSettings: Fragment() {
         binding.apply {
                 settingsViewModel.settings.observe(viewLifecycleOwner){
                     languageSettings.initViewInformation("Language", listOf(Language.English.name, Language.Bulgarian.name), it, settingsViewModel)
-                    weightSettings.initViewInformation("Weight", listOf(Units.Banana.name, Units.Normal.name), it, settingsViewModel)
-                    distanceSettings.initViewInformation("Distance", listOf(Units.Banana.name, Units.Normal.name),it, settingsViewModel)
+                    weightSettings.initViewInformation("Weight", listOf(Units.Banana.name, Units.Metric.name), it, settingsViewModel)
+                    distanceSettings.initViewInformation("Distance", listOf(Units.Banana.name, Units.Metric.name),it, settingsViewModel)
                     soundEffectsSettings.initViewInformation("Sound effects", "Doesn't include rest timer alert", it, settingsViewModel)
                     themeSettings.initViewInformation("Theme", listOf(Theme.Light.name, Theme.Dark.name), it, settingsViewModel)
                     restTimerSettings.initViewInformation("Timer increment value", listOf("30 s", "15 s", "5 s"), it, settingsViewModel)
                     vibrateSettings.initViewInformation("Vibrate upon finish", "", it, settingsViewModel)
                     soundSettings.initViewInformation("Sound", listOf(Sound.SOUND_1.name, Sound.SOUND_2.name, Sound.SOUND_3.name),it, settingsViewModel)
                     showUpdateTemplateSettings.initViewInformation("Show update template", "Prompt when a workout is finished", it, settingsViewModel)
-                    turnSyncOnSettings.initViewInformation("Sync with cloud", "Enable syncing to cloud", it, settingsViewModel)
                     samsungFitSettings.initViewInformation("Use samsung watch during workout", "", it, settingsViewModel)
                     editProfile.initViewInformation("Edit")
                     github.initViewInformation("Github")

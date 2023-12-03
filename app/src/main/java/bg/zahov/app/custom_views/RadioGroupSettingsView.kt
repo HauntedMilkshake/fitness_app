@@ -15,10 +15,10 @@ import android.widget.RadioGroup
 import android.widget.RelativeLayout
 import androidx.core.content.ContextCompat
 import bg.zahov.app.data.Language
-import bg.zahov.app.data.Settings
 import bg.zahov.app.data.Sound
 import bg.zahov.app.data.Theme
 import bg.zahov.app.data.Units
+import bg.zahov.app.realm_db.Settings
 import bg.zahov.app.settings.SettingsViewModel
 import bg.zahov.fitness.app.R
 import com.google.android.material.textview.MaterialTextView
@@ -37,12 +37,12 @@ class RadioGroupSettingsView @JvmOverloads constructor(
         val subtitleTextView: MaterialTextView = findViewById(R.id.subtitleTextView)
 
         when (title) {
-            "Language" -> subtitleTextView.text = settings.language.name
-            "Weight" -> subtitleTextView.text = settings.weight.name
-            "Distance" -> subtitleTextView.text = settings.distance.name
+            "Language" -> subtitleTextView.text = settings.language
+            "Weight" -> subtitleTextView.text = settings.weight
+            "Distance" -> subtitleTextView.text = settings.distance
             "Timer increment value" -> subtitleTextView.text = settings.restTimer.toString()
-            "Sound" -> subtitleTextView.text = settings.soundSettings.name
-            "Theme" -> subtitleTextView.text = settings.theme.name
+            "Sound" -> subtitleTextView.text = settings.soundSettings
+            "Theme" -> subtitleTextView.text = settings.theme
 
         }
 
@@ -95,7 +95,7 @@ class RadioGroupSettingsView @JvmOverloads constructor(
                 else -> null
             } ?.let {
                 settingsVM.writeNewSetting(title, it)
-                settingsVM.refreshSettings()
+                settingsVM.getSettings()
                 subtitleTextView.text = when (title) {
                     "Language" -> (it as Language).name
                     "Weight", "Distance" -> (it as Units).name
@@ -106,7 +106,6 @@ class RadioGroupSettingsView @JvmOverloads constructor(
                 }
             }
         }
-        //TODO(Fancier animation perhaps view gets dragged out from under where we have clicked)
         val scaleUpAnimation = AnimationUtils.loadAnimation(context, R.anim.scale_up)
         popupView.startAnimation(scaleUpAnimation)
 
@@ -115,14 +114,16 @@ class RadioGroupSettingsView @JvmOverloads constructor(
     }
     private fun getSelectedOption(title: String, settings: Settings): String? {
         return when (title) {
-            "Language" -> settings.language.name
-            "Weight" -> settings.weight.name
-            "Distance" -> settings.distance.name
+            "Language" -> settings.language
+            "Weight" -> settings.weight
+            "Distance" -> settings.distance
             "Timer increment value" -> "${settings.restTimer} s"
-            "Sound" -> settings.soundSettings.name
-            "Theme" -> settings.theme.name
+            "Sound" -> settings.soundSettings
+            "Theme" -> settings.theme
             else -> null
         }
     }
 }
+//TODO(Fancier animation perhaps view gets dragged out from under where we have clicked)
+
 

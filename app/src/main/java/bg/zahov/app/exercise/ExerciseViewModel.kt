@@ -4,10 +4,9 @@ import androidx.lifecycle.LiveData
 import androidx.lifecycle.MutableLiveData
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
-import bg.zahov.app.mediators.UserRepository
+import bg.zahov.app.repository.UserRepository
 import bg.zahov.app.realm_db.Exercise
 import com.google.firebase.auth.FirebaseAuth
-import com.google.firebase.auth.ktx.auth
 import kotlinx.coroutines.launch
 
 class ExerciseViewModel: ViewModel() {
@@ -21,10 +20,10 @@ class ExerciseViewModel: ViewModel() {
         if(auth.uid != null){
             viewModelScope.launch {
                 if(_userExercises.value.isNullOrEmpty()){
-                    _userExercises.postValue(localDB.getUserExercises(auth.uid!!))
+                    _userExercises.postValue(localDB.getUserExercises())
                 }else{
                     _userExercises.value = listOf()
-                    _userExercises.postValue(localDB.getUserExercises(auth.uid!!))
+                    _userExercises.postValue(localDB.getUserExercises())
                 }
             }
         }else{

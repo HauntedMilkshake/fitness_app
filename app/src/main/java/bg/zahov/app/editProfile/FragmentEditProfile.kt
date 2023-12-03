@@ -1,14 +1,10 @@
 package bg.zahov.app.editProfile
 
 import android.os.Bundle
-import android.text.Editable
-import android.text.TextWatcher
 import android.view.LayoutInflater
 import android.view.View
 import android.view.ViewGroup
 import android.widget.Toast
-import androidx.compose.material3.Snackbar
-import androidx.core.widget.addTextChangedListener
 import androidx.fragment.app.Fragment
 import androidx.fragment.app.viewModels
 import bg.zahov.fitness.app.databinding.FragmentEditProfileBinding
@@ -25,7 +21,6 @@ class FragmentEditProfile: Fragment() {
         _binding = FragmentEditProfileBinding.inflate(inflater, container, false)
         return binding.root
     }
-
     override fun onViewCreated(view: View, savedInstanceState: Bundle?) {
         super.onViewCreated(view, savedInstanceState)
         binding.apply {
@@ -53,5 +48,4 @@ class FragmentEditProfile: Fragment() {
         }
     }
     private fun isEmailNotValid(email: String) = !Regex("^\\S+@\\S+\\.\\S+$").matches(email)
-
 }

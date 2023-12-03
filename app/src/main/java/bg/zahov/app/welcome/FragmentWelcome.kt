@@ -30,6 +30,7 @@ class FragmentWelcome: Fragment() {
     override fun onViewCreated(view: View, savedInstanceState: Bundle?) {
         super.onViewCreated(view, savedInstanceState)
         binding.apply {
+            //TODO(New animation due to theme change)
             entry.setOnClickListener {
                 if(welcomeText.visibility != View.VISIBLE) {
                     it.startAnimation(

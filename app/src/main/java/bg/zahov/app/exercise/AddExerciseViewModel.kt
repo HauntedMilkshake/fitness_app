@@ -1,16 +1,13 @@
 package bg.zahov.app.exercise
 
 import android.app.Application
-import android.util.Log
 import android.widget.Toast
 import androidx.lifecycle.AndroidViewModel
-import androidx.lifecycle.LiveData
 import androidx.lifecycle.MutableLiveData
 import androidx.lifecycle.viewModelScope
 import bg.zahov.app.data.BodyPart
 import bg.zahov.app.data.Category
-import bg.zahov.app.mediators.SettingsManager
-import bg.zahov.app.mediators.UserRepository
+import bg.zahov.app.repository.UserRepository
 import bg.zahov.app.realm_db.Exercise
 import com.google.firebase.auth.FirebaseAuth
 import io.realm.kotlin.ext.realmListOf
@@ -22,9 +19,6 @@ class AddExerciseViewModel(application: Application): AndroidViewModel(applicati
     //might not even need this to be a live data
     private val _bodyPart = MutableLiveData<String>()
     private val _category = MutableLiveData<String>()
-    //will be used later for checking sync option
-    private val storage = SettingsManager.getInstance(application)
-    //might make it boolean or return a callback to know if we have successfully added an exercise
     //would be good to create ?: adding a blank exercise
     fun addExercise(exerciseTitle: String ){
         if(exerciseTitle.isNullOrEmpty()){
@@ -32,7 +26,7 @@ class AddExerciseViewModel(application: Application): AndroidViewModel(applicati
         }else{
             auth.uid?.let{
                 viewModelScope.launch {
-                    realm.addExercise(it,Exercise().apply {
+                    realm.addExercise(Exercise().apply {
                         bodyPart = _bodyPart.value
                         category = _category.value
                         exerciseName = exerciseTitle

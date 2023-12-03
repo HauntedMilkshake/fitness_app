@@ -4,7 +4,6 @@
     xmlns:tools="http://schemas.android.com/tools"
     android:id="@+id/nav_graph"
     app:startDestination="@id/welcome">
-<!--  app:popUpTo="@id/favFragment"             app:popUpToInclusive="true"             app:popUpToSaveState="true"  -->
 
     <fragment
         android:id="@+id/welcome"
@@ -22,7 +21,6 @@
             app:destination="@+id/home"
             app:popUpTo="@id/welcome"
             app:popUpToInclusive="true"/>
-
     </fragment>
 
     <fragment
@@ -63,22 +61,6 @@
         android:name="bg.zahov.app.home.FragmentHome"
         android:label="@string/home"
         tools:layout="@layout/fragment_home">
-        <action
-            android:id="@+id/home_to_history"
-            app:destination="@id/history">
-        </action>
-        <action
-            android:id="@+id/home_to_workout"
-            app:destination="@id/workout">
-        </action>
-        <action
-            android:id="@+id/home_to_exercises"
-            app:destination="@+id/exercises">
-        </action>
-        <action
-            android:id="@+id/home_to_measures"
-            app:destination="@+id/measures">
-        </action>
         <action
             android:id="@+id/home_to_settings"
             app:destination="@+id/settings">

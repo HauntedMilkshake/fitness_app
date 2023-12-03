@@ -1,6 +1,7 @@
 package bg.zahov.app.home
 
 import android.os.Bundle
+import android.transition.TransitionInflater
 import android.view.LayoutInflater
 import android.view.View
 import android.view.ViewGroup
@@ -24,6 +25,9 @@ class FragmentHome : Fragment() {
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
         requireActivity().showBottomNav()
+        val inflater = TransitionInflater.from(requireContext())
+        enterTransition = inflater.inflateTransition(R.transition.slide_up)
+        exitTransition = inflater.inflateTransition(R.transition.fade_out)
     }
     override fun onViewCreated(view: View, savedInstanceState: Bundle?) {
         super.onViewCreated(view, savedInstanceState)
@@ -33,6 +37,7 @@ class FragmentHome : Fragment() {
         binding.apply {
             settings.setOnClickListener {
                 findNavController().navigate(R.id.home_to_settings)
+
             }
             homeViewModel.userName.observe(viewLifecycleOwner){
                 profileName.text = it

@@ -1,12 +1,8 @@
 package bg.zahov.app.signup
 
-import androidx.lifecycle.LiveData
-import androidx.lifecycle.MutableLiveData
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
-import bg.zahov.app.realm_db.RealmManager
 import com.google.firebase.auth.FirebaseAuth
-import com.google.firebase.database.FirebaseDatabase
 import com.google.firebase.firestore.FirebaseFirestore
 import kotlinx.coroutines.launch
 
@@ -30,14 +26,12 @@ class SignupViewModel : ViewModel() {
                                 callback(true, null)
                                 //this may be bad ¯\_(ツ)_/¯
                                 viewModelScope.launch {
-                                    RealmManager.getInstance().createRealm(userId = auth.currentUser!!.uid, uName = userName)
+//                                    RealmManager.getInstance().createRealm(userId = auth.currentUser!!.uid, uName = userName)
                                 }
                             }
                             .addOnFailureListener {
                                 callback(false, it.message)
                             }
-//                        RealmManager.getInstance()
-//                            .createRealm(userId = auth.currentUser!!.uid, uName = userName)
                     }
                 } else {
                     callback(false, task.exception?.message)
@@ -45,4 +39,5 @@ class SignupViewModel : ViewModel() {
             }
     }
 }
+//TODO(REALM)
 

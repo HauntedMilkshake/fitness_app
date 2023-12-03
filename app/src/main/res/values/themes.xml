@@ -3,8 +3,7 @@
 <!--    <style name="Theme.Fitness_app" parent="Theme.AppCompat.Light.NoActionBar" />-->
     <style name="Theme.Fitness_app" parent="Theme.MaterialComponents.Light.NoActionBar">
         <item name="android:statusBarColor">@color/background</item>
-        <item name="android:windowIsTranslucent"></item>
-
+        <item name="android:windowBackground">@color/background</item>
     </style>
 
 </resources>
