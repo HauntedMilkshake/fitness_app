@@ -1,12 +1,10 @@
 package bg.zahov.app.login
 
 import android.os.Bundle
-import android.util.Log
 import android.view.LayoutInflater
 import android.view.View
 import android.view.ViewGroup
 import android.widget.Toast
-import androidx.core.os.bundleOf
 import androidx.fragment.app.Fragment
 import androidx.fragment.app.viewModels
 import androidx.navigation.fragment.findNavController
@@ -59,7 +57,6 @@ class FragmentLogIn: Fragment() {
                 }
 
                 loginViewModel.login(email, password) { success, errorMessage ->
-                    Log.d("goingToHome", "WE ARE HERE ${success.toString()}")
                     if(success){
                         findNavController().navigate(R.id.login_to_home)
                     }else{

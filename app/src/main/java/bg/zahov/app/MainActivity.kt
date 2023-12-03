@@ -38,9 +38,6 @@ class MainActivity : AppCompatActivity() {
                 isAuthenticated && currentDestinationId == R.id.welcome ->{
                     navController.navigate(R.id.welcome_to_home)
                 }
-                !isAuthenticated && currentDestinationId != R.id.welcome -> {
-                    navController.navigate(R.id.welcome)
-                }
             }
         })
     }

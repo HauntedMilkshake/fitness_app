@@ -14,8 +14,8 @@ import io.realm.kotlin.ext.realmListOf
 import kotlinx.coroutines.launch
 
 class AddExerciseViewModel(application: Application): AndroidViewModel(application) {
-    private val realm = UserRepository.getInstance()
     private val auth = FirebaseAuth.getInstance()
+    private val repo = UserRepository.getInstance(auth.currentUser!!.uid)
     //might not even need this to be a live data
     private val _bodyPart = MutableLiveData<String>()
     private val _category = MutableLiveData<String>()
@@ -26,7 +26,7 @@ class AddExerciseViewModel(application: Application): AndroidViewModel(applicati
         }else{
             auth.uid?.let{
                 viewModelScope.launch {
-                    realm.addExercise(Exercise().apply {
+                    repo.addExercise(Exercise().apply {
                         bodyPart = _bodyPart.value
                         category = _category.value
                         exerciseName = exerciseTitle

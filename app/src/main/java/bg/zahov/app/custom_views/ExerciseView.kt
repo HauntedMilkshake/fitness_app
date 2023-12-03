@@ -17,7 +17,6 @@
     import bg.zahov.app.exercise.AddExerciseViewModel
     import bg.zahov.fitness.app.R
     import com.google.android.material.textview.MaterialTextView
-    import java.lang.Integer.max
 
     class ExerciseView @JvmOverloads constructor(
         context: Context,

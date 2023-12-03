@@ -2,17 +2,18 @@ package bg.zahov.app.repository
 
 import bg.zahov.app.realm_db.Exercise
 import bg.zahov.app.realm_db.RealmManager
+import bg.zahov.app.realm_db.User
 import bg.zahov.app.realm_db.Workout
 
-class UserRepository private constructor(){
+class UserRepository (userId: String){
     companion object {
         @Volatile
         private var repoInstance: UserRepository? = null
-        fun getInstance() = repoInstance ?: synchronized(this) {
-            repoInstance ?: UserRepository().also { repoInstance = it }
+        fun getInstance(userId: String) = repoInstance ?: synchronized(this) {
+            repoInstance ?: UserRepository(userId).also { repoInstance = it }
         }
     }
-    private val realmInstance = RealmManager.getInstance()
+    private val realmInstance = RealmManager.getInstance(userId)
     suspend fun getUserHomeInfo(): Triple<String, Int, List<Workout>> = realmInstance.getUserInformationForProfileFragment()
     suspend fun getUsername(): String = realmInstance.getUsername()
     suspend fun getUserExercises() = realmInstance.getUserExercises()
@@ -26,8 +27,12 @@ class UserRepository private constructor(){
     suspend fun writeNewSettings(title: String, newValue: Any){
         realmInstance.writeNewSettings(title, newValue)
     }
-    suspend fun refreshSettings(){
-        realmInstance.refreshSettings()
-    }
 
+    suspend fun createRealm(newUser: User) {
+        realmInstance.createRealm(newUser)
+    }
+    suspend fun createRealmFromFirestore(){
+        realmInstance.createRealmFromFirestore()
+    }
+    fun doesUserHaveRealm(): Boolean = realmInstance.doesUserHaveLocalRealmFile()
 }

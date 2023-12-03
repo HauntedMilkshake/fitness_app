@@ -31,7 +31,7 @@ class SwitchSettingsView @JvmOverloads constructor(
         }
         titleView.text = title
         subTitleView.text = subTitle
-        switchView.isChecked = state
+        switchView.isChecked = state!!
 
         switchView.setOnCheckedChangeListener { buttonView, isChecked ->
             handleSwitchStateChanged(title, isChecked, settingsVM)

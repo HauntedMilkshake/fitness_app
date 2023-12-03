@@ -1,11 +1,11 @@
 package bg.zahov.app.signup
 
 import android.os.Bundle
+import android.util.Log
 import android.view.LayoutInflater
 import android.view.View
 import android.view.ViewGroup
 import android.widget.Toast
-import androidx.core.os.bundleOf
 import androidx.fragment.app.Fragment
 import androidx.fragment.app.viewModels
 import androidx.navigation.fragment.findNavController
@@ -35,7 +35,6 @@ class FragmentSignup : Fragment() {
                 val email = emailFieldText.text.toString()
                 val username = usernameFieldText.text.toString()
 
-                //mitigating nesting
                 if (areFieldsEmpty(username, email, password)) {
                     Toast.makeText(requireContext(), "All fields must not be empty!", Toast.LENGTH_SHORT).show()
                     return@setOnClickListener
@@ -53,6 +52,7 @@ class FragmentSignup : Fragment() {
 
                 authViewModel.signUp(username, email, password) { success, errorMessage ->
                     if (success) {
+                        Log.d("LOG", "We should be navigating here")
                         findNavController().navigate(R.id.signup_to_home)
                     } else {
                         Toast.makeText(requireContext(), errorMessage, Toast.LENGTH_SHORT).show()

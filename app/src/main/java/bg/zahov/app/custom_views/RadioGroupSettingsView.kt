@@ -95,6 +95,7 @@ class RadioGroupSettingsView @JvmOverloads constructor(
                 else -> null
             } ?.let {
                 settingsVM.writeNewSetting(title, it)
+                //TODO(Refresh settings)
                 settingsVM.getSettings()
                 subtitleTextView.text = when (title) {
                     "Language" -> (it as Language).name

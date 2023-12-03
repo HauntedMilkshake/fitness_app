@@ -75,7 +75,7 @@
 
     <fragment
         android:id="@+id/workout"
-        android:name="bg.zahov.app.data.FragmentWorkout"
+        android:name="bg.zahov.app.workout.FragmentWorkout"
         tools:layout="@layout/fragment_workout">
     </fragment>
 

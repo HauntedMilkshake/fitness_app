@@ -12,7 +12,7 @@ import kotlinx.coroutines.launch
 
 class SettingsViewModel(application: Application): AndroidViewModel(application) {
     private val auth: FirebaseAuth = FirebaseAuth.getInstance()
-    private val repo: UserRepository = UserRepository.getInstance()
+    private val repo: UserRepository = UserRepository.getInstance(auth.currentUser!!.uid)
     private val _settings = MutableLiveData<Settings>()
     val settings: LiveData<Settings> get() = _settings
     fun logout(){
@@ -22,16 +22,18 @@ class SettingsViewModel(application: Application): AndroidViewModel(application)
         getSettings()
     }
     fun writeNewSetting(title: String, newValue: Any){
-
+        viewModelScope.launch {
+            repo.writeNewSettings(title, newValue)
+        }
     }
     fun getSettings() {
         viewModelScope.launch {
             _settings.value = repo.getUserSettings()
         }
     }
-    fun refreshSettings(){
-        viewModelScope.launch {
-            repo.refreshSettings()
-        }
-    }
+//    fun refreshSettings(){
+//        viewModelScope.launch {
+//            repo.refreshSettings()
+//        }
+//    }
 }

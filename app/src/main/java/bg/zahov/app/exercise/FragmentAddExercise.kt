@@ -7,10 +7,8 @@ import android.view.View
 import android.view.ViewGroup
 import androidx.fragment.app.Fragment
 import androidx.fragment.app.viewModels
-import androidx.navigation.fragment.findNavController
 import bg.zahov.app.data.BodyPart
 import bg.zahov.app.data.Category
-import bg.zahov.app.realm_db.Exercise
 import bg.zahov.fitness.app.databinding.FragmentNewExerciseBinding
 
 class FragmentAddExercise: Fragment() {
