@@ -7,8 +7,10 @@ import android.view.View
 import android.view.ViewGroup
 import androidx.fragment.app.Fragment
 import androidx.fragment.app.viewModels
+import androidx.navigation.fragment.findNavController
 import bg.zahov.app.data.BodyPart
 import bg.zahov.app.data.Category
+import bg.zahov.fitness.app.R
 import bg.zahov.fitness.app.databinding.FragmentNewExerciseBinding
 
 class FragmentAddExercise: Fragment() {
@@ -31,6 +33,9 @@ class FragmentAddExercise: Fragment() {
                 Log.d("TEXT", "TEXT: ${exerciseNameField.editText!!.text!!}")
                 addExerciseViewModel.addExercise(exerciseNameField.editText!!.text!!.toString())
 
+                back.setOnClickListener{
+                    findNavController().navigate(R.id.add_exercise_to_exercises)
+                }
             }
         }
     }

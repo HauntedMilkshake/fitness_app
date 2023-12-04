@@ -1,17 +1,15 @@
-package bg.zahov.app.home
+package bg.zahov.app.loading
 
-import android.util.Log
 import androidx.lifecycle.LiveData
 import androidx.lifecycle.MutableLiveData
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
-import bg.zahov.app.repository.UserRepository
 import bg.zahov.app.realm_db.Workout
+import bg.zahov.app.repository.UserRepository
 import com.google.firebase.auth.FirebaseAuth
-import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.launch
 
-class HomeViewModel : ViewModel() {
+class LoadingViewModel: ViewModel() {
     private val auth: FirebaseAuth = FirebaseAuth.getInstance()
     private val _userName = MutableLiveData<String>()
     private val repo = UserRepository.getInstance(auth.currentUser!!.uid)
@@ -21,14 +19,11 @@ class HomeViewModel : ViewModel() {
     private val _userWorkouts = MutableLiveData<List<Workout>>()
     val userWorkouts: LiveData<List<Workout>> get() = _userWorkouts
     init {
-            viewModelScope.launch {
-                val userInfo = repo.getUserHomeInfo()
-                _userName.postValue(userInfo.first!!)
-                _numberOfWorkouts.postValue(userInfo.second!!)
-                _userWorkouts.postValue(userInfo.third!!)
-            }
+        viewModelScope.launch {
+            val userInfo = repo.getUserHomeInfo()
+            _userName.postValue(userInfo.first!!)
+            _numberOfWorkouts.postValue(userInfo.second!!)
+            _userWorkouts.postValue(userInfo.third!!)
         }
-
+    }
 }
-
-

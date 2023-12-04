@@ -4,6 +4,7 @@ import android.util.Log
 import bg.zahov.app.data.Language
 import bg.zahov.app.data.Units
 import bg.zahov.app.utils.FireStoreAdapter
+import bg.zahov.app.utils.toFirestoreMap
 import com.google.firebase.firestore.DocumentSnapshot
 import com.google.firebase.firestore.FirebaseFirestore
 import com.google.firebase.firestore.SetOptions
@@ -11,8 +12,11 @@ import io.realm.kotlin.Realm
 import io.realm.kotlin.RealmConfiguration
 import io.realm.kotlin.ext.query
 import kotlinx.coroutines.CoroutineScope
+import kotlinx.coroutines.Deferred
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.Job
+import kotlinx.coroutines.async
+import kotlinx.coroutines.coroutineScope
 import kotlinx.coroutines.launch
 import kotlinx.coroutines.runBlocking
 import kotlinx.coroutines.suspendCancellableCoroutine
@@ -21,7 +25,6 @@ import kotlinx.coroutines.sync.withLock
 import kotlinx.coroutines.tasks.await
 import java.io.File
 import kotlin.coroutines.resumeWithException
-
 class RealmManager (userId: String) {
     companion object {
         @Volatile
@@ -35,6 +38,9 @@ class RealmManager (userId: String) {
     private val firestoreInstance = FirebaseFirestore.getInstance()
     private val firestoreAdapter = FireStoreAdapter()
     private val uid = userId
+    private val realmConfig by lazy {
+        getConfig(uid).build()
+    }
 
     //makes sure realm gets locked in a single thread
     private val realmMutex = Mutex()
@@ -43,16 +49,15 @@ class RealmManager (userId: String) {
     private var userCache: User? = null
 
 
-    fun doesUserHaveLocalRealmFile() = File(getConfig(uid).build().path).exists()
-    //checks if the authenticated user has firestore data
-    private suspend fun doesUserHaveSyncData(): Boolean{
-        return firestoreInstance.collection("users").document(uid).get().await().exists()
-    }
+    fun doesUserHaveLocalRealmFile() = File(realmConfig.path).exists()
+
     //user sync from firestore
     private fun createUserFromFirestore(document: DocumentSnapshot){
         userCache = firestoreAdapter.adapt(document.data!!)
+        Log.d("USER", userCache?.username.toString() )
+
     }
-    //function ensures we open the correct realm File
+    //ensures we open the correct realm File
     private fun getConfig(userId: String): RealmConfiguration.Builder {
         val config = RealmConfiguration.Builder(
             setOf(
@@ -68,52 +73,42 @@ class RealmManager (userId: String) {
         config.name("$userId.realm")
         return config
     }
-    //might be smarter to have it return a boolean for whether we have created realm or not but if we haven't I dont know how to handle it
     suspend fun createRealmFromFirestore(){
-        runBlocking {
-            if(doesUserHaveSyncData()) {
-                if(!doesUserHaveLocalRealmFile()) {
-                    firestoreInstance.collection("users").document(uid).get()
-                        .addOnSuccessListener { document ->
-                            createUserFromFirestore(document)
-                            Log.d("Realm", "Sync")
-                            CoroutineScope(Dispatchers.IO).launch{
-                                createRealm(userCache!!)
-
-                            }
+                firestoreInstance.collection("users").document(uid).get()
+                    .addOnSuccessListener { document ->
+                        createUserFromFirestore(document)
+                        Log.d("Realm", "Sync")
+                        CoroutineScope(Dispatchers.IO).launch{
+                            createRealm(userCache!!)
                         }
-                }
-            }
-        }
+                    }
     }
     suspend fun createRealm(user: User) {
         try {
-            realmMutex.withLock{
-                realmInstance = Realm.open(getConfig(uid).build())
+            realmMutex.withLock {
+                realmInstance = Realm.open(realmConfig)
                 realmInstance?.write {
                     copyToRealm(user)
                 }
             }
-            addUserToFirestore(user.username!!, user.numberOfWorkouts!!)
-            Log.d("CREATE REALM", "Realm and Firestore operations completed successfully")
         } catch (e: Exception) {
             Log.e("Realm start error", e.toString())
         } finally {
             realmInstance?.close()
         }
     }
-    private fun addUserToFirestore(userName: String, numberOfWorkouts: Int){
+    suspend fun addUserToFirestore(user: User) {
         firestoreInstance.collection("users")
             .document(uid)
-            .set(hashMapOf("username" to userName, "numberOfWorkouts" to numberOfWorkouts))
+            .set(user.toFirestoreMap())
             .addOnSuccessListener {
             }
             .addOnFailureListener {
             }
     }
-    private suspend fun <T> withRealm(userId: String, block: suspend (Realm) -> T): T {
+
+    private suspend fun <T> withRealm(block: suspend (Realm) -> T): T {
         return suspendCancellableCoroutine { cancellableContinuation ->
-            val realmConfig = getConfig(userId).build()
 
             val job = Job()
 
@@ -133,11 +128,34 @@ class RealmManager (userId: String) {
             }
         }
     }
-    suspend fun getUserInformationForProfileFragment(): Triple<String, Int, List<Workout>> {
+
+//suspend fun getUserInformationForProfileFragment(): Deferred<Triple<String, Int, List<Workout>>> {
+//    return coroutineScope {
+//        async {
+//            val information = userCache?.let { user ->
+//                Log.d("Information from user", user.settings.toString())
+//                Triple(user.username ?: "invalid", user.numberOfWorkouts ?: -1, user.workouts)
+//            } ?: withRealm { realm ->
+//                realm.query<User>().first().find().let { realmUser ->
+//                    userCache = realmUser
+//                    Triple(
+//                        realmUser?.username ?: "invalid",
+//                        realmUser?.numberOfWorkouts ?: -1,
+//                        realmUser?.workouts ?: listOf<Workout>()
+//                    )
+//                }
+//            }
+//
+//            information
+//        }
+//    }
+//}
+        suspend fun getUserInformationForProfileFragment(): Triple<String, Int, List<Workout>> {
+        Log.d("USER", userCache?.username ?: "tough luck")
         val information  = userCache?.let { user ->
             Log.d("Information from user", user.settings.toString())
             Triple(user.username ?: "invalid", user.numberOfWorkouts ?: -1, user.workouts)
-            } ?: withRealm(uid) { realm ->
+            } ?: withRealm { realm ->
             realm.query<User>().first().find().let { realmUser ->
                     userCache = realmUser
                     Triple(realmUser?.username ?: "invalid", realmUser?.numberOfWorkouts ?: -1, realmUser?.workouts ?: listOf<Workout>())
@@ -146,35 +164,36 @@ class RealmManager (userId: String) {
 
         return information
     }
+
     suspend fun getUsername(): String {
-        return userCache?.username ?: withRealm(uid) { realm ->
+        return userCache?.username ?: withRealm { realm ->
             val realmUser = realm.query<User>().find().first()
             userCache = realmUser
             realmUser.username ?: "invalid"
         }
     }
     suspend fun getUserExercises(): List<Exercise>{
-        return userCache?.customExercises ?: withRealm(uid){ realm ->
+        return userCache?.customExercises ?: withRealm { realm ->
             val realmUser = realm.query<User>().find().first()
             userCache = realmUser
             realmUser.customExercises
         }
     }
     suspend fun getUserSettings(): Settings{
-        return userCache?.settings ?: withRealm(uid){ realm ->
+        return userCache?.settings ?: withRealm { realm ->
             val realmUser = realm.query<User>().find().first()
             userCache = realmUser
             realmUser.settings!!
         }
     }
     suspend fun changeUserName(newUserName: String){
-        withRealm(uid){ realm ->
+        withRealm { realm ->
             val realmUser = realm.query<User>().find().first()
             realm.write {
                 findLatest(realmUser)?.let{
                     it.username = newUserName
 
-                    CoroutineScope(Dispatchers.IO).launch {
+                    CoroutineScope(Dispatchers.Default).launch {
                         syncFireStoreName(newUserName)
                     }
                 }
@@ -194,14 +213,12 @@ class RealmManager (userId: String) {
         }.await()
     }
     suspend fun addExercise(newExercise: Exercise){
-        withRealm(uid){realm ->
+        withRealm {realm ->
             val user = realm.query<User>().find().first()
             realm.write {
                 findLatest(user)?.customExercises?.add(newExercise)
 
-                CoroutineScope(Dispatchers.IO).launch {
-                    addExerciseToFirestore(newExercise)
-                }
+//                    addExerciseToFirestore(newExercise)
             }
         }
     }
@@ -220,7 +237,7 @@ class RealmManager (userId: String) {
         }.await()
     }
     suspend fun writeNewSettings(title: String, newValue: Any){
-        withRealm(uid){realm ->
+        withRealm {realm ->
             val realmUser = realm.query<User>().find().first()
             realm.write {
                 findLatest(realmUser)?.let{
@@ -294,3 +311,7 @@ class RealmManager (userId: String) {
 //TODO(replace find with flow - everywhere)
 
 //TODO(adequate handling on addUserToFirestore onSuccess and onFail)
+
+//TODO(adding every new feature to firestore is stupid needs to be refactored)
+//possibly by making checks every once in a while if the user has internet to sync the data
+//or making the user manually press a button for sync

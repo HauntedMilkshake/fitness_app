@@ -1,5 +1,5 @@
 <resources xmlns:tools="http://schemas.android.com/tools">
-    <string name="app_name">fitness_app</string>
+    <string name="app_name">Disciplined</string>
     <!-- Strings used for bottom navigation   -->
     <string name="profile">Profile</string>
     <string name="history">History</string>
@@ -17,8 +17,8 @@
     <string name="password_helper_text">Use a password with numbers</string>
     <string name="username_text">Username</string>
     <!-- Strings used for welcome fragment-->
-    <string name="welcome_text">Strong</string>
-    <string name="motivational_quote">For a stronger version of yourself!</string>
+    <string name="welcome_text">Disciplined</string>
+    <string name="motivational_quote">Discipline is remembering what you want</string>
     <!-- Strings used for nav log in fragment   -->
     <string name="no_account_text">No account? Sign up here!</string>
     <!-- String used for signup fragment   -->

@@ -4,6 +4,7 @@ import bg.zahov.app.realm_db.Exercise
 import bg.zahov.app.realm_db.RealmManager
 import bg.zahov.app.realm_db.User
 import bg.zahov.app.realm_db.Workout
+import kotlinx.coroutines.Deferred
 
 class UserRepository (userId: String){
     companion object {
@@ -33,6 +34,9 @@ class UserRepository (userId: String){
     }
     suspend fun createRealmFromFirestore(){
         realmInstance.createRealmFromFirestore()
+    }
+    suspend fun addUserToFirestore(user: User){
+       realmInstance.addUserToFirestore(user)
     }
     fun doesUserHaveRealm(): Boolean = realmInstance.doesUserHaveLocalRealmFile()
 }

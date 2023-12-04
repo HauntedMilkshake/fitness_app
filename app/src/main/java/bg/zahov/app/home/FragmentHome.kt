@@ -39,12 +39,12 @@ class FragmentHome : Fragment() {
                 findNavController().navigate(R.id.home_to_settings)
 
             }
-            homeViewModel.userName.observe(viewLifecycleOwner){
-                profileName.text = it
-            }
-            homeViewModel.numberOfWorkouts.observe(viewLifecycleOwner){
-                numberOfWorkouts.text = it.toString()
-            }
+                homeViewModel.userName.observe(viewLifecycleOwner){
+                    profileName.text = it
+                }
+                homeViewModel.numberOfWorkouts.observe(viewLifecycleOwner){
+                    numberOfWorkouts.text = it.toString()
+                }
         }
     }
     override fun onResume() {

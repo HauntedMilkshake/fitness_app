@@ -65,6 +65,10 @@
             android:id="@+id/home_to_settings"
             app:destination="@+id/settings">
         </action>
+        <action
+            android:id="@+id/home_to_loading"
+            app:destination="@id/loading"
+            ></action>
     </fragment>
 
     <fragment
@@ -121,6 +125,19 @@
         android:id="@+id/create_exercise"
         android:name="bg.zahov.app.exercise.FragmentAddExercise"
         tools:layout="@layout/fragment_new_exercise">
+        <action
+            android:id="@+id/add_exercise_to_exercises"
+            app:destination="@+id/exercises"
+            ></action>
+    </fragment>
+    <fragment
+        android:id="@+id/loading"
+        android:name="bg.zahov.app.loading.FragmentLoading"
+        tools:layout="@layout/fragment_loading">
+        <action
+            android:id="@+id/loading_to_home"
+            app:destination="@id/home"
+            />
     </fragment>
 
 </navigation>

@@ -51,6 +51,7 @@ class FragmentSignup : Fragment() {
                 }
 
                 authViewModel.signUp(username, email, password) { success, errorMessage ->
+                    Log.d("Info", success.toString())
                     if (success) {
                         Log.d("LOG", "We should be navigating here")
                         findNavController().navigate(R.id.signup_to_home)
