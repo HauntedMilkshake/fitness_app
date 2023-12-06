@@ -5,6 +5,7 @@ import android.animation.ValueAnimator
 import android.content.Context
 import android.content.res.ColorStateList
 import android.util.AttributeSet
+import android.util.Log
 import android.view.Gravity
 import android.view.LayoutInflater
 import android.view.View
@@ -14,6 +15,7 @@ import android.widget.RadioButton
 import android.widget.RadioGroup
 import android.widget.RelativeLayout
 import androidx.core.content.ContextCompat
+import bg.zahov.app.common.SettingsChangeListener
 import bg.zahov.app.data.Language
 import bg.zahov.app.data.Sound
 import bg.zahov.app.data.Theme
@@ -29,10 +31,12 @@ class RadioGroupSettingsView @JvmOverloads constructor(
     attrs: AttributeSet? = null,
     defStyle: Int = 0
 ) : RelativeLayout(context, attrs, defStyle) {
+
+    var settingsChangeListener: SettingsChangeListener? = null
     init {
         inflate(context, R.layout.radio_group_settings_view, this)
     }
-    fun initViewInformation(title: String, radioOptions: List<String>, settings: Settings, settingsVM: SettingsViewModel) {
+    fun initViewInformation(title: String, radioOptions: List<String>, settings: Settings) {
         val titleTextView: MaterialTextView = findViewById(R.id.titleTextView)
         val subtitleTextView: MaterialTextView = findViewById(R.id.subtitleTextView)
 
@@ -48,19 +52,23 @@ class RadioGroupSettingsView @JvmOverloads constructor(
 
         titleTextView.text = title
 
-        val highlightAnimator = ObjectAnimator.ofFloat(null, "alpha", 1f, 0.5f)
+        val highlightAnimator = ObjectAnimator.ofFloat(this, "alpha", 1f, 0.5f)
         highlightAnimator.duration = 300
         highlightAnimator.repeatMode = ValueAnimator.REVERSE
         highlightAnimator.repeatCount = 1
 
         setOnClickListener {
-            highlightAnimator.target = it
             highlightAnimator.start()
-            showPopupWindow(title, radioOptions, settings, settingsVM, subtitleTextView)
+            showPopupWindow(title, radioOptions, settings, subtitleTextView)
 
         }
     }
-    private fun showPopupWindow(title: String, radioOptions: List<String>, settings: Settings, settingsVM: SettingsViewModel, subtitleTextView: MaterialTextView) {
+    private fun showPopupWindow(
+        title: String,
+        radioOptions: List<String>,
+        settings: Settings,
+        subtitleTextView: MaterialTextView
+    ) {
         val popupView: View = LayoutInflater.from(context).inflate(R.layout.settings_popup, null)
         popupView.setBackgroundResource(R.drawable.custom_popup_background)
         val popupTitleTextView: MaterialTextView = popupView.findViewById(R.id.popupTitleTextView)
@@ -72,10 +80,15 @@ class RadioGroupSettingsView @JvmOverloads constructor(
             val radioButton = RadioButton(context)
             val currOption = radioOptions[index]
             radioButton.text = currOption
-            radioButton.layoutParams = RadioGroup.LayoutParams(RadioGroup.LayoutParams.MATCH_PARENT, RadioGroup.LayoutParams.WRAP_CONTENT)
+            radioButton.layoutParams =
+                RadioGroup.LayoutParams(
+                    RadioGroup.LayoutParams.MATCH_PARENT,
+                    RadioGroup.LayoutParams.WRAP_CONTENT
+                )
             radioButton.setPadding(16, 16, 16, 16)
             radioButton.setTextColor(ContextCompat.getColor(context, R.color.white))
-            radioButton.buttonTintList = ColorStateList.valueOf(ContextCompat.getColor(context, R.color.white))
+            radioButton.buttonTintList =
+                ColorStateList.valueOf(ContextCompat.getColor(context, R.color.white))
             radioGroup.addView(radioButton)
 
             if (currOption == getSelectedOption(title, settings)) {
@@ -86,20 +99,20 @@ class RadioGroupSettingsView @JvmOverloads constructor(
             val radioButton = radioGroup.findViewById<RadioButton>(index)
             val selectedOption = radioButton.text.toString()
 
-            when (title) {
+            val selectedValue = when (title) {
                 "Language" -> Language.valueOf(selectedOption)
-                "Weight", "Distance" -> Units.valueOf(selectedOption)
+                "Units" -> Units.valueOf(selectedOption)
                 "Timer increment value" -> selectedOption.split(" ").first().toInt()
                 "Sound" -> Sound.valueOf(selectedOption)
                 "Theme" -> Theme.valueOf(selectedOption)
                 else -> null
-            } ?.let {
-                settingsVM.writeNewSetting(title, it)
-                //TODO(Refresh settings)
-                settingsVM.getSettings()
+            }
+
+            selectedValue?.let {
+                settingsChangeListener?.onSettingChanged(title, it)
                 subtitleTextView.text = when (title) {
                     "Language" -> (it as Language).name
-                    "Weight", "Distance" -> (it as Units).name
+                    "Units" -> (it as Units).name
                     "Timer increment value" -> "$it s"
                     "Sound" -> (it as Sound).name
                     "Theme" -> (it as Theme).name
@@ -110,9 +123,15 @@ class RadioGroupSettingsView @JvmOverloads constructor(
         val scaleUpAnimation = AnimationUtils.loadAnimation(context, R.anim.scale_up)
         popupView.startAnimation(scaleUpAnimation)
 
-        val popupWindow = PopupWindow(popupView, resources.getDimension(R.dimen.popup_width).toInt(), resources.getDimension(R.dimen.popup_height).toInt(), true)
+        val popupWindow = PopupWindow(
+            popupView,
+            resources.getDimension(R.dimen.popup_width).toInt(),
+            resources.getDimension(R.dimen.popup_height).toInt(),
+            true
+        )
         popupWindow.showAtLocation(this, Gravity.CENTER, 0, 0)
     }
+
     private fun getSelectedOption(title: String, settings: Settings): String? {
         return when (title) {
             "Language" -> settings.language

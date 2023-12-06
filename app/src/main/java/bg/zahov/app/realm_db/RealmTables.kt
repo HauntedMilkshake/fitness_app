@@ -36,16 +36,16 @@ class Sets: RealmObject{
     var secondMetric: Int? = null
 }
 class Settings: RealmObject{
-    var language: String? = Language.English.name
-    var weight: String? = Units.Metric.name
-    var distance: String? = Units.Metric.name
-    var soundEffects: Boolean? = true
-    var theme: String? = Theme.Dark.name
-    var restTimer: Int? = 30
-    var vibration: Boolean? = true
-    var soundSettings: String? = Sound.SOUND_1.name
-    var updateTemplate: Boolean? = true
+    var language: String = Language.English.name
+    var weight: String = Units.Metric.name
+    var distance: String = Units.Metric.name
+    var soundEffects: Boolean = true
+    var theme: String = Theme.Dark.name
+    var restTimer: Int = 30
+    var vibration: Boolean = true
+    var soundSettings: String = Sound.SOUND_1.name
+    var updateTemplate: Boolean = true
 //    var sync: Boolean = true
-    var fit: Boolean? = false
+    var fit: Boolean = false
 
 }

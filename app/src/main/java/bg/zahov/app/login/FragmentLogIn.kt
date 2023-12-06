@@ -1,6 +1,7 @@
 package bg.zahov.app.login
 
 import android.os.Bundle
+import android.util.Log
 import android.view.LayoutInflater
 import android.view.View
 import android.view.ViewGroup
@@ -58,7 +59,13 @@ class FragmentLogIn: Fragment() {
 
                 loginViewModel.login(email, password) { success, errorMessage ->
                     if(success){
-                        findNavController().navigate(R.id.login_to_home)
+                        if(!loginViewModel.doesUserHaveRealm()){
+                            Log.d("WHERE TO", "loading")
+                            findNavController().navigate(R.id.login_to_loading)
+                        }else{
+                            Log.d("WHERE TO", "home")
+                            findNavController().navigate(R.id.login_to_home)
+                        }
                     }else{
                         Toast.makeText(requireContext(), errorMessage, Toast.LENGTH_SHORT).show()
                     }

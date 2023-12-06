@@ -45,4 +45,5 @@ class LoginViewModel: ViewModel() {
                 }
             }
     }
+    fun doesUserHaveRealm() = repo.doesUserHaveRealm()
 }

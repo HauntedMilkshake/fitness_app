@@ -4,7 +4,8 @@ import bg.zahov.app.realm_db.Exercise
 import bg.zahov.app.realm_db.RealmManager
 import bg.zahov.app.realm_db.User
 import bg.zahov.app.realm_db.Workout
-import kotlinx.coroutines.Deferred
+import kotlinx.coroutines.Dispatchers
+import kotlinx.coroutines.withContext
 
 class UserRepository (userId: String){
     companion object {
@@ -26,7 +27,7 @@ class UserRepository (userId: String){
         realmInstance.addExercise(newExercise)
     }
     suspend fun writeNewSettings(title: String, newValue: Any){
-        realmInstance.writeNewSettings(title, newValue)
+        realmInstance.writeNewSetting(title, newValue)
     }
 
     suspend fun createRealm(newUser: User) {
@@ -35,8 +36,11 @@ class UserRepository (userId: String){
     suspend fun createRealmFromFirestore(){
         realmInstance.createRealmFromFirestore()
     }
-    suspend fun addUserToFirestore(user: User){
-       realmInstance.addUserToFirestore(user)
+    suspend fun syncFromRealmToFirestore(){
+       realmInstance.syncFromRealmToFirestore()
+    }
+    suspend fun resetSettings(){
+        realmInstance.resetSettings()
     }
     fun doesUserHaveRealm(): Boolean = realmInstance.doesUserHaveLocalRealmFile()
 }

@@ -81,7 +81,7 @@
         app:layout_constraintTop_toBottomOf="@id/top_bar" />
 
     <ScrollView
-        android:layout_width="wrap_content"
+        android:layout_width="match_parent"
         android:layout_height="wrap_content"
         app:layout_constraintTop_toBottomOf="@id/view"
         app:layout_constraintStart_toStartOf="parent"
@@ -89,7 +89,7 @@
 
     <LinearLayout
         android:id="@+id/container"
-        android:layout_width="wrap_content"
+        android:layout_width="match_parent"
         android:layout_height="wrap_content"
         app:layout_constraintTop_toTopOf="@id/view"
         app:layout_constraintStart_toStartOf="parent"
@@ -139,13 +139,7 @@
         android:layout_marginTop="15dp" />
 
     <bg.zahov.app.custom_views.RadioGroupSettingsView
-        android:id="@+id/weight_settings"
-        android:layout_width="wrap_content"
-        android:layout_height="wrap_content"
-        android:layout_marginTop="15dp" />
-
-    <bg.zahov.app.custom_views.RadioGroupSettingsView
-        android:id="@+id/distance_settings"
+        android:id="@+id/unit_settings"
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
         android:layout_marginTop="15dp" />
@@ -243,11 +237,11 @@
         android:layout_height="wrap_content"
         android:layout_marginTop="15dp" />
 
-    <bg.zahov.app.custom_views.SwitchSettingsView
-        android:id="@+id/turn_sync_on_settings"
-        android:layout_width="wrap_content"
-        android:layout_height="wrap_content"
-        android:layout_marginTop="15dp" />
+<!--    <bg.zahov.app.custom_views.SwitchSettingsView-->
+<!--        android:id="@+id/turn_sync_on_settings"-->
+<!--        android:layout_width="wrap_content"-->
+<!--        android:layout_height="wrap_content"-->
+<!--        android:layout_marginTop="15dp" />-->
 
     <bg.zahov.app.custom_views.SwitchSettingsView
         android:id="@+id/samsung_fit_settings"
@@ -278,17 +272,36 @@
         android:id="@+id/sixth_segment_seperator"
         android:layout_width="match_parent"
         android:layout_height="1dp"
+        android:layout_marginTop="15dp"
         android:background="@color/teal_700"
         android:elevation="4dp" />
 
     <com.google.android.material.button.MaterialButton
         android:id="@+id/sign_out_button"
         android:layout_width="250dp"
+        android:layout_marginTop="10dp"
         android:layout_height="wrap_content"
         android:backgroundTint="@color/red"
         android:text="@string/sign_out_button_text"
         android:textAllCaps="false"
+        android:layout_gravity="center"
+        android:visibility="visible"
         app:cornerRadius="12dp" />
+        <com.google.android.material.button.MaterialButton
+            android:id="@+id/delete_account"
+            android:layout_width="250dp"
+            android:layout_height="wrap_content"
+            android:backgroundTint="@color/red"
+            android:layout_marginTop="10dp"
+            android:text="@string/delete_account_text"
+            android:textAllCaps="false"
+            android:layout_gravity="center"
+            android:visibility="visible"
+            app:cornerRadius="12dp" />
+        <View
+            android:layout_width="match_parent"
+            android:layout_height="80dp"
+            />
     </LinearLayout>
     </ScrollView>
 </androidx.constraintlayout.widget.ConstraintLayout>

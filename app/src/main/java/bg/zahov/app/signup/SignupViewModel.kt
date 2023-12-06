@@ -28,7 +28,7 @@ class SignupViewModel : ViewModel() {
                                 settings = Settings()
                         }
                         repo.createRealm(user)
-                        repo.addUserToFirestore(user)
+                        repo.syncFromRealmToFirestore()
                         callback(true, null)
                     }
                 } else {

@@ -43,24 +43,14 @@
     app:layout_constraintStart_toStartOf="parent"/>
 
   <com.google.android.material.imageview.ShapeableImageView
-      android:id="@+id/loading_animation"
+      android:id="@+id/icon"
       android:layout_width="wrap_content"
       android:layout_height="wrap_content"
-      android:layout_marginTop="300dp"
+      android:src="@drawable/ic_launcher"
+      app:layout_constraintBottom_toBottomOf="parent"
       app:layout_constraintEnd_toEndOf="parent"
       app:layout_constraintStart_toStartOf="parent"
-      app:layout_constraintTop_toTopOf="parent"/>
+      app:layout_constraintTop_toTopOf="parent" />
 
-  <com.google.android.material.textview.MaterialTextView
-      android:id="@+id/loading_text"
-      android:layout_width="wrap_content"
-      android:layout_height="wrap_content"
-      android:textColor="@color/white"
-      android:textSize="17sp"
-      android:textStyle="bold"
-      android:layout_marginTop="35dp"
-      android:text="@string/motivational_quote"
-      app:layout_constraintTop_toTopOf="@id/loading_animation"
-      app:layout_constraintEnd_toEndOf="parent"
-      app:layout_constraintStart_toStartOf="parent" />
+
 </androidx.constraintlayout.widget.ConstraintLayout>

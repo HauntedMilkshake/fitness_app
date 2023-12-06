@@ -35,6 +35,8 @@
     <string name="my_templates_text">my templates</string>
     <string name="searchbar_hint">Dumbell press</string>
     <!-- Strings used for settings fragment   -->
+    <string name="units_text">Units</string>
+    <string name="delete_account_text">Delete account</string>
     <string name="settings_text">Settings</string>
     <string name="edit_text">Edit</string>
     <string name="units_and_locale_text">Units and Localization</string>
