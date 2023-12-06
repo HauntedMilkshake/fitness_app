@@ -58,7 +58,6 @@ android {
 
 dependencies {
 
-    implementation("com.github.bumptech.glide:glide:4.16.0")
     implementation("io.realm:realm-android-kotlin-extensions:10.10.0")
     implementation("com.google.firebase:firebase-auth-ktx:22.3.0")
     implementation("androidx.core:core-ktx:1.12.0")
@@ -86,4 +85,7 @@ dependencies {
     implementation("io.realm.kotlin:library-base:1.11.0")
     implementation("io.realm.kotlin:library-sync:1.11.0")
     implementation("org.jetbrains.kotlinx:kotlinx-coroutines-android:1.7.0")
+    implementation("androidx.lifecycle:lifecycle-livedata-ktx:2.6.2")
+
+
 }

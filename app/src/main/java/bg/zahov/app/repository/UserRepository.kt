@@ -1,5 +1,6 @@
 package bg.zahov.app.repository
 
+import androidx.lifecycle.LiveData
 import bg.zahov.app.realm_db.Exercise
 import bg.zahov.app.realm_db.RealmManager
 import bg.zahov.app.realm_db.User
@@ -16,10 +17,10 @@ class UserRepository (userId: String){
         }
     }
     private val realmInstance = RealmManager.getInstance(userId)
-    suspend fun getUserHomeInfo(): Triple<String, Int, List<Workout>> = realmInstance.getUserInformationForProfileFragment()
     suspend fun getUsername(): String = realmInstance.getUsername()
     suspend fun getUserExercises() = realmInstance.getUserExercises()
     suspend fun getUserSettings() = realmInstance.getUserSettings()
+    suspend fun getUserHomeInfo() = realmInstance.getUserInformationForProfileFragment()
     suspend fun changeUserName(newUserName: String){
         realmInstance.changeUserName(newUserName)
     }

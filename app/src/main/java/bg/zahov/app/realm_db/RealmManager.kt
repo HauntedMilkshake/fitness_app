@@ -7,14 +7,27 @@ import bg.zahov.app.utils.FireStoreAdapter
 import bg.zahov.app.utils.toFirestoreMap
 import com.google.firebase.firestore.DocumentSnapshot
 import com.google.firebase.firestore.FirebaseFirestore
+import com.google.firebase.firestore.SetOptions
 import io.realm.kotlin.Realm
 import io.realm.kotlin.RealmConfiguration
+import io.realm.kotlin.ext.asFlow
 import io.realm.kotlin.ext.query
+import io.realm.kotlin.notifications.DeletedObject
+import io.realm.kotlin.notifications.InitialObject
+import io.realm.kotlin.notifications.ObjectChange
+import io.realm.kotlin.notifications.PendingObject
+import io.realm.kotlin.notifications.SingleQueryChange
+import io.realm.kotlin.notifications.UpdatedObject
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.Dispatchers
+import kotlinx.coroutines.flow.Flow
+import kotlinx.coroutines.flow.collect
+import kotlinx.coroutines.flow.flowOf
+import kotlinx.coroutines.flow.map
 import kotlinx.coroutines.launch
 import kotlinx.coroutines.sync.Mutex
 import kotlinx.coroutines.sync.withLock
+import kotlinx.coroutines.tasks.await
 import kotlinx.coroutines.withContext
 import java.io.File
 class RealmManager (userId: String) {
@@ -41,6 +54,7 @@ class RealmManager (userId: String) {
     //caching user for in app faster data retrieval
     private var userCache: User? = null
 
+    //might be redundant as it always returns true if I am not mistaken
     fun doesUserHaveLocalRealmFile() = File(realmConfig.path).exists()
 
     //user sync from firestore
@@ -134,6 +148,7 @@ class RealmManager (userId: String) {
         }
         return information
     }
+
     suspend fun getUsername(): String {
         return userCache?.username ?: withRealm { realm ->
             val realmUser = realm.query<User>().find().first()
@@ -149,15 +164,7 @@ class RealmManager (userId: String) {
             realmUser.customExercises
         }
     }
-     suspend fun getUserSettings(): Settings {
-         return withContext(Dispatchers.IO) {
-             userCache?.settings ?: withRealm { realm ->
-                 val realmUser = realm.query<User>().find().first()
-                 userCache = realmUser
-                 realmUser.settings
-             } ?: Settings()
-         }
-     }
+
     suspend fun changeUserName(newUserName: String) {
         withRealm { realm ->
             val realmUser = realm.query<User>().find().first()
@@ -174,17 +181,17 @@ class RealmManager (userId: String) {
         userCache?.username = newUserName
     }
 
-//    private suspend fun syncFireStoreName(newUserName: String) {
-//        val userDocRef = firestoreInstance.collection("users").document(uid)
-//        userDocRef.get().addOnSuccessListener { documentSnapshot ->
-//            if (documentSnapshot.exists()) {
-//                val user = documentSnapshot.toObject(User::class.java)
-//                user?.let {
-//                    userDocRef.set(mapOf("username" to newUserName), SetOptions.merge())
-//                }
-//            }
-//        }.await()
-//    }
+    private suspend fun syncFireStoreName(newUserName: String) {
+        val userDocRef = firestoreInstance.collection("users").document(uid)
+        userDocRef.get().addOnSuccessListener { documentSnapshot ->
+            if (documentSnapshot.exists()) {
+                val user = documentSnapshot.toObject(User::class.java)
+                user?.let {
+                    userDocRef.set(mapOf("username" to newUserName), SetOptions.merge())
+                }
+            }
+        }.await()
+    }
 
     suspend fun addExercise(newExercise: Exercise) {
         withRealm { realm ->
@@ -279,14 +286,34 @@ class RealmManager (userId: String) {
             }
         }
     }
+    suspend fun getUserSettings(): Flow<Settings> = withContext(Dispatchers.IO) {
+        return@withContext userCache?.settings?.asFlow()?.map { objectChange ->
+            when (objectChange) {
+                is InitialObject -> objectChange.obj
+                is UpdatedObject -> objectChange.obj
+                else -> throw UnsupportedOperationException("Unexpected ObjectChange type")
+            }
+        } ?: withContext(Dispatchers.Main) {
+            withRealm { realm ->
+                val user = realm.query<User>().find().first()
+                user.settings?.asFlow()?.map { objectChange ->
+                    when (objectChange) {
+                        is InitialObject -> objectChange.obj
+                        is UpdatedObject -> objectChange.obj
+                        else -> throw UnsupportedOperationException("Unexpected ObjectChange type")
+                    }
+                } ?: flowOf(Settings())
+            }
+        }
+    }
+
+
+
 }
 
 
-//TODO(potentially add sync setting but don't know how to handle some cases - 49)
 
-//TODO(replace find with flow - everywhere)
 
-//TODO(adequate handling on addUserToFirestore onSuccess and onFail)
 //TODO(doesUserHaveRealm might not be working)
 //TODO(Cache isn't being initialized)
 

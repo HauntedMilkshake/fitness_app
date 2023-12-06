@@ -1,5 +1,6 @@
 package bg.zahov.app.realm_db
 
+import android.database.Observable
 import bg.zahov.app.data.Language
 import bg.zahov.app.data.Sound
 import bg.zahov.app.data.Theme
@@ -15,6 +16,7 @@ class User: RealmObject {
     var customExercises: RealmList<Exercise> = realmListOf()
     var settings: Settings? = null
 }
+
 class Workout: RealmObject{
     var duration: Double? = null
     var totalVolume: Double? = null

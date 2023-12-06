@@ -1,6 +1,7 @@
 package bg.zahov.app.settings
 
 import android.app.Application
+import androidx.compose.runtime.collectAsState
 import androidx.lifecycle.AndroidViewModel
 import androidx.lifecycle.LiveData
 import androidx.lifecycle.MutableLiveData
@@ -13,6 +14,7 @@ import bg.zahov.app.realm_db.Settings
 import bg.zahov.app.repository.UserRepository
 import com.google.firebase.auth.FirebaseAuth
 import kotlinx.coroutines.Dispatchers
+import kotlinx.coroutines.flow.collect
 import kotlinx.coroutines.launch
 import kotlinx.coroutines.withContext
 
@@ -40,7 +42,9 @@ class SettingsViewModel(application: Application) : AndroidViewModel(application
     }
 
     private suspend fun getSettings() {
-        _settings.postValue(repo.getUserSettings())
+        repo.getUserSettings().collect {
+            _settings.postValue(it)
+        }
     }
 
     fun resetSettings() {
