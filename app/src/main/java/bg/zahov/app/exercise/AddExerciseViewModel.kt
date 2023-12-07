@@ -14,7 +14,7 @@ import com.google.firebase.auth.FirebaseAuth
 import io.realm.kotlin.ext.realmListOf
 import kotlinx.coroutines.launch
 
-class AddExerciseViewModel(application: Application): AndroidViewModel(application) {
+class AddExerciseViewModel(application: Application) : AndroidViewModel(application) {
     private val auth = FirebaseAuth.getInstance()
     private val repo = UserRepository.getInstance(auth.currentUser!!.uid)
     private val _bodyPart = MutableLiveData<String>()
@@ -22,14 +22,16 @@ class AddExerciseViewModel(application: Application): AndroidViewModel(applicati
     private val _isCreated = MutableLiveData<Boolean>()
     val isCreated: LiveData<Boolean> get() = _isCreated
 
-    init{
+    init {
         _isCreated.value = false
     }
-    fun addExercise(exerciseTitle: String? ){
-        if(exerciseTitle.isNullOrEmpty()){
-            Toast.makeText(getApplication(), "Please don't leave title empty", Toast.LENGTH_SHORT).show()
-        }else{
-            auth.uid?.let{
+
+    fun addExercise(exerciseTitle: String?) {
+        if (exerciseTitle.isNullOrEmpty()) {
+            Toast.makeText(getApplication(), "Please don't leave title empty", Toast.LENGTH_SHORT)
+                .show()
+        } else {
+            auth.uid?.let {
                 viewModelScope.launch {
                     repo.addExercise(Exercise().apply {
                         bodyPart = _bodyPart.value
@@ -40,22 +42,30 @@ class AddExerciseViewModel(application: Application): AndroidViewModel(applicati
                     _isCreated.postValue(true)
                 }
             }
-            Toast.makeText(getApplication(), "Successfully added a new exercise", Toast.LENGTH_SHORT).show()
+            Toast.makeText(
+                getApplication(),
+                "Successfully added a new exercise",
+                Toast.LENGTH_SHORT
+            ).show()
         }
     }
-    fun buildExercise(title: String, info: String){
+
+    fun buildExercise(title: String, info: String) {
         when (title) {
             "Body part" -> {
                 _bodyPart.value = BodyPart.valueOf(info).name
             }
+
             "Category" -> {
                 _category.value = Category.valueOf(info).name
             }
+
             else -> {
                 return
             }
         }
     }
+
     fun getCurrBodyPart() = _bodyPart.value
     fun getCurrCategory() = _category.value
 }

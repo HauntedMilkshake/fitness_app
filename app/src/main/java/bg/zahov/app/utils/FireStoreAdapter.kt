@@ -13,7 +13,7 @@ import bg.zahov.app.realm_db.Workout
 import io.realm.kotlin.ext.realmListOf
 import io.realm.kotlin.ext.toRealmList
 
-class FireStoreAdapter: Adapter<Map<String, Any>, User> {
+class FireStoreAdapter : Adapter<Map<String, Any>, User> {
     override fun adapt(t: Map<String, Any>): User {
         return User().apply {
             username = t["username"] as? String
@@ -27,8 +27,8 @@ class FireStoreAdapter: Adapter<Map<String, Any>, User> {
                         numberOfPrs = (it["numberOfPrs"] as? Long)?.toInt()
                         workoutName = it["workoutName"] as? String
                         date = it["date"] as? String
+                        count = it["count"] as? Int
 
-                        // Extracting data for Exercises
                         exercises = (it["exercises"] as? List<*>)?.mapNotNull { exerciseData ->
                             (exerciseData as? Map<*, *>)?.let {
                                 Exercise().apply {
@@ -41,7 +41,8 @@ class FireStoreAdapter: Adapter<Map<String, Any>, User> {
                                         (setData as? Map<*, *>)?.let {
                                             Sets().apply {
                                                 firstMetric = (it["firstMetric"] as? Long)?.toInt()
-                                                secondMetric = (it["secondMetric"] as? Long)?.toInt()
+                                                secondMetric =
+                                                    (it["secondMetric"] as? Long)?.toInt()
                                             }
                                         }
                                     }?.toRealmList() ?: realmListOf()
@@ -83,7 +84,6 @@ class FireStoreAdapter: Adapter<Map<String, Any>, User> {
                 vibration = settingsData?.get("vibration") as? Boolean ?: true
                 soundSettings = settingsData?.get("soundSettings") as? String ?: Sound.SOUND_1.name
                 updateTemplate = settingsData?.get("updateTemplate") as? Boolean ?: true
-//                sync = settingsData?.get("sync") as? Boolean ?: true
                 fit = settingsData?.get("fit") as? Boolean ?: false
             }
         }

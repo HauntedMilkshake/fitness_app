@@ -21,20 +21,23 @@ class HomeViewModel : ViewModel() {
     val numberOfWorkouts: LiveData<Int> get() = _numberOfWorkouts
     private val _userWorkouts = MutableLiveData<List<Workout>>()
     val userWorkouts: LiveData<List<Workout>> get() = _userWorkouts
+
     init {
         viewModelScope.launch {
             repo.getUser().collect {
-                when(it){
+                when (it) {
                     is DeletedObject -> {
                         _userName.postValue(it.obj?.username)
                         _numberOfWorkouts.postValue(it.obj?.numberOfWorkouts)
                         _userWorkouts.postValue(it.obj?.workouts)
                     }
+
                     is InitialObject -> {
                         _userName.postValue(it.obj.username)
                         _numberOfWorkouts.postValue(it.obj.numberOfWorkouts)
                         _userWorkouts.postValue(it.obj.workouts)
                     }
+
                     is UpdatedObject -> {
                         _userName.postValue(it.obj.username)
                         _numberOfWorkouts.postValue(it.obj.numberOfWorkouts)

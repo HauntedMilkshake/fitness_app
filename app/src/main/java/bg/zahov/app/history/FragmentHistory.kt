@@ -9,11 +9,12 @@ import androidx.fragment.app.Fragment
 import bg.zahov.fitness.app.R
 import bg.zahov.fitness.app.databinding.FragmentHistoryBinding
 
-class FragmentHistory: Fragment() {
+class FragmentHistory : Fragment() {
     private var _binding: FragmentHistoryBinding? = null
     private val binding get() = _binding!!
     override fun onCreateView(
-        inflater: LayoutInflater, container: ViewGroup?, savedInstanceState: Bundle?): View {
+        inflater: LayoutInflater, container: ViewGroup?, savedInstanceState: Bundle?,
+    ): View {
         _binding = FragmentHistoryBinding.inflate(inflater, container, false)
         return binding.root
     }

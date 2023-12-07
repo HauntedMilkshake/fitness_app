@@ -21,7 +21,8 @@ import kotlinx.coroutines.flow.Flow
 import kotlinx.coroutines.launch
 import kotlinx.coroutines.withContext
 import java.io.File
-class RealmManager (userId: String) {
+
+class RealmManager(userId: String) {
     companion object {
         @Volatile
         private var instance: RealmManager? = null
@@ -66,6 +67,7 @@ class RealmManager (userId: String) {
         config.name("$userId.realm")
         return config
     }
+
     suspend fun createRealmFromFirestore() {
         firestoreInstance.collection("users").document(uid).get()
             .addOnSuccessListener { document ->
@@ -76,13 +78,14 @@ class RealmManager (userId: String) {
                 }
             }
     }
+
     suspend fun createRealm(user: User) {
         withContext(Dispatchers.IO) {
             try {
-                    realmInstance = Realm.open(realmConfig)
-                    realmInstance?.write {
-                        copyToRealm(user)
-                    }
+                realmInstance = Realm.open(realmConfig)
+                realmInstance?.write {
+                    copyToRealm(user)
+                }
             } catch (e: Exception) {
                 Log.e("Realm start error", e.toString())
             } finally {
@@ -90,6 +93,7 @@ class RealmManager (userId: String) {
             }
         }
     }
+
     private fun addUserToFirestore(user: User) {
         firestoreInstance.collection("users")
             .document(uid)
@@ -99,6 +103,7 @@ class RealmManager (userId: String) {
             .addOnFailureListener {
             }
     }
+
     suspend fun syncFromRealmToFirestore() {
         userCache?.let {
             addUserToFirestore(it)
@@ -108,24 +113,28 @@ class RealmManager (userId: String) {
             userCache = user
         }
     }
+
     private suspend fun <T> withRealm(block: suspend (Realm) -> T): T {
         return withContext(Dispatchers.IO) {
             val realm = Realm.open(realmConfig)
             block(realm)
         }
     }
-    suspend fun getSettings() : Flow<ObjectChange<Settings>>{
-        return withRealm {realm ->
+
+    suspend fun getSettings(): Flow<ObjectChange<Settings>> {
+        return withRealm { realm ->
             realm.query<User>().find().first().settings!!.asFlow()
         }
     }
+
     suspend fun getExercises(): Flow<ListChange<Exercise>> {
-        return withRealm {realm ->
+        return withRealm { realm ->
             realm.query<User>().find().first().customExercises.asFlow()
         }
     }
+
     suspend fun getUser(): Flow<ObjectChange<User>> {
-        return withRealm{realm ->
+        return withRealm { realm ->
             realm.query<User>().find().first().asFlow()
         }
     }
@@ -140,6 +149,7 @@ class RealmManager (userId: String) {
             }
         }
     }
+
     suspend fun addExercise(newExercise: Exercise) {
         withRealm { realm ->
             val user = realm.query<User>().find().first()
@@ -149,16 +159,17 @@ class RealmManager (userId: String) {
         }
     }
 
-    suspend fun resetSettings(){
+    suspend fun resetSettings() {
         withRealm { realm ->
             val realmUser = realm.query<User>().find().first()
-           realm.write {
-               findLatest(realmUser)?.let{
-                   it.settings = Settings()
-               }
-           }
+            realm.write {
+                findLatest(realmUser)?.let {
+                    it.settings = Settings()
+                }
+            }
         }
     }
+
     suspend fun writeNewSetting(title: String, newValue: Any) {
         withRealm { realm ->
             val realmUser = realm.query<User>().find().first()
@@ -205,8 +216,7 @@ class RealmManager (userId: String) {
                     }
                 }
             }
-            }
         }
+    }
 }
-//TODO(doesUserHaveRealm might not be working)
 

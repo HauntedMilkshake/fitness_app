@@ -4,7 +4,7 @@ import bg.zahov.app.realm_db.Exercise
 import bg.zahov.app.realm_db.RealmManager
 import bg.zahov.app.realm_db.User
 
-class UserRepository (userId: String){
+class UserRepository(userId: String) {
     companion object {
         @Volatile
         private var repoInstance: UserRepository? = null
@@ -18,25 +18,33 @@ class UserRepository (userId: String){
     suspend fun getSettings() = realmInstance.getSettings()
 
     suspend fun getUser() = realmInstance.getUser()
-    suspend fun changeUserName(newUserName: String){
+    suspend fun changeUserName(newUserName: String) {
         realmInstance.changeUserName(newUserName)
     }
-    suspend fun addExercise(newExercise: Exercise){
+
+    suspend fun addExercise(newExercise: Exercise) {
         realmInstance.addExercise(newExercise)
     }
-    suspend fun writeNewSettings(title: String, newValue: Any){ realmInstance.writeNewSetting(title, newValue) }
+
+    suspend fun writeNewSettings(title: String, newValue: Any) {
+        realmInstance.writeNewSetting(title, newValue)
+    }
 
     suspend fun createRealm(newUser: User) {
         realmInstance.createRealm(newUser)
     }
-    suspend fun createRealmFromFirestore(){
+
+    suspend fun createRealmFromFirestore() {
         realmInstance.createRealmFromFirestore()
     }
-    suspend fun syncFromRealmToFirestore(){
-       realmInstance.syncFromRealmToFirestore()
+
+    suspend fun syncFromRealmToFirestore() {
+        realmInstance.syncFromRealmToFirestore()
     }
-    suspend fun resetSettings(){
+
+    suspend fun resetSettings() {
         realmInstance.resetSettings()
     }
+
     fun doesUserHaveRealm(): Boolean = realmInstance.doesUserHaveLocalRealmFile()
 }

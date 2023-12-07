@@ -6,14 +6,13 @@ import android.widget.RelativeLayout
 import android.widget.Switch
 import bg.zahov.app.common.SettingsChangeListener
 import bg.zahov.app.realm_db.Settings
-import bg.zahov.app.settings.SettingsViewModel
 import bg.zahov.fitness.app.R
 import com.google.android.material.textview.MaterialTextView
 
 class SwitchSettingsView @JvmOverloads constructor(
     context: Context,
     attrs: AttributeSet? = null,
-    defStyle: Int = 0
+    defStyle: Int = 0,
 ) : RelativeLayout(context, attrs, defStyle) {
 
     var settingsChangeListener: SettingsChangeListener? = null

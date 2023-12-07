@@ -14,6 +14,7 @@ fun User.toFirestoreMap(): Map<String, Any?> {
         "settings" to settings?.toMap()
     )
 }
+
 fun RealmList<out RealmObject>.toMap(): List<Map<String, Any?>> {
     return map { element ->
         val fieldMap = element.javaClass.declaredFields.associate { field ->
