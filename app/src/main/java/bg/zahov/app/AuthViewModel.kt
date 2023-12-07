@@ -13,13 +13,12 @@ class AuthViewModel : ViewModel() {
     private val authStateListener = FirebaseAuth.AuthStateListener { firebaseAuth ->
         _isAuthenticated.value = firebaseAuth.currentUser != null
     }
-
     init {
         auth.addAuthStateListener(authStateListener)
     }
-
     override fun onCleared() {
         super.onCleared()
         auth.removeAuthStateListener(authStateListener)
     }
+
 }

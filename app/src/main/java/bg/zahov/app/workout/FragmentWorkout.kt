@@ -1,10 +1,12 @@
-package bg.zahov.app.data
+package bg.zahov.app.workout
 
 import android.os.Bundle
+import android.transition.TransitionInflater
 import android.view.LayoutInflater
 import android.view.View
 import android.view.ViewGroup
 import androidx.fragment.app.Fragment
+import bg.zahov.fitness.app.R
 import bg.zahov.fitness.app.databinding.FragmentWorkoutBinding
 
 class FragmentWorkout: Fragment() {
@@ -15,7 +17,10 @@ class FragmentWorkout: Fragment() {
         _binding = FragmentWorkoutBinding.inflate(inflater, container, false)
         return binding.root
     }
-    override fun onViewCreated(view: View, savedInstanceState: Bundle?) {
-        super.onViewCreated(view, savedInstanceState)
+    override fun onCreate(savedInstanceState: Bundle?) {
+        super.onCreate(savedInstanceState)
+        val inflater = TransitionInflater.from(requireContext())
+        enterTransition = inflater.inflateTransition(R.transition.slide_up)
+        exitTransition = inflater.inflateTransition(R.transition.fade_out)
     }
 }

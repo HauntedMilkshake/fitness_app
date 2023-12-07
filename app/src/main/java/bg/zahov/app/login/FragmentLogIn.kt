@@ -6,7 +6,6 @@ import android.view.LayoutInflater
 import android.view.View
 import android.view.ViewGroup
 import android.widget.Toast
-import androidx.core.os.bundleOf
 import androidx.fragment.app.Fragment
 import androidx.fragment.app.viewModels
 import androidx.navigation.fragment.findNavController
@@ -59,9 +58,14 @@ class FragmentLogIn: Fragment() {
                 }
 
                 loginViewModel.login(email, password) { success, errorMessage ->
-                    Log.d("goingToHome", "WE ARE HERE ${success.toString()}")
                     if(success){
-                        findNavController().navigate(R.id.login_to_home)
+                        if(!loginViewModel.doesUserHaveRealm()){
+                            Log.d("WHERE TO", "loading")
+                            findNavController().navigate(R.id.login_to_loading)
+                        }else{
+                            Log.d("WHERE TO", "home")
+                            findNavController().navigate(R.id.login_to_home)
+                        }
                     }else{
                         Toast.makeText(requireContext(), errorMessage, Toast.LENGTH_SHORT).show()
                     }
@@ -77,6 +81,6 @@ class FragmentLogIn: Fragment() {
         super.onDestroyView()
         _binding = null
     }
-    private fun areFieldsEmpty(email: String, password: String) = listOf(email, password).count { it.isNullOrEmpty() } >= 1
+    private fun areFieldsEmpty(email: String?, password: String?) = listOf(email, password).count { it.isNullOrEmpty() } >= 1
     private fun isEmailNotValid(email: String) = !Regex("^\\S+@\\S+\\.\\S+$").matches(email)
 }

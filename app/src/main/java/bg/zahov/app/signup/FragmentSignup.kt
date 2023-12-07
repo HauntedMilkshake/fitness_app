@@ -5,7 +5,6 @@ import android.view.LayoutInflater
 import android.view.View
 import android.view.ViewGroup
 import android.widget.Toast
-import androidx.core.os.bundleOf
 import androidx.fragment.app.Fragment
 import androidx.fragment.app.viewModels
 import androidx.navigation.fragment.findNavController
@@ -17,7 +16,7 @@ class FragmentSignup : Fragment() {
     private var _binding: FragmentSignUpBinding? = null
     private val binding get() = _binding!!
     private val authViewModel: SignupViewModel by viewModels()
-    override fun onCreateView(inflater: LayoutInflater, container: ViewGroup?, savedInstanceState: Bundle?): View? {
+    override fun onCreateView(inflater: LayoutInflater, container: ViewGroup?, savedInstanceState: Bundle?): View {
         _binding = FragmentSignUpBinding.inflate(inflater, container, false)
         return binding.root
     }
@@ -35,7 +34,6 @@ class FragmentSignup : Fragment() {
                 val email = emailFieldText.text.toString()
                 val username = usernameFieldText.text.toString()
 
-                //mitigating nesting
                 if (areFieldsEmpty(username, email, password)) {
                     Toast.makeText(requireContext(), "All fields must not be empty!", Toast.LENGTH_SHORT).show()
                     return@setOnClickListener
@@ -66,6 +64,6 @@ class FragmentSignup : Fragment() {
         }
     }
     private fun checkPasswords(firstPass: String, secondPass:String ) = firstPass != secondPass
-    private fun areFieldsEmpty(userName: String, email: String, pass: String) = listOf(userName, email, pass).count { it.isNullOrEmpty() } >= 1
+    private fun areFieldsEmpty(userName: String?, email: String?, pass: String?) = listOf(userName, email, pass).count { it.isNullOrEmpty() } >= 1
     private fun isEmailNotValid(email: String) = !Regex("^\\S+@\\S+\\.\\S+$").matches(email)
 }

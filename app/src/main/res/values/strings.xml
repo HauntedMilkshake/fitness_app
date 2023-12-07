@@ -1,5 +1,5 @@
-<resources>
-    <string name="app_name">fitness_app</string>
+<resources xmlns:tools="http://schemas.android.com/tools">
+    <string name="app_name">Disciplined</string>
     <!-- Strings used for bottom navigation   -->
     <string name="profile">Profile</string>
     <string name="history">History</string>
@@ -17,8 +17,8 @@
     <string name="password_helper_text">Use a password with numbers</string>
     <string name="username_text">Username</string>
     <!-- Strings used for welcome fragment-->
-    <string name="welcome_text">Strong</string>
-    <string name="motivational_quote">For a stronger version of yourself!</string>
+    <string name="welcome_text">Disciplined</string>
+    <string name="motivational_quote">Discipline is remembering what you want</string>
     <!-- Strings used for nav log in fragment   -->
     <string name="no_account_text">No account? Sign up here!</string>
     <!-- String used for signup fragment   -->
@@ -35,6 +35,8 @@
     <string name="my_templates_text">my templates</string>
     <string name="searchbar_hint">Dumbell press</string>
     <!-- Strings used for settings fragment   -->
+    <string name="units_text">Units</string>
+    <string name="delete_account_text">Delete account</string>
     <string name="settings_text">Settings</string>
     <string name="edit_text">Edit</string>
     <string name="units_and_locale_text">Units and Localization</string>
@@ -62,4 +64,8 @@
     <!--  Strings used for create exercise fragment    -->
     <string name="new_exercise_placeholder_text">new exercise</string>
     <string name="add_name_hint">Add name</string>
+    <!-- Strings used for edit profile fragment   -->
+    <string name="create_exercise" tools:ignore="ExtraTranslation">Create exercise</string>
+    <string name="edit_profile_text"> Edit profile</string>
+    <string name="reset_password_text">Reset password</string>
 </resources>

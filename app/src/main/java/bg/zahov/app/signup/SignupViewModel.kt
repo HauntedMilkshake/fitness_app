@@ -1,31 +1,30 @@
 package bg.zahov.app.signup
 
-import android.widget.Toast
-import androidx.lifecycle.LiveData
-import androidx.lifecycle.MutableLiveData
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
-import bg.zahov.app.realm_db.RealmManager
+import bg.zahov.app.realm_db.Settings
+import bg.zahov.app.realm_db.User
+import bg.zahov.app.repository.UserRepository
 import com.google.firebase.auth.FirebaseAuth
-import com.google.firebase.database.FirebaseDatabase
 import kotlinx.coroutines.launch
 
-class SignupViewModel: ViewModel() {
+class SignupViewModel : ViewModel() {
     private val auth: FirebaseAuth = FirebaseAuth.getInstance()
-    private val _isAuthenticated = MutableLiveData<Boolean>()
-    private val database = FirebaseDatabase.getInstance().reference
-    val isAuthenticated: LiveData<Boolean> get() = _isAuthenticated
-    init{
-        _isAuthenticated.value = false
-    }
+    private lateinit var repo: UserRepository
     fun signUp(userName: String, email: String, password: String, callback: (Boolean, String?) -> Unit) {
         auth.createUserWithEmailAndPassword(email, password)
             .addOnCompleteListener { task ->
                 if (task.isSuccessful) {
-                    viewModelScope.launch {
+                    viewModelScope.launch() {
+                        repo = UserRepository.getInstance(auth.currentUser!!.uid)
+                        val user = User().apply{
+                                username = userName
+                                numberOfWorkouts = 0
+                                settings = Settings()
+                        }
+                        repo.createRealm(user)
+                        repo.syncFromRealmToFirestore()
                         callback(true, null)
-                        _isAuthenticated.postValue(true)
-                        RealmManager.getInstance().createRealm(userId = auth.currentUser!!.uid, uName = userName)
                     }
                 } else {
                     callback(false, task.exception?.message)

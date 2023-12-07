@@ -1,95 +1,53 @@
 package bg.zahov.app.settings
 
 import android.app.Application
-import android.text.BoringLayout
-import android.util.Log
 import androidx.lifecycle.AndroidViewModel
 import androidx.lifecycle.LiveData
 import androidx.lifecycle.MutableLiveData
-import bg.zahov.app.data.Language
-import bg.zahov.app.data.Settings
-import bg.zahov.app.data.Sound
-import bg.zahov.app.data.Theme
-import bg.zahov.app.data.Units
-import bg.zahov.app.mediators.SettingsManager
+import androidx.lifecycle.viewModelScope
+import bg.zahov.app.realm_db.Settings
+import bg.zahov.app.repository.UserRepository
 import com.google.firebase.auth.FirebaseAuth
+import io.realm.kotlin.notifications.DeletedObject
+import io.realm.kotlin.notifications.InitialObject
+import io.realm.kotlin.notifications.UpdatedObject
+import kotlinx.coroutines.Dispatchers
+import kotlinx.coroutines.launch
 
-class SettingsViewModel(application: Application): AndroidViewModel(application) {
+class SettingsViewModel(application: Application) : AndroidViewModel(application) {
     private val auth: FirebaseAuth = FirebaseAuth.getInstance()
-    private val settingsManager = SettingsManager.getInstance(application)
+    private val repo: UserRepository = UserRepository.getInstance(auth.currentUser!!.uid)
     private val _settings = MutableLiveData<Settings>()
     val settings: LiveData<Settings> get() = _settings
-    fun logout(){
+    fun logout() {
         auth.signOut()
     }
-    init{
-        initSettings()
+
+    init {
+            getSettings()
     }
-    fun writeNewSetting(title: String, newValue: Any){
-        when(title){
-            "Language" -> {
-                if (newValue is Language) {
-                    settingsManager.setLanguage(newValue)
-                }
-            }
-            "Weight" -> {
-                if (newValue is Units) {
-                    settingsManager.setWeight(newValue)
-                }
-            }
-            "Distance" -> {
-                if (newValue is Units) {
-                    settingsManager.setDistance(newValue)
-                }
-            }
-            "Timer increment value" -> {
-                if (newValue is Int) {
-                    settingsManager.setRestTimer(newValue)
-                }
-            }
-            "Sound" -> {
-                if (newValue is Sound) {
-                    settingsManager.setSoundSettings(newValue)
-                }
-            }
-            "Theme" -> {
-                if(newValue is Theme){
-                    settingsManager.setTheme(newValue)
-                }
-            }
-            "Sound effects" -> {
-                if(newValue is Boolean){
-                    settingsManager.setSoundEffects(newValue)
-                }
-            }
-            "Vibrate upon finish" -> {
-                if(newValue is Boolean){
-                    settingsManager.setVibration(newValue)
-                }
-            }
-            "Sync with cloud" -> {
-                if(newValue is Boolean){
-                    settingsManager.setSync(newValue)
-                }
-            }
-            "Use samsung watch during workout" -> {
-                if(newValue is Boolean){
-                    settingsManager.setFit(newValue)
-                }
-            }
-            "Show update template" -> {
-                if(newValue is Boolean){
-                    settingsManager.setUpdateTemplate(newValue)
-                }
-            }
-            else -> null
+
+    fun writeNewSetting(title: String, newValue: Any) {
+        viewModelScope.launch(Dispatchers.IO) {
+            repo.writeNewSettings(title, newValue)
         }
     }
-    private fun initSettings() {
-        _settings.value = settingsManager.getSettings()
-        Log.d("Initial Settings", _settings.value.toString())
+
+    private fun getSettings() {
+        viewModelScope.launch {
+            repo.getSettings().collect {
+                when (it) {
+                    is DeletedObject -> _settings.postValue(Settings())
+                    is InitialObject -> _settings.postValue(it.obj)
+                    is UpdatedObject -> _settings.postValue(it.obj)
+                }
+            }
+        }
     }
-    fun refreshSettings(){
-        _settings.value = settingsManager.getSettings()
+
+    fun resetSettings() {
+        viewModelScope.launch(Dispatchers.IO) {
+            repo.resetSettings()
+        }
     }
 }
