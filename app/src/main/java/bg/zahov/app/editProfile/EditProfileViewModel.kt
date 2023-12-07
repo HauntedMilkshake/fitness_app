@@ -10,6 +10,10 @@ import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
 import bg.zahov.app.repository.UserRepository
 import com.google.firebase.auth.FirebaseAuth
+import io.realm.kotlin.notifications.DeletedObject
+import io.realm.kotlin.notifications.InitialObject
+import io.realm.kotlin.notifications.UpdatedObject
+import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.launch
 
 class EditProfileViewModel(application: Application): AndroidViewModel(application) {
@@ -22,19 +26,26 @@ class EditProfileViewModel(application: Application): AndroidViewModel(applicati
     val userEmail: LiveData<String> get() = _userEmail
 
     init {
-        viewModelScope.launch {
-            repo.getUsername().let {
-                _userName.postValue(it)
-            }
-            _userEmail.postValue(currUser?.email ?: "no email")
-        }
+//        viewModelScope.launch {
+//            repo.getUser().collect {
+//                when(it){
+//                    is InitialObject -> {
+//                        _userName.postValue(it.obj.username)
+//                    }
+//                    is UpdatedObject -> {
+//                        _userName.postValue(it.obj.username)
+//                    }
+//                    is DeletedObject -> {}
+//                }
+//            }
+//            _userEmail.postValue(currUser?.email ?: "no email")
+//        }
     }
     fun changeUserName(newUserName: String){
-        viewModelScope.launch {
+        viewModelScope.launch(Dispatchers.IO) {
             repo.changeUserName(newUserName)
         }
     }
-    //another option is to make it return a boolean and show the toast in the fragment
     fun changeEmail(newEmail: String){
         auth.signInWithEmailAndPassword(auth.currentUser!!.email!! , auth.uid!!).addOnCompleteListener { task->
             if(task.isSuccessful){

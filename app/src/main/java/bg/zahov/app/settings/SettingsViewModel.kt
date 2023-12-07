@@ -1,6 +1,7 @@
 package bg.zahov.app.settings
 
 import android.app.Application
+import android.util.Log
 import androidx.compose.runtime.collectAsState
 import androidx.lifecycle.AndroidViewModel
 import androidx.lifecycle.LiveData
@@ -13,6 +14,9 @@ import bg.zahov.app.data.Units
 import bg.zahov.app.realm_db.Settings
 import bg.zahov.app.repository.UserRepository
 import com.google.firebase.auth.FirebaseAuth
+import io.realm.kotlin.notifications.DeletedObject
+import io.realm.kotlin.notifications.InitialObject
+import io.realm.kotlin.notifications.UpdatedObject
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.flow.collect
 import kotlinx.coroutines.launch
@@ -36,15 +40,17 @@ class SettingsViewModel(application: Application) : AndroidViewModel(application
     fun writeNewSetting(title: String, newValue: Any) {
         viewModelScope.launch(Dispatchers.IO) {
             repo.writeNewSettings(title, newValue)
-            updateLiveData(title, newValue, _settings)
-
         }
     }
 
     private suspend fun getSettings() {
-        repo.getUserSettings().collect {
-            _settings.postValue(it)
-        }
+//        repo.getUserSettings()?.collect {
+//            when(it){
+//                is DeletedObject -> _settings.postValue(Settings())
+//                is InitialObject -> _settings.postValue(it.obj)
+//                is UpdatedObject -> _settings.postValue(it.obj)
+//            }
+//        }
     }
 
     fun resetSettings() {
@@ -52,71 +58,4 @@ class SettingsViewModel(application: Application) : AndroidViewModel(application
             repo.resetSettings()
         }
     }
-
-    private fun updateLiveData(title: String, newValue: Any, data: MutableLiveData<Settings>) {
-        val updatedSettings = data.value!!
-
-        when (title) {
-            "Language" -> {
-                if (newValue is String) {
-                    updatedSettings.language = Language.valueOf(newValue).name
-                }
-            }
-
-            "Units" -> {
-                if (newValue is String) {
-                    updatedSettings.weight = Units.valueOf(newValue).name
-                    updatedSettings.distance = Units.valueOf(newValue).name
-                }
-            }
-
-            "Sound effects" -> {
-                if (newValue is Boolean) {
-                    updatedSettings.soundEffects = newValue
-                }
-            }
-
-            "Theme" -> {
-                if (newValue is String) {
-                    updatedSettings.theme = Theme.valueOf(newValue).name
-                }
-            }
-
-            "Timer increment value" -> {
-                if (newValue is Int) {
-                    updatedSettings.restTimer = newValue
-                }
-            }
-
-            "Vibrate upon finish" -> {
-                if (newValue is Boolean) {
-                    updatedSettings.vibration = newValue
-                }
-            }
-
-            "Sound" -> {
-                if (newValue is String) {
-                    updatedSettings.soundSettings = Sound.valueOf(newValue).name
-                }
-            }
-
-            "Show update template" -> {
-                if (newValue is Boolean) {
-                    updatedSettings.updateTemplate = newValue
-                }
-            }
-
-            "Use samsung watch during workout" -> {
-                if (newValue is Boolean) {
-                    updatedSettings.fit = newValue
-                }
-            }
-
-            else -> return
-        }
-
-        data.postValue(updatedSettings)
-    }
-
-
 }

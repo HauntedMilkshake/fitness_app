@@ -99,16 +99,14 @@ class RadioGroupSettingsView @JvmOverloads constructor(
             val radioButton = radioGroup.findViewById<RadioButton>(index)
             val selectedOption = radioButton.text.toString()
 
-            val selectedValue = when (title) {
+            when (title) {
                 "Language" -> Language.valueOf(selectedOption)
                 "Units" -> Units.valueOf(selectedOption)
                 "Timer increment value" -> selectedOption.split(" ").first().toInt()
                 "Sound" -> Sound.valueOf(selectedOption)
                 "Theme" -> Theme.valueOf(selectedOption)
                 else -> null
-            }
-
-            selectedValue?.let {
+            }?.let{
                 settingsChangeListener?.onSettingChanged(title, it)
                 subtitleTextView.text = when (title) {
                     "Language" -> (it as Language).name
@@ -144,6 +142,8 @@ class RadioGroupSettingsView @JvmOverloads constructor(
         }
     }
 }
-//TODO(Fancier animation perhaps view gets dragged out from under where we have clicked)
+//TODO(Fancier animation when opening popup)
+//TODO(Make settings actually impact the app) - might have to do something in the mainActivity
+//TODO(Fix units not being visualized)
 
 

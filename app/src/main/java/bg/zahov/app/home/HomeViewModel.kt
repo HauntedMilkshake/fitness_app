@@ -8,6 +8,9 @@ import androidx.lifecycle.viewModelScope
 import bg.zahov.app.repository.UserRepository
 import bg.zahov.app.realm_db.Workout
 import com.google.firebase.auth.FirebaseAuth
+import io.realm.kotlin.notifications.DeletedObject
+import io.realm.kotlin.notifications.InitialObject
+import io.realm.kotlin.notifications.UpdatedObject
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.launch
 
@@ -21,13 +24,22 @@ class HomeViewModel : ViewModel() {
     private val _userWorkouts = MutableLiveData<List<Workout>>()
     val userWorkouts: LiveData<List<Workout>> get() = _userWorkouts
     init {
-            viewModelScope.launch {
-                val userInfo = repo.getUserHomeInfo()
-                _userName.postValue(userInfo.first!!)
-                _numberOfWorkouts.postValue(userInfo.second!!)
-                _userWorkouts.postValue(userInfo.third!!)
-            }
-        }
+//        viewModelScope.launch {
+//            repo.getUser().collect{
+//                when(it){
+//                    is UpdatedObject -> {
+//                        _userName.postValue(it.obj.username)
+//                        _numberOfWorkouts.postValue(it.obj.numberOfWorkouts)
+//                    }
+//                   is InitialObject -> {
+//                       _userName.postValue(it.obj.username)
+//                       _numberOfWorkouts.postValue(it.obj.numberOfWorkouts)
+//                   }
+//                   is DeletedObject -> {}
+//                }
+//            }
+//        }
+    }
 
 }
 

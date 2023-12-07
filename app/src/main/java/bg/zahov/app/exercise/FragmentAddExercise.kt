@@ -30,9 +30,12 @@ class FragmentAddExercise: Fragment() {
         initViews()
         binding.apply {
             confirm.setOnClickListener {
-                Log.d("TEXT", "TEXT: ${exerciseNameField.editText!!.text!!}")
                 addExerciseViewModel.addExercise(exerciseNameField.editText!!.text!!.toString())
-
+                addExerciseViewModel.isCreated.observe(viewLifecycleOwner){
+                    if(it){
+                        findNavController().navigate(R.id.add_exercise_to_exercises)
+                    }
+                }
                 back.setOnClickListener{
                     findNavController().navigate(R.id.add_exercise_to_exercises)
                 }

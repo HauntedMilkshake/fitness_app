@@ -25,7 +25,6 @@ class FragmentExercises: Fragment() {
     private val exerciseViewModel: ExerciseViewModel by viewModels()
     override fun onCreateView(inflater: LayoutInflater, container: ViewGroup?, savedInstanceState: Bundle?): View {
         _binding = FragmentExercisesBinding.inflate(inflater, container, false)
-        exerciseViewModel.refreshUserExercises()
         return binding.root
     }
 
@@ -114,8 +113,4 @@ class FragmentExercises: Fragment() {
         popupWindow.showAsDropDown(binding.settingsDots, 80 , 70)
     }
 
-    override fun onResume() {
-        super.onResume()
-        exerciseViewModel.refreshUserExercises()
-    }
 }

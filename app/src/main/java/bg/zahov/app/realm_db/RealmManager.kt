@@ -2,6 +2,8 @@ package bg.zahov.app.realm_db
 
 import android.util.Log
 import bg.zahov.app.data.Language
+import bg.zahov.app.data.Sound
+import bg.zahov.app.data.Theme
 import bg.zahov.app.data.Units
 import bg.zahov.app.utils.FireStoreAdapter
 import bg.zahov.app.utils.toFirestoreMap
@@ -12,12 +14,11 @@ import io.realm.kotlin.Realm
 import io.realm.kotlin.RealmConfiguration
 import io.realm.kotlin.ext.asFlow
 import io.realm.kotlin.ext.query
-import io.realm.kotlin.notifications.DeletedObject
-import io.realm.kotlin.notifications.InitialObject
 import io.realm.kotlin.notifications.ObjectChange
 import io.realm.kotlin.notifications.PendingObject
 import io.realm.kotlin.notifications.SingleQueryChange
 import io.realm.kotlin.notifications.UpdatedObject
+import io.realm.kotlin.types.RealmList
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.flow.Flow
@@ -130,40 +131,12 @@ class RealmManager (userId: String) {
             block(realm)
         }
     }
-    suspend fun getUserInformationForProfileFragment(): Triple<String, Int, List<Workout>> {
-        Log.d("USER", userCache?.username ?: "tough luck")
-        val information = userCache?.let { user ->
-            Log.d("Information from user", user.settings.toString())
-            Triple(user.username ?: "invalid", user.numberOfWorkouts ?: -1, user.workouts)
-        } ?: withRealm { realm ->
-            realm.query<User>().first().find().let { realmUser ->
-                userCache = realmUser
-                Log.d("USER", realmUser?.username ?: "shit")
-                Triple(
-                    realmUser?.username ?: "invalid",
-                    realmUser?.numberOfWorkouts ?: -1,
-                    realmUser?.workouts ?: listOf<Workout>()
-                )
-            }
-        }
-        return information
-    }
-
-    suspend fun getUsername(): String {
-        return userCache?.username ?: withRealm { realm ->
-            val realmUser = realm.query<User>().find().first()
-            userCache = realmUser
-            realmUser.username ?: "invalid"
+    suspend fun getUser(): User? {
+        return withRealm { realm ->
+            realm.query<User>().find().first()
         }
     }
 
-    suspend fun getUserExercises(): List<Exercise> {
-        return userCache?.customExercises ?: withRealm { realm ->
-            val realmUser = realm.query<User>().find().first()
-            userCache = realmUser
-            realmUser.customExercises
-        }
-    }
 
     suspend fun changeUserName(newUserName: String) {
         withRealm { realm ->
@@ -171,27 +144,22 @@ class RealmManager (userId: String) {
             realm.write {
                 findLatest(realmUser)?.let {
                     it.username = newUserName
-//
-//                    CoroutineScope(Dispatchers.Default).launch {
-//                        syncFireStoreName(newUserName)
-//                    }
                 }
             }
         }
-        userCache?.username = newUserName
     }
 
-    private suspend fun syncFireStoreName(newUserName: String) {
-        val userDocRef = firestoreInstance.collection("users").document(uid)
-        userDocRef.get().addOnSuccessListener { documentSnapshot ->
-            if (documentSnapshot.exists()) {
-                val user = documentSnapshot.toObject(User::class.java)
-                user?.let {
-                    userDocRef.set(mapOf("username" to newUserName), SetOptions.merge())
-                }
-            }
-        }.await()
-    }
+//    private suspend fun syncFireStoreName(newUserName: String) {
+//        val userDocRef = firestoreInstance.collection("users").document(uid)
+//        userDocRef.get().addOnSuccessListener { documentSnapshot ->
+//            if (documentSnapshot.exists()) {
+//                val user = documentSnapshot.toObject(User::class.java)
+//                user?.let {
+//                    userDocRef.set(mapOf("username" to newUserName), SetOptions.merge())
+//                }
+//            }
+//        }.await()
+//    }
 
     suspend fun addExercise(newExercise: Exercise) {
         withRealm { realm ->
@@ -210,110 +178,62 @@ class RealmManager (userId: String) {
                    it.settings = Settings()
                }
            }
-            userCache?.settings= Settings()
         }
     }
     suspend fun writeNewSetting(title: String, newValue: Any) {
         withRealm { realm ->
             val realmUser = realm.query<User>().find().first()
             realm.write {
-                findLatest(realmUser)?.let {
-                    Log.d("WRITING", title)
-                    Log.d("WRITING", it.settings!!.language)
+                findLatest(realmUser)?.settings?.let {
                     when (title) {
                         "Language" -> {
-                            if (newValue is String) {
-                                Log.d("WRITING", newValue)
-                                Log.d("WRITING", Language.valueOf(newValue).name)
-                                it.settings!!.language = Language.valueOf(newValue).name
-                            }
+                            it.language = (newValue as Language).name
                         }
 
                         "Units" -> {
-                            if (newValue is String) {
-                                it.settings!!.weight = Units.valueOf(newValue).name
-                                it.settings!!.distance = Units.valueOf(newValue).name
-                            }
+                            it.weight = (newValue as Units).name
+                            it.distance = newValue.name
                         }
 
                         "Sound effects" -> {
-                            if (newValue is Boolean) {
-                                it.settings!!.soundEffects = newValue
-                            }
+                            it.soundEffects = newValue as Boolean
                         }
 
                         "Theme" -> {
-                            if (newValue is String) {
-                                it.settings!!.theme = newValue
-                            }
+                            it.theme = (newValue as Theme).name
                         }
 
                         "Timer increment value" -> {
-                            if (newValue is Int) {
-                                it.settings!!.restTimer = newValue
-                            }
+                            it.restTimer = (newValue as Int)
                         }
 
                         "Vibrate upon finish" -> {
-                            if (newValue is Boolean) {
-                                it.settings!!.vibration = newValue
-                            }
+                            it.vibration = (newValue as Boolean)
                         }
 
                         "Sound" -> {
-                            if (newValue is String) {
-                                it.settings!!.soundSettings = newValue
-                            }
+                            it.soundSettings = (newValue as Sound).name
                         }
 
                         "Show update template" -> {
-                            if (newValue is Boolean) {
-                                it.settings!!.updateTemplate = newValue
-                            }
+                            it.updateTemplate = (newValue as Boolean)
                         }
 
                         "Use samsung watch during workout" -> {
-                            if (newValue is Boolean) {
-                                it.settings!!.fit = newValue
-                            }
+                            it.fit = (newValue as Boolean)
                         }
 
-                        else -> {}
                     }
-                    Log.d("WRITING", it.settings!!.language)
-                    userCache = it
                 }
             }
-        }
-    }
-    suspend fun getUserSettings(): Flow<Settings> = withContext(Dispatchers.IO) {
-        return@withContext userCache?.settings?.asFlow()?.map { objectChange ->
-            when (objectChange) {
-                is InitialObject -> objectChange.obj
-                is UpdatedObject -> objectChange.obj
-                else -> throw UnsupportedOperationException("Unexpected ObjectChange type")
-            }
-        } ?: withContext(Dispatchers.Main) {
-            withRealm { realm ->
-                val user = realm.query<User>().find().first()
-                user.settings?.asFlow()?.map { objectChange ->
-                    when (objectChange) {
-                        is InitialObject -> objectChange.obj
-                        is UpdatedObject -> objectChange.obj
-                        else -> throw UnsupportedOperationException("Unexpected ObjectChange type")
-                    }
-                } ?: flowOf(Settings())
             }
         }
-    }
-
-
 
 }
 
 
 
-
+//TODO(Check where in the chain you should check the when conditions)
 //TODO(doesUserHaveRealm might not be working)
 //TODO(Cache isn't being initialized)
 

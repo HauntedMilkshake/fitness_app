@@ -69,12 +69,6 @@ class FragmentSettings: Fragment() {
         initDefaultSettingsViews()
 
     }
-
-    override fun onResume() {
-        super.onResume()
-        //TODO(FIX NAME CHANGE)
-    }
-
     private fun initRadioSettingsView(
         view: RadioGroupSettingsView,
         title: String,
@@ -84,7 +78,6 @@ class FragmentSettings: Fragment() {
         view.initViewInformation(title, radioOptions, settings)
         view.settingsChangeListener = object : SettingsChangeListener {
             override fun onSettingChanged(title: String, newValue: Any) {
-                Log.d("SETTING", "$title $newValue")
                     settingsViewModel.writeNewSetting(title, newValue)
            }
         }
@@ -103,9 +96,7 @@ class FragmentSettings: Fragment() {
     }
     private fun initDefaultSettingsViews() {
         binding.apply {
-            Log.d("init", "init")
                 settingsViewModel.settings.observe(viewLifecycleOwner){
-                    Log.d("settings", it.language)
                     initRadioSettingsView(languageSettings, "Language", listOf(Language.English.name, Language.Bulgarian.name), it)
                     initRadioSettingsView(unitSettings, "Units", listOf(Units.Banana.name, Units.Metric.name), it)
                     initRadioSettingsView(themeSettings, "Theme", listOf(Theme.Light.name, Theme.Dark.name), it)
