@@ -6,17 +6,17 @@ import bg.zahov.app.repository.UserRepository
 import com.google.firebase.auth.FirebaseAuth
 import kotlinx.coroutines.launch
 
-class LoginViewModel: ViewModel() {
+class LoginViewModel : ViewModel() {
     private val auth: FirebaseAuth = FirebaseAuth.getInstance()
     private lateinit var repo: UserRepository
     fun login(email: String, password: String, callback: (Boolean, String?) -> Unit) {
         auth.signInWithEmailAndPassword(email, password)
             .addOnCompleteListener { task ->
                 if (task.isSuccessful) {
-                    
+
                     repo = UserRepository.getInstance(auth.currentUser!!.uid)
                     viewModelScope.launch() {
-                        if(!repo.doesUserHaveRealm()){
+                        if (!repo.doesUserHaveRealm()) {
                             repo.createRealmFromFirestore()
                         }
                     }
@@ -27,6 +27,7 @@ class LoginViewModel: ViewModel() {
                 }
             }
     }
+
     fun sendPasswordResetEmail(email: String, callback: (Boolean, String?) -> Unit) {
         auth.sendPasswordResetEmail(email)
             .addOnCompleteListener { task ->
@@ -37,5 +38,6 @@ class LoginViewModel: ViewModel() {
                 }
             }
     }
+
     fun doesUserHaveRealm() = repo.doesUserHaveRealm()
 }

@@ -21,7 +21,7 @@ class FragmentLoading : Fragment() {
     override fun onCreateView(
         inflater: LayoutInflater,
         container: ViewGroup?,
-        savedInstanceState: Bundle?
+        savedInstanceState: Bundle?,
     ): View {
         _binding = FragmentLoadingBinding.inflate(inflater, container, false)
         return binding.root
@@ -29,7 +29,6 @@ class FragmentLoading : Fragment() {
 
     override fun onStart() {
         super.onStart()
-        Log.d("Current location", findNavController().currentDestination.toString())
         requireActivity().hideBottomNav()
     }
 
@@ -57,7 +56,7 @@ class FragmentLoading : Fragment() {
             }
 
             override fun onAnimationEnd(animation: Animation?) {
-                if(!isNavigationInProgress){
+                if (!isNavigationInProgress) {
                     isNavigationInProgress = true
                     findNavController().navigate(R.id.loading_to_home)
 
@@ -70,4 +69,3 @@ class FragmentLoading : Fragment() {
         view.startAnimation(scaleAnimation)
     }
 }
-//TODO(Make the animation load based on whether we have created a realm file for the user instead of hardcoded value)

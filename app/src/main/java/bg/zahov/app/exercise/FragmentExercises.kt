@@ -19,11 +19,15 @@ import bg.zahov.fitness.app.R
 import bg.zahov.fitness.app.databinding.FragmentExercisesBinding
 import com.google.android.material.textview.MaterialTextView
 
-class FragmentExercises: Fragment() {
+class FragmentExercises : Fragment() {
     private var _binding: FragmentExercisesBinding? = null
     private val binding get() = _binding!!
     private val exerciseViewModel: ExerciseViewModel by viewModels()
-    override fun onCreateView(inflater: LayoutInflater, container: ViewGroup?, savedInstanceState: Bundle?): View {
+    override fun onCreateView(
+        inflater: LayoutInflater,
+        container: ViewGroup?,
+        savedInstanceState: Bundle?,
+    ): View {
         _binding = FragmentExercisesBinding.inflate(inflater, container, false)
         return binding.root
     }
@@ -34,14 +38,18 @@ class FragmentExercises: Fragment() {
         enterTransition = inflater.inflateTransition(R.transition.slide_up)
         exitTransition = inflater.inflateTransition(R.transition.fade_out)
     }
+
     override fun onViewCreated(view: View, savedInstanceState: Bundle?) {
         super.onViewCreated(view, savedInstanceState)
         binding.apply {
 
             val exerciseAdapter = ExerciseAdapter().apply {
-                itemClickListener = object : ExerciseAdapter.ItemClickListener<Exercise>{
-                    override fun onItemClicked(item: Exercise, itemPosition: Int, clickedView: View) {
-                        //navigate to a new fragment
+                itemClickListener = object : ExerciseAdapter.ItemClickListener<Exercise> {
+                    override fun onItemClicked(
+                        item: Exercise,
+                        itemPosition: Int,
+                        clickedView: View,
+                    ) {
                     }
                 }
             }
@@ -49,7 +57,7 @@ class FragmentExercises: Fragment() {
                 layoutManager = LinearLayoutManager(requireContext())
                 adapter = exerciseAdapter
             }
-            exerciseViewModel.userExercises.observe(viewLifecycleOwner){
+            exerciseViewModel.userExercises.observe(viewLifecycleOwner) {
                 exerciseAdapter.updateItems(it)
             }
             searchIcon.setOnClickListener {
@@ -60,7 +68,7 @@ class FragmentExercises: Fragment() {
                 searchBar.visibility = View.VISIBLE
             }
             removeSearchBar.setOnClickListener {
-                if(searchBar.visibility == View.VISIBLE){
+                if (searchBar.visibility == View.VISIBLE) {
                     exerciseText.visibility = View.VISIBLE
                     searchIcon.visibility = View.VISIBLE
                     settingsDots.visibility = View.VISIBLE
@@ -71,7 +79,11 @@ class FragmentExercises: Fragment() {
                 }
             }
             settingsDots.setOnClickListener {
-                val scaleAnimation = ObjectAnimator.ofPropertyValuesHolder(it, PropertyValuesHolder.ofFloat("scaleX", 1.2f), PropertyValuesHolder.ofFloat("scaleY", 1.2f))
+                val scaleAnimation = ObjectAnimator.ofPropertyValuesHolder(
+                    it,
+                    PropertyValuesHolder.ofFloat("scaleX", 1.2f),
+                    PropertyValuesHolder.ofFloat("scaleY", 1.2f)
+                )
                 scaleAnimation.duration = 200
                 scaleAnimation.repeatCount = 1
                 scaleAnimation.repeatMode = ObjectAnimator.REVERSE
@@ -82,6 +94,7 @@ class FragmentExercises: Fragment() {
             }
         }
     }
+
     private fun showCustomLayout() {
         val inflater = LayoutInflater.from(requireContext())
         val customView = inflater.inflate(R.layout.simple_popup, null)
@@ -110,7 +123,7 @@ class FragmentExercises: Fragment() {
             popupWindow.dismiss()
         }
 
-        popupWindow.showAsDropDown(binding.settingsDots, 80 , 70)
+        popupWindow.showAsDropDown(binding.settingsDots, 80, 70)
     }
 
 }

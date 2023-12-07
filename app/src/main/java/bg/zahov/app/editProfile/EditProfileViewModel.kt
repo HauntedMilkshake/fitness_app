@@ -14,7 +14,7 @@ import io.realm.kotlin.notifications.UpdatedObject
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.launch
 
-class EditProfileViewModel(application: Application): AndroidViewModel(application) {
+class EditProfileViewModel(application: Application) : AndroidViewModel(application) {
     private val auth: FirebaseAuth = FirebaseAuth.getInstance()
     private val repo = UserRepository.getInstance(auth.currentUser!!.uid)
     private val _userName = MutableLiveData<String>()
@@ -25,34 +25,47 @@ class EditProfileViewModel(application: Application): AndroidViewModel(applicati
     init {
         viewModelScope.launch {
             repo.getUser().collect {
-                when(it){
+                when (it) {
                     is InitialObject -> {
                         _userName.postValue(it.obj.username)
                     }
+
                     is UpdatedObject -> {
                         _userName.postValue(it.obj.username)
                     }
+
                     is DeletedObject -> {}
                 }
             }
         }
     }
-    fun changeUserName(newUserName: String){
+
+    fun changeUserName(newUserName: String) {
         viewModelScope.launch(Dispatchers.IO) {
             repo.changeUserName(newUserName)
         }
     }
-    fun changeEmail(newEmail: String){
-        auth.signInWithEmailAndPassword(auth.currentUser!!.email!! , auth.uid!!).addOnCompleteListener { task->
-            if(task.isSuccessful){
-                auth.currentUser!!.updateEmail(newEmail).addOnCompleteListener {
-                    if(task.isSuccessful){
-                        Toast.makeText(getApplication(), "Successfully changed email!", Toast.LENGTH_SHORT).show()
-                    }else{
-                        Toast.makeText(getApplication(), "Successfully changed email!", Toast.LENGTH_SHORT).show()
+
+    fun changeEmail(newEmail: String) {
+        auth.signInWithEmailAndPassword(auth.currentUser!!.email!!, auth.uid!!)
+            .addOnCompleteListener { task ->
+                if (task.isSuccessful) {
+                    auth.currentUser!!.updateEmail(newEmail).addOnCompleteListener {
+                        if (task.isSuccessful) {
+                            Toast.makeText(
+                                getApplication(),
+                                "Successfully changed email!",
+                                Toast.LENGTH_SHORT
+                            ).show()
+                        } else {
+                            Toast.makeText(
+                                getApplication(),
+                                "Successfully changed email!",
+                                Toast.LENGTH_SHORT
+                            ).show()
+                        }
                     }
                 }
             }
-        }
     }
 }

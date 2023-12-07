@@ -8,7 +8,7 @@ import io.realm.kotlin.ext.realmListOf
 import io.realm.kotlin.types.RealmList
 import io.realm.kotlin.types.RealmObject
 
-class User: RealmObject {
+class User : RealmObject {
     var username: String? = null
     var numberOfWorkouts: Int? = null
     var workouts: RealmList<Workout> = realmListOf()
@@ -16,7 +16,7 @@ class User: RealmObject {
     var settings: Settings? = null
 }
 
-class Workout: RealmObject{
+class Workout : RealmObject {
     var duration: Double? = null
     var totalVolume: Double? = null
     var numberOfPrs: Int? = null
@@ -25,17 +25,20 @@ class Workout: RealmObject{
     var exercises: RealmList<Exercise> = realmListOf()
     var count: Int? = null
 }
-class Exercise: RealmObject{
+
+class Exercise : RealmObject {
     var bodyPart: String? = null
     var category: String? = null
     var exerciseName: String? = null
     var sets: RealmList<Sets> = realmListOf()
 }
-class Sets: RealmObject{
+
+class Sets : RealmObject {
     var firstMetric: Int? = null
     var secondMetric: Int? = null
 }
-class Settings: RealmObject{
+
+class Settings : RealmObject {
     var language: String = Language.English.name
     var weight: String = Units.Metric.name
     var distance: String = Units.Metric.name
@@ -45,7 +48,8 @@ class Settings: RealmObject{
     var vibration: Boolean = true
     var soundSettings: String = Sound.SOUND_1.name
     var updateTemplate: Boolean = true
-//    var sync: Boolean = true
+
+    //    var sync: Boolean = true
     var fit: Boolean = false
 
 }

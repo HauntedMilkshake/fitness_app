@@ -11,16 +11,21 @@ import kotlinx.coroutines.launch
 class SignupViewModel : ViewModel() {
     private val auth: FirebaseAuth = FirebaseAuth.getInstance()
     private lateinit var repo: UserRepository
-    fun signUp(userName: String, email: String, password: String, callback: (Boolean, String?) -> Unit) {
+    fun signUp(
+        userName: String,
+        email: String,
+        password: String,
+        callback: (Boolean, String?) -> Unit,
+    ) {
         auth.createUserWithEmailAndPassword(email, password)
             .addOnCompleteListener { task ->
                 if (task.isSuccessful) {
                     viewModelScope.launch() {
                         repo = UserRepository.getInstance(auth.currentUser!!.uid)
-                        val user = User().apply{
-                                username = userName
-                                numberOfWorkouts = 0
-                                settings = Settings()
+                        val user = User().apply {
+                            username = userName
+                            numberOfWorkouts = 0
+                            settings = Settings()
                         }
                         repo.createRealm(user)
                         repo.syncFromRealmToFirestore()

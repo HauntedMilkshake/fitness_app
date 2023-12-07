@@ -16,7 +16,11 @@ class FragmentSignup : Fragment() {
     private var _binding: FragmentSignUpBinding? = null
     private val binding get() = _binding!!
     private val authViewModel: SignupViewModel by viewModels()
-    override fun onCreateView(inflater: LayoutInflater, container: ViewGroup?, savedInstanceState: Bundle?): View {
+    override fun onCreateView(
+        inflater: LayoutInflater,
+        container: ViewGroup?,
+        savedInstanceState: Bundle?,
+    ): View {
         _binding = FragmentSignUpBinding.inflate(inflater, container, false)
         return binding.root
     }
@@ -25,6 +29,7 @@ class FragmentSignup : Fragment() {
         super.onStart()
         requireActivity().hideBottomNav()
     }
+
     override fun onViewCreated(view: View, savedInstanceState: Bundle?) {
         super.onViewCreated(view, savedInstanceState)
         binding.apply {
@@ -35,17 +40,26 @@ class FragmentSignup : Fragment() {
                 val username = usernameFieldText.text.toString()
 
                 if (areFieldsEmpty(username, email, password)) {
-                    Toast.makeText(requireContext(), "All fields must not be empty!", Toast.LENGTH_SHORT).show()
+                    Toast.makeText(
+                        requireContext(),
+                        "All fields must not be empty!",
+                        Toast.LENGTH_SHORT
+                    ).show()
                     return@setOnClickListener
                 }
 
                 if (checkPasswords(password, confirmPassword)) {
-                    Toast.makeText(requireContext(), "Passwords must match!", Toast.LENGTH_SHORT).show()
+                    Toast.makeText(requireContext(), "Passwords must match!", Toast.LENGTH_SHORT)
+                        .show()
                     return@setOnClickListener
                 }
 
                 if (isEmailNotValid(email)) {
-                    Toast.makeText(requireContext(), "Please enter a valid email address", Toast.LENGTH_SHORT).show()
+                    Toast.makeText(
+                        requireContext(),
+                        "Please enter a valid email address",
+                        Toast.LENGTH_SHORT
+                    ).show()
                     return@setOnClickListener
                 }
 
@@ -63,7 +77,10 @@ class FragmentSignup : Fragment() {
             }
         }
     }
-    private fun checkPasswords(firstPass: String, secondPass:String ) = firstPass != secondPass
-    private fun areFieldsEmpty(userName: String?, email: String?, pass: String?) = listOf(userName, email, pass).count { it.isNullOrEmpty() } >= 1
+
+    private fun checkPasswords(firstPass: String, secondPass: String) = firstPass != secondPass
+    private fun areFieldsEmpty(userName: String?, email: String?, pass: String?) =
+        listOf(userName, email, pass).count { it.isNullOrEmpty() } >= 1
+
     private fun isEmailNotValid(email: String) = !Regex("^\\S+@\\S+\\.\\S+$").matches(email)
 }

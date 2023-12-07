@@ -18,10 +18,12 @@ class FragmentHome : Fragment() {
     private val homeViewModel: HomeViewModel by viewModels()
     private var allowBackPressed: Boolean = false
     override fun onCreateView(
-        inflater: LayoutInflater, container: ViewGroup?, savedInstanceState: Bundle?): View {
+        inflater: LayoutInflater, container: ViewGroup?, savedInstanceState: Bundle?,
+    ): View {
         _binding = FragmentHomeBinding.inflate(inflater, container, false)
         return binding.root
     }
+
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
         requireActivity().showBottomNav()
@@ -29,6 +31,7 @@ class FragmentHome : Fragment() {
         enterTransition = inflater.inflateTransition(R.transition.slide_up)
         exitTransition = inflater.inflateTransition(R.transition.fade_out)
     }
+
     override fun onViewCreated(view: View, savedInstanceState: Bundle?) {
         super.onViewCreated(view, savedInstanceState)
 
@@ -39,12 +42,12 @@ class FragmentHome : Fragment() {
                 findNavController().navigate(R.id.home_to_settings)
 
             }
-                homeViewModel.userName.observe(viewLifecycleOwner){
-                    profileName.text = it
-                }
-                homeViewModel.numberOfWorkouts.observe(viewLifecycleOwner){
-                    numberOfWorkouts.text = it.toString()
-                }
+            homeViewModel.userName.observe(viewLifecycleOwner) {
+                profileName.text = it
+            }
+            homeViewModel.numberOfWorkouts.observe(viewLifecycleOwner) {
+                numberOfWorkouts.text = it.toString()
+            }
         }
     }
 

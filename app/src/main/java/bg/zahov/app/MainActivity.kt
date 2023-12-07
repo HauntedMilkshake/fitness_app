@@ -35,24 +35,27 @@ class MainActivity : AppCompatActivity() {
             val currentDestinationId = navController.currentDestination?.id
 
             when {
-                isAuthenticated && currentDestinationId == R.id.welcome ->{
+                isAuthenticated && currentDestinationId == R.id.welcome -> {
                     navController.navigate(R.id.welcome_to_home)
                 }
             }
         })
     }
+
     override fun onSupportNavigateUp(): Boolean {
         val navController = findNavController(R.id.nav_host_fragment)
         return navController.navigateUp(appBarConfiguration)
                 || super.onSupportNavigateUp()
     }
 }
-fun FragmentActivity.hideBottomNav(){
+
+fun FragmentActivity.hideBottomNav() {
     findViewById<BottomNavigationView>(R.id.bottom_navigation).apply {
         visibility = View.GONE
     }
 }
-fun FragmentActivity.showBottomNav(){
+
+fun FragmentActivity.showBottomNav() {
     findViewById<BottomNavigationView>(R.id.bottom_navigation).apply {
         visibility = View.VISIBLE
     }

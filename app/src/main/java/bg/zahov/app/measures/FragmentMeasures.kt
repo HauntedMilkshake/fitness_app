@@ -9,7 +9,7 @@ import androidx.fragment.app.Fragment
 import bg.zahov.fitness.app.R
 import bg.zahov.fitness.app.databinding.FragmentMeasuresBinding
 
-class FragmentMeasures: Fragment() {
+class FragmentMeasures : Fragment() {
     private var _binding: FragmentMeasuresBinding? = null
     private val binding get() = _binding!!
     override fun onCreate(savedInstanceState: Bundle?) {
@@ -18,7 +18,12 @@ class FragmentMeasures: Fragment() {
         enterTransition = inflater.inflateTransition(R.transition.slide_up)
         exitTransition = inflater.inflateTransition(R.transition.fade_out)
     }
-    override fun onCreateView(inflater: LayoutInflater, container: ViewGroup?, savedInstanceState: Bundle?): View {
+
+    override fun onCreateView(
+        inflater: LayoutInflater,
+        container: ViewGroup?,
+        savedInstanceState: Bundle?,
+    ): View {
         _binding = FragmentMeasuresBinding.inflate(inflater, container, false)
         return binding.root
     }

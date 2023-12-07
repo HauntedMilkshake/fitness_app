@@ -24,7 +24,7 @@ class SettingsViewModel(application: Application) : AndroidViewModel(application
     }
 
     init {
-            getSettings()
+        getSettings()
     }
 
     fun writeNewSetting(title: String, newValue: Any) {

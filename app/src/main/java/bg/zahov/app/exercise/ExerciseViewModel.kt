@@ -24,13 +24,15 @@ class ExerciseViewModel : ViewModel() {
 
     private fun getUserExercises() {
         viewModelScope.launch {
-            repo.getExercises().collect {changes ->
+            repo.getExercises().collect { changes ->
 
-                _userExercises.postValue(when(changes){
-                    is DeletedList -> changes.list
-                    is InitialList -> changes.list
-                    is UpdatedList -> changes.list
-                })
+                _userExercises.postValue(
+                    when (changes) {
+                        is DeletedList -> changes.list
+                        is InitialList -> changes.list
+                        is UpdatedList -> changes.list
+                    }
+                )
 
             }
         }

@@ -13,31 +13,36 @@ import bg.zahov.app.hideBottomNav
 import bg.zahov.fitness.app.R
 import bg.zahov.fitness.app.databinding.FragmentLogInBinding
 
-class FragmentLogIn: Fragment() {
+class FragmentLogIn : Fragment() {
     private var _binding: FragmentLogInBinding? = null
     private val binding get() = _binding!!
     private val loginViewModel: LoginViewModel by viewModels()
-    override fun onCreateView(inflater: LayoutInflater, container: ViewGroup?, savedInstanceState: Bundle?): View {
+    override fun onCreateView(
+        inflater: LayoutInflater,
+        container: ViewGroup?,
+        savedInstanceState: Bundle?,
+    ): View {
         _binding = FragmentLogInBinding.inflate(inflater, container, false)
         return binding.root
     }
+
     override fun onStart() {
         super.onStart()
         requireActivity().hideBottomNav()
     }
+
     override fun onViewCreated(view: View, savedInstanceState: Bundle?) {
         super.onViewCreated(view, savedInstanceState)
         binding.apply {
             forgotPassword.setOnClickListener {
                 val email = emailFieldText.text.toString()
-                if(isEmailNotValid(email)){
+                if (isEmailNotValid(email)) {
                     Toast.makeText(requireContext(), "Email not valid", Toast.LENGTH_SHORT).show()
                     return@setOnClickListener
                 }
-                loginViewModel.sendPasswordResetEmail(email){success, errorMessage ->
-                    if(success){
-                        //todo
-                    }else{
+                loginViewModel.sendPasswordResetEmail(email) { success, errorMessage ->
+                    if (success) {
+                    } else {
                         Toast.makeText(requireContext(), errorMessage, Toast.LENGTH_SHORT).show()
                     }
                 }
@@ -47,26 +52,27 @@ class FragmentLogIn: Fragment() {
                 val password = passwordFieldText.text.toString()
                 val email = emailFieldText.text.toString()
 
-                if(areFieldsEmpty(email, password)){
-                    Toast.makeText(requireContext(), "Fields can't be empty", Toast.LENGTH_SHORT).show()
+                if (areFieldsEmpty(email, password)) {
+                    Toast.makeText(requireContext(), "Fields can't be empty", Toast.LENGTH_SHORT)
+                        .show()
                     return@setOnClickListener
                 }
 
-                if(isEmailNotValid(email)){
+                if (isEmailNotValid(email)) {
                     Toast.makeText(requireContext(), "Email not valid", Toast.LENGTH_SHORT).show()
                     return@setOnClickListener
                 }
 
                 loginViewModel.login(email, password) { success, errorMessage ->
-                    if(success){
-                        if(!loginViewModel.doesUserHaveRealm()){
+                    if (success) {
+                        if (!loginViewModel.doesUserHaveRealm()) {
                             Log.d("WHERE TO", "loading")
                             findNavController().navigate(R.id.login_to_loading)
-                        }else{
+                        } else {
                             Log.d("WHERE TO", "home")
                             findNavController().navigate(R.id.login_to_home)
                         }
-                    }else{
+                    } else {
                         Toast.makeText(requireContext(), errorMessage, Toast.LENGTH_SHORT).show()
                     }
                 }
@@ -77,10 +83,14 @@ class FragmentLogIn: Fragment() {
             }
         }
     }
+
     override fun onDestroyView() {
         super.onDestroyView()
         _binding = null
     }
-    private fun areFieldsEmpty(email: String?, password: String?) = listOf(email, password).count { it.isNullOrEmpty() } >= 1
+
+    private fun areFieldsEmpty(email: String?, password: String?) =
+        listOf(email, password).count { it.isNullOrEmpty() } >= 1
+
     private fun isEmailNotValid(email: String) = !Regex("^\\S+@\\S+\\.\\S+$").matches(email)
 }
