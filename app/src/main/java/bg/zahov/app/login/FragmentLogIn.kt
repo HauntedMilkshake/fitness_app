@@ -81,6 +81,6 @@ class FragmentLogIn: Fragment() {
         super.onDestroyView()
         _binding = null
     }
-    private fun areFieldsEmpty(email: String, password: String) = listOf(email, password).count { it.isNullOrEmpty() } >= 1
+    private fun areFieldsEmpty(email: String?, password: String?) = listOf(email, password).count { it.isNullOrEmpty() } >= 1
     private fun isEmailNotValid(email: String) = !Regex("^\\S+@\\S+\\.\\S+$").matches(email)
 }

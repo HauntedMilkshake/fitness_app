@@ -1,7 +1,6 @@
 package bg.zahov.app.signup
 
 import android.os.Bundle
-import android.util.Log
 import android.view.LayoutInflater
 import android.view.View
 import android.view.ViewGroup
@@ -17,7 +16,7 @@ class FragmentSignup : Fragment() {
     private var _binding: FragmentSignUpBinding? = null
     private val binding get() = _binding!!
     private val authViewModel: SignupViewModel by viewModels()
-    override fun onCreateView(inflater: LayoutInflater, container: ViewGroup?, savedInstanceState: Bundle?): View? {
+    override fun onCreateView(inflater: LayoutInflater, container: ViewGroup?, savedInstanceState: Bundle?): View {
         _binding = FragmentSignUpBinding.inflate(inflater, container, false)
         return binding.root
     }
@@ -51,9 +50,7 @@ class FragmentSignup : Fragment() {
                 }
 
                 authViewModel.signUp(username, email, password) { success, errorMessage ->
-                    Log.d("Info", success.toString())
                     if (success) {
-                        Log.d("LOG", "We should be navigating here")
                         findNavController().navigate(R.id.signup_to_home)
                     } else {
                         Toast.makeText(requireContext(), errorMessage, Toast.LENGTH_SHORT).show()
@@ -67,6 +64,6 @@ class FragmentSignup : Fragment() {
         }
     }
     private fun checkPasswords(firstPass: String, secondPass:String ) = firstPass != secondPass
-    private fun areFieldsEmpty(userName: String, email: String, pass: String) = listOf(userName, email, pass).count { it.isNullOrEmpty() } >= 1
+    private fun areFieldsEmpty(userName: String?, email: String?, pass: String?) = listOf(userName, email, pass).count { it.isNullOrEmpty() } >= 1
     private fun isEmailNotValid(email: String) = !Regex("^\\S+@\\S+\\.\\S+$").matches(email)
 }

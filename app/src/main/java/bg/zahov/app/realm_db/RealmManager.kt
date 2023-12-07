@@ -9,26 +9,16 @@ import bg.zahov.app.utils.FireStoreAdapter
 import bg.zahov.app.utils.toFirestoreMap
 import com.google.firebase.firestore.DocumentSnapshot
 import com.google.firebase.firestore.FirebaseFirestore
-import com.google.firebase.firestore.SetOptions
 import io.realm.kotlin.Realm
 import io.realm.kotlin.RealmConfiguration
 import io.realm.kotlin.ext.asFlow
 import io.realm.kotlin.ext.query
+import io.realm.kotlin.notifications.ListChange
 import io.realm.kotlin.notifications.ObjectChange
-import io.realm.kotlin.notifications.PendingObject
-import io.realm.kotlin.notifications.SingleQueryChange
-import io.realm.kotlin.notifications.UpdatedObject
-import io.realm.kotlin.types.RealmList
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.flow.Flow
-import kotlinx.coroutines.flow.collect
-import kotlinx.coroutines.flow.flowOf
-import kotlinx.coroutines.flow.map
 import kotlinx.coroutines.launch
-import kotlinx.coroutines.sync.Mutex
-import kotlinx.coroutines.sync.withLock
-import kotlinx.coroutines.tasks.await
 import kotlinx.coroutines.withContext
 import java.io.File
 class RealmManager (userId: String) {
@@ -49,9 +39,6 @@ class RealmManager (userId: String) {
         getConfig(uid).build()
     }
 
-    //makes sure realm gets locked in a single thread
-    private val realmMutex = Mutex()
-
     //caching user for in app faster data retrieval
     private var userCache: User? = null
 
@@ -61,8 +48,6 @@ class RealmManager (userId: String) {
     //user sync from firestore
     private fun createUserFromFirestore(document: DocumentSnapshot) {
         userCache = firestoreAdapter.adapt(document.data!!)
-        Log.d("USER", userCache?.username.toString())
-
     }
 
     //ensures we open the correct realm File
@@ -94,12 +79,10 @@ class RealmManager (userId: String) {
     suspend fun createRealm(user: User) {
         withContext(Dispatchers.IO) {
             try {
-                realmMutex.withLock {
                     realmInstance = Realm.open(realmConfig)
                     realmInstance?.write {
                         copyToRealm(user)
                     }
-                }
             } catch (e: Exception) {
                 Log.e("Realm start error", e.toString())
             } finally {
@@ -131,12 +114,21 @@ class RealmManager (userId: String) {
             block(realm)
         }
     }
-    suspend fun getUser(): User? {
-        return withRealm { realm ->
-            realm.query<User>().find().first()
+    suspend fun getSettings() : Flow<ObjectChange<Settings>>{
+        return withRealm {realm ->
+            realm.query<User>().find().first().settings!!.asFlow()
         }
     }
-
+    suspend fun getExercises(): Flow<ListChange<Exercise>> {
+        return withRealm {realm ->
+            realm.query<User>().find().first().customExercises.asFlow()
+        }
+    }
+    suspend fun getUser(): Flow<ObjectChange<User>> {
+        return withRealm{realm ->
+            realm.query<User>().find().first().asFlow()
+        }
+    }
 
     suspend fun changeUserName(newUserName: String) {
         withRealm { realm ->
@@ -148,19 +140,6 @@ class RealmManager (userId: String) {
             }
         }
     }
-
-//    private suspend fun syncFireStoreName(newUserName: String) {
-//        val userDocRef = firestoreInstance.collection("users").document(uid)
-//        userDocRef.get().addOnSuccessListener { documentSnapshot ->
-//            if (documentSnapshot.exists()) {
-//                val user = documentSnapshot.toObject(User::class.java)
-//                user?.let {
-//                    userDocRef.set(mapOf("username" to newUserName), SetOptions.merge())
-//                }
-//            }
-//        }.await()
-//    }
-
     suspend fun addExercise(newExercise: Exercise) {
         withRealm { realm ->
             val user = realm.query<User>().find().first()
@@ -228,12 +207,6 @@ class RealmManager (userId: String) {
             }
             }
         }
-
 }
-
-
-
-//TODO(Check where in the chain you should check the when conditions)
 //TODO(doesUserHaveRealm might not be working)
-//TODO(Cache isn't being initialized)
 

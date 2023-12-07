@@ -1,6 +1,5 @@
 package bg.zahov.app.realm_db
 
-import android.database.Observable
 import bg.zahov.app.data.Language
 import bg.zahov.app.data.Sound
 import bg.zahov.app.data.Theme
@@ -32,7 +31,6 @@ class Exercise: RealmObject{
     var exerciseName: String? = null
     var sets: RealmList<Sets> = realmListOf()
 }
-//depends on Exercise category
 class Sets: RealmObject{
     var firstMetric: Int? = null
     var secondMetric: Int? = null

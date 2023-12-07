@@ -1,6 +1,5 @@
 package bg.zahov.app.home
 
-import android.util.Log
 import androidx.lifecycle.LiveData
 import androidx.lifecycle.MutableLiveData
 import androidx.lifecycle.ViewModel
@@ -11,7 +10,6 @@ import com.google.firebase.auth.FirebaseAuth
 import io.realm.kotlin.notifications.DeletedObject
 import io.realm.kotlin.notifications.InitialObject
 import io.realm.kotlin.notifications.UpdatedObject
-import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.launch
 
 class HomeViewModel : ViewModel() {
@@ -24,21 +22,28 @@ class HomeViewModel : ViewModel() {
     private val _userWorkouts = MutableLiveData<List<Workout>>()
     val userWorkouts: LiveData<List<Workout>> get() = _userWorkouts
     init {
-//        viewModelScope.launch {
-//            repo.getUser().collect{
-//                when(it){
-//                    is UpdatedObject -> {
-//                        _userName.postValue(it.obj.username)
-//                        _numberOfWorkouts.postValue(it.obj.numberOfWorkouts)
-//                    }
-//                   is InitialObject -> {
-//                       _userName.postValue(it.obj.username)
-//                       _numberOfWorkouts.postValue(it.obj.numberOfWorkouts)
-//                   }
-//                   is DeletedObject -> {}
-//                }
-//            }
-//        }
+        viewModelScope.launch {
+            repo.getUser().collect {
+                when(it){
+                    is DeletedObject -> {
+                        _userName.postValue(it.obj?.username)
+                        _numberOfWorkouts.postValue(it.obj?.numberOfWorkouts)
+                        _userWorkouts.postValue(it.obj?.workouts)
+                    }
+                    is InitialObject -> {
+                        _userName.postValue(it.obj.username)
+                        _numberOfWorkouts.postValue(it.obj.numberOfWorkouts)
+                        _userWorkouts.postValue(it.obj.workouts)
+                    }
+                    is UpdatedObject -> {
+                        _userName.postValue(it.obj.username)
+                        _numberOfWorkouts.postValue(it.obj.numberOfWorkouts)
+                        _userWorkouts.postValue(it.obj.workouts)
+
+                    }
+                }
+            }
+        }
     }
 
 }

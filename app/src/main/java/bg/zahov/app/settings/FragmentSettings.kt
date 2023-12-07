@@ -3,7 +3,6 @@ package bg.zahov.app.settings
 import android.content.Intent
 import android.net.Uri
 import android.os.Bundle
-import android.util.Log
 import android.view.LayoutInflater
 import android.view.View
 import android.view.ViewGroup
@@ -21,8 +20,6 @@ import bg.zahov.app.hideBottomNav
 import bg.zahov.app.realm_db.Settings
 import bg.zahov.fitness.app.R
 import bg.zahov.fitness.app.databinding.FragmentSettingsBinding
-import kotlinx.coroutines.Dispatchers
-import kotlinx.coroutines.withContext
 
 class FragmentSettings: Fragment() {
     private var _binding: FragmentSettingsBinding? = null

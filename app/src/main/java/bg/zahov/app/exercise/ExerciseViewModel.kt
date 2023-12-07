@@ -7,9 +7,9 @@ import androidx.lifecycle.viewModelScope
 import bg.zahov.app.realm_db.Exercise
 import bg.zahov.app.repository.UserRepository
 import com.google.firebase.auth.FirebaseAuth
-import io.realm.kotlin.notifications.DeletedObject
-import io.realm.kotlin.notifications.InitialObject
-import io.realm.kotlin.notifications.UpdatedObject
+import io.realm.kotlin.notifications.DeletedList
+import io.realm.kotlin.notifications.InitialList
+import io.realm.kotlin.notifications.UpdatedList
 import kotlinx.coroutines.launch
 
 class ExerciseViewModel : ViewModel() {
@@ -19,19 +19,20 @@ class ExerciseViewModel : ViewModel() {
     val userExercises: LiveData<List<Exercise>> get() = _userExercises
 
     init {
-//        getUserExercises()
+        getUserExercises()
     }
 
-//    private fun getUserExercises() {
-//        viewModelScope.launch {
-//            repo.getUser().collect {
-//                when (it) {
-//                    is DeletedObject -> {}
-//                    is InitialObject -> _userExercises.postValue(it.obj.customExercises)
-//                    is UpdatedObject -> _userExercises.postValue(it.obj.customExercises)
-//                }
-//            }
-//        }
-//    }
+    private fun getUserExercises() {
+        viewModelScope.launch {
+            repo.getExercises().collect {changes ->
+
+                _userExercises.postValue(when(changes){
+                    is DeletedList -> changes.list
+                    is InitialList -> changes.list
+                    is UpdatedList -> changes.list
+                })
+
+            }
+        }
+    }
 }
-//TODO(Updated object add only new exercises to list)

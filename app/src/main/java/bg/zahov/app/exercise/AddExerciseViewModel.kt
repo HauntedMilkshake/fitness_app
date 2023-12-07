@@ -17,17 +17,15 @@ import kotlinx.coroutines.launch
 class AddExerciseViewModel(application: Application): AndroidViewModel(application) {
     private val auth = FirebaseAuth.getInstance()
     private val repo = UserRepository.getInstance(auth.currentUser!!.uid)
-    //might not even need this to be a live data
     private val _bodyPart = MutableLiveData<String>()
     private val _category = MutableLiveData<String>()
-    //would be good to create ?: adding a blank exercise
     private val _isCreated = MutableLiveData<Boolean>()
     val isCreated: LiveData<Boolean> get() = _isCreated
 
     init{
         _isCreated.value = false
     }
-    fun addExercise(exerciseTitle: String ){
+    fun addExercise(exerciseTitle: String? ){
         if(exerciseTitle.isNullOrEmpty()){
             Toast.makeText(getApplication(), "Please don't leave title empty", Toast.LENGTH_SHORT).show()
         }else{

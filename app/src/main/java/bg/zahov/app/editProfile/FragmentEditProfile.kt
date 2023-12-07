@@ -17,7 +17,7 @@ class FragmentEditProfile: Fragment() {
         inflater: LayoutInflater,
         container: ViewGroup?,
         savedInstanceState: Bundle?
-    ): View? {
+    ): View {
         _binding = FragmentEditProfileBinding.inflate(inflater, container, false)
         return binding.root
     }
