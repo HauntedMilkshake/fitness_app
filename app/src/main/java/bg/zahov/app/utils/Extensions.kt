@@ -16,12 +16,16 @@ fun User.toFirestoreMap(): Map<String, Any?> {
 }
 
 fun RealmList<out RealmObject>.toMap(): List<Map<String, Any?>> {
-    return map { element ->
-        val fieldMap = element.javaClass.declaredFields.associate { field ->
-            field.isAccessible = true
-            field.name to field.get(element)
+    return if (isEmpty()) {
+        emptyList()
+    } else {
+        map { element ->
+            val fieldMap = element.javaClass.declaredFields.associate { field ->
+                field.isAccessible = true
+                field.name to field.get(element)
+            }
+            fieldMap.filterValues { it != null }
         }
-        fieldMap.filterValues { it != null }
     }
 }
 
@@ -37,6 +41,5 @@ private fun Settings?.toMap(): Map<String, Any?> {
         "soundSettings" to this?.soundSettings,
         "updateTemplate" to this?.updateTemplate,
         "fit" to this?.fit
-    )
+    ).filterValues { it != null }
 }
-

@@ -17,7 +17,7 @@ class LoginViewModel : ViewModel() {
                     repo = UserRepository.getInstance(auth.currentUser!!.uid)
                     viewModelScope.launch() {
                         if (!repo.doesUserHaveRealm()) {
-                            repo.createRealmFromFirestore()
+                            repo.syncFromFirestore()
                         }
                     }
 

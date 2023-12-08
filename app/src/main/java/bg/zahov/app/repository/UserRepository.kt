@@ -34,12 +34,12 @@ class UserRepository(userId: String) {
         realmInstance.createRealm(newUser)
     }
 
-    suspend fun createRealmFromFirestore() {
-        realmInstance.createRealmFromFirestore()
+    suspend fun syncFromFirestore() {
+        realmInstance.syncFromFirestore()
     }
 
-    suspend fun syncFromRealmToFirestore() {
-        realmInstance.syncFromRealmToFirestore()
+    suspend fun syncToFirestore() {
+        realmInstance.syncToFirestore()
     }
 
     suspend fun resetSettings() {
