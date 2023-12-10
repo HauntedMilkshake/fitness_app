@@ -88,8 +88,7 @@ class RadioGroupSettingsView @JvmOverloads constructor(
                 )
             radioButton.setPadding(16, 16, 16, 16)
             radioButton.setTextColor(ContextCompat.getColor(context, R.color.white))
-            radioButton.buttonTintList =
-                ColorStateList.valueOf(ContextCompat.getColor(context, R.color.white))
+            radioButton.buttonTintList = ColorStateList.valueOf(ContextCompat.getColor(context, R.color.white))
             radioGroup.addView(radioButton)
 
             if (currOption == getSelectedOption(title, settings)) {

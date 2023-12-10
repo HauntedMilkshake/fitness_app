@@ -4,7 +4,9 @@ import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
 import bg.zahov.app.repository.UserRepository
 import com.google.firebase.auth.FirebaseAuth
+import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.launch
+import kotlinx.coroutines.runBlocking
 
 class LoginViewModel : ViewModel() {
     private val auth: FirebaseAuth = FirebaseAuth.getInstance()
@@ -15,10 +17,12 @@ class LoginViewModel : ViewModel() {
                 if (task.isSuccessful) {
 
                     repo = UserRepository.getInstance(auth.currentUser!!.uid)
-                    viewModelScope.launch() {
-                        if (!repo.doesUserHaveRealm()) {
-                            repo.syncFromFirestore()
-                        }
+
+//                    viewModelScope.launch(Dispatchers.Main) {
+//                    }
+                    runBlocking {
+                        repo.syncFromFirestore()
+
                     }
 
                     callback(true, null)
@@ -38,6 +42,4 @@ class LoginViewModel : ViewModel() {
                 }
             }
     }
-
-    fun doesUserHaveRealm() = repo.doesUserHaveRealm()
 }

@@ -9,7 +9,9 @@ import bg.zahov.app.realm_db.Workout
 import com.google.firebase.auth.FirebaseAuth
 import io.realm.kotlin.notifications.DeletedObject
 import io.realm.kotlin.notifications.InitialObject
+import io.realm.kotlin.notifications.InitialResults
 import io.realm.kotlin.notifications.UpdatedObject
+import io.realm.kotlin.notifications.UpdatedResults
 import kotlinx.coroutines.launch
 
 class HomeViewModel : ViewModel() {
@@ -29,21 +31,25 @@ class HomeViewModel : ViewModel() {
                     is DeletedObject -> {
                         _userName.postValue(it.obj?.username)
                         _numberOfWorkouts.postValue(it.obj?.numberOfWorkouts)
-                        _userWorkouts.postValue(it.obj?.workouts)
                     }
 
                     is InitialObject -> {
                         _userName.postValue(it.obj.username)
                         _numberOfWorkouts.postValue(it.obj.numberOfWorkouts)
-                        _userWorkouts.postValue(it.obj.workouts)
                     }
 
                     is UpdatedObject -> {
                         _userName.postValue(it.obj.username)
                         _numberOfWorkouts.postValue(it.obj.numberOfWorkouts)
-                        _userWorkouts.postValue(it.obj.workouts)
-
                     }
+//                    is InitialResults -> {
+//                        _userName.postValue(it.list[0].username)
+//                        _numberOfWorkouts.postValue(it.list[0].numberOfWorkouts)
+//                    }
+//                    is UpdatedResults -> {
+//                        _userName.postValue(it.list[0].username)
+//                        _numberOfWorkouts.postValue(it.list[0].numberOfWorkouts)
+//                    }
                 }
             }
         }

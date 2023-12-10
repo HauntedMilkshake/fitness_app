@@ -50,7 +50,7 @@ class FragmentLoading : Fragment() {
             Animation.RELATIVE_TO_SELF, 0.5f
         )
 
-        scaleAnimation.duration = 1000L
+        scaleAnimation.duration = 2000L
         scaleAnimation.setAnimationListener(object : Animation.AnimationListener {
             override fun onAnimationStart(animation: Animation?) {
             }

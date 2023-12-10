@@ -147,6 +147,12 @@ class FragmentSettings : Fragment() {
                     "Prompt when a workout is finished",
                     it
                 )
+                initSwitchSettingsView(
+                    autoSyncSettings,
+                    "Automatic between device sync",
+                    "Turn this on if you want to use your account on another device",
+                    it
+                )
                 editProfile.initViewInformation("Edit")
                 github.initViewInformation("Github")
                 bugReport.initViewInformation("Bug report")

@@ -65,13 +65,7 @@ class FragmentLogIn : Fragment() {
 
                 loginViewModel.login(email, password) { success, errorMessage ->
                     if (success) {
-                        if (!loginViewModel.doesUserHaveRealm()) {
-                            Log.d("WHERE TO", "loading")
                             findNavController().navigate(R.id.login_to_loading)
-                        } else {
-                            Log.d("WHERE TO", "home")
-                            findNavController().navigate(R.id.login_to_home)
-                        }
                     } else {
                         Toast.makeText(requireContext(), errorMessage, Toast.LENGTH_SHORT).show()
                     }

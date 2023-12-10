@@ -9,7 +9,10 @@ import bg.zahov.app.repository.UserRepository
 import com.google.firebase.auth.FirebaseAuth
 import io.realm.kotlin.notifications.DeletedList
 import io.realm.kotlin.notifications.InitialList
+import io.realm.kotlin.notifications.InitialResults
 import io.realm.kotlin.notifications.UpdatedList
+import io.realm.kotlin.notifications.UpdatedResults
+import kotlinx.coroutines.flow.cancellable
 import kotlinx.coroutines.launch
 
 class ExerciseViewModel : ViewModel() {
@@ -24,16 +27,11 @@ class ExerciseViewModel : ViewModel() {
 
     private fun getUserExercises() {
         viewModelScope.launch {
-            repo.getExercises().collect { changes ->
-
-                _userExercises.postValue(
-                    when (changes) {
-                        is DeletedList -> changes.list
-                        is InitialList -> changes.list
-                        is UpdatedList -> changes.list
-                    }
-                )
-
+            repo.getTemplateExercises().collect { exercises ->
+                when(exercises) {
+                    is InitialResults -> _userExercises.postValue(exercises.list)
+                    is UpdatedResults -> _userExercises.postValue(exercises.list)
+                }
             }
         }
     }

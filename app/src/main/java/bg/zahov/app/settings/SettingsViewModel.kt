@@ -29,7 +29,7 @@ class SettingsViewModel(application: Application) : AndroidViewModel(application
 
     fun writeNewSetting(title: String, newValue: Any) {
         viewModelScope.launch(Dispatchers.IO) {
-            repo.writeNewSettings(title, newValue)
+            repo.updateSetting(title, newValue)
         }
     }
 

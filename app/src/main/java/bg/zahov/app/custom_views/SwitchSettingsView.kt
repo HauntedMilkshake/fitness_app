@@ -31,6 +31,7 @@ class SwitchSettingsView @JvmOverloads constructor(
             "Vibrate upon finish" -> settings.vibration
             "Use samsung watch during workout" -> settings.fit
             "Show update template" -> settings.updateTemplate
+            "Automatic between device sync" -> settings.automaticSync
             else -> false
         }
         titleView.text = title

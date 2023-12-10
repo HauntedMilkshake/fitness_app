@@ -22,13 +22,27 @@ class SignupViewModel : ViewModel() {
                 if (task.isSuccessful) {
                     viewModelScope.launch() {
                         repo = UserRepository.getInstance(auth.currentUser!!.uid)
-                        val user = User().apply {
-                            username = userName
-                            numberOfWorkouts = 0
+
+                        repo.createRealm(
+                            User().apply {
+                                username = userName
+                                numberOfWorkouts = 0
+                            },
+                            workouts = null,
+                            exercises = null,
                             settings = Settings()
-                        }
-                        repo.createRealm(user)
-                        repo.syncToFirestore()
+                        )
+
+                        repo.syncToFirestore(
+                            User().apply {
+                                username = userName
+                                numberOfWorkouts = 0
+                            },
+                            workouts = null,
+                            exercises = null,
+                            settings = Settings()
+                        )
+
                         callback(true, null)
                     }
                 } else {

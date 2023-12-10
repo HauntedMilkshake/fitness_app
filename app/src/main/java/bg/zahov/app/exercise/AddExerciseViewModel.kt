@@ -31,22 +31,25 @@ class AddExerciseViewModel(application: Application) : AndroidViewModel(applicat
             Toast.makeText(getApplication(), "Please don't leave title empty", Toast.LENGTH_SHORT)
                 .show()
         } else {
-            auth.uid?.let {
-                viewModelScope.launch {
-                    repo.addExercise(Exercise().apply {
-                        bodyPart = _bodyPart.value
-                        category = _category.value
-                        exerciseName = exerciseTitle
-                        sets = realmListOf()
-                    })
-                    _isCreated.postValue(true)
-                }
+            viewModelScope.launch {
+                repo.addExercise(Exercise().apply {
+                    bodyPart = _bodyPart.value
+                    category = _category.value
+                    exerciseName = exerciseTitle
+                    isTemplate = true
+                    sets = realmListOf()
+                })
+
+                Toast.makeText(
+                    getApplication(),
+                    "Successfully added a new exercise",
+                    Toast.LENGTH_SHORT
+                ).show()
+
+
+                _isCreated.postValue(true)
             }
-            Toast.makeText(
-                getApplication(),
-                "Successfully added a new exercise",
-                Toast.LENGTH_SHORT
-            ).show()
+
         }
     }
 

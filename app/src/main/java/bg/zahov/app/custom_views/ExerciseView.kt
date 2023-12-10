@@ -70,7 +70,6 @@ class ExerciseView @JvmOverloads constructor(
                 RadioGroup.LayoutParams.WRAP_CONTENT
             )
 
-
             when (title) {
                 "Category" -> {
                     if (currOption == getCategory(exerciseVm.getCurrCategory().toString())) {
@@ -125,9 +124,9 @@ class ExerciseView @JvmOverloads constructor(
             "Barbell" -> Category.Barbell.name
             "Dumbbell" -> Category.Dumbbell.name
             "Machine" -> Category.Machine.name
-            "AdditionalWeight" -> Category.AdditionalWeight.name
-            "AssistedWeight" -> Category.AssistedWeight.name
-            "RepsOnly" -> Category.RepsOnly.name
+            "Additional weight" -> Category.AdditionalWeight.name
+            "Assisted weight" -> Category.AssistedWeight.name
+            "Reps only" -> Category.RepsOnly.name
             "Cardio" -> Category.Cardio.name
             "Timed" -> Category.Timed.name
             else -> Category.None.name

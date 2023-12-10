@@ -5,22 +5,24 @@ import bg.zahov.app.data.Language
 import bg.zahov.app.data.Sound
 import bg.zahov.app.data.Theme
 import bg.zahov.app.data.Units
-import bg.zahov.app.utils.FireStoreAdapter
+import bg.zahov.app.utils.FirestoreExerciseAdapter
+import bg.zahov.app.utils.FirestoreSettingsAdapter
+import bg.zahov.app.utils.FirestoreUserAdapter
+import bg.zahov.app.utils.FirestoreWorkoutAdapter
 import bg.zahov.app.utils.toFirestoreMap
-import com.google.firebase.firestore.DocumentSnapshot
 import com.google.firebase.firestore.FirebaseFirestore
 import io.realm.kotlin.Realm
 import io.realm.kotlin.RealmConfiguration
 import io.realm.kotlin.ext.asFlow
 import io.realm.kotlin.ext.query
-import io.realm.kotlin.notifications.ListChange
 import io.realm.kotlin.notifications.ObjectChange
+import io.realm.kotlin.notifications.ResultsChange
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.flow.Flow
 import kotlinx.coroutines.launch
+import kotlinx.coroutines.tasks.await
 import kotlinx.coroutines.withContext
-import java.io.File
 
 class RealmManager(userId: String) {
     companion object {
@@ -34,40 +36,64 @@ class RealmManager(userId: String) {
 
     private var realmInstance: Realm? = null
     private val firestoreInstance = FirebaseFirestore.getInstance()
-    private val firestoreAdapter = FireStoreAdapter()
+
+    private val userAdapter =  FirestoreUserAdapter()
+    private val workoutAdapter =  FirestoreWorkoutAdapter()
+    private val exerciseAdapter = FirestoreExerciseAdapter()
+    private val settingsAdapter = FirestoreSettingsAdapter()
+
+
     private val uid = userId
     private val realmConfig by lazy {
         getConfig(uid).build()
     }
 
-    fun doesUserHaveLocalRealmFile() = File(realmConfig.path).exists()
 
     suspend fun syncFromFirestore() {
-        firestoreInstance.collection("users").document(uid).get()
-            .addOnSuccessListener { document ->
-                CoroutineScope(Dispatchers.IO).launch {
-                    Log.d("REALM", "FROM FIRESTORE")
-                    createRealm(createUserFromFirestore(document))
-                }
-            }
-    }
 
-    private fun createUserFromFirestore(document: DocumentSnapshot) = firestoreAdapter.adapt(document.data!!)
+        val userDocument = firestoreInstance.collection("users").document(uid).get().await()
 
-    suspend fun syncToFirestore() {
-        withRealm { realm ->
-            firestoreInstance.collection("users")
-                .document(uid)
-                .set( realm.query<User>().find().first().toFirestoreMap() )
-                .addOnSuccessListener {
-                    Log.d("SYNC", "SUCCESS")
-                }
-                .addOnFailureListener {
-                    Log.d("SYNC", "FAILURE")
-                }
+        val rUser = userAdapter.adapt(userDocument.data!!)
+
+        val settingsDocument = userDocument.reference.collection("settings").document("userSettings").get().await()
+        val settings = settingsAdapter.adapt(settingsDocument.data!!)
+
+        val workoutsCollection = userDocument.reference.collection("workouts").get().await()
+        val workouts = workoutsCollection.documents.mapNotNull { workoutDocument ->
+            val workout = workoutAdapter.adapt(workoutDocument.data!!)
+            workout
+        }
+
+        val exercisesCollection = userDocument.reference.collection("exercises").get().await()
+        val exercises = exercisesCollection.documents.mapNotNull { exerciseDocument ->
+            val exercise = exerciseAdapter.adapt(exerciseDocument.data!!)
+            exercise
+        }
+
+        CoroutineScope(Dispatchers.Main).launch {
+            createRealm(rUser, workouts, exercises, settings)
         }
     }
 
+    fun syncToFirestore(user: User,  workouts: List<Workout?>?, exercises: List<Exercise?>?, settings: Settings, ) {
+        val userDocRef = firestoreInstance.collection("users").document(uid)
+
+        userDocRef.set(user.toFirestoreMap())
+
+        userDocRef.collection("settings").document("userSettings").set(settings.toFirestoreMap())
+
+        workouts?.let {
+            it.filterNotNull().forEach { workout ->
+                userDocRef.collection("workouts").add(workout.toFirestoreMap())
+            }
+        }
+
+        exercises?.let {
+            it.filterNotNull().forEach { exercise ->
+                userDocRef.collection("exercises").add(exercise.toFirestoreMap())
+            }
+        }
+    }
 
     private fun getConfig(userId: String): RealmConfiguration.Builder {
         val config = RealmConfiguration.Builder(
@@ -85,12 +111,21 @@ class RealmManager(userId: String) {
         return config
     }
 
-    suspend fun createRealm(user: User) {
+    suspend fun createRealm(user: User, workouts: List<Workout?>?, exercises: List<Exercise?>?, settings: Settings) {
         withContext(Dispatchers.IO) {
             try {
-                realmInstance = Realm.open(realmConfig)
-                realmInstance?.write {
+                val realmInstance = Realm.open(realmConfig)
+                realmInstance.write {
                     copyToRealm(user)
+                    copyToRealm(settings)
+
+                    workouts?.forEach { workout ->
+                        workout?.let { copyToRealm(it) }
+                    }
+
+                    exercises?.forEach { exercise ->
+                        exercise?.let { copyToRealm(it) }
+                    }
                 }
             } catch (e: Exception) {
                 Log.e("Realm start error", e.toString())
@@ -109,22 +144,37 @@ class RealmManager(userId: String) {
 
     suspend fun getUser(): Flow<ObjectChange<User>> {
         return withRealm { realm ->
-            realm.query<User>().find().first().asFlow()
+            realm.query<User>().first().find()!!.asFlow()
         }
     }
 
     suspend fun getSettings(): Flow<ObjectChange<Settings>> {
         return withRealm { realm ->
-            realm.query<User>().find().first().settings!!.asFlow()
+            realm.query<Settings>().find().first().asFlow()
         }
     }
 
-    suspend fun getExercises(): Flow<ListChange<Exercise>> {
+    suspend fun getTemplateExercises(): Flow<ResultsChange<Exercise>> {
         return withRealm { realm ->
-            realm.query<User>().find().first().customExercises.asFlow()
+            realm.query<Exercise>("isTemplate == true").find().asFlow()
         }
     }
 
+    suspend fun getPerformedWorkouts(): Flow<ResultsChange<Workout>> {
+        return withRealm { realm ->
+            realm.query<Workout>("isTemplate == false").find().asFlow()
+        }
+    }
+    suspend fun getAllWorkouts(): Flow<ResultsChange<Workout>> {
+        return withRealm {realm ->
+            realm.query<Workout>().find().asFlow()
+        }
+    }
+    suspend fun getTemplateWorkouts(): Flow<ResultsChange<Workout>> {
+        return withRealm {realm ->
+            realm.query<Workout>("isTemplate == true").find().asFlow()
+        }
+    }
     suspend fun changeUserName(newUserName: String) {
         withRealm { realm ->
             val realmUser = realm.query<User>().find().first()
@@ -138,29 +188,38 @@ class RealmManager(userId: String) {
 
     suspend fun addExercise(newExercise: Exercise) {
         withRealm { realm ->
-            val user = realm.query<User>().find().first()
             realm.write {
-                findLatest(user)?.customExercises?.add(newExercise)
+               copyToRealm(newExercise)
             }
         }
     }
 
     suspend fun resetSettings() {
         withRealm { realm ->
-            val realmUser = realm.query<User>().find().first()
+            val settings = realm.query<Settings>().find().first()
             realm.write {
-                findLatest(realmUser)?.let {
-                    it.settings = Settings()
+                findLatest(settings)?.apply {
+                    language= Language.English.name
+                    weight = Units.Metric.name
+                    distance = Units.Metric.name
+                    soundEffects = true
+                    theme = Theme.Dark.name
+                    restTimer = 30
+                    vibration = true
+                    soundSettings = Sound.SOUND_1.name
+                    updateTemplate = true
+                    fit = false
+                    automaticSync = true
                 }
             }
         }
     }
 
-    suspend fun writeNewSetting(title: String, newValue: Any) {
+    suspend fun updateSetting(title: String, newValue: Any) {
         withRealm { realm ->
-            val realmUser = realm.query<User>().find().first()
+            val settings = realm.query<Settings>().find().first()
             realm.write {
-                findLatest(realmUser)?.settings?.let {
+                findLatest(settings)?.let {
                     when (title) {
                         "Language" -> {
                             it.language = (newValue as Language).name
@@ -197,6 +256,10 @@ class RealmManager(userId: String) {
 
                         "Use samsung watch during workout" -> {
                             it.fit = (newValue as Boolean)
+                        }
+
+                        "Automatic between device sync" -> {
+                            it.automaticSync = (newValue as Boolean)
                         }
 
                     }
