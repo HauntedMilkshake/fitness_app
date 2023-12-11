@@ -14,6 +14,24 @@ fun User.toFirestoreMap(): Map<String, Any?> {
     )
 }
 
+fun User.equalsTo(otherUser: User): Boolean{
+    return this.username != otherUser.username || this.numberOfWorkouts != otherUser.numberOfWorkouts
+}
+
+fun Settings.equalTo(newSettings: Settings): Boolean {
+    return this.language != newSettings.language ||
+            this.weight != newSettings.weight ||
+            this.distance != newSettings.distance ||
+            this.soundEffects != newSettings.soundEffects ||
+            this.theme != newSettings.theme ||
+            this.restTimer != newSettings.restTimer ||
+            this.vibration != newSettings.vibration ||
+            this.soundSettings != newSettings.soundSettings ||
+            this.updateTemplate != newSettings.updateTemplate ||
+            this.fit != newSettings.fit ||
+            this.automaticSync != newSettings.automaticSync
+}
+
 inline fun <reified T> RealmList<T>.toFirestoreMap(): List<Map<String, Any?>> {
     return map { item ->
         when (item) {

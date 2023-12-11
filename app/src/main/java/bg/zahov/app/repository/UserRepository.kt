@@ -43,8 +43,20 @@ class UserRepository(userId: String) {
         realmInstance.syncFromFirestore()
     }
 
-    suspend fun syncToFirestore(user: User, workouts: List<Workout?>?, exercises: List<Exercise?>?, settings: Settings) {
+    suspend fun syncToFirestore(user: User?, workouts: List<Workout?>?, exercises: List<Exercise?>?, settings: Settings?) {
         realmInstance.syncToFirestore(user, workouts, exercises, settings)
+    }
+    suspend fun getSettingsSync(): Settings{
+       return realmInstance.getSettingsSync()
+    }
+    suspend fun getTemplateExercisesSync(): List<Exercise>{
+        return realmInstance.getTemplateExercisesSync()
+    }
+    suspend fun getWorkoutsSync(): List<Workout> {
+        return realmInstance.getWorkoutsSync()
+    }
+    suspend fun getUserSync(): User {
+        return realmInstance.getUserSync()
     }
 
     suspend fun resetSettings() {

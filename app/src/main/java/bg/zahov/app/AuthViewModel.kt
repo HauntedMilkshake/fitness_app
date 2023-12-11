@@ -13,6 +13,9 @@ import bg.zahov.app.realm_db.Settings
 import bg.zahov.app.realm_db.User
 import bg.zahov.app.realm_db.Workout
 import bg.zahov.app.repository.UserRepository
+import bg.zahov.app.utils.checkForChanges
+import bg.zahov.app.utils.equalTo
+import bg.zahov.app.utils.equalsTo
 import com.google.firebase.auth.FirebaseAuth
 import io.realm.kotlin.notifications.DeletedObject
 import io.realm.kotlin.notifications.InitialObject
@@ -67,33 +70,28 @@ class AuthViewModel : ViewModel() {
                                 "SYNC",
                                 "BEFORE SYNC - Funny"
                             )
-                            getCurrUser()
-                            getCurrSettings()
-                            getWorkouts()
-                            getExerciseTemplates()
-
+                            initUser()
+                            //TODO(initWorkouts())
+                            //TODO(initExercises())
                             Log.d(
                                 "SYNC",
-                                "BEFORE SYNC - Inside if condition ${settingsCache?.automaticSync}"
+                                "BEFORE SYNC - Checking settings ${settingsCache?.automaticSync}"
                             )
-
-                            settingsCache?.let {
-                                if (it.automaticSync) {
+                                if (settingsCache!!.automaticSync) {
                                     Log.d("SYNC", "Launching sync")
                                     repo.syncToFirestore(
-                                        userCache!!,
+                                        getChangedUserOrNull(),
                                         workoutCache,
                                         exerciseCache,
                                         settingsCache!!
                                     )
                                 }
-                            }
                         }
                     } else {
                         Log.d("SYNC", "COULDN'T SYNC")
                     }
                 }
-            }, 0, checkInterval)
+            }, 5000, checkInterval)
     }
 
     private fun isUserConnected(context: Context): Boolean {
@@ -103,60 +101,41 @@ class AuthViewModel : ViewModel() {
 
         return networkCapabilities?.hasCapability(NetworkCapabilities.NET_CAPABILITY_INTERNET) == true
     }
-    private suspend fun getCurrUser() {
-        withContext(Dispatchers.IO) {
-            repo.getUser().collect {
-                when (it) {
-                    is DeletedObject -> {
-                        Log.d("SYNC", "User deleted")
-                    }
-                    is InitialObject -> {
-                        Log.d("SYNC", "Initial User object received: ${it.obj}")
-                        if (userCache == null) userCache = it.obj
-                    }
-                    is UpdatedObject -> {
-                        Log.d("SYNC", "User object updated: ${it.obj}")
-                        userCache = it.obj
-                    }
-                }
-            }
+
+    private suspend fun getChangedSettingsOrNull(): Settings?  {
+        val newSettings = repo.getSettingsSync()
+        return if(settingsCache!!.equalTo(newSettings)) {
+            settingsCache = newSettings
+
+            settingsCache
+        }else{
+             null
         }
     }
+    private suspend fun getChangedUserOrNull(): User?{
+        val newUser = repo.getUserSync()
 
+       return if(userCache!!.equalsTo(newUser)){
+            userCache = newUser
 
-    private suspend fun getCurrSettings() {
-        withContext(Dispatchers.IO) {
-            repo.getSettings().collect {
-                when(it){
-                    is DeletedObject -> {}
-                    is InitialObject -> if(settingsCache == null) settingsCache = it.obj
-                    is UpdatedObject -> settingsCache = it.obj
-                }
-            }
-            Log.d("SYNC", "SETTINGS -> ${settingsCache?.automaticSync}")
-        }
+            newUser
+        }else{
+            null
+       }
     }
-
+    private suspend fun getChangedWorkoutsOrNull(): List<Workout?>? {
+        val newWorkouts = repo.getWorkoutsSync()
+        return if()
+    }
+    private suspend fun getExercises() {
+        exerciseCache = repo.getTemplateExercisesSync()
+    }
     private suspend fun getWorkouts() {
-        withContext(Dispatchers.IO) {
-            repo.getAllWorkouts().collect {
-                when(it){
-                    is InitialResults -> if(workoutCache.isEmpty()) workoutCache = it.list
-                    is UpdatedResults -> workoutCache = it.list
-                }
-            }
+        workoutCache = repo.getWorkoutsSync()
+    }
+    private suspend fun initUser() {
+        if(userCache == null){
+            userCache = repo.getUserSync()
         }
     }
-
-    private suspend fun getExerciseTemplates() {
-        withContext(Dispatchers.IO) {
-            repo.getTemplateExercises().collect {
-                when(it){
-                    is InitialResults -> if(exerciseCache.isEmpty()) exerciseCache = it.list
-                    is UpdatedResults -> exerciseCache = it.list
-                }
-            }
-        }
-    }
-
 }

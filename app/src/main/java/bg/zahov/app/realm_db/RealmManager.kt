@@ -75,12 +75,16 @@ class RealmManager(userId: String) {
         }
     }
 
-    fun syncToFirestore(user: User,  workouts: List<Workout?>?, exercises: List<Exercise?>?, settings: Settings, ) {
+    fun syncToFirestore(user: User?,  workouts: List<Workout?>?, exercises: List<Exercise?>?, settings: Settings?, ) {
         val userDocRef = firestoreInstance.collection("users").document(uid)
 
-        userDocRef.set(user.toFirestoreMap())
+        user?.let{
+            userDocRef.set(user.toFirestoreMap())
+        }
 
-        userDocRef.collection("settings").document("userSettings").set(settings.toFirestoreMap())
+        settings?.let{
+            userDocRef.collection("settings").document("userSettings").set(settings.toFirestoreMap())
+        }
 
         workouts?.let {
             it.filterNotNull().forEach { workout ->
@@ -153,7 +157,26 @@ class RealmManager(userId: String) {
             realm.query<Settings>().find().first().asFlow()
         }
     }
-
+    suspend fun getSettingsSync(): Settings {
+        return withRealm{ realm ->
+            realm.query<Settings>().find().first()
+        }
+    }
+    suspend fun getUserSync(): User {
+        return withRealm{ realm ->
+            realm.query<User>().find().first()
+        }
+    }
+    suspend fun getTemplateExercisesSync():  List<Exercise>{
+        return withRealm{ realm ->
+            realm.query<Exercise>("isTemplate == true").find()
+        }
+    }
+    suspend fun getWorkoutsSync(): List<Workout> {
+        return withRealm { realm ->
+            realm.query<Workout>().find()
+        }
+    }
     suspend fun getTemplateExercises(): Flow<ResultsChange<Exercise>> {
         return withRealm { realm ->
             realm.query<Exercise>("isTemplate == true").find().asFlow()
