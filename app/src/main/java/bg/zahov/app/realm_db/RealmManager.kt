@@ -75,28 +75,70 @@ class RealmManager(userId: String) {
         }
     }
 
-    fun syncToFirestore(user: User?,  workouts: List<Workout?>?, exercises: List<Exercise?>?, settings: Settings?, ) {
+    suspend fun syncUserFromFirestore(): User? {
+        val userDocument = firestoreInstance.collection("users").document(uid).get().await()
+        return userAdapter.adapt(userDocument.data!!)
+    }
+
+    suspend fun syncSettingsFromFirestore(): Settings? {
+        val settingsDocument =
+            firestoreInstance.collection("users").document(uid).collection("settings")
+                .document("userSettings").get().await()
+        return settingsAdapter.adapt(settingsDocument.data!!)
+    }
+
+    suspend fun syncWorkoutsFromFirestore(): List<Workout> {
+        val workoutsCollection =
+            firestoreInstance.collection("users").document(uid).collection("workouts").get().await()
+        return workoutsCollection.documents.mapNotNull { workoutDocument ->
+            workoutAdapter.adapt(workoutDocument.data!!)
+        }
+    }
+
+    suspend fun syncExercisesFromFirestore(): List<Exercise> {
+        val exercisesCollection =
+            firestoreInstance.collection("users").document(uid).collection("exercises").get().await()
+        return exercisesCollection.documents.mapNotNull { exerciseDocument ->
+            exerciseAdapter.adapt(exerciseDocument.data!!)
+        }
+    }
+
+
+    fun syncToFirestore(user: User?,  workouts: List<Workout?>?, exercises: List<Exercise?>?, settings: Settings?) {
         val userDocRef = firestoreInstance.collection("users").document(uid)
 
         user?.let{
+            Log.d("INFIRESTORE", "USER")
             userDocRef.set(user.toFirestoreMap())
-        }
+        } ?: Log.d("INFIRESTORE", "USER = not sync")
 
         settings?.let{
+            Log.d("INFIRESTORE", "SETTING")
             userDocRef.collection("settings").document("userSettings").set(settings.toFirestoreMap())
-        }
+        } ?: Log.d("INFIRESTORE", "setting - not sync")
 
         workouts?.let {
             it.filterNotNull().forEach { workout ->
-                userDocRef.collection("workouts").add(workout.toFirestoreMap())
+                Log.d("INFIRESTORE", "WORKOUT")
+                if(workout.isTemplate!!){
+                    userDocRef.collection("workouts").document(workout.workoutName!!).set(workout.toFirestoreMap())
+                }else{
+                    userDocRef.collection("workouts").add(workout.toFirestoreMap())
+
+                }
             }
-        }
+        } ?: Log.d("INFIRESTORE", "workout - not sync")
 
         exercises?.let {
             it.filterNotNull().forEach { exercise ->
-                userDocRef.collection("exercises").add(exercise.toFirestoreMap())
+                Log.d("INFIRESTORE", "EXERCISE")
+                if(exercise.isTemplate!!){
+                    userDocRef.collection("exercises").document(exercise.exerciseName!!).set(exercise.toFirestoreMap())
+                }else{
+                    userDocRef.collection("exercises").add(exercise.toFirestoreMap())
+                }
             }
-        }
+        }?: Log.d("INFIRESTORE", "exercise - not sync")
     }
 
     private fun getConfig(userId: String): RealmConfiguration.Builder {

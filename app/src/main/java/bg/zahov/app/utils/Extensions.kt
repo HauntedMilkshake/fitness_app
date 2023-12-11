@@ -31,6 +31,45 @@ fun Settings.equalTo(newSettings: Settings): Boolean {
             this.fit != newSettings.fit ||
             this.automaticSync != newSettings.automaticSync
 }
+fun Workout.equalsTo(newWorkout: Workout): Boolean {
+
+    this.isTemplate?.let {
+        return exerciseIds.toList() != newWorkout.exerciseIds.toList()
+    }
+
+    return this.duration != newWorkout.duration ||
+            this.totalVolume != newWorkout.totalVolume ||
+            this.numberOfPrs != newWorkout.numberOfPrs ||
+            this.workoutName != newWorkout.workoutName ||
+            this.date != newWorkout.date ||
+            this.count != newWorkout.count ||
+            this.isTemplate !=  newWorkout.isTemplate ||
+            this.exercises.any { currExercises ->
+                 newWorkout.exercises.any { newExercises ->
+                     currExercises.equalsTo(newExercises)
+                 }
+            }
+}
+
+fun Exercise.equalsTo(exercise: Exercise): Boolean {
+    this.isTemplate?.let {
+        return this.bodyPart != exercise.bodyPart ||
+                this.category != exercise.category ||
+                this.exerciseName != exercise.exerciseName
+    }
+    return  this.bodyPart != exercise.bodyPart ||
+            this.category != exercise.category ||
+            this.exerciseName != exercise.exerciseName ||
+            this.sets.all { currSets ->
+                exercise.sets.any { newSets ->
+                    currSets.equalsTo(newSets)
+                }
+            }
+}
+fun Sets.equalsTo(newSets: Sets): Boolean {
+    return this.firstMetric != newSets.firstMetric ||
+            this.secondMetric != newSets.secondMetric
+}
 
 inline fun <reified T> RealmList<T>.toFirestoreMap(): List<Map<String, Any?>> {
     return map { item ->
@@ -85,6 +124,7 @@ fun Settings.toFirestoreMap(): Map<String, Any?> {
         "vibration" to this.vibration,
         "soundSettings" to this.soundSettings,
         "updateTemplate" to this.updateTemplate,
+        "automaticSync" to this.automaticSync,
         "fit" to this.fit
     )
 }

@@ -19,6 +19,7 @@ class FirestoreSettingsAdapter : Adapter<Map<String, Any>, Settings> {
             vibration = t["vibration"] as? Boolean ?: true
             soundSettings = t["soundSettings"] as? String ?: Sound.SOUND_1.name
             updateTemplate = t["updateTemplate"] as? Boolean ?: true
+            automaticSync = t["automaticSync"] as? Boolean ?: true
             fit = t["fit"] as? Boolean ?: false
         }
     }

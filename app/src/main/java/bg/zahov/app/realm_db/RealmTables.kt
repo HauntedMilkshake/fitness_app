@@ -64,5 +64,5 @@ class Settings : RealmObject {
     var soundSettings: String = Sound.SOUND_1.name
     var updateTemplate: Boolean = true
     var fit: Boolean = false
-    var automaticSync: Boolean = false
+    var automaticSync: Boolean = true
 }

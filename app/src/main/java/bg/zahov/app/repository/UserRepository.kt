@@ -62,5 +62,16 @@ class UserRepository(userId: String) {
     suspend fun resetSettings() {
         realmInstance.resetSettings()
     }
-
+    suspend fun getSyncUserFromFirestore(): User? {
+        return realmInstance.syncUserFromFirestore()
+    }
+    suspend fun getSyncSettingsFromFirestore(): Settings? {
+        return realmInstance.syncSettingsFromFirestore()
+    }
+    suspend fun getSyncWorkoutsFromFirestore(): List<Workout>{
+        return realmInstance.syncWorkoutsFromFirestore()
+    }
+    suspend fun getSyncExercisesFromFirestore(): List<Exercise>{
+        return realmInstance.syncExercisesFromFirestore()
+    }
 }

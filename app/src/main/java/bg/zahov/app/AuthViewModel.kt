@@ -13,21 +13,11 @@ import bg.zahov.app.realm_db.Settings
 import bg.zahov.app.realm_db.User
 import bg.zahov.app.realm_db.Workout
 import bg.zahov.app.repository.UserRepository
-import bg.zahov.app.utils.checkForChanges
 import bg.zahov.app.utils.equalTo
 import bg.zahov.app.utils.equalsTo
 import com.google.firebase.auth.FirebaseAuth
-import io.realm.kotlin.notifications.DeletedObject
-import io.realm.kotlin.notifications.InitialObject
-import io.realm.kotlin.notifications.InitialResults
-import io.realm.kotlin.notifications.UpdatedObject
-import io.realm.kotlin.notifications.UpdatedResults
-import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.Dispatchers
-import kotlinx.coroutines.GlobalScope
-import kotlinx.coroutines.flow.collect
 import kotlinx.coroutines.launch
-import kotlinx.coroutines.withContext
 import java.util.Timer
 import java.util.TimerTask
 
@@ -70,22 +60,30 @@ class AuthViewModel : ViewModel() {
                                 "SYNC",
                                 "BEFORE SYNC - Funny"
                             )
-                            initUser()
-                            //TODO(initWorkouts())
-                            //TODO(initExercises())
+                            initSettingsCache()
+
+                            if (settingsCache!!.automaticSync) {
+
+                                initWorkoutCache()
+                                initExerciseCache()
+
+                                Log.d("SYNC", "Launching sync")
+                                repo.syncToFirestore(
+                                    getChangedUserOrNull(),
+                                    getChangedWorkoutsOrNull(),
+                                    getChangedExercisesOrNull(),
+                                    getChangedSettingsOrNull()
+                                )
+                            }
                             Log.d(
                                 "SYNC",
                                 "BEFORE SYNC - Checking settings ${settingsCache?.automaticSync}"
                             )
-                                if (settingsCache!!.automaticSync) {
-                                    Log.d("SYNC", "Launching sync")
-                                    repo.syncToFirestore(
-                                        getChangedUserOrNull(),
-                                        workoutCache,
-                                        exerciseCache,
-                                        settingsCache!!
-                                    )
-                                }
+
+
+
+
+
                         }
                     } else {
                         Log.d("SYNC", "COULDN'T SYNC")
@@ -103,39 +101,99 @@ class AuthViewModel : ViewModel() {
     }
 
     private suspend fun getChangedSettingsOrNull(): Settings?  {
+
+        initSettingsCache()
+
         val newSettings = repo.getSettingsSync()
         return if(settingsCache!!.equalTo(newSettings)) {
+            null
+        }else{
             settingsCache = newSettings
 
             settingsCache
-        }else{
-             null
         }
     }
     private suspend fun getChangedUserOrNull(): User?{
+
+        initUserCache()
+
+
         val newUser = repo.getUserSync()
 
        return if(userCache!!.equalsTo(newUser)){
-            userCache = newUser
-
-            newUser
-        }else{
             null
+        }else{
+           userCache = newUser
+
+           newUser
        }
     }
     private suspend fun getChangedWorkoutsOrNull(): List<Workout?>? {
-        val newWorkouts = repo.getWorkoutsSync()
-        return if()
+
+        initWorkoutCache()
+
+        val currWorkouts = repo.getWorkoutsSync()
+        val newWorkouts = mutableListOf<Workout>()
+
+        workoutCache.forEach {wCache ->
+            currWorkouts.forEach {currWorkouts ->
+                if(!(wCache.equalsTo(currWorkouts))){
+                    newWorkouts.add(currWorkouts)
+                }
+            }
+        }
+
+        return if(newWorkouts.size == 0){
+            null
+        }else{
+            newWorkouts
+        }
     }
-    private suspend fun getExercises() {
-        exerciseCache = repo.getTemplateExercisesSync()
+    private suspend fun getChangedExercisesOrNull(): List<Exercise?>? {
+
+        initExerciseCache()
+
+
+        val currTemplateExercises = repo.getTemplateExercisesSync()
+        val newExercises = mutableListOf<Exercise>()
+
+        exerciseCache.forEach { cExercise ->
+            currTemplateExercises.forEach {currExercise ->
+                if(!(cExercise.equalsTo(currExercise))){
+                    newExercises.add(currExercise)
+                }
+            }
+        }
+
+        return if(newExercises.size == 0){
+            null
+        }else{
+            newExercises
+        }
     }
-    private suspend fun getWorkouts() {
-        workoutCache = repo.getWorkoutsSync()
-    }
-    private suspend fun initUser() {
+    private suspend fun initUserCache() {
         if(userCache == null){
-            userCache = repo.getUserSync()
+            userCache = repo.getSyncUserFromFirestore()
+            Log.d("INFO", "USERINFO -> ${userCache?.username}")
+        }
+    }
+    private suspend fun initSettingsCache(){
+        if(settingsCache == null){
+            settingsCache = repo.getSyncSettingsFromFirestore()
+            Log.d("INFO", "SETTINGSINFO -> ${settingsCache?.language}")
+        }
+    }
+    private suspend fun initWorkoutCache(){
+        if(workoutCache.isEmpty()){
+            workoutCache = repo.getSyncWorkoutsFromFirestore()
+            Log.d("INFO", "WORKOUTINFO -> ${workoutCache.forEach { it.toString() }}")
+        }
+    }
+    private suspend fun initExerciseCache(){
+        if(exerciseCache.isEmpty()){
+            exerciseCache = repo.getSyncExercisesFromFirestore()
+            Log.d("INFO", "EXERCISEINFO  -> ${workoutCache.forEach { it.toString() }}")
+
         }
     }
 }
