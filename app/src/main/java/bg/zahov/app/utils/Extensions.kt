@@ -15,35 +15,35 @@ fun User.toFirestoreMap(): Map<String, Any?> {
 }
 
 fun User.equalsTo(otherUser: User): Boolean{
-    return this.username != otherUser.username || this.numberOfWorkouts != otherUser.numberOfWorkouts
+    return this.username == otherUser.username && this.numberOfWorkouts == otherUser.numberOfWorkouts
 }
 
 fun Settings.equalTo(newSettings: Settings): Boolean {
-    return this.language != newSettings.language ||
-            this.weight != newSettings.weight ||
-            this.distance != newSettings.distance ||
-            this.soundEffects != newSettings.soundEffects ||
-            this.theme != newSettings.theme ||
-            this.restTimer != newSettings.restTimer ||
-            this.vibration != newSettings.vibration ||
-            this.soundSettings != newSettings.soundSettings ||
-            this.updateTemplate != newSettings.updateTemplate ||
-            this.fit != newSettings.fit ||
-            this.automaticSync != newSettings.automaticSync
+    return this.language == newSettings.language &&
+            this.weight == newSettings.weight &&
+            this.distance == newSettings.distance &&
+            this.soundEffects == newSettings.soundEffects &&
+            this.theme == newSettings.theme &&
+            this.restTimer == newSettings.restTimer &&
+            this.vibration == newSettings.vibration &&
+            this.soundSettings == newSettings.soundSettings &&
+            this.updateTemplate == newSettings.updateTemplate &&
+            this.fit == newSettings.fit &&
+            this.automaticSync == newSettings.automaticSync
 }
 fun Workout.equalsTo(newWorkout: Workout): Boolean {
 
     this.isTemplate?.let {
-        return exerciseIds.toList() != newWorkout.exerciseIds.toList()
+        return exerciseIds.toList() == newWorkout.exerciseIds.toList()
     }
 
-    return this.duration != newWorkout.duration ||
-            this.totalVolume != newWorkout.totalVolume ||
-            this.numberOfPrs != newWorkout.numberOfPrs ||
-            this.workoutName != newWorkout.workoutName ||
-            this.date != newWorkout.date ||
-            this.count != newWorkout.count ||
-            this.isTemplate !=  newWorkout.isTemplate ||
+    return this.duration == newWorkout.duration &&
+            this.totalVolume == newWorkout.totalVolume &&
+            this.numberOfPrs == newWorkout.numberOfPrs &&
+            this.workoutName == newWorkout.workoutName &&
+            this.date == newWorkout.date &&
+            this.count == newWorkout.count &&
+            this.isTemplate ==  newWorkout.isTemplate &&
             this.exercises.any { currExercises ->
                  newWorkout.exercises.any { newExercises ->
                      currExercises.equalsTo(newExercises)
@@ -53,13 +53,13 @@ fun Workout.equalsTo(newWorkout: Workout): Boolean {
 
 fun Exercise.equalsTo(exercise: Exercise): Boolean {
     this.isTemplate?.let {
-        return this.bodyPart != exercise.bodyPart ||
-                this.category != exercise.category ||
-                this.exerciseName != exercise.exerciseName
+        return this.bodyPart == exercise.bodyPart &&
+                this.category == exercise.category &&
+                this.exerciseName == exercise.exerciseName
     }
-    return  this.bodyPart != exercise.bodyPart ||
-            this.category != exercise.category ||
-            this.exerciseName != exercise.exerciseName ||
+    return  this.bodyPart == exercise.bodyPart &&
+            this.category == exercise.category &&
+            this.exerciseName == exercise.exerciseName &&
             this.sets.all { currSets ->
                 exercise.sets.any { newSets ->
                     currSets.equalsTo(newSets)
@@ -67,8 +67,8 @@ fun Exercise.equalsTo(exercise: Exercise): Boolean {
             }
 }
 fun Sets.equalsTo(newSets: Sets): Boolean {
-    return this.firstMetric != newSets.firstMetric ||
-            this.secondMetric != newSets.secondMetric
+    return this.firstMetric == newSets.firstMetric &&
+            this.secondMetric == newSets.secondMetric
 }
 
 inline fun <reified T> RealmList<T>.toFirestoreMap(): List<Map<String, Any?>> {

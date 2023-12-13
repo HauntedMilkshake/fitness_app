@@ -106,7 +106,7 @@
             android:id="@+id/settings_to_welcome"
             app:destination="@+id/welcome"
             app:popUpTo="@id/home"
-            app:popUpToInclusive="true"/>
+            app:popUpToInclusive="true" />
         <action
             android:id="@+id/settings_to_edit_profile"
             app:destination="@+id/edit_profile" />

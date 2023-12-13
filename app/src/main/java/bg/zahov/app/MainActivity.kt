@@ -38,11 +38,12 @@ class MainActivity : AppCompatActivity() {
 
             when {
                 isAuthenticated && currentDestinationId == R.id.welcome -> {
+                    authViewModel.initateSync(applicationContext)
                     navController.navigate(R.id.welcome_to_home)
                 }
             }
 
-            authViewModel.syncCheck(applicationContext)
+//            authViewModel.syncCheck(applicationContext)
         })
     }
 
