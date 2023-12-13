@@ -24,7 +24,7 @@ class EditProfileViewModel(application: Application) : AndroidViewModel(applicat
 
     init {
         viewModelScope.launch {
-            repo.getUser().collect {
+            repo.getUser()!!.collect {
                 when (it) {
                     is InitialObject -> {
                         _userName.postValue(it.obj.username)

@@ -26,15 +26,10 @@ class RealmManager(userId: String) {
     }
 
     private var realmInstance: Realm? = null
-
-
-
     private val uid = userId
     private val realmConfig by lazy {
         getConfig(uid).build()
     }
-
-
 
     private fun getConfig(userId: String): RealmConfiguration.Builder {
         val config = RealmConfiguration.Builder(
@@ -83,9 +78,15 @@ class RealmManager(userId: String) {
         }
     }
 
-    suspend fun getUser(): Flow<ObjectChange<User>> {
+    suspend fun getUser(): Flow<ObjectChange<User>>? {
         return withRealm { realm ->
-            realm.query<User>().first().find()!!.asFlow()
+            realm.query<User>().first().find()?.asFlow()
+        }
+    }
+
+    suspend fun getUserSync(): User {
+        return withRealm{ realm ->
+            realm.query<User>().find().first()
         }
     }
 
@@ -94,17 +95,14 @@ class RealmManager(userId: String) {
             realm.query<Settings>().find().first().asFlow()
         }
     }
+
     suspend fun getSettingsSync(): Settings {
         return withRealm{ realm ->
             realm.query<Settings>().find().first()
         }
     }
-    suspend fun getUserSync(): User {
-        return withRealm{ realm ->
-            realm.query<User>().find().first()
-        }
-    }
-    suspend fun getTemplateExercisesSync():  List<Exercise>{
+
+    suspend fun getTemplateExercisesSync(): List<Exercise> {
         return withRealm{ realm ->
             realm.query<Exercise>("isTemplate == true").find()
         }

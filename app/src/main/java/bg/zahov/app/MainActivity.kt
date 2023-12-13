@@ -6,7 +6,6 @@ import androidx.activity.viewModels
 import androidx.appcompat.app.AppCompatActivity
 import androidx.fragment.app.FragmentActivity
 import androidx.lifecycle.Observer
-import androidx.lifecycle.ViewModelProvider
 import androidx.navigation.findNavController
 import androidx.navigation.ui.AppBarConfiguration
 import androidx.navigation.ui.navigateUp
@@ -38,12 +37,12 @@ class MainActivity : AppCompatActivity() {
 
             when {
                 isAuthenticated && currentDestinationId == R.id.welcome -> {
-                    authViewModel.initateSync(applicationContext)
                     navController.navigate(R.id.welcome_to_home)
                 }
             }
-
-//            authViewModel.syncCheck(applicationContext)
+            if(isAuthenticated && currentDestinationId != R.id.welcome || currentDestinationId != R.id.signup || currentDestinationId != R.id.log_in){
+                authViewModel.initiateSync(applicationContext)
+            }
         })
     }
 

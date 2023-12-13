@@ -18,11 +18,8 @@ class LoginViewModel : ViewModel() {
 
                     repo = UserRepository.getInstance(auth.currentUser!!.uid)
 
-//                    viewModelScope.launch(Dispatchers.Main) {
-//                    }
-                    runBlocking {
+                    viewModelScope.launch(Dispatchers.Main) {
                         repo.syncFromFirestore()
-
                     }
 
                     callback(true, null)

@@ -1,11 +1,13 @@
 package bg.zahov.app.signup
 
+import android.util.Log
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
 import bg.zahov.app.realm_db.Settings
 import bg.zahov.app.realm_db.User
 import bg.zahov.app.repository.UserRepository
 import com.google.firebase.auth.FirebaseAuth
+import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.launch
 
 class SignupViewModel : ViewModel() {
@@ -32,17 +34,17 @@ class SignupViewModel : ViewModel() {
                             exercises = null,
                             settings = Settings()
                         )
-
-                        repo.syncToFirestore(
-                            User().apply {
-                                username = userName
-                                numberOfWorkouts = 0
-                            },
-                            workouts = null,
-                            exercises = null,
-                            settings = Settings()
-                        )
-
+                        viewModelScope.launch(Dispatchers.Default) {
+                            repo.syncToFirestore(
+                                User().apply {
+                                    username = userName
+                                    numberOfWorkouts = 0
+                                },
+                                workouts = null,
+                                exercises = null,
+                                settings = Settings()
+                            )
+                        }
                         callback(true, null)
                     }
                 } else {

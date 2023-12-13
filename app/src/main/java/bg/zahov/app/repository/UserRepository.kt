@@ -44,8 +44,8 @@ class UserRepository(userId: String) {
         syncManager.syncFromFirestore()
     }
     // no longer need to pass nullable values
-    suspend fun syncToFirestore(user: User?, workouts: List<Workout>?, exercises: List<Exercise>?, settings: Settings?) {
-        syncToFirestore(user, workouts, exercises, settings)
+    suspend fun syncToFirestore(user: User, workouts: List<Workout>?, exercises: List<Exercise>?, settings: Settings) {
+        syncManager.syncToFirestore(user, workouts, exercises, settings)
     }
     suspend fun periodicSync() {
         syncManager.initPeriodicSync()

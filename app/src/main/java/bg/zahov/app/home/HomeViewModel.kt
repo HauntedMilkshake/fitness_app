@@ -26,7 +26,7 @@ class HomeViewModel : ViewModel() {
 
     init {
         viewModelScope.launch {
-            repo.getUser().collect {
+            repo.getUser()!!.collect {
                 when (it) {
                     is DeletedObject -> {
                         _userName.postValue(it.obj?.username)
