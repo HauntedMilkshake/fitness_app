@@ -17,7 +17,7 @@ class UserRepository(userId: String) {
     }
 
     private val realmInstance = RealmManager.getInstance(userId)
-    private val syncManager = SyncManager(userId)
+    private val syncManager = SyncManager.getInstance(userId)
     suspend fun getTemplateExercises() = realmInstance.getTemplateExercises()
     suspend fun getSettings() = realmInstance.getSettings()
 
@@ -40,12 +40,11 @@ class UserRepository(userId: String) {
     suspend fun createRealm(newUser: User, workouts: List<Workout?>?, exercises: List<Exercise?>?, settings: Settings) {
         realmInstance.createRealm(newUser, workouts, exercises, settings)
     }
+    suspend fun createFirestore(user: User, settings: Settings) {
+        syncManager.createFirestore(user, settings)
+    }
     suspend fun syncFromFirestore() {
         syncManager.syncFromFirestore()
-    }
-    // no longer need to pass nullable values
-    suspend fun syncToFirestore(user: User, workouts: List<Workout>?, exercises: List<Exercise>?, settings: Settings) {
-        syncManager.syncToFirestore(user, workouts, exercises, settings)
     }
     suspend fun periodicSync() {
         syncManager.initPeriodicSync()

@@ -83,6 +83,7 @@ inline fun <reified T> RealmList<T>.toFirestoreMap(): List<Map<String, Any?>> {
 
 fun Workout.toFirestoreMap(): Map<String, Any?> {
     return hashMapOf(
+        "_id" to _id.toHexString(),
         "duration" to duration,
         "totalVolume" to totalVolume,
         "numberOfPrs" to numberOfPrs,

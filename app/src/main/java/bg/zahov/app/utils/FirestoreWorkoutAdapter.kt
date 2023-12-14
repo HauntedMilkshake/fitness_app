@@ -4,11 +4,14 @@ import bg.zahov.app.common.Adapter
 import bg.zahov.app.realm_db.Workout
 import io.realm.kotlin.ext.realmListOf
 import io.realm.kotlin.ext.toRealmList
+import org.mongodb.kbson.BsonObjectId
+import org.mongodb.kbson.ObjectId
 
 class FirestoreWorkoutAdapter : Adapter<Map<String, Any>, Workout> {
     override fun adapt(t: Map<String, Any>): Workout? {
         return Workout().apply {
             t?.let {
+                _id = it["_id"] as? ObjectId ?: ObjectId()
                 duration = it["duration"] as? Double
                 totalVolume = it["totalVolume"] as? Double
                 numberOfPrs = it["numberOfPrs"] as? Int

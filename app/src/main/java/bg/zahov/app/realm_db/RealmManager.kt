@@ -107,9 +107,14 @@ class RealmManager(userId: String) {
             realm.query<Exercise>("isTemplate == true").find()
         }
     }
-    suspend fun getWorkoutsSync(): List<Workout> {
+    suspend fun getPastWorkoutsSync(): List<Workout> {
         return withRealm { realm ->
-            realm.query<Workout>().find()
+            realm.query<Workout>("isTemplate == false").find()
+        }
+    }
+    suspend fun getTemplateWorkoutsSync(): List<Workout> {
+        return withRealm { realm ->
+            realm.query<Workout>("isTemplate == true").find()
         }
     }
     suspend fun getTemplateExercises(): Flow<ResultsChange<Exercise>> {

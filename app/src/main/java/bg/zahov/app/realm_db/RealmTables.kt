@@ -20,6 +20,8 @@ class User : RealmObject {
 //This ensures that if we update a template exercise all of the workouts that have it would get updated as well
 //otherwise we would like to have the historically accurate data
 class Workout : RealmObject {
+    @PrimaryKey
+    var _id: ObjectId = ObjectId()
     var duration: Double? = null
     var totalVolume: Double? = null
     var numberOfPrs: Int? = null

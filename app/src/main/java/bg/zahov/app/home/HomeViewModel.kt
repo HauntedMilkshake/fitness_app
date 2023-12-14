@@ -1,5 +1,6 @@
 package bg.zahov.app.home
 
+import android.util.Log
 import androidx.lifecycle.LiveData
 import androidx.lifecycle.MutableLiveData
 import androidx.lifecycle.ViewModel
@@ -26,6 +27,7 @@ class HomeViewModel : ViewModel() {
 
     init {
         viewModelScope.launch {
+            Log.d("INIT", repo.getUser().toString())
             repo.getUser()!!.collect {
                 when (it) {
                     is DeletedObject -> {

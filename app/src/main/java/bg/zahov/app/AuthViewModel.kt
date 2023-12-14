@@ -44,7 +44,7 @@ class AuthViewModel : ViewModel() {
                         )
                     ) {
 
-                        repo = UserRepository(auth.currentUser!!.uid)
+                        repo = UserRepository.getInstance(auth.currentUser!!.uid)
 
                         viewModelScope.launch(Dispatchers.IO) {
                             repo.periodicSync()
@@ -52,7 +52,7 @@ class AuthViewModel : ViewModel() {
 
                     }
                 }
-            }, 5000, checkInterval)
+            }, 12000, checkInterval)
         }
     }
 

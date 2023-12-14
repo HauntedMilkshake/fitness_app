@@ -35,15 +35,12 @@ class SignupViewModel : ViewModel() {
                             settings = Settings()
                         )
                         viewModelScope.launch(Dispatchers.Default) {
-                            repo.syncToFirestore(
+                            repo.createFirestore(
                                 User().apply {
                                     username = userName
                                     numberOfWorkouts = 0
                                 },
-                                workouts = null,
-                                exercises = null,
-                                settings = Settings()
-                            )
+                                settings = Settings())
                         }
                         callback(true, null)
                     }
