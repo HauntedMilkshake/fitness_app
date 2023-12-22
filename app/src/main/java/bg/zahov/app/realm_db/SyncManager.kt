@@ -172,13 +172,9 @@ class SyncManager(private val uid: String) {
     //TODO(if the user doesn't have internet we might not update call this function)
     private suspend fun initCaches(){
         userCache = getUserFromLastSync()
-        Log.d("SYNC", "INIT USER -> ${userCache.username}")
         settingsCache = getSettingsFromLastSync()
-        Log.d("SYNC", "INIT USER -> ${settingsCache.language}")
         workoutCache = getWorkoutsFromLastSync()?.toMutableList()
-        Log.d("SYNC", "INIT USER -> $workoutCache")
         exerciseCache = getExercisesFromLastSync()?.toMutableList()
-        Log.d("SYNC", "INIT USER -> $exerciseCache")
     }
     private suspend fun getChangedUserOrNull(): User? {
 
@@ -209,61 +205,44 @@ class SyncManager(private val uid: String) {
     //working only with exercises marked as *template*
     private suspend fun getChangedExercisesOrNull(): Pair<List<Exercise>?, List<Exercise>?>? {
         val currTemplateExercises = realm.getTemplateExercisesSync()
-        Log.d("Current exercises", currTemplateExercises.size.toString())
         val newExercises: Pair<List<Exercise>?, List<Exercise>?>?
 
         if (currTemplateExercises.isEmpty() && exerciseCache.isNullOrEmpty()) {
             exerciseCache = null
-            Log.d("Return", "Null due to both empty")
             return null
         }
 
         if (currTemplateExercises.isEmpty()) {
             exerciseCache = mutableListOf()
-            Log.d("Return", "Deleting exercises")
             return Pair(listOf(), null)
         }
 
         if (exerciseCache.isNullOrEmpty()) {
             exerciseCache = currTemplateExercises.toMutableList()
-            Log.d("Return", "Adding everything")
             return Pair(null, exerciseCache)
         }
 
         val currSet = currTemplateExercises.toSet()
-//        Log.d("Return", "Curr exercises -> $currSet")
+
         val cacheSet = exerciseCache!!.toSet()
-//        Log.d("Return", "Exercise cache exercises -> $cacheSet")
 
         var newExercisesSet: Set<Exercise>? = currSet.difference(cacheSet)
-//        Log.d("Return", "New exercises to add -> $newExercisesSet")
 
-        var updatedExercisesSet: List<Exercise>?     = currSet.difference(newExercisesSet!!).mapNotNull { exercise ->
+        var updatedExercisesSet: List<Exercise>? = currSet.difference(newExercisesSet!!).mapNotNull { exercise ->
             currSet.find{
                 it._id == exercise._id && !it.equalsTo(exercise)
             }
         }
 
-//        Log.d("Return", "Updated exercises -> $updatedExercisesSet")
-
-        // Log the names of exercises in the sets
-//        Log.d("Return", "Names of new exercises: ${newExercisesSet?.forEach { it.exerciseName }}")
-//        Log.d("Return", "Names of updated exercises: ${updatedExercisesSet?.forEach { it.exerciseName }}")
-
-        // Handle the case where newExercisesSet is empty
         if (newExercisesSet.isNullOrEmpty()) {
-        Log.d("Return", "no new exercises")
             newExercisesSet = null
         }
 
-        // Handle the case where updatedExercisesSet is empty
         if (updatedExercisesSet.isNullOrEmpty()) {
-            Log.d("Return", "no exercises to update")
             updatedExercisesSet = null
         }
 
         exerciseCache = currTemplateExercises.toMutableList()
-        Log.d("Return", "$updatedExercisesSet, $newExercisesSet")
         newExercises = Pair(updatedExercisesSet, newExercisesSet?.toList())
 
         return newExercises
