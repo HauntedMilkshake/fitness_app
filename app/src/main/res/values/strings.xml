@@ -61,6 +61,9 @@
     <string name="switch_off">off</string>
     <string name="advanced_settings_text">Advanced settings</string>
     <string name="popup_exampel_title">Popup title</string>
+    <string name="new_password">New password</string>
+    <string name="cancel">cancel</string>
+    <string name="confirm">confirm</string>
     <!--  Strings used for create exercise fragment    -->
     <string name="new_exercise_placeholder_text">new exercise</string>
     <string name="add_name_hint">Add name</string>
@@ -68,4 +71,5 @@
     <string name="create_exercise" tools:ignore="ExtraTranslation">Create exercise</string>
     <string name="edit_profile_text"> Edit profile</string>
     <string name="reset_password_text">Reset password</string>
+    <string name="confirm_changes">Confirm changes</string>
 </resources>

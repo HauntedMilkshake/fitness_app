@@ -2,6 +2,7 @@ package bg.zahov.app.login
 
 import android.os.Bundle
 import android.util.Log
+import android.view.KeyEvent
 import android.view.LayoutInflater
 import android.view.View
 import android.view.ViewGroup
@@ -34,6 +35,15 @@ class FragmentLogIn : Fragment() {
     override fun onViewCreated(view: View, savedInstanceState: Bundle?) {
         super.onViewCreated(view, savedInstanceState)
         binding.apply {
+
+            emailFieldText.setOnKeyListener { _, keyCode, event ->
+                if (keyCode == KeyEvent.KEYCODE_ENTER && event.action == KeyEvent.ACTION_DOWN) {
+                    passwordFieldText.requestFocus()
+                } else {
+                    false
+                }
+            }
+
             forgotPassword.setOnClickListener {
                 val email = emailFieldText.text.toString()
                 if (isEmailNotValid(email)) {

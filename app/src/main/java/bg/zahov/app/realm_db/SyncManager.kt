@@ -5,6 +5,7 @@ import bg.zahov.app.utils.FirestoreExerciseAdapter
 import bg.zahov.app.utils.FirestoreSettingsAdapter
 import bg.zahov.app.utils.FirestoreUserAdapter
 import bg.zahov.app.utils.FirestoreWorkoutAdapter
+import bg.zahov.app.utils.difference
 import bg.zahov.app.utils.equalTo
 import bg.zahov.app.utils.equalsTo
 import bg.zahov.app.utils.toFirestoreMap
@@ -47,7 +48,57 @@ class SyncManager(private val uid: String) {
         }
     }
 
-    //handle when log in and
+    //1st values of pairs represent the ones we need to update
+    //2nd values of pairs are the ones we need to add
+    //empty values represent we need to delete (if there is something to delete)
+    //null values represent no changes from last sync
+    //new values are added on the principle I explained on lines 120, 121
+    private fun syncToFirestore(user: User?,  workouts: Pair<Pair<List<Workout>?, List<Workout>?>?, List<Workout>?>?, exercises: Pair<List<Exercise>?, List<Exercise>?>?, settings: Settings?) {
+        val userDocRef = firestore.collection("users").document(uid)
+        Log.d("SYNC", "In syncToFirestore")
+        user?.let{
+            Log.d("SYNC", "syncing user...")
+            userDocRef.set(it.toFirestoreMap())
+        } ?: Log.d("SYNC", "failed to sync user")
+
+        settings?.let{
+            Log.d("SYNC", "syncing settings...")
+            userDocRef.collection("settings").document("userSettings").set(it.toFirestoreMap())
+        } ?: Log.d("SYNC", "failed to sync settings")
+
+
+        workouts?.let { wrapper ->
+            wrapper.first?.let { templates ->
+                templates.first?.forEach { workout ->
+                    userDocRef.collection("workouts").document(workout.workoutName!!).set(workout.toFirestoreMap())
+                }
+                templates.second?.forEach {workout ->
+                    userDocRef.collection("workouts").add(workout.toFirestoreMap())
+
+                }
+            }
+            wrapper.second?.let{ pastWorkouts ->
+                pastWorkouts.forEach {
+                    userDocRef.collection("workouts").add(it.toFirestoreMap())
+                }
+            }
+        } ?: Log.d("SYNC", "failed to sync workouts")
+
+
+        //check when we have the size of the first list to 0 to delete all entries
+        exercises?.let {
+            it.first?.forEach {exercise ->
+                Log.d("SYNC", "replacing template exercises...")
+                userDocRef.collection("exercises").document(exercise.exerciseName!!).set(exercise.toFirestoreMap())
+            }
+            it.second?.forEach {exercise ->
+                Log.d("SYNC", "adding new template exercises...")
+                userDocRef.collection("exercises").add(exercise.toFirestoreMap())
+            }
+        } ?: Log.d("SYNC", "failed to sync exercises")
+
+    }
+
     suspend fun syncFromFirestore() {
 
         val userDocument = firestore.collection("users").document(uid).get().await()
@@ -95,7 +146,6 @@ class SyncManager(private val uid: String) {
             }
         }
     }
-
     private suspend fun getExercisesFromLastSync(): List<Exercise>? {
         val exercisesCollection = firestore.collection("users").document(uid).collection("exercises").get().await()
 
@@ -107,7 +157,9 @@ class SyncManager(private val uid: String) {
             }
         }
     }
-    suspend fun createFirestore(user: User, settings: Settings){
+
+
+    fun createFirestore(user: User, settings: Settings){
         val userDocRef = firestore.collection("users").document(uid)
 
         userDocRef.set(user.toFirestoreMap())
@@ -116,56 +168,8 @@ class SyncManager(private val uid: String) {
 
     }
 
-
-    //1st values of pairs represent the ones we need to update
-    //2nd values of pairs are the ones we need to add
-    private suspend fun syncToFirestore(user: User?,  workouts: Pair<Pair<List<Workout>?, List<Workout>?>?, List<Workout>?>?, exercises: Pair<List<Exercise>?, List<Exercise>?>?, settings: Settings?) {
-        val userDocRef = firestore.collection("users").document(uid)
-        Log.d("SYNC", "In syncToFirestore")
-        user?.let{
-            Log.d("SYNC", "syncing user...")
-            userDocRef.set(it.toFirestoreMap())
-        } ?: Log.d("SYNC", "failed to sync user")
-
-        settings?.let{
-            Log.d("SYNC", "syncing settings...")
-            userDocRef.collection("settings").document("userSettings").set(it.toFirestoreMap())
-        } ?: Log.d("SYNC", "failed to sync settings")
-
-
-        workouts?.let { wrapper ->
-            wrapper.first?.let { templates ->
-                templates.first?.forEach { workout ->
-                    userDocRef.collection("workouts").document(workout.workoutName!!).set(workout.toFirestoreMap())
-                }
-                templates.second?.forEach {workout ->
-                    userDocRef.collection("workouts").add(workout.toFirestoreMap())
-
-                }
-            }
-            wrapper.second?.let{pastWorkouts ->
-                pastWorkouts.forEach {
-                    userDocRef.collection("workouts").add(it.toFirestoreMap())
-                }
-            }
-        } ?: Log.d("SYNC", "failed to sync workouts")
-
-        exercises?.let {
-            it.first?.forEach {exercise ->
-                Log.d("SYNC", "replacing template exercises...")
-                userDocRef.collection("exercises").document(exercise.exerciseName!!).set(exercise.toFirestoreMap())
-            }
-            it.second?.forEach {exercise ->
-                Log.d("SYNC", "adding new template exercises...")
-                userDocRef.collection("exercises").add(exercise.exerciseName!!)
-            }
-        } ?: Log.d("SYNC", "failed to sync exercises")
-
-    }
-
     //this function retrieves the information from the last sync whenever the app is restarted
     //TODO(if the user doesn't have internet we might not update call this function)
-    //TODO(Functions is still called twice for some reason)
     private suspend fun initCaches(){
         userCache = getUserFromLastSync()
         Log.d("SYNC", "INIT USER -> ${userCache.username}")
@@ -205,38 +209,66 @@ class SyncManager(private val uid: String) {
     //working only with exercises marked as *template*
     private suspend fun getChangedExercisesOrNull(): Pair<List<Exercise>?, List<Exercise>?>? {
         val currTemplateExercises = realm.getTemplateExercisesSync()
-        var newExercises: Pair<List<Exercise>?, List<Exercise>?>?
+        Log.d("Current exercises", currTemplateExercises.size.toString())
+        val newExercises: Pair<List<Exercise>?, List<Exercise>?>?
 
-        if(currTemplateExercises.isEmpty() && exerciseCache.isNullOrEmpty()){
+        if (currTemplateExercises.isEmpty() && exerciseCache.isNullOrEmpty()) {
             exerciseCache = null
+            Log.d("Return", "Null due to both empty")
             return null
         }
 
-        if(currTemplateExercises.isEmpty()) {
+        if (currTemplateExercises.isEmpty()) {
             exerciseCache = mutableListOf()
+            Log.d("Return", "Deleting exercises")
             return Pair(listOf(), null)
         }
 
-        if(exerciseCache.isNullOrEmpty()){
+        if (exerciseCache.isNullOrEmpty()) {
             exerciseCache = currTemplateExercises.toMutableList()
-            return Pair(exerciseCache, null)
+            Log.d("Return", "Adding everything")
+            return Pair(null, exerciseCache)
         }
 
         val currSet = currTemplateExercises.toSet()
+//        Log.d("Return", "Curr exercises -> $currSet")
         val cacheSet = exerciseCache!!.toSet()
+//        Log.d("Return", "Exercise cache exercises -> $cacheSet")
 
-        val newExercisesSet = currSet - cacheSet
+        var newExercisesSet: Set<Exercise>? = currSet.difference(cacheSet)
+//        Log.d("Return", "New exercises to add -> $newExercisesSet")
 
-        val updatedExercisesSet = (currSet - newExercisesSet).filter { exercise ->
-            exerciseCache!!.any {
+        var updatedExercisesSet: List<Exercise>?     = currSet.difference(newExercisesSet!!).mapNotNull { exercise ->
+            currSet.find{
                 it._id == exercise._id && !it.equalsTo(exercise)
             }
         }
 
-        newExercises = Pair(updatedExercisesSet.toList(), newExercisesSet.toList())
+//        Log.d("Return", "Updated exercises -> $updatedExercisesSet")
+
+        // Log the names of exercises in the sets
+//        Log.d("Return", "Names of new exercises: ${newExercisesSet?.forEach { it.exerciseName }}")
+//        Log.d("Return", "Names of updated exercises: ${updatedExercisesSet?.forEach { it.exerciseName }}")
+
+        // Handle the case where newExercisesSet is empty
+        if (newExercisesSet.isNullOrEmpty()) {
+        Log.d("Return", "no new exercises")
+            newExercisesSet = null
+        }
+
+        // Handle the case where updatedExercisesSet is empty
+        if (updatedExercisesSet.isNullOrEmpty()) {
+            Log.d("Return", "no exercises to update")
+            updatedExercisesSet = null
+        }
+
+        exerciseCache = currTemplateExercises.toMutableList()
+        Log.d("Return", "$updatedExercisesSet, $newExercisesSet")
+        newExercises = Pair(updatedExercisesSet, newExercisesSet?.toList())
 
         return newExercises
     }
+
 
     //First item of the surrounding contains a pair which has the template workouts. The first are the ones we need to update, the second are the ones we need to add
     //Second item of the surrounding pair are past workouts
@@ -264,6 +296,7 @@ class SyncManager(private val uid: String) {
         val updatedTemplates = (allWorkoutTemplates.toSet() - newTemplatesSet).filter { workout -> lastSyncTemplates.any {
             it._id == workout._id && !workout.equalsTo(it)
         }}
+        workoutCache = allPastWorkouts.toMutableList()
         val newWorkouts = (allPastWorkouts - workoutCache!!)
         return Pair(Pair(updatedTemplates, newTemplates), newWorkouts)
     }

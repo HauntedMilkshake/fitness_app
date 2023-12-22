@@ -66,6 +66,9 @@ fun Exercise.equalsTo(exercise: Exercise): Boolean {
                 }
             }
 }
+fun Set<Exercise>.difference(other: Set<Exercise>): Set<Exercise> {
+  return this.filterNot { it in other }.toSet()
+}
 fun Sets.equalsTo(newSets: Sets): Boolean {
     return this.firstMetric == newSets.firstMetric &&
             this.secondMetric == newSets.secondMetric

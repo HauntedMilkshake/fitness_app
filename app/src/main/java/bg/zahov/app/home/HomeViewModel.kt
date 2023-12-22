@@ -44,14 +44,7 @@ class HomeViewModel : ViewModel() {
                         _userName.postValue(it.obj.username)
                         _numberOfWorkouts.postValue(it.obj.numberOfWorkouts)
                     }
-//                    is InitialResults -> {
-//                        _userName.postValue(it.list[0].username)
-//                        _numberOfWorkouts.postValue(it.list[0].numberOfWorkouts)
-//                    }
-//                    is UpdatedResults -> {
-//                        _userName.postValue(it.list[0].username)
-//                        _numberOfWorkouts.postValue(it.list[0].numberOfWorkouts)
-//                    }
+
                 }
             }
         }

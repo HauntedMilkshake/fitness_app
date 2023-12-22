@@ -4,6 +4,7 @@ import bg.zahov.app.data.Language
 import bg.zahov.app.data.Sound
 import bg.zahov.app.data.Theme
 import bg.zahov.app.data.Units
+import bg.zahov.app.utils.equalsTo
 import io.realm.kotlin.ext.realmListOf
 import io.realm.kotlin.types.RealmList
 import io.realm.kotlin.types.RealmObject
@@ -43,6 +44,18 @@ class Exercise : RealmObject {
     var exerciseName: String? = null
     var isTemplate: Boolean? = null
     var sets: RealmList<Sets> = realmListOf()
+
+    override fun equals(other: Any?): Boolean {
+        return if(other is Exercise){
+            this.equalsTo(other)
+        }else{
+            false
+        }
+    }
+
+    override fun hashCode(): Int {
+        return _id.hashCode() + bodyPart.hashCode() + category.hashCode() + exerciseName.hashCode()
+    }
 }
 
 //Metrics determined by category

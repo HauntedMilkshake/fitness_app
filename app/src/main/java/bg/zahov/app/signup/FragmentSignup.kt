@@ -1,9 +1,12 @@
 package bg.zahov.app.signup
 
 import android.os.Bundle
+import android.util.Log
+import android.view.KeyEvent
 import android.view.LayoutInflater
 import android.view.View
 import android.view.ViewGroup
+import android.view.inputmethod.EditorInfo
 import android.widget.Toast
 import androidx.fragment.app.Fragment
 import androidx.fragment.app.viewModels
@@ -33,6 +36,43 @@ class FragmentSignup : Fragment() {
     override fun onViewCreated(view: View, savedInstanceState: Bundle?) {
         super.onViewCreated(view, savedInstanceState)
         binding.apply {
+
+            usernameFieldText.setOnKeyListener { _, keyCode, event ->
+                if( keyCode == KeyEvent.KEYCODE_ENTER && event.action == KeyEvent.ACTION_DOWN ){
+                    emailFieldText.requestFocus()
+                    true
+                }else{
+                    false
+                }
+            }
+
+            emailFieldText.setOnKeyListener { _, keyCode, event ->
+                if( keyCode == KeyEvent.KEYCODE_ENTER && event.action == KeyEvent.ACTION_DOWN ){
+                    passwordFieldText.requestFocus()
+                    true
+                }else{
+                    false
+                }
+            }
+
+            passwordFieldText.setOnKeyListener{ _, keyCode, event ->
+                if( keyCode == KeyEvent.KEYCODE_ENTER && event.action == KeyEvent.ACTION_DOWN ){
+                    confirmPasswordFieldText.requestFocus()
+                    true
+                }else{
+                    false
+                }
+            }
+
+            confirmPasswordFieldText.setOnKeyListener{ _, keyCode, event ->
+                if( keyCode == KeyEvent.KEYCODE_ENTER && event.action == KeyEvent.ACTION_DOWN ){
+                   registerButton.callOnClick()
+                    true
+                }else{
+                    false
+                }
+            }
+
             registerButton.setOnClickListener {
                 val password = passwordFieldText.text.toString()
                 val confirmPassword = confirmPasswordFieldText.text.toString()

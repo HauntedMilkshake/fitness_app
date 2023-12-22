@@ -1,5 +1,8 @@
 <?xml version="1.0" encoding="utf-8"?>
 <resources>
-    <style name="Welcome.Theme.Fitness_app" parent="Theme.MaterialComponents.Light.NoActionBar">
+    <style name="Welcome.Theme.Fitness_app" parent="Theme.MaterialComponents.Light.NoActionBar"></style>
+    <style name="CustomMaterialStyle" parent="Widget.Material3.TextInputLayout.OutlinedBox.Dense">
+        <item name="colorAccent">@color/background</item>
+        <item name="textAppearanceBody1">@null</item>
     </style>
 </resources>
