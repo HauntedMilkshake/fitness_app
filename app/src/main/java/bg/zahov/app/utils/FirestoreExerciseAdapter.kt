@@ -5,8 +5,8 @@ import bg.zahov.app.realm_db.Exercise
 import io.realm.kotlin.ext.toRealmList
 import org.mongodb.kbson.ObjectId
 
-class FirestoreExerciseAdapter : Adapter<Map<String, Any?>, Exercise> {
-    override fun adapt(t: Map<String, Any>): Exercise {
+class FirestoreExerciseAdapter : Adapter<Map<String, Any>?, Exercise> {
+    override fun adapt(t: Map<String, Any>?): Exercise {
         return Exercise().apply {
             t?.let {
                 _id = it["_id"] as? ObjectId ?: ObjectId()
@@ -15,8 +15,8 @@ class FirestoreExerciseAdapter : Adapter<Map<String, Any?>, Exercise> {
                 exerciseName = it["exerciseName"] as? String
                 isTemplate = it["isTemplate"] as? Boolean
 
-                val setsList = it["sets"] as? List<Map<String, Any>> ?: emptyList()
-                sets = setsList.mapNotNull { setsMap -> FirestoreSetsAdapter().adapt(setsMap) }.toRealmList()
+                val setsList = it["sets"] as? List<Map<String, Any>?> ?: emptyList()
+                sets = setsList.mapNotNull { setsMap -> setsMap?.let{ FirestoreSetsAdapter().adapt(setsMap) } }.toRealmList()
             }
         }
     }

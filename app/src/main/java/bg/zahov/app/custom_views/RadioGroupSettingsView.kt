@@ -24,7 +24,7 @@ import bg.zahov.fitness.app.R
 import com.google.android.material.textview.MaterialTextView
 
 
-class RadioGroupSettingsView @JvmOverloads constructor(
+class   RadioGroupSettingsView @JvmOverloads constructor(
     context: Context,
     attrs: AttributeSet? = null,
     defStyle: Int = 0,
@@ -42,8 +42,7 @@ class RadioGroupSettingsView @JvmOverloads constructor(
 
         when (title) {
             "Language" -> subtitleTextView.text = settings.language
-            "Weight" -> subtitleTextView.text = settings.weight
-            "Distance" -> subtitleTextView.text = settings.distance
+            "Units" -> subtitleTextView.text = settings.units
             "Timer increment value" -> subtitleTextView.text = settings.restTimer.toString()
             "Sound" -> subtitleTextView.text = settings.soundSettings
             "Theme" -> subtitleTextView.text = settings.theme
@@ -133,8 +132,7 @@ class RadioGroupSettingsView @JvmOverloads constructor(
     private fun getSelectedOption(title: String, settings: Settings): String? {
         return when (title) {
             "Language" -> settings.language
-            "Weight" -> settings.weight
-            "Distance" -> settings.distance
+            "Units" -> settings.units
             "Timer increment value" -> "${settings.restTimer} s"
             "Sound" -> settings.soundSettings
             "Theme" -> settings.theme

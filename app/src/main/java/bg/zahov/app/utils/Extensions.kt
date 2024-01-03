@@ -1,5 +1,8 @@
 package bg.zahov.app.utils
 
+import android.animation.ObjectAnimator
+import android.animation.PropertyValuesHolder
+import android.view.View
 import bg.zahov.app.realm_db.Exercise
 import bg.zahov.app.realm_db.Sets
 import bg.zahov.app.realm_db.Settings
@@ -14,14 +17,13 @@ fun User.toFirestoreMap(): Map<String, Any?> {
     )
 }
 
-fun User.equalsTo(otherUser: User): Boolean{
+fun User.equalsTo(otherUser: User): Boolean {
     return this.username == otherUser.username && this.numberOfWorkouts == otherUser.numberOfWorkouts
 }
 
 fun Settings.equalTo(newSettings: Settings): Boolean {
     return this.language == newSettings.language &&
-            this.weight == newSettings.weight &&
-            this.distance == newSettings.distance &&
+            this.units == newSettings.units
             this.soundEffects == newSettings.soundEffects &&
             this.theme == newSettings.theme &&
             this.restTimer == newSettings.restTimer &&
@@ -31,6 +33,7 @@ fun Settings.equalTo(newSettings: Settings): Boolean {
             this.fit == newSettings.fit &&
             this.automaticSync == newSettings.automaticSync
 }
+
 fun Workout.equalsTo(newWorkout: Workout): Boolean {
 
     this.isTemplate?.let {
@@ -43,11 +46,11 @@ fun Workout.equalsTo(newWorkout: Workout): Boolean {
             this.workoutName == newWorkout.workoutName &&
             this.date == newWorkout.date &&
             this.count == newWorkout.count &&
-            this.isTemplate ==  newWorkout.isTemplate &&
+            this.isTemplate == newWorkout.isTemplate &&
             this.exercises.any { currExercises ->
-                 newWorkout.exercises.any { newExercises ->
-                     currExercises.equalsTo(newExercises)
-                 }
+                newWorkout.exercises.any { newExercises ->
+                    currExercises.equalsTo(newExercises)
+                }
             }
 }
 
@@ -57,7 +60,7 @@ fun Exercise.equalsTo(exercise: Exercise): Boolean {
                 this.category == exercise.category &&
                 this.exerciseName == exercise.exerciseName
     }
-    return  this.bodyPart == exercise.bodyPart &&
+    return this.bodyPart == exercise.bodyPart &&
             this.category == exercise.category &&
             this.exerciseName == exercise.exerciseName &&
             this.sets.all { currSets ->
@@ -66,8 +69,15 @@ fun Exercise.equalsTo(exercise: Exercise): Boolean {
                 }
             }
 }
-fun Set<Exercise>.difference(other: Set<Exercise>): Set<Exercise> {
-    return this.filter { it !in other }.toSet()
+
+fun Set<Exercise?>.getExerciseDifference(other: Set<Exercise?>): Set<Exercise?> {
+    val idToExerciseMap = this.associateBy { it?._id?.toHexString() }
+    return other.filter { it?._id?.toHexString() !in idToExerciseMap }.toSet()
+}
+
+fun Set<Workout?>.getWorkoutDifference(other: Set<Workout?>): Set<Workout?> {
+    val idToWorkoutMap = this.associateBy { it?._id?.toHexString() }
+    return other.filter { it?._id?.toHexString() !in idToWorkoutMap }.toSet()
 }
 
 fun Sets.equalsTo(newSets: Sets): Boolean {
@@ -121,8 +131,7 @@ fun Sets.toFirestoreMap(): Map<String, Any?> {
 fun Settings.toFirestoreMap(): Map<String, Any?> {
     return mapOf(
         "language" to this.language,
-        "weight" to this.weight,
-        "distance" to this.distance,
+        "units" to this.units,
         "soundEffects" to this.soundEffects,
         "theme" to this.theme,
         "restTimer" to this.restTimer,
@@ -132,4 +141,17 @@ fun Settings.toFirestoreMap(): Map<String, Any?> {
         "automaticSync" to this.automaticSync,
         "fit" to this.fit
     )
+}
+
+fun View.applyScaleAnimation() {
+    val scaleAnimation = ObjectAnimator.ofPropertyValuesHolder(
+        this,
+        PropertyValuesHolder.ofFloat("scaleX", 1.4f),
+        PropertyValuesHolder.ofFloat("scaleY", 1.4f)
+    )
+    scaleAnimation.duration = 140
+    scaleAnimation.repeatCount = 1
+    scaleAnimation.repeatMode = ObjectAnimator.REVERSE
+
+    scaleAnimation.start()
 }

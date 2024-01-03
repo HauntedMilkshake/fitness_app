@@ -67,9 +67,18 @@
     <!--  Strings used for create exercise fragment    -->
     <string name="new_exercise_placeholder_text">new exercise</string>
     <string name="add_name_hint">Add name</string>
+    <string name="no_results">Hmm... there are no results, so try creating an exercise</string>
     <!-- Strings used for edit profile fragment   -->
-    <string name="create_exercise" tools:ignore="ExtraTranslation">Create exercise</string>
+    <string name="create_exercise">Create exercise</string>
     <string name="edit_profile_text"> Edit profile</string>
     <string name="reset_password_text">Reset password</string>
     <string name="confirm_changes">Confirm changes</string>
+    <!-- Strings used for edit profile fragment   -->
+    <string name="filter">Filter</string>
+    <string name="body_part">Body part</string>
+    <string name="category">Category</string>
+    <!-- Strings used for create workout template -->
+    <string name="new_workout_template">New workout template</string>
+    <string name="add_exercise">Add exercise</string>
+
 </resources>

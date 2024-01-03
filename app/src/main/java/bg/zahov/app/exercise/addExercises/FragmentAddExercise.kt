@@ -1,4 +1,4 @@
-package bg.zahov.app.exercise
+package bg.zahov.app.exercise.addExercises
 
 import android.os.Bundle
 import android.view.LayoutInflater
@@ -9,6 +9,7 @@ import androidx.fragment.app.viewModels
 import androidx.navigation.fragment.findNavController
 import bg.zahov.app.data.BodyPart
 import bg.zahov.app.data.Category
+import bg.zahov.app.utils.applyScaleAnimation
 import bg.zahov.fitness.app.R
 import bg.zahov.fitness.app.databinding.FragmentNewExerciseBinding
 
@@ -30,15 +31,18 @@ class FragmentAddExercise : Fragment() {
         initViews()
         binding.apply {
             confirm.setOnClickListener {
+                it.applyScaleAnimation()
                 addExerciseViewModel.addExercise(exerciseNameField.editText!!.text!!.toString())
-                addExerciseViewModel.isCreated.observe(viewLifecycleOwner) {
-                    if (it) {
+                addExerciseViewModel.isCreated.observe(viewLifecycleOwner) {success ->
+                    if (success) {
                         findNavController().navigate(R.id.add_exercise_to_exercises)
                     }
                 }
-                back.setOnClickListener {
-                    findNavController().navigate(R.id.add_exercise_to_exercises)
-                }
+
+            }
+            back.setOnClickListener {
+                it.applyScaleAnimation()
+                findNavController().navigate(R.id.add_exercise_to_exercises)
             }
         }
     }

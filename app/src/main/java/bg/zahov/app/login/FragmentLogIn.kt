@@ -45,39 +45,17 @@ class FragmentLogIn : Fragment() {
             }
 
             forgotPassword.setOnClickListener {
-                val email = emailFieldText.text.toString()
-                if (isEmailNotValid(email)) {
-                    Toast.makeText(requireContext(), "Email not valid", Toast.LENGTH_SHORT).show()
-                    return@setOnClickListener
-                }
-                loginViewModel.sendPasswordResetEmail(email) { success, errorMessage ->
-                    if (success) {
-                    } else {
-                        Toast.makeText(requireContext(), errorMessage, Toast.LENGTH_SHORT).show()
-                    }
+                loginViewModel.sendPasswordResetEmail(emailFieldText.text.toString()) { message ->
+                    showToast(message)
                 }
             }
+
             logInButton.setOnClickListener {
-
-                val password = passwordFieldText.text.toString()
-                val email = emailFieldText.text.toString()
-
-                if (areFieldsEmpty(email, password)) {
-                    Toast.makeText(requireContext(), "Fields can't be empty", Toast.LENGTH_SHORT)
-                        .show()
-                    return@setOnClickListener
-                }
-
-                if (isEmailNotValid(email)) {
-                    Toast.makeText(requireContext(), "Email not valid", Toast.LENGTH_SHORT).show()
-                    return@setOnClickListener
-                }
-
-                loginViewModel.login(email, password) { success, errorMessage ->
+                loginViewModel.login(emailFieldText.text.toString(), passwordFieldText.text.toString()) { success, errorMessage ->
                     if (success) {
-                            findNavController().navigate(R.id.login_to_loading)
+                        findNavController().navigate(R.id.login_to_loading)
                     } else {
-                        Toast.makeText(requireContext(), errorMessage, Toast.LENGTH_SHORT).show()
+                        showToast(errorMessage)
                     }
                 }
             }
@@ -93,8 +71,10 @@ class FragmentLogIn : Fragment() {
         _binding = null
     }
 
-    private fun areFieldsEmpty(email: String?, password: String?) =
-        listOf(email, password).count { it.isNullOrEmpty() } >= 1
+    private fun showToast(message: String?){
+        message?.let{
+            Toast.makeText(requireContext(), it, Toast.LENGTH_SHORT).show()
+        }
+    }
 
-    private fun isEmailNotValid(email: String) = !Regex("^\\S+@\\S+\\.\\S+$").matches(email)
 }

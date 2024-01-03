@@ -18,7 +18,7 @@ import java.util.TimerTask
 class AuthViewModel : ViewModel() {
     private val auth: FirebaseAuth = FirebaseAuth.getInstance()
     private val _isAuthenticated = MutableLiveData<Boolean>()
-    private val checkInterval: Long = 60 * 1000 // num of minutes * seconds in a minute * 1000
+    private val checkInterval: Long = 15 * 60 * 1000 // num of minutes * seconds in a minute * 1000
     private lateinit var repo: UserRepository
     val isAuthenticated: LiveData<Boolean> get() = _isAuthenticated
 
@@ -44,9 +44,8 @@ class AuthViewModel : ViewModel() {
                         repo = UserRepository.getInstance(auth.currentUser!!.uid)
 
                         viewModelScope.launch(Dispatchers.IO) {
-                            repo.periodicSync()
+//                            repo.periodicSync()
                         }
-
                     }
                 }
             }, 12000, checkInterval)

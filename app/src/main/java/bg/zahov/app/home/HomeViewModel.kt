@@ -24,11 +24,11 @@ class HomeViewModel : ViewModel() {
     val numberOfWorkouts: LiveData<Int> get() = _numberOfWorkouts
     private val _userWorkouts = MutableLiveData<List<Workout>>()
     val userWorkouts: LiveData<List<Workout>> get() = _userWorkouts
+    var flag: Boolean = true
 
     init {
         viewModelScope.launch {
-            Log.d("INIT", repo.getUser().toString())
-            repo.getUser()!!.collect {
+            repo.getUser()?.collect {
                 when (it) {
                     is DeletedObject -> {
                         _userName.postValue(it.obj?.username)

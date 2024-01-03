@@ -8,4 +8,6 @@
     <dimen name="cardview_elevation">10dp</dimen>
     <dimen name="pop_up_radius">15dp</dimen>
     <dimen name="popup_min_height">40dp</dimen>
+    <dimen name="item_spacing_bottom">10dp</dimen>
+    <dimen name="item_spacing_right">5dp</dimen>
 </resources>

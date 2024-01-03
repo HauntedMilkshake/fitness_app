@@ -11,6 +11,7 @@
         android:layout_height="wrap_content"
         android:background="@color/background"
         android:hint="@string/password_text_field_hint"
+        app:boxBackgroundColor="@android:color/transparent"
         app:boxCornerRadiusBottomEnd="15dp"
         app:boxCornerRadiusBottomStart="15dp"
         app:boxCornerRadiusTopEnd="15dp"

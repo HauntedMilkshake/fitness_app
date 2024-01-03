@@ -163,8 +163,7 @@ class RealmManager(userId: String) {
             realm.write {
                 findLatest(settings)?.apply {
                     language= Language.English.name
-                    weight = Units.Metric.name
-                    distance = Units.Metric.name
+                    units = Units.Metric.name
                     soundEffects = true
                     theme = Theme.Dark.name
                     restTimer = 30
@@ -189,8 +188,7 @@ class RealmManager(userId: String) {
                         }
 
                         "Units" -> {
-                            it.weight = (newValue as Units).name
-                            it.distance = newValue.name
+                            it.units = (newValue as Units).name
                         }
 
                         "Sound effects" -> {

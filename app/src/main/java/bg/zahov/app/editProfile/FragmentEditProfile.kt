@@ -7,6 +7,7 @@ import android.view.ViewGroup
 import android.widget.Toast
 import androidx.fragment.app.Fragment
 import androidx.fragment.app.viewModels
+import androidx.navigation.fragment.findNavController
 import bg.zahov.fitness.app.R
 import bg.zahov.fitness.app.databinding.FragmentEditProfileBinding
 
@@ -26,14 +27,12 @@ class FragmentEditProfile: Fragment() {
         super.onViewCreated(view, savedInstanceState)
         binding.apply {
 
+            back.setOnClickListener {
+                findNavController().navigate(R.id.edit_profile_to_settings)
+            }
+
             resetPassword.setOnClickListener {
-                editProfileViewModel.sendPasswordResetLink { isSuccess, message ->
-                    if(isSuccess){
-                        Toast.makeText(requireContext(), message, Toast.LENGTH_SHORT).show()
-                    }else{
-                        Toast.makeText(requireContext(), message, Toast.LENGTH_SHORT).show()
-                    }
-                }
+                editProfileViewModel.sendPasswordResetLink { message -> showToast(message) }
             }
 
             editProfileViewModel.isUnlocked.observe(viewLifecycleOwner) {
@@ -66,31 +65,16 @@ class FragmentEditProfile: Fragment() {
                     val email = emailFieldText.text.toString()
                     val password = passwordFieldText.text.toString()
                     if(it){
-                        editProfileViewModel.updateEmail(email) { isSuccess, message ->
-                            if (isSuccess) {
-                                Toast.makeText(requireContext(), message, Toast.LENGTH_SHORT).show()
-                            } else {
-                                Toast.makeText(requireContext(), message, Toast.LENGTH_SHORT).show()
-                            }
-                        }
+                        editProfileViewModel.updateEmail(email) { message -> showToast(message)}
 
-                        editProfileViewModel.updatePassword(password) { isSuccess, message ->
-                            if (isSuccess) {
-                                Toast.makeText(requireContext(), message, Toast.LENGTH_SHORT).show()
-                            } else {
-                                Toast.makeText(requireContext(), message, Toast.LENGTH_SHORT).show()
-                            }
-                        }
+                        editProfileViewModel.updatePassword(password) { message -> showToast(message)}
                     }
-                    editProfileViewModel.updateUsername(username){ isSuccess, message ->
-                        if(isSuccess){
-                            Toast.makeText(requireContext(), message, Toast.LENGTH_SHORT).show()
-                        }else{
-                            Toast.makeText(requireContext(), message, Toast.LENGTH_SHORT).show()
-                        }
-                    }
+                    editProfileViewModel.updateUsername(username){message -> showToast(message)}
                 }
             }
         }
+    }
+    private fun showToast(message: String){
+        Toast.makeText(requireContext(), message, Toast.LENGTH_SHORT).show()
     }
 }

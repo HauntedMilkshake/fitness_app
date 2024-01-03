@@ -7,8 +7,8 @@ import io.realm.kotlin.ext.toRealmList
 import org.mongodb.kbson.BsonObjectId
 import org.mongodb.kbson.ObjectId
 
-class FirestoreWorkoutAdapter : Adapter<Map<String, Any>, Workout> {
-    override fun adapt(t: Map<String, Any>): Workout? {
+class FirestoreWorkoutAdapter : Adapter<Map<String, Any>?, Workout?> {
+    override fun adapt(t: Map<String, Any>?): Workout {
         return Workout().apply {
             t?.let {
                 _id = it["_id"] as? ObjectId ?: ObjectId()
@@ -24,7 +24,7 @@ class FirestoreWorkoutAdapter : Adapter<Map<String, Any>, Workout> {
                 exerciseIds = realmListOf(*exerciseIdsList.toTypedArray())
 
                 val exercisesList = it["exercises"] as? List<Map<String, Any>> ?: emptyList()
-                exercises = exercisesList.mapNotNull { exerciseMap -> FirestoreExerciseAdapter().adapt(exerciseMap) }.toRealmList()
+                exercises = exercisesList.map { exerciseMap -> FirestoreExerciseAdapter().adapt(exerciseMap) }.toRealmList()
             }
         }
     }

@@ -2,16 +2,14 @@ package bg.zahov.app.editProfile
 
 import android.app.AlertDialog
 import android.app.Dialog
+import android.graphics.drawable.ColorDrawable
 import android.os.Bundle
 import android.view.LayoutInflater
-import android.view.View
-import android.view.ViewGroup
 import android.widget.Toast
-import androidx.core.content.ContentProviderCompat
+import androidx.compose.ui.graphics.Color
+import androidx.compose.ui.graphics.toArgb
 import androidx.fragment.app.DialogFragment
-import androidx.fragment.app.activityViewModels
 import androidx.fragment.app.viewModels
-import bg.zahov.fitness.app.R
 import bg.zahov.fitness.app.databinding.DialogFragmentAuthenticationBinding
 
 class AuthenticationDialog : DialogFragment() {
@@ -24,19 +22,19 @@ class AuthenticationDialog : DialogFragment() {
         val dialog = AlertDialog.Builder(requireActivity())
             .setView(binding.root)
             .create()
-
+        dialog.window?.setBackgroundDrawable(ColorDrawable(Color.Transparent.toArgb()))
         dialog.setOnShowListener {
             binding.cancel.setOnClickListener {
                 dismiss()
             }
 
             binding.confirm.setOnClickListener {
-                editProfileViewModel.unlockFields(binding.passwordFieldText.text.toString()) {
-                    if(it){
-                        Toast.makeText(requireContext(), "Successfully logged in", Toast.LENGTH_SHORT).show()
+                editProfileViewModel.unlockFields(binding.passwordFieldText.text.toString()) {isSuccess, message ->
+                    if(isSuccess){
+                        Toast.makeText(requireContext(), message, Toast.LENGTH_SHORT).show()
                         dismiss()
                     }else{
-                        Toast.makeText(requireContext(), "Incorrect password", Toast.LENGTH_SHORT).show()
+                        Toast.makeText(requireContext(), message, Toast.LENGTH_SHORT).show()
                     }
                 }
             }

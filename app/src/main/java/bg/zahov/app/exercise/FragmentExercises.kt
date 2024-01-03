@@ -3,8 +3,9 @@ package bg.zahov.app.exercise
 import android.animation.Animator
 import android.animation.AnimatorListenerAdapter
 import android.animation.ObjectAnimator
-import android.animation.PropertyValuesHolder
 import android.os.Bundle
+import android.os.Handler
+import android.os.Looper
 import android.transition.TransitionInflater
 import android.view.LayoutInflater
 import android.view.View
@@ -14,15 +15,21 @@ import androidx.fragment.app.Fragment
 import androidx.fragment.app.viewModels
 import androidx.navigation.fragment.findNavController
 import androidx.recyclerview.widget.LinearLayoutManager
+import bg.zahov.app.data.Filter
 import bg.zahov.app.realm_db.Exercise
+import bg.zahov.app.utils.applyScaleAnimation
 import bg.zahov.fitness.app.R
 import bg.zahov.fitness.app.databinding.FragmentExercisesBinding
+import com.google.android.flexbox.FlexDirection
+import com.google.android.flexbox.FlexboxLayoutManager
+import com.google.android.flexbox.JustifyContent
 import com.google.android.material.textview.MaterialTextView
 
 class FragmentExercises : Fragment() {
     private var _binding: FragmentExercisesBinding? = null
     private val binding get() = _binding!!
-    private val exerciseViewModel: ExerciseViewModel by viewModels()
+    private val exerciseViewModel: ExerciseViewModel by viewModels({requireActivity()})
+    private val handler = Handler(Looper.getMainLooper())
     override fun onCreateView(
         inflater: LayoutInflater,
         container: ViewGroup?,
@@ -42,56 +49,94 @@ class FragmentExercises : Fragment() {
     override fun onViewCreated(view: View, savedInstanceState: Bundle?) {
         super.onViewCreated(view, savedInstanceState)
         binding.apply {
-
-            val exerciseAdapter = ExerciseAdapter().apply {
-                itemClickListener = object : ExerciseAdapter.ItemClickListener<Exercise> {
-                    override fun onItemClicked(
-                        item: Exercise,
-                        itemPosition: Int,
-                        clickedView: View,
-                    ) {
+            val filterAdapter = FilterAdapter(true).apply {
+                itemClickListener = object : FilterAdapter.ItemClickListener<Filter> {
+                    override fun onItemClicked(item: Filter, clickedView: View) {
+                        exerciseViewModel.removeFilter(item)
                     }
                 }
             }
+            filterItemsRecyclerView.apply {
+                layoutManager = FlexboxLayoutManager(requireContext()).apply {
+                    flexDirection = FlexDirection.ROW
+                    justifyContent = JustifyContent.FLEX_START
+                }
+                adapter = filterAdapter
+            }
+
+            val exerciseAdapter = ExerciseAdapter().apply {
+                itemClickListener = object : ExerciseAdapter.ItemClickListener<Exercise> {
+                    override fun onItemClicked(item: Exercise, itemPosition: Int, clickedView: View) {
+                    }
+                }
+            }
+
             exercisesRecyclerView.apply {
                 layoutManager = LinearLayoutManager(requireContext())
                 adapter = exerciseAdapter
             }
-            exerciseViewModel.userExercises.observe(viewLifecycleOwner) {
-                exerciseAdapter.updateItems(it)
-            }
+
             searchIcon.setOnClickListener {
                 exerciseText.visibility = View.GONE
                 searchIcon.visibility = View.GONE
                 settingsDots.visibility = View.GONE
                 removeSearchBar.visibility = View.VISIBLE
                 searchBar.visibility = View.VISIBLE
-            }
-            removeSearchBar.setOnClickListener {
-                if (searchBar.visibility == View.VISIBLE) {
-                    exerciseText.visibility = View.VISIBLE
-                    searchIcon.visibility = View.VISIBLE
-                    settingsDots.visibility = View.VISIBLE
-                    searchBar.visibility = View.INVISIBLE
-                    removeSearchBar.visibility = View.GONE
+                searchBar.onActionViewExpanded()
 
-                    searchBar.setQuery("search exercises", true)
+            }
+
+            settingsFilters.setOnClickListener {
+                it.applyScaleAnimation()
+                FilterDialog().show(childFragmentManager, FilterDialog.TAG)
+            }
+
+
+            exerciseViewModel.searchFilters.observe(viewLifecycleOwner){ filters ->
+                filterAdapter.updateItems(filters)
+
+                searchBar.let {
+                    it.setOnQueryTextListener(object :
+                        androidx.appcompat.widget.SearchView.OnQueryTextListener {
+                        override fun onQueryTextSubmit(query: String?): Boolean {
+                            query?.let { name ->
+                                exerciseViewModel.searchExercises(name, listOf())
+                            }
+                            return true
+                        }
+
+                        override fun onQueryTextChange(query: String?): Boolean {
+                            query?.let { name ->
+                                handler.postDelayed({
+                                    exerciseViewModel.searchExercises(name, listOf())
+                                }, 1500)
+                            }
+                            return true
+                        }
+                    })
                 }
+
             }
+
+            removeSearchBar.setOnClickListener {
+                exerciseText.visibility = View.VISIBLE
+                searchIcon.visibility = View.VISIBLE
+                settingsDots.visibility = View.VISIBLE
+                searchBar.onActionViewCollapsed()
+                searchBar.visibility = View.GONE
+                removeSearchBar.visibility = View.GONE
+            }
+
             settingsDots.setOnClickListener {
-                val scaleAnimation = ObjectAnimator.ofPropertyValuesHolder(
-                    it,
-                    PropertyValuesHolder.ofFloat("scaleX", 1.2f),
-                    PropertyValuesHolder.ofFloat("scaleY", 1.2f)
-                )
-                scaleAnimation.duration = 200
-                scaleAnimation.repeatCount = 1
-                scaleAnimation.repeatMode = ObjectAnimator.REVERSE
-
-                scaleAnimation.start()
-
+                it.applyScaleAnimation()
                 showCustomLayout()
             }
+
+            exerciseViewModel.userExercises.observe(viewLifecycleOwner) {
+                exerciseAdapter.updateItems(it)
+                noResultsLabel.visibility = if(it.isEmpty()) View.VISIBLE else View.GONE
+            }
+
         }
     }
 

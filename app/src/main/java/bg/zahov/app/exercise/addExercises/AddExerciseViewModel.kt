@@ -1,4 +1,4 @@
-package bg.zahov.app.exercise
+package bg.zahov.app.exercise.addExercises
 
 import android.app.Application
 import android.widget.Toast

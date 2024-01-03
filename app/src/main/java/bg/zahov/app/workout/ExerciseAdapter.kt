@@ -1,4 +1,4 @@
-package bg.zahov.app.exercise
+package bg.zahov.app.workout
 
 import android.view.LayoutInflater
 import android.view.View
@@ -10,14 +10,12 @@ import bg.zahov.app.utils.equalsTo
 import bg.zahov.fitness.app.R
 import com.google.android.material.textview.MaterialTextView
 
-class ExerciseAdapter : RecyclerView.Adapter<ExerciseAdapter.ExerciseAdapterViewHolder>() {
-
+class ExerciseAdapter: RecyclerView.Adapter<ExerciseAdapter.ExerciseAdapterViewHolder>() {
     private val items = ArrayList<Exercise>()
-    var itemClickListener: ItemClickListener<Exercise>? = null
 
     override fun onCreateViewHolder(parent: ViewGroup, viewType: Int): ExerciseAdapterViewHolder {
         val itemView =
-            LayoutInflater.from(parent.context).inflate(R.layout.exercise_item, parent, false)
+            LayoutInflater.from(parent.context).inflate(R.layout.template_exercise_item, parent, false)
         return ExerciseAdapterViewHolder(itemView)
     }
 
@@ -47,17 +45,11 @@ class ExerciseAdapter : RecyclerView.Adapter<ExerciseAdapter.ExerciseAdapterView
     }
 
     inner class ExerciseAdapterViewHolder(view: View) : RecyclerView.ViewHolder(view) {
-        private val exerciseTitle = view.findViewById<MaterialTextView>(R.id.exercise_title)
-        private val exerciseSubtitle = view.findViewById<MaterialTextView>(R.id.body_part)
+        private val exerciseLabel = view.findViewById<MaterialTextView>(R.id.exercise)
 
-        //TODO(on click) :)
         fun bind(exercise: Exercise) {
-            exerciseTitle.text = exercise.exerciseName
-            exerciseSubtitle.text = exercise.bodyPart
+            exerciseLabel.text = "${exercise.sets.size} x ${exercise.exerciseName}"
         }
     }
 
-    interface ItemClickListener<T> {
-        fun onItemClicked(item: T, itemPosition: Int, clickedView: View)
-    }
 }

@@ -12,31 +12,38 @@ class LoginViewModel : ViewModel() {
     private val auth: FirebaseAuth = FirebaseAuth.getInstance()
     private lateinit var repo: UserRepository
     fun login(email: String, password: String, callback: (Boolean, String?) -> Unit) {
-        auth.signInWithEmailAndPassword(email, password)
-            .addOnCompleteListener { task ->
-                if (task.isSuccessful) {
+        if(emailIsValid(email) && email.isNotEmpty() && password.isNotEmpty()){
+            auth.signInWithEmailAndPassword(email, password)
+                .addOnCompleteListener { task ->
+                    if (task.isSuccessful) {
 
-                    repo = UserRepository.getInstance(auth.currentUser!!.uid)
+                        repo = UserRepository.getInstance(auth.currentUser!!.uid)
 
-                   runBlocking {
-                        repo.syncFromFirestore()
-                   }
+                        runBlocking {
+                            repo.syncFromFirestore()
+                        }
 
-                    callback(true, null)
-                } else {
-                    callback(false, task.exception?.message)
+                        callback(true, null)
+                    } else {
+                        callback(false, task.exception?.message)
+                    }
                 }
-            }
+        }else{
+            callback(false, "Please ensure your fields aren't empty and are valid")
+        }
+
     }
 
-    fun sendPasswordResetEmail(email: String, callback: (Boolean, String?) -> Unit) {
-        auth.sendPasswordResetEmail(email)
-            .addOnCompleteListener { task ->
-                if (task.isSuccessful) {
-                    callback(true, null)
-                } else {
-                    callback(false, task.exception?.message)
+    fun sendPasswordResetEmail(email: String, callback: (String) -> Unit) {
+        if(emailIsValid(email) && email.isNotEmpty()){
+            auth.sendPasswordResetEmail(email)
+                .addOnCompleteListener { task ->
+                        callback(if(task.isSuccessful) "Password link sent!" else task.exception?.message ?: "Failed to send email reset link")
                 }
-            }
+        }else{
+            callback("Please ensure you have a valid email!")
+        }
+
     }
+    private fun emailIsValid(email: String) = Regex("^\\S+@\\S+\\.\\S+$").matches(email)
 }

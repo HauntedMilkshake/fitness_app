@@ -45,17 +45,6 @@ class Exercise : RealmObject {
     var isTemplate: Boolean? = null
     var sets: RealmList<Sets> = realmListOf()
 
-    override fun equals(other: Any?): Boolean {
-        return if(other is Exercise){
-            this.equalsTo(other)
-        }else{
-            false
-        }
-    }
-
-    override fun hashCode(): Int {
-        return _id.hashCode() + bodyPart.hashCode() + category.hashCode() + exerciseName.hashCode()
-    }
 }
 
 //Metrics determined by category
@@ -70,8 +59,7 @@ class Sets : RealmObject {
 
 class Settings : RealmObject {
     var language: String = Language.English.name
-    var weight: String = Units.Metric.name
-    var distance: String = Units.Metric.name
+    var units: String = Units.Metric.name
     var soundEffects: Boolean = true
     var theme: String = Theme.Dark.name
     var restTimer: Int = 30

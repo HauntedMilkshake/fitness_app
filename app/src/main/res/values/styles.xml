@@ -5,4 +5,11 @@
         <item name="colorAccent">@color/background</item>
         <item name="textAppearanceBody1">@null</item>
     </style>
+    <style name="ExpandDialogAnimation">
+        <item name="android:windowEnterAnimation">@anim/expand_filter_dialog</item>
+    </style>
+    <style name="MyAlertDialog" parent="Theme.AppCompat.Dialog">
+        <item name="android:windowBackground">@android:color/transparent</item>
+        <item name="android:layout_gravity">center</item>
+    </style>
 </resources>

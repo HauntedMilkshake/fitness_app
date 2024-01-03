@@ -14,7 +14,7 @@ import android.widget.RelativeLayout
 import androidx.core.content.ContextCompat
 import bg.zahov.app.data.BodyPart
 import bg.zahov.app.data.Category
-import bg.zahov.app.exercise.AddExerciseViewModel
+import bg.zahov.app.exercise.addExercises.AddExerciseViewModel
 import bg.zahov.fitness.app.R
 import com.google.android.material.textview.MaterialTextView
 
