@@ -29,19 +29,7 @@ class ExerciseAdapter: RecyclerView.Adapter<ExerciseAdapter.ExerciseAdapterViewH
         val oldList: List<Exercise> = ArrayList(items)
         items.clear()
         items.addAll(newExercises)
-        DiffUtil.calculateDiff(object : DiffUtil.Callback() {
-            override fun getOldListSize(): Int = oldList.size
-
-            override fun getNewListSize(): Int = newExercises.size
-
-            override fun areItemsTheSame(oldItemPosition: Int, newItemPosition: Int): Boolean {
-                return oldList[oldItemPosition]._id.toHexString() == newExercises[newItemPosition]._id.toHexString()
-            }
-
-            override fun areContentsTheSame(oldItemPosition: Int, newItemPosition: Int): Boolean {
-                return oldList[oldItemPosition].equalsTo(newExercises[newItemPosition])
-            }
-        }).dispatchUpdatesTo(this)
+        notifyDataSetChanged()
     }
 
     inner class ExerciseAdapterViewHolder(view: View) : RecyclerView.ViewHolder(view) {

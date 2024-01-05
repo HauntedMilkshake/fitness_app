@@ -66,7 +66,7 @@ class FragmentExercises : Fragment() {
 
             val exerciseAdapter = ExerciseAdapter().apply {
                 itemClickListener = object : ExerciseAdapter.ItemClickListener<Exercise> {
-                    override fun onItemClicked(item: Exercise, itemPosition: Int, clickedView: View) {
+                    override fun onItemClicked(item: Exercise, itemPosition: Int, clickedView: View, ) {
                     }
                 }
             }

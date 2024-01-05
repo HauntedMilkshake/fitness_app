@@ -149,7 +149,7 @@
     </fragment>
     <fragment
         android:id="@+id/create_workout_template"
-        android:name="bg.zahov.app.workout.FragmentNewWorkoutTemplate"
+        android:name="bg.zahov.app.workout.addWorkout.FragmentNewWorkoutTemplate"
         tools:layout="@layout/fragment_new_workout_template">
 
         <action

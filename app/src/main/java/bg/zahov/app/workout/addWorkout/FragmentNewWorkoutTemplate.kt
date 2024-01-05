@@ -1,4 +1,4 @@
-package bg.zahov.app.workout
+package bg.zahov.app.workout.addWorkout
 
 import android.os.Bundle
 import android.transition.TransitionInflater
@@ -6,6 +6,7 @@ import android.view.LayoutInflater
 import android.view.View
 import android.view.ViewGroup
 import androidx.fragment.app.Fragment
+import androidx.fragment.app.viewModels
 import androidx.navigation.fragment.findNavController
 import bg.zahov.app.utils.applyScaleAnimation
 import bg.zahov.fitness.app.R
@@ -14,6 +15,7 @@ import bg.zahov.fitness.app.databinding.FragmentNewWorkoutTemplateBinding
 class FragmentNewWorkoutTemplate: Fragment() {
     private var _binding: FragmentNewWorkoutTemplateBinding? = null
     private val binding get() = _binding!!
+    private val addWorkoutViewModel: AddWorkoutViewModel by viewModels()
     override fun onCreateView(
         inflater: LayoutInflater,
         container: ViewGroup?,
@@ -36,6 +38,11 @@ class FragmentNewWorkoutTemplate: Fragment() {
             stopCreatingWorkout.setOnClickListener {
                 it.applyScaleAnimation()
                 findNavController().navigate(R.id.create_workout_template_to_workout)
+            }
+
+            save.setOnClickListener {
+                it.applyScaleAnimation()
+//                addWorkoutViewModel.addWorkout(workoutNameFieldText.text.toString(), )
             }
         }
     }

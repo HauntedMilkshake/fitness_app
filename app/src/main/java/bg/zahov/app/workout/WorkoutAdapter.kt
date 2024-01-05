@@ -3,6 +3,7 @@ package bg.zahov.app.workout
 import android.view.LayoutInflater
 import android.view.View
 import android.view.ViewGroup
+import androidx.constraintlayout.widget.ConstraintLayout
 import androidx.recyclerview.widget.LinearLayoutManager
 import androidx.recyclerview.widget.RecyclerView
 import bg.zahov.app.realm_db.Workout
@@ -33,26 +34,15 @@ class WorkoutAdapter: RecyclerView.Adapter<WorkoutAdapter.WorkoutAdapterViewHold
         private val title = view.findViewById<MaterialTextView>(R.id.workout_title)
         private val lastPerformed = view.findViewById<MaterialTextView>(R.id.last_performed)
         private val settings = view.findViewById<ShapeableImageView>(R.id.settings)
-        private val exerciseRecyclerView = view.findViewById<RecyclerView>(R.id.exercises_recycler_view)
+        private val sets = view.findViewById<MaterialTextView>(R.id.sets)
+        private val layout = view.findViewById<ConstraintLayout>(R.id.template_layout)
 
-        //we here have a valid question of whether the date should be the date the
-        //template was created or the date the template was last performed
         fun bind(workout: Workout){
             title.text = workout.workoutName
             lastPerformed.text = workout.date
-            //TODO(exerciseRecyclerView)
             settings.setOnClickListener {
                 itemClickListener?.onItemClicked(workout, settings)
             }
-
-            val exerciseAdapter = ExerciseAdapter()
-
-            exerciseRecyclerView.apply {
-                layoutManager = LinearLayoutManager(title.context)
-                adapter = exerciseAdapter
-            }
-
-            exerciseAdapter.updateItems(workout.exercises)
         }
     }
 

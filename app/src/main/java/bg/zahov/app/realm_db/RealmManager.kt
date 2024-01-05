@@ -157,6 +157,14 @@ class RealmManager(userId: String) {
         }
     }
 
+    suspend fun addWorkout(newWorkout: Workout){
+        withRealm { realm ->
+            realm.write {
+                copyToRealm(newWorkout)
+            }
+        }
+    }
+
     suspend fun resetSettings() {
         withRealm { realm ->
             val settings = realm.query<Settings>().find().first()

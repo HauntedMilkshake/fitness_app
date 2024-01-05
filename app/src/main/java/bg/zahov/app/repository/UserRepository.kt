@@ -23,6 +23,9 @@ class UserRepository(userId: String) {
 
     suspend fun getUser() = realmInstance.getUser()
     suspend fun getAllWorkouts() = realmInstance.getAllWorkouts()
+    suspend fun addWorkout(newWorkout: Workout){
+        realmInstance.addWorkout(newWorkout)
+    }
 
     suspend fun getTemplateWorkouts() = realmInstance.getTemplateWorkouts()
     suspend fun changeUserName(newUserName: String) {
