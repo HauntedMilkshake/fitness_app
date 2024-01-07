@@ -9,7 +9,7 @@ import androidx.fragment.app.Fragment
 import androidx.fragment.app.viewModels
 import androidx.navigation.fragment.findNavController
 import androidx.recyclerview.widget.LinearLayoutManager
-import bg.zahov.app.realm_db.Workout
+import bg.zahov.app.backend.Workout
 import bg.zahov.app.utils.applyScaleAnimation
 import bg.zahov.fitness.app.R
 import bg.zahov.fitness.app.databinding.FragmentWorkoutBinding
@@ -40,12 +40,10 @@ class FragmentWorkout: Fragment() {
 
             val workoutAdapter = WorkoutAdapter().apply {
                 object : WorkoutAdapter.ItemClickListener<Workout> {
-                    override fun onItemClicked(item: Workout, clickedView: View) {
-                        //TODO(Different screens)
-                        when (clickedView.id) {
-                            R.id.settings_dots -> {}
-                            R.id.exercises_recycler_view -> {}
-                        }
+                    override fun onSettingsClicked(item: Workout, clickedView: View) {
+                    }
+
+                    override fun onWorkoutClicked(item: Workout, clickedView: View) {
                     }
                 }
             }

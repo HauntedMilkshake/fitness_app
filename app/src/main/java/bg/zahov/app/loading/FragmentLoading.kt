@@ -1,13 +1,13 @@
 package bg.zahov.app.loading
 
 import android.os.Bundle
-import android.util.Log
 import android.view.LayoutInflater
 import android.view.View
 import android.view.ViewGroup
 import android.view.animation.Animation
 import android.view.animation.ScaleAnimation
 import androidx.fragment.app.Fragment
+import androidx.fragment.app.viewModels
 import androidx.navigation.fragment.findNavController
 import bg.zahov.app.hideBottomNav
 import bg.zahov.fitness.app.R
@@ -17,7 +17,7 @@ import com.google.android.material.imageview.ShapeableImageView
 class FragmentLoading : Fragment() {
     private var _binding: FragmentLoadingBinding? = null
     private val binding get() = _binding!!
-    private var isNavigationInProgress = false
+    private val loadingViewModel: LoadingViewModel by viewModels()
     override fun onCreateView(
         inflater: LayoutInflater,
         container: ViewGroup?,
@@ -39,7 +39,18 @@ class FragmentLoading : Fragment() {
             animateView(bottomRight)
             animateView(topLeft)
             animateView(topRight)
+
+
+
+            loadingViewModel.isAuthenticated.observe(viewLifecycleOwner) {
+                if (it) {
+                    findNavController().navigate(R.id.loading_to_home)
+                } else {
+                    findNavController().navigate(R.id.loading_to_welcome)
+                }
+            }
         }
+
     }
 
     private fun animateView(view: ShapeableImageView) {
@@ -53,19 +64,16 @@ class FragmentLoading : Fragment() {
         scaleAnimation.duration = 2000L
         scaleAnimation.setAnimationListener(object : Animation.AnimationListener {
             override fun onAnimationStart(animation: Animation?) {
+                loadingViewModel.startAnimations(scaleAnimation.duration - 300)
             }
 
             override fun onAnimationEnd(animation: Animation?) {
-                if (!isNavigationInProgress) {
-                    isNavigationInProgress = true
-                    findNavController().navigate(R.id.loading_to_home)
-
-                }
             }
 
             override fun onAnimationRepeat(animation: Animation?) {
             }
         })
         view.startAnimation(scaleAnimation)
+
     }
 }

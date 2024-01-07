@@ -6,16 +6,15 @@ import androidx.lifecycle.MutableLiveData
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
 import bg.zahov.app.repository.UserRepository
-import bg.zahov.app.realm_db.Workout
+import bg.zahov.app.backend.Workout
+import bg.zahov.app.common.AuthenticationStateObserver
 import com.google.firebase.auth.FirebaseAuth
 import io.realm.kotlin.notifications.DeletedObject
 import io.realm.kotlin.notifications.InitialObject
-import io.realm.kotlin.notifications.InitialResults
 import io.realm.kotlin.notifications.UpdatedObject
-import io.realm.kotlin.notifications.UpdatedResults
 import kotlinx.coroutines.launch
 
-class HomeViewModel : ViewModel() {
+class HomeViewModel : ViewModel(), AuthenticationStateObserver {
     private val auth: FirebaseAuth = FirebaseAuth.getInstance()
     private val _userName = MutableLiveData<String>()
     private val repo = UserRepository.getInstance(auth.currentUser!!.uid)
@@ -50,6 +49,11 @@ class HomeViewModel : ViewModel() {
         }
     }
 
+    override fun onAuthenticationStateChanged(isAuthenticated: Boolean) {
+        Log.d("CLEAR", "CLEAR")
+        if(!isAuthenticated) onCleared()
+
+    }
 }
 
 

@@ -11,18 +11,19 @@ import androidx.navigation.fragment.findNavController
 import bg.zahov.fitness.app.R
 import bg.zahov.fitness.app.databinding.FragmentEditProfileBinding
 
-class FragmentEditProfile: Fragment() {
+class FragmentEditProfile : Fragment() {
     private var _binding: FragmentEditProfileBinding? = null
     private val binding get() = _binding!!
-    private val editProfileViewModel: EditProfileViewModel by viewModels({requireActivity()})
+    private val editProfileViewModel: EditProfileViewModel by viewModels({ requireActivity() })
     override fun onCreateView(
         inflater: LayoutInflater,
         container: ViewGroup?,
-        savedInstanceState: Bundle?
+        savedInstanceState: Bundle?,
     ): View {
         _binding = FragmentEditProfileBinding.inflate(inflater, container, false)
         return binding.root
     }
+
     override fun onViewCreated(view: View, savedInstanceState: Bundle?) {
         super.onViewCreated(view, savedInstanceState)
         binding.apply {
@@ -36,20 +37,20 @@ class FragmentEditProfile: Fragment() {
             }
 
             editProfileViewModel.isUnlocked.observe(viewLifecycleOwner) {
-                if(it){
+                if (it) {
                     lock.setImageResource(R.drawable.ic_open_lock)
                 }
                 emailField.isEnabled = it
                 passwordField.isEnabled = it
             }
 
-            editProfileViewModel.userName.observe(viewLifecycleOwner){
+            editProfileViewModel.userName.observe(viewLifecycleOwner) {
                 usernameFieldText.apply {
                     setText(it)
                 }
             }
 
-            editProfileViewModel.userEmail.observe(viewLifecycleOwner){
+            editProfileViewModel.userEmail.observe(viewLifecycleOwner) {
                 emailFieldText.apply {
                     setText(it)
                 }
@@ -64,17 +65,18 @@ class FragmentEditProfile: Fragment() {
                     val username = usernameFieldText.text.toString()
                     val email = emailFieldText.text.toString()
                     val password = passwordFieldText.text.toString()
-                    if(it){
-                        editProfileViewModel.updateEmail(email) { message -> showToast(message)}
+                    if (it) {
+                        editProfileViewModel.updateEmail(email) { message -> showToast(message) }
 
-                        editProfileViewModel.updatePassword(password) { message -> showToast(message)}
+                        editProfileViewModel.updatePassword(password) { message -> showToast(message) }
                     }
-                    editProfileViewModel.updateUsername(username){message -> showToast(message)}
+                    editProfileViewModel.updateUsername(username) { message -> showToast(message) }
                 }
             }
         }
     }
-    private fun showToast(message: String){
+
+    private fun showToast(message: String) {
         Toast.makeText(requireContext(), message, Toast.LENGTH_SHORT).show()
     }
 }

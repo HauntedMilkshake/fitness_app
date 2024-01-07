@@ -6,7 +6,7 @@ class GenericDiffUtil<T>(
     private val oldList: List<T>,
     private val newList: List<T>,
     private val areItemsTheSame: (oldItem: T, newItem: T) -> Boolean,
-    private val areContentsTheSame: (oldItem: T, newItem: T) -> Boolean
+    private val areContentsTheSame: (oldItem: T, newItem: T) -> Boolean,
 ) : DiffUtil.Callback() {
 
     override fun getOldListSize(): Int = oldList.size

@@ -78,10 +78,12 @@
         android:id="@+id/workout_name_field"
         android:layout_width="250dp"
         android:layout_height="wrap_content"
-        android:hint="@string/new_workout_template"
+        android:hint="@string/new_workout_template_hint"
         android:textColorHint="@color/white"
         android:layout_marginTop="15dp"
         android:layout_marginStart="15dp"
+        app:boxStrokeColor="@color/background"
+        app:hintTextColor="@color/white"
         app:boxCornerRadiusBottomEnd="15dp"
         app:boxCornerRadiusBottomStart="15dp"
         app:boxCornerRadiusTopEnd="15dp"
@@ -94,7 +96,8 @@
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
             android:textColor="@color/white"
-            android:background="@color/background"/>
+            android:background="@color/background"
+            android:maxLines="1"/>
     </com.google.android.material.textfield.TextInputLayout>
 
     <androidx.recyclerview.widget.RecyclerView
@@ -110,6 +113,7 @@
 
 
     <com.google.android.material.button.MaterialButton
+        android:id="@+id/add_exercise"
         android:layout_width="0dp"
         android:layout_height="wrap_content"
         android:layout_marginStart="10dp"

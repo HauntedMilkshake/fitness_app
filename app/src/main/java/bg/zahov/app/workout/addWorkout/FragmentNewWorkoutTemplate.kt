@@ -5,6 +5,7 @@ import android.transition.TransitionInflater
 import android.view.LayoutInflater
 import android.view.View
 import android.view.ViewGroup
+import androidx.core.os.bundleOf
 import androidx.fragment.app.Fragment
 import androidx.fragment.app.viewModels
 import androidx.navigation.fragment.findNavController
@@ -15,12 +16,12 @@ import bg.zahov.fitness.app.databinding.FragmentNewWorkoutTemplateBinding
 class FragmentNewWorkoutTemplate: Fragment() {
     private var _binding: FragmentNewWorkoutTemplateBinding? = null
     private val binding get() = _binding!!
-    private val addWorkoutViewModel: AddWorkoutViewModel by viewModels()
+    private val addWorkoutViewModel: AddWorkoutViewModel by viewModels({requireActivity()})
     override fun onCreateView(
         inflater: LayoutInflater,
         container: ViewGroup?,
         savedInstanceState: Bundle?
-    ): View? {
+    ): View {
         _binding = FragmentNewWorkoutTemplateBinding.inflate(inflater, container, false)
         return binding.root
     }
@@ -38,6 +39,14 @@ class FragmentNewWorkoutTemplate: Fragment() {
             stopCreatingWorkout.setOnClickListener {
                 it.applyScaleAnimation()
                 findNavController().navigate(R.id.create_workout_template_to_workout)
+            }
+
+            addExercise.setOnClickListener {
+                findNavController().navigate(R.id.create_workout_template_to_add_exercise, bundleOf("SELECTABLE" to true))
+            }
+
+            addWorkoutViewModel.currExercises.observe(viewLifecycleOwner) {
+
             }
 
             save.setOnClickListener {

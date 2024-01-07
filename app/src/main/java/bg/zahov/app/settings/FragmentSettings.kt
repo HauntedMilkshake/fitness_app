@@ -9,6 +9,7 @@ import android.view.ViewGroup
 import androidx.fragment.app.Fragment
 import androidx.fragment.app.viewModels
 import androidx.navigation.fragment.findNavController
+import bg.zahov.app.AuthViewModel
 import bg.zahov.app.common.SettingsChangeListener
 import bg.zahov.app.custom_views.RadioGroupSettingsView
 import bg.zahov.app.custom_views.SwitchSettingsView
@@ -17,7 +18,7 @@ import bg.zahov.app.data.Sound
 import bg.zahov.app.data.Theme
 import bg.zahov.app.data.Units
 import bg.zahov.app.hideBottomNav
-import bg.zahov.app.realm_db.Settings
+import bg.zahov.app.backend.Settings
 import bg.zahov.fitness.app.R
 import bg.zahov.fitness.app.databinding.FragmentSettingsBinding
 
@@ -25,6 +26,7 @@ class FragmentSettings : Fragment() {
     private var _binding: FragmentSettingsBinding? = null
     private val binding get() = _binding!!
     private val settingsViewModel: SettingsViewModel by viewModels()
+    private val authViewModel: AuthViewModel by viewModels({ requireActivity() })
     override fun onCreateView(
         inflater: LayoutInflater,
         container: ViewGroup?,
@@ -43,7 +45,7 @@ class FragmentSettings : Fragment() {
         super.onViewCreated(view, savedInstanceState)
         binding.apply {
             signOutButton.setOnClickListener {
-                settingsViewModel.logout()
+                authViewModel.signOut()
                 findNavController().navigate(R.id.settings_to_welcome)
             }
             back.setOnClickListener {
@@ -60,6 +62,10 @@ class FragmentSettings : Fragment() {
             }
             bugReport.setOnClickListener {
                 openLink("https://github.com/HauntedMilkshake/fitness_app/issues")
+            }
+            deleteAccount.setOnClickListener {
+                authViewModel.deleteAccount()
+                findNavController().navigate(R.id.settings_to_welcome)
             }
 
         }

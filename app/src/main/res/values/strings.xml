@@ -18,7 +18,7 @@
     <string name="username_text">Username</string>
     <!-- Strings used for welcome fragment-->
     <string name="welcome_text">Disciplined</string>
-    <string name="motivational_quote">Discipline is remembering what you want</string>
+    <string name="motivational_quote">"Discipline is remembering what you want"</string>
     <!-- Strings used for nav log in fragment   -->
     <string name="no_account_text">No account? Sign up here!</string>
     <!-- String used for signup fragment   -->
@@ -80,5 +80,7 @@
     <!-- Strings used for create workout template -->
     <string name="new_workout_template">New workout template</string>
     <string name="add_exercise">Add exercise</string>
+    <string name="template_name_placeholder">Example</string>
+    <string name="new_workout_template_hint">Workout template name</string>
 
 </resources>

@@ -1,52 +1,43 @@
 package bg.zahov.app.workout
 
-import android.view.LayoutInflater
 import android.view.View
-import android.view.ViewGroup
-import androidx.constraintlayout.widget.ConstraintLayout
-import androidx.recyclerview.widget.LinearLayoutManager
-import androidx.recyclerview.widget.RecyclerView
-import bg.zahov.app.realm_db.Workout
+import bg.zahov.app.common.BaseAdapter
+import bg.zahov.app.backend.Workout
+import bg.zahov.app.utils.equalsTo
 import bg.zahov.fitness.app.R
 import com.google.android.material.imageview.ShapeableImageView
 import com.google.android.material.textview.MaterialTextView
 
-class WorkoutAdapter: RecyclerView.Adapter<WorkoutAdapter.WorkoutAdapterViewHolder>() {
-    private val items = ArrayList<Workout>()
+class WorkoutAdapter: BaseAdapter<Workout>(
+    areItemsTheSame = {oldItem, newItem -> oldItem._id.toHexString() == newItem._id.toHexString()  },
+    areContentsTheSame = {oldItem, newItem -> oldItem.equalsTo(newItem) },
+    layoutResId = R.layout.template_item
+){
     var itemClickListener: ItemClickListener<Workout>? = null
-    override fun onCreateViewHolder(parent: ViewGroup, viewType: Int): WorkoutAdapterViewHolder {
-        return WorkoutAdapterViewHolder(LayoutInflater.from(parent.context).inflate(R.layout.template_item, parent, false))
-    }
 
-    override fun getItemCount(): Int = items.size
+    override fun createViewHolder(view: View): WorkoutAdapterViewHolder = WorkoutAdapterViewHolder(view)
 
-    override fun onBindViewHolder(holder: WorkoutAdapterViewHolder, position: Int) {
-        holder.bind(items[position])
-    }
-
-    fun updateItems(newWorkouts: List<Workout>){
-        items.clear()
-        items.addAll(newWorkouts)
-        notifyDataSetChanged()
-    }
-
-    inner class WorkoutAdapterViewHolder(view: View): RecyclerView.ViewHolder(view){
+    inner class WorkoutAdapterViewHolder(view: View): BaseViewHolder(view){
         private val title = view.findViewById<MaterialTextView>(R.id.workout_title)
         private val lastPerformed = view.findViewById<MaterialTextView>(R.id.last_performed)
         private val settings = view.findViewById<ShapeableImageView>(R.id.settings)
-        private val sets = view.findViewById<MaterialTextView>(R.id.sets)
-        private val layout = view.findViewById<ConstraintLayout>(R.id.template_layout)
+        private val exercises = view.findViewById<MaterialTextView>(R.id.exercises)
 
-        fun bind(workout: Workout){
-            title.text = workout.workoutName
-            lastPerformed.text = workout.date
+        override fun bind(item: Workout){
+            title.text = item.workoutName
+            lastPerformed.text = item.date
             settings.setOnClickListener {
-                itemClickListener?.onItemClicked(workout, settings)
+                itemClickListener?.onSettingsClicked(item, settings)
             }
+            itemView.setOnClickListener {
+                itemClickListener?.onWorkoutClicked(item, itemView)
+            }
+            exercises.text = item.exercises.joinToString("\n") { "${it.sets.size} x ${it.exerciseName}"}
         }
     }
 
     interface ItemClickListener<T> {
-        fun onItemClicked(item: T, clickedView: View)
+        fun onSettingsClicked(item: T, clickedView: View)
+        fun onWorkoutClicked(item: T, clickedView: View)
     }
 }

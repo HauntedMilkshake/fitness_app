@@ -5,7 +5,7 @@ import android.util.AttributeSet
 import android.widget.RelativeLayout
 import android.widget.Switch
 import bg.zahov.app.common.SettingsChangeListener
-import bg.zahov.app.realm_db.Settings
+import bg.zahov.app.backend.Settings
 import bg.zahov.fitness.app.R
 import com.google.android.material.textview.MaterialTextView
 

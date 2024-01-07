@@ -33,7 +33,7 @@ class FragmentAddExercise : Fragment() {
             confirm.setOnClickListener {
                 it.applyScaleAnimation()
                 addExerciseViewModel.addExercise(exerciseNameField.editText!!.text!!.toString())
-                addExerciseViewModel.isCreated.observe(viewLifecycleOwner) {success ->
+                addExerciseViewModel.isCreated.observe(viewLifecycleOwner) { success ->
                     if (success) {
                         findNavController().navigate(R.id.add_exercise_to_exercises)
                     }
@@ -51,7 +51,8 @@ class FragmentAddExercise : Fragment() {
         binding.apply {
             category.initViewInformation(
                 "Body part",
-                listOf(BodyPart.Arms.name,
+                listOf(
+                    BodyPart.Arms.name,
                     BodyPart.Other.name,
                     BodyPart.Back.name,
                     BodyPart.Chest.name,

@@ -1,10 +1,9 @@
 package bg.zahov.app.utils
 
 import bg.zahov.app.common.Adapter
-import bg.zahov.app.realm_db.Workout
+import bg.zahov.app.backend.Workout
 import io.realm.kotlin.ext.realmListOf
 import io.realm.kotlin.ext.toRealmList
-import org.mongodb.kbson.BsonObjectId
 import org.mongodb.kbson.ObjectId
 
 class FirestoreWorkoutAdapter : Adapter<Map<String, Any>?, Workout?> {
@@ -24,7 +23,9 @@ class FirestoreWorkoutAdapter : Adapter<Map<String, Any>?, Workout?> {
                 exerciseIds = realmListOf(*exerciseIdsList.toTypedArray())
 
                 val exercisesList = it["exercises"] as? List<Map<String, Any>> ?: emptyList()
-                exercises = exercisesList.map { exerciseMap -> FirestoreExerciseAdapter().adapt(exerciseMap) }.toRealmList()
+                exercises =
+                    exercisesList.map { exerciseMap -> FirestoreExerciseAdapter().adapt(exerciseMap) }
+                        .toRealmList()
             }
         }
     }

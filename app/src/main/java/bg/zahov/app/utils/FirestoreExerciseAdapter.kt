@@ -1,7 +1,7 @@
 package bg.zahov.app.utils
 
 import bg.zahov.app.common.Adapter
-import bg.zahov.app.realm_db.Exercise
+import bg.zahov.app.backend.Exercise
 import io.realm.kotlin.ext.toRealmList
 import org.mongodb.kbson.ObjectId
 
@@ -16,7 +16,11 @@ class FirestoreExerciseAdapter : Adapter<Map<String, Any>?, Exercise> {
                 isTemplate = it["isTemplate"] as? Boolean
 
                 val setsList = it["sets"] as? List<Map<String, Any>?> ?: emptyList()
-                sets = setsList.mapNotNull { setsMap -> setsMap?.let{ FirestoreSetsAdapter().adapt(setsMap) } }.toRealmList()
+                sets = setsList.mapNotNull { setsMap ->
+                    setsMap?.let {
+                        FirestoreSetsAdapter().adapt(setsMap)
+                    }
+                }.toRealmList()
             }
         }
     }

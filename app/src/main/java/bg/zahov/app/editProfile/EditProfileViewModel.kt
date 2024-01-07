@@ -1,26 +1,21 @@
 package bg.zahov.app.editProfile
 
 import android.app.Application
-import android.credentials.Credential
-import android.util.Log
-import android.widget.Toast
-import androidx.core.content.ContentProviderCompat.requireContext
 import androidx.lifecycle.AndroidViewModel
 import androidx.lifecycle.LiveData
 import androidx.lifecycle.MutableLiveData
 import androidx.lifecycle.viewModelScope
+import bg.zahov.app.common.AuthenticationStateObserver
 import bg.zahov.app.repository.UserRepository
-import com.google.firebase.auth.AuthCredential
+import bg.zahov.app.utils.isAValidEmail
 import com.google.firebase.auth.EmailAuthProvider
 import com.google.firebase.auth.FirebaseAuth
 import io.realm.kotlin.notifications.DeletedObject
 import io.realm.kotlin.notifications.InitialObject
 import io.realm.kotlin.notifications.UpdatedObject
-import kotlinx.coroutines.Dispatchers
-import kotlinx.coroutines.flow.callbackFlow
 import kotlinx.coroutines.launch
 
-class EditProfileViewModel(application: Application) : AndroidViewModel(application) {
+class EditProfileViewModel(application: Application) : AndroidViewModel(application), AuthenticationStateObserver {
     private val auth: FirebaseAuth = FirebaseAuth.getInstance()
     private val repo = UserRepository.getInstance(auth.currentUser!!.uid)
 
@@ -58,17 +53,18 @@ class EditProfileViewModel(application: Application) : AndroidViewModel(applicat
 
     fun updateUsername(newUsername: String, callback: (String) -> Unit) {
         viewModelScope.launch {
-            if(newUsername != _userName.value && newUsername.isNotEmpty()){
+            if (newUsername != _userName.value && newUsername.isNotEmpty()) {
                 repo.changeUserName(newUsername)
                 callback("Successfully updated username!")
-            }else if(newUsername != _userName.value){
+            } else if (newUsername != _userName.value) {
                 callback("Couldn't update username!")
             }
         }
     }
 
+    //updateEmail deprecated ??
     fun updateEmail(newEmail: String, callback: (String) -> Unit) {
-        if(newEmail != auth.currentUser!!.email && isEmailValid(newEmail) && newEmail.isNotEmpty()) {
+        if (newEmail != auth.currentUser!!.email && newEmail.isAValidEmail() && newEmail.isNotEmpty()) {
 //            auth.currentUser!!.reauthenticate(EmailAuthProvider.getCredential(auth.currentUser!!.email!!, userPassword!!)).addOnCompleteListener {rTask ->
             auth.signInWithEmailAndPassword(auth.currentUser!!.email!!, userPassword!!)
                 .addOnCompleteListener { rTask ->
@@ -78,29 +74,41 @@ class EditProfileViewModel(application: Application) : AndroidViewModel(applicat
                         }
                     }
                 }
-            }
         }
+    }
 
-    fun unlockFields(password: String, callback: (Boolean, String) -> Unit){
-        auth.currentUser!!.reauthenticate(EmailAuthProvider.getCredential(auth.currentUser?.email!!, password))
+    fun unlockFields(password: String, callback: (Boolean, String) -> Unit) {
+        auth.currentUser!!.reauthenticate(
+            EmailAuthProvider.getCredential(
+                auth.currentUser?.email!!,
+                password
+            )
+        )
             .addOnCompleteListener { task ->
                 _isUnlocked.value = task.isSuccessful
                 userPassword = password
-                callback(task.isSuccessful, if (task.isSuccessful) "Successfully logged in" else "Incorrect password")
+                callback(
+                    task.isSuccessful,
+                    if (task.isSuccessful) "Successfully logged in" else "Incorrect password"
+                )
             }
     }
-    fun sendPasswordResetLink(callback: (String) -> Unit){
-        auth.sendPasswordResetEmail(auth.currentUser!!.email!!).addOnCompleteListener {task ->
+
+    fun sendPasswordResetLink(callback: (String) -> Unit) {
+        auth.sendPasswordResetEmail(auth.currentUser!!.email!!).addOnCompleteListener { task ->
             callback(if (task.isSuccessful) "Password link sent!" else "Couldn't send password link!")
         }
     }
-    fun updatePassword(newPassword: String, callback: (String) -> Unit){
-        if(newPassword.isNotEmpty()){
-            auth.currentUser!!.updatePassword(newPassword).addOnCompleteListener{ task ->
+
+    fun updatePassword(newPassword: String, callback: (String) -> Unit) {
+        if (newPassword.isNotEmpty()) {
+            auth.currentUser!!.updatePassword(newPassword).addOnCompleteListener { task ->
                 callback(if (task.isSuccessful) "Successfully updated password!" else "Couldn't update password!")
             }
         }
     }
-    private fun isEmailValid(email: String) = Regex("^\\S+@\\S+\\.\\S+$").matches(email)
 
+    override fun onAuthenticationStateChanged(isAuthenticated: Boolean) {
+        if(!isAuthenticated) onCleared()
+    }
 }

@@ -1,14 +1,13 @@
 package bg.zahov.app.exercise
 
-import android.content.res.Resources
-import android.util.Log
 import androidx.lifecycle.LiveData
 import androidx.lifecycle.MutableLiveData
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
 import bg.zahov.app.data.BodyPart
 import bg.zahov.app.data.Category
-import bg.zahov.app.realm_db.Exercise
+import bg.zahov.app.backend.Exercise
+import bg.zahov.app.common.AuthenticationStateObserver
 import bg.zahov.app.repository.UserRepository
 import com.google.firebase.auth.FirebaseAuth
 import io.realm.kotlin.notifications.InitialResults
@@ -16,7 +15,7 @@ import io.realm.kotlin.notifications.UpdatedResults
 import kotlinx.coroutines.launch
 import bg.zahov.app.data.Filter as Filter
 
-class ExerciseViewModel : ViewModel() {
+class ExerciseViewModel : ViewModel(), AuthenticationStateObserver {
     private val auth = FirebaseAuth.getInstance()
     private val repo = UserRepository.getInstance(auth.currentUser!!.uid)
     private val _userExercises = MutableLiveData<List<Exercise>>()
@@ -30,28 +29,33 @@ class ExerciseViewModel : ViewModel() {
 
     fun getBodyPartItems(): List<Filter> {
         val bodyPartFilters = enumValues<BodyPart>().map { Filter(it.name) }
-        bodyPartFilters.forEach { it.selected = _searchFilters.value?.any { filter -> filter.name == it.name } == true }
+        bodyPartFilters.forEach {
+            it.selected = _searchFilters.value?.any { filter -> filter.name == it.name } == true
+        }
         return bodyPartFilters
     }
 
     fun getCategoryItems(): List<Filter> {
         val categoryFilters = enumValues<Category>().map { Filter(it.name) }
-        categoryFilters.forEach { it.selected = _searchFilters.value?.any { filter -> filter.name == it.name } == true }
+        categoryFilters.forEach {
+            it.selected = _searchFilters.value?.any { filter -> filter.name == it.name } == true
+        }
         return categoryFilters
     }
-    
+
     init {
         getUserExercises()
     }
 
     private fun getUserExercises() {
         viewModelScope.launch {
-            repo.getTemplateExercises().collect { exercises ->
-                when(exercises) {
+            repo.getTemplateExercises()?.collect { exercises ->
+                when (exercises) {
                     is InitialResults -> {
                         _userExercises.postValue(exercises.list)
                         allExercises.addAll(exercises.list)
                     }
+
                     is UpdatedResults -> {
                         _userExercises.postValue(exercises.list)
                         allExercises.addAll(exercises.list)
@@ -60,14 +64,16 @@ class ExerciseViewModel : ViewModel() {
             }
         }
     }
-    fun addFilter(filter: Filter){
+
+    fun addFilter(filter: Filter) {
         val filters = _searchFilters.value?.toMutableList() ?: mutableListOf()
         filters.add(filter)
         _searchFilters.value = filters
 
         searchExercises(search, filters)
     }
-    fun removeFilter(filter: Filter){
+
+    fun removeFilter(filter: Filter) {
         val filters = _searchFilters.value?.toMutableList() ?: mutableListOf()
         filters.remove(filter)
         _searchFilters.value = filters
@@ -86,9 +92,11 @@ class ExerciseViewModel : ViewModel() {
                         }
                     }
                 }
+
                 !name.isNullOrEmpty() && filters.isEmpty() -> filter {
                     it.exerciseName?.contains(name, true) == true
                 }
+
                 else -> filter {
                     val nameMatches = name.isNullOrEmpty() || it.exerciseName?.contains(name, true) == true
                     val categoryMatches = filters.any { filter -> filter?.name == it.category }
@@ -103,5 +111,8 @@ class ExerciseViewModel : ViewModel() {
         _userExercises.value = newExercises
     }
 
+    override fun onAuthenticationStateChanged(isAuthenticated: Boolean) {
+        if(!isAuthenticated) onCleared()
 
+    }
 }

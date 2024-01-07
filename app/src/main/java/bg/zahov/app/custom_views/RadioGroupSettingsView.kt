@@ -19,12 +19,12 @@ import bg.zahov.app.data.Language
 import bg.zahov.app.data.Sound
 import bg.zahov.app.data.Theme
 import bg.zahov.app.data.Units
-import bg.zahov.app.realm_db.Settings
+import bg.zahov.app.backend.Settings
 import bg.zahov.fitness.app.R
 import com.google.android.material.textview.MaterialTextView
 
 
-class   RadioGroupSettingsView @JvmOverloads constructor(
+class RadioGroupSettingsView @JvmOverloads constructor(
     context: Context,
     attrs: AttributeSet? = null,
     defStyle: Int = 0,
@@ -87,7 +87,8 @@ class   RadioGroupSettingsView @JvmOverloads constructor(
                 )
             radioButton.setPadding(16, 16, 16, 16)
             radioButton.setTextColor(ContextCompat.getColor(context, R.color.white))
-            radioButton.buttonTintList = ColorStateList.valueOf(ContextCompat.getColor(context, R.color.white))
+            radioButton.buttonTintList =
+                ColorStateList.valueOf(ContextCompat.getColor(context, R.color.white))
             radioGroup.addView(radioButton)
 
             if (currOption == getSelectedOption(title, settings)) {

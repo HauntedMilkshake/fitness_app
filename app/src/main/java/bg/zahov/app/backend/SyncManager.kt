@@ -1,4 +1,4 @@
-package bg.zahov.app.realm_db
+package bg.zahov.app.backend
 
 import android.util.Log
 import bg.zahov.app.utils.FirestoreExerciseAdapter
@@ -10,22 +10,25 @@ import bg.zahov.app.utils.equalsTo
 import bg.zahov.app.utils.getExerciseDifference
 import bg.zahov.app.utils.getWorkoutDifference
 import bg.zahov.app.utils.toFirestoreMap
+import com.google.firebase.auth.FirebaseAuth
 import com.google.firebase.firestore.FirebaseFirestore
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.launch
 import kotlinx.coroutines.runBlocking
 import kotlinx.coroutines.tasks.await
+import kotlinx.coroutines.withContext
 
-class SyncManager(private val uid: String) {
+class SyncManager(private val uid: String, private val realm: RealmManager) {
     companion object {
         @Volatile
         private var instance: SyncManager? = null
-        fun getInstance(userId: String) =
+        fun getInstance(userId: String, realm: RealmManager) =
             instance ?: synchronized(this) {
-                instance ?: SyncManager(userId).also { instance = it }
+                instance ?: SyncManager(userId, realm).also { instance = it }
             }
     }
+    private val auth = FirebaseAuth.getInstance()
     private val firestore = FirebaseFirestore.getInstance()
 
     private val userAdapter =  FirestoreUserAdapter()
@@ -40,21 +43,18 @@ class SyncManager(private val uid: String) {
 
     private var currSync: Boolean = true
 
-    private val realm: RealmManager = RealmManager.getInstance(uid)
-
     init {
         CoroutineScope(Dispatchers.Default).launch {
             initCaches()
         }
     }
 
-    fun createFirestore(user: User, settings: Settings){
-        val userDocRef = firestore.collection("users").document(uid)
-
-        userDocRef.set(user.toFirestoreMap())
-
-        userDocRef.collection("settings").document("userSettings").set(settings.toFirestoreMap())
-
+    suspend fun createFirestore(user: User, settings: Settings){
+        withContext(Dispatchers.IO){
+            val userDocRef = firestore.collection("users").document(uid)
+            userDocRef.set(user.toFirestoreMap())
+            userDocRef.collection("settings").document("userSettings").set(settings.toFirestoreMap())
+        }
     }
 
     suspend fun syncFromFirestore() {
@@ -85,9 +85,7 @@ class SyncManager(private val uid: String) {
 
     //1st values of pairs represent the ones we need to upsert
     //2nd values of pairs are the ones we need to delete
-    //empty values represent we need to delete (if there is something to delete)
     //null values represent no changes from last sync
-    //new values are added on the principle I explained on lines 120, 121
     private fun syncToFirestore(
         user: User?,
         workouts: Pair<List<Workout>?, List<String>?>?,
@@ -133,6 +131,12 @@ class SyncManager(private val uid: String) {
             } ?: Log.d("SYNC", "failed to sync exercises")
         }
     }
+    fun deleteFirebaseUser(){
+        auth.currentUser?.delete()
+        firestore.runBatch{
+            it.delete(firestore.collection("users").document(uid))
+        }
+    }
 
     private suspend fun getChangedUserOrNull(): User? {
 
@@ -160,6 +164,8 @@ class SyncManager(private val uid: String) {
     }
 
     //working only with exercises marked as *template*
+    //first - exercises to upsert
+    //second - exercises to delete
     private suspend fun getChangedExercisesOrNull(): Pair<List<Exercise>?, List<String>?>? {
         val currTemplateExercises = realm.getTemplateExercisesSync()
         val changedExercises: MutableList<Exercise> = mutableListOf()
@@ -200,9 +206,8 @@ class SyncManager(private val uid: String) {
         }
     }
 
-
-    //First item of the surrounding contains a pair which has the template workouts. The first are the ones we need to update, the second are the ones we need to add
-    //Second item of the surrounding pair are past workouts
+    //First - workouts to upsert
+    //Second - workouts to delete
     private suspend fun getChangedWorkoutsOrNull(): Pair<List<Workout>?, List<String>?>? {
         val currWorkouts = realm.getPastWorkoutsSync()
         val currWorkoutTemplates = realm.getTemplateWorkoutsSync()
@@ -295,4 +300,5 @@ class SyncManager(private val uid: String) {
             syncToFirestore(getChangedUserOrNull(), getChangedWorkoutsOrNull(), getChangedExercisesOrNull(), getChangedSettingsOrNull())
         }
     }
+
 }

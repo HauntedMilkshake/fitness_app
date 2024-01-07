@@ -106,7 +106,7 @@
         android:id="@+id/confirm"
         android:layout_width="45dp"
         android:layout_height="45dp"
-        android:src="@drawable/ic_inferior_check"
+        android:src="@drawable/ic_check"
         android:background="@drawable/custom_circle_background"
         android:layout_marginEnd="30dp"
         android:layout_marginBottom="120dp"

@@ -16,8 +16,10 @@ import androidx.fragment.app.viewModels
 import androidx.navigation.fragment.findNavController
 import androidx.recyclerview.widget.LinearLayoutManager
 import bg.zahov.app.data.Filter
-import bg.zahov.app.realm_db.Exercise
+import bg.zahov.app.data.SelectableExercise
 import bg.zahov.app.utils.applyScaleAnimation
+import bg.zahov.app.utils.toSelectableList
+import bg.zahov.app.workout.addWorkout.AddWorkoutViewModel
 import bg.zahov.fitness.app.R
 import bg.zahov.fitness.app.databinding.FragmentExercisesBinding
 import com.google.android.flexbox.FlexDirection
@@ -28,7 +30,8 @@ import com.google.android.material.textview.MaterialTextView
 class FragmentExercises : Fragment() {
     private var _binding: FragmentExercisesBinding? = null
     private val binding get() = _binding!!
-    private val exerciseViewModel: ExerciseViewModel by viewModels({requireActivity()})
+    private val exerciseViewModel: ExerciseViewModel by viewModels({ requireActivity() })
+    private val addWorkoutViewModel: AddWorkoutViewModel by viewModels({ requireActivity() })
     private val handler = Handler(Looper.getMainLooper())
     override fun onCreateView(
         inflater: LayoutInflater,
@@ -49,6 +52,11 @@ class FragmentExercises : Fragment() {
     override fun onViewCreated(view: View, savedInstanceState: Bundle?) {
         super.onViewCreated(view, savedInstanceState)
         binding.apply {
+            exerciseText.apply {
+                text =
+                    if (arguments?.getBoolean("SELECTABLE") == true) "Add exercises" else "Exercises"
+            }
+
             val filterAdapter = FilterAdapter(true).apply {
                 itemClickListener = object : FilterAdapter.ItemClickListener<Filter> {
                     override fun onItemClicked(item: Filter, clickedView: View) {
@@ -63,13 +71,18 @@ class FragmentExercises : Fragment() {
                 }
                 adapter = filterAdapter
             }
-
-            val exerciseAdapter = ExerciseAdapter().apply {
-                itemClickListener = object : ExerciseAdapter.ItemClickListener<Exercise> {
-                    override fun onItemClicked(item: Exercise, itemPosition: Int, clickedView: View, ) {
-                    }
+            val exerciseAdapter =
+                ExerciseAdapter(arguments?.getBoolean("SELECTABLE") ?: false).apply {
+                    itemClickListener =
+                        object : ExerciseAdapter.ItemClickListener<SelectableExercise> {
+                            override fun onItemClicked(
+                                item: SelectableExercise,
+                                itemPosition: Int,
+                                clickedView: View,
+                            ) {
+                            }
+                        }
                 }
-            }
 
             exercisesRecyclerView.apply {
                 layoutManager = LinearLayoutManager(requireContext())
@@ -77,6 +90,7 @@ class FragmentExercises : Fragment() {
             }
 
             searchIcon.setOnClickListener {
+                it.applyScaleAnimation()
                 exerciseText.visibility = View.GONE
                 searchIcon.visibility = View.GONE
                 settingsDots.visibility = View.GONE
@@ -92,7 +106,7 @@ class FragmentExercises : Fragment() {
             }
 
 
-            exerciseViewModel.searchFilters.observe(viewLifecycleOwner){ filters ->
+            exerciseViewModel.searchFilters.observe(viewLifecycleOwner) { filters ->
                 filterAdapter.updateItems(filters)
 
                 searchBar.let {
@@ -119,6 +133,7 @@ class FragmentExercises : Fragment() {
             }
 
             removeSearchBar.setOnClickListener {
+                it.applyScaleAnimation()
                 exerciseText.visibility = View.VISIBLE
                 searchIcon.visibility = View.VISIBLE
                 settingsDots.visibility = View.VISIBLE
@@ -133,10 +148,28 @@ class FragmentExercises : Fragment() {
             }
 
             exerciseViewModel.userExercises.observe(viewLifecycleOwner) {
-                exerciseAdapter.updateItems(it)
-                noResultsLabel.visibility = if(it.isEmpty()) View.VISIBLE else View.GONE
+                exerciseAdapter.updateItems(it.toSelectableList())
+                noResultsLabel.visibility = if (it.isEmpty()) View.VISIBLE else View.GONE
             }
 
+            close.apply {
+                visibility =
+                    if (arguments?.getBoolean("SELECTABLE") == true) View.VISIBLE else View.GONE
+                setOnClickListener {
+                    it.applyScaleAnimation()
+                    findNavController().navigate(R.id.exercises_to_create_workout_template)
+                }
+            }
+
+            confirm.apply {
+                visibility =
+                    if (arguments?.getBoolean("SELECTABLE") == true) View.VISIBLE else View.GONE
+                setOnClickListener {
+                    it.applyScaleAnimation()
+                    addWorkoutViewModel.addSelectedExercises(exerciseAdapter.getSelected())
+                    findNavController().navigate(R.id.exercises_to_create_workout_template)
+                }
+            }
         }
     }
 

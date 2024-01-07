@@ -25,17 +25,29 @@
                 android:background="@color/background"
                 android:gravity="clip_horizontal"
                 android:orientation="horizontal">
+                <com.google.android.material.imageview.ShapeableImageView
+                    android:id="@+id/close"
+                    android:layout_width="24dp"
+                    android:layout_height="24dp"
+                    android:src="@drawable/ic_close"
+                    android:visibility="gone"
+                    android:layout_marginStart="10dp"
+                    android:layout_marginTop="5dp"
+                    app:layout_constraintTop_toTopOf="parent"
+                    app:layout_constraintStart_toStartOf="parent"
+                    app:layout_constraintBottom_toBottomOf="parent"/>
 
                 <com.google.android.material.imageview.ShapeableImageView
                     android:id="@+id/remove_search_bar"
-                    android:layout_width="wrap_content"
-                    android:layout_height="wrap_content"
-                    android:layout_marginStart="20dp"
+                    android:layout_width="24dp"
+                    android:layout_height="24dp"
+                    android:layout_marginStart="30dp"
                     android:src="@drawable/ic_back_arrow"
                     android:visibility="gone"
-                    app:layout_constraintBottom_toBottomOf="parent"
-                    app:layout_constraintStart_toStartOf="parent"
-                    app:layout_constraintTop_toTopOf="parent" />
+                    android:scaleX="-1"
+                    app:layout_constraintBottom_toBottomOf="@id/close"
+                    app:layout_constraintStart_toStartOf="@id/close"
+                    app:layout_constraintTop_toTopOf="@id/close" />
 
                 <androidx.appcompat.widget.SearchView
                     android:id="@id/search_bar"
@@ -56,7 +68,7 @@
                     android:id="@+id/exercise_text"
                     android:layout_width="wrap_content"
                     android:layout_height="wrap_content"
-                    android:layout_marginStart="15dp"
+                    android:layout_marginStart="40dp"
                     android:layout_marginTop="15dp"
                     android:layout_marginBottom="10dp"
                     android:text="@string/exercise"
@@ -150,19 +162,28 @@
         app:layout_constraintStart_toStartOf="parent"
         app:layout_constraintTop_toBottomOf="@id/filter_items_recycler_view"/>
 
-
     <androidx.recyclerview.widget.RecyclerView
         android:id="@+id/exercises_recycler_view"
         android:layout_width="match_parent"
         android:layout_height="0dp"
         android:layout_marginTop="20dp"
-        android:layout_marginStart="15dp"
-        android:layout_marginEnd="15dp"
         android:layout_marginBottom="10dp"
         android:orientation="vertical"
         app:layout_constraintBottom_toBottomOf="parent"
         app:layout_constraintEnd_toEndOf="parent"
         app:layout_constraintStart_toStartOf="parent"
         app:layout_constraintTop_toBottomOf="@+id/filter_items_recycler_view" />
+
+    <com.google.android.material.imageview.ShapeableImageView
+        android:id="@+id/confirm"
+        android:layout_width="45dp"
+        android:layout_height="45dp"
+        android:src="@drawable/ic_check"
+        android:background="@drawable/custom_circle_background"
+        android:layout_marginEnd="30dp"
+        android:layout_marginBottom="120dp"
+        android:visibility="gone"
+        app:layout_constraintBottom_toBottomOf="parent"
+        app:layout_constraintEnd_toEndOf="parent" />
 
 </androidx.constraintlayout.widget.ConstraintLayout>

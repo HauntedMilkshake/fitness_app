@@ -1,7 +1,6 @@
 package bg.zahov.app.login
 
 import android.os.Bundle
-import android.util.Log
 import android.view.KeyEvent
 import android.view.LayoutInflater
 import android.view.View
@@ -76,5 +75,4 @@ class FragmentLogIn : Fragment() {
             Toast.makeText(requireContext(), it, Toast.LENGTH_SHORT).show()
         }
     }
-
 }

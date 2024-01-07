@@ -1,10 +1,9 @@
-package bg.zahov.app.realm_db
+package bg.zahov.app.backend
 
 import bg.zahov.app.data.Language
 import bg.zahov.app.data.Sound
 import bg.zahov.app.data.Theme
 import bg.zahov.app.data.Units
-import bg.zahov.app.utils.equalsTo
 import io.realm.kotlin.ext.realmListOf
 import io.realm.kotlin.types.RealmList
 import io.realm.kotlin.types.RealmObject

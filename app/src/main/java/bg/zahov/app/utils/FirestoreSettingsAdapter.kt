@@ -5,12 +5,12 @@ import bg.zahov.app.data.Language
 import bg.zahov.app.data.Sound
 import bg.zahov.app.data.Theme
 import bg.zahov.app.data.Units
-import bg.zahov.app.realm_db.Settings
+import bg.zahov.app.backend.Settings
 
 class FirestoreSettingsAdapter : Adapter<Map<String, Any>?, Settings> {
     override fun adapt(t: Map<String, Any>?): Settings {
         return Settings().apply {
-            t?.let{
+            t?.let {
                 language = it["language"] as? String ?: Language.English.name
                 units = it["units"] as? String ?: Units.Metric.name
                 soundEffects = it["soundEffects"] as? Boolean ?: true

@@ -15,7 +15,7 @@ import bg.zahov.fitness.app.databinding.DialogFragmentAuthenticationBinding
 class AuthenticationDialog : DialogFragment() {
     private var _binding: DialogFragmentAuthenticationBinding? = null
     private val binding get() = _binding!!
-    private val editProfileViewModel: EditProfileViewModel by viewModels({requireActivity()})
+    private val editProfileViewModel: EditProfileViewModel by viewModels({ requireActivity() })
 
     override fun onCreateDialog(savedInstanceState: Bundle?): Dialog {
         _binding = DialogFragmentAuthenticationBinding.inflate(LayoutInflater.from(context))
@@ -29,11 +29,11 @@ class AuthenticationDialog : DialogFragment() {
             }
 
             binding.confirm.setOnClickListener {
-                editProfileViewModel.unlockFields(binding.passwordFieldText.text.toString()) {isSuccess, message ->
-                    if(isSuccess){
+                editProfileViewModel.unlockFields(binding.passwordFieldText.text.toString()) { isSuccess, message ->
+                    if (isSuccess) {
                         Toast.makeText(requireContext(), message, Toast.LENGTH_SHORT).show()
                         dismiss()
-                    }else{
+                    } else {
                         Toast.makeText(requireContext(), message, Toast.LENGTH_SHORT).show()
                     }
                 }

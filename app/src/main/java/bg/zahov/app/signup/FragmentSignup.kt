@@ -1,12 +1,10 @@
 package bg.zahov.app.signup
 
 import android.os.Bundle
-import android.util.Log
 import android.view.KeyEvent
 import android.view.LayoutInflater
 import android.view.View
 import android.view.ViewGroup
-import android.view.inputmethod.EditorInfo
 import android.widget.Toast
 import androidx.fragment.app.Fragment
 import androidx.fragment.app.viewModels
@@ -74,36 +72,7 @@ class FragmentSignup : Fragment() {
             }
 
             registerButton.setOnClickListener {
-                val password = passwordFieldText.text.toString()
-                val confirmPassword = confirmPasswordFieldText.text.toString()
-                val email = emailFieldText.text.toString()
-                val username = usernameFieldText.text.toString()
-
-                if (areFieldsEmpty(username, email, password)) {
-                    Toast.makeText(
-                        requireContext(),
-                        "All fields must not be empty!",
-                        Toast.LENGTH_SHORT
-                    ).show()
-                    return@setOnClickListener
-                }
-
-                if (checkPasswords(password, confirmPassword)) {
-                    Toast.makeText(requireContext(), "Passwords must match!", Toast.LENGTH_SHORT)
-                        .show()
-                    return@setOnClickListener
-                }
-
-                if (isEmailNotValid(email)) {
-                    Toast.makeText(
-                        requireContext(),
-                        "Please enter a valid email address",
-                        Toast.LENGTH_SHORT
-                    ).show()
-                    return@setOnClickListener
-                }
-
-                authViewModel.signUp(username, email, password) { success, errorMessage ->
+                authViewModel.signUp(usernameFieldText.text.toString(), emailFieldText.text.toString(), passwordFieldText.text.toString(), confirmPasswordFieldText.text.toString()) { success, errorMessage ->
                     if (success) {
                         findNavController().navigate(R.id.signup_to_home)
                     } else {
@@ -118,9 +87,4 @@ class FragmentSignup : Fragment() {
         }
     }
 
-    private fun checkPasswords(firstPass: String, secondPass: String) = firstPass != secondPass
-    private fun areFieldsEmpty(userName: String?, email: String?, pass: String?) =
-        listOf(userName, email, pass).count { it.isNullOrEmpty() } >= 1
-
-    private fun isEmailNotValid(email: String) = !Regex("^\\S+@\\S+\\.\\S+$").matches(email)
 }

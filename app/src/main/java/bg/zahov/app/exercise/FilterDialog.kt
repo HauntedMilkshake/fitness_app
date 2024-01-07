@@ -19,17 +19,24 @@ import com.google.android.flexbox.JustifyContent
 class FilterDialog : DialogFragment() {
     private var _binding: DialogFragmentFiltersBinding? = null
     private val binding get() = _binding!!
-    private val exerciseViewModel: ExerciseViewModel by viewModels({requireActivity()})
-    override fun onCreateView(inflater: LayoutInflater, container: ViewGroup?, savedInstanceState: Bundle?): View {
+    private val exerciseViewModel: ExerciseViewModel by viewModels({ requireActivity() })
+    override fun onCreateView(
+        inflater: LayoutInflater,
+        container: ViewGroup?,
+        savedInstanceState: Bundle?,
+    ): View {
         _binding = DialogFragmentFiltersBinding.inflate(inflater, container, false)
-    return binding.root
+        return binding.root
     }
 
     override fun onStart() {
         super.onStart()
-        dialog?.window?.setLayout(ViewGroup.LayoutParams.MATCH_PARENT, ViewGroup.LayoutParams.MATCH_PARENT);
-
+        dialog?.window?.setLayout(
+            ViewGroup.LayoutParams.MATCH_PARENT,
+            ViewGroup.LayoutParams.MATCH_PARENT
+        )
     }
+
     override fun onViewCreated(view: View, savedInstanceState: Bundle?) {
         super.onViewCreated(view, savedInstanceState)
         binding.apply {
@@ -42,14 +49,17 @@ class FilterDialog : DialogFragment() {
             configureFilterRecyclerView(categoryRecyclerView, exerciseViewModel.getCategoryItems())
         }
     }
+
     private fun configureFilterRecyclerView(recyclerView: RecyclerView, items: List<Filter>) {
         val filterAdapter = FilterAdapter(false).apply {
             itemClickListener = object : FilterAdapter.ItemClickListener<Filter> {
                 override fun onItemClicked(item: Filter, clickedView: View) {
-                    if(item.selected) exerciseViewModel.addFilter(item) else exerciseViewModel.removeFilter(item)
+                    if (item.selected) exerciseViewModel.addFilter(item) else exerciseViewModel.removeFilter(
+                        item
+                    )
                 }
             }
-            initItems(items)
+            updateItems(items)
         }
 
         recyclerView.apply {

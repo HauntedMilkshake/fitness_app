@@ -1,15 +1,21 @@
 package bg.zahov.app.utils
 
+import android.animation.ArgbEvaluator
 import android.animation.ObjectAnimator
 import android.animation.PropertyValuesHolder
 import android.view.View
-import bg.zahov.app.realm_db.Exercise
-import bg.zahov.app.realm_db.Sets
-import bg.zahov.app.realm_db.Settings
-import bg.zahov.app.realm_db.User
-import bg.zahov.app.realm_db.Workout
+import androidx.core.content.ContextCompat
+import bg.zahov.app.data.Filter
+import bg.zahov.app.data.SelectableExercise
+import bg.zahov.app.backend.Exercise
+import bg.zahov.app.backend.Sets
+import bg.zahov.app.backend.Settings
+import bg.zahov.app.backend.User
+import bg.zahov.app.backend.Workout
+import bg.zahov.fitness.app.R
 import io.realm.kotlin.types.RealmList
 
+fun String.isAValidEmail() = Regex("^\\S+@\\S+\\.\\S+$").matches(this)
 fun User.toFirestoreMap(): Map<String, Any?> {
     return hashMapOf(
         "username" to username,
@@ -23,7 +29,7 @@ fun User.equalsTo(otherUser: User): Boolean {
 
 fun Settings.equalTo(newSettings: Settings): Boolean {
     return this.language == newSettings.language &&
-            this.units == newSettings.units
+            this.units == newSettings.units &&
             this.soundEffects == newSettings.soundEffects &&
             this.theme == newSettings.theme &&
             this.restTimer == newSettings.restTimer &&
@@ -95,6 +101,22 @@ inline fun <reified T> RealmList<T>.toFirestoreMap(): List<Map<String, Any?>> {
     }
 }
 
+fun Exercise.toSelectable() = SelectableExercise(this)
+fun List<Exercise>.toSelectableList() = this.map { it.toSelectable() }
+
+fun SelectableExercise.toExercise(): Exercise {
+    return Exercise().apply {
+        _id = exercise._id
+        bodyPart = exercise.bodyPart
+        category = exercise.category
+        exerciseName = exercise.exerciseName
+        isTemplate = exercise.isTemplate
+        sets = exercise.sets
+    }
+}
+
+fun List<SelectableExercise>.toExerciseList(): List<Exercise> = this.map { it.toExercise() }
+
 fun Workout.toFirestoreMap(): Map<String, Any?> {
     return hashMapOf(
         "_id" to _id.toHexString(),
@@ -154,4 +176,26 @@ fun View.applyScaleAnimation() {
     scaleAnimation.repeatMode = ObjectAnimator.REVERSE
 
     scaleAnimation.start()
+}
+
+fun Filter.equalsTo(filter: Filter): Boolean {
+    return this.name == filter.name
+}
+
+fun View.applySelectAnimation(
+    isSelected: Boolean,
+    selectedColorResId: Int,
+    unselectedColorResId: Int,
+    duration: Long = 300,
+) {
+    val targetColor = ContextCompat.getColor(
+        context,
+        if (isSelected) selectedColorResId else unselectedColorResId
+    )
+
+    val animator = ObjectAnimator.ofInt(this, "backgroundColor", R.color.background, targetColor)
+    animator.setEvaluator(ArgbEvaluator())
+    animator.duration = duration
+    animator.addUpdateListener { animation -> setBackgroundColor(animation.animatedValue as Int) }
+    animator.start()
 }

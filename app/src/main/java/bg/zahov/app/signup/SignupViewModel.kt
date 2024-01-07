@@ -1,24 +1,40 @@
 package bg.zahov.app.signup
 
-import android.util.Log
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
-import bg.zahov.app.realm_db.Settings
-import bg.zahov.app.realm_db.User
+import bg.zahov.app.backend.Settings
+import bg.zahov.app.backend.User
+import bg.zahov.app.common.AuthenticationStateObserver
 import bg.zahov.app.repository.UserRepository
+import bg.zahov.app.utils.isAValidEmail
 import com.google.firebase.auth.FirebaseAuth
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.launch
 
-class SignupViewModel : ViewModel() {
+class SignupViewModel : ViewModel(), AuthenticationStateObserver {
     private val auth: FirebaseAuth = FirebaseAuth.getInstance()
     private lateinit var repo: UserRepository
     fun signUp(
         userName: String,
         email: String,
         password: String,
+        confirmPassword: String,
         callback: (Boolean, String?) -> Unit,
     ) {
+        if(areFieldsEmpty(userName, email, password)){
+            callback(false, "Cannot have empty fields")
+            return
+        }
+
+        if(!email.isAValidEmail()){
+            callback(false, "Invalid email!")
+            return
+        }
+
+        if(password != confirmPassword){
+            callback(false, "Passwords must match")
+            return
+        }
         auth.createUserWithEmailAndPassword(email, password)
             .addOnCompleteListener { task ->
                 if (task.isSuccessful) {
@@ -49,5 +65,14 @@ class SignupViewModel : ViewModel() {
                 }
             }
     }
+
+    private fun areFieldsEmpty(userName: String?, email: String?, pass: String?) =
+        listOf(userName, email, pass).count { it.isNullOrEmpty() } >= 1
+
+    override fun onAuthenticationStateChanged(isAuthenticated: Boolean) {
+        if(!isAuthenticated) onCleared()
+
+    }
+
 }
 

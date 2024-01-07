@@ -1,4 +1,4 @@
-package bg.zahov.app.realm_db
+package bg.zahov.app.backend
 
 import android.util.Log
 import bg.zahov.app.data.Language
@@ -12,10 +12,12 @@ import io.realm.kotlin.ext.query
 import io.realm.kotlin.notifications.ObjectChange
 import io.realm.kotlin.notifications.ResultsChange
 import kotlinx.coroutines.Dispatchers
+import kotlinx.coroutines.NonCancellable
 import kotlinx.coroutines.flow.Flow
 import kotlinx.coroutines.withContext
+import java.io.File
 
-class RealmManager(userId: String) {
+class RealmManager(private val userId: String) {
     companion object {
         @Volatile
         private var instance: RealmManager? = null
@@ -26,12 +28,11 @@ class RealmManager(userId: String) {
     }
 
     private var realmInstance: Realm? = null
-    private val uid = userId
     private val realmConfig by lazy {
-        getConfig(uid).build()
+        getConfig().build()
     }
 
-    private fun getConfig(userId: String): RealmConfiguration.Builder {
+    private fun getConfig(): RealmConfiguration.Builder {
         val config = RealmConfiguration.Builder(
             setOf(
                 User::class,
@@ -47,11 +48,20 @@ class RealmManager(userId: String) {
         return config
     }
 
+    private fun openRealm(){
+        if(realmInstance == null || realmInstance?.isClosed() == true) {
+            realmInstance = Realm.open(realmConfig)
+        }
+    }
+    private fun closeRealm(){
+        realmInstance?.close()
+    }
+
     suspend fun createRealm(user: User, workouts: List<Workout?>?, exercises: List<Exercise?>?, settings: Settings) {
         withContext(Dispatchers.IO) {
             try {
-                val realmInstance = Realm.open(realmConfig)
-                realmInstance.write {
+                openRealm()
+                realmInstance?.write {
                     copyToRealm(user)
                     copyToRealm(settings)
 
@@ -63,6 +73,7 @@ class RealmManager(userId: String) {
                         exercise?.let { copyToRealm(it) }
                     }
                 }
+
             } catch (e: Exception) {
                 Log.e("Realm start error", e.toString())
             } finally {
@@ -71,16 +82,25 @@ class RealmManager(userId: String) {
         }
     }
 
+    fun deleteRealm(){
+        closeRealm()
+        File(realmConfig.path).delete()
+    }
+
+    fun doesUserHaveRealm() = File(realmConfig.path).exists()
+
     private suspend fun <T> withRealm(block: suspend (Realm) -> T): T {
         return withContext(Dispatchers.IO) {
-            val realm = Realm.open(realmConfig)
-            block(realm)
+            openRealm()
+            block(realmInstance!!)
         }
     }
 
     suspend fun getUser(): Flow<ObjectChange<User>>? {
         return withRealm { realm ->
-            realm.query<User>().first().find()?.asFlow()
+            withContext(NonCancellable){
+                realm.query<User>().first().find()?.asFlow()
+            }
         }
     }
 
@@ -95,28 +115,6 @@ class RealmManager(userId: String) {
             realm.query<Settings>().find().first().asFlow()
         }
     }
-
-    suspend fun getSettingsSync(): Settings {
-        return withRealm{ realm ->
-            realm.query<Settings>().find().first()
-        }
-    }
-
-    suspend fun getTemplateExercisesSync(): List<Exercise> {
-        return withRealm{ realm ->
-            realm.query<Exercise>("isTemplate == true").find()
-        }
-    }
-    suspend fun getPastWorkoutsSync(): List<Workout> {
-        return withRealm { realm ->
-            realm.query<Workout>("isTemplate == false").find()
-        }
-    }
-    suspend fun getTemplateWorkoutsSync(): List<Workout> {
-        return withRealm { realm ->
-            realm.query<Workout>("isTemplate == true").find()
-        }
-    }
     suspend fun getTemplateExercises(): Flow<ResultsChange<Exercise>> {
         return withRealm { realm ->
             realm.query<Exercise>("isTemplate == true").find().asFlow()
@@ -128,16 +126,19 @@ class RealmManager(userId: String) {
             realm.query<Workout>("isTemplate == false").find().asFlow()
         }
     }
+
     suspend fun getAllWorkouts(): Flow<ResultsChange<Workout>> {
         return withRealm {realm ->
             realm.query<Workout>().find().asFlow()
         }
     }
+
     suspend fun getTemplateWorkouts(): Flow<ResultsChange<Workout>> {
         return withRealm {realm ->
             realm.query<Workout>("isTemplate == true").find().asFlow()
         }
     }
+
     suspend fun changeUserName(newUserName: String) {
         withRealm { realm ->
             val realmUser = realm.query<User>().find().first()
@@ -234,6 +235,28 @@ class RealmManager(userId: String) {
                     }
                 }
             }
+        }
+    }
+
+    suspend fun getSettingsSync(): Settings {
+        return withRealm{ realm ->
+            realm.query<Settings>().find().first()
+        }
+    }
+
+    suspend fun getTemplateExercisesSync(): List<Exercise> {
+        return withRealm{ realm ->
+            realm.query<Exercise>("isTemplate == true").find()
+        }
+    }
+    suspend fun getPastWorkoutsSync(): List<Workout> {
+        return withRealm { realm ->
+            realm.query<Workout>("isTemplate == false").find()
+        }
+    }
+    suspend fun getTemplateWorkoutsSync(): List<Workout> {
+        return withRealm { realm ->
+            realm.query<Workout>("isTemplate == true").find()
         }
     }
 }
