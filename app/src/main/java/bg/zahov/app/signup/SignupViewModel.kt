@@ -12,7 +12,7 @@ import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.launch
 
 class SignupViewModel : ViewModel(), AuthenticationStateObserver {
-    private val auth: FirebaseAuth = FirebaseAuth.getInstance()
+    private var auth: FirebaseAuth = FirebaseAuth.getInstance()
     private lateinit var repo: UserRepository
     fun signUp(
         userName: String,
@@ -70,7 +70,12 @@ class SignupViewModel : ViewModel(), AuthenticationStateObserver {
         listOf(userName, email, pass).count { it.isNullOrEmpty() } >= 1
 
     override fun onAuthenticationStateChanged(isAuthenticated: Boolean) {
-        if(!isAuthenticated) onCleared()
+        if(!isAuthenticated){
+            onCleared()
+        }else{
+            auth = FirebaseAuth.getInstance()
+            repo = UserRepository.getInstance(auth.currentUser!!.uid)
+        }
 
     }
 

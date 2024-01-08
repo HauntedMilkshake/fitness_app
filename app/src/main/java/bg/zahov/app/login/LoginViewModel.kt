@@ -5,10 +5,11 @@ import bg.zahov.app.common.AuthenticationStateObserver
 import bg.zahov.app.repository.UserRepository
 import bg.zahov.app.utils.isAValidEmail
 import com.google.firebase.auth.FirebaseAuth
+import com.google.firebase.firestore.auth.User
 import kotlinx.coroutines.runBlocking
 
 class LoginViewModel : ViewModel(), AuthenticationStateObserver {
-    private val auth: FirebaseAuth = FirebaseAuth.getInstance()
+    private var auth: FirebaseAuth = FirebaseAuth.getInstance()
     private lateinit var repo: UserRepository
     fun login(email: String, password: String, callback: (Boolean, String?) -> Unit) {
         if (email.isEmpty() || password.isEmpty()) {
@@ -58,7 +59,12 @@ class LoginViewModel : ViewModel(), AuthenticationStateObserver {
     }
 
     override fun onAuthenticationStateChanged(isAuthenticated: Boolean) {
-        if(!isAuthenticated) onCleared()
+        if(!isAuthenticated){
+            onCleared()
+        }else{
+            auth = FirebaseAuth.getInstance()
+            repo = UserRepository.getInstance(auth.currentUser!!.uid)
+        }
 
     }
 }

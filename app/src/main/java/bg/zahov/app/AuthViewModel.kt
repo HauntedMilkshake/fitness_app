@@ -23,7 +23,7 @@ class AuthViewModel() : ViewModel() {
     private val checkInterval: Long = 15 * 60 * 1000 // num of minutes * seconds in a minute * 1000
     private var syncTask: TimerTask? = null
     private var repo: UserRepository? = null
-    private val stateManager = AuthenticationStateManager()
+    private val stateManager = AuthenticationStateManager.getInstance()
     val isAuthenticated: LiveData<Boolean> get() = _isAuthenticated
 
     private val authStateListener = FirebaseAuth.AuthStateListener { firebaseAuth ->
@@ -104,5 +104,8 @@ class AuthViewModel() : ViewModel() {
     }
     private fun removeAuthStateListener(){
         auth.removeAuthStateListener(authStateListener)
+    }
+    fun loginEvent(){
+        stateManager.sendUpdateEvent(true)
     }
 }

@@ -9,6 +9,7 @@ import android.widget.Toast
 import androidx.fragment.app.Fragment
 import androidx.fragment.app.viewModels
 import androidx.navigation.fragment.findNavController
+import bg.zahov.app.AuthViewModel
 import bg.zahov.app.hideBottomNav
 import bg.zahov.fitness.app.R
 import bg.zahov.fitness.app.databinding.FragmentLogInBinding
@@ -17,6 +18,8 @@ class FragmentLogIn : Fragment() {
     private var _binding: FragmentLogInBinding? = null
     private val binding get() = _binding!!
     private val loginViewModel: LoginViewModel by viewModels()
+    private val authViewModel: AuthViewModel by viewModels({ requireActivity() })
+
     override fun onCreateView(
         inflater: LayoutInflater,
         container: ViewGroup?,
@@ -52,6 +55,7 @@ class FragmentLogIn : Fragment() {
             logInButton.setOnClickListener {
                 loginViewModel.login(emailFieldText.text.toString(), passwordFieldText.text.toString()) { success, errorMessage ->
                     if (success) {
+                        authViewModel.loginEvent()
                         findNavController().navigate(R.id.login_to_loading)
                     } else {
                         showToast(errorMessage)
