@@ -5,7 +5,6 @@ import androidx.lifecycle.AndroidViewModel
 import androidx.lifecycle.LiveData
 import androidx.lifecycle.MutableLiveData
 import androidx.lifecycle.viewModelScope
-import bg.zahov.app.common.AuthenticationStateObserver
 import bg.zahov.app.repository.UserRepository
 import bg.zahov.app.utils.isAValidEmail
 import com.google.firebase.auth.EmailAuthProvider
@@ -15,7 +14,7 @@ import io.realm.kotlin.notifications.InitialObject
 import io.realm.kotlin.notifications.UpdatedObject
 import kotlinx.coroutines.launch
 
-class EditProfileViewModel(application: Application) : AndroidViewModel(application), AuthenticationStateObserver {
+class EditProfileViewModel(application: Application) : AndroidViewModel(application){
     private val auth: FirebaseAuth = FirebaseAuth.getInstance()
     private val repo = UserRepository.getInstance(auth.currentUser!!.uid)
 
@@ -106,9 +105,5 @@ class EditProfileViewModel(application: Application) : AndroidViewModel(applicat
                 callback(if (task.isSuccessful) "Successfully updated password!" else "Couldn't update password!")
             }
         }
-    }
-
-    override fun onAuthenticationStateChanged(isAuthenticated: Boolean) {
-        if(!isAuthenticated) onCleared()
     }
 }

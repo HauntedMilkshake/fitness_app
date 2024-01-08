@@ -7,7 +7,6 @@ import androidx.lifecycle.viewModelScope
 import bg.zahov.app.data.BodyPart
 import bg.zahov.app.data.Category
 import bg.zahov.app.backend.Exercise
-import bg.zahov.app.common.AuthenticationStateObserver
 import bg.zahov.app.repository.UserRepository
 import com.google.firebase.auth.FirebaseAuth
 import io.realm.kotlin.notifications.InitialResults
@@ -15,7 +14,7 @@ import io.realm.kotlin.notifications.UpdatedResults
 import kotlinx.coroutines.launch
 import bg.zahov.app.data.Filter as Filter
 
-class ExerciseViewModel : ViewModel(), AuthenticationStateObserver {
+class ExerciseViewModel : ViewModel(){
     private val auth = FirebaseAuth.getInstance()
     private val repo = UserRepository.getInstance(auth.currentUser!!.uid)
     private val _userExercises = MutableLiveData<List<Exercise>>()
@@ -109,10 +108,5 @@ class ExerciseViewModel : ViewModel(), AuthenticationStateObserver {
 
         search = name
         _userExercises.value = newExercises
-    }
-
-    override fun onAuthenticationStateChanged(isAuthenticated: Boolean) {
-        if(!isAuthenticated) onCleared()
-
     }
 }

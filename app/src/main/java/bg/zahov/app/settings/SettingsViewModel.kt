@@ -6,7 +6,6 @@ import androidx.lifecycle.LiveData
 import androidx.lifecycle.MutableLiveData
 import androidx.lifecycle.viewModelScope
 import bg.zahov.app.backend.Settings
-import bg.zahov.app.common.AuthenticationStateObserver
 import bg.zahov.app.repository.UserRepository
 import com.google.firebase.auth.FirebaseAuth
 import io.realm.kotlin.notifications.DeletedObject
@@ -15,7 +14,7 @@ import io.realm.kotlin.notifications.UpdatedObject
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.launch
 
-class SettingsViewModel(application: Application) : AndroidViewModel(application), AuthenticationStateObserver {
+class SettingsViewModel(application: Application) : AndroidViewModel(application){
     private val auth: FirebaseAuth = FirebaseAuth.getInstance()
     private val repo: UserRepository = UserRepository.getInstance(auth.currentUser!!.uid)
     private val _settings = MutableLiveData<Settings>()
@@ -47,10 +46,5 @@ class SettingsViewModel(application: Application) : AndroidViewModel(application
         viewModelScope.launch(Dispatchers.IO) {
             repo.resetSettings()
         }
-    }
-
-    override fun onAuthenticationStateChanged(isAuthenticated: Boolean) {
-        if(!isAuthenticated) onCleared()
-
     }
 }

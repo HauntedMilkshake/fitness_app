@@ -17,7 +17,7 @@ import kotlinx.coroutines.flow.Flow
 import kotlinx.coroutines.withContext
 import java.io.File
 
-class RealmManager(private val userId: String) {
+class RealmManager(private var userId: String) {
     companion object {
         @Volatile
         private var instance: RealmManager? = null
@@ -57,9 +57,15 @@ class RealmManager(private val userId: String) {
         realmInstance?.close()
     }
 
+    fun resetInstance(newUserId: String){
+        userId = newUserId
+        realmInstance?.close()
+        realmInstance = null
+    }
     suspend fun createRealm(user: User, workouts: List<Workout?>?, exercises: List<Exercise?>?, settings: Settings) {
         withContext(Dispatchers.IO) {
             try {
+                Log.d("CLEARED", "user id used for realm creation -> $userId")
                 openRealm()
                 realmInstance?.write {
                     copyToRealm(user)

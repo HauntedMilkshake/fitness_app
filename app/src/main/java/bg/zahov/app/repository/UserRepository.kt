@@ -1,5 +1,6 @@
 package bg.zahov.app.repository
 
+import android.util.Log
 import bg.zahov.app.backend.Exercise
 import bg.zahov.app.backend.RealmManager
 import bg.zahov.app.backend.Settings
@@ -7,7 +8,7 @@ import bg.zahov.app.backend.SyncManager
 import bg.zahov.app.backend.User
 import bg.zahov.app.backend.Workout
 
-class UserRepository(userId: String) {
+class UserRepository(private var userId: String) {
     companion object {
         @Volatile
         private var repoInstance: UserRepository? = null
@@ -42,6 +43,9 @@ class UserRepository(userId: String) {
     }
 
     suspend fun createRealm(newUser: User, workouts: List<Workout?>?, exercises: List<Exercise?>?, settings: Settings) {
+        Log.d("CREATING REALM", userId)
+        realmInstance?.resetInstance(userId)
+        realmInstance = RealmManager.getInstance(userId)
         realmInstance?.createRealm(newUser, workouts, exercises, settings)
     }
     suspend fun createFirestore(user: User, settings: Settings) {
@@ -57,14 +61,14 @@ class UserRepository(userId: String) {
         realmInstance?.resetSettings()
     }
 
-    fun clearResources(){
-        realmInstance = null
-        syncManager = null
+    fun invalidate(){
+        repoInstance = null
     }
     fun deleteUser(){
         syncManager?.deleteFirebaseUser()
+        syncManager = null
         realmInstance?.deleteRealm()
-        clearResources()
+        realmInstance = null
     }
     fun isSyncRequired() = realmInstance?.doesUserHaveRealm() ?: false
 }

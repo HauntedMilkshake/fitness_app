@@ -55,7 +55,6 @@ class FragmentLogIn : Fragment() {
             logInButton.setOnClickListener {
                 loginViewModel.login(emailFieldText.text.toString(), passwordFieldText.text.toString()) { success, errorMessage ->
                     if (success) {
-                        authViewModel.loginEvent()
                         findNavController().navigate(R.id.login_to_loading)
                     } else {
                         showToast(errorMessage)

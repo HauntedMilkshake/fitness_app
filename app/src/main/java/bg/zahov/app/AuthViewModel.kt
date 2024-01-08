@@ -8,7 +8,6 @@ import androidx.lifecycle.LiveData
 import androidx.lifecycle.MutableLiveData
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
-import bg.zahov.app.common.AuthenticationStateManager
 import bg.zahov.app.repository.UserRepository
 import com.google.firebase.auth.FirebaseAuth
 import kotlinx.coroutines.Dispatchers
@@ -16,29 +15,14 @@ import kotlinx.coroutines.launch
 import java.util.Timer
 import java.util.TimerTask
 
-class AuthViewModel() : ViewModel() {
+class AuthViewModel : ViewModel() {
     private val auth: FirebaseAuth = FirebaseAuth.getInstance()
-    private var userId: String? = auth.currentUser?.uid
+    private var userId = auth.currentUser?.uid
     private val _isAuthenticated = MutableLiveData<Boolean>()
     private val checkInterval: Long = 15 * 60 * 1000 // num of minutes * seconds in a minute * 1000
     private var syncTask: TimerTask? = null
     private var repo: UserRepository? = null
-    private val stateManager = AuthenticationStateManager.getInstance()
     val isAuthenticated: LiveData<Boolean> get() = _isAuthenticated
-
-    private val authStateListener = FirebaseAuth.AuthStateListener { firebaseAuth ->
-        _isAuthenticated.value = firebaseAuth.currentUser != null
-    }
-
-    init {
-        auth.addAuthStateListener(authStateListener)
-    }
-
-    override fun onCleared() {
-        super.onCleared()
-        auth.removeAuthStateListener(authStateListener)
-    }
-
     fun initiateSync(context: Context) {
         viewModelScope.launch(Dispatchers.Default) {
             syncTask?.cancel()
@@ -74,38 +58,20 @@ class AuthViewModel() : ViewModel() {
     }
 
     fun signOut() {
-        stateManager.sendUpdateEvent(false)
-        invalidateUser()
+        Log.d("SIGNOUT", "PERFORMING SIGNOUT :)")
         cancelSync()
-        removeAuthStateListener()
-        auth.signOut()
         _isAuthenticated.value = false
-        repo?.clearResources()
-        invalidateRepo()
+        repo?.invalidate()
+        auth.signOut()
     }
     fun deleteAccount() {
-        stateManager.sendUpdateEvent(false)
-        invalidateUser()
         cancelSync()
-        removeAuthStateListener()
         auth.signOut()
         _isAuthenticated.value = false
         repo?.deleteUser()
-        invalidateRepo()
-    }
-    private fun invalidateRepo(){
-        repo = null
+        repo?.invalidate()
     }
     private fun cancelSync(){
         syncTask?.cancel()
-    }
-    private fun invalidateUser(){
-        userId = null
-    }
-    private fun removeAuthStateListener(){
-        auth.removeAuthStateListener(authStateListener)
-    }
-    fun loginEvent(){
-        stateManager.sendUpdateEvent(true)
     }
 }

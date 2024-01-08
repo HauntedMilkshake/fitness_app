@@ -10,12 +10,11 @@ import bg.zahov.app.data.BodyPart
 import bg.zahov.app.data.Category
 import bg.zahov.app.repository.UserRepository
 import bg.zahov.app.backend.Exercise
-import bg.zahov.app.common.AuthenticationStateObserver
 import com.google.firebase.auth.FirebaseAuth
 import io.realm.kotlin.ext.realmListOf
 import kotlinx.coroutines.launch
 
-class AddExerciseViewModel(application: Application) : AndroidViewModel(application), AuthenticationStateObserver {
+class AddExerciseViewModel(application: Application) : AndroidViewModel(application){
     private val auth = FirebaseAuth.getInstance()
     private val repo = UserRepository.getInstance(auth.currentUser!!.uid)
     private val _bodyPart = MutableLiveData<String>()
@@ -72,8 +71,4 @@ class AddExerciseViewModel(application: Application) : AndroidViewModel(applicat
 
     fun getCurrBodyPart() = _bodyPart.value
     fun getCurrCategory() = _category.value
-    override fun onAuthenticationStateChanged(isAuthenticated: Boolean) {
-        if(!isAuthenticated) onCleared()
-
-    }
 }

@@ -1,17 +1,17 @@
 package bg.zahov.app.signup
 
+import android.util.Log
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
 import bg.zahov.app.backend.Settings
 import bg.zahov.app.backend.User
-import bg.zahov.app.common.AuthenticationStateObserver
 import bg.zahov.app.repository.UserRepository
 import bg.zahov.app.utils.isAValidEmail
 import com.google.firebase.auth.FirebaseAuth
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.launch
 
-class SignupViewModel : ViewModel(), AuthenticationStateObserver {
+class SignupViewModel : ViewModel(){
     private var auth: FirebaseAuth = FirebaseAuth.getInstance()
     private lateinit var repo: UserRepository
     fun signUp(
@@ -39,6 +39,8 @@ class SignupViewModel : ViewModel(), AuthenticationStateObserver {
             .addOnCompleteListener { task ->
                 if (task.isSuccessful) {
                     viewModelScope.launch() {
+                        Log.d("SIGNUP", "new id - ${auth.currentUser!!.uid}")
+                        repo.invalidate()
                         repo = UserRepository.getInstance(auth.currentUser!!.uid)
 
                         repo.createRealm(
@@ -68,16 +70,5 @@ class SignupViewModel : ViewModel(), AuthenticationStateObserver {
 
     private fun areFieldsEmpty(userName: String?, email: String?, pass: String?) =
         listOf(userName, email, pass).count { it.isNullOrEmpty() } >= 1
-
-    override fun onAuthenticationStateChanged(isAuthenticated: Boolean) {
-        if(!isAuthenticated){
-            onCleared()
-        }else{
-            auth = FirebaseAuth.getInstance()
-            repo = UserRepository.getInstance(auth.currentUser!!.uid)
-        }
-
-    }
-
 }
 

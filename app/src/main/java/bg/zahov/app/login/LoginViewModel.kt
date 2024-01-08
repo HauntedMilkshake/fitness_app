@@ -1,16 +1,16 @@
 package bg.zahov.app.login
 
 import androidx.lifecycle.ViewModel
-import bg.zahov.app.common.AuthenticationStateObserver
 import bg.zahov.app.repository.UserRepository
 import bg.zahov.app.utils.isAValidEmail
 import com.google.firebase.auth.FirebaseAuth
-import com.google.firebase.firestore.auth.User
 import kotlinx.coroutines.runBlocking
 
-class LoginViewModel : ViewModel(), AuthenticationStateObserver {
+class LoginViewModel : ViewModel(){
     private var auth: FirebaseAuth = FirebaseAuth.getInstance()
     private lateinit var repo: UserRepository
+    init {
+    }
     fun login(email: String, password: String, callback: (Boolean, String?) -> Unit) {
         if (email.isEmpty() || password.isEmpty()) {
             callback(false, "Fields cannot be empty!")
@@ -55,16 +55,6 @@ class LoginViewModel : ViewModel(), AuthenticationStateObserver {
                         ?: "Failed to send email reset link"
                 )
             }
-
-    }
-
-    override fun onAuthenticationStateChanged(isAuthenticated: Boolean) {
-        if(!isAuthenticated){
-            onCleared()
-        }else{
-            auth = FirebaseAuth.getInstance()
-            repo = UserRepository.getInstance(auth.currentUser!!.uid)
-        }
 
     }
 }
