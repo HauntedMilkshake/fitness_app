@@ -7,6 +7,7 @@ import bg.zahov.app.backend.Settings
 import bg.zahov.app.backend.SyncManager
 import bg.zahov.app.backend.User
 import bg.zahov.app.backend.Workout
+import com.google.firebase.auth.FirebaseAuth
 
 class UserRepository(private var userId: String) {
     companion object {
@@ -16,9 +17,11 @@ class UserRepository(private var userId: String) {
             repoInstance ?: UserRepository(userId).also { repoInstance = it }
         }
     }
-
+    init{
+        Log.d("ID", "INIT OF REPO WITH ID $userId")
+    }
     private var realmInstance: RealmManager? = RealmManager.getInstance(userId)
-    //this needs fixing
+
     private var syncManager: SyncManager? = SyncManager.getInstance(userId, realmInstance!!)
     suspend fun getTemplateExercises() = realmInstance?.getTemplateExercises()
     suspend fun getSettings() = realmInstance?.getSettings()
@@ -43,12 +46,19 @@ class UserRepository(private var userId: String) {
     }
 
     suspend fun createRealm(newUser: User, workouts: List<Workout?>?, exercises: List<Exercise?>?, settings: Settings) {
-        Log.d("CREATING REALM", userId)
-        realmInstance?.resetInstance(userId)
+        Log.d("ID", "IN REPO -> $userId")
+        invalidate()
+        realmInstance?.updateUser(userId)
         realmInstance = RealmManager.getInstance(userId)
         realmInstance?.createRealm(newUser, workouts, exercises, settings)
     }
+    fun updateUser(newId: String){
+        Log.d("ID", "UPDATING USER WITH ID IN REPO -> $newId")
+        userId = newId
+    }
     suspend fun createFirestore(user: User, settings: Settings) {
+        syncManager?.updateUser(userId)
+        syncManager?.resetRealm(realmInstance!!)
         syncManager?.createFirestore(user, settings)
     }
     suspend fun syncFromFirestore() {
@@ -64,8 +74,8 @@ class UserRepository(private var userId: String) {
     fun invalidate(){
         repoInstance = null
     }
-    fun deleteUser(){
-        syncManager?.deleteFirebaseUser()
+    fun deleteUser(auth: FirebaseAuth){
+        syncManager?.deleteFirebaseUser(auth)
         syncManager = null
         realmInstance?.deleteRealm()
         realmInstance = null

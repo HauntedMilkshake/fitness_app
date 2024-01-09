@@ -1,16 +1,17 @@
 package bg.zahov.app.login
 
 import androidx.lifecycle.ViewModel
+import androidx.lifecycle.viewModelScope
 import bg.zahov.app.repository.UserRepository
 import bg.zahov.app.utils.isAValidEmail
 import com.google.firebase.auth.FirebaseAuth
+import kotlinx.coroutines.launch
 import kotlinx.coroutines.runBlocking
 
 class LoginViewModel : ViewModel(){
     private var auth: FirebaseAuth = FirebaseAuth.getInstance()
     private lateinit var repo: UserRepository
-    init {
-    }
+
     fun login(email: String, password: String, callback: (Boolean, String?) -> Unit) {
         if (email.isEmpty() || password.isEmpty()) {
             callback(false, "Fields cannot be empty!")
@@ -27,7 +28,7 @@ class LoginViewModel : ViewModel(){
                     repo = UserRepository.getInstance(auth.currentUser!!.uid)
 
                     if(repo.isSyncRequired()){
-                        runBlocking {
+                        viewModelScope.launch {
                             repo.syncFromFirestore()
                         }
                     }

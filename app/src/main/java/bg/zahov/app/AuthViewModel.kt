@@ -68,7 +68,7 @@ class AuthViewModel : ViewModel() {
         cancelSync()
         auth.signOut()
         _isAuthenticated.value = false
-        repo?.deleteUser()
+        repo?.deleteUser(auth)
         repo?.invalidate()
     }
     private fun cancelSync(){

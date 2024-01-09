@@ -13,7 +13,7 @@ import kotlinx.coroutines.launch
 
 class SignupViewModel : ViewModel(){
     private var auth: FirebaseAuth = FirebaseAuth.getInstance()
-    private lateinit var repo: UserRepository
+    private var repo: UserRepository? = null
     fun signUp(
         userName: String,
         email: String,
@@ -35,38 +35,38 @@ class SignupViewModel : ViewModel(){
             callback(false, "Passwords must match")
             return
         }
-        auth.createUserWithEmailAndPassword(email, password)
-            .addOnCompleteListener { task ->
-                if (task.isSuccessful) {
-                    viewModelScope.launch() {
-                        Log.d("SIGNUP", "new id - ${auth.currentUser!!.uid}")
-                        repo.invalidate()
-                        repo = UserRepository.getInstance(auth.currentUser!!.uid)
+            auth.createUserWithEmailAndPassword(email, password)
+                .addOnCompleteListener { task ->
+                    if (task.isSuccessful) {
+                        viewModelScope.launch {
+                            Log.d("ID", "new id from auth - ${auth.currentUser!!.uid}")
 
-                        repo.createRealm(
-                            User().apply {
-                                username = userName
-                                numberOfWorkouts = 0
-                            },
-                            workouts = null,
-                            exercises = null,
-                            settings = Settings()
-                        )
-                        viewModelScope.launch(Dispatchers.Default) {
-                            repo.createFirestore(
+                                repo = UserRepository.getInstance(auth.currentUser!!.uid)
+                                repo?.updateUser(auth.currentUser!!.uid)
+
+                            repo?.createRealm(
                                 User().apply {
                                     username = userName
                                     numberOfWorkouts = 0
                                 },
-                                settings = Settings())
+                                workouts = null,
+                                exercises = null,
+                                settings = Settings()
+                            )
+
+                                repo?.createFirestore(
+                                    User().apply {
+                                        username = userName
+                                        numberOfWorkouts = 0
+                                    },
+                                    settings = Settings())
+                            callback(true, null)
                         }
-                        callback(true, null)
+                    } else {
+                        callback(false, task.exception?.message)
                     }
-                } else {
-                    callback(false, task.exception?.message)
                 }
-            }
-    }
+        }
 
     private fun areFieldsEmpty(userName: String?, email: String?, pass: String?) =
         listOf(userName, email, pass).count { it.isNullOrEmpty() } >= 1

@@ -19,7 +19,7 @@ import kotlinx.coroutines.runBlocking
 import kotlinx.coroutines.tasks.await
 import kotlinx.coroutines.withContext
 
-class SyncManager(private val uid: String, private val realm: RealmManager) {
+class SyncManager(private var uid: String, private var realm: RealmManager) {
     companion object {
         @Volatile
         private var instance: SyncManager? = null
@@ -28,7 +28,6 @@ class SyncManager(private val uid: String, private val realm: RealmManager) {
                 instance ?: SyncManager(userId, realm).also { instance = it }
             }
     }
-    private val auth = FirebaseAuth.getInstance()
     private val firestore = FirebaseFirestore.getInstance()
 
     private val userAdapter =  FirestoreUserAdapter()
@@ -58,29 +57,26 @@ class SyncManager(private val uid: String, private val realm: RealmManager) {
     }
 
     suspend fun syncFromFirestore() {
+            val userDocument = firestore.collection("users").document(uid).get().await()
 
-        val userDocument = firestore.collection("users").document(uid).get().await()
+            val rUser = userAdapter.adapt(userDocument.data!!)
 
-        val rUser = userAdapter.adapt(userDocument.data!!)
+            val settingsDocument = userDocument.reference.collection("settings").document("userSettings").get().await()
+            val settings = settingsAdapter.adapt(settingsDocument.data!!)
 
-        val settingsDocument = userDocument.reference.collection("settings").document("userSettings").get().await()
-        val settings = settingsAdapter.adapt(settingsDocument.data!!)
+            val workoutsCollection = userDocument.reference.collection("workouts").get().await()
+            val workouts = workoutsCollection.documents.mapNotNull { workoutDocument ->
+                val workout = workoutAdapter.adapt(workoutDocument.data!!)
+                workout
+            }
 
-        val workoutsCollection = userDocument.reference.collection("workouts").get().await()
-        val workouts = workoutsCollection.documents.mapNotNull { workoutDocument ->
-            val workout = workoutAdapter.adapt(workoutDocument.data!!)
-            workout
-        }
+            val exercisesCollection = userDocument.reference.collection("exercises").get().await()
+            val exercises = exercisesCollection.documents.mapNotNull { exerciseDocument ->
+                val exercise = exerciseAdapter.adapt(exerciseDocument.data!!)
+                exercise
+            }
 
-        val exercisesCollection = userDocument.reference.collection("exercises").get().await()
-        val exercises = exercisesCollection.documents.mapNotNull { exerciseDocument ->
-            val exercise = exerciseAdapter.adapt(exerciseDocument.data!!)
-            exercise
-        }
-
-        runBlocking {
             realm.createRealm(rUser, workouts, exercises, settings)
-        }
     }
 
     //1st values of pairs represent the ones we need to upsert
@@ -131,7 +127,7 @@ class SyncManager(private val uid: String, private val realm: RealmManager) {
             } ?: Log.d("SYNC", "failed to sync exercises")
         }
     }
-    fun deleteFirebaseUser(){
+    fun deleteFirebaseUser(auth: FirebaseAuth){
         auth.currentUser?.delete()
         firestore.runBatch{
             it.delete(firestore.collection("users").document(uid))
@@ -300,5 +296,10 @@ class SyncManager(private val uid: String, private val realm: RealmManager) {
             syncToFirestore(getChangedUserOrNull(), getChangedWorkoutsOrNull(), getChangedExercisesOrNull(), getChangedSettingsOrNull())
         }
     }
-
+    fun updateUser(newId: String){
+        uid = newId
+    }
+    fun resetRealm(newRealm: RealmManager) {
+        realm = newRealm
+    }
 }

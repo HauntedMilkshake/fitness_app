@@ -26,7 +26,6 @@ class RealmManager(private var userId: String) {
                 instance ?: RealmManager(userId).also { instance = it }
             }
     }
-
     private var realmInstance: Realm? = null
     private val realmConfig by lazy {
         getConfig().build()
@@ -44,6 +43,7 @@ class RealmManager(private var userId: String) {
         )
         config.schemaVersion(1)
         config.deleteRealmIfMigrationNeeded()
+        Log.d("CONFIG", userId)
         config.name("$userId.realm")
         return config
     }
@@ -57,15 +57,18 @@ class RealmManager(private var userId: String) {
         realmInstance?.close()
     }
 
-    fun resetInstance(newUserId: String){
-        userId = newUserId
+    fun resetInstance(){
         realmInstance?.close()
         realmInstance = null
     }
+    fun updateUser(newId: String){
+        Log.d("ID", "UPDATING USER WITH ID IN REALM -> $newId")
+        userId = newId
+    }
     suspend fun createRealm(user: User, workouts: List<Workout?>?, exercises: List<Exercise?>?, settings: Settings) {
-        withContext(Dispatchers.IO) {
+        withContext(Dispatchers.Main) {
             try {
-                Log.d("CLEARED", "user id used for realm creation -> $userId")
+                Log.d("ID", "id used for realm creation -> $userId")
                 openRealm()
                 realmInstance?.write {
                     copyToRealm(user)
