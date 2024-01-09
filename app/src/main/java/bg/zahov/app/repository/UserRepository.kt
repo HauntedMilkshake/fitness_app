@@ -8,6 +8,8 @@ import bg.zahov.app.backend.SyncManager
 import bg.zahov.app.backend.User
 import bg.zahov.app.backend.Workout
 import com.google.firebase.auth.FirebaseAuth
+import kotlinx.coroutines.Dispatchers
+import kotlinx.coroutines.withContext
 
 class UserRepository(private var userId: String) {
     companion object {
@@ -47,9 +49,9 @@ class UserRepository(private var userId: String) {
 
     suspend fun createRealm(newUser: User, workouts: List<Workout?>?, exercises: List<Exercise?>?, settings: Settings) {
         Log.d("ID", "IN REPO -> $userId")
-        invalidate()
-        realmInstance?.updateUser(userId)
+        realmInstance?.resetInstance()
         realmInstance = RealmManager.getInstance(userId)
+        realmInstance?.updateUser(userId)
         realmInstance?.createRealm(newUser, workouts, exercises, settings)
     }
     fun updateUser(newId: String){
@@ -74,11 +76,14 @@ class UserRepository(private var userId: String) {
     fun invalidate(){
         repoInstance = null
     }
-    fun deleteUser(auth: FirebaseAuth){
+    suspend fun deleteUser(auth: FirebaseAuth){
         syncManager?.deleteFirebaseUser(auth)
-        syncManager = null
+        syncManager?.invalidateInstance()
         realmInstance?.deleteRealm()
-        realmInstance = null
+        realmInstance?.resetInstance()
+    }
+    fun deleteRealm(){
+        realmInstance?.deleteRealm()
     }
     fun isSyncRequired() = realmInstance?.doesUserHaveRealm() ?: false
 }

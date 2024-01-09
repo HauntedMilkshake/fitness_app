@@ -14,6 +14,7 @@ import io.realm.kotlin.notifications.ResultsChange
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.NonCancellable
 import kotlinx.coroutines.flow.Flow
+import kotlinx.coroutines.runBlocking
 import kotlinx.coroutines.withContext
 import java.io.File
 
@@ -26,7 +27,7 @@ class RealmManager(private var userId: String) {
                 instance ?: RealmManager(userId).also { instance = it }
             }
     }
-    private var realmInstance: Realm? = null
+    private  var realmInstance: Realm? = null
     private val realmConfig by lazy {
         getConfig().build()
     }
@@ -58,7 +59,7 @@ class RealmManager(private var userId: String) {
     }
 
     fun resetInstance(){
-        realmInstance?.close()
+        closeRealm()
         realmInstance = null
     }
     fun updateUser(newId: String){
@@ -91,9 +92,11 @@ class RealmManager(private var userId: String) {
         }
     }
 
+
     fun deleteRealm(){
-        closeRealm()
-        File(realmConfig.path).delete()
+            closeRealm()
+            Log.d("DELETE", "BEFORE FILE EXISTS")
+            Realm.deleteRealm(realmConfig)
     }
 
     fun doesUserHaveRealm() = File(realmConfig.path).exists()

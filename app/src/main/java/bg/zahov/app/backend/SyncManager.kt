@@ -302,4 +302,7 @@ class SyncManager(private var uid: String, private var realm: RealmManager) {
     fun resetRealm(newRealm: RealmManager) {
         realm = newRealm
     }
+    fun invalidateInstance(){
+        instance = null
+    }
 }

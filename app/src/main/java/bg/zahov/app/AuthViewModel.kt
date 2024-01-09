@@ -58,18 +58,21 @@ class AuthViewModel : ViewModel() {
     }
 
     fun signOut() {
-        Log.d("SIGNOUT", "PERFORMING SIGNOUT :)")
-        cancelSync()
-        _isAuthenticated.value = false
-        repo?.invalidate()
-        auth.signOut()
+            Log.d("SIGNOUT", "PERFORMING SIGN OUT :)")
+            cancelSync()
+            _isAuthenticated.value = false
+            repo?.deleteRealm()
+            repo?.invalidate()
+            auth.signOut()
     }
     fun deleteAccount() {
-        cancelSync()
-        auth.signOut()
-        _isAuthenticated.value = false
-        repo?.deleteUser(auth)
-        repo?.invalidate()
+        viewModelScope.launch {
+            cancelSync()
+            repo?.deleteUser(auth)
+            auth.signOut()
+            _isAuthenticated.value = false
+            repo?.invalidate()
+        }
     }
     private fun cancelSync(){
         syncTask?.cancel()
