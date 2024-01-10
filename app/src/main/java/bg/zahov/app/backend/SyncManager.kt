@@ -136,7 +136,7 @@ class SyncManager(private var uid: String, private var realm: RealmManager) {
 
     private suspend fun getChangedUserOrNull(): User? {
 
-        val newUser = realm.getUserSync()
+        val newUser = realm.getUserSync()!!
 
         return if (!userCache.equalsTo(newUser)) {
             userCache = newUser
@@ -148,9 +148,9 @@ class SyncManager(private var uid: String, private var realm: RealmManager) {
 
     private suspend fun getChangedSettingsOrNull(): Settings? {
 
-        val newSettings = realm.getSettingsSync()
+        val newSettings = realm.getSettingsSync()!!
 
-        return if (!settingsCache.equalTo(newSettings)) {
+        return if ( settingsCache.equalTo(newSettings)) {
             settingsCache = newSettings
             settingsCache.automaticSync = currSync
             newSettings
@@ -166,7 +166,7 @@ class SyncManager(private var uid: String, private var realm: RealmManager) {
         val currTemplateExercises = realm.getTemplateExercisesSync()
         val changedExercises: MutableList<Exercise> = mutableListOf()
 
-        val currSet = currTemplateExercises.toSet()
+        val currSet = currTemplateExercises!!.toSet()
 
         val cacheSet = exerciseCache.toSet()
         cacheSet.forEach {
@@ -213,9 +213,9 @@ class SyncManager(private var uid: String, private var realm: RealmManager) {
         val workoutsToUpsert: MutableList<Workout> = mutableListOf()
         val workoutsToDelete: MutableList<String> = mutableListOf()
 
-        val currWorkoutTemplatesSet = currWorkoutTemplates.toSet()
+        val currWorkoutTemplatesSet = currWorkoutTemplates!!.toSet()
         val cacheWorkoutTemplatesSet = cacheWorkoutTemplates.toSet()
-        val currWorkoutsSet = currWorkouts.toSet()
+        val currWorkoutsSet = currWorkouts!!.toSet()
         val cacheWorkoutSets = cacheWorkouts.toSet()
 
         val newTemplatesSet = cacheWorkoutTemplatesSet.getWorkoutDifference(currWorkoutTemplatesSet)
@@ -298,11 +298,5 @@ class SyncManager(private var uid: String, private var realm: RealmManager) {
     }
     fun updateUser(newId: String){
         uid = newId
-    }
-    fun resetRealm(newRealm: RealmManager) {
-        realm = newRealm
-    }
-    fun invalidateInstance(){
-        instance = null
     }
 }

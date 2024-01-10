@@ -13,6 +13,7 @@ import bg.zahov.app.backend.Settings
 import bg.zahov.app.backend.User
 import bg.zahov.app.backend.Workout
 import bg.zahov.fitness.app.R
+import io.realm.kotlin.Realm
 import io.realm.kotlin.types.RealmList
 
 fun String.isAValidEmail() = Regex("^\\S+@\\S+\\.\\S+$").matches(this)
@@ -199,3 +200,4 @@ fun View.applySelectAnimation(
     animator.addUpdateListener { animation -> setBackgroundColor(animation.animatedValue as Int) }
     animator.start()
 }
+

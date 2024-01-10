@@ -14,17 +14,16 @@ import io.realm.kotlin.notifications.ResultsChange
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.NonCancellable
 import kotlinx.coroutines.flow.Flow
-import kotlinx.coroutines.runBlocking
 import kotlinx.coroutines.withContext
 import java.io.File
 
-class RealmManager(private var userId: String) {
+class RealmManager() {
     companion object {
         @Volatile
         private var instance: RealmManager? = null
-        fun getInstance(userId: String) =
+        fun getInstance() =
             instance ?: synchronized(this) {
-                instance ?: RealmManager(userId).also { instance = it }
+                instance ?: RealmManager().also { instance = it }
             }
     }
     private  var realmInstance: Realm? = null
@@ -44,8 +43,7 @@ class RealmManager(private var userId: String) {
         )
         config.schemaVersion(1)
         config.deleteRealmIfMigrationNeeded()
-        Log.d("CONFIG", userId)
-        config.name("$userId.realm")
+        config.name("talicegay,maksoshtepoveche,ivonaimnogo.realm")
         return config
     }
 
@@ -58,19 +56,14 @@ class RealmManager(private var userId: String) {
         realmInstance?.close()
     }
 
-    fun resetInstance(){
-        closeRealm()
-        realmInstance = null
-    }
-    fun updateUser(newId: String){
-        Log.d("ID", "UPDATING USER WITH ID IN REALM -> $newId")
-        userId = newId
-    }
     suspend fun createRealm(user: User, workouts: List<Workout?>?, exercises: List<Exercise?>?, settings: Settings) {
         withContext(Dispatchers.Main) {
             try {
-                Log.d("ID", "id used for realm creation -> $userId")
-                openRealm()
+
+                if(!doesUserHaveRealm()){
+                    openRealm()
+                }
+
                 realmInstance?.write {
                     copyToRealm(user)
                     copyToRealm(settings)
@@ -92,71 +85,76 @@ class RealmManager(private var userId: String) {
         }
     }
 
-
-    fun deleteRealm(){
-            closeRealm()
-            Log.d("DELETE", "BEFORE FILE EXISTS")
-            Realm.deleteRealm(realmConfig)
+    suspend fun deleteRealm(){
+        withRealm {
+            it?.write {
+                deleteAll()
+            }
+        }
     }
 
     fun doesUserHaveRealm() = File(realmConfig.path).exists()
 
-    private suspend fun <T> withRealm(block: suspend (Realm) -> T): T {
+    private suspend fun <T> withRealm(block: suspend (Realm?) -> T): T {
         return withContext(Dispatchers.IO) {
             openRealm()
-            block(realmInstance!!)
+            block(realmInstance)
         }
     }
 
     suspend fun getUser(): Flow<ObjectChange<User>>? {
         return withRealm { realm ->
             withContext(NonCancellable){
-                realm.query<User>().first().find()?.asFlow()
+                realm?.query<User>()?.first()?.find()?.asFlow()
             }
         }
     }
 
-    suspend fun getUserSync(): User {
+    suspend fun getUserSync(): User? {
         return withRealm{ realm ->
-            realm.query<User>().find().first()
+            realm?.query<User>()?.find()?.first()
         }
     }
 
-    suspend fun getSettings(): Flow<ObjectChange<Settings>> {
+    suspend fun getSettings(): Flow<ObjectChange<Settings>>? {
         return withRealm { realm ->
-            realm.query<Settings>().find().first().asFlow()
+            realm?.query<Settings>()?.find()?.first()?.asFlow()
         }
     }
-    suspend fun getTemplateExercises(): Flow<ResultsChange<Exercise>> {
+    suspend fun getTemplateExercises(): Flow<ResultsChange<Exercise>>? {
         return withRealm { realm ->
-            realm.query<Exercise>("isTemplate == true").find().asFlow()
-        }
-    }
-
-    suspend fun getPerformedWorkouts(): Flow<ResultsChange<Workout>> {
-        return withRealm { realm ->
-            realm.query<Workout>("isTemplate == false").find().asFlow()
+            realm?.query<Exercise>("isTemplate == true")?.find()?.asFlow()
         }
     }
 
-    suspend fun getAllWorkouts(): Flow<ResultsChange<Workout>> {
+    suspend fun getPerformedWorkouts(): Flow<ResultsChange<Workout>>? {
+        return withRealm { realm ->
+            realm?.query<Workout>("isTemplate == false")?.find()?.asFlow()
+        }
+    }
+
+    suspend fun getAllWorkouts(): Flow<ResultsChange<Workout>>? {
         return withRealm {realm ->
-            realm.query<Workout>().find().asFlow()
+            realm?.query<Workout>()?.find()?.asFlow()
         }
     }
 
-    suspend fun getTemplateWorkouts(): Flow<ResultsChange<Workout>> {
+    suspend fun getTemplateWorkouts(): Flow<ResultsChange<Workout>>? {
         return withRealm {realm ->
-            realm.query<Workout>("isTemplate == true").find().asFlow()
+            realm?.query<Workout>("isTemplate == true")?.find()?.asFlow()
         }
     }
 
     suspend fun changeUserName(newUserName: String) {
         withRealm { realm ->
-            val realmUser = realm.query<User>().find().first()
-            realm.write {
-                findLatest(realmUser)?.let {
-                    it.username = newUserName
+            val realmUser = getUserSync()
+            realm?.write {
+                realmUser?.let{coldUser->
+                    findLatest(coldUser)?.let{hotUser ->
+                        hotUser.apply {
+                            username = newUserName
+                        }
+                    }
                 }
             }
         }
@@ -164,7 +162,7 @@ class RealmManager(private var userId: String) {
 
     suspend fun addExercise(newExercise: Exercise) {
         withRealm { realm ->
-            realm.write {
+            realm?.write {
                copyToRealm(newExercise)
             }
         }
@@ -172,7 +170,7 @@ class RealmManager(private var userId: String) {
 
     suspend fun addWorkout(newWorkout: Workout){
         withRealm { realm ->
-            realm.write {
+            realm?.write {
                 copyToRealm(newWorkout)
             }
         }
@@ -180,19 +178,21 @@ class RealmManager(private var userId: String) {
 
     suspend fun resetSettings() {
         withRealm { realm ->
-            val settings = realm.query<Settings>().find().first()
-            realm.write {
-                findLatest(settings)?.apply {
-                    language= Language.English.name
-                    units = Units.Metric.name
-                    soundEffects = true
-                    theme = Theme.Dark.name
-                    restTimer = 30
-                    vibration = true
-                    soundSettings = Sound.SOUND_1.name
-                    updateTemplate = true
-                    fit = false
-                    automaticSync = true
+            val settings = getSettingsSync()
+            realm?.write {
+                settings?.let{ coldSettings ->
+                    findLatest(coldSettings)?.apply {
+                        language= Language.English.name
+                        units = Units.Metric.name
+                        soundEffects = true
+                        theme = Theme.Dark.name
+                        restTimer = 30
+                        vibration = true
+                        soundSettings = Sound.SOUND_1.name
+                        updateTemplate = true
+                        fit = false
+                        automaticSync = true
+                    }
                 }
             }
         }
@@ -200,75 +200,77 @@ class RealmManager(private var userId: String) {
 
     suspend fun updateSetting(title: String, newValue: Any) {
         withRealm { realm ->
-            val settings = realm.query<Settings>().find().first()
-            realm.write {
-                findLatest(settings)?.let {
-                    when (title) {
-                        "Language" -> {
-                            it.language = (newValue as Language).name
-                        }
+            val settings = getSettingsSync()
+            realm?.write {
+                settings?.let{coldSettings ->
+                    findLatest(coldSettings)?.let {
+                        when (title) {
+                            "Language" -> {
+                                it.language = (newValue as Language).name
+                            }
 
-                        "Units" -> {
-                            it.units = (newValue as Units).name
-                        }
+                            "Units" -> {
+                                it.units = (newValue as Units).name
+                            }
 
-                        "Sound effects" -> {
-                            it.soundEffects = newValue as Boolean
-                        }
+                            "Sound effects" -> {
+                                it.soundEffects = newValue as Boolean
+                            }
 
-                        "Theme" -> {
-                            it.theme = (newValue as Theme).name
-                        }
+                            "Theme" -> {
+                                it.theme = (newValue as Theme).name
+                            }
 
-                        "Timer increment value" -> {
-                            it.restTimer = (newValue as Int)
-                        }
+                            "Timer increment value" -> {
+                                it.restTimer = (newValue as Int)
+                            }
 
-                        "Vibrate upon finish" -> {
-                            it.vibration = (newValue as Boolean)
-                        }
+                            "Vibrate upon finish" -> {
+                                it.vibration = (newValue as Boolean)
+                            }
 
-                        "Sound" -> {
-                            it.soundSettings = (newValue as Sound).name
-                        }
+                            "Sound" -> {
+                                it.soundSettings = (newValue as Sound).name
+                            }
 
-                        "Show update template" -> {
-                            it.updateTemplate = (newValue as Boolean)
-                        }
+                            "Show update template" -> {
+                                it.updateTemplate = (newValue as Boolean)
+                            }
 
-                        "Use samsung watch during workout" -> {
-                            it.fit = (newValue as Boolean)
-                        }
+                            "Use samsung watch during workout" -> {
+                                it.fit = (newValue as Boolean)
+                            }
 
-                        "Automatic between device sync" -> {
-                            it.automaticSync = (newValue as Boolean)
-                        }
+                            "Automatic between device sync" -> {
+                                it.automaticSync = (newValue as Boolean)
+                            }
 
+                        }
                     }
                 }
             }
         }
     }
 
-    suspend fun getSettingsSync(): Settings {
+    suspend fun getSettingsSync(): Settings? {
         return withRealm{ realm ->
-            realm.query<Settings>().find().first()
+            realm?.query<Settings>()?.find()?.first()
         }
     }
 
-    suspend fun getTemplateExercisesSync(): List<Exercise> {
+    suspend fun getTemplateExercisesSync(): List<Exercise>? {
         return withRealm{ realm ->
-            realm.query<Exercise>("isTemplate == true").find()
+            realm?.query<Exercise>("isTemplate == true")?.find()
         }
     }
-    suspend fun getPastWorkoutsSync(): List<Workout> {
+    suspend fun getPastWorkoutsSync(): List<Workout>? {
         return withRealm { realm ->
-            realm.query<Workout>("isTemplate == false").find()
+            realm?.query<Workout>("isTemplate == false")?.find()
         }
     }
-    suspend fun getTemplateWorkoutsSync(): List<Workout> {
+    suspend fun getTemplateWorkoutsSync(): List<Workout>? {
         return withRealm { realm ->
-            realm.query<Workout>("isTemplate == true").find()
+            realm?.query<Workout>("isTemplate == true")?.find()
         }
     }
 }

@@ -19,10 +19,8 @@ class UserRepository(private var userId: String) {
             repoInstance ?: UserRepository(userId).also { repoInstance = it }
         }
     }
-    init{
-        Log.d("ID", "INIT OF REPO WITH ID $userId")
-    }
-    private var realmInstance: RealmManager? = RealmManager.getInstance(userId)
+
+    private var realmInstance: RealmManager? = RealmManager.getInstance()
 
     private var syncManager: SyncManager? = SyncManager.getInstance(userId, realmInstance!!)
     suspend fun getTemplateExercises() = realmInstance?.getTemplateExercises()
@@ -49,18 +47,15 @@ class UserRepository(private var userId: String) {
 
     suspend fun createRealm(newUser: User, workouts: List<Workout?>?, exercises: List<Exercise?>?, settings: Settings) {
         Log.d("ID", "IN REPO -> $userId")
-        realmInstance?.resetInstance()
-        realmInstance = RealmManager.getInstance(userId)
-        realmInstance?.updateUser(userId)
+        realmInstance = RealmManager.getInstance()
         realmInstance?.createRealm(newUser, workouts, exercises, settings)
     }
     fun updateUser(newId: String){
-        Log.d("ID", "UPDATING USER WITH ID IN REPO -> $newId")
         userId = newId
+        syncManager!!.updateUser(newId)
     }
     suspend fun createFirestore(user: User, settings: Settings) {
         syncManager?.updateUser(userId)
-        syncManager?.resetRealm(realmInstance!!)
         syncManager?.createFirestore(user, settings)
     }
     suspend fun syncFromFirestore() {
@@ -73,16 +68,11 @@ class UserRepository(private var userId: String) {
         realmInstance?.resetSettings()
     }
 
-    fun invalidate(){
-        repoInstance = null
-    }
     suspend fun deleteUser(auth: FirebaseAuth){
         syncManager?.deleteFirebaseUser(auth)
-        syncManager?.invalidateInstance()
         realmInstance?.deleteRealm()
-        realmInstance?.resetInstance()
     }
-    fun deleteRealm(){
+    suspend fun deleteRealm(){
         realmInstance?.deleteRealm()
     }
     fun isSyncRequired() = realmInstance?.doesUserHaveRealm() ?: false
