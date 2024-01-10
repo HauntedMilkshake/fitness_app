@@ -6,6 +6,6 @@ Fitness app for tracking exercise progress.
    
 #Functionality
  * Monitor workout performance + volume
- * Create workout templates and track your workouts while doing them
+ * Create workout templates and track your workout while doing them
  * Create custom exercises
  * Track measurements
