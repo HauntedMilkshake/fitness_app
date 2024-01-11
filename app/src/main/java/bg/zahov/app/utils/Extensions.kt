@@ -13,32 +13,28 @@ import bg.zahov.app.backend.Settings
 import bg.zahov.app.backend.User
 import bg.zahov.app.backend.Workout
 import bg.zahov.fitness.app.R
-import io.realm.kotlin.Realm
 import io.realm.kotlin.types.RealmList
 
 fun String.isAValidEmail() = Regex("^\\S+@\\S+\\.\\S+$").matches(this)
-fun User.toFirestoreMap(): Map<String, Any?> {
-    return hashMapOf(
-        "username" to username,
-        "numberOfWorkouts" to numberOfWorkouts
-    )
+fun User.equalsTo(otherUser: User?): Boolean {
+    return otherUser?.let{
+        return this.username == it.username && this.numberOfWorkouts == it.numberOfWorkouts
+    } ?: false
 }
 
-fun User.equalsTo(otherUser: User): Boolean {
-    return this.username == otherUser.username && this.numberOfWorkouts == otherUser.numberOfWorkouts
-}
-
-fun Settings.equalTo(newSettings: Settings): Boolean {
-    return this.language == newSettings.language &&
-            this.units == newSettings.units &&
-            this.soundEffects == newSettings.soundEffects &&
-            this.theme == newSettings.theme &&
-            this.restTimer == newSettings.restTimer &&
-            this.vibration == newSettings.vibration &&
-            this.soundSettings == newSettings.soundSettings &&
-            this.updateTemplate == newSettings.updateTemplate &&
-            this.fit == newSettings.fit &&
-            this.automaticSync == newSettings.automaticSync
+fun Settings.equalTo(newSettings: Settings?): Boolean {
+    return newSettings?.let{
+        this.language == it.language &&
+        this.units == it.units &&
+        this.soundEffects == it.soundEffects &&
+        this.theme == it.theme &&
+        this.restTimer == it.restTimer &&
+        this.vibration == it.vibration &&
+        this.soundSettings == it.soundSettings &&
+        this.updateTemplate == it.updateTemplate &&
+        this.fit == it.fit &&
+        this.automaticSync == it.automaticSync
+    } ?: false
 }
 
 fun Workout.equalsTo(newWorkout: Workout): Boolean {
@@ -61,20 +57,31 @@ fun Workout.equalsTo(newWorkout: Workout): Boolean {
             }
 }
 
-fun Exercise.equalsTo(exercise: Exercise): Boolean {
-    this.isTemplate?.let {
-        return this.bodyPart == exercise.bodyPart &&
-                this.category == exercise.category &&
-                this.exerciseName == exercise.exerciseName
-    }
-    return this.bodyPart == exercise.bodyPart &&
-            this.category == exercise.category &&
-            this.exerciseName == exercise.exerciseName &&
-            this.sets.all { currSets ->
-                exercise.sets.any { newSets ->
-                    currSets.equalsTo(newSets)
+fun Exercise.equalsTo(exercise: Exercise?): Boolean {
+    return exercise?.let {e ->
+        this.isTemplate?.let {
+            this.bodyPart == e.bodyPart &&
+            this.category == e.category &&
+            this.exerciseName == e.exerciseName
+        }
+        this.bodyPart == e.bodyPart &&
+        this.category == e.category &&
+        this.exerciseName == e.exerciseName &&
+        this.sets.all { currSets ->
+                    e.sets.let{
+                        it.any { set->
+                            !(currSets.equalsTo(set))
+                        }
+                    }
                 }
-            }
+    } ?: false
+}
+
+fun Sets.equalsTo(newSet: Sets?): Boolean {
+    return newSet?.let{
+         this.firstMetric == it.firstMetric &&
+                this.secondMetric == it.secondMetric
+    } ?: false
 }
 
 fun Set<Exercise?>.getExerciseDifference(other: Set<Exercise?>): Set<Exercise?> {
@@ -85,11 +92,6 @@ fun Set<Exercise?>.getExerciseDifference(other: Set<Exercise?>): Set<Exercise?> 
 fun Set<Workout?>.getWorkoutDifference(other: Set<Workout?>): Set<Workout?> {
     val idToWorkoutMap = this.associateBy { it?._id?.toHexString() }
     return other.filter { it?._id?.toHexString() !in idToWorkoutMap }.toSet()
-}
-
-fun Sets.equalsTo(newSets: Sets): Boolean {
-    return this.firstMetric == newSets.firstMetric &&
-            this.secondMetric == newSets.secondMetric
 }
 
 inline fun <reified T> RealmList<T>.toFirestoreMap(): List<Map<String, Any?>> {
@@ -103,8 +105,8 @@ inline fun <reified T> RealmList<T>.toFirestoreMap(): List<Map<String, Any?>> {
 }
 
 fun Exercise.toSelectable() = SelectableExercise(this)
-fun List<Exercise>.toSelectableList() = this.map { it.toSelectable() }
 
+fun List<Exercise>.toSelectableList() = this.map { it.toSelectable() }
 fun SelectableExercise.toExercise(): Exercise {
     return Exercise().apply {
         _id = exercise._id
@@ -117,6 +119,39 @@ fun SelectableExercise.toExercise(): Exercise {
 }
 
 fun List<SelectableExercise>.toExerciseList(): List<Exercise> = this.map { it.toExercise() }
+
+fun User.toFirestoreMap(): Map<String, Any?> {
+    return hashMapOf(
+        "username" to username,
+        "numberOfWorkouts" to numberOfWorkouts
+    )
+}
+
+fun Exercise.toFirestoreMap(): Map<String, Any?> {
+    return hashMapOf(
+        "_id" to _id.toHexString(),
+        "bodyPart" to bodyPart,
+        "category" to category,
+        "exerciseName" to exerciseName,
+        "isTemplate" to isTemplate,
+        "sets" to sets.toFirestoreMap()
+    )
+}
+
+fun Settings.toFirestoreMap(): Map<String, Any?> {
+    return mapOf(
+        "language" to this.language,
+        "units" to this.units,
+        "soundEffects" to this.soundEffects,
+        "theme" to this.theme,
+        "restTimer" to this.restTimer,
+        "vibration" to this.vibration,
+        "soundSettings" to this.soundSettings,
+        "updateTemplate" to this.updateTemplate,
+        "automaticSync" to this.automaticSync,
+        "fit" to this.fit
+    )
+}
 
 fun Workout.toFirestoreMap(): Map<String, Any?> {
     return hashMapOf(
@@ -133,36 +168,10 @@ fun Workout.toFirestoreMap(): Map<String, Any?> {
     )
 }
 
-fun Exercise.toFirestoreMap(): Map<String, Any?> {
-    return hashMapOf(
-        "_id" to _id.toHexString(),
-        "bodyPart" to bodyPart,
-        "category" to category,
-        "exerciseName" to exerciseName,
-        "isTemplate" to isTemplate,
-        "sets" to sets.toFirestoreMap()
-    )
-}
-
 fun Sets.toFirestoreMap(): Map<String, Any?> {
     return hashMapOf(
         "firstMetric" to firstMetric,
         "secondMetric" to secondMetric
-    )
-}
-
-fun Settings.toFirestoreMap(): Map<String, Any?> {
-    return mapOf(
-        "language" to this.language,
-        "units" to this.units,
-        "soundEffects" to this.soundEffects,
-        "theme" to this.theme,
-        "restTimer" to this.restTimer,
-        "vibration" to this.vibration,
-        "soundSettings" to this.soundSettings,
-        "updateTemplate" to this.updateTemplate,
-        "automaticSync" to this.automaticSync,
-        "fit" to this.fit
     )
 }
 

@@ -6,11 +6,10 @@ import bg.zahov.app.repository.UserRepository
 import bg.zahov.app.utils.isAValidEmail
 import com.google.firebase.auth.FirebaseAuth
 import kotlinx.coroutines.launch
-import kotlinx.coroutines.runBlocking
 
-class LoginViewModel : ViewModel(){
+class LoginViewModel : ViewModel() {
     private var auth: FirebaseAuth = FirebaseAuth.getInstance()
-    private lateinit var repo: UserRepository
+    private var repo: UserRepository? = null
 
     fun login(email: String, password: String, callback: (Boolean, String?) -> Unit) {
         if (email.isEmpty() || password.isEmpty()) {
@@ -25,15 +24,23 @@ class LoginViewModel : ViewModel(){
             .addOnCompleteListener { task ->
                 if (task.isSuccessful) {
 
-                    repo = UserRepository.getInstance(auth.currentUser!!.uid)
-
-                    if(repo.isSyncRequired()){
-                        viewModelScope.launch {
-                            repo.syncFromFirestore()
+                    auth.currentUser?.uid?.let {
+                        if (repo == null) {
+                            repo = UserRepository.getInstance(it)
+                        } else {
+                            repo!!.updateUser(it)
                         }
                     }
 
-                    callback(true, null)
+                    repo?.let {
+                        if (it.isSyncRequired()) {
+                            viewModelScope.launch {
+                                it.syncFromFirestore()
+                            }
+                        }
+                        callback(true, null)
+                    } ?: callback(false, "Failed to log in :(")
+
                 } else {
                     callback(false, task.exception?.message)
                 }

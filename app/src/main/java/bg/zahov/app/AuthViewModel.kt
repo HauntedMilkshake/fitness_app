@@ -3,7 +3,6 @@ package bg.zahov.app
 import android.content.Context
 import android.net.ConnectivityManager
 import android.net.NetworkCapabilities
-import android.util.Log
 import androidx.lifecycle.LiveData
 import androidx.lifecycle.MutableLiveData
 import androidx.lifecycle.ViewModel
@@ -13,7 +12,6 @@ import com.google.firebase.auth.FirebaseAuth
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.Job
 import kotlinx.coroutines.launch
-import kotlinx.coroutines.withContext
 import java.util.Timer
 import java.util.TimerTask
 
@@ -25,11 +23,13 @@ class AuthViewModel : ViewModel() {
     private var syncTask: TimerTask? = null
     private var repo: UserRepository? = null
     private val authStateListener = FirebaseAuth.AuthStateListener {
-        userId = if(it.currentUser != null) it.currentUser?.uid else null
+        userId = if (it.currentUser != null) it.currentUser?.uid else null
     }
+
     init {
         auth.addAuthStateListener(authStateListener)
     }
+
     val isAuthenticated: LiveData<Boolean> get() = _isAuthenticated
     fun initiateSync(context: Context) {
         viewModelScope.launch(Dispatchers.Default) {
@@ -38,15 +38,12 @@ class AuthViewModel : ViewModel() {
                 override fun run() {
                     if (auth.currentUser != null && userId != null && isUserConnected(context)) {
 
-                        Log.d("ID", userId.toString())
-                        userId?.let{
+                        userId?.let {
                             repo = UserRepository.getInstance(it)
                         }
 
-                        viewModelScope.launch(Dispatchers.IO) {
-//                            repo?.let{
-//                                it.periodicSync()
-//                            }
+                        viewModelScope.launch {
+                            repo?.periodicSync()
                         }
                     }
                 }
@@ -61,23 +58,25 @@ class AuthViewModel : ViewModel() {
             userId?.let {
                 repo = UserRepository.getInstance(it)
             }
-            Log.d("REPO", if(repo == null) "kur" else "nekur")
             cancelSync().join()
             _isAuthenticated.value = false
             repo?.deleteRealm()
-            repo?.invalidate()
             auth.signOut()
         }
     }
+
     fun deleteAccount() {
         viewModelScope.launch {
-            cancelSync()
+            userId?.let {
+                repo = UserRepository.getInstance(it)
+            }
+            cancelSync().join()
+            _isAuthenticated.value = false
             repo?.deleteUser(auth)
             auth.signOut()
-            _isAuthenticated.value = false
-            repo?.invalidate()
         }
     }
+
     private fun cancelSync(): Job {
         return viewModelScope.launch {
             syncTask?.cancel()

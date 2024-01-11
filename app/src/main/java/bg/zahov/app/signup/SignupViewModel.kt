@@ -1,6 +1,5 @@
 package bg.zahov.app.signup
 
-import android.util.Log
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
 import bg.zahov.app.backend.Settings
@@ -8,10 +7,9 @@ import bg.zahov.app.backend.User
 import bg.zahov.app.repository.UserRepository
 import bg.zahov.app.utils.isAValidEmail
 import com.google.firebase.auth.FirebaseAuth
-import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.launch
 
-class SignupViewModel : ViewModel(){
+class SignupViewModel : ViewModel() {
     private var auth: FirebaseAuth = FirebaseAuth.getInstance()
     private var repo: UserRepository? = null
     fun signUp(
@@ -21,52 +19,57 @@ class SignupViewModel : ViewModel(){
         confirmPassword: String,
         callback: (Boolean, String?) -> Unit,
     ) {
-        if(areFieldsEmpty(userName, email, password)){
+        if (areFieldsEmpty(userName, email, password)) {
             callback(false, "Cannot have empty fields")
             return
         }
 
-        if(!email.isAValidEmail()){
+        if (!email.isAValidEmail()) {
             callback(false, "Invalid email!")
             return
         }
 
-        if(password != confirmPassword){
+        if (password != confirmPassword) {
             callback(false, "Passwords must match")
             return
         }
-            auth.createUserWithEmailAndPassword(email, password)
-                .addOnCompleteListener { task ->
-                    if (task.isSuccessful) {
-                        viewModelScope.launch {
-                            Log.d("ID", "new id from auth - ${auth.currentUser!!.uid}")
+        auth.createUserWithEmailAndPassword(email, password)
+            .addOnCompleteListener { task ->
+                if (task.isSuccessful) {
+                    viewModelScope.launch {
 
-                                repo = UserRepository.getInstance(auth.currentUser!!.uid)
-                                repo?.updateUser(auth.currentUser!!.uid)
-
-                            repo?.createRealm(
-                                User().apply {
-                                    username = userName
-                                    numberOfWorkouts = 0
-                                },
-                                workouts = null,
-                                exercises = null,
-                                settings = Settings()
-                            )
-
-                                repo?.createFirestore(
-                                    User().apply {
-                                        username = userName
-                                        numberOfWorkouts = 0
-                                    },
-                                    settings = Settings())
-                            callback(true, null)
+                        auth.currentUser?.uid?.let {
+                            if (repo == null) {
+                                repo = UserRepository.getInstance(it)
+                            } else {
+                                repo!!.updateUser(it)
+                            }
                         }
-                    } else {
-                        callback(false, task.exception?.message)
+
+                        repo?.createRealm(
+                            User().apply {
+                                username = userName
+                                numberOfWorkouts = 0
+                            },
+                            workouts = null,
+                            exercises = null,
+                            settings = Settings()
+                        )
+
+                        repo?.createFirestore(
+                            User().apply {
+                                username = userName
+                                numberOfWorkouts = 0
+                            },
+                            settings = Settings()
+                        )
+                        callback(true, null)
                     }
+                } else {
+                    callback(false, task.exception?.message)
                 }
-        }
+            }
+    }
 
     private fun areFieldsEmpty(userName: String?, email: String?, pass: String?) =
         listOf(userName, email, pass).count { it.isNullOrEmpty() } >= 1

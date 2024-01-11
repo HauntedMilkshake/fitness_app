@@ -15,11 +15,10 @@ import com.google.firebase.firestore.FirebaseFirestore
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.launch
-import kotlinx.coroutines.runBlocking
 import kotlinx.coroutines.tasks.await
 import kotlinx.coroutines.withContext
 
-class SyncManager(private var uid: String, private var realm: RealmManager) {
+class SyncManager(private var userId: String, private var realm: RealmManager) {
     companion object {
         @Volatile
         private var instance: SyncManager? = null
@@ -28,18 +27,20 @@ class SyncManager(private var uid: String, private var realm: RealmManager) {
                 instance ?: SyncManager(userId, realm).also { instance = it }
             }
     }
+
     private val firestore = FirebaseFirestore.getInstance()
 
-    private val userAdapter =  FirestoreUserAdapter()
-    private val workoutAdapter =  FirestoreWorkoutAdapter()
+    private val userAdapter = FirestoreUserAdapter()
+    private val workoutAdapter = FirestoreWorkoutAdapter()
     private val exerciseAdapter = FirestoreExerciseAdapter()
     private val settingsAdapter = FirestoreSettingsAdapter()
 
-    private var userCache = User()
-    private var settingsCache = Settings()
+    private var userCache: User? = null
+    private var settingsCache: Settings? = null
     private var exerciseCache: MutableList<Exercise?> = mutableListOf()
     private var workoutCache: MutableList<Workout?> = mutableListOf()
 
+    //TODO(Fix this not to be here)
     private var currSync: Boolean = true
 
     init {
@@ -48,97 +49,112 @@ class SyncManager(private var uid: String, private var realm: RealmManager) {
         }
     }
 
-    suspend fun createFirestore(user: User, settings: Settings){
-        withContext(Dispatchers.IO){
-            val userDocRef = firestore.collection("users").document(uid)
+    suspend fun createFirestore(user: User, settings: Settings) {
+        withContext(Dispatchers.IO) {
+            val userDocRef = firestore.collection("users").document(userId)
             userDocRef.set(user.toFirestoreMap())
-            userDocRef.collection("settings").document("userSettings").set(settings.toFirestoreMap())
+            userDocRef.collection("settings").document("userSettings")
+                .set(settings.toFirestoreMap())
         }
     }
 
     suspend fun syncFromFirestore() {
-            val userDocument = firestore.collection("users").document(uid).get().await()
+        val userDocument = firestore.collection("users").document(userId).get().await()
 
-            val rUser = userAdapter.adapt(userDocument.data!!)
+        val rUser = userAdapter.adapt(userDocument.data!!)
 
-            val settingsDocument = userDocument.reference.collection("settings").document("userSettings").get().await()
-            val settings = settingsAdapter.adapt(settingsDocument.data!!)
+        val settingsDocument =
+            userDocument.reference.collection("settings").document("userSettings").get().await()
+        val settings = settingsAdapter.adapt(settingsDocument.data!!)
 
-            val workoutsCollection = userDocument.reference.collection("workouts").get().await()
-            val workouts = workoutsCollection.documents.mapNotNull { workoutDocument ->
-                val workout = workoutAdapter.adapt(workoutDocument.data!!)
-                workout
-            }
+        val workoutsCollection = userDocument.reference.collection("workouts").get().await()
+        val workouts = workoutsCollection.documents.mapNotNull { workoutDocument ->
+            val workout = workoutAdapter.adapt(workoutDocument.data!!)
+            workout
+        }
 
-            val exercisesCollection = userDocument.reference.collection("exercises").get().await()
-            val exercises = exercisesCollection.documents.mapNotNull { exerciseDocument ->
-                val exercise = exerciseAdapter.adapt(exerciseDocument.data!!)
-                exercise
-            }
+        val exercisesCollection = userDocument.reference.collection("exercises").get().await()
+        val exercises = exercisesCollection.documents.mapNotNull { exerciseDocument ->
+            val exercise = exerciseAdapter.adapt(exerciseDocument.data!!)
+            exercise
+        }
 
-            realm.createRealm(rUser, workouts, exercises, settings)
+        realm.createRealm(rUser, workouts, exercises, settings)
     }
 
     //1st values of pairs represent the ones we need to upsert
     //2nd values of pairs are the ones we need to delete
     //null values represent no changes from last sync
-    private fun syncToFirestore(
+    private suspend fun syncToFirestore(
         user: User?,
         workouts: Pair<List<Workout>?, List<String>?>?,
         exercises: Pair<List<Exercise>?, List<String>?>?,
         settings: Settings?
     ) {
-        val userDocRef = firestore.collection("users").document(uid)
-        Log.d("SYNC", "In syncToFirestore")
+        withContext(Dispatchers.IO){
 
-        firestore.runBatch { batch ->
-            user?.let {
-                Log.d("SYNC", "syncing user...")
-                batch.set(userDocRef, it.toFirestoreMap())
-            } ?: Log.d("SYNC", "failed to sync user")
+            val userDocRef = firestore.collection("users").document(userId)
+            Log.d("SYNC", "In syncToFirestore")
 
-            settings?.let {
-                Log.d("SYNC", "syncing settings...")
-                batch.set(userDocRef.collection("settings").document("userSettings"), it.toFirestoreMap())
-            } ?: Log.d("SYNC", "failed to sync settings")
+            firestore.runBatch { batch ->
+                user?.let {
+                    Log.d("SYNC", "syncing user...")
+                    batch.set(userDocRef, it.toFirestoreMap())
+                } ?: Log.d("SYNC", "failed to sync user")
 
-            workouts?.let {
-                it.first?.forEach { workout ->
-                    batch.set(userDocRef.collection("workouts").document(workout._id.toHexString()), workout.toFirestoreMap())
-                    Log.d("SYNC", "upserting new workouts...")
-                } ?: Log.d("SYNC", "failed to add workouts ")
+                settings?.let {
+                    Log.d("SYNC", "syncing settings...")
+                    batch.set(
+                        userDocRef.collection("settings").document("userSettings"),
+                        it.toFirestoreMap()
+                    )
+                } ?: Log.d("SYNC", "failed to sync settings")
 
-                it.second?.forEach { id ->
-                    batch.delete(userDocRef.collection("workouts").document(id))
-                    Log.d("SYNC", "deleting workouts...")
-                } ?: Log.d("SYNC", "failed to delete workouts")
-            } ?: Log.d("SYNC", "failed to sync workouts")
+                workouts?.let {
+                    it.first?.forEach { workout ->
+                        batch.set(
+                            userDocRef.collection("workouts").document(workout._id.toHexString()),
+                            workout.toFirestoreMap()
+                        )
+                        Log.d("SYNC", "upserting new workouts...")
+                    } ?: Log.d("SYNC", "failed to add workouts ")
 
-            exercises?.let {
-                it.first?.forEach { exercise ->
-                    batch.set(userDocRef.collection("exercises").document(exercise._id.toHexString()), exercise.toFirestoreMap())
-                    Log.d("SYNC", "adding new exercises")
-                } ?: Log.d("SYNC", "failed to add new exercises")
+                    it.second?.forEach { id ->
+                        batch.delete(userDocRef.collection("workouts").document(id))
+                        Log.d("SYNC", "deleting workouts...")
+                    } ?: Log.d("SYNC", "failed to delete workouts")
+                } ?: Log.d("SYNC", "failed to sync workouts")
 
-                it.second?.forEach { id ->
-                    batch.delete(userDocRef.collection("exercises").document(id))
-                    Log.d("SYNC", "deleting exercises...")
-                } ?: Log.d("SYNC", "failed to delete exercises")
-            } ?: Log.d("SYNC", "failed to sync exercises")
+                exercises?.let {
+                    it.first?.forEach { exercise ->
+                        batch.set(
+                            userDocRef.collection("exercises").document(exercise._id.toHexString()),
+                            exercise.toFirestoreMap()
+                        )
+                        Log.d("SYNC", "adding new exercises")
+                    } ?: Log.d("SYNC", "failed to add new exercises")
+
+                    it.second?.forEach { id ->
+                        batch.delete(userDocRef.collection("exercises").document(id))
+                        Log.d("SYNC", "deleting exercises...")
+                    } ?: Log.d("SYNC", "failed to delete exercises")
+                } ?: Log.d("SYNC", "failed to sync exercises")
+            }
         }
     }
-    fun deleteFirebaseUser(auth: FirebaseAuth){
+
+    fun deleteFirebaseUser(auth: FirebaseAuth) {
         auth.currentUser?.delete()
-        firestore.runBatch{
-            it.delete(firestore.collection("users").document(uid))
+        firestore.runBatch {
+
+            it.delete(firestore.collection("users").document(userId))
         }
     }
 
     private suspend fun getChangedUserOrNull(): User? {
+        val newUser = realm.getUserSync()
 
-        val newUser = realm.getUserSync()!!
-
-        return if (!userCache.equalsTo(newUser)) {
+        return if (userCache == null || !( userCache!!.equalsTo(newUser)) ) {
             userCache = newUser
             userCache
         } else {
@@ -146,13 +162,15 @@ class SyncManager(private var uid: String, private var realm: RealmManager) {
         }
     }
 
+
+
     private suspend fun getChangedSettingsOrNull(): Settings? {
 
-        val newSettings = realm.getSettingsSync()!!
+        val newSettings = realm.getSettingsSync()
 
-        return if ( settingsCache.equalTo(newSettings)) {
+        return if (settingsCache == null || !(settingsCache!!.equalTo(newSettings)) ) {
             settingsCache = newSettings
-            settingsCache.automaticSync = currSync
+            settingsCache?.automaticSync = currSync
             newSettings
         } else {
             null
@@ -180,14 +198,16 @@ class SyncManager(private var uid: String, private var realm: RealmManager) {
         }
 
         //exercises present in the cache but not in the new ones
-        val updatedExercises: List<Exercise> = newExercisesSet.getExerciseDifference(cacheSet).mapNotNull { exercise ->
-            currSet.find{
-                it._id == exercise?._id && !(it.equalsTo(exercise))
+        val updatedExercises: List<Exercise> =
+            newExercisesSet.getExerciseDifference(cacheSet).mapNotNull { exercise ->
+                currSet.find {
+                    it._id == exercise?._id && !(it.equalsTo(exercise))
+                }
             }
-        }
 
         //everything that is the cache but not in the current exercises
-        val deletedExercisesIds: List<String> = currSet.getExerciseDifference(cacheSet).mapNotNull { it?._id?.toHexString() }
+        val deletedExercisesIds: List<String> =
+            currSet.getExerciseDifference(cacheSet).mapNotNull { it?._id?.toHexString() }
 
         changedExercises.apply {
             addAll(newExercisesSet.filterNotNull())
@@ -197,8 +217,11 @@ class SyncManager(private var uid: String, private var realm: RealmManager) {
 
         return if (changedExercises.isEmpty() && deletedExercisesIds.isEmpty()) {
             null
-        }else{
-            return Pair( if (changedExercises.isEmpty()) null else changedExercises, if (deletedExercisesIds.isEmpty()) null else deletedExercisesIds)
+        } else {
+            return Pair(
+                if (changedExercises.isEmpty()) null else changedExercises,
+                if (deletedExercisesIds.isEmpty()) null else deletedExercisesIds
+            )
         }
     }
 
@@ -220,19 +243,23 @@ class SyncManager(private var uid: String, private var realm: RealmManager) {
 
         val newTemplatesSet = cacheWorkoutTemplatesSet.getWorkoutDifference(currWorkoutTemplatesSet)
 
-        val updatedTemplates: List<Workout> = (newTemplatesSet.getWorkoutDifference(currWorkoutTemplatesSet)).mapNotNull { workout ->
-            currWorkoutTemplatesSet.find {
-                it._id == workout?._id && !(it.equalsTo(workout))
+        val updatedTemplates: List<Workout> =
+            (newTemplatesSet.getWorkoutDifference(currWorkoutTemplatesSet)).mapNotNull { workout ->
+                currWorkoutTemplatesSet.find {
+                    it._id == workout?._id && !(it.equalsTo(workout))
+                }
             }
-        }
 
         val newWorkoutsSet = cacheWorkoutSets.getWorkoutDifference(currWorkoutsSet)
 
-        val deletedWorkoutsIds = currWorkoutsSet.getWorkoutDifference(cacheWorkoutSets).map { it?._id?.toHexString() }
-        val deletedWorkoutTemplatesIds = currWorkoutTemplatesSet.getWorkoutDifference(cacheWorkoutTemplatesSet).map { it?._id?.toHexString() }
+        val deletedWorkoutsIds =
+            currWorkoutsSet.getWorkoutDifference(cacheWorkoutSets).map { it?._id?.toHexString() }
+        val deletedWorkoutTemplatesIds =
+            currWorkoutTemplatesSet.getWorkoutDifference(cacheWorkoutTemplatesSet)
+                .map { it?._id?.toHexString() }
 
 
-        workoutsToUpsert.apply{
+        workoutsToUpsert.apply {
             addAll(newWorkoutsSet.filterNotNull())
             addAll(newTemplatesSet.filterNotNull())
             addAll(updatedTemplates)
@@ -243,47 +270,61 @@ class SyncManager(private var uid: String, private var realm: RealmManager) {
             addAll(deletedWorkoutTemplatesIds.filterNotNull())
         }
 
-        if(workoutCache.isEmpty()){
+        if (workoutCache.isEmpty()) {
             workoutCache = currWorkouts.toMutableList()
             workoutCache.addAll(currWorkoutTemplates)
-        }else{
-            workoutCache.let{
+        } else {
+            workoutCache.let {
                 it.addAll(currWorkouts)
                 it.addAll(currWorkoutTemplates)
             }
         }
 
-        return if(workoutsToUpsert.isEmpty() && workoutsToDelete.isEmpty()){
+        return if (workoutsToUpsert.isEmpty() && workoutsToDelete.isEmpty()) {
             null
-        }else{
-            Pair(if (workoutsToUpsert.isEmpty()) null else workoutsToUpsert, if (workoutsToDelete.isEmpty()) null else workoutsToDelete)
+        } else {
+            Pair(
+                if (workoutsToUpsert.isEmpty()) null else workoutsToUpsert,
+                if (workoutsToDelete.isEmpty()) null else workoutsToDelete
+            )
         }
 
     }
 
     private suspend fun getUserFromLastSync(): User {
-        val userDocument = firestore.collection("users").document(uid).get().await()
+        val userDocument = firestore.collection("users").document(userId).get().await()
         return userAdapter.adapt(userDocument.data)
     }
 
     private suspend fun getSettingsFromLastSync(): Settings {
-        val settingsDocument = firestore.collection("users").document(uid).collection("settings").document("userSettings").get().await()
+        val settingsDocument = firestore.collection("users").document(userId).collection("settings")
+            .document("userSettings").get().await()
         return settingsAdapter.adapt(settingsDocument.data)
     }
 
     private suspend fun getExercisesFromLastSync(): List<Exercise?> {
-        val exercisesCollection = firestore.collection("users").document(uid).collection("exercises").get().await()
-        return exercisesCollection.documents.mapNotNull { exerciseDocument -> exerciseAdapter.adapt(exerciseDocument.data) }
+        val exercisesCollection =
+            firestore.collection("users").document(userId).collection("exercises").get().await()
+        return exercisesCollection.documents.mapNotNull { exerciseDocument ->
+            exerciseAdapter.adapt(
+                exerciseDocument.data
+            )
+        }
     }
 
     private suspend fun getWorkoutsFromLastSync(): List<Workout?> {
-        val workoutsCollection = firestore.collection("users").document(uid).collection("workouts").get().await()
-        return workoutsCollection.documents.mapNotNull { workoutDocument -> workoutAdapter.adapt(workoutDocument.data) }
+        val workoutsCollection =
+            firestore.collection("users").document(userId).collection("workouts").get().await()
+        return workoutsCollection.documents.mapNotNull { workoutDocument ->
+            workoutAdapter.adapt(
+                workoutDocument.data
+            )
+        }
     }
 
     //this function retrieves the information from the last sync whenever the app is restarted
     //TODO(if the user doesn't have internet we might not update call this function)
-    private suspend fun initCaches(){
+    private suspend fun initCaches() {
         userCache = getUserFromLastSync()
         settingsCache = getSettingsFromLastSync()
         workoutCache = getWorkoutsFromLastSync().toMutableList()
@@ -291,12 +332,18 @@ class SyncManager(private var uid: String, private var realm: RealmManager) {
     }
 
     //right now after automaticSync is set to false we will have 1 extra sync cycle executed
-    suspend fun initPeriodicSync(){
-        if(currSync){
-            syncToFirestore(getChangedUserOrNull(), getChangedWorkoutsOrNull(), getChangedExercisesOrNull(), getChangedSettingsOrNull())
+    suspend fun initPeriodicSync() {
+        if (currSync) {
+            syncToFirestore(
+                getChangedUserOrNull(),
+                getChangedWorkoutsOrNull(),
+                getChangedExercisesOrNull(),
+                getChangedSettingsOrNull()
+            )
         }
     }
-    fun updateUser(newId: String){
-        uid = newId
+
+    fun updateUser(newId: String) {
+        userId = newId
     }
 }

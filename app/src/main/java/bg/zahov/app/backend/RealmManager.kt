@@ -26,7 +26,8 @@ class RealmManager() {
                 instance ?: RealmManager().also { instance = it }
             }
     }
-    private  var realmInstance: Realm? = null
+
+    private var realmInstance: Realm? = null
     private val realmConfig by lazy {
         getConfig().build()
     }
@@ -47,20 +48,22 @@ class RealmManager() {
         return config
     }
 
-    private fun openRealm(){
-        if(realmInstance == null || realmInstance?.isClosed() == true) {
+    private fun openRealm() {
+        if (realmInstance == null || realmInstance?.isClosed() == true) {
             realmInstance = Realm.open(realmConfig)
         }
     }
-    private fun closeRealm(){
-        realmInstance?.close()
-    }
 
-    suspend fun createRealm(user: User, workouts: List<Workout?>?, exercises: List<Exercise?>?, settings: Settings) {
+    suspend fun createRealm(
+        user: User,
+        workouts: List<Workout?>?,
+        exercises: List<Exercise?>?,
+        settings: Settings
+    ) {
         withContext(Dispatchers.Main) {
             try {
 
-                if(!doesUserHaveRealm()){
+                if (!doesUserHaveRealm()) {
                     openRealm()
                 }
 
@@ -85,7 +88,7 @@ class RealmManager() {
         }
     }
 
-    suspend fun deleteRealm(){
+    suspend fun deleteRealm() {
         withRealm {
             it?.write {
                 deleteAll()
@@ -104,14 +107,14 @@ class RealmManager() {
 
     suspend fun getUser(): Flow<ObjectChange<User>>? {
         return withRealm { realm ->
-            withContext(NonCancellable){
+            withContext(NonCancellable) {
                 realm?.query<User>()?.first()?.find()?.asFlow()
             }
         }
     }
 
     suspend fun getUserSync(): User? {
-        return withRealm{ realm ->
+        return withRealm { realm ->
             realm?.query<User>()?.find()?.first()
         }
     }
@@ -121,6 +124,7 @@ class RealmManager() {
             realm?.query<Settings>()?.find()?.first()?.asFlow()
         }
     }
+
     suspend fun getTemplateExercises(): Flow<ResultsChange<Exercise>>? {
         return withRealm { realm ->
             realm?.query<Exercise>("isTemplate == true")?.find()?.asFlow()
@@ -134,13 +138,13 @@ class RealmManager() {
     }
 
     suspend fun getAllWorkouts(): Flow<ResultsChange<Workout>>? {
-        return withRealm {realm ->
+        return withRealm { realm ->
             realm?.query<Workout>()?.find()?.asFlow()
         }
     }
 
     suspend fun getTemplateWorkouts(): Flow<ResultsChange<Workout>>? {
-        return withRealm {realm ->
+        return withRealm { realm ->
             realm?.query<Workout>("isTemplate == true")?.find()?.asFlow()
         }
     }
@@ -149,8 +153,8 @@ class RealmManager() {
         withRealm { realm ->
             val realmUser = getUserSync()
             realm?.write {
-                realmUser?.let{coldUser->
-                    findLatest(coldUser)?.let{hotUser ->
+                realmUser?.let { coldUser ->
+                    findLatest(coldUser)?.let { hotUser ->
                         hotUser.apply {
                             username = newUserName
                         }
@@ -163,12 +167,12 @@ class RealmManager() {
     suspend fun addExercise(newExercise: Exercise) {
         withRealm { realm ->
             realm?.write {
-               copyToRealm(newExercise)
+                copyToRealm(newExercise)
             }
         }
     }
 
-    suspend fun addWorkout(newWorkout: Workout){
+    suspend fun addWorkout(newWorkout: Workout) {
         withRealm { realm ->
             realm?.write {
                 copyToRealm(newWorkout)
@@ -180,9 +184,9 @@ class RealmManager() {
         withRealm { realm ->
             val settings = getSettingsSync()
             realm?.write {
-                settings?.let{ coldSettings ->
+                settings?.let { coldSettings ->
                     findLatest(coldSettings)?.apply {
-                        language= Language.English.name
+                        language = Language.English.name
                         units = Units.Metric.name
                         soundEffects = true
                         theme = Theme.Dark.name
@@ -202,7 +206,7 @@ class RealmManager() {
         withRealm { realm ->
             val settings = getSettingsSync()
             realm?.write {
-                settings?.let{coldSettings ->
+                settings?.let { coldSettings ->
                     findLatest(coldSettings)?.let {
                         when (title) {
                             "Language" -> {
@@ -253,21 +257,23 @@ class RealmManager() {
     }
 
     suspend fun getSettingsSync(): Settings? {
-        return withRealm{ realm ->
+        return withRealm { realm ->
             realm?.query<Settings>()?.find()?.first()
         }
     }
 
     suspend fun getTemplateExercisesSync(): List<Exercise>? {
-        return withRealm{ realm ->
+        return withRealm { realm ->
             realm?.query<Exercise>("isTemplate == true")?.find()
         }
     }
+
     suspend fun getPastWorkoutsSync(): List<Workout>? {
         return withRealm { realm ->
             realm?.query<Workout>("isTemplate == false")?.find()
         }
     }
+
     suspend fun getTemplateWorkoutsSync(): List<Workout>? {
         return withRealm { realm ->
             realm?.query<Workout>("isTemplate == true")?.find()
