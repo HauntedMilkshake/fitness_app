@@ -1,10 +1,12 @@
 package bg.zahov.app.login
 
+import android.util.Log
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
 import bg.zahov.app.repository.UserRepository
 import bg.zahov.app.utils.isAValidEmail
 import com.google.firebase.auth.FirebaseAuth
+import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.launch
 
 class LoginViewModel : ViewModel() {
@@ -26,18 +28,19 @@ class LoginViewModel : ViewModel() {
 
                     auth.currentUser?.uid?.let {
                         if (repo == null) {
+                            Log.d("SYNC", "INIT REPO")
                             repo = UserRepository.getInstance(it)
                         } else {
+                            Log.d("SYNC", "UPDATING LOGIN USER WITH $it")
                             repo!!.updateUser(it)
                         }
                     }
 
                     repo?.let {
-                        if (it.isSyncRequired()) {
-                            viewModelScope.launch {
+                            Log.d("SYNC", "REQUIRED")
+                            viewModelScope.launch(Dispatchers.Main) {
                                 it.syncFromFirestore()
                             }
-                        }
                         callback(true, null)
                     } ?: callback(false, "Failed to log in :(")
 

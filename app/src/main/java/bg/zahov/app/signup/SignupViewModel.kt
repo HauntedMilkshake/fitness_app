@@ -1,5 +1,6 @@
 package bg.zahov.app.signup
 
+import android.util.Log
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
 import bg.zahov.app.backend.Settings
@@ -39,6 +40,7 @@ class SignupViewModel : ViewModel() {
                     viewModelScope.launch {
 
                         auth.currentUser?.uid?.let {
+                            Log.d("SYNC SIGNUP BLOCK", it)
                             if (repo == null) {
                                 repo = UserRepository.getInstance(it)
                             } else {

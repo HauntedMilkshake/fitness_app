@@ -32,6 +32,10 @@ class RealmManager() {
         getConfig().build()
     }
 
+    init{
+        Log.d("SYNC", "INIT SYNC ")
+    }
+
     private fun getConfig(): RealmConfiguration.Builder {
         val config = RealmConfiguration.Builder(
             setOf(
@@ -51,6 +55,7 @@ class RealmManager() {
     private fun openRealm() {
         if (realmInstance == null || realmInstance?.isClosed() == true) {
             realmInstance = Realm.open(realmConfig)
+            Log.d("SYNC", "OPENING REALM")
         }
     }
 
@@ -64,10 +69,12 @@ class RealmManager() {
             try {
 
                 if (!doesUserHaveRealm()) {
+                    Log.d("SYNC", "CALLING OPENING REALM")
                     openRealm()
                 }
-
+                Log.d("SYNC", "BEFORE WRITE")
                 realmInstance?.write {
+                    Log.d("SYNC", "WRITING TO REALM")
                     copyToRealm(user)
                     copyToRealm(settings)
 
@@ -100,7 +107,6 @@ class RealmManager() {
 
     private suspend fun <T> withRealm(block: suspend (Realm?) -> T): T {
         return withContext(Dispatchers.IO) {
-            openRealm()
             block(realmInstance)
         }
     }

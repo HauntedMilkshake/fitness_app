@@ -1,5 +1,6 @@
 package bg.zahov.app.repository
 
+import android.util.Log
 import bg.zahov.app.backend.Exercise
 import bg.zahov.app.backend.RealmManager
 import bg.zahov.app.backend.Settings
@@ -47,10 +48,13 @@ class UserRepository(private var userId: String) {
     }
 
     suspend fun createFirestore(user: User, settings: Settings) {
-        syncManager.updateUser(userId)
+//        syncManager.updateUser(userId)
         syncManager.createFirestore(user, settings)
     }
     suspend fun syncFromFirestore() {
+        Log.d("SYNC FROM FIRESTORE", if(syncManager == null) "kur" else "nekur")
+        Log.d("SYNC FROM FIRESTORE", userId)
+
         syncManager.syncFromFirestore()
     }
     suspend fun periodicSync() {
@@ -61,7 +65,9 @@ class UserRepository(private var userId: String) {
     }
 
     fun updateUser(newId: String){
+
         userId = newId
+        syncManager.updateUser(newId)
     }
 
     suspend fun deleteUser(auth: FirebaseAuth){

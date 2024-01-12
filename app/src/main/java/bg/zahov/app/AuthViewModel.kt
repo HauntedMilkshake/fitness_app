@@ -23,7 +23,7 @@ class AuthViewModel : ViewModel() {
     private var syncTask: TimerTask? = null
     private var repo: UserRepository? = null
     private val authStateListener = FirebaseAuth.AuthStateListener {
-        userId = if (it.currentUser != null) it.currentUser?.uid else null
+        userId = it.currentUser?.uid
     }
 
     init {
@@ -38,8 +38,10 @@ class AuthViewModel : ViewModel() {
                 override fun run() {
                     if (auth.currentUser != null && userId != null && isUserConnected(context)) {
 
+                        //might be redundant
                         userId?.let {
                             repo = UserRepository.getInstance(it)
+
                         }
 
                         viewModelScope.launch {

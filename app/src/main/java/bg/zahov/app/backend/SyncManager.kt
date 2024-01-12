@@ -18,6 +18,8 @@ import kotlinx.coroutines.launch
 import kotlinx.coroutines.tasks.await
 import kotlinx.coroutines.withContext
 
+
+//TODO(WHEN USER LOGS IN MIGHT NOT HAVE WIFI TO CREATE FIRESTORE)
 class SyncManager(private var userId: String, private var realm: RealmManager) {
     companion object {
         @Volatile
@@ -46,6 +48,7 @@ class SyncManager(private var userId: String, private var realm: RealmManager) {
     init {
         CoroutineScope(Dispatchers.Default).launch {
             initCaches()
+            Log.d("SYNC", "INIT SYNC MANAGER -> ${userId}")
         }
     }
 
@@ -61,21 +64,21 @@ class SyncManager(private var userId: String, private var realm: RealmManager) {
     suspend fun syncFromFirestore() {
         val userDocument = firestore.collection("users").document(userId).get().await()
 
-        val rUser = userAdapter.adapt(userDocument.data!!)
+        val rUser = userAdapter.adapt(userDocument.data)
 
         val settingsDocument =
             userDocument.reference.collection("settings").document("userSettings").get().await()
-        val settings = settingsAdapter.adapt(settingsDocument.data!!)
+        val settings = settingsAdapter.adapt(settingsDocument.data)
 
         val workoutsCollection = userDocument.reference.collection("workouts").get().await()
         val workouts = workoutsCollection.documents.mapNotNull { workoutDocument ->
-            val workout = workoutAdapter.adapt(workoutDocument.data!!)
+            val workout = workoutAdapter.adapt(workoutDocument.data)
             workout
         }
 
         val exercisesCollection = userDocument.reference.collection("exercises").get().await()
         val exercises = exercisesCollection.documents.mapNotNull { exerciseDocument ->
-            val exercise = exerciseAdapter.adapt(exerciseDocument.data!!)
+            val exercise = exerciseAdapter.adapt(exerciseDocument.data)
             exercise
         }
 
@@ -184,7 +187,7 @@ class SyncManager(private var userId: String, private var realm: RealmManager) {
         val currTemplateExercises = realm.getTemplateExercisesSync()
         val changedExercises: MutableList<Exercise> = mutableListOf()
 
-        val currSet = currTemplateExercises!!.toSet()
+        val currSet = currTemplateExercises?.toSet() ?: emptySet()
 
         val cacheSet = exerciseCache.toSet()
         cacheSet.forEach {
@@ -213,7 +216,9 @@ class SyncManager(private var userId: String, private var realm: RealmManager) {
             addAll(newExercisesSet.filterNotNull())
             addAll(updatedExercises)
         }
-        exerciseCache = currTemplateExercises.toMutableList()
+        if(currTemplateExercises != null){
+            exerciseCache = currTemplateExercises.toMutableList()
+        }
 
         return if (changedExercises.isEmpty() && deletedExercisesIds.isEmpty()) {
             null
@@ -236,9 +241,9 @@ class SyncManager(private var userId: String, private var realm: RealmManager) {
         val workoutsToUpsert: MutableList<Workout> = mutableListOf()
         val workoutsToDelete: MutableList<String> = mutableListOf()
 
-        val currWorkoutTemplatesSet = currWorkoutTemplates!!.toSet()
+        val currWorkoutTemplatesSet = currWorkoutTemplates?.toSet() ?: emptySet()
         val cacheWorkoutTemplatesSet = cacheWorkoutTemplates.toSet()
-        val currWorkoutsSet = currWorkouts!!.toSet()
+        val currWorkoutsSet = currWorkouts?.toSet() ?: emptySet()
         val cacheWorkoutSets = cacheWorkouts.toSet()
 
         val newTemplatesSet = cacheWorkoutTemplatesSet.getWorkoutDifference(currWorkoutTemplatesSet)
@@ -271,12 +276,12 @@ class SyncManager(private var userId: String, private var realm: RealmManager) {
         }
 
         if (workoutCache.isEmpty()) {
-            workoutCache = currWorkouts.toMutableList()
-            workoutCache.addAll(currWorkoutTemplates)
+            if(currWorkouts != null) workoutCache = currWorkouts.toMutableList()
+            currWorkoutTemplates?.let { workoutCache.addAll(it) }
         } else {
             workoutCache.let {
-                it.addAll(currWorkouts)
-                it.addAll(currWorkoutTemplates)
+                currWorkouts?.let { it1 -> it.addAll(it1) }
+                currWorkoutTemplates?.let { it1 -> it.addAll(it1) }
             }
         }
 
@@ -344,6 +349,7 @@ class SyncManager(private var userId: String, private var realm: RealmManager) {
     }
 
     fun updateUser(newId: String) {
+        Log.d("SYNC", "UPATE USER SYNC MANAGER -> ${newId}")
         userId = newId
     }
 }
