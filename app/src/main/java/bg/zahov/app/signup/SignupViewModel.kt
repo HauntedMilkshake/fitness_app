@@ -34,6 +34,7 @@ class SignupViewModel : ViewModel() {
             callback(false, "Passwords must match")
             return
         }
+
         auth.createUserWithEmailAndPassword(email, password)
             .addOnCompleteListener { task ->
                 if (task.isSuccessful) {

@@ -17,7 +17,7 @@ import kotlinx.coroutines.flow.Flow
 import kotlinx.coroutines.withContext
 import java.io.File
 
-class RealmManager() {
+class RealmManager {
     companion object {
         @Volatile
         private var instance: RealmManager? = null
@@ -33,7 +33,7 @@ class RealmManager() {
     }
 
     init{
-        Log.d("SYNC", "INIT SYNC ")
+        openRealm()
     }
 
     private fun getConfig(): RealmConfiguration.Builder {
@@ -48,7 +48,7 @@ class RealmManager() {
         )
         config.schemaVersion(1)
         config.deleteRealmIfMigrationNeeded()
-        config.name("talicegay,maksoshtepoveche,ivonaimnogo.realm")
+        config.name("lednafiliiki,studknakutiikibrrrrr.realm")
         return config
     }
 
@@ -67,11 +67,6 @@ class RealmManager() {
     ) {
         withContext(Dispatchers.Main) {
             try {
-
-                if (!doesUserHaveRealm()) {
-                    Log.d("SYNC", "CALLING OPENING REALM")
-                    openRealm()
-                }
                 Log.d("SYNC", "BEFORE WRITE")
                 realmInstance?.write {
                     Log.d("SYNC", "WRITING TO REALM")
@@ -103,19 +98,21 @@ class RealmManager() {
         }
     }
 
-    fun doesUserHaveRealm() = File(realmConfig.path).exists()
-
     private suspend fun <T> withRealm(block: suspend (Realm?) -> T): T {
         return withContext(Dispatchers.IO) {
-            block(realmInstance)
+            try{
+                openRealm()
+                block(realmInstance)
+
+            } finally {
+                realmInstance?.close()
+            }
         }
     }
 
     suspend fun getUser(): Flow<ObjectChange<User>>? {
         return withRealm { realm ->
-            withContext(NonCancellable) {
                 realm?.query<User>()?.first()?.find()?.asFlow()
-            }
         }
     }
 

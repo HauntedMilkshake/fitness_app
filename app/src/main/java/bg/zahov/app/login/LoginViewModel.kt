@@ -18,36 +18,36 @@ class LoginViewModel : ViewModel() {
             callback(false, "Fields cannot be empty!")
             return
         }
+
         if (!email.isAValidEmail()) {
             callback(false, "Please ensure your email is valid!")
             return
         }
+
         auth.signInWithEmailAndPassword(email, password)
             .addOnCompleteListener { task ->
                 if (task.isSuccessful) {
-
-                    auth.currentUser?.uid?.let {
-                        if (repo == null) {
-                            Log.d("SYNC", "INIT REPO")
-                            repo = UserRepository.getInstance(it)
-                        } else {
-                            Log.d("SYNC", "UPDATING LOGIN USER WITH $it")
-                            repo!!.updateUser(it)
-                        }
-                    }
-
-                    repo?.let {
-                            Log.d("SYNC", "REQUIRED")
-                            viewModelScope.launch(Dispatchers.Main) {
-                                it.syncFromFirestore()
+                    //either Dispatchers.Main
+                    viewModelScope.launch {
+                        auth.currentUser?.uid?.let {
+                            if (repo == null) {
+                                Log.d("SYNC", "INIT REPO")
+                                repo = UserRepository.getInstance(it)
+                            } else {
+                                Log.d("SYNC", "UPDATING LOGIN USER WITH $it")
+                                repo!!.updateUser(it)
                             }
-                        callback(true, null)
-                    } ?: callback(false, "Failed to log in :(")
+                        } ?: callback(false, "Failed to initalize!")
 
+                        repo!!.syncFromFirestore()
+
+                        callback(true, null)
+                    }
                 } else {
                     callback(false, task.exception?.message)
                 }
-            }
+        }
+
     }
 
     fun sendPasswordResetEmail(email: String, callback: (String) -> Unit) {

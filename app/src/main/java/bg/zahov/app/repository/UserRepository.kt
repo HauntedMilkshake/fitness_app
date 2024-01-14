@@ -55,17 +55,19 @@ class UserRepository(private var userId: String) {
         Log.d("SYNC FROM FIRESTORE", if(syncManager == null) "kur" else "nekur")
         Log.d("SYNC FROM FIRESTORE", userId)
 
+        syncManager.initCaches()
         syncManager.syncFromFirestore()
     }
+
     suspend fun periodicSync() {
         syncManager.initPeriodicSync()
     }
+
     suspend fun resetSettings() {
         realmInstance.resetSettings()
     }
 
     fun updateUser(newId: String){
-
         userId = newId
         syncManager.updateUser(newId)
     }
@@ -77,5 +79,4 @@ class UserRepository(private var userId: String) {
     suspend fun deleteRealm(){
         realmInstance.deleteRealm()
     }
-    fun isSyncRequired() = realmInstance.doesUserHaveRealm()
 }

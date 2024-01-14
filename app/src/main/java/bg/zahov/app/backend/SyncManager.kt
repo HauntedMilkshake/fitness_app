@@ -45,12 +45,12 @@ class SyncManager(private var userId: String, private var realm: RealmManager) {
     //TODO(Fix this not to be here)
     private var currSync: Boolean = true
 
-    init {
-        CoroutineScope(Dispatchers.Default).launch {
-            initCaches()
-            Log.d("SYNC", "INIT SYNC MANAGER -> ${userId}")
-        }
-    }
+//    init {
+//        CoroutineScope(Dispatchers.Main).launch {
+//            initCaches()
+//            Log.d("SYNC", "INIT SYNC MANAGER -> ${userId}")
+//        }
+//    }
 
     suspend fun createFirestore(user: User, settings: Settings) {
         withContext(Dispatchers.IO) {
@@ -62,27 +62,9 @@ class SyncManager(private var userId: String, private var realm: RealmManager) {
     }
 
     suspend fun syncFromFirestore() {
-        val userDocument = firestore.collection("users").document(userId).get().await()
 
-        val rUser = userAdapter.adapt(userDocument.data)
-
-        val settingsDocument =
-            userDocument.reference.collection("settings").document("userSettings").get().await()
-        val settings = settingsAdapter.adapt(settingsDocument.data)
-
-        val workoutsCollection = userDocument.reference.collection("workouts").get().await()
-        val workouts = workoutsCollection.documents.mapNotNull { workoutDocument ->
-            val workout = workoutAdapter.adapt(workoutDocument.data)
-            workout
-        }
-
-        val exercisesCollection = userDocument.reference.collection("exercises").get().await()
-        val exercises = exercisesCollection.documents.mapNotNull { exerciseDocument ->
-            val exercise = exerciseAdapter.adapt(exerciseDocument.data)
-            exercise
-        }
-
-        realm.createRealm(rUser, workouts, exercises, settings)
+        Log.d("SYNC", "IN FIRESTORE")
+        realm.createRealm(userCache!!, workoutCache, exerciseCache, settingsCache!!)
     }
 
     //1st values of pairs represent the ones we need to upsert
@@ -149,7 +131,6 @@ class SyncManager(private var userId: String, private var realm: RealmManager) {
     fun deleteFirebaseUser(auth: FirebaseAuth) {
         auth.currentUser?.delete()
         firestore.runBatch {
-
             it.delete(firestore.collection("users").document(userId))
         }
     }
@@ -164,8 +145,6 @@ class SyncManager(private var userId: String, private var realm: RealmManager) {
             null
         }
     }
-
-
 
     private suspend fun getChangedSettingsOrNull(): Settings? {
 
@@ -329,8 +308,9 @@ class SyncManager(private var userId: String, private var realm: RealmManager) {
 
     //this function retrieves the information from the last sync whenever the app is restarted
     //TODO(if the user doesn't have internet we might not update call this function)
-    private suspend fun initCaches() {
+    suspend fun initCaches() {
         userCache = getUserFromLastSync()
+        Log.d("SYNC", userCache?.username ?: "no user")
         settingsCache = getSettingsFromLastSync()
         workoutCache = getWorkoutsFromLastSync().toMutableList()
         exerciseCache = getExercisesFromLastSync().toMutableList()
