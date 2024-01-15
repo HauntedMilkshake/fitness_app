@@ -74,7 +74,7 @@ class FragmentSignup : Fragment() {
             registerButton.setOnClickListener {
                 authViewModel.signUp(usernameFieldText.text.toString(), emailFieldText.text.toString(), passwordFieldText.text.toString(), confirmPasswordFieldText.text.toString()) { success, errorMessage ->
                     if (success) {
-                        findNavController().navigate(R.id.signup_to_home)
+                        findNavController().navigate(R.id.signup_to_loading)
                     } else {
                         Toast.makeText(requireContext(), errorMessage, Toast.LENGTH_SHORT).show()
                     }

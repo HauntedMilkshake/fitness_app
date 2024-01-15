@@ -12,7 +12,7 @@ import kotlinx.coroutines.launch
 
 class SignupViewModel : ViewModel() {
     private var auth: FirebaseAuth = FirebaseAuth.getInstance()
-    private var repo: UserRepository? = null
+    private lateinit var repo: UserRepository
     fun signUp(
         userName: String,
         email: String,
@@ -41,15 +41,12 @@ class SignupViewModel : ViewModel() {
                     viewModelScope.launch {
 
                         auth.currentUser?.uid?.let {
-                            Log.d("SYNC SIGNUP BLOCK", it)
-                            if (repo == null) {
-                                repo = UserRepository.getInstance(it)
-                            } else {
-                                repo!!.updateUser(it)
-                            }
+                            Log.d("SYNC SIGNUP ID", it)
+                            repo = UserRepository.getInstance(it)
+                            repo.updateUser(it)
                         }
 
-                        repo?.createRealm(
+                        repo.createRealm(
                             User().apply {
                                 username = userName
                                 numberOfWorkouts = 0
@@ -59,13 +56,14 @@ class SignupViewModel : ViewModel() {
                             settings = Settings()
                         )
 
-                        repo?.createFirestore(
+                        repo.createFirestore(
                             User().apply {
                                 username = userName
                                 numberOfWorkouts = 0
                             },
                             settings = Settings()
                         )
+
                         callback(true, null)
                     }
                 } else {

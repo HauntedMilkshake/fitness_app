@@ -55,7 +55,6 @@ class RealmManager {
     private fun openRealm() {
         if (realmInstance == null || realmInstance?.isClosed() == true) {
             realmInstance = Realm.open(realmConfig)
-            Log.d("SYNC", "OPENING REALM")
         }
     }
 
@@ -84,9 +83,10 @@ class RealmManager {
 
             } catch (e: Exception) {
                 Log.e("Realm start error", e.toString())
-            } finally {
-                realmInstance?.close()
             }
+//            finally {
+//                realmInstance?.close()
+//            }
         }
     }
 
@@ -100,13 +100,12 @@ class RealmManager {
 
     private suspend fun <T> withRealm(block: suspend (Realm?) -> T): T {
         return withContext(Dispatchers.IO) {
-            try{
+//            try{
                 openRealm()
                 block(realmInstance)
-
-            } finally {
-                realmInstance?.close()
-            }
+//            } finally {
+//                realmInstance?.close()
+//            }
         }
     }
 

@@ -48,6 +48,11 @@
             app:destination="@id/home"
             app:popUpTo="@id/welcome"
             app:popUpToInclusive="true" />
+        <action
+            android:id="@+id/signup_to_loading"
+            app:destination="@id/loading"
+            app:popUpTo="@id/welcome"
+            app:popUpToInclusive="true"/>
     </fragment>
 
     <fragment

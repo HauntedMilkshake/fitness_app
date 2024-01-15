@@ -11,7 +11,7 @@ import kotlinx.coroutines.launch
 
 class LoginViewModel : ViewModel() {
     private var auth: FirebaseAuth = FirebaseAuth.getInstance()
-    private var repo: UserRepository? = null
+    private lateinit var repo: UserRepository
 
     fun login(email: String, password: String, callback: (Boolean, String?) -> Unit) {
         if (email.isEmpty() || password.isEmpty()) {
@@ -30,16 +30,12 @@ class LoginViewModel : ViewModel() {
                     //either Dispatchers.Main
                     viewModelScope.launch {
                         auth.currentUser?.uid?.let {
-                            if (repo == null) {
-                                Log.d("SYNC", "INIT REPO")
-                                repo = UserRepository.getInstance(it)
-                            } else {
-                                Log.d("SYNC", "UPDATING LOGIN USER WITH $it")
-                                repo!!.updateUser(it)
-                            }
+                            Log.d("SYNC LOGIN ID", it)
+                            repo = UserRepository.getInstance(it)
+                            repo.updateUser(it)
                         } ?: callback(false, "Failed to initalize!")
 
-                        repo!!.syncFromFirestore()
+                        repo.syncFromFirestore()
 
                         callback(true, null)
                     }

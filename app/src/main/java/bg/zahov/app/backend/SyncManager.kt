@@ -11,7 +11,12 @@ import bg.zahov.app.utils.getExerciseDifference
 import bg.zahov.app.utils.getWorkoutDifference
 import bg.zahov.app.utils.toFirestoreMap
 import com.google.firebase.auth.FirebaseAuth
+import com.google.firebase.database.ktx.database
 import com.google.firebase.firestore.FirebaseFirestore
+import com.google.firebase.firestore.ktx.firestore
+import com.google.firebase.functions.ktx.functions
+import com.google.firebase.ktx.Firebase
+import com.google.firebase.ktx.options
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.launch
@@ -53,6 +58,7 @@ class SyncManager(private var userId: String, private var realm: RealmManager) {
 //    }
 
     suspend fun createFirestore(user: User, settings: Settings) {
+        Log.d("SYNC", "Creating user with $userId")
         withContext(Dispatchers.IO) {
             val userDocRef = firestore.collection("users").document(userId)
             userDocRef.set(user.toFirestoreMap())
@@ -64,6 +70,7 @@ class SyncManager(private var userId: String, private var realm: RealmManager) {
     suspend fun syncFromFirestore() {
 
         Log.d("SYNC", "IN FIRESTORE")
+        Log.d("SYNC", "username before sign in ${userCache?.username}")
         realm.createRealm(userCache!!, workoutCache, exerciseCache, settingsCache!!)
     }
 
@@ -129,10 +136,15 @@ class SyncManager(private var userId: String, private var realm: RealmManager) {
     }
 
     fun deleteFirebaseUser(auth: FirebaseAuth) {
+        Log.d("DELETE", userId)
         auth.currentUser?.delete()
-        firestore.runBatch {
-            it.delete(firestore.collection("users").document(userId))
-        }
+//            Firebase.functions.getHttpsCallable("recursiveDelete").call(hashMapOf("path" to "users/$userId"))
+//                .addOnSuccessListener {
+//                    Log.d("DELETE", "YAY")
+//                }
+//                .addOnFailureListener {
+//                    Log.d("DELETE", it.message ?: "no message")
+//                }
     }
 
     private suspend fun getChangedUserOrNull(): User? {
@@ -329,7 +341,7 @@ class SyncManager(private var userId: String, private var realm: RealmManager) {
     }
 
     fun updateUser(newId: String) {
-        Log.d("SYNC", "UPATE USER SYNC MANAGER -> ${newId}")
+        Log.d("SYNC", "UPDATE USER SYNC MANAGER -> $newId")
         userId = newId
     }
 }
