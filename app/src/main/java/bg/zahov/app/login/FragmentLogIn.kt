@@ -18,7 +18,6 @@ class FragmentLogIn : Fragment() {
     private var _binding: FragmentLogInBinding? = null
     private val binding get() = _binding!!
     private val loginViewModel: LoginViewModel by viewModels()
-    private val authViewModel: AuthViewModel by viewModels({ requireActivity() })
 
     override fun onCreateView(
         inflater: LayoutInflater,
@@ -53,7 +52,10 @@ class FragmentLogIn : Fragment() {
             }
 
             logInButton.setOnClickListener {
-                loginViewModel.login(emailFieldText.text.toString(), passwordFieldText.text.toString()) { success, errorMessage ->
+                loginViewModel.login(
+                    emailFieldText.text.toString(),
+                    passwordFieldText.text.toString()
+                ) { success, errorMessage ->
                     if (success) {
                         findNavController().navigate(R.id.login_to_loading)
                     } else {
@@ -73,8 +75,8 @@ class FragmentLogIn : Fragment() {
         _binding = null
     }
 
-    private fun showToast(message: String?){
-        message?.let{
+    private fun showToast(message: String?) {
+        message?.let {
             Toast.makeText(requireContext(), it, Toast.LENGTH_SHORT).show()
         }
     }

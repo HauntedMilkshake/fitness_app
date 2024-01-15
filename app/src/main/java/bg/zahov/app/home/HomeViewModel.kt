@@ -1,6 +1,5 @@
 package bg.zahov.app.home
 
-import android.util.Log
 import androidx.lifecycle.LiveData
 import androidx.lifecycle.MutableLiveData
 import androidx.lifecycle.ViewModel
@@ -13,10 +12,14 @@ import io.realm.kotlin.notifications.InitialObject
 import io.realm.kotlin.notifications.UpdatedObject
 import kotlinx.coroutines.launch
 
-class HomeViewModel : ViewModel(){
+class HomeViewModel : ViewModel() {
     private var auth: FirebaseAuth = FirebaseAuth.getInstance()
     private val _userName = MutableLiveData<String>()
-    private val repo = UserRepository.getInstance(auth.currentUser!!.uid)
+    private val repo by lazy {
+        auth.currentUser?.uid?.let {
+            UserRepository.getInstance(it)
+        }
+    }
     val userName: LiveData<String> get() = _userName
     private val _numberOfWorkouts = MutableLiveData<Int>()
     val numberOfWorkouts: LiveData<Int> get() = _numberOfWorkouts
@@ -25,7 +28,7 @@ class HomeViewModel : ViewModel(){
 
     init {
         viewModelScope.launch {
-            repo.getUser()?.collect {
+            repo?.getUser()?.collect {
                 when (it) {
                     is DeletedObject -> {
                         _userName.postValue(it.obj?.username)
@@ -45,11 +48,6 @@ class HomeViewModel : ViewModel(){
                 }
             }
         }
-    }
-
-    override fun onCleared() {
-        super.onCleared()
-        Log.d("ClEARED", "HOME")
     }
 }
 

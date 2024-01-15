@@ -11,15 +11,8 @@ import bg.zahov.app.utils.getExerciseDifference
 import bg.zahov.app.utils.getWorkoutDifference
 import bg.zahov.app.utils.toFirestoreMap
 import com.google.firebase.auth.FirebaseAuth
-import com.google.firebase.database.ktx.database
 import com.google.firebase.firestore.FirebaseFirestore
-import com.google.firebase.firestore.ktx.firestore
-import com.google.firebase.functions.ktx.functions
-import com.google.firebase.ktx.Firebase
-import com.google.firebase.ktx.options
-import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.Dispatchers
-import kotlinx.coroutines.launch
 import kotlinx.coroutines.tasks.await
 import kotlinx.coroutines.withContext
 
@@ -47,18 +40,9 @@ class SyncManager(private var userId: String, private var realm: RealmManager) {
     private var exerciseCache: MutableList<Exercise?> = mutableListOf()
     private var workoutCache: MutableList<Workout?> = mutableListOf()
 
-    //TODO(Fix this not to be here)
     private var currSync: Boolean = true
 
-//    init {
-//        CoroutineScope(Dispatchers.Main).launch {
-//            initCaches()
-//            Log.d("SYNC", "INIT SYNC MANAGER -> ${userId}")
-//        }
-//    }
-
     suspend fun createFirestore(user: User, settings: Settings) {
-        Log.d("SYNC", "Creating user with $userId")
         withContext(Dispatchers.IO) {
             val userDocRef = firestore.collection("users").document(userId)
             userDocRef.set(user.toFirestoreMap())
@@ -69,8 +53,6 @@ class SyncManager(private var userId: String, private var realm: RealmManager) {
 
     suspend fun syncFromFirestore() {
 
-        Log.d("SYNC", "IN FIRESTORE")
-        Log.d("SYNC", "username before sign in ${userCache?.username}")
         realm.createRealm(userCache!!, workoutCache, exerciseCache, settingsCache!!)
     }
 
@@ -136,7 +118,6 @@ class SyncManager(private var userId: String, private var realm: RealmManager) {
     }
 
     fun deleteFirebaseUser(auth: FirebaseAuth) {
-        Log.d("DELETE", userId)
         auth.currentUser?.delete()
 //            Firebase.functions.getHttpsCallable("recursiveDelete").call(hashMapOf("path" to "users/$userId"))
 //                .addOnSuccessListener {
@@ -341,7 +322,6 @@ class SyncManager(private var userId: String, private var realm: RealmManager) {
     }
 
     fun updateUser(newId: String) {
-        Log.d("SYNC", "UPDATE USER SYNC MANAGER -> $newId")
         userId = newId
     }
 }

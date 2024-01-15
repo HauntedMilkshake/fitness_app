@@ -14,15 +14,17 @@ import bg.zahov.app.utils.applyScaleAnimation
 import bg.zahov.fitness.app.R
 import bg.zahov.fitness.app.databinding.FragmentWorkoutBinding
 
-class FragmentWorkout: Fragment() {
+class FragmentWorkout : Fragment() {
     private var _binding: FragmentWorkoutBinding? = null
     private val binding get() = _binding!!
     private val workoutViewModel: WorkoutViewModel by viewModels()
     override fun onCreateView(
-        inflater: LayoutInflater, container: ViewGroup?, savedInstanceState: Bundle?): View? {
+        inflater: LayoutInflater, container: ViewGroup?, savedInstanceState: Bundle?,
+    ): View? {
         _binding = FragmentWorkoutBinding.inflate(inflater, container, false)
         return binding.root
     }
+
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
         val inflater = TransitionInflater.from(requireContext())

@@ -1,6 +1,5 @@
 package bg.zahov.app.repository
 
-import android.util.Log
 import bg.zahov.app.backend.Exercise
 import bg.zahov.app.backend.RealmManager
 import bg.zahov.app.backend.Settings
@@ -26,7 +25,7 @@ class UserRepository(private var userId: String) {
 
     suspend fun getTemplateExercises() = realmInstance.getTemplateExercises()
     suspend fun getAllWorkouts() = realmInstance.getAllWorkouts()
-    suspend fun addWorkout(newWorkout: Workout){
+    suspend fun addWorkout(newWorkout: Workout) {
         realmInstance.addWorkout(newWorkout)
     }
 
@@ -43,18 +42,20 @@ class UserRepository(private var userId: String) {
         realmInstance.updateSetting(title, newValue)
     }
 
-    suspend fun createRealm(newUser: User, workouts: List<Workout?>?, exercises: List<Exercise?>?, settings: Settings) {
+    suspend fun createRealm(
+        newUser: User,
+        workouts: List<Workout?>?,
+        exercises: List<Exercise?>?,
+        settings: Settings,
+    ) {
         realmInstance.createRealm(newUser, workouts, exercises, settings)
     }
 
     suspend fun createFirestore(user: User, settings: Settings) {
-//        syncManager.updateUser(userId)
         syncManager.createFirestore(user, settings)
     }
-    suspend fun syncFromFirestore() {
-        Log.d("SYNC FROM FIRESTORE", if(syncManager == null) "kur" else "nekur")
-        Log.d("SYNC FROM FIRESTORE", userId)
 
+    suspend fun syncFromFirestore() {
         syncManager.initCaches()
         syncManager.syncFromFirestore()
     }
@@ -67,16 +68,17 @@ class UserRepository(private var userId: String) {
         realmInstance.resetSettings()
     }
 
-    fun updateUser(newId: String){
+    fun updateUser(newId: String) {
         userId = newId
         syncManager.updateUser(newId)
     }
 
-    suspend fun deleteUser(auth: FirebaseAuth){
+    suspend fun deleteUser(auth: FirebaseAuth) {
         syncManager.deleteFirebaseUser(auth)
         realmInstance.deleteRealm()
     }
-    suspend fun deleteRealm(){
+
+    suspend fun deleteRealm() {
         realmInstance.deleteRealm()
     }
 }

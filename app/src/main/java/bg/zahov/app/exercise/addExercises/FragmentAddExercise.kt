@@ -4,6 +4,7 @@ import android.os.Bundle
 import android.view.LayoutInflater
 import android.view.View
 import android.view.ViewGroup
+import android.widget.Toast
 import androidx.fragment.app.Fragment
 import androidx.fragment.app.viewModels
 import androidx.navigation.fragment.findNavController
@@ -32,13 +33,14 @@ class FragmentAddExercise : Fragment() {
         binding.apply {
             confirm.setOnClickListener {
                 it.applyScaleAnimation()
-                addExerciseViewModel.addExercise(exerciseNameField.editText!!.text!!.toString())
-                addExerciseViewModel.isCreated.observe(viewLifecycleOwner) { success ->
+                addExerciseViewModel.addExercise(exerciseNameField.editText!!.text!!.toString()) { success, message ->
                     if (success) {
+                        Toast.makeText(requireContext(), message, Toast.LENGTH_SHORT).show()
                         findNavController().navigate(R.id.add_exercise_to_exercises)
+                    } else {
+                        Toast.makeText(requireContext(), message, Toast.LENGTH_SHORT).show()
                     }
                 }
-
             }
             back.setOnClickListener {
                 it.applyScaleAnimation()

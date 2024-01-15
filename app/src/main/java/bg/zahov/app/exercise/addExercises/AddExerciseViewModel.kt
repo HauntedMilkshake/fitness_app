@@ -1,10 +1,9 @@
 package bg.zahov.app.exercise.addExercises
 
-import android.app.Application
 import android.widget.Toast
-import androidx.lifecycle.AndroidViewModel
 import androidx.lifecycle.LiveData
 import androidx.lifecycle.MutableLiveData
+import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
 import bg.zahov.app.data.BodyPart
 import bg.zahov.app.data.Category
@@ -14,42 +13,27 @@ import com.google.firebase.auth.FirebaseAuth
 import io.realm.kotlin.ext.realmListOf
 import kotlinx.coroutines.launch
 
-class AddExerciseViewModel(application: Application) : AndroidViewModel(application){
+class AddExerciseViewModel : ViewModel() {
     private val auth = FirebaseAuth.getInstance()
     private val repo = UserRepository.getInstance(auth.currentUser!!.uid)
     private val _bodyPart = MutableLiveData<String>()
     private val _category = MutableLiveData<String>()
-    private val _isCreated = MutableLiveData<Boolean>()
-    val isCreated: LiveData<Boolean> get() = _isCreated
 
-    init {
-        _isCreated.value = false
-    }
+    fun addExercise(exerciseTitle: String?, callback: (Boolean, String?) -> Unit) {
+        if (exerciseTitle.isNullOrEmpty() || _category.value.isNullOrEmpty() || _bodyPart.value.isNullOrEmpty()) {
+            callback(false, "Do not leave empty fields!")
+            return
+        }
 
-    fun addExercise(exerciseTitle: String?) {
-        if (exerciseTitle.isNullOrEmpty()) {
-            Toast.makeText(getApplication(), "Please don't leave title empty", Toast.LENGTH_SHORT)
-                .show()
-        } else {
-            viewModelScope.launch {
-                repo.addExercise(Exercise().apply {
-                    bodyPart = _bodyPart.value
-                    category = _category.value
-                    exerciseName = exerciseTitle
-                    isTemplate = true
-                    sets = realmListOf()
-                })
-
-                Toast.makeText(
-                    getApplication(),
-                    "Successfully added a new exercise",
-                    Toast.LENGTH_SHORT
-                ).show()
-
-
-                _isCreated.postValue(true)
-            }
-
+        viewModelScope.launch {
+            repo.addExercise(Exercise().apply {
+                bodyPart = _bodyPart.value
+                category = _category.value
+                exerciseName = exerciseTitle
+                isTemplate = true
+                sets = realmListOf()
+            })
+            callback(true, "Successfully added exercise :)")
         }
     }
 

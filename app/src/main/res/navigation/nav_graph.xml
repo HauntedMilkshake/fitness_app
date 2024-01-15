@@ -44,11 +44,6 @@
             app:destination="@id/log_in">
         </action>
         <action
-            android:id="@+id/signup_to_home"
-            app:destination="@id/home"
-            app:popUpTo="@id/welcome"
-            app:popUpToInclusive="true" />
-        <action
             android:id="@+id/signup_to_loading"
             app:destination="@id/loading"
             app:popUpTo="@id/welcome"
