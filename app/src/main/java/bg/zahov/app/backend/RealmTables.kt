@@ -52,6 +52,7 @@ class Exercise : RealmObject {
 //reps only - first metric = null
 //cardio/timed - both have time but emphasize different things
 class Sets : RealmObject {
+    var type: String? = null
     var firstMetric: Int? = null
     var secondMetric: Int? = null
 }

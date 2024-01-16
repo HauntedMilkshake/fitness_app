@@ -53,8 +53,7 @@ class FragmentExercises : Fragment() {
         super.onViewCreated(view, savedInstanceState)
         binding.apply {
             exerciseText.apply {
-                text =
-                    if (arguments?.getBoolean("SELECTABLE") == true) "Add exercises" else "Exercises"
+                text = if (arguments?.getBoolean("SELECTABLE") == true) "Add exercises" else "Exercises"
             }
 
             val filterAdapter = FilterAdapter(true).apply {
@@ -104,7 +103,6 @@ class FragmentExercises : Fragment() {
                 it.applyScaleAnimation()
                 FilterDialog().show(childFragmentManager, FilterDialog.TAG)
             }
-
 
             exerciseViewModel.searchFilters.observe(viewLifecycleOwner) { filters ->
                 filterAdapter.updateItems(filters)

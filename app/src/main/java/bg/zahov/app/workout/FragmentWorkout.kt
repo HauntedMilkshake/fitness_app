@@ -40,12 +40,14 @@ class FragmentWorkout : Fragment() {
                 findNavController().navigate(R.id.workout_to_create_workout_template)
             }
 
-            val workoutAdapter = WorkoutAdapter().apply {
-                object : WorkoutAdapter.ItemClickListener<Workout> {
+            val workoutAdapter = TemplateWorkoutAdapter().apply {
+                object : TemplateWorkoutAdapter.ItemClickListener<Workout> {
                     override fun onSettingsClicked(item: Workout, clickedView: View) {
+                        //
                     }
 
                     override fun onWorkoutClicked(item: Workout, clickedView: View) {
+
                     }
                 }
             }

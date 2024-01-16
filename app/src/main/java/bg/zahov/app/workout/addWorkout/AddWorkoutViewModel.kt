@@ -1,5 +1,6 @@
 package bg.zahov.app.workout.addWorkout
 
+import android.util.Log
 import androidx.lifecycle.LiveData
 import androidx.lifecycle.MutableLiveData
 import androidx.lifecycle.ViewModel
@@ -7,6 +8,7 @@ import androidx.lifecycle.viewModelScope
 import bg.zahov.app.data.SelectableExercise
 import bg.zahov.app.backend.Exercise
 import bg.zahov.app.backend.Workout
+import bg.zahov.app.data.ClickableSet
 import bg.zahov.app.repository.UserRepository
 import bg.zahov.app.utils.toExerciseList
 import com.google.firebase.auth.FirebaseAuth
@@ -42,6 +44,10 @@ class AddWorkoutViewModel: ViewModel() {
     fun addSelectedExercises(selectedExercises: List<SelectableExercise>){
         val captured = _currExercises.value?.toMutableList()
         captured?.addAll(selectedExercises.toExerciseList())
+        captured?.forEach {
+            Log.d("EXERCISES", it.exerciseName ?: "penis")
+        }
         _currExercises.value = captured ?: listOf()
     }
+//    fun addSelectableWorkouts(workouts: List<Workout>)
 }

@@ -62,6 +62,11 @@ abstract class BaseAdapter<T>(
         }
     }
 
+    fun deleteItem(position: Int) {
+        items.removeAt(position)
+        updateItems(items)
+    }
+
     open inner class BaseViewHolder(view: View) : RecyclerView.ViewHolder(view) {
         open fun bind(item: T) {
 

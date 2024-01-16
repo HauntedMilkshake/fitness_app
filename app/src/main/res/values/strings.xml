@@ -82,5 +82,14 @@
     <string name="add_exercise">Add exercise</string>
     <string name="template_name_placeholder">Example</string>
     <string name="new_workout_template_hint">Workout template name</string>
+    <!-- Strings used for exercise template creation   -->
+    <string name="set_column_text">Set</string>
+    <string name="previous_column_text">Previous</string>
+    <string name="kg_column_text">(+kg)</string>
+    <string name="lbs_column_text">(+lbs)</string>
+    <string name="reps_column_text">reps</string>
+    <string name="add_set">add set</string>
+    <string name="cancel_text">cancel workout</string>
+
 
 </resources>

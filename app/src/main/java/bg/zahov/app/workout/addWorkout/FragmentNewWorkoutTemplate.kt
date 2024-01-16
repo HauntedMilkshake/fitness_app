@@ -9,6 +9,8 @@ import androidx.core.os.bundleOf
 import androidx.fragment.app.Fragment
 import androidx.fragment.app.viewModels
 import androidx.navigation.fragment.findNavController
+import androidx.recyclerview.widget.LinearLayoutManager
+import bg.zahov.app.backend.Workout
 import bg.zahov.app.utils.applyScaleAnimation
 import bg.zahov.fitness.app.R
 import bg.zahov.fitness.app.databinding.FragmentNewWorkoutTemplateBinding
@@ -41,12 +43,25 @@ class FragmentNewWorkoutTemplate: Fragment() {
                 findNavController().navigate(R.id.create_workout_template_to_workout)
             }
 
+            val exerciseSetAdapter = ExerciseSetAdapter().apply {
+                object : ExerciseSetAdapter.ItemClickListener<Workout> {
+                    override fun onOptionsClicked(item: Workout, clickedView: View) {
+                        //TODO(Open popup)
+                    }
+
+                }
+            }
+            exercisesRecyclerView.apply {
+                adapter = exerciseSetAdapter
+                layoutManager = LinearLayoutManager(requireContext())
+            }
+
             addExercise.setOnClickListener {
                 findNavController().navigate(R.id.create_workout_template_to_add_exercise, bundleOf("SELECTABLE" to true))
             }
 
             addWorkoutViewModel.currExercises.observe(viewLifecycleOwner) {
-
+                exerciseSetAdapter.updateItems(it)
             }
 
             save.setOnClickListener {

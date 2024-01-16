@@ -1,14 +1,14 @@
 package bg.zahov.app.workout
 
 import android.view.View
-import bg.zahov.app.common.BaseAdapter
 import bg.zahov.app.backend.Workout
+import bg.zahov.app.common.BaseAdapter
 import bg.zahov.app.utils.equalsTo
 import bg.zahov.fitness.app.R
 import com.google.android.material.imageview.ShapeableImageView
 import com.google.android.material.textview.MaterialTextView
 
-class WorkoutAdapter : BaseAdapter<Workout>(
+class TemplateWorkoutAdapter : BaseAdapter<Workout>(
     areItemsTheSame = { oldItem, newItem -> oldItem._id.toHexString() == newItem._id.toHexString() },
     areContentsTheSame = { oldItem, newItem -> oldItem.equalsTo(newItem) },
     layoutResId = R.layout.template_item
