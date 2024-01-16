@@ -15,14 +15,14 @@ import bg.zahov.app.utils.applyScaleAnimation
 import bg.zahov.fitness.app.R
 import bg.zahov.fitness.app.databinding.FragmentNewWorkoutTemplateBinding
 
-class FragmentNewWorkoutTemplate: Fragment() {
+class FragmentNewWorkoutTemplate : Fragment() {
     private var _binding: FragmentNewWorkoutTemplateBinding? = null
     private val binding get() = _binding!!
-    private val addWorkoutViewModel: AddWorkoutViewModel by viewModels({requireActivity()})
+    private val addWorkoutViewModel: AddWorkoutViewModel by viewModels({ requireActivity() })
     override fun onCreateView(
         inflater: LayoutInflater,
         container: ViewGroup?,
-        savedInstanceState: Bundle?
+        savedInstanceState: Bundle?,
     ): View {
         _binding = FragmentNewWorkoutTemplateBinding.inflate(inflater, container, false)
         return binding.root
@@ -48,16 +48,19 @@ class FragmentNewWorkoutTemplate: Fragment() {
                     override fun onOptionsClicked(item: Workout, clickedView: View) {
                         //TODO(Open popup)
                     }
-
                 }
             }
+
             exercisesRecyclerView.apply {
                 adapter = exerciseSetAdapter
                 layoutManager = LinearLayoutManager(requireContext())
             }
 
             addExercise.setOnClickListener {
-                findNavController().navigate(R.id.create_workout_template_to_add_exercise, bundleOf("SELECTABLE" to true))
+                findNavController().navigate(
+                    R.id.create_workout_template_to_add_exercise,
+                    bundleOf("SELECTABLE" to true)
+                )
             }
 
             addWorkoutViewModel.currExercises.observe(viewLifecycleOwner) {
@@ -67,6 +70,12 @@ class FragmentNewWorkoutTemplate: Fragment() {
             save.setOnClickListener {
                 it.applyScaleAnimation()
 //                addWorkoutViewModel.addWorkout(workoutNameFieldText.text.toString(), )
+//                findNavController().navigate(R.id.create_workout_template_to_workout)
+            }
+
+            cancel.setOnClickListener {
+                it.applyScaleAnimation()
+                findNavController().navigate(R.id.create_workout_template_to_workout)
             }
         }
     }

@@ -89,7 +89,7 @@
     <string name="lbs_column_text">(+lbs)</string>
     <string name="reps_column_text">reps</string>
     <string name="add_set">add set</string>
-    <string name="cancel_text">cancel workout</string>
+    <string name="cancel_text">cancel</string>
 
 
 </resources>

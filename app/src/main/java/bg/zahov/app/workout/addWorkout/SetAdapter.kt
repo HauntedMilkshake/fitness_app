@@ -1,5 +1,6 @@
 package bg.zahov.app.workout.addWorkout
 
+import android.util.Log
 import android.view.View
 import bg.zahov.app.backend.Sets
 import bg.zahov.app.common.BaseAdapter
@@ -11,13 +12,22 @@ import com.google.android.material.imageview.ShapeableImageView
 import com.google.android.material.textview.MaterialTextView
 
 class SetAdapter : BaseAdapter<ClickableSet>(
-    areItemsTheSame = { oldItem, newItem -> oldItem.set.equalsTo(newItem.set)},
-    areContentsTheSame = {oldItem, newItem -> oldItem.set.equalsTo(newItem.set)},
+    areItemsTheSame = { oldItem, newItem -> oldItem.set.equalsTo(newItem.set) },
+    areContentsTheSame = {oldItem, newItem -> oldItem.set.equalsTo(newItem.set) },
     layoutResId = R.layout.set_item
 ), SwipeGesture.OnSwipeListener
 {
     var itemClickListener: ItemClickListener<ClickableSet>? = null
     override fun createViewHolder(view: View) = SetAdapterViewHolder(view)
+
+    fun addEmptySet() {
+        Log.d("CLICKED IN SETADAPTER", "BEFORE CAPTURE ${getItems().size}")
+        val items = getItems()
+        items.add(ClickableSet(set = Sets(), false))
+        Log.d("CLICKED IN SETADAPTER", "AFTER CAPTURE ${items.size}")
+        updateItems(items)
+        Log.d("CLICKED IN SETADAPTER", "Recycler view size ${items.size}")
+    }
 
     inner class SetAdapterViewHolder(view: View) : BaseViewHolder(view) {
         private val setIndicator = view.findViewById<MaterialTextView>(R.id.set_number)

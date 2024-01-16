@@ -7,6 +7,7 @@ import android.os.Bundle
 import android.os.Handler
 import android.os.Looper
 import android.transition.TransitionInflater
+import android.util.Log
 import android.view.LayoutInflater
 import android.view.View
 import android.view.ViewGroup
@@ -164,6 +165,7 @@ class FragmentExercises : Fragment() {
                     if (arguments?.getBoolean("SELECTABLE") == true) View.VISIBLE else View.GONE
                 setOnClickListener {
                     it.applyScaleAnimation()
+                    Log.d("EXERCISES", exerciseAdapter.getSelected().toString())
                     addWorkoutViewModel.addSelectedExercises(exerciseAdapter.getSelected())
                     findNavController().navigate(R.id.exercises_to_create_workout_template)
                 }

@@ -18,13 +18,13 @@ import java.time.LocalDate
 import java.time.format.DateTimeFormatter
 import java.util.Locale
 
-class AddWorkoutViewModel: ViewModel() {
+class AddWorkoutViewModel : ViewModel() {
     private val auth = FirebaseAuth.getInstance()
     private val repo = UserRepository.getInstance(auth.currentUser!!.uid)
-    private val _currExercises = MutableLiveData<List<Exercise>>()
+    private val _currExercises = MutableLiveData<List<Exercise>>(listOf())
     val currExercises: LiveData<List<Exercise>> get() = _currExercises
 
-    fun addWorkout(name: String, ids: List<String>, callback: (String, Boolean) -> Unit){
+    fun addWorkout(name: String, ids: List<String>, callback: (String, Boolean) -> Unit) {
         when {
             ids.isNotEmpty() -> {
                 viewModelScope.launch {
@@ -33,15 +33,22 @@ class AddWorkoutViewModel: ViewModel() {
                             workoutName = name
                             exerciseIds = ids.toRealmList()
                             isTemplate = true
-                            date = LocalDate.now().format(DateTimeFormatter.ofPattern("yyyy-MM-dd", Locale.getDefault()))
+                            date = LocalDate.now().format(
+                                DateTimeFormatter.ofPattern(
+                                    "yyyy-MM-dd",
+                                    Locale.getDefault()
+                                )
+                            )
                         }
                     )
                 }
             }
+
             else -> callback("Cannot have an empty template", false)
         }
     }
-    fun addSelectedExercises(selectedExercises: List<SelectableExercise>){
+
+    fun addSelectedExercises(selectedExercises: List<SelectableExercise>) {
         val captured = _currExercises.value?.toMutableList()
         captured?.addAll(selectedExercises.toExerciseList())
         captured?.forEach {
@@ -49,5 +56,8 @@ class AddWorkoutViewModel: ViewModel() {
         }
         _currExercises.value = captured ?: listOf()
     }
-//    fun addSelectableWorkouts(workouts: List<Workout>)
+
+    fun resetSelectedExercises() {
+        _currExercises.value = listOf()
+    }
 }
