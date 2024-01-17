@@ -10,6 +10,8 @@ import bg.zahov.app.backend.Exercise
 import bg.zahov.app.backend.Workout
 import bg.zahov.app.data.ClickableSet
 import bg.zahov.app.repository.UserRepository
+import bg.zahov.app.utils.equalsTo
+import bg.zahov.app.utils.toExercise
 import bg.zahov.app.utils.toExerciseList
 import com.google.firebase.auth.FirebaseAuth
 import io.realm.kotlin.ext.toRealmList
@@ -55,6 +57,32 @@ class AddWorkoutViewModel : ViewModel() {
             Log.d("EXERCISES", it.exerciseName ?: "penis")
         }
         _currExercises.value = captured ?: listOf()
+    }
+
+    fun addExercise(newExercise: SelectableExercise) {
+        val captured = _currExercises.value?.toMutableList()
+        captured?.add( newExercise.exercise )
+        captured?.forEach {
+            Log.d("EXERCISES", it.exerciseName ?: "penis")
+        }
+        _currExercises.value = captured ?: listOf()
+    }
+    fun removeExercise(position: Int) {
+        val captured = _currExercises.value?.toMutableList()
+        captured?.removeAt(position)
+        _currExercises.value = captured ?: listOf()
+
+    }
+
+    fun addSet(ePosition: Int, newSet: ClickableSet) {
+        val captured = _currExercises.value?.toMutableList()
+        captured?.get(ePosition)?.sets?.add(newSet.set)
+        _currExercises.value = captured ?: listOf()
+    }
+    //
+    fun removeSet(ePosition: Int, sPosition: Int) {
+        val captured = _currExercises.value?.toMutableList()
+        captured?.get(ePosition)?.sets?.removeAt(sPosition)
     }
 
     fun resetSelectedExercises() {

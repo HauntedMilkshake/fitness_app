@@ -1,5 +1,6 @@
 package bg.zahov.app.common
 
+import android.util.Log
 import android.view.LayoutInflater
 import android.view.View
 import android.view.ViewGroup
@@ -39,32 +40,42 @@ abstract class BaseAdapter<T>(
     override fun getItemCount(): Int = items.size
 
     fun updateItems(newItems: List<T>) {
+        val oldItems = items
         diffUtil?.let {
             val result = DiffUtil.calculateDiff(
                 GenericDiffUtil(
-                    oldList = items,
+                    oldList = oldItems,
                     newList = newItems,
                     areItemsTheSame = areItemsTheSame,
                     areContentsTheSame = areContentsTheSame
                 )
             )
-
+            Log.d("DIFF", "update items old items size ${items.size}")
             items.clear()
             items.addAll(newItems)
+            Log.d("DIFF", "update items new items size ${items.size}")
             diffUtil = GenericDiffUtil(
-                oldList = items.toList(),
-                newList = newItems.toList(),
+                oldList = oldItems,
+                newList = items,
                 areItemsTheSame = areItemsTheSame,
                 areContentsTheSame = areContentsTheSame
             )
-
             result.dispatchUpdatesTo(this)
         }
     }
 
-    fun deleteItem(position: Int) {
-        items.removeAt(position)
-        updateItems(items)
+    internal fun deleteItem(position: Int) {
+        val new = items
+        new.removeAt(position)
+        updateItems(new)
+    }
+
+    internal fun addItem(item: T) {
+        Log.d("DIFF", "items old size - ${items.size}")
+        val new = items
+        new.add(item)
+        Log.d("DIFF", "items new size - ${new.size}")
+        updateItems(new)
     }
 
     open inner class BaseViewHolder(view: View) : RecyclerView.ViewHolder(view) {

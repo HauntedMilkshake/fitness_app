@@ -9,7 +9,7 @@
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
         android:layout_marginStart="5dp"
-        android:textColor="@color/white"
+        android:textColor="@color/blue_text"
         android:textSize="12sp"
         app:layout_constraintStart_toStartOf="parent"
         app:layout_constraintTop_toTopOf="parent" />
@@ -44,6 +44,7 @@
             android:id="@+id/first_input_field_text"
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
+            android:backgroundTint="@color/input_field_background"
             android:inputType="numberDecimal" />
     </com.google.android.material.textfield.TextInputLayout>
 
@@ -51,7 +52,7 @@
         android:id="@+id/second_input_field"
         android:layout_width="70dp"
         android:layout_height="wrap_content"
-        android:layout_marginStart="70dp"
+        android:layout_marginStart="50dp"
         app:boxCornerRadiusBottomEnd="10dp"
         app:boxCornerRadiusBottomStart="10dp"
         app:boxCornerRadiusTopEnd="10dp"
@@ -60,6 +61,7 @@
         app:boxStrokeWidthFocused="0dp"
         app:boxStrokeColor="@color/background"
         app:hintTextColor="@color/background"
+        android:layout_marginEnd="30dp"
         app:layout_constraintEnd_toEndOf="@id/check"
         app:layout_constraintStart_toEndOf="@id/first_input_field"
         app:layout_constraintTop_toTopOf="@id/set_number">
@@ -68,6 +70,7 @@
             android:id="@+id/second_input_field_text"
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
+            android:backgroundTint="@color/input_field_background"
             android:inputType="numberDecimal" />
     </com.google.android.material.textfield.TextInputLayout>
 
@@ -75,10 +78,10 @@
         android:id="@+id/check"
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
-        android:layout_marginTop="5dp"
         android:layout_marginEnd="5dp"
         android:src="@drawable/ic_check"
+        app:layout_constraintBottom_toBottomOf="@+id/second_input_field"
         app:layout_constraintEnd_toEndOf="parent"
-        app:layout_constraintTop_toTopOf="@id/set_number" />
+        app:layout_constraintTop_toTopOf="@+id/second_input_field" />
 
 </androidx.constraintlayout.widget.ConstraintLayout>

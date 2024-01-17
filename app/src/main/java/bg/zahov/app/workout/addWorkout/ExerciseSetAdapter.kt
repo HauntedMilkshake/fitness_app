@@ -1,10 +1,10 @@
 package bg.zahov.app.workout.addWorkout
 
-import android.util.Log
 import android.view.View
 import androidx.recyclerview.widget.LinearLayoutManager
 import androidx.recyclerview.widget.RecyclerView
 import bg.zahov.app.backend.Exercise
+import bg.zahov.app.backend.Sets
 import bg.zahov.app.common.BaseAdapter
 import bg.zahov.app.data.ClickableSet
 import bg.zahov.app.utils.equalsTo
@@ -19,10 +19,10 @@ class ExerciseSetAdapter : BaseAdapter<Exercise>(
     layoutResId = R.layout.exercise_set_item
 ) {
 
-    var itemClickListener: ItemClickListener<Exercise>? = null
-    override fun createViewHolder(view: View) = WorkoutAdapterViewHolder(view)
+    var exerciseItemClickListener: ItemClickListener<Exercise>? = null
+    override fun createViewHolder(view: View) = ExerciseAdapterViewHolder(view)
 
-    inner class WorkoutAdapterViewHolder(view: View) : BaseViewHolder(view) {
+    inner class ExerciseAdapterViewHolder(view: View) : BaseViewHolder(view) {
         private val title = view.findViewById<MaterialTextView>(R.id.exercise_title)
         private val options = view.findViewById<ShapeableImageView>(R.id.options)
         private val sets = view.findViewById<RecyclerView>(R.id.set_recycler_view)
@@ -31,15 +31,17 @@ class ExerciseSetAdapter : BaseAdapter<Exercise>(
         override fun bind(item: Exercise) {
             title.text = item.exerciseName
             options.setOnClickListener {
-                itemClickListener?.onOptionsClicked(item, it)
+                exerciseItemClickListener?.onOptionsClicked(item, it)
             }
 
             val setAdapter = SetAdapter().apply {
-                object : SetAdapter.ItemClickListener<ClickableSet> {
+                itemClickListener = object : SetAdapter.ItemClickListener<ClickableSet> {
                     override fun onSetNumberClicked(item: ClickableSet, clickedView: View) {
+                        exerciseItemClickListener?.onSetClicked(item, clickedView)
                     }
 
                     override fun onCheckClicked(item: ClickableSet, clickedView: View) {
+                        //might be redundant we can alter it in the bind itself
                         item.clicked = !(item.clicked)
                     }
                 }
@@ -50,14 +52,15 @@ class ExerciseSetAdapter : BaseAdapter<Exercise>(
                 adapter = setAdapter
             }
 
+            //EXPOSE TO UI AND OBSERVE LIVE DATA
             addSetButton.setOnClickListener {
-                setAdapter.addEmptySet()
-                Log.d("CLICKED", "RecyclerView item count ${setAdapter.itemCount}")
+                setAdapter.addItem(ClickableSet(set = Sets(), false))
             }
         }
     }
 
     interface ItemClickListener<T> {
         fun onOptionsClicked(item: T, clickedView: View)
+        fun onSetClicked(item: ClickableSet, clickedView: View)
     }
 }

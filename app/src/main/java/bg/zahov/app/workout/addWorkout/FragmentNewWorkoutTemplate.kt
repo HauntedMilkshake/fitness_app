@@ -10,7 +10,10 @@ import androidx.fragment.app.Fragment
 import androidx.fragment.app.viewModels
 import androidx.navigation.fragment.findNavController
 import androidx.recyclerview.widget.LinearLayoutManager
+import bg.zahov.app.backend.Sets
 import bg.zahov.app.backend.Workout
+import bg.zahov.app.common.BaseAdapter
+import bg.zahov.app.data.ClickableSet
 import bg.zahov.app.utils.applyScaleAnimation
 import bg.zahov.fitness.app.R
 import bg.zahov.fitness.app.databinding.FragmentNewWorkoutTemplateBinding
@@ -48,6 +51,11 @@ class FragmentNewWorkoutTemplate : Fragment() {
                     override fun onOptionsClicked(item: Workout, clickedView: View) {
                         //TODO(Open popup)
                     }
+
+                    override fun onSetClicked(item: ClickableSet, clickedView: View) {
+                        TODO("Not yet implemented")
+                    }
+
                 }
             }
 

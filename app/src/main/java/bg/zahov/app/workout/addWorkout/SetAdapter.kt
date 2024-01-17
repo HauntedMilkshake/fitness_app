@@ -1,8 +1,6 @@
 package bg.zahov.app.workout.addWorkout
 
-import android.util.Log
 import android.view.View
-import bg.zahov.app.backend.Sets
 import bg.zahov.app.common.BaseAdapter
 import bg.zahov.app.common.SwipeGesture
 import bg.zahov.app.data.ClickableSet
@@ -20,30 +18,33 @@ class SetAdapter : BaseAdapter<ClickableSet>(
     var itemClickListener: ItemClickListener<ClickableSet>? = null
     override fun createViewHolder(view: View) = SetAdapterViewHolder(view)
 
-    fun addEmptySet() {
-        Log.d("CLICKED IN SETADAPTER", "BEFORE CAPTURE ${getItems().size}")
-        val items = getItems()
-        items.add(ClickableSet(set = Sets(), false))
-        Log.d("CLICKED IN SETADAPTER", "AFTER CAPTURE ${items.size}")
-        updateItems(items)
-        Log.d("CLICKED IN SETADAPTER", "Recycler view size ${items.size}")
-    }
-
     inner class SetAdapterViewHolder(view: View) : BaseViewHolder(view) {
         private val setIndicator = view.findViewById<MaterialTextView>(R.id.set_number)
+        private val previous = view.findViewById<MaterialTextView>(R.id.previous)
+        private val firstInput by lazy {
+            view.findViewById<MaterialTextView>(R.id.first_input_field)
+        }
+        private val secondInput by lazy {
+            view.findViewById<MaterialTextView>(R.id.second_input_field)
+        }
         private val check = view.findViewById<ShapeableImageView>(R.id.check)
 
         override fun bind(item: ClickableSet) {
+            setIndicator.text = "${getItems().size}"
+            // previous.text = TODO()
+
             setIndicator.setOnClickListener {
                 itemClickListener?.onSetNumberClicked(item, itemView)
             }
             check.setOnClickListener {
                 itemClickListener?.onCheckClicked(item, itemView)
+                //TODO(Change background and play dopamine inducing animation)
             }
         }
     }
 
     interface ItemClickListener<T> {
+
         fun onSetNumberClicked(item: T, clickedView: View)
         fun onCheckClicked(item: T, clickedView: View)
     }
