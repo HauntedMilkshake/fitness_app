@@ -18,6 +18,7 @@ import bg.zahov.app.utils.applyScaleAnimation
 import bg.zahov.fitness.app.R
 import bg.zahov.fitness.app.databinding.FragmentNewWorkoutTemplateBinding
 
+//FIXME clear binding
 class FragmentNewWorkoutTemplate : Fragment() {
     private var _binding: FragmentNewWorkoutTemplateBinding? = null
     private val binding get() = _binding!!

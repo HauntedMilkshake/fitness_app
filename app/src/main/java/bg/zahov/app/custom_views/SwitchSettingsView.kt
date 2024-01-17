@@ -21,9 +21,11 @@ class SwitchSettingsView @JvmOverloads constructor(
         inflate(context, R.layout.switch_settings_view, this)
     }
 
+    // FIXME check comments in ExerciseView
     fun initViewInformation(title: String, subTitle: String, settings: Settings) {
         val titleView = findViewById<MaterialTextView>(R.id.titleTextView)
         val subTitleView = findViewById<MaterialTextView>(R.id.subtitleTextView)
+        // FIXME pay attention to the warning  - use SwitchCompat or SwitchMaterial
         val switchView = findViewById<Switch>(R.id.settings_switch)
 
         val state = when (title) {

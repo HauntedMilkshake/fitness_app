@@ -22,6 +22,8 @@ class SyncManager(private var userId: String, private var realm: RealmManager) {
     companion object {
         @Volatile
         private var instance: SyncManager? = null
+        // FIXME this method will always return the instance, created with on the first method invocation
+        //  meaning that you will not get a difference SyncManager when passing different userId
         fun getInstance(userId: String, realm: RealmManager) =
             instance ?: synchronized(this) {
                 instance ?: SyncManager(userId, realm).also { instance = it }
@@ -30,6 +32,8 @@ class SyncManager(private var userId: String, private var realm: RealmManager) {
 
     private val firestore = FirebaseFirestore.getInstance()
 
+    // FIXME you don't need to use adapter classes where a simple static function to convert
+    //  a map to an Object will do. You own all these types, so you can add a fromMap factory method
     private val userAdapter = FirestoreUserAdapter()
     private val workoutAdapter = FirestoreWorkoutAdapter()
     private val exerciseAdapter = FirestoreExerciseAdapter()
@@ -44,6 +48,8 @@ class SyncManager(private var userId: String, private var realm: RealmManager) {
 
     suspend fun createFirestore(user: User, settings: Settings) {
         withContext(Dispatchers.IO) {
+            // FIXME You can keep references that are often used as values
+            //  also please use String constants for the collection and document keys
             val userDocRef = firestore.collection("users").document(userId)
             userDocRef.set(user.toFirestoreMap())
             userDocRef.collection("settings").document("userSettings")
@@ -56,6 +62,16 @@ class SyncManager(private var userId: String, private var realm: RealmManager) {
         realm.createRealm(userCache!!, workoutCache, exerciseCache, settingsCache!!)
     }
 
+
+
+    // FIXME Instead of having this obscure comment here define a simple changes data class that
+    //  has self-explanatory fields for updates and deletions, also prefer defaulting to empty collections
+    //  not null values. As above - declare constants for all document keys.
+    //  Since this is a suspending function, you should await the execution of the runBatch task.
+    //  Add some error handling, what if your update fails?
+    //  From what I gather you are tracking local changes in Realm and uploading them to Firestore?
+    //  You can update your Firestore documents directly through a repository interface or use the sync provided by
+    //  Realm (again, through a repository interface, I do not recommend using Realm object throughout your codebase)
     //1st values of pairs represent the ones we need to upsert
     //2nd values of pairs are the ones we need to delete
     //null values represent no changes from last sync
@@ -117,6 +133,8 @@ class SyncManager(private var userId: String, private var realm: RealmManager) {
         }
     }
 
+
+    // FIXME this method looks out of place here
     fun deleteFirebaseUser(auth: FirebaseAuth) {
         auth.currentUser?.delete()
 //            Firebase.functions.getHttpsCallable("recursiveDelete").call(hashMapOf("path" to "users/$userId"))

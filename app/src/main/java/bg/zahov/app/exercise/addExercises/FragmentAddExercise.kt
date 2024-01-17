@@ -14,6 +14,7 @@ import bg.zahov.app.utils.applyScaleAnimation
 import bg.zahov.fitness.app.R
 import bg.zahov.fitness.app.databinding.FragmentNewExerciseBinding
 
+//FIXME binding should be set to null in onDestroyView
 class FragmentAddExercise : Fragment() {
     private var _binding: FragmentNewExerciseBinding? = null
     private val binding get() = _binding!!
@@ -49,6 +50,8 @@ class FragmentAddExercise : Fragment() {
         }
     }
 
+    //FIXME use string resources for labels, not hardcoded strings
+    // See related comments in ExerciseView
     private fun initViews() {
         binding.apply {
             category.initViewInformation(

@@ -6,6 +6,7 @@ import androidx.compose.ui.text.font.FontFamily
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.sp
 
+//FIXME not needed if not using Compose
 // Set of Material typography styles to start with
 val Typography = Typography(
     bodyLarge = TextStyle(

@@ -15,7 +15,12 @@ import bg.zahov.app.backend.Workout
 import bg.zahov.fitness.app.R
 import io.realm.kotlin.types.RealmList
 
+// FIXME check method name conventions for methods that return a Boolean value
 fun String.isAValidEmail() = Regex("^\\S+@\\S+\\.\\S+$").matches(this)
+
+// FIXME You own these types, don't make extension functions for them.
+//  For proper equals implementation either override hashCode() and equals() (you can generate them from the IDE)
+//  or make the classes data classes (looks like the latter is not an option since Realm requires an empty constructor)
 fun User.equalsTo(otherUser: User?): Boolean {
     return otherUser?.let{
         return this.username == it.username && this.numberOfWorkouts == it.numberOfWorkouts

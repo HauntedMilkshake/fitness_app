@@ -12,6 +12,7 @@ import io.realm.kotlin.notifications.InitialObject
 import io.realm.kotlin.notifications.UpdatedObject
 import kotlinx.coroutines.launch
 
+//FIXME check comments in AuthViewModel
 class HomeViewModel : ViewModel() {
     private var auth: FirebaseAuth = FirebaseAuth.getInstance()
     private val _userName = MutableLiveData<String>()

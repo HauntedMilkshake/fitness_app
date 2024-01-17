@@ -36,6 +36,9 @@ class RadioGroupSettingsView @JvmOverloads constructor(
         inflate(context, R.layout.radio_group_settings_view, this)
     }
 
+    //FIXME again - meaningful names, see other comments in ExerciseView.
+    // This component looks very similar, to the other one, can you use the same component for both?
+    // I see that you are using a listener here, so maybe use this one as a starting point
     fun initViewInformation(title: String, radioOptions: List<String>, settings: Settings) {
         val titleTextView: MaterialTextView = findViewById(R.id.titleTextView)
         val subtitleTextView: MaterialTextView = findViewById(R.id.subtitleTextView)

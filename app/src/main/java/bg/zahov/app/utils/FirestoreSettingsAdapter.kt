@@ -7,6 +7,7 @@ import bg.zahov.app.data.Theme
 import bg.zahov.app.data.Units
 import bg.zahov.app.backend.Settings
 
+//FIXME replace these adapters with factory method in entity, also - use constants instead of hardcoded strings
 class FirestoreSettingsAdapter : Adapter<Map<String, Any>?, Settings> {
     override fun adapt(t: Map<String, Any>?): Settings {
         return Settings().apply {

@@ -20,6 +20,7 @@ import java.time.LocalDate
 import java.time.format.DateTimeFormatter
 import java.util.Locale
 
+//FIXME see comments in AuthViewModel and EditProfileViewModel
 class AddWorkoutViewModel : ViewModel() {
     private val auth = FirebaseAuth.getInstance()
     private val repo = UserRepository.getInstance(auth.currentUser!!.uid)
@@ -36,6 +37,7 @@ class AddWorkoutViewModel : ViewModel() {
                             exerciseIds = ids.toRealmList()
                             isTemplate = true
                             date = LocalDate.now().format(
+                                // FIXME extract formatter
                                 DateTimeFormatter.ofPattern(
                                     "yyyy-MM-dd",
                                     Locale.getDefault()

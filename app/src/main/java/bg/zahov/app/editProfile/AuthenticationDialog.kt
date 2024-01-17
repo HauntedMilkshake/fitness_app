@@ -13,7 +13,10 @@ import androidx.fragment.app.viewModels
 import bg.zahov.fitness.app.databinding.DialogFragmentAuthenticationBinding
 
 class AuthenticationDialog : DialogFragment() {
+    //FIXME since the binding is used only in onCreateDialog, you can
     private var _binding: DialogFragmentAuthenticationBinding? = null
+    //FIXME code style - get() method definition is usually placed on a new line with indent
+    // also use requireNotNull() instead of !!
     private val binding get() = _binding!!
     private val editProfileViewModel: EditProfileViewModel by viewModels({ requireActivity() })
 
@@ -22,6 +25,8 @@ class AuthenticationDialog : DialogFragment() {
         val dialog = AlertDialog.Builder(requireActivity())
             .setView(binding.root)
             .create()
+        //FIXME you can control dialog styling from the application theme or another theme declared in
+        // themes.xml
         dialog.window?.setBackgroundDrawable(ColorDrawable(Color.Transparent.toArgb()))
         dialog.setOnShowListener {
             binding.cancel.setOnClickListener {

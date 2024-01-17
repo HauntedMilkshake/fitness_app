@@ -14,6 +14,7 @@ import bg.zahov.fitness.app.R
 import bg.zahov.fitness.app.databinding.FragmentLoadingBinding
 import com.google.android.material.imageview.ShapeableImageView
 
+//FIXME _binding should be set to null in onDestroyView
 class FragmentLoading : Fragment() {
     private var _binding: FragmentLoadingBinding? = null
     private val binding get() = _binding!!

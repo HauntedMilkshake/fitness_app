@@ -10,6 +10,7 @@ import bg.zahov.app.utils.isAValidEmail
 import com.google.firebase.auth.FirebaseAuth
 import kotlinx.coroutines.launch
 
+//FIXME check comments in AuthViewModel and EditProfileViewModel
 class SignupViewModel : ViewModel() {
     private var auth: FirebaseAuth = FirebaseAuth.getInstance()
     private lateinit var repo: UserRepository
@@ -72,6 +73,7 @@ class SignupViewModel : ViewModel() {
             }
     }
 
+    //FIXME use any{}, also isNullOrBlank() is better
     private fun areFieldsEmpty(userName: String?, email: String?, pass: String?) =
         listOf(userName, email, pass).count { it.isNullOrEmpty() } >= 1
 }

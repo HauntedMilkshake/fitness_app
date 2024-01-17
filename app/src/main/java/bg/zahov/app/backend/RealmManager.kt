@@ -52,6 +52,9 @@ class RealmManager {
         return config
     }
 
+    // FIXME since this method can be potentially called from multiple threads,
+    //  realmInstance access should be synchronized in some way. You can also return it as a
+    //  non-nullable type from this function (fun openRealm(): Realm
     private fun openRealm() {
         if (realmInstance == null || realmInstance?.isClosed() == true) {
             realmInstance = Realm.open(realmConfig)
@@ -60,15 +63,27 @@ class RealmManager {
 
     suspend fun createRealm(
         user: User,
+        // FIXME do not use nullable types in the signature - does it make sense to try have null values
+        //  in the list or the list to be null itself? You can always use filterNotNull() and orEmpty()
+        //  on collections before passing them as parameters
         workouts: List<Workout?>?,
         exercises: List<Exercise?>?,
         settings: Settings
     ) {
+        // FIXME (codestyle) when the first function statement contains a lambda, it's better to use
+        //  fun doSomething(...) = lambda(...) {.... }
+        //  so the code is less indented
+        //  Also, why is this being executed on Main?
         withContext(Dispatchers.Main) {
             try {
+                // FIXME Checkout Timber library for logging: https://github.com/JakeWharton/timber
+                //  The idea of this library is that logging is a big no-no for published applications -
+                //  it affects performance, battery life and can possibly leak sensitive information.
+                //  The library makes it easy to disable logging for release builds.
                 Log.d("SYNC", "BEFORE WRITE")
                 realmInstance?.write {
                     Log.d("SYNC", "WRITING TO REALM")
+                    // FIXME all copy calls can throw an exception on error, add some error handling
                     copyToRealm(user)
                     copyToRealm(settings)
 
@@ -92,12 +107,14 @@ class RealmManager {
 
     suspend fun deleteRealm() {
         withRealm {
+            //
             it?.write {
                 deleteAll()
             }
         }
     }
 
+    // FIXME can you really perform the block operation on a null value?
     private suspend fun <T> withRealm(block: suspend (Realm?) -> T): T {
         return withContext(Dispatchers.IO) {
 //            try{
@@ -109,6 +126,7 @@ class RealmManager {
         }
     }
 
+    // FIXME Please don't return nullable flows - this is bad API design
     suspend fun getUser(): Flow<ObjectChange<User>>? {
         return withRealm { realm ->
                 realm?.query<User>()?.first()?.find()?.asFlow()
@@ -123,12 +141,14 @@ class RealmManager {
 
     suspend fun getSettings(): Flow<ObjectChange<Settings>>? {
         return withRealm { realm ->
+            // FIXME the order of the calls matters, are you sure you're doing the right thing here?
             realm?.query<Settings>()?.find()?.first()?.asFlow()
         }
     }
 
     suspend fun getTemplateExercises(): Flow<ResultsChange<Exercise>>? {
         return withRealm { realm ->
+            // FIXME please use query arguments, not hardcoded conditions, you might even reuse some code this way
             realm?.query<Exercise>("isTemplate == true")?.find()?.asFlow()
         }
     }
@@ -204,6 +224,8 @@ class RealmManager {
         }
     }
 
+    // FIXME please don't use when statements with raw strings, use String constants instead
+    //  These checks bases on title look extremely fishy, though
     suspend fun updateSetting(title: String, newValue: Any) {
         withRealm { realm ->
             val settings = getSettingsSync()

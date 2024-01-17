@@ -14,6 +14,7 @@ import io.realm.kotlin.notifications.UpdatedObject
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.launch
 
+//FIXME check comments in AuthViewModel
 class SettingsViewModel(application: Application) : AndroidViewModel(application){
     private val auth: FirebaseAuth = FirebaseAuth.getInstance()
     private val repo: UserRepository = UserRepository.getInstance(auth.currentUser!!.uid)

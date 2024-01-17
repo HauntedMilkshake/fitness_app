@@ -39,9 +39,11 @@ android {
     kotlinOptions {
         jvmTarget = "17"
     }
+    //FIXME compose is not used - remove
     buildFeatures {
         compose = true
     }
+    //FIXME compose is not used - remove
     composeOptions {
         kotlinCompilerExtensionVersion = "1.4.3"
     }
@@ -52,6 +54,7 @@ android {
     }
     buildFeatures {
         viewBinding = true
+        //FIXME data binding is not used - remove
         dataBinding = true
     }
 }
@@ -69,6 +72,7 @@ dependencies {
     implementation("androidx.navigation:navigation-ui-ktx:2.7.6")
     implementation("androidx.lifecycle:lifecycle-runtime-ktx:2.7.0")
     implementation("androidx.activity:activity-compose:1.8.2")
+    //FIXME remove Compose related dependencies as it's not used in the project
     implementation(platform("androidx.compose:compose-bom:2023.03.00"))
     implementation("androidx.compose.ui:ui")
     implementation("androidx.compose.ui:ui-graphics")

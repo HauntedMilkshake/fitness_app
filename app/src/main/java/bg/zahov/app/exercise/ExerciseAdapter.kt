@@ -12,13 +12,18 @@ import com.google.android.material.textview.MaterialTextView
 class ExerciseAdapter(
     private val selectable: Boolean,
 ) : BaseAdapter<SelectableExercise>(
+    //FIXME This comment is FYI only, since you shouldn't use RealmObjects in your presentation, but ObjectId (alias for BsonId)
+    // already has equals and hash code implemented, you can compare those directly
     areItemsTheSame = { oldItem, newItem -> oldItem.exercise._id.toHexString() == newItem.exercise._id.toHexString() },
+    //FIXME see comment on those equalsTo extension functions in Extensions
     areContentsTheSame = { oldItem, newItem -> oldItem.exercise.equalsTo(newItem.exercise) },
     layoutResId = R.layout.exercise_item
 ) {
     var itemClickListener: ItemClickListener<SelectableExercise>? = null
     override fun createViewHolder(view: View): BaseViewHolder = ExerciseAdapterViewHolder(view)
 
+    //FIXME I would rather pass the click listener to the bind method rather than use an inner class here,
+    // as this way you have an implicit reference to the adapter in the ViewHolder
     inner class ExerciseAdapterViewHolder(view: View) : BaseViewHolder(view) {
         private val exerciseImage = view.findViewById<ShapeableImageView>(R.id.exercise_image)
         private val exerciseTitle = view.findViewById<MaterialTextView>(R.id.exercise_title)

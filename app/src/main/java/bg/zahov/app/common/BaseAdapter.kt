@@ -7,6 +7,8 @@ import android.view.ViewGroup
 import androidx.recyclerview.widget.DiffUtil
 import androidx.recyclerview.widget.RecyclerView
 
+// FIXME check whether androidx.recyclerview.widget.ListAdapter will fit your  needs
+
 abstract class BaseAdapter<T>(
     private val areItemsTheSame: (oldItem: T, newItem: T) -> Boolean,
     private val areContentsTheSame: (oldItem: T, newItem: T) -> Boolean,
@@ -17,6 +19,7 @@ abstract class BaseAdapter<T>(
     private var diffUtil: GenericDiffUtil<T>? = null
 
     init {
+        // FIXME this instantiation does not make sense
         diffUtil = GenericDiffUtil(
             oldList = listOf(),
             newList = listOf(),
@@ -40,6 +43,7 @@ abstract class BaseAdapter<T>(
     override fun getItemCount(): Int = items.size
 
     fun updateItems(newItems: List<T>) {
+        // FIXME what is this null check about? The checked object is never used
         val oldItems = items
         diffUtil?.let {
             val result = DiffUtil.calculateDiff(
@@ -54,6 +58,7 @@ abstract class BaseAdapter<T>(
             items.clear()
             items.addAll(newItems)
             Log.d("DIFF", "update items new items size ${items.size}")
+            // FIXME again, this is not used and redundant
             diffUtil = GenericDiffUtil(
                 oldList = oldItems,
                 newList = items,
@@ -78,11 +83,15 @@ abstract class BaseAdapter<T>(
         updateItems(new)
     }
 
+    // FIXME this doesn't need to be an inner class, make it abstract with abstract method bind and
+    //  make it generic
     open inner class BaseViewHolder(view: View) : RecyclerView.ViewHolder(view) {
         open fun bind(item: T) {
 
         }
     }
 
+    // FIXME I believe you want to grant access to items to subclasses, make items protected
+    //  or make this method protected and set the return type to List<T> to hide collection mutability
     internal fun getItems() = items
 }

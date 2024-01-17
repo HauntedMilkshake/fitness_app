@@ -8,6 +8,7 @@ import com.google.firebase.auth.FirebaseAuth
 import kotlinx.coroutines.delay
 import kotlinx.coroutines.launch
 
+//FIXME check comments in AuthViewModel
 class LoadingViewModel : ViewModel() {
     private val auth = FirebaseAuth.getInstance()
     private val _isAuthenticated = MutableLiveData<Boolean>()

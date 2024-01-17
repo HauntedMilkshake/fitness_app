@@ -16,10 +16,12 @@ import com.google.android.flexbox.FlexDirection
 import com.google.android.flexbox.FlexboxLayoutManager
 import com.google.android.flexbox.JustifyContent
 
+//FIXME binding should be disposed in onDestroyView
 class FilterDialog : DialogFragment() {
     private var _binding: DialogFragmentFiltersBinding? = null
     private val binding get() = _binding!!
     private val exerciseViewModel: ExerciseViewModel by viewModels({ requireActivity() })
+
     override fun onCreateView(
         inflater: LayoutInflater,
         container: ViewGroup?,

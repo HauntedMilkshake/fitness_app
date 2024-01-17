@@ -9,6 +9,7 @@ import androidx.fragment.app.Fragment
 import bg.zahov.fitness.app.R
 import bg.zahov.fitness.app.databinding.FragmentMeasuresBinding
 
+//FIXME clear _binding...
 class FragmentMeasures : Fragment() {
     private var _binding: FragmentMeasuresBinding? = null
     private val binding get() = _binding!!

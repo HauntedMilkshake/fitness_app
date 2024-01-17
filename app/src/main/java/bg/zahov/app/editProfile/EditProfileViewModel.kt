@@ -14,6 +14,7 @@ import io.realm.kotlin.notifications.InitialObject
 import io.realm.kotlin.notifications.UpdatedObject
 import kotlinx.coroutines.launch
 
+//FIXME see comments in AuthViewModel
 class EditProfileViewModel(application: Application) : AndroidViewModel(application){
     private val auth: FirebaseAuth = FirebaseAuth.getInstance()
     private val repo = UserRepository.getInstance(auth.currentUser!!.uid)
@@ -29,9 +30,9 @@ class EditProfileViewModel(application: Application) : AndroidViewModel(applicat
 
     init {
         viewModelScope.launch {
-
+            //FIXME you should have a single source of truth for the user in your VMs and
+            // that is the user object served by UserRepository (probably as a flow)
             _userEmail.postValue(auth.currentUser?.email)
-
             repo.getUser()!!.collect {
                 when (it) {
                     is InitialObject -> {
@@ -50,6 +51,7 @@ class EditProfileViewModel(application: Application) : AndroidViewModel(applicat
         }
     }
 
+    //FIXME  please don't use callbacks with Kotlin and coroutines
     fun updateUsername(newUsername: String, callback: (String) -> Unit) {
         viewModelScope.launch {
             if (newUsername != _userName.value && newUsername.isNotEmpty()) {
@@ -61,6 +63,9 @@ class EditProfileViewModel(application: Application) : AndroidViewModel(applicat
         }
     }
 
+    //FIXME please don't use callbacks with Kotlin and coroutines
+    // Usage of !! operator is highly discouraged
+    // Check API deprecation and use the suggested substitute calls
     //updateEmail deprecated ??
     fun updateEmail(newEmail: String, callback: (String) -> Unit) {
         if (newEmail != auth.currentUser!!.email && newEmail.isAValidEmail() && newEmail.isNotEmpty()) {
@@ -76,6 +81,7 @@ class EditProfileViewModel(application: Application) : AndroidViewModel(applicat
         }
     }
 
+    //FIXME please don't use callbacks with Kotlin and coroutines
     fun unlockFields(password: String, callback: (Boolean, String) -> Unit) {
         auth.currentUser!!.reauthenticate(
             EmailAuthProvider.getCredential(
@@ -93,12 +99,14 @@ class EditProfileViewModel(application: Application) : AndroidViewModel(applicat
             }
     }
 
+    //FIXME please don't use callbacks with Kotlin and coroutines
     fun sendPasswordResetLink(callback: (String) -> Unit) {
         auth.sendPasswordResetEmail(auth.currentUser!!.email!!).addOnCompleteListener { task ->
             callback(if (task.isSuccessful) "Password link sent!" else "Couldn't send password link!")
         }
     }
 
+    //FIXME I see this is a pattern in the project - please don't use callbacks with Kotlin and coroutines
     fun updatePassword(newPassword: String, callback: (String) -> Unit) {
         if (newPassword.isNotEmpty()) {
             auth.currentUser!!.updatePassword(newPassword).addOnCompleteListener { task ->

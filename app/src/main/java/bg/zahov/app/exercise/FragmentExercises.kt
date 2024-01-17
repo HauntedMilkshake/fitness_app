@@ -28,6 +28,7 @@ import com.google.android.flexbox.FlexboxLayoutManager
 import com.google.android.flexbox.JustifyContent
 import com.google.android.material.textview.MaterialTextView
 
+//FIXME _binding should be set to null in onDestroyView()
 class FragmentExercises : Fragment() {
     private var _binding: FragmentExercisesBinding? = null
     private val binding get() = _binding!!
@@ -53,6 +54,7 @@ class FragmentExercises : Fragment() {
     override fun onViewCreated(view: View, savedInstanceState: Bundle?) {
         super.onViewCreated(view, savedInstanceState)
         binding.apply {
+            // FIXME use string resources, also avoid unnecessary function calls - use exerciseText.text = ...
             exerciseText.apply {
                 text = if (arguments?.getBoolean("SELECTABLE") == true) "Add exercises" else "Exercises"
             }
@@ -65,6 +67,7 @@ class FragmentExercises : Fragment() {
                 }
             }
             filterItemsRecyclerView.apply {
+                //FIXME you can use this.context from the recycler view here
                 layoutManager = FlexboxLayoutManager(requireContext()).apply {
                     flexDirection = FlexDirection.ROW
                     justifyContent = JustifyContent.FLEX_START
@@ -85,6 +88,7 @@ class FragmentExercises : Fragment() {
                 }
 
             exercisesRecyclerView.apply {
+                //FIXME you can use this.context from the recycler view here
                 layoutManager = LinearLayoutManager(requireContext())
                 adapter = exerciseAdapter
             }
@@ -120,6 +124,7 @@ class FragmentExercises : Fragment() {
 
                         override fun onQueryTextChange(query: String?): Boolean {
                             query?.let { name ->
+                                //FIXME what's with he delay??
                                 handler.postDelayed({
                                     exerciseViewModel.searchExercises(name, listOf())
                                 }, 1500)

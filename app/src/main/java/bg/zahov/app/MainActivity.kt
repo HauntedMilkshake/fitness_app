@@ -26,10 +26,12 @@ class MainActivity : AppCompatActivity() {
         setContentView(binding.root)
 
         val navController = findNavController(R.id.nav_host_fragment)
+        //FIXME use the binding.bottomNavigation
         val bottomNav = findViewById<BottomNavigationView>(R.id.bottom_navigation)
 
         bottomNav?.setupWithNavController(navController)
 
+        //FIXME see comments in AuthViewModel
         authViewModel.isAuthenticated.observe(this) { isAuthenticated ->
             val currentDestinationId = navController.currentDestination?.id
             if (isAuthenticated && currentDestinationId != R.id.welcome || currentDestinationId != R.id.signup || currentDestinationId != R.id.log_in) {
@@ -46,12 +48,14 @@ class MainActivity : AppCompatActivity() {
 }
 
 fun FragmentActivity.hideBottomNav() {
+    //FIXME result of findViewById can be null
     findViewById<BottomNavigationView>(R.id.bottom_navigation).apply {
         visibility = View.GONE
     }
 }
 
 fun FragmentActivity.showBottomNav() {
+    //FIXME result of findViewById can be null
     findViewById<BottomNavigationView>(R.id.bottom_navigation).apply {
         visibility = View.VISIBLE
     }

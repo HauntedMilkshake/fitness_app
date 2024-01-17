@@ -5,6 +5,7 @@ import bg.zahov.app.backend.Exercise
 import io.realm.kotlin.ext.toRealmList
 import org.mongodb.kbson.ObjectId
 
+//FIXME replace these adapters with factory method in entity, also - use constants instead of hardcoded strings
 class FirestoreExerciseAdapter : Adapter<Map<String, Any>?, Exercise> {
     override fun adapt(t: Map<String, Any>?): Exercise {
         return Exercise().apply {

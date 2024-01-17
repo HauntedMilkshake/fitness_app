@@ -7,6 +7,7 @@ import bg.zahov.app.utils.isAValidEmail
 import com.google.firebase.auth.FirebaseAuth
 import kotlinx.coroutines.launch
 
+//FIXME check comments in AuthViewModel and EditProfileViewModel
 class LoginViewModel : ViewModel() {
     private var auth: FirebaseAuth = FirebaseAuth.getInstance()
     private lateinit var repo: UserRepository
@@ -21,7 +22,12 @@ class LoginViewModel : ViewModel() {
             callback(false, "Please ensure your email is valid!")
             return
         }
-
+        //FIXME this should be replaced with a kotlin/coroutines centric API in a new auth service class
+        // There you will probably want to convert this callback-based API to a suspending function,
+        // check this:
+        // https://kotlinlang.org/api/kotlinx.coroutines/kotlinx-coroutines-core/kotlinx.coroutines/suspend-cancellable-coroutine.html
+        // or this for flows:
+        // https://kotlinlang.org/api/kotlinx.coroutines/kotlinx-coroutines-core/kotlinx.coroutines.flow/callback-flow.html
         auth.signInWithEmailAndPassword(email, password)
             .addOnCompleteListener { task ->
                 if (task.isSuccessful) {

@@ -14,12 +14,13 @@ import io.realm.kotlin.notifications.UpdatedResults
 import kotlinx.coroutines.launch
 import bg.zahov.app.data.Filter as Filter
 
+//FIXME see AuthViewModel comments
 class ExerciseViewModel : ViewModel(){
     private val auth = FirebaseAuth.getInstance()
     private val repo = UserRepository.getInstance(auth.currentUser!!.uid)
     private val _userExercises = MutableLiveData<List<Exercise>>()
     val userExercises: LiveData<List<Exercise>> get() = _userExercises
-    private val _searchFilters = MutableLiveData<List<Filter>>(listOf())
+    private val _searchFilters = MutableLiveData<List<Filter>>(listOf()) //FIXME use emptyList()
     val searchFilters: LiveData<List<Filter>> = _searchFilters
 
     private val allExercises: MutableList<Exercise> = mutableListOf()
@@ -81,6 +82,7 @@ class ExerciseViewModel : ViewModel(){
     }
 
     fun searchExercises(name: String?, filters: List<Filter?>) {
+        //FIXME let {} would be more suitable in this case
         val newExercises = _userExercises.value?.run {
             when {
                 name.isNullOrEmpty() && filters.isEmpty() -> allExercises

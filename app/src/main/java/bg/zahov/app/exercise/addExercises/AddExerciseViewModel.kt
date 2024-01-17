@@ -12,13 +12,14 @@ import bg.zahov.app.backend.Exercise
 import com.google.firebase.auth.FirebaseAuth
 import io.realm.kotlin.ext.realmListOf
 import kotlinx.coroutines.launch
-
+//FIXME see AuthViewModel comments
 class AddExerciseViewModel : ViewModel() {
     private val auth = FirebaseAuth.getInstance()
     private val repo = UserRepository.getInstance(auth.currentUser!!.uid)
     private val _bodyPart = MutableLiveData<String>()
     private val _category = MutableLiveData<String>()
 
+    //FIXME please don't use callbacks with Kotlin and coroutines
     fun addExercise(exerciseTitle: String?, callback: (Boolean, String?) -> Unit) {
         if (exerciseTitle.isNullOrEmpty() || _category.value.isNullOrEmpty() || _bodyPart.value.isNullOrEmpty()) {
             callback(false, "Do not leave empty fields!")
@@ -37,6 +38,8 @@ class AddExerciseViewModel : ViewModel() {
         }
     }
 
+    //FIXME function name does not correspond to what the function actually does
+    // Don't use hardcoded strings
     fun buildExercise(title: String, info: String) {
         when (title) {
             "Body part" -> {
