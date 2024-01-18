@@ -1,7 +1,7 @@
 package bg.zahov.app.utils
 
-import bg.zahov.app.common.Adapter
-import bg.zahov.app.backend.Workout
+import bg.zahov.app.util.Adapter
+import bg.zahov.app.data.local.Workout
 import io.realm.kotlin.ext.realmListOf
 import io.realm.kotlin.ext.toRealmList
 import org.mongodb.kbson.ObjectId

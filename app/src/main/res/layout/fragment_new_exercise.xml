@@ -85,7 +85,7 @@
 
     </com.google.android.material.textfield.TextInputLayout>
 
-    <bg.zahov.app.custom_views.ExerciseView
+    <bg.zahov.app.ui.custom.ExerciseView
         android:id="@+id/category"
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
@@ -94,7 +94,7 @@
         app:layout_constraintStart_toStartOf="parent"
         app:layout_constraintTop_toBottomOf="@+id/exercise_name_field" />
 
-    <bg.zahov.app.custom_views.ExerciseView
+    <bg.zahov.app.ui.custom.ExerciseView
         android:id="@+id/body_part"
         android:layout_width="match_parent"
         android:layout_height="wrap_content"

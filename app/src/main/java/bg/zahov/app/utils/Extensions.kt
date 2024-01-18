@@ -5,13 +5,13 @@ import android.animation.ObjectAnimator
 import android.animation.PropertyValuesHolder
 import android.view.View
 import androidx.core.content.ContextCompat
-import bg.zahov.app.data.Filter
-import bg.zahov.app.data.SelectableExercise
-import bg.zahov.app.backend.Exercise
-import bg.zahov.app.backend.Sets
-import bg.zahov.app.backend.Settings
-import bg.zahov.app.backend.User
-import bg.zahov.app.backend.Workout
+import bg.zahov.app.data.model.Filter
+import bg.zahov.app.data.model.SelectableExercise
+import bg.zahov.app.data.local.Exercise
+import bg.zahov.app.data.local.Sets
+import bg.zahov.app.data.local.Settings
+import bg.zahov.app.data.local.User
+import bg.zahov.app.data.local.Workout
 import bg.zahov.fitness.app.R
 import io.realm.kotlin.types.RealmList
 

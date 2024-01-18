@@ -1,11 +1,11 @@
 package bg.zahov.app.utils
 
-import bg.zahov.app.common.Adapter
-import bg.zahov.app.data.Language
-import bg.zahov.app.data.Sound
-import bg.zahov.app.data.Theme
-import bg.zahov.app.data.Units
-import bg.zahov.app.backend.Settings
+import bg.zahov.app.util.Adapter
+import bg.zahov.app.data.model.Language
+import bg.zahov.app.data.model.Sound
+import bg.zahov.app.data.model.Theme
+import bg.zahov.app.data.model.Units
+import bg.zahov.app.data.local.Settings
 
 //FIXME replace these adapters with factory method in entity, also - use constants instead of hardcoded strings
 class FirestoreSettingsAdapter : Adapter<Map<String, Any>?, Settings> {

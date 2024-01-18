@@ -7,7 +7,7 @@
 
     <fragment
         android:id="@+id/welcome"
-        android:name="bg.zahov.app.welcome.FragmentWelcome"
+        android:name="bg.zahov.app.ui.fragment.WelcomeFragment"
         android:label="@string/welcome_text"
         tools:layout="@layout/fragment_welcome">
         <action
@@ -20,7 +20,7 @@
 
     <fragment
         android:id="@+id/log_in"
-        android:name="bg.zahov.app.login.FragmentLogIn"
+        android:name="bg.zahov.app.ui.fragment.LoginFragment"
         android:label="@string/login"
         tools:layout="@layout/fragment_log_in">
         <action
@@ -35,7 +35,7 @@
 
     <fragment
         android:id="@+id/signup"
-        android:name="bg.zahov.app.signup.FragmentSignup"
+        android:name="bg.zahov.app.ui.fragment.SignupFragment"
         android:label="@string/register"
         tools:layout="@layout/fragment_sign_up">
         <action
@@ -50,7 +50,7 @@
 
     <fragment
         android:id="@+id/home"
-        android:name="bg.zahov.app.home.FragmentHome"
+        android:name="bg.zahov.app.ui.fragment.HomeFragment"
         android:label="@string/home"
         tools:layout="@layout/fragment_home">
         <action
@@ -60,17 +60,17 @@
 
     <fragment
         android:id="@+id/history"
-        android:name="bg.zahov.app.history.FragmentHistory"
+        android:name="bg.zahov.app.ui.fragment.HistoryFragment"
         tools:layout="@layout/fragment_history"></fragment>
 
     <fragment
         android:id="@+id/measures"
-        android:name="bg.zahov.app.measures.FragmentMeasures"
+        android:name="bg.zahov.app.ui.fragment.MeasuresFragment"
         tools:layout="@layout/fragment_measures"></fragment>
 
     <fragment
         android:id="@+id/exercises"
-        android:name="bg.zahov.app.exercise.FragmentExercises"
+        android:name="bg.zahov.app.ui.fragment.ExercisesFragment"
         tools:layout="@layout/fragment_exercises">
         <action
             android:id="@+id/exercise_to_create_exercise"
@@ -82,7 +82,7 @@
 
     <fragment
         android:id="@+id/settings"
-        android:name="bg.zahov.app.settings.FragmentSettings"
+        android:name="bg.zahov.app.ui.fragment.SettingsFragment"
         tools:layout="@layout/fragment_settings">
         <action
             android:id="@+id/settings_to_home"
@@ -101,7 +101,7 @@
 
     <fragment
         android:id="@+id/edit_profile"
-        android:name="bg.zahov.app.editProfile.FragmentEditProfile"
+        android:name="bg.zahov.app.ui.fragment.EditProfileFragment"
         tools:layout="@layout/fragment_edit_profile">
         <action
             android:id="@+id/edit_profile_to_settings"
@@ -110,7 +110,7 @@
 
     <fragment
         android:id="@+id/create_exercise"
-        android:name="bg.zahov.app.exercise.addExercises.FragmentAddExercise"
+        android:name="bg.zahov.app.ui.fragment.AddExerciseFragment"
         tools:layout="@layout/fragment_new_exercise">
 
         <action
@@ -126,7 +126,7 @@
 
     <fragment
         android:id="@+id/loading"
-        android:name="bg.zahov.app.loading.FragmentLoading"
+        android:name="bg.zahov.app.ui.fragment.LoadingFragment"
         tools:layout="@layout/fragment_loading">
         <action
             android:id="@+id/loading_to_home"
@@ -141,7 +141,7 @@
     </fragment>
     <fragment
         android:id="@+id/create_workout_template"
-        android:name="bg.zahov.app.workout.addWorkout.FragmentNewWorkoutTemplate"
+        android:name="bg.zahov.app.ui.fragment.NewWorkoutTemplateFragment"
         tools:layout="@layout/fragment_new_workout_template">
 
         <action
@@ -154,7 +154,7 @@
     </fragment>
     <fragment
         android:id="@+id/workout"
-        android:name="bg.zahov.app.workout.FragmentWorkout"
+        android:name="bg.zahov.app.ui.fragment.WorkoutFragment"
         tools:layout="@layout/fragment_workout">
         <action
             android:id="@+id/workout_to_create_workout_template"

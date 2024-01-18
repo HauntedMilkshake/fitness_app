@@ -1,7 +1,7 @@
 package bg.zahov.app.utils
 
-import bg.zahov.app.common.Adapter
-import bg.zahov.app.backend.User
+import bg.zahov.app.util.Adapter
+import bg.zahov.app.data.local.User
 
 //FIXME replace these adapters with factory method in entity, also - use constants instead of hardcoded strings
 class FirestoreUserAdapter : Adapter<Map<String, Any>?, User> {
