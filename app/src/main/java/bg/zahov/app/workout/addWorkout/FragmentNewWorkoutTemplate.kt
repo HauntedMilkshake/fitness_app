@@ -52,7 +52,15 @@ class FragmentNewWorkoutTemplate : Fragment() {
                         //TODO(Open popup)
                     }
 
-                    override fun onSetClicked(item: ClickableSet, clickedView: View) {
+                    override fun addSet(exercisePosition: Int) {
+                        addWorkoutViewModel.addSet(exercisePosition)
+                    }
+
+                    override fun onSetNumberClicked(item: ClickableSet, clickedView: View) {
+                        TODO("Not yet implemented")
+                    }
+
+                    override fun onCheckClicked(item: ClickableSet, clickedView: View) {
                         TODO("Not yet implemented")
                     }
 

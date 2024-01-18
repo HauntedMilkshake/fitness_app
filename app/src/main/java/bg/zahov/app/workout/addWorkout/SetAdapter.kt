@@ -34,7 +34,7 @@ class SetAdapter : BaseAdapter<ClickableSet>(
             // previous.text = TODO()
 
             setIndicator.setOnClickListener {
-                itemClickListener?.onSetNumberClicked(item, itemView)
+                itemClickListener?.onSetNumberClicked(item, itemView, adapterPosition)
             }
             check.setOnClickListener {
                 itemClickListener?.onCheckClicked(item, itemView)
@@ -45,7 +45,7 @@ class SetAdapter : BaseAdapter<ClickableSet>(
 
     interface ItemClickListener<T> {
 
-        fun onSetNumberClicked(item: T, clickedView: View)
+        fun onSetNumberClicked(item: T, clickedView: View, position: Int)
         fun onCheckClicked(item: T, clickedView: View)
     }
 

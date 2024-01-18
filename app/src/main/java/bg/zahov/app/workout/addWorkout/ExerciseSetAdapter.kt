@@ -37,10 +37,11 @@ class ExerciseSetAdapter : BaseAdapter<Exercise>(
             val setAdapter = SetAdapter().apply {
                 itemClickListener = object : SetAdapter.ItemClickListener<ClickableSet> {
                     override fun onSetNumberClicked(item: ClickableSet, clickedView: View) {
-                        exerciseItemClickListener?.onSetClicked(item, clickedView)
+                        exerciseItemClickListener?.onSetNumberClicked(item, clickedView)
                     }
 
                     override fun onCheckClicked(item: ClickableSet, clickedView: View) {
+                        exerciseItemClickListener?.onCheckClicked(item, clickedView)
                         //might be redundant we can alter it in the bind itself
                         item.clicked = !(item.clicked)
                     }
@@ -54,13 +55,15 @@ class ExerciseSetAdapter : BaseAdapter<Exercise>(
 
             //EXPOSE TO UI AND OBSERVE LIVE DATA
             addSetButton.setOnClickListener {
-                setAdapter.addItem(ClickableSet(set = Sets(), false))
+                exerciseItemClickListener?.addSet(adapterPosition)
             }
         }
     }
 
     interface ItemClickListener<T> {
         fun onOptionsClicked(item: T, clickedView: View)
-        fun onSetClicked(item: ClickableSet, clickedView: View)
+        fun onSetNumberClicked(item: ClickableSet, clickedView: View)
+        fun addSet(exercisePosition: Int)
+        fun onCheckClicked(item: ClickableSet, clickedView: View)
     }
 }

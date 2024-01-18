@@ -7,6 +7,7 @@ import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
 import bg.zahov.app.data.SelectableExercise
 import bg.zahov.app.backend.Exercise
+import bg.zahov.app.backend.Sets
 import bg.zahov.app.backend.Workout
 import bg.zahov.app.data.ClickableSet
 import bg.zahov.app.repository.UserRepository
@@ -74,9 +75,9 @@ class AddWorkoutViewModel : ViewModel() {
 
     }
 
-    fun addSet(ePosition: Int, newSet: ClickableSet) {
+    fun addSet(ePosition: Int) {
         val captured = _currExercises.value?.toMutableList()
-        captured?.get(ePosition)?.sets?.add(newSet.set)
+        captured?.get(ePosition)?.sets?.add(Sets())
         _currExercises.value = captured ?: listOf()
     }
     //
