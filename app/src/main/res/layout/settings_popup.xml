@@ -14,7 +14,7 @@
         android:textSize="16sp"
         android:textColor="@color/white"
         android:textStyle="bold"
-        android:text="Popup Title"/>
+        android:text=""/>
 
     <RadioGroup
         android:id="@+id/radioGroup"

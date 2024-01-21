@@ -62,7 +62,6 @@ class RadioGroupSettingsView @JvmOverloads constructor(
         setOnClickListener {
             highlightAnimator.start()
             showPopupWindow(title, radioOptions, settings, subtitleTextView)
-
         }
     }
 
@@ -72,10 +71,10 @@ class RadioGroupSettingsView @JvmOverloads constructor(
         settings: Settings,
         subtitleTextView: MaterialTextView,
     ) {
-        val popupView: View = LayoutInflater.from(context).inflate(R.layout.settings_popup, null)
+        val popupView: View = LayoutInflater.from(context).inflate(R.layout.popup_settings, null)
         popupView.setBackgroundResource(R.drawable.custom_popup_background)
-        val popupTitleTextView: MaterialTextView = popupView.findViewById(R.id.popupTitleTextView)
-        val radioGroup: RadioGroup = popupView.findViewById(R.id.radioGroup)
+        val popupTitleTextView: MaterialTextView = popupView.findViewById(R.id.popup_title_text_view)
+        val radioGroup: RadioGroup = popupView.findViewById(R.id.radio_group)
 
         popupTitleTextView.text = title
 

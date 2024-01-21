@@ -7,6 +7,8 @@
     android:fitsSystemWindows="true"
     tools:context="bg.zahov.app.MainActivity">
 
+
+    <!-- Custom view above bottom nav for workout fragment-->
     <fragment
         android:id="@+id/nav_host_fragment"
         android:name="androidx.navigation.fragment.NavHostFragment"

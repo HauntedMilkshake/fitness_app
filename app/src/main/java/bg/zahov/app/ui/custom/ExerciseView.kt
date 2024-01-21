@@ -12,9 +12,10 @@ import android.widget.RadioButton
 import android.widget.RadioGroup
 import android.widget.RelativeLayout
 import androidx.core.content.ContextCompat
+import androidx.core.view.setPadding
 import bg.zahov.app.data.model.BodyPart
 import bg.zahov.app.data.model.Category
-import bg.zahov.app.ui.viewmodel.AddExerciseViewModel
+import bg.zahov.app.ui.exercise.add.AddExerciseViewModel
 import bg.zahov.fitness.app.R
 import com.google.android.material.textview.MaterialTextView
 
@@ -44,110 +45,82 @@ class ExerciseView @JvmOverloads constructor(
         }
     }
 
-    //FIXME This looks like a pretty generic component -
-    // you have an list of items, you have an initial selection and you want to track selection changes.
-    // You don't need to handle category and body part input differently here, just pass the initial state,
-    // and items here and then handle changes in a listener. I would advise against using the labels passed
-    // in radioOptions as a way to map to actual model classes - this will not work with localization.
-    // Instead you can make the method generic and pass a lambda that maps the generic type with a string for
-    // the label or use an interface for the options that has a getLabel method, or take another approach - you
-    // get the idea
-    private fun showPopupWindow(
-        title: String,
-        radioOptions: List<String>,
-        exerciseVm: AddExerciseViewModel,
-    ) {
-        val popupView: View = LayoutInflater.from(context).inflate(R.layout.settings_popup, null)
-        popupView.setBackgroundResource(R.drawable.custom_popup_background)
-        val popupTitleTextView: MaterialTextView = popupView.findViewById(R.id.popupTitleTextView)
-        val radioGroup: RadioGroup = popupView.findViewById(R.id.radioGroup)
+        //FIXME This looks like a pretty generic component -
+        // you have an list of items, you have an initial selection and you want to track selection changes.
+        // You don't need to handle category and body part input differently here, just pass the initial state,
+        // and items here and then handle changes in a listener. I would advise against using the labels passed
+        // in radioOptions as a way to map to actual model classes - this will not work with localization.
+        // Instead you can make the method generic and pass a lambda that maps the generic type with a string for
+        // the label or use an interface for the options that has a getLabel method, or take another approach - you
+        // get the idea
+        private fun showPopupWindow(
+            title: String,
+            radioOptions: List<String>,
+            exerciseVm: AddExerciseViewModel,
+        ) {
+            val popupView: View = LayoutInflater.from(context).inflate(R.layout.settings_popup, null)
+            popupView.setBackgroundResource(R.drawable.custom_popup_background)
+            val popupTitleTextView: MaterialTextView = popupView.findViewById(R.id.popupTitleTextView)
+            val radioGroup: RadioGroup = popupView.findViewById(R.id.radioGroup)
 
-        popupTitleTextView.text = title
+            popupTitleTextView.text = title
 
-        radioOptions.forEachIndexed { index, _ ->
-            val radioButton = RadioButton(context)
-            // FIXME replace the _ from the lambda declaration with currOption and remove this line
-            val currOption = radioOptions[index]
-            radioButton.text = currOption
-            radioButton.layoutParams = RadioGroup.LayoutParams(
-                RadioGroup.LayoutParams.MATCH_PARENT,
-                RadioGroup.LayoutParams.WRAP_CONTENT
-            )
-            radioButton.setPadding(16, 16, 16, 16)
-            radioButton.setTextColor(ContextCompat.getColor(context, R.color.white))
-            radioButton.buttonTintList =
-                ColorStateList.valueOf(ContextCompat.getColor(context, R.color.white))
-            radioButton.layoutParams = RadioGroup.LayoutParams(
-                RadioGroup.LayoutParams.MATCH_PARENT,
-                RadioGroup.LayoutParams.WRAP_CONTENT
-            )
-            // FIXME remove this
-            when (title) {
-                "Category" -> {
-                    if (currOption == getCategory(exerciseVm.getCurrCategory().toString())) {
-                        radioButton.isChecked = true
+            radioOptions.forEachIndexed { _, currOption ->
+                val radioButton = RadioButton(context).apply {
+                    text = currOption
+                    layoutParams = RadioGroup.LayoutParams(RadioGroup.LayoutParams.MATCH_PARENT, RadioGroup.LayoutParams.WRAP_CONTENT)
+                    setPadding(R.dimen.pop_up_radius)
+                }
+                radioButton.setPadding(16, 16, 16, 16)
+                radioButton.setTextColor(ContextCompat.getColor(context, R.color.white))
+                radioButton.buttonTintList =
+                    ColorStateList.valueOf(ContextCompat.getColor(context, R.color.white))
+                radioButton.layoutParams = RadioGroup.LayoutParams(
+                    RadioGroup.LayoutParams.MATCH_PARENT,
+                    RadioGroup.LayoutParams.WRAP_CONTENT
+                )
+                // FIXME remove this
+                when (title) {
+                    "Category" -> {
+                        if (currOption == getCategory(exerciseVm.getCurrCategory().toString())) {
+                            radioButton.isChecked = true
+                        }
+                    }
+
+                    "Body part" -> {
+                        if (currOption == getBodyPart(exerciseVm.getCurrBodyPart().toString())) {
+                            radioButton.isChecked = true
+                        }
                     }
                 }
 
-                "Body part" -> {
-                    if (currOption == getBodyPart(exerciseVm.getCurrBodyPart().toString())) {
-                        radioButton.isChecked = true
-                    }
-                }
+                radioGroup.addView(radioButton)
             }
 
-            radioGroup.addView(radioButton)
+            radioGroup.setOnCheckedChangeListener { _, index ->
+                val radioButton = radioGroup.findViewById<RadioButton>(index)
+                val selectedOption = radioButton.text.toString()
+                // FIXME replace with listener notification
+                exerciseVm.buildExercise(title, selectedOption)
+            }
+
+            val scaleUpAnimation = AnimationUtils.loadAnimation(context, R.anim.scale_up)
+            popupView.startAnimation(scaleUpAnimation)
+
+            val popupWindow = PopupWindow(
+                popupView,
+                resources.getDimension(R.dimen.popup_width).toInt(),
+                (radioOptions.size * resources.getDimension(R.dimen.popup_min_height).toInt()),
+                true
+            )
+            popupWindow.showAtLocation(this, Gravity.CENTER, 0, 0)
         }
 
-        radioGroup.setOnCheckedChangeListener { _, index ->
-            val radioButton = radioGroup.findViewById<RadioButton>(index)
-            val selectedOption = radioButton.text.toString()
-            // FIXME replace with listener notification
-            exerciseVm.buildExercise(title, selectedOption)
-        }
-
-        val scaleUpAnimation = AnimationUtils.loadAnimation(context, R.anim.scale_up)
-        popupView.startAnimation(scaleUpAnimation)
-
-        val popupWindow = PopupWindow(
-            popupView,
-            resources.getDimension(R.dimen.popup_width).toInt(),
-            (radioOptions.size * resources.getDimension(R.dimen.popup_min_height).toInt()),
-            true
-        )
-        popupWindow.showAtLocation(this, Gravity.CENTER, 0, 0)
-    }
-
-    //FIXME I've already commented somewhere on using Enum.name - don't do this. This method
-    // looks very similar to what Enum.valueOf(String) does, but with the hardcoded string
-    // keys it smells like trouble from a mile - from what I see the string passed from other
-    // parts in the codebase is BodyPart.*.name, what will happen if you change Chest to Breast?
     private fun getBodyPart(bodyPart: String): String {
-        return when (bodyPart) {
-            "Core" -> BodyPart.Core.name
-            "Arms" -> BodyPart.Arms.name
-            "Back" -> BodyPart.Back.name
-            "Chest" -> BodyPart.Chest.name
-            "Legs" -> BodyPart.Legs.name
-            "Shoulders" -> BodyPart.Shoulders.name
-            "Other" -> BodyPart.Other.name
-            "Olympic" -> BodyPart.Olympic.name
-            else -> ""
-        }
+        return BodyPart.fromKey(bodyPart)
     }
 
     private fun getCategory(category: String): String {
-        return when (category) {
-            "Barbell" -> Category.Barbell.name
-            "Dumbbell" -> Category.Dumbbell.name
-            "Machine" -> Category.Machine.name
-            "Additional weight" -> Category.AdditionalWeight.name
-            "Assisted weight" -> Category.AssistedWeight.name
-            "Reps only" -> Category.RepsOnly.name
-            "Cardio" -> Category.Cardio.name
-            "Timed" -> Category.Timed.name
-            else -> Category.None.name
-        }
-    }
+        return Category.fromKey(category)
 }
 
