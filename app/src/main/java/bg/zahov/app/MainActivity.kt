@@ -30,12 +30,12 @@ class MainActivity : AppCompatActivity() {
         binding.bottomNavigation.setupWithNavController(navController)
 
         //FIXME see comments in AuthViewModel 👍
-        authViewModel.isAuthenticated.observe(this) { isAuthenticated ->
-            val currentDestinationId = navController.currentDestination?.id
-            if (isAuthenticated && currentDestinationId != R.id.welcome || currentDestinationId != R.id.signup || currentDestinationId != R.id.log_in) {
-                authViewModel.initiateSync(applicationContext)
-            }
-        }
+//        authViewModel.isAuthenticated.observe(this) { isAuthenticated ->
+//            val currentDestinationId = navController.currentDestination?.id
+//            if (isAuthenticated && currentDestinationId != R.id.welcome || currentDestinationId != R.id.signup || currentDestinationId != R.id.log_in) {
+//                authViewModel.initiateSync(applicationContext)
+//            }
+//        }
     }
 
     override fun onSupportNavigateUp(): Boolean {

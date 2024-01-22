@@ -9,7 +9,6 @@ import androidx.fragment.app.Fragment
 import androidx.fragment.app.viewModels
 import androidx.navigation.fragment.findNavController
 import androidx.recyclerview.widget.LinearLayoutManager
-import bg.zahov.app.data.local.Workout
 import bg.zahov.app.util.applyScaleAnimation
 import bg.zahov.fitness.app.R
 import bg.zahov.fitness.app.databinding.FragmentWorkoutBinding
@@ -41,26 +40,26 @@ class WorkoutFragment : Fragment() {
                 findNavController().navigate(R.id.workout_to_create_workout_template)
             }
 
-            val workoutAdapter = TemplateWorkoutAdapter().apply {
-                object : TemplateWorkoutAdapter.ItemClickListener<Workout> {
-                    override fun onSettingsClicked(item: Workout, clickedView: View) {
-                        //
-                    }
-
-                    override fun onWorkoutClicked(item: Workout, clickedView: View) {
-
-                    }
-                }
-            }
-
-            templatesRecyclerView.apply {
-                layoutManager = LinearLayoutManager(requireContext())
-                adapter = workoutAdapter
-            }
-
-            workoutViewModel.templates.observe(viewLifecycleOwner) {
-                workoutAdapter.updateItems(it)
-            }
+//            val workoutAdapter = TemplateWorkoutAdapter().apply {
+//                object : TemplateWorkoutAdapter.ItemClickListener<Workout> {
+//                    override fun onSettingsClicked(item: Workout, clickedView: View) {
+//                        //
+//                    }
+//
+//                    override fun onWorkoutClicked(item: Workout, clickedView: View) {
+//
+//                    }
+//                }
+//            }
+//
+//            templatesRecyclerView.apply {
+//                layoutManager = LinearLayoutManager(requireContext())
+//                adapter = workoutAdapter
+//            }
+//
+//            workoutViewModel.templates.observe(viewLifecycleOwner) {
+//                workoutAdapter.updateItems(it)
+//            }
 
         }
     }

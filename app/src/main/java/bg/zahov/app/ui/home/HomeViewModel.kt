@@ -9,20 +9,35 @@ import bg.zahov.app.data.model.Workout
 import kotlinx.coroutines.launch
 
 class HomeViewModel : ViewModel() {
-    private val _userName = MutableLiveData<String>()
     private val repo by lazy {
         UserRepositoryImpl.getInstance()
     }
-    val userName: LiveData<String> get() = _userName
-    private val _userWorkouts = MutableLiveData<List<Workout>>()
-    val userWorkouts: LiveData<List<Workout>> get() = _userWorkouts
+    private val _state = MutableLiveData<State>()
+    val state: LiveData<State>
+        get() = _state
 
     init {
         viewModelScope.launch {
-            repo.getUser().collect {
-                //TODO(Custom type from discord post value here)
-            }
+            _state.postValue(State.Loading(true))
+            repo.getUser()?.collect {
+                _state.postValue(State.Username(it.name))
+            } ?: _state.postValue(State.Error("Error loading data"))
+
+            _state.postValue(State.Loading(false))
         }
+    }
+
+    sealed interface State {
+        object Default : State
+
+        data class Loading(val isLoading: Boolean) : State
+        data class Username(val username: String) : State
+        data class UserWorkouts(val number: Int) : State
+
+        //FOR CHARTS LATER
+        data class Workouts(val workouts: Workout) : State
+
+        data class Error(val message: String) : State
     }
 }
 

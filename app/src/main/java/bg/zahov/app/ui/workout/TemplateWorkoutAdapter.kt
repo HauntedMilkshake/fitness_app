@@ -1,16 +1,15 @@
 package bg.zahov.app.ui.workout
 
 import android.view.View
-import bg.zahov.app.data.local.Workout
+import bg.zahov.app.data.model.Workout
 import bg.zahov.app.util.BaseAdapter
-import bg.zahov.app.utils.equalsTo
 import bg.zahov.fitness.app.R
 import com.google.android.material.imageview.ShapeableImageView
 import com.google.android.material.textview.MaterialTextView
 
 class TemplateWorkoutAdapter : BaseAdapter<Workout>(
-    areItemsTheSame = { oldItem, newItem -> oldItem._id.toHexString() == newItem._id.toHexString() },
-    areContentsTheSame = { oldItem, newItem -> oldItem.equalsTo(newItem) },
+    areItemsTheSame = { oldItem, newItem -> oldItem == newItem },
+    areContentsTheSame = { oldItem, newItem -> oldItem == newItem },
     layoutResId = R.layout.item_template
 ) {
     var itemClickListener: ItemClickListener<Workout>? = null
@@ -18,14 +17,14 @@ class TemplateWorkoutAdapter : BaseAdapter<Workout>(
     override fun createViewHolder(view: View): WorkoutAdapterViewHolder =
         WorkoutAdapterViewHolder(view)
 
-    inner class WorkoutAdapterViewHolder(view: View) : BaseViewHolder(view) {
+    inner class WorkoutAdapterViewHolder(view: View) : BaseViewHolder<Workout>(view) {
         private val title = view.findViewById<MaterialTextView>(R.id.workout_title)
         private val lastPerformed = view.findViewById<MaterialTextView>(R.id.last_performed)
         private val settings = view.findViewById<ShapeableImageView>(R.id.settings)
         private val exercises = view.findViewById<MaterialTextView>(R.id.exercises)
 
         override fun bind(item: Workout) {
-            title.text = item.workoutName
+            title.text = item.name
             lastPerformed.text = item.date
             settings.setOnClickListener {
                 itemClickListener?.onSettingsClicked(item, settings)
@@ -34,7 +33,7 @@ class TemplateWorkoutAdapter : BaseAdapter<Workout>(
                 itemClickListener?.onWorkoutClicked(item, itemView)
             }
             exercises.text =
-                item.exercises.joinToString("\n") { "${it.sets.size} x ${it.exerciseName}" }
+                item.exercises.joinToString("\n") { "${it.sets.size} x ${it.name}" }
         }
     }
 

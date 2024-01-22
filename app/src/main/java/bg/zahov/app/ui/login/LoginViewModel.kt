@@ -17,12 +17,12 @@ class LoginViewModel : ViewModel() {
 
     fun login(email: String, password: String) {
         if (email.isEmpty() || password.isEmpty()) {
-            _state.value = State.Error("Dont leave empty fields")
+            _state.value = State.AuthError("Don't leave empty fields")
             return
         }
 
         if (!email.isEmail()) {
-            _state.value = State.Error("Email not valid")
+            _state.value = State.AuthError("Email not valid")
             return
         }
 
@@ -31,7 +31,7 @@ class LoginViewModel : ViewModel() {
                 auth.login(email, password)
                 _state.postValue(State.Authenticated(true))
             } catch (e: AuthenticationException) {
-                _state.postValue(State.Error(e.message))
+                _state.postValue(State.AuthError(e.message))
             }
         }
 
@@ -39,21 +39,23 @@ class LoginViewModel : ViewModel() {
 
     fun sendPasswordResetEmail(email: String) {
         if (email.isEmpty()) {
-            _state.value = State.Error("Empty fields")
+            _state.value = State.PasswordLinkError("Empty fields")
             return
         }
 
         if (!email.isEmail()) {
-            _state.value = State.Error("Email is not valid")
+            _state.value = State.PasswordLinkError("Email is not valid")
             return
         }
 
         viewModelScope.launch {
             try {
                 auth.passwordReset(email)
-                _state.postValue(State.ForgotPasswordLinkSent("Password link sent"))
+                _state.postValue(State.PasswordLink("Password link sent"))
             } catch (e: AuthenticationException) {
-                _state.value = State.Error(e.message)
+                _state.value = State.PasswordLinkError(
+                    e.message ?: "Error with sending link, try again later."
+                )
             }
         }
 
@@ -63,7 +65,9 @@ class LoginViewModel : ViewModel() {
         object Default : State
 
         data class Authenticated(val isAuthenticated: Boolean) : State
-        data class Error(val errorMessage: String?) : State
-        data class ForgotPasswordLinkSent(val message: String) : State
+        data class AuthError(val errorMessage: String?) : State
+
+        data class PasswordLinkError(val errorMessage: String) : State
+        data class PasswordLink(val message: String) : State
     }
 }

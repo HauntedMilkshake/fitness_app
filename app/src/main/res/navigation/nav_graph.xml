@@ -25,7 +25,7 @@
         tools:layout="@layout/fragment_log_in">
         <action
             android:id="@+id/login_to_signup"
-            app:destination="@id/signup"></action>
+            app:destination="@id/signup" />
         <action
             android:id="@+id/login_to_loading"
             app:destination="@id/loading"
@@ -40,7 +40,7 @@
         tools:layout="@layout/fragment_sign_up">
         <action
             android:id="@+id/signup_to_login"
-            app:destination="@id/log_in"></action>
+            app:destination="@id/log_in"/>
         <action
             android:id="@+id/signup_to_loading"
             app:destination="@id/loading"
@@ -55,18 +55,18 @@
         tools:layout="@layout/fragment_home">
         <action
             android:id="@+id/home_to_settings"
-            app:destination="@+id/settings"></action>
+            app:destination="@+id/settings"/>
     </fragment>
 
     <fragment
         android:id="@+id/history"
         android:name="bg.zahov.app.ui.history.HistoryFragment"
-        tools:layout="@layout/fragment_history"></fragment>
+        tools:layout="@layout/fragment_history"/>
 
     <fragment
         android:id="@+id/measures"
         android:name="bg.zahov.app.ui.measures.MeasuresFragment"
-        tools:layout="@layout/fragment_measures"></fragment>
+        tools:layout="@layout/fragment_measures"/>
 
     <fragment
         android:id="@+id/exercises"

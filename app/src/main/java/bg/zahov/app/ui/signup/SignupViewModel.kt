@@ -1,5 +1,6 @@
 package bg.zahov.app.ui.signup
 
+import android.util.Log
 import androidx.lifecycle.LiveData
 import androidx.lifecycle.MutableLiveData
 import androidx.lifecycle.ViewModel
@@ -17,7 +18,6 @@ class SignupViewModel : ViewModel() {
         get() = _state
 
 
-
     fun signUp(
         userName: String,
         email: String,
@@ -25,27 +25,28 @@ class SignupViewModel : ViewModel() {
         confirmPassword: String,
     ) {
         if (areFieldsEmpty(userName, email, password)) {
-            _state.value = State.FailedAuthentication("Do not leave empty fields")
+            _state.value = State.Error("Do not leave empty fields")
             return
         }
 
         if (!email.isEmail()) {
-            _state.value = State.FailedAuthentication("Email is not valid")
+            _state.value = State.Error("Email is not valid")
             return
         }
 
         if (password != confirmPassword || password.length < 6) {
             _state.value =
-                State.FailedAuthentication("Make sure the passwords are matching and at least 6 characters long")
+                State.Error("Make sure the passwords are matching and at least 6 characters long")
             return
         }
 
         viewModelScope.launch {
             try {
+                Log.d("VM", "VM")
                 auth.signup(userName, email, password)
-                _state.postValue(State.Authenticated(true))
+                _state.postValue(State.Authentication(true))
             } catch (e: AuthenticationException) {
-                _state.postValue(State.FailedAuthentication(e.message))
+                _state.postValue(State.Error(e.message))
             }
         }
 
@@ -57,8 +58,9 @@ class SignupViewModel : ViewModel() {
     sealed interface State {
         object Default : State
 
-        data class Authenticated(val proceed: Boolean) : State
-        data class FailedAuthentication(val message: String?) : State
+        data class Authentication(val isAuthenticated: Boolean) : State
+
+        data class Error(val message: String?) : State
     }
 }
 

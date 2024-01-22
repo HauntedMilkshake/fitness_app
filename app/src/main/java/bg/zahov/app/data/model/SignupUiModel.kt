@@ -10,7 +10,7 @@ data class SignupUiModel(
 object SignupUiMapper {
     fun map(state: SignupViewModel.State): SignupUiModel = when (state) {
         is SignupViewModel.State.Default -> SignupUiModel()
-        is SignupViewModel.State.Authenticated -> SignupUiModel(authenticated = true)
-        is SignupViewModel.State.FailedAuthentication -> SignupUiModel()
+        is SignupViewModel.State.Authentication -> SignupUiModel(authenticated = true)
+        is SignupViewModel.State.Error -> SignupUiModel(false, state.message)
     }
 }

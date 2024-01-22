@@ -4,21 +4,20 @@ import android.view.View
 import bg.zahov.app.util.BaseAdapter
 import bg.zahov.app.util.SwipeGesture
 import bg.zahov.app.data.model.ClickableSet
-import bg.zahov.app.utils.equalsTo
 import bg.zahov.fitness.app.R
 import com.google.android.material.imageview.ShapeableImageView
 import com.google.android.material.textview.MaterialTextView
 
 class SetAdapter : BaseAdapter<ClickableSet>(
-    areItemsTheSame = { oldItem, newItem -> oldItem.set.equalsTo(newItem.set) },
-    areContentsTheSame = {oldItem, newItem -> oldItem.set.equalsTo(newItem.set) },
+    areItemsTheSame = { oldItem, newItem -> oldItem == newItem },
+    areContentsTheSame = {oldItem, newItem -> oldItem == newItem },
     layoutResId = R.layout.item_set
 ), SwipeGesture.OnSwipeListener
 {
     var itemClickListener: ItemClickListener<ClickableSet>? = null
     override fun createViewHolder(view: View) = SetAdapterViewHolder(view)
 
-    inner class SetAdapterViewHolder(view: View) : BaseViewHolder(view) {
+    inner class SetAdapterViewHolder(view: View) : BaseViewHolder<ClickableSet>(view) {
         private val setIndicator = view.findViewById<MaterialTextView>(R.id.set_number)
         private val previous = view.findViewById<MaterialTextView>(R.id.previous)
         private val firstInput by lazy {
@@ -30,7 +29,7 @@ class SetAdapter : BaseAdapter<ClickableSet>(
         private val check = view.findViewById<ShapeableImageView>(R.id.check)
 
         override fun bind(item: ClickableSet) {
-            setIndicator.text = "${getItems().size}"
+//            setIndicator.text = "${getItems().size}"
             // previous.text = TODO()
 
             setIndicator.setOnClickListener {

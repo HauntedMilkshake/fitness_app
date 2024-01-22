@@ -3,20 +3,19 @@ package bg.zahov.app.ui.exercise
 import android.view.View
 import bg.zahov.app.util.BaseAdapter
 import bg.zahov.app.data.model.Filter
-import bg.zahov.app.utils.equalsTo
 import bg.zahov.fitness.app.R
 import com.google.android.material.imageview.ShapeableImageView
 import com.google.android.material.textview.MaterialTextView
 
 class FilterAdapter(private val isRemovable: Boolean) : BaseAdapter<Filter>(
     areItemsTheSame = { oldItem, newItem -> oldItem == newItem },
-    areContentsTheSame = { oldItem, newItem -> oldItem.equalsTo(newItem) },
+    areContentsTheSame = { oldItem, newItem -> oldItem == newItem },
     layoutResId = R.layout.item_filter
 ) {
 
     internal var itemClickListener: ItemClickListener<Filter>? = null
 
-    inner class FilterAdapterViewHolder(view: View) : BaseViewHolder(view) {
+    inner class FilterAdapterViewHolder(view: View) : BaseViewHolder<Filter>(view) {
         private val filterView = view.findViewById<MaterialTextView>(R.id.text)
         private val remove = view.findViewById<ShapeableImageView>(R.id.remove)
 
@@ -40,5 +39,5 @@ class FilterAdapter(private val isRemovable: Boolean) : BaseAdapter<Filter>(
         fun onItemClicked(item: T, clickedView: View)
     }
 
-    override fun createViewHolder(view: View): BaseViewHolder = FilterAdapterViewHolder(view)
+    override fun createViewHolder(view: View): BaseViewHolder<Filter> = FilterAdapterViewHolder(view)
 }

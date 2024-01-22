@@ -1,5 +1,6 @@
 package bg.zahov.app.data.remote
 
+import android.util.Log
 import bg.zahov.app.data.exception.AuthenticationException
 import bg.zahov.app.data.interfaces.Authentication
 import bg.zahov.app.data.local.RealmManager
@@ -7,6 +8,9 @@ import bg.zahov.app.data.local.Settings
 import com.google.firebase.auth.FirebaseAuth
 import com.google.firebase.auth.FirebaseAuthException
 import com.google.firebase.firestore.FirebaseFirestoreException
+import kotlinx.coroutines.CoroutineScope
+import kotlinx.coroutines.Dispatchers
+import kotlinx.coroutines.launch
 
 class AuthenticationImpl : Authentication {
     companion object {
@@ -30,7 +34,7 @@ class AuthenticationImpl : Authentication {
                     if (task.isSuccessful) {
                         userId?.let {
                             //Might need to do something else with realm
-                            FirestoreManager.getInstance(it)
+                            FirestoreManager.getInstance().initUser(it)
                         }
                     } else throw AuthenticationException("Something went wrong try again")
                 }
@@ -44,17 +48,19 @@ class AuthenticationImpl : Authentication {
             auth.createUserWithEmailAndPassword(email, password)
                 .addOnCompleteListener { task ->
                     if (task.isSuccessful) {
-                        suspend {
-                            userId?.let {
+                        CoroutineScope(Dispatchers.Default).launch {
+                            task.result.user?.uid?.let {
                                 try {
-                                    FirestoreManager.getInstance(it).createFirestore(username)
+                                    Log.d("SIGNUP IMPL", it)
+                                    FirestoreManager.getInstance().initUser(it)
+                                    FirestoreManager.getInstance().createFirestore(username)
                                     RealmManager.getInstance().createRealm(settings = Settings())
                                 } catch (e: FirebaseFirestoreException) {
                                     throw AuthenticationException(
                                         e.message ?: "Error creating account"
                                     )
                                 }
-                            }
+                            } ?: Log.d("SIGNUP IMPL", "no id")
                         }
 
                     } else throw AuthenticationException("Please restart the app and try again later")

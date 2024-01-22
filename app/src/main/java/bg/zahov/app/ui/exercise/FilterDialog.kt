@@ -56,9 +56,9 @@ class FilterDialog : DialogFragment() {
         val filterAdapter = FilterAdapter(false).apply {
             itemClickListener = object : FilterAdapter.ItemClickListener<Filter> {
                 override fun onItemClicked(item: Filter, clickedView: View) {
-                    if (item.selected) exerciseViewModel.addFilter(item) else exerciseViewModel.removeFilter(
-                        item
-                    )
+//                    if (item.selected) exerciseViewModel.addFilter(item) else exerciseViewModel.removeFilter(
+//                        item
+//                    )
                 }
             }
             updateItems(items)

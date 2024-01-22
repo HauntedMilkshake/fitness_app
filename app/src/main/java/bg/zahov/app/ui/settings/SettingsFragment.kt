@@ -45,7 +45,7 @@ class SettingsFragment : Fragment() {
         super.onViewCreated(view, savedInstanceState)
         binding.apply {
             signOutButton.setOnClickListener {
-                authViewModel.signOut()
+//                authViewModel.signOut()
                 findNavController().navigate(R.id.settings_to_welcome)
             }
             back.setOnClickListener {
@@ -64,7 +64,7 @@ class SettingsFragment : Fragment() {
                 openLink("https://github.com/HauntedMilkshake/fitness_app/issues")
             }
             deleteAccount.setOnClickListener {
-                authViewModel.deleteAccount()
+//                authViewModel.deleteAccount()
                 findNavController().navigate(R.id.settings_to_welcome)
             }
 
@@ -113,7 +113,7 @@ class SettingsFragment : Fragment() {
                 initRadioSettingsView(
                     unitSettings,
                     "Units",
-                    listOf(Units.Banana.name, Units.Metric.name),
+                    listOf(Units.BANANA.name, Units.METRIC.name),
                     it
                 )
                 initRadioSettingsView(

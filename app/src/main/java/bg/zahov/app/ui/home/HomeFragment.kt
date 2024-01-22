@@ -7,7 +7,10 @@ import android.view.View
 import android.view.ViewGroup
 import androidx.fragment.app.Fragment
 import androidx.fragment.app.viewModels
+import androidx.lifecycle.map
 import androidx.navigation.fragment.findNavController
+import bg.zahov.app.data.model.HomeUiMapper
+import bg.zahov.app.data.model.LoginUiMapper
 import bg.zahov.app.showBottomNav
 import bg.zahov.fitness.app.R
 import bg.zahov.fitness.app.databinding.FragmentHomeBinding
@@ -37,11 +40,10 @@ class HomeFragment : Fragment() {
             settings.setOnClickListener {
                 findNavController().navigate(R.id.home_to_settings)
             }
-            homeViewModel.userName.observe(viewLifecycleOwner) {
-                profileName.text = it
-            }
-            homeViewModel.numberOfWorkouts.observe(viewLifecycleOwner) {
-                numberOfWorkouts.text = it.toString()
+
+            homeViewModel.state.map { HomeUiMapper.map(it) }.observe(viewLifecycleOwner) {
+
+                profileName.text = it.username
             }
         }
     }

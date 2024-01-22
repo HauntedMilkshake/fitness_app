@@ -45,82 +45,82 @@ class ExerciseView @JvmOverloads constructor(
         }
     }
 
-        //FIXME This looks like a pretty generic component -
-        // you have an list of items, you have an initial selection and you want to track selection changes.
-        // You don't need to handle category and body part input differently here, just pass the initial state,
-        // and items here and then handle changes in a listener. I would advise against using the labels passed
-        // in radioOptions as a way to map to actual model classes - this will not work with localization.
-        // Instead you can make the method generic and pass a lambda that maps the generic type with a string for
-        // the label or use an interface for the options that has a getLabel method, or take another approach - you
-        // get the idea
-        private fun showPopupWindow(
-            title: String,
-            radioOptions: List<String>,
-            exerciseVm: AddExerciseViewModel,
-        ) {
-            val popupView: View = LayoutInflater.from(context).inflate(R.layout.settings_popup, null)
-            popupView.setBackgroundResource(R.drawable.custom_popup_background)
-            val popupTitleTextView: MaterialTextView = popupView.findViewById(R.id.popupTitleTextView)
-            val radioGroup: RadioGroup = popupView.findViewById(R.id.radioGroup)
+    //FIXME This looks like a pretty generic component -
+    // you have an list of items, you have an initial selection and you want to track selection changes.
+    // You don't need to handle category and body part input differently here, just pass the initial state,
+    // and items here and then handle changes in a listener. I would advise against using the labels passed
+    // in radioOptions as a way to map to actual model classes - this will not work with localization.
+    // Instead you can make the method generic and pass a lambda that maps the generic type with a string for
+    // the label or use an interface for the options that has a getLabel method, or take another approach - you
+    // get the idea
+    private fun showPopupWindow(
+        title: String,
+        radioOptions: List<String>,
+        exerciseVm: AddExerciseViewModel,
+    ) {
+        val popupView: View = LayoutInflater.from(context).inflate(R.layout.settings_popup, null)
+        popupView.setBackgroundResource(R.drawable.custom_popup_background)
+        val popupTitleTextView: MaterialTextView = popupView.findViewById(R.id.popupTitleTextView)
+        val radioGroup: RadioGroup = popupView.findViewById(R.id.radioGroup)
 
-            popupTitleTextView.text = title
+        popupTitleTextView.text = title
 
-            radioOptions.forEachIndexed { _, currOption ->
-                val radioButton = RadioButton(context).apply {
-                    text = currOption
-                    layoutParams = RadioGroup.LayoutParams(RadioGroup.LayoutParams.MATCH_PARENT, RadioGroup.LayoutParams.WRAP_CONTENT)
-                    setPadding(R.dimen.pop_up_radius)
-                }
-                radioButton.setPadding(16, 16, 16, 16)
-                radioButton.setTextColor(ContextCompat.getColor(context, R.color.white))
-                radioButton.buttonTintList =
-                    ColorStateList.valueOf(ContextCompat.getColor(context, R.color.white))
-                radioButton.layoutParams = RadioGroup.LayoutParams(
+        radioOptions.forEachIndexed { _, currOption ->
+            val radioButton = RadioButton(context).apply {
+                text = currOption
+                layoutParams = RadioGroup.LayoutParams(
                     RadioGroup.LayoutParams.MATCH_PARENT,
                     RadioGroup.LayoutParams.WRAP_CONTENT
                 )
-                // FIXME remove this
-                when (title) {
-                    "Category" -> {
-                        if (currOption == getCategory(exerciseVm.getCurrCategory().toString())) {
-                            radioButton.isChecked = true
-                        }
-                    }
-
-                    "Body part" -> {
-                        if (currOption == getBodyPart(exerciseVm.getCurrBodyPart().toString())) {
-                            radioButton.isChecked = true
-                        }
+                setPadding(R.dimen.pop_up_radius)
+            }
+            radioButton.setPadding(16, 16, 16, 16)
+            radioButton.setTextColor(ContextCompat.getColor(context, R.color.white))
+            radioButton.buttonTintList =
+                ColorStateList.valueOf(ContextCompat.getColor(context, R.color.white))
+            radioButton.layoutParams = RadioGroup.LayoutParams(
+                RadioGroup.LayoutParams.MATCH_PARENT,
+                RadioGroup.LayoutParams.WRAP_CONTENT
+            )
+            // FIXME remove this
+            when (title) {
+                "Category" -> {
+                    if (currOption == getCategory(exerciseVm.getCurrCategory().toString())) {
+                        radioButton.isChecked = true
                     }
                 }
 
-                radioGroup.addView(radioButton)
+                "Body part" -> {
+                    if (currOption == getBodyPart(exerciseVm.getCurrBodyPart().toString())) {
+                        radioButton.isChecked = true
+                    }
+                }
             }
 
-            radioGroup.setOnCheckedChangeListener { _, index ->
-                val radioButton = radioGroup.findViewById<RadioButton>(index)
-                val selectedOption = radioButton.text.toString()
-                // FIXME replace with listener notification
-                exerciseVm.buildExercise(title, selectedOption)
-            }
-
-            val scaleUpAnimation = AnimationUtils.loadAnimation(context, R.anim.scale_up)
-            popupView.startAnimation(scaleUpAnimation)
-
-            val popupWindow = PopupWindow(
-                popupView,
-                resources.getDimension(R.dimen.popup_width).toInt(),
-                (radioOptions.size * resources.getDimension(R.dimen.popup_min_height).toInt()),
-                true
-            )
-            popupWindow.showAtLocation(this, Gravity.CENTER, 0, 0)
+            radioGroup.addView(radioButton)
         }
 
-    private fun getBodyPart(bodyPart: String): String {
-        return BodyPart.fromKey(bodyPart)
+        radioGroup.setOnCheckedChangeListener { _, index ->
+            val radioButton = radioGroup.findViewById<RadioButton>(index)
+            val selectedOption = radioButton.text.toString()
+            // FIXME replace with listener notification
+//            exerciseVm.buildExercise(title, selectedOption)
+        }
+
+        val scaleUpAnimation = AnimationUtils.loadAnimation(context, R.anim.scale_up)
+        popupView.startAnimation(scaleUpAnimation)
+
+        val popupWindow = PopupWindow(
+            popupView,
+            resources.getDimension(R.dimen.popup_width).toInt(),
+            (radioOptions.size * resources.getDimension(R.dimen.popup_min_height).toInt()),
+            true
+        )
+        popupWindow.showAtLocation(this, Gravity.CENTER, 0, 0)
     }
 
-    private fun getCategory(category: String): String {
-        return Category.fromKey(category)
+    private fun getBodyPart(bodyPart: String) = BodyPart.fromKey(bodyPart)
+
+    private fun getCategory(category: String) = Category.fromKey(category)
 }
 

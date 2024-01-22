@@ -28,7 +28,6 @@ import com.google.android.flexbox.FlexboxLayoutManager
 import com.google.android.flexbox.JustifyContent
 import com.google.android.material.textview.MaterialTextView
 
-//FIXME _binding should be set to null in onDestroyView()
 class ExercisesFragment : Fragment() {
     private var _binding: FragmentExercisesBinding? = null
     private val binding get() = _binding!!
@@ -54,15 +53,12 @@ class ExercisesFragment : Fragment() {
     override fun onViewCreated(view: View, savedInstanceState: Bundle?) {
         super.onViewCreated(view, savedInstanceState)
         binding.apply {
-            // FIXME use string resources, also avoid unnecessary function calls - use exerciseText.text = ...
-            exerciseText.apply {
-                text = if (arguments?.getBoolean("SELECTABLE") == true) "Add exercises" else "Exercises"
-            }
+            exerciseText.text = if (arguments?.getBoolean("SELECTABLE") == true) "Add exercises" else "Exercises"
 
             val filterAdapter = FilterAdapter(true).apply {
                 itemClickListener = object : FilterAdapter.ItemClickListener<Filter> {
                     override fun onItemClicked(item: Filter, clickedView: View) {
-                        exerciseViewModel.removeFilter(item)
+//                        exerciseViewModel.removeFilter(item)
                     }
                 }
             }
@@ -88,8 +84,7 @@ class ExercisesFragment : Fragment() {
                 }
 
             exercisesRecyclerView.apply {
-                //FIXME you can use this.context from the recycler view here
-                layoutManager = LinearLayoutManager(requireContext())
+                layoutManager = LinearLayoutManager(context)
                 adapter = exerciseAdapter
             }
 
@@ -109,32 +104,32 @@ class ExercisesFragment : Fragment() {
                 FilterDialog().show(childFragmentManager, FilterDialog.TAG)
             }
 
-            exerciseViewModel.searchFilters.observe(viewLifecycleOwner) { filters ->
-                filterAdapter.updateItems(filters)
-
-                searchBar.let {
-                    it.setOnQueryTextListener(object :
-                        androidx.appcompat.widget.SearchView.OnQueryTextListener {
-                        override fun onQueryTextSubmit(query: String?): Boolean {
-                            query?.let { name ->
-                                exerciseViewModel.searchExercises(name, listOf())
-                            }
-                            return true
-                        }
-
-                        override fun onQueryTextChange(query: String?): Boolean {
-                            query?.let { name ->
-                                //FIXME what's with he delay??
-                                handler.postDelayed({
-                                    exerciseViewModel.searchExercises(name, listOf())
-                                }, 1500)
-                            }
-                            return true
-                        }
-                    })
-                }
-
-            }
+//            exerciseViewModel.searchFilters.observe(viewLifecycleOwner) { filters ->
+//                filterAdapter.updateItems(filters)
+//
+//                searchBar.let {
+//                    it.setOnQueryTextListener(object :
+//                        androidx.appcompat.widget.SearchView.OnQueryTextListener {
+//                        override fun onQueryTextSubmit(query: String?): Boolean {
+//                            query?.let { name ->
+//                                exerciseViewModel.searchExercises(name, listOf())
+//                            }
+//                            return true
+//                        }
+//
+//                        override fun onQueryTextChange(query: String?): Boolean {
+//                            query?.let { name ->
+//                                //FIXME what's with he delay??
+//                                handler.postDelayed({
+//                                    exerciseViewModel.searchExercises(name, listOf())
+//                                }, 1500)
+//                            }
+//                            return true
+//                        }
+//                    })
+//                }
+//
+//            }
 
             removeSearchBar.setOnClickListener {
                 it.applyScaleAnimation()
@@ -165,16 +160,16 @@ class ExercisesFragment : Fragment() {
                 }
             }
 
-            confirm.apply {
-                visibility =
-                    if (arguments?.getBoolean("SELECTABLE") == true) View.VISIBLE else View.GONE
-                setOnClickListener {
-                    it.applyScaleAnimation()
-                    Log.d("EXERCISES", exerciseAdapter.getSelected().toString())
-                    addWorkoutViewModel.addSelectedExercises(exerciseAdapter.getSelected())
-                    findNavController().navigate(R.id.exercises_to_create_workout_template)
-                }
-            }
+//            confirm.apply {
+//                visibility =
+//                    if (arguments?.getBoolean("SELECTABLE") == true) View.VISIBLE else View.GONE
+//                setOnClickListener {
+//                    it.applyScaleAnimation()
+//                    Log.d("EXERCISES", exerciseAdapter.getSelected().toString())
+//                    addWorkoutViewModel.addSelectedExercises(exerciseAdapter.getSelected())
+//                    findNavController().navigate(R.id.exercises_to_create_workout_template)
+//                }
+//            }
         }
     }
 

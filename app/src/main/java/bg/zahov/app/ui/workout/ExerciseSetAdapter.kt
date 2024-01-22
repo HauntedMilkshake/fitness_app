@@ -3,33 +3,31 @@ package bg.zahov.app.ui.workout
 import android.view.View
 import androidx.recyclerview.widget.LinearLayoutManager
 import androidx.recyclerview.widget.RecyclerView
-import bg.zahov.app.data.local.Exercise
-import bg.zahov.app.data.local.Sets
 import bg.zahov.app.util.BaseAdapter
 import bg.zahov.app.data.model.ClickableSet
-import bg.zahov.app.utils.equalsTo
+import bg.zahov.app.data.model.Exercise
 import bg.zahov.fitness.app.R
 import com.google.android.material.button.MaterialButton
 import com.google.android.material.imageview.ShapeableImageView
 import com.google.android.material.textview.MaterialTextView
 
 class ExerciseSetAdapter : BaseAdapter<Exercise>(
-    areItemsTheSame = { oldItem, newItem -> oldItem._id.toHexString() == newItem._id.toHexString() },
-    areContentsTheSame = { oldItem, newItem -> oldItem.equalsTo(newItem) },
+    areItemsTheSame = { oldItem, newItem -> oldItem == newItem },
+    areContentsTheSame = { oldItem, newItem -> oldItem == newItem },
     layoutResId = R.layout.exercise_set_item
 ) {
 
     var exerciseItemClickListener: ItemClickListener<Exercise>? = null
     override fun createViewHolder(view: View) = ExerciseAdapterViewHolder(view)
 
-    inner class ExerciseAdapterViewHolder(view: View) : BaseViewHolder(view) {
+    inner class ExerciseAdapterViewHolder(view: View) : BaseViewHolder<Exercise>(view) {
         private val title = view.findViewById<MaterialTextView>(R.id.exercise_title)
         private val options = view.findViewById<ShapeableImageView>(R.id.options)
         private val sets = view.findViewById<RecyclerView>(R.id.set_recycler_view)
         private val addSetButton = view.findViewById<MaterialButton>(R.id.add_set)
 
         override fun bind(item: Exercise) {
-            title.text = item.exerciseName
+            title.text = item.name
             options.setOnClickListener {
                 exerciseItemClickListener?.onOptionsClicked(item, it)
             }
@@ -54,7 +52,7 @@ class ExerciseSetAdapter : BaseAdapter<Exercise>(
 
             //EXPOSE TO UI AND OBSERVE LIVE DATA
             addSetButton.setOnClickListener {
-                setAdapter.addItem(ClickableSet(set = Sets(), false))
+                //setAdapter.addItem(ClickableSet(set = Sets(), false))
             }
         }
     }

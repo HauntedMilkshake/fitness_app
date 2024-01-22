@@ -8,7 +8,10 @@ import android.view.ViewGroup
 import android.widget.Toast
 import androidx.fragment.app.Fragment
 import androidx.fragment.app.viewModels
+import androidx.lifecycle.map
 import androidx.navigation.fragment.findNavController
+import bg.zahov.app.data.model.LoginUiMapper
+import bg.zahov.app.data.model.LoginUiModel
 import bg.zahov.app.hideBottomNav
 import bg.zahov.fitness.app.R
 import bg.zahov.fitness.app.databinding.FragmentLogInBinding
@@ -45,10 +48,43 @@ class LoginFragment : Fragment() {
             }
 
             forgotPassword.setOnClickListener {
-
+                loginViewModel.sendPasswordResetEmail(emailFieldText.text.toString())
             }
 
             logInButton.setOnClickListener {
+                loginViewModel.login(
+                    emailFieldText.text.toString(),
+                    passwordFieldText.text.toString()
+                )
+            }
+
+            loginViewModel.state.map { LoginUiMapper.map(it) }.observe(viewLifecycleOwner) {
+                if (it.isAuthenticated) {
+                    findNavController().navigate(R.id.login_to_loading)
+                } else {
+                    it.errorMessage?.let { message ->
+                        Toast.makeText(
+                            context,
+                            message,
+                            Toast.LENGTH_SHORT
+                        ).show()
+                    }
+                }
+
+                it.passwordLinkMessage?.let { message ->
+                    Toast.makeText(
+                        context,
+                        message,
+                        Toast.LENGTH_SHORT
+                    ).show()
+                }
+                it.passwordErrorMessage?.let { message ->
+                    Toast.makeText(
+                        context,
+                        message,
+                        Toast.LENGTH_SHORT
+                    ).show()
+                }
             }
 
             createAccount.setOnClickListener {

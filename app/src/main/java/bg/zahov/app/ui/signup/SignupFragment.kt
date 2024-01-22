@@ -75,13 +75,17 @@ class SignupFragment : Fragment() {
             }
 
             registerButton.setOnClickListener {
-                signupViewModel.signUp(usernameFieldText.text.toString(), emailFieldText.text.toString(), passwordFieldText.text.toString(), confirmPasswordFieldText.text.toString())
+                signupViewModel.signUp(
+                    usernameFieldText.text.toString(),
+                    emailFieldText.text.toString(),
+                    passwordFieldText.text.toString(),
+                    confirmPasswordFieldText.text.toString()
+                )
             }
 
-            //messages might not be propagated
             signupViewModel.state.map { SignupUiMapper.map(it) }.observe(viewLifecycleOwner) {
                 if (it.authenticated) {
-                    findNavController().navigate(R.id.loading_to_home)
+                    findNavController().navigate(R.id.signup_to_loading)
                 } else {
                     Toast.makeText(context, it.errorMessage, Toast.LENGTH_SHORT).show()
                 }

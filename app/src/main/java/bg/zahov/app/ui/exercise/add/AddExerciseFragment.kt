@@ -34,14 +34,14 @@ class AddExerciseFragment : Fragment() {
         binding.apply {
             confirm.setOnClickListener {
                 it.applyScaleAnimation()
-                addExerciseViewModel.addExercise(exerciseNameField.editText!!.text!!.toString()) { success, message ->
-                    if (success) {
-                        Toast.makeText(requireContext(), message, Toast.LENGTH_SHORT).show()
-                        findNavController().navigate(R.id.add_exercise_to_exercises)
-                    } else {
-                        Toast.makeText(requireContext(), message, Toast.LENGTH_SHORT).show()
-                    }
-                }
+//                addExerciseViewModel.addExercise(exerciseNameField.editText!!.text!!.toString()) { success, message ->
+//                    if (success) {
+//                        Toast.makeText(requireContext(), message, Toast.LENGTH_SHORT).show()
+//                        findNavController().navigate(R.id.add_exercise_to_exercises)
+//                    } else {
+//                        Toast.makeText(requireContext(), message, Toast.LENGTH_SHORT).show()
+//                    }
+//                }
             }
             back.setOnClickListener {
                 it.applyScaleAnimation()
@@ -57,14 +57,14 @@ class AddExerciseFragment : Fragment() {
             category.initViewInformation(
                 "Body part",
                 listOf(
-                    BodyPart.Arms.name,
-                    BodyPart.Other.name,
-                    BodyPart.Back.name,
-                    BodyPart.Chest.name,
-                    BodyPart.Core.name,
-                    BodyPart.Legs.name,
-                    BodyPart.Olympic.name,
-                    BodyPart.Shoulders.name
+                    BodyPart.ARMS.name,
+                    BodyPart.OTHER.name,
+                    BodyPart.BACK.name,
+                    BodyPart.CHEST.name,
+                    BodyPart.CORE.name,
+                    BodyPart.LEGS.name,
+                    BodyPart.OLYMPIC.name,
+                    BodyPart.SHOULDERS.name
                 ),
                 addExerciseViewModel
             )

@@ -10,7 +10,6 @@ import androidx.fragment.app.Fragment
 import androidx.fragment.app.viewModels
 import androidx.navigation.fragment.findNavController
 import androidx.recyclerview.widget.LinearLayoutManager
-import bg.zahov.app.data.local.Workout
 import bg.zahov.app.data.model.ClickableSet
 import bg.zahov.app.ui.workout.ExerciseSetAdapter
 import bg.zahov.app.util.applyScaleAnimation
@@ -46,23 +45,23 @@ class NewWorkoutTemplateFragment : Fragment() {
                 findNavController().navigate(R.id.create_workout_template_to_workout)
             }
 
-            val exerciseSetAdapter = ExerciseSetAdapter().apply {
-                object : ExerciseSetAdapter.ItemClickListener<Workout> {
-                    override fun onOptionsClicked(item: Workout, clickedView: View) {
-                        //TODO(Open popup)
-                    }
+//            val exerciseSetAdapter = ExerciseSetAdapter().apply {
+//                object : ExerciseSetAdapter.ItemClickListener<Workout> {
+//                    override fun onOptionsClicked(item: Workout, clickedView: View) {
+//                        //TODO(Open popup)
+//                    }
+//
+//                    override fun onSetClicked(item: ClickableSet, clickedView: View) {
+//                        TODO("Not yet implemented")
+//                    }
+//
+//                }
+//            }
 
-                    override fun onSetClicked(item: ClickableSet, clickedView: View) {
-                        TODO("Not yet implemented")
-                    }
-
-                }
-            }
-
-            exercisesRecyclerView.apply {
-                adapter = exerciseSetAdapter
-                layoutManager = LinearLayoutManager(requireContext())
-            }
+//            exercisesRecyclerView.apply {
+//                adapter = exerciseSetAdapter
+//                layoutManager = LinearLayoutManager(requireContext())
+//            }
 
             addExercise.setOnClickListener {
                 findNavController().navigate(
@@ -70,10 +69,10 @@ class NewWorkoutTemplateFragment : Fragment() {
                     bundleOf("SELECTABLE" to true)
                 )
             }
-
-            addWorkoutViewModel.currExercises.observe(viewLifecycleOwner) {
-                exerciseSetAdapter.updateItems(it)
-            }
+//
+//            addWorkoutViewModel.currExercises.observe(viewLifecycleOwner) {
+//                exerciseSetAdapter.updateItems(it)
+//            }
 
             save.setOnClickListener {
                 it.applyScaleAnimation()

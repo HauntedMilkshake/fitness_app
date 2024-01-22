@@ -34,45 +34,45 @@ class EditProfileFragment : Fragment() {
             }
 
             resetPassword.setOnClickListener {
-                editProfileViewModel.sendPasswordResetLink { message -> showToast(message) }
+//                editProfileViewModel.sendPasswordResetLink { message -> showToast(message) }
             }
 
-            editProfileViewModel.isUnlocked.observe(viewLifecycleOwner) {
-                if (it) {
-                    lock.setImageResource(R.drawable.ic_open_lock)
-                }
-                emailField.isEnabled = it
-                passwordField.isEnabled = it
-            }
+//            editProfileViewModel.isUnlocked.observe(viewLifecycleOwner) {
+//                if (it) {
+//                    lock.setImageResource(R.drawable.ic_open_lock)
+//                }
+//                emailField.isEnabled = it
+//                passwordField.isEnabled = it
+//            }
 
-            editProfileViewModel.userName.observe(viewLifecycleOwner) {
-                usernameFieldText.apply {
-                    setText(it)
-                }
-            }
-
-            editProfileViewModel.userEmail.observe(viewLifecycleOwner) {
-                emailFieldText.apply {
-                    setText(it)
-                }
-            }
+//            editProfileViewModel.userName.observe(viewLifecycleOwner) {
+//                usernameFieldText.apply {
+//                    setText(it)
+//                }
+//            }
+//
+//            editProfileViewModel.userEmail.observe(viewLifecycleOwner) {
+//                emailFieldText.apply {
+//                    setText(it)
+//                }
+//            }
 
             lock.setOnClickListener {
                 AuthenticationDialog().show(childFragmentManager, AuthenticationDialog.TAG)
             }
 
             saveChanges.setOnClickListener {
-                editProfileViewModel.isUnlocked.observe(viewLifecycleOwner) {
-                    val username = usernameFieldText.text.toString()
-                    val email = emailFieldText.text.toString()
-                    val password = passwordFieldText.text.toString()
-                    if (it) {
-                        editProfileViewModel.updateEmail(email) { message -> showToast(message) }
-
-                        editProfileViewModel.updatePassword(password) { message -> showToast(message) }
-                    }
-                    editProfileViewModel.updateUsername(username) { message -> showToast(message) }
-                }
+//                editProfileViewModel.isUnlocked.observe(viewLifecycleOwner) {
+//                    val username = usernameFieldText.text.toString()
+//                    val email = emailFieldText.text.toString()
+//                    val password = passwordFieldText.text.toString()
+//                    if (it) {
+//                        editProfileViewModel.updateEmail(email) { message -> showToast(message) }
+//
+//                        editProfileViewModel.updatePassword(password) { message -> showToast(message) }
+//                    }
+//                    editProfileViewModel.updateUsername(username) { message -> showToast(message) }
+//                }
             }
         }
     }
