@@ -23,6 +23,7 @@ class UserRepositoryImpl : UserRepository {
     }
 
     override suspend fun changeUserName(newUsername: String) {
+        firestore.updateUsername(newUsername)
 
     }
 }

@@ -1,5 +1,6 @@
 package bg.zahov.app.data.local
 
+import android.util.Log
 import bg.zahov.app.data.model.Language
 import bg.zahov.app.data.model.LanguageKeys
 import bg.zahov.app.data.model.Sound
@@ -64,19 +65,17 @@ class RealmManager {
         }
     }
 
-    //the idea behind the nullable lists was to make them optional
-    suspend fun createRealm(settings: Settings) = withContext(Dispatchers.IO) {
-        try {
-            //" ...every time you log in production, a puppy dies."
-            realmInstance?.write {
-                try {
-                    copyToRealm(settings)
-                } catch (e: IllegalArgumentException) {
-                    throw e
-                }
+    suspend fun createRealm() = withContext(Dispatchers.IO) {
+        Log.d("REALM", "BEFORE CREATION")
+        //try catch
+        openRealm()
+        realmInstance?.write {
+            try {
+                Log.d("REALM", "CREATION")
+                copyToRealm(Settings())
+            } catch (e: IllegalArgumentException) {
+                throw e
             }
-        } catch (e: IllegalStateException) {
-            throw e
         }
     }
 
@@ -97,20 +96,18 @@ class RealmManager {
     }
 
     suspend fun getSettings() = withRealm { realm ->
-        realm.query<Settings>().first().find()?.asFlow()
+        realm.query<Settings>().find().first().asFlow()
     }
 
     //TODO(Try catch)
     private suspend fun <T> withRealm(block: suspend (Realm) -> T): T {
-        return withContext(Dispatchers.IO) {
-            block(openRealm())
-        }
+        return block(openRealm())
     }
 
     suspend fun resetSettings() = withRealm { realm ->
         var settings: Settings? = null
 
-        getSettings()?.collect {
+        getSettings().collect {
             settings = it.obj
         }
 

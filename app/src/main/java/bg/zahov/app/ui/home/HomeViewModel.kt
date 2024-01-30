@@ -16,14 +16,26 @@ class HomeViewModel : ViewModel() {
     val state: LiveData<State>
         get() = _state
 
+    private val _userName = MutableLiveData<String>()
+    val userName: LiveData<String>
+        get() = _userName
+
+    private val _numberOfWorkouts = MutableLiveData<Int>()
+    val numberOfWorkouts: LiveData<Int>
+        get() = _numberOfWorkouts
+
+    private val _userWorkouts = MutableLiveData<List<Workout>>()
+    val userWorkouts: LiveData<List<Workout>> get() = _userWorkouts
+
     init {
         viewModelScope.launch {
             _state.postValue(State.Loading(true))
-            repo.getUser()?.collect {
-                _state.postValue(State.Username(it.name))
-            } ?: _state.postValue(State.Error("Error loading data"))
 
-            _state.postValue(State.Loading(false))
+            repo.getUser()?.collect {
+                _userName.postValue(it.name)
+                _state.postValue(State.Loading(false))
+            } ?: _state.postValue(State.Error("Try reloading the app"))
+
         }
     }
 
@@ -31,14 +43,7 @@ class HomeViewModel : ViewModel() {
         object Default : State
 
         data class Loading(val isLoading: Boolean) : State
-        data class Username(val username: String) : State
-        data class UserWorkouts(val number: Int) : State
-
-        //FOR CHARTS LATER
-        data class Workouts(val workouts: Workout) : State
 
         data class Error(val message: String) : State
     }
 }
-
-

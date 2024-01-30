@@ -1,30 +1,32 @@
-package bg.zahov.app.ui.loading
+package bg.zahov.app.ui.home
 
 import android.os.Bundle
+import android.util.Log
 import android.view.LayoutInflater
 import android.view.View
 import android.view.ViewGroup
 import android.view.animation.Animation
 import android.view.animation.ScaleAnimation
-import androidx.fragment.app.Fragment
+import androidx.fragment.app.DialogFragment
 import androidx.fragment.app.viewModels
-import androidx.navigation.fragment.findNavController
+import androidx.lifecycle.map
+import bg.zahov.app.data.model.HomeUiMapper
 import bg.zahov.app.hideBottomNav
-import bg.zahov.fitness.app.R
-import bg.zahov.fitness.app.databinding.FragmentLoadingBinding
+import bg.zahov.app.showBottomNav
+import bg.zahov.fitness.app.databinding.DialogFragmentLoadingBinding
 import com.google.android.material.imageview.ShapeableImageView
 
-//FIXME _binding should be set to null in onDestroyView
-class LoadingFragment : Fragment() {
-    private var _binding: FragmentLoadingBinding? = null
-    private val binding get() = _binding!!
-    private val loadingViewModel: LoadingViewModel by viewModels()
+class LoadingDialogFragment : DialogFragment() {
+    private var _binding: DialogFragmentLoadingBinding? = null
+    private val binding
+        get() = requireNotNull(_binding)
+    private val homeViewModel: HomeViewModel by viewModels()
     override fun onCreateView(
         inflater: LayoutInflater,
         container: ViewGroup?,
         savedInstanceState: Bundle?,
     ): View {
-        _binding = FragmentLoadingBinding.inflate(inflater, container, false)
+        _binding = DialogFragmentLoadingBinding.inflate(inflater, container, false)
         return binding.root
     }
 
@@ -40,15 +42,11 @@ class LoadingFragment : Fragment() {
             animateView(bottomRight)
             animateView(topLeft)
             animateView(topRight)
-            loadingViewModel.isAuthenticated.observe(viewLifecycleOwner) {
-                if (it) {
-                    findNavController().navigate(R.id.loading_to_home)
-                } else {
-                    findNavController().navigate(R.id.loading_to_welcome)
-                }
+
+            homeViewModel.state.map { HomeUiMapper.map(it) }.observe(viewLifecycleOwner) {
+                if(!it.isLoading) dismiss()
             }
         }
-
     }
 
     private fun animateView(view: ShapeableImageView) {
@@ -62,7 +60,6 @@ class LoadingFragment : Fragment() {
         scaleAnimation.duration = 2000L
         scaleAnimation.setAnimationListener(object : Animation.AnimationListener {
             override fun onAnimationStart(animation: Animation?) {
-                loadingViewModel.startAnimations(scaleAnimation.duration - 300)
             }
 
             override fun onAnimationEnd(animation: Animation?) {
@@ -72,11 +69,15 @@ class LoadingFragment : Fragment() {
             }
         })
         view.startAnimation(scaleAnimation)
-
     }
 
     override fun onDestroyView() {
         super.onDestroyView()
+        requireActivity().showBottomNav()
         _binding = null
+    }
+
+    companion object {
+        const val TAG = "LoadingDialogFragment"
     }
 }

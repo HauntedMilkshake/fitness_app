@@ -10,14 +10,14 @@ import androidx.fragment.app.viewModels
 import androidx.lifecycle.map
 import androidx.navigation.fragment.findNavController
 import bg.zahov.app.data.model.HomeUiMapper
-import bg.zahov.app.data.model.LoginUiMapper
 import bg.zahov.app.showBottomNav
 import bg.zahov.fitness.app.R
 import bg.zahov.fitness.app.databinding.FragmentHomeBinding
 
 class HomeFragment : Fragment() {
     private var _binding: FragmentHomeBinding? = null
-    private val binding get() = _binding!!
+    private val binding
+        get() = requireNotNull(_binding)
     private val homeViewModel: HomeViewModel by viewModels()
     override fun onCreateView(
         inflater: LayoutInflater, container: ViewGroup?, savedInstanceState: Bundle?,
@@ -42,8 +42,17 @@ class HomeFragment : Fragment() {
             }
 
             homeViewModel.state.map { HomeUiMapper.map(it) }.observe(viewLifecycleOwner) {
+                if (it.isLoading) {
+                    LoadingDialogFragment().show(childFragmentManager, LoadingDialogFragment.TAG)
+                }
+            }
 
-                profileName.text = it.username
+            homeViewModel.userName.observe(viewLifecycleOwner) {
+                profileName.text = it
+            }
+
+            homeViewModel.numberOfWorkouts.observe(viewLifecycleOwner) {
+                numberOfWorkouts.text = it.toString()
             }
         }
     }

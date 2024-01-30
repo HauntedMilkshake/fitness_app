@@ -11,15 +11,16 @@ import androidx.fragment.app.viewModels
 import androidx.navigation.fragment.findNavController
 import androidx.recyclerview.widget.LinearLayoutManager
 import bg.zahov.app.data.model.ClickableSet
+import bg.zahov.app.data.model.Workout
 import bg.zahov.app.ui.workout.ExerciseSetAdapter
 import bg.zahov.app.util.applyScaleAnimation
 import bg.zahov.fitness.app.R
 import bg.zahov.fitness.app.databinding.FragmentNewWorkoutTemplateBinding
 
-//FIXME clear binding
 class NewWorkoutTemplateFragment : Fragment() {
     private var _binding: FragmentNewWorkoutTemplateBinding? = null
-    private val binding get() = _binding!!
+    private val binding
+        get() = requireNotNull(_binding)
     private val addWorkoutViewModel: AddWorkoutViewModel by viewModels({ requireActivity() })
     override fun onCreateView(
         inflater: LayoutInflater,
@@ -45,23 +46,30 @@ class NewWorkoutTemplateFragment : Fragment() {
                 findNavController().navigate(R.id.create_workout_template_to_workout)
             }
 
-//            val exerciseSetAdapter = ExerciseSetAdapter().apply {
-//                object : ExerciseSetAdapter.ItemClickListener<Workout> {
-//                    override fun onOptionsClicked(item: Workout, clickedView: View) {
-//                        //TODO(Open popup)
-//                    }
-//
-//                    override fun onSetClicked(item: ClickableSet, clickedView: View) {
-//                        TODO("Not yet implemented")
-//                    }
-//
-//                }
-//            }
+            val exerciseSetAdapter = ExerciseSetAdapter().apply {
+                object : ExerciseSetAdapter.ItemClickListener<Workout> {
+                    override fun onOptionsClicked(item: Workout, clickedView: View) {
+                        //TODO(Open popup)
+                    }
 
-//            exercisesRecyclerView.apply {
-//                adapter = exerciseSetAdapter
-//                layoutManager = LinearLayoutManager(requireContext())
-//            }
+                    override fun onSetClicked(item: ClickableSet, clickedView: View) {
+                        TODO("Not yet implemented")
+                    }
+
+                    override fun onAddSet(exercisePosition: Int, set: ClickableSet) {
+                        addWorkoutViewModel.addSet(exercisePosition, set)
+                    }
+
+                    override fun onDeleteSet(exercisePosition: Int, setPosition: Int) {
+                        addWorkoutViewModel.removeSet(exercisePosition, setPosition)
+                    }
+                }
+            }
+
+            exercisesRecyclerView.apply {
+                adapter = exerciseSetAdapter
+                layoutManager = LinearLayoutManager(requireContext())
+            }
 
             addExercise.setOnClickListener {
                 findNavController().navigate(
@@ -69,10 +77,10 @@ class NewWorkoutTemplateFragment : Fragment() {
                     bundleOf("SELECTABLE" to true)
                 )
             }
-//
-//            addWorkoutViewModel.currExercises.observe(viewLifecycleOwner) {
-//                exerciseSetAdapter.updateItems(it)
-//            }
+
+            addWorkoutViewModel.currExercises.observe(viewLifecycleOwner) {
+                exerciseSetAdapter.updateItems(it)
+            }
 
             save.setOnClickListener {
                 it.applyScaleAnimation()
@@ -85,5 +93,10 @@ class NewWorkoutTemplateFragment : Fragment() {
                 findNavController().navigate(R.id.create_workout_template_to_workout)
             }
         }
+    }
+
+    override fun onDestroy() {
+        super.onDestroy()
+        _binding = null
     }
 }

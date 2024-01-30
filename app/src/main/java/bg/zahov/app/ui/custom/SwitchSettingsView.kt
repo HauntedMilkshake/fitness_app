@@ -3,7 +3,7 @@ package bg.zahov.app.ui.custom
 import android.content.Context
 import android.util.AttributeSet
 import android.widget.RelativeLayout
-import android.widget.Switch
+import androidx.appcompat.widget.SwitchCompat
 import bg.zahov.app.util.SettingsChangeListener
 import bg.zahov.app.data.local.Settings
 import bg.zahov.fitness.app.R
@@ -18,7 +18,7 @@ class SwitchSettingsView @JvmOverloads constructor(
     var settingsChangeListener: SettingsChangeListener? = null
 
     init {
-        inflate(context, R.layout.switch_settings_view, this)
+        inflate(context, R.layout.view_switch_settings, this)
     }
 
     // FIXME check comments in ExerciseView
@@ -26,7 +26,7 @@ class SwitchSettingsView @JvmOverloads constructor(
         val titleView = findViewById<MaterialTextView>(R.id.titleTextView)
         val subTitleView = findViewById<MaterialTextView>(R.id.subtitleTextView)
         // FIXME pay attention to the warning  - use SwitchCompat or SwitchMaterial
-        val switchView = findViewById<Switch>(R.id.settings_switch)
+        val switchView = findViewById<SwitchCompat>(R.id.settings_switch)
 
         val state = when (title) {
             "Sound effects" -> settings.soundEffects

@@ -5,10 +5,12 @@ import android.view.View
 import androidx.activity.viewModels
 import androidx.appcompat.app.AppCompatActivity
 import androidx.fragment.app.FragmentActivity
+import androidx.lifecycle.map
 import androidx.navigation.findNavController
 import androidx.navigation.ui.AppBarConfiguration
 import androidx.navigation.ui.navigateUp
 import androidx.navigation.ui.setupWithNavController
+import bg.zahov.app.data.model.AuthUiModelMapper
 import bg.zahov.fitness.app.R
 import bg.zahov.fitness.app.databinding.ActivityMainBinding
 import com.google.android.material.bottomnavigation.BottomNavigationView
@@ -29,13 +31,9 @@ class MainActivity : AppCompatActivity() {
 
         binding.bottomNavigation.setupWithNavController(navController)
 
-        //FIXME see comments in AuthViewModel 👍
-//        authViewModel.isAuthenticated.observe(this) { isAuthenticated ->
-//            val currentDestinationId = navController.currentDestination?.id
-//            if (isAuthenticated && currentDestinationId != R.id.welcome || currentDestinationId != R.id.signup || currentDestinationId != R.id.log_in) {
-//                authViewModel.initiateSync(applicationContext)
-//            }
-//        }
+        authViewModel.state.map { AuthUiModelMapper.map(it) }.observe(this) {
+            if(it.isAuthenticated) navController.navigate(R.id.welcome_to_home)
+        }
     }
 
     override fun onSupportNavigateUp(): Boolean {

@@ -6,7 +6,7 @@ import androidx.lifecycle.MutableLiveData
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
 import bg.zahov.app.data.exception.AuthenticationException
-import bg.zahov.app.data.remote.AuthenticationImpl
+import bg.zahov.app.data.repository.AuthenticationImpl
 import bg.zahov.app.util.isEmail
 import kotlinx.coroutines.launch
 
@@ -41,13 +41,9 @@ class SignupViewModel : ViewModel() {
         }
 
         viewModelScope.launch {
-            try {
-                Log.d("VM", "VM")
-                auth.signup(userName, email, password)
-                _state.postValue(State.Authentication(true))
-            } catch (e: AuthenticationException) {
-                _state.postValue(State.Error(e.message))
-            }
+            Log.d("VM", "VM")
+            auth.signup(userName, email, password)
+            _state.postValue(State.Authentication(true))
         }
 
     }

@@ -13,16 +13,16 @@ class BodyPartKeys {
 }
 
 enum class BodyPart(val key: String) {
-    CORE(BodyPartKeys.CORE),
-    ARMS(BodyPartKeys.ARMS),
-    BACK(BodyPartKeys.BACK),
-    CHEST(BodyPartKeys.CHEST),
-    LEGS(BodyPartKeys.LEGS),
-    SHOULDERS(BodyPartKeys.SHOULDERS),
-    OTHER(BodyPartKeys.OTHER),
-    OLYMPIC(BodyPartKeys.OLYMPIC);
+    Core(BodyPartKeys.CORE),
+    Arms(BodyPartKeys.ARMS),
+    Back(BodyPartKeys.BACK),
+    Chest(BodyPartKeys.CHEST),
+    Legs(BodyPartKeys.LEGS),
+    Shoulders(BodyPartKeys.SHOULDERS),
+    Other(BodyPartKeys.OTHER),
+    Olympic(BodyPartKeys.OLYMPIC);
 
     companion object {
-        fun fromKey(key: String) = values().firstOrNull { it.key == key }.toString()
+        fun fromKey(key: String) = values().firstOrNull { it.key == key }
     }
 }

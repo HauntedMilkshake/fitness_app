@@ -15,7 +15,7 @@ class DefaultSettingsView @JvmOverloads constructor(
     private var titleTextView: MaterialTextView? = null
 
     init {
-        inflate(context, R.layout.default_settings_view, this)
+        inflate(context, R.layout.view_default_settings, this)
 
         titleTextView = findViewById(R.id.title)
     }

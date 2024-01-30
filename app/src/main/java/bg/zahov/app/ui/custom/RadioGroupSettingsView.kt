@@ -33,7 +33,7 @@ class RadioGroupSettingsView @JvmOverloads constructor(
     var settingsChangeListener: SettingsChangeListener? = null
 
     init {
-        inflate(context, R.layout.radio_group_settings_view, this)
+        inflate(context, R.layout.view_radio_group_settings, this)
     }
 
     //FIXME again - meaningful names, see other comments in ExerciseView.

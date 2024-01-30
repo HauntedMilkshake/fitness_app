@@ -6,45 +6,50 @@ import androidx.lifecycle.LiveData
 import androidx.lifecycle.MutableLiveData
 import androidx.lifecycle.viewModelScope
 import bg.zahov.app.data.local.Settings
-import bg.zahov.app.data.repository.UserRepositoryImpl
-import com.google.firebase.auth.FirebaseAuth
-import io.realm.kotlin.notifications.DeletedObject
-import io.realm.kotlin.notifications.InitialObject
-import io.realm.kotlin.notifications.UpdatedObject
+import bg.zahov.app.data.repository.AuthenticationImpl
+import bg.zahov.app.data.repository.SettingsRepositoryImpl
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.launch
 
-//FIXME check comments in AuthViewModel
-class SettingsViewModel(application: Application) : AndroidViewModel(application){
-    private val auth: FirebaseAuth = FirebaseAuth.getInstance()
+class SettingsViewModel(application: Application) : AndroidViewModel(application) {
+
+    private val repo = SettingsRepositoryImpl.getInstance()
+    private val auth = AuthenticationImpl.getInstance()
     private val _settings = MutableLiveData<Settings>()
-    val settings: LiveData<Settings> get() = _settings
+    val settings: LiveData<Settings>
+        get() = _settings
+
 
     init {
-        getSettings()
+        viewModelScope.launch {
+            repo.getSettings()?.collect {
+                _settings.postValue(it.obj)
+            }
+        }
     }
 
     fun writeNewSetting(title: String, newValue: Any) {
         viewModelScope.launch(Dispatchers.IO) {
-//            repo.updateSetting(title, newValue)
-        }
-    }
-
-    private fun getSettings() {
-        viewModelScope.launch {
-//            repo.getSettings()?.collect {
-//                when (it) {
-//                    is DeletedObject -> _settings.postValue(Settings())
-//                    is InitialObject -> _settings.postValue(it.obj)
-//                    is UpdatedObject -> _settings.postValue(it.obj)
-//                }
-//            }
+            repo.addSetting(title, newValue)
         }
     }
 
     fun resetSettings() {
         viewModelScope.launch(Dispatchers.IO) {
-//            repo.resetSettings()
+            repo.resetSettings()
         }
     }
+
+    fun logout() {
+        viewModelScope.launch {
+            auth.logout()
+        }
+    }
+
+    fun deleteAccount() {
+        viewModelScope.launch {
+            auth.deleteAccount()
+        }
+    }
+
 }

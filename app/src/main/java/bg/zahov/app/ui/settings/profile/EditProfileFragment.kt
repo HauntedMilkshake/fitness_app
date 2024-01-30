@@ -7,7 +7,9 @@ import android.view.ViewGroup
 import android.widget.Toast
 import androidx.fragment.app.Fragment
 import androidx.fragment.app.viewModels
+import androidx.lifecycle.map
 import androidx.navigation.fragment.findNavController
+import bg.zahov.app.data.model.EditProfileUiMapper
 import bg.zahov.fitness.app.R
 import bg.zahov.fitness.app.databinding.FragmentEditProfileBinding
 
@@ -34,45 +36,35 @@ class EditProfileFragment : Fragment() {
             }
 
             resetPassword.setOnClickListener {
-//                editProfileViewModel.sendPasswordResetLink { message -> showToast(message) }
+                editProfileViewModel.sendPasswordResetLink()
             }
+            editProfileViewModel.state.map { EditProfileUiMapper.map(it) }.observe(viewLifecycleOwner) {
+                usernameFieldText.setText(it.username)
+                emailFieldText.setText(it.email)
 
-//            editProfileViewModel.isUnlocked.observe(viewLifecycleOwner) {
-//                if (it) {
-//                    lock.setImageResource(R.drawable.ic_open_lock)
-//                }
-//                emailField.isEnabled = it
-//                passwordField.isEnabled = it
-//            }
+                lock.setImageResource(if(it.isUnlocked) R.drawable.ic_open_lock else R.drawable.ic_closed_lock)
+                usernameField.isEnabled = it.isUnlocked
+                emailField.isEnabled = it.isUnlocked
 
-//            editProfileViewModel.userName.observe(viewLifecycleOwner) {
-//                usernameFieldText.apply {
-//                    setText(it)
-//                }
-//            }
-//
-//            editProfileViewModel.userEmail.observe(viewLifecycleOwner) {
-//                emailFieldText.apply {
-//                    setText(it)
-//                }
-//            }
+                if(!it.errorMessage.isNullOrEmpty()) {
+                    Toast.makeText(context, it.errorMessage, Toast.LENGTH_SHORT).show()
+                }
+
+                if(!it.notifyMessage.isNullOrEmpty()) {
+                    Toast.makeText(context, it.notifyMessage, Toast.LENGTH_SHORT).show()
+                }
+
+                if(it.isUnlocked) {
+                    saveChanges.setOnClickListener {
+                        editProfileViewModel.updateEmail(emailFieldText.toString())
+                        editProfileViewModel.updateUsername(usernameFieldText.toString())
+                        editProfileViewModel.updatePassword(passwordFieldText.toString())
+                    }
+                }
+            }
 
             lock.setOnClickListener {
                 AuthenticationDialog().show(childFragmentManager, AuthenticationDialog.TAG)
-            }
-
-            saveChanges.setOnClickListener {
-//                editProfileViewModel.isUnlocked.observe(viewLifecycleOwner) {
-//                    val username = usernameFieldText.text.toString()
-//                    val email = emailFieldText.text.toString()
-//                    val password = passwordFieldText.text.toString()
-//                    if (it) {
-//                        editProfileViewModel.updateEmail(email) { message -> showToast(message) }
-//
-//                        editProfileViewModel.updatePassword(password) { message -> showToast(message) }
-//                    }
-//                    editProfileViewModel.updateUsername(username) { message -> showToast(message) }
-//                }
             }
         }
     }

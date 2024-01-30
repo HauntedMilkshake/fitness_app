@@ -5,7 +5,7 @@ import io.realm.kotlin.notifications.ObjectChange
 import kotlinx.coroutines.flow.Flow
 
 interface SettingsRepository {
-    suspend fun getSettings(): Flow<ObjectChange<Settings>>
-    suspend fun addSetting(value: Any): Unit
+    suspend fun getSettings(): Flow<ObjectChange<Settings>>?
+    suspend fun addSetting(title: String, value: Any): Unit
     suspend fun resetSettings()
 }

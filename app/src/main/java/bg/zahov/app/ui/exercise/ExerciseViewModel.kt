@@ -7,103 +7,125 @@ import androidx.lifecycle.viewModelScope
 import bg.zahov.app.data.model.BodyPart
 import bg.zahov.app.data.model.Category
 import bg.zahov.app.data.model.Exercise
-import bg.zahov.app.data.model.Filter
+import bg.zahov.app.data.model.SelectableFilter
+import bg.zahov.app.data.repository.WorkoutRepositoryImpl
 import kotlinx.coroutines.launch
 
-//FIXME see AuthViewModel comments
-class ExerciseViewModel : ViewModel(){
-    private val _userExercises = MutableLiveData<List<Exercise>>()
-    val userExercises: LiveData<List<Exercise>> get() = _userExercises
-    private val _searchFilters = MutableLiveData<List<Filter>>(listOf()) //FIXME use emptyList()
-    val searchFilters: LiveData<List<Filter>> = _searchFilters
 
-    private val allExercises: MutableList<Exercise> = mutableListOf()
+class ExerciseViewModel : ViewModel() {
+    private val repo = WorkoutRepositoryImpl.getInstance()
+
+    private val _state = MutableLiveData<State>()
+    val state: LiveData<State>
+        get() = _state
+
+    private val _userExercises = MutableLiveData<List<Exercise>>()
+    val userExercises: LiveData<List<Exercise>>
+        get() = _userExercises
+
+    private val _searchFilters = MutableLiveData<List<SelectableFilter>>(listOf())
+    val searchFilters: LiveData<List<SelectableFilter>>
+        get() = _searchFilters
 
     private var search: String? = null
+    private val allExercises: MutableList<Exercise> = mutableListOf()
+    private var selectedFilters: MutableList<SelectableFilter> = mutableListOf()
 
-    fun getBodyPartItems(): List<Filter> {
-        val bodyPartFilters = enumValues<BodyPart>().map { Filter(it.name) }
+    init {
+        getExercises()
+    }
+
+    fun getExercises() {
+        _state.value = State.Loading(true)
+        viewModelScope.launch {
+
+            repo.getTemplateExercises()?.collect {
+                _userExercises.postValue(it)
+                allExercises.apply {
+                    clear()
+                    addAll(it)
+                }
+
+                _state.postValue(State.Default)
+            }
+                ?: _state.postValue(State.ErrorFetching("There was an error fetching your exercises please try again later :)"))
+        }
+    }
+
+    fun getBodyPartItems(): List<SelectableFilter> {
+        val bodyPartFilters = enumValues<BodyPart>().map { SelectableFilter(it.name) }
         bodyPartFilters.forEach {
             it.selected = _searchFilters.value?.any { filter -> filter.name == it.name } == true
         }
         return bodyPartFilters
     }
 
-    fun getCategoryItems(): List<Filter> {
-        val categoryFilters = enumValues<Category>().map { Filter(it.name) }
+    fun getCategoryItems(): List<SelectableFilter> {
+        val categoryFilters = enumValues<Category>().map { SelectableFilter(it.name) }
         categoryFilters.forEach {
             it.selected = _searchFilters.value?.any { filter -> filter.name == it.name } == true
         }
         return categoryFilters
     }
 
-    init {
-        getUserExercises()
+    fun addFilter(filter: SelectableFilter) {
+        selectedFilters = _searchFilters.value?.toMutableList() ?: mutableListOf()
+        selectedFilters.add(filter)
+
+        _searchFilters.value = selectedFilters
+
+        searchExercises(search)
     }
 
-    private fun getUserExercises() {
-        viewModelScope.launch {
-//            repo.getTemplateExercises()?.collect { exercises ->
-//                when (exercises) {
-//                    is InitialResults -> {
-//                        _userExercises.postValue(exercises.list)
-//                        allExercises.addAll(exercises.list)
-//                    }
-//
-//                    is UpdatedResults -> {
-//                        _userExercises.postValue(exercises.list)
-//                        allExercises.addAll(exercises.list)
-//                    }
-//                }
-//            }
-        }
+    fun removeFilter(filter: SelectableFilter) {
+        selectedFilters = _searchFilters.value?.toMutableList() ?: mutableListOf()
+        selectedFilters.remove(filter)
+        _searchFilters.value = selectedFilters
+
+        searchExercises(search)
     }
 
-//    fun addFilter(filter: Filter) {
-//        val filters = _searchFilters.value?.toMutableList() ?: mutableListOf()
-//        filters.add(filter)
-//        _searchFilters.value = filters
-//
-//        searchExercises(search, filters)
-//    }
-//
-//    fun removeFilter(filter: Filter) {
-//        val filters = _searchFilters.value?.toMutableList() ?: mutableListOf()
-//        filters.remove(filter)
-//        _searchFilters.value = filters
-//
-//        searchExercises(search, filters)
-//    }
+    fun searchExercises(name: String?) {
+        val newExercises = _userExercises.value?.let {
+            when {
+                name.isNullOrEmpty() && selectedFilters.isEmpty() -> allExercises
+                name.isNullOrEmpty() && selectedFilters.isNotEmpty() -> {
+                    allExercises.filter { exercise ->
+                        selectedFilters.any { filter ->
+                            filter.name == exercise.bodyPart.key || filter.name == exercise.category.key
+                        }
+                    }
+                }
 
-//    fun searchExercises(name: String?, filters: List<Filter?>) {
-//        //FIXME let {} would be more suitable in this case
-//        val newExercises = _userExercises.value?.let {
-//            when {
-//                name.isNullOrEmpty() && filters.isEmpty() -> allExercises
-//                name.isNullOrEmpty() && filters.isNotEmpty() -> {
-//                    it.filter { exercise ->
-//                        filters.any { filter ->
-//                            //this is not ok
-//                            filter?.name == exercise.category.name || filter?.name == BodyPart.fromKey(exercise.bodyPart.key)
-//                        }
-//                    }
-//                }
-//
-//                !name.isNullOrEmpty() && filters.isEmpty() -> filter {
-//                    it.exerciseName?.contains(name, true) == true
-//                }
-//
-//                else -> filter {
-//                    val nameMatches = name.isNullOrEmpty() || it.exerciseName?.contains(name, true) == true
-//                    val categoryMatches = filters.any { filter -> filter?.name == it.category }
-//                    val bodyPartMatches = filters.any { filter -> filter?.name == it.bodyPart }
-//
-//                    nameMatches && (categoryMatches || bodyPartMatches)
-//                }
-//            }
-//        } ?: emptyList()
-//
-//        search = name
-//        _userExercises.value = newExercises
-//    }
+                !name.isNullOrEmpty() && selectedFilters.isEmpty() -> allExercises.filter {
+                    it.name.contains(name, true)
+                }
+
+                else -> allExercises.filter { exercise ->
+                    val nameMatches = name.isNullOrEmpty() || exercise.name.contains(name, true)
+                    val categoryMatches =
+                        selectedFilters.any { filter -> filter.name == exercise.category.key }
+                    val bodyPartMatches =
+                        selectedFilters.any { filter -> filter.name == exercise.bodyPart.key }
+
+                    nameMatches && (categoryMatches || bodyPartMatches)
+                }
+            }
+        } ?: emptyList()
+
+        search = name
+        _userExercises.value = newExercises
+
+        if (newExercises.isEmpty()) _state.value = State.NoResults(true)
+    }
+
+    sealed interface State {
+        object Default : State
+
+        data class Loading(val isLoading: Boolean) : State
+
+        data class ErrorFetching(val error: String) : State
+
+        data class NoResults(val areThereResults: Boolean) : State
+    }
 }

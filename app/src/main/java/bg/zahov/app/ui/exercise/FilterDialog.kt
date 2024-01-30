@@ -7,7 +7,7 @@ import android.view.ViewGroup
 import androidx.fragment.app.DialogFragment
 import androidx.fragment.app.viewModels
 import androidx.recyclerview.widget.RecyclerView
-import bg.zahov.app.data.model.Filter
+import bg.zahov.app.data.model.SelectableFilter
 import bg.zahov.app.util.SpacingItemDecoration
 import bg.zahov.app.util.applyScaleAnimation
 import bg.zahov.fitness.app.R
@@ -16,10 +16,11 @@ import com.google.android.flexbox.FlexDirection
 import com.google.android.flexbox.FlexboxLayoutManager
 import com.google.android.flexbox.JustifyContent
 
-//FIXME binding should be disposed in onDestroyView
 class FilterDialog : DialogFragment() {
     private var _binding: DialogFragmentFiltersBinding? = null
-    private val binding get() = _binding!!
+    private val binding
+        get() = requireNotNull(_binding)
+
     private val exerciseViewModel: ExerciseViewModel by viewModels({ requireActivity() })
 
     override fun onCreateView(
@@ -52,13 +53,11 @@ class FilterDialog : DialogFragment() {
         }
     }
 
-    private fun configureFilterRecyclerView(recyclerView: RecyclerView, items: List<Filter>) {
+    private fun configureFilterRecyclerView(recyclerView: RecyclerView, items: List<SelectableFilter>) {
         val filterAdapter = FilterAdapter(false).apply {
-            itemClickListener = object : FilterAdapter.ItemClickListener<Filter> {
-                override fun onItemClicked(item: Filter, clickedView: View) {
-//                    if (item.selected) exerciseViewModel.addFilter(item) else exerciseViewModel.removeFilter(
-//                        item
-//                    )
+            itemClickListener = object : FilterAdapter.ItemClickListener<SelectableFilter> {
+                override fun onItemClicked(item: SelectableFilter, clickedView: View) {
+                    if (item.selected) exerciseViewModel.addFilter(item) else exerciseViewModel.removeFilter(item)
                 }
             }
             updateItems(items)
@@ -79,6 +78,11 @@ class FilterDialog : DialogFragment() {
                 )
             )
         }
+    }
+
+    override fun onDestroyView() {
+        super.onDestroyView()
+        _binding = null
     }
 
     companion object {

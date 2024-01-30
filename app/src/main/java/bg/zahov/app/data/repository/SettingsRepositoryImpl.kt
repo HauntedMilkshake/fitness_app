@@ -17,15 +17,14 @@ class SettingsRepositoryImpl : SettingsRepository {
 
     private val realm = RealmManager.getInstance()
 
-    //FILTER INFORMATION HERE + CACHE
+    override suspend fun getSettings(): Flow<ObjectChange<Settings>>? = realm.getSettings()
 
-    //REMOVE !!
-    override suspend fun getSettings(): Flow<ObjectChange<Settings>> = realm.getSettings()!!
-
-    override suspend fun addSetting(value: Any) {
+    override suspend fun addSetting(title: String, value: Any) {
+        realm.updateSetting(title, value)
     }
 
     override suspend fun resetSettings() {
-        //TODO()
+        realm.resetSettings()
     }
+
 }

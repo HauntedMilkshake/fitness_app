@@ -13,10 +13,11 @@ class ExerciseAdapter(
 ) : BaseAdapter<SelectableExercise>(
     areItemsTheSame = { oldItem, newItem -> oldItem.exercise == newItem.exercise },
     areContentsTheSame = { oldItem, newItem -> oldItem.exercise == newItem.exercise },
-    layoutResId = R.layout.exercise_item
+    layoutResId = R.layout.item_exercise
 ) {
     var itemClickListener: ItemClickListener<SelectableExercise>? = null
-    override fun createViewHolder(view: View): BaseViewHolder<SelectableExercise> = ExerciseAdapterViewHolder(view)
+    override fun createViewHolder(view: View): BaseViewHolder<SelectableExercise> =
+        ExerciseAdapterViewHolder(view)
 
     inner class ExerciseAdapterViewHolder(view: View) : BaseViewHolder<SelectableExercise>(view) {
         private val exerciseImage = view.findViewById<ShapeableImageView>(R.id.exercise_image)
@@ -55,6 +56,4 @@ class ExerciseAdapter(
     interface ItemClickListener<T> {
         fun onItemClicked(item: T, itemPosition: Int, clickedView: View)
     }
-
-
 }

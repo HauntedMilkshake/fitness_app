@@ -26,7 +26,6 @@ class SettingsFragment : Fragment() {
     private var _binding: FragmentSettingsBinding? = null
     private val binding get() = _binding!!
     private val settingsViewModel: SettingsViewModel by viewModels()
-    private val authViewModel: AuthViewModel by viewModels({ requireActivity() })
     override fun onCreateView(
         inflater: LayoutInflater,
         container: ViewGroup?,
@@ -45,7 +44,7 @@ class SettingsFragment : Fragment() {
         super.onViewCreated(view, savedInstanceState)
         binding.apply {
             signOutButton.setOnClickListener {
-//                authViewModel.signOut()
+                settingsViewModel.logout()
                 findNavController().navigate(R.id.settings_to_welcome)
             }
             back.setOnClickListener {
@@ -64,7 +63,7 @@ class SettingsFragment : Fragment() {
                 openLink("https://github.com/HauntedMilkshake/fitness_app/issues")
             }
             deleteAccount.setOnClickListener {
-//                authViewModel.deleteAccount()
+                settingsViewModel.deleteAccount()
                 findNavController().navigate(R.id.settings_to_welcome)
             }
 

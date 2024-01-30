@@ -28,7 +28,7 @@ enum class Category(val key: String) {
     Cable(CategoryKeys.CABLE);
 
     companion object {
-        fun fromKey(key: String) = values().firstOrNull { it.key == key }.toString()
+        fun fromKey(key: String) = values().firstOrNull { it.key == key }
 
     }
 }

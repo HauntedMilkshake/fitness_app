@@ -13,12 +13,12 @@ object FirestoreFields {
     const val WORKOUT_DATE = "date"
     const val WORKOUT_IS_TEMPLATE = "isTemplate"
     const val WORKOUT_EXERCISES = "exercises"
-
+    const val WORKOUT_IDS = "ids"
     // Exercise fields
     const val EXERCISE_NAME = "name"
     const val EXERCISE_BODY_PART = "bodyPart"
     const val EXERCISE_CATEGORY = "category"
-    const val EXERCISE_IS_TEMPLATE = "isTemplate"
+    const val EXERCISE_IS_TEMPLATE = "template"
     const val EXERCISE_SETS = "sets"
 
     // Sets fields
@@ -52,7 +52,8 @@ data class Workout(
     var duration: Double,
     var date: String,
     var isTemplate: Boolean,
-    val exercises: List<Exercise>
+    val exercises: List<Exercise>,
+    val ids: List<String>
 ) {
     companion object {
         fun fromFirestoreMap(data: Map<String, Any>): Workout {
@@ -61,7 +62,8 @@ data class Workout(
                 duration = data[FirestoreFields.WORKOUT_DURATION] as Double,
                 date = data[FirestoreFields.WORKOUT_DATE] as String,
                 isTemplate = data[FirestoreFields.WORKOUT_IS_TEMPLATE] as Boolean,
-                exercises = (data[FirestoreFields.WORKOUT_EXERCISES] as List<Map<String, Any>>).map { Exercise.fromFirestoreMap(it) }
+                exercises = (data[FirestoreFields.WORKOUT_EXERCISES] as List<Map<String, Any>>).map { Exercise.fromFirestoreMap(it) },
+                ids =  (data[FirestoreFields.WORKOUT_IDS] as List<Map<String, Any>>).map { it as String}
             )
         }
     }
@@ -80,6 +82,7 @@ data class Exercise(
                 name = data[FirestoreFields.EXERCISE_NAME] as String,
                 bodyPart = data[FirestoreFields.EXERCISE_BODY_PART].toString().let { BodyPart.valueOf(it) },
                 category = data[FirestoreFields.EXERCISE_CATEGORY].toString().let { Category.valueOf(it) },
+                //TODO(SOMETHING TO FIX HERE
                 isTemplate = data[FirestoreFields.EXERCISE_IS_TEMPLATE] as Boolean,
                 sets = (data[FirestoreFields.EXERCISE_SETS] as List<Map<String, Any>>).map { Sets.fromFirestoreMap(it) }
             )

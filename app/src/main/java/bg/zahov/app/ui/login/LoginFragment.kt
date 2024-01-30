@@ -60,30 +60,15 @@ class LoginFragment : Fragment() {
 
             loginViewModel.state.map { LoginUiMapper.map(it) }.observe(viewLifecycleOwner) {
                 if (it.isAuthenticated) {
-                    findNavController().navigate(R.id.login_to_loading)
+                    findNavController().navigate(R.id.login_to_home)
                 } else {
-                    it.errorMessage?.let { message ->
+                    it.notifyMessage.let { message ->
                         Toast.makeText(
                             context,
                             message,
                             Toast.LENGTH_SHORT
                         ).show()
                     }
-                }
-
-                it.passwordLinkMessage?.let { message ->
-                    Toast.makeText(
-                        context,
-                        message,
-                        Toast.LENGTH_SHORT
-                    ).show()
-                }
-                it.passwordErrorMessage?.let { message ->
-                    Toast.makeText(
-                        context,
-                        message,
-                        Toast.LENGTH_SHORT
-                    ).show()
                 }
             }
 

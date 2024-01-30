@@ -4,6 +4,7 @@
     android:layout_width="match_parent"
     android:layout_height="match_parent"
     android:background="@color/background">
+
     <com.google.android.material.appbar.AppBarLayout
         android:id="@+id/top_bar"
         android:layout_width="match_parent"
@@ -25,26 +26,27 @@
                 android:background="@color/background"
                 android:gravity="clip_horizontal"
                 android:orientation="horizontal">
+
                 <com.google.android.material.imageview.ShapeableImageView
                     android:id="@+id/close"
                     android:layout_width="24dp"
                     android:layout_height="24dp"
-                    android:src="@drawable/ic_close"
-                    android:visibility="gone"
                     android:layout_marginStart="10dp"
                     android:layout_marginTop="5dp"
-                    app:layout_constraintTop_toTopOf="parent"
+                    android:src="@drawable/ic_close"
+                    android:visibility="gone"
+                    app:layout_constraintBottom_toBottomOf="parent"
                     app:layout_constraintStart_toStartOf="parent"
-                    app:layout_constraintBottom_toBottomOf="parent"/>
+                    app:layout_constraintTop_toTopOf="parent" />
 
                 <com.google.android.material.imageview.ShapeableImageView
                     android:id="@+id/remove_search_bar"
                     android:layout_width="22dp"
                     android:layout_height="22dp"
                     android:layout_marginStart="30dp"
+                    android:scaleX="-1"
                     android:src="@drawable/ic_back_arrow"
                     android:visibility="gone"
-                    android:scaleX="-1"
                     app:layout_constraintBottom_toBottomOf="@id/close"
                     app:layout_constraintStart_toStartOf="@id/close"
                     app:layout_constraintTop_toTopOf="@id/close" />
@@ -53,16 +55,16 @@
                     android:id="@id/search_bar"
                     android:layout_width="0dp"
                     android:layout_height="0dp"
-                    android:layout_marginTop="5dp"
-                    android:layout_marginBottom="5dp"
                     android:layout_marginStart="15dp"
+                    android:layout_marginTop="5dp"
                     android:layout_marginEnd="15dp"
-                    app:searchIcon="@drawable/ic_search"
+                    android:layout_marginBottom="5dp"
                     android:visibility="gone"
                     app:layout_constraintBottom_toBottomOf="parent"
                     app:layout_constraintEnd_toStartOf="@+id/settings_filters"
                     app:layout_constraintStart_toEndOf="@+id/remove_search_bar"
-                    app:layout_constraintTop_toTopOf="parent" />
+                    app:layout_constraintTop_toTopOf="parent"
+                    app:searchIcon="@drawable/ic_search" />
 
                 <com.google.android.material.textview.MaterialTextView
                     android:id="@+id/exercise_text"
@@ -84,8 +86,8 @@
                     android:layout_width="24dp"
                     android:layout_height="24dp"
                     android:layout_gravity="end"
-                    android:layout_marginEnd="15dp"
                     android:layout_marginTop="15dp"
+                    android:layout_marginEnd="15dp"
                     android:layout_marginBottom="10dp"
                     android:src="@drawable/ic_search"
                     app:layout_collapseMode="parallax"
@@ -98,8 +100,8 @@
                     android:layout_width="24dp"
                     android:layout_height="24dp"
                     android:layout_gravity="end"
-                    android:layout_marginEnd="15dp"
                     android:layout_marginTop="15dp"
+                    android:layout_marginEnd="15dp"
                     android:layout_marginBottom="10dp"
                     android:src="@drawable/ic_filters"
                     app:layout_collapseMode="parallax"
@@ -129,8 +131,8 @@
         android:id="@+id/view"
         android:layout_width="match_parent"
         android:layout_height="1dp"
-        android:background="@drawable/shadow"
         android:layout_marginTop="2dp"
+        android:background="@drawable/shadow"
         android:elevation="4dp"
         app:layout_constraintEnd_toEndOf="parent"
         app:layout_constraintStart_toStartOf="parent"
@@ -140,8 +142,8 @@
         android:id="@+id/filter_items_recycler_view"
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
-        android:layout_marginTop="5dp"
         android:layout_marginStart="10dp"
+        android:layout_marginTop="5dp"
         android:layout_marginEnd="10dp"
         android:orientation="horizontal"
         app:layout_constraintEnd_toEndOf="parent"
@@ -152,24 +154,22 @@
         android:id="@+id/no_results_label"
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
+        android:layout_marginStart="15dp"
+        android:layout_marginTop="45dp"
+        android:text="@string/no_results"
         android:textColor="@color/white"
         android:textSize="20sp"
         android:visibility="gone"
-        android:text="@string/no_results"
-        android:layout_marginStart="15dp"
-        android:layout_marginTop="45dp"
         app:layout_constraintEnd_toEndOf="parent"
         app:layout_constraintStart_toStartOf="parent"
-        app:layout_constraintTop_toBottomOf="@id/filter_items_recycler_view"/>
+        app:layout_constraintTop_toBottomOf="@id/filter_items_recycler_view" />
 
     <androidx.recyclerview.widget.RecyclerView
         android:id="@+id/exercises_recycler_view"
         android:layout_width="match_parent"
         android:layout_height="0dp"
         android:layout_marginTop="20dp"
-        android:layout_marginBottom="10dp"
         android:orientation="vertical"
-        app:layout_constraintBottom_toBottomOf="parent"
         app:layout_constraintEnd_toEndOf="parent"
         app:layout_constraintStart_toStartOf="parent"
         app:layout_constraintTop_toBottomOf="@+id/filter_items_recycler_view" />
@@ -178,12 +178,23 @@
         android:id="@+id/confirm"
         android:layout_width="45dp"
         android:layout_height="45dp"
-        android:src="@drawable/ic_check"
-        android:background="@drawable/custom_circle_background"
         android:layout_marginEnd="30dp"
         android:layout_marginBottom="120dp"
+        android:background="@drawable/custom_circle_background"
+        android:src="@drawable/ic_check"
         android:visibility="gone"
         app:layout_constraintBottom_toBottomOf="parent"
         app:layout_constraintEnd_toEndOf="parent" />
+
+    <com.google.android.material.progressindicator.CircularProgressIndicator
+        android:id="@+id/circular_progress_Indicator"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:indeterminate="true"
+        app:indicatorColor="@color/blue_text"
+        app:layout_constraintBottom_toBottomOf="parent"
+        app:layout_constraintEnd_toEndOf="parent"
+        app:layout_constraintStart_toStartOf="parent"
+        app:layout_constraintTop_toBottomOf="@+id/exercises_recycler_view" />
 
 </androidx.constraintlayout.widget.ConstraintLayout>

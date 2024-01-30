@@ -1,19 +1,23 @@
 package bg.zahov.app.data.remote
 
-import android.util.Log
 import bg.zahov.app.data.model.Exercise
+import bg.zahov.app.data.model.FirestoreFields
 import bg.zahov.app.data.model.User
 import bg.zahov.app.data.model.Workout
 import bg.zahov.app.util.toFirestoreMap
 import com.google.firebase.firestore.CollectionReference
 import com.google.firebase.firestore.DocumentReference
 import com.google.firebase.firestore.FirebaseFirestore
-import com.google.firebase.firestore.FirebaseFirestoreException
-import com.google.firebase.firestore.SetOptions
-import kotlinx.coroutines.channels.awaitClose
+import kotlinx.coroutines.Dispatchers
+import kotlinx.coroutines.async
+import kotlinx.coroutines.awaitAll
 import kotlinx.coroutines.flow.Flow
-import kotlinx.coroutines.flow.callbackFlow
+import kotlinx.coroutines.flow.channelFlow
+import kotlinx.coroutines.flow.filter
+import kotlinx.coroutines.flow.first
+import kotlinx.coroutines.flow.map
 import kotlinx.coroutines.tasks.await
+import kotlinx.coroutines.withContext
 
 class FirestoreManager {
     companion object {
@@ -32,85 +36,116 @@ class FirestoreManager {
 
     private val firestore = FirebaseFirestore.getInstance()
 
-    private val userDocRef by lazy {
-        userId?.let { firestore.collection(USERS_COLLECTION).document(it) }
-    }
+    private var userDocRef: DocumentReference? = null
 
-    private val workoutsCollectionRef by lazy {
-        userDocRef?.collection(WORKOUTS_SUB_COLLECTION)
-    }
+    private var workoutsCollectionRef: CollectionReference? = null
 
-    private val templateExercisesCollectionRef by lazy {
-        userDocRef?.collection(TEMPLATE_EXERCISES)
-    }
+    private var templateExercisesCollectionRef: CollectionReference? = null
+
 
     fun initUser(id: String) {
-        Log.d("SIGNUP INIT USER", id)
         userId = id
+        userDocRef = userId?.let { firestore.collection(USERS_COLLECTION).document(it) }
+        workoutsCollectionRef = userDocRef?.collection(WORKOUTS_SUB_COLLECTION)
+        templateExercisesCollectionRef = userDocRef?.collection(TEMPLATE_EXERCISES)
+    }
+
+    fun resetUser() {
+        userId = null
+        userDocRef = null
+        workoutsCollectionRef = null
+        templateExercisesCollectionRef = null
     }
 
     suspend fun createFirestore(username: String) {
-        try {
-            Log.d("SIGNUP CREATE", username)
-            userDocRef?.set(User(username).toFirestoreMap(), SetOptions.merge())?.await()
-        } catch (e: FirebaseFirestoreException) {
-            throw FirebaseFirestoreException(e.message ?: "unknown", e.code)
+        withContext(Dispatchers.Default) {
+            userDocRef?.set(User(username).toFirestoreMap())
         }
     }
 
     private suspend fun <T> getDocData(
         reference: DocumentReference,
         mapper: (Map<String, Any>) -> T,
-    ): Flow<T> = callbackFlow {
-        reference.get()
-            .addOnSuccessListener { snapshot ->
-                snapshot.data?.let { data ->
-                    trySend(mapper(data))
-                    //CLOSE AND THROW ON THIS LINE
-                } ?: close()
-            }
-            .addOnFailureListener {
-//                    throw smth
-                close(it)
-            }
-        awaitClose { close() }
+    ): Flow<T> = channelFlow {
+//        reference.get()
+//            .addOnSuccessListener { snapshot ->
+//                snapshot.data?.let { data ->
+//                    trySend(mapper(data))
+//                    //CLOSE AND THROW ON THIS LINE
+//                } ?: close()
+//            }
+//            .addOnFailureListener {
+////                    throw smth
+//                close(it)
+//            }
+//        awaitClose { close() }
+
+        val result = reference.get().await()
+
+        result.data?.let {
+            trySend(mapper(it))
+        }
 
     }
 
     private suspend fun <T> getCollectionData(
         reference: CollectionReference,
         mapper: (Map<String, Any>) -> T,
-    ): Flow<List<T>> = callbackFlow {
-        reference.get()
-            .addOnSuccessListener {
+    ): Flow<List<T>> = channelFlow {
 
-                val data: MutableList<T> = mutableListOf()
+        //I DON'T LIKE THIS
+//        reference.get()
+//            .addOnSuccessListener {
+//                CoroutineScope(Dispatchers.Default).launch {
+//                    val results = it.documents.map {
+//                        async(Dispatchers.Default) {
+//                            getDocData(it.reference, mapper).first()
+//                        }
+//                    }.awaitAll()
+//
+//                    trySend(results)
+//                }
+//            }
 
-                it.documents.forEach {
-                    suspend {
-                        getDocData(it.reference, mapper).collect { workout ->
-                            data.add(workout)
-                        }
-                    }
-                }
+        val snapshopts = reference.get().await()
 
-                trySend(data)
-
+        val results = snapshopts.documents.map {
+            async {
+                getDocData(it.reference, mapper).first()
             }
-            .addOnFailureListener {
-                close(it)
-            }
-        awaitClose { close() }
+        }.awaitAll()
+
+        trySend(results)
     }
 
 
     suspend fun getUser(): Flow<User>? =
         userDocRef?.let { getDocData(it) { info -> User.fromFirestoreMap(info) } }
 
-    suspend fun getWorkouts(): Flow<List<Workout>>? = workoutsCollectionRef?.let { getCollectionData(it) { info -> Workout.fromFirestoreMap(info) } }
-    suspend fun getTemplateExercises(): Flow<List<Exercise>>? = templateExercisesCollectionRef?.let { getCollectionData(it) { info -> Exercise.fromFirestoreMap(info) } }
+    suspend fun getWorkouts(): Flow<List<Workout>>? =
+        workoutsCollectionRef?.let {
+            getCollectionData(it) { info ->
+                Workout.fromFirestoreMap(
+                    info
+                )
+            }
+        }
+
+    suspend fun getTemplateWorkouts(): Flow<List<Workout>>? = getWorkouts()?.map { it.filter { it.isTemplate} }
+    suspend fun getTemplateExercises(): Flow<List<Exercise>>? =
+        templateExercisesCollectionRef?.let {
+            getCollectionData(it) { info ->
+                Exercise.fromFirestoreMap(info)
+            }
+        }
+
+    suspend fun addTemplateExercise(newExercise: Exercise) {
+        withContext(Dispatchers.Default) {
+            templateExercisesCollectionRef?.add(newExercise)
+        }
+    }
+
     private fun deleteFirestore() {
-        // Get all subcollections of the document
 //        return userDocRef.listCollections().fold(Tasks.forResult(null as Void?)) { task, collectionRef ->
 //            task.continueWithTask { _ ->
 //                // Delete all documents within the subcollection
@@ -125,5 +160,9 @@ class FirestoreManager {
 //            // Delete the main document
 //            documentRef.delete()
 //        }
+    }
+
+    suspend fun updateUsername(newUsername: String) {
+        userDocRef?.update(FirestoreFields.USER_NAME, newUsername)
     }
 }

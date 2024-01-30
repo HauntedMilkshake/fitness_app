@@ -24,8 +24,10 @@ class ExerciseView @JvmOverloads constructor(
     attrs: AttributeSet? = null,
     defStyle: Int = 0,
 ) : RelativeLayout(context, attrs, defStyle) {
+
+    var exerciseChangeListener: ExerciseChangeListener<String>? = null
     init {
-        inflate(context, R.layout.create_exercise_view, this)
+        inflate(context, R.layout.view_create_exercise, this)
     }
 
     //FIXME don't pass the VM directly to a view, if you need some data to initialize the view/popup
@@ -34,14 +36,15 @@ class ExerciseView @JvmOverloads constructor(
     fun initViewInformation(
         title: String,
         radioOptions: List<String>,
-        exerciseVm: AddExerciseViewModel,
+        currCategory: String?,
+        currBodyPart: String?
     ) {
         val titleTextView: MaterialTextView = findViewById(R.id.titleTextView)
 
         titleTextView.text = title
 
         setOnClickListener {
-            showPopupWindow(title, radioOptions, exerciseVm)
+            showPopupWindow(title, radioOptions, currCategory, currBodyPart)
         }
     }
 
@@ -56,12 +59,13 @@ class ExerciseView @JvmOverloads constructor(
     private fun showPopupWindow(
         title: String,
         radioOptions: List<String>,
-        exerciseVm: AddExerciseViewModel,
+        currCategory: String? = null,
+        currBodyPart: String? = null
     ) {
-        val popupView: View = LayoutInflater.from(context).inflate(R.layout.settings_popup, null)
+        val popupView: View = LayoutInflater.from(context).inflate(R.layout.popup_settings, null)
         popupView.setBackgroundResource(R.drawable.custom_popup_background)
-        val popupTitleTextView: MaterialTextView = popupView.findViewById(R.id.popupTitleTextView)
-        val radioGroup: RadioGroup = popupView.findViewById(R.id.radioGroup)
+        val popupTitleTextView: MaterialTextView = popupView.findViewById(R.id.popup_title_text_view)
+        val radioGroup: RadioGroup = popupView.findViewById(R.id.radio_group)
 
         popupTitleTextView.text = title
 
@@ -72,7 +76,7 @@ class ExerciseView @JvmOverloads constructor(
                     RadioGroup.LayoutParams.MATCH_PARENT,
                     RadioGroup.LayoutParams.WRAP_CONTENT
                 )
-                setPadding(R.dimen.pop_up_radius)
+                setPadding(15)
             }
             radioButton.setPadding(16, 16, 16, 16)
             radioButton.setTextColor(ContextCompat.getColor(context, R.color.white))
@@ -82,20 +86,8 @@ class ExerciseView @JvmOverloads constructor(
                 RadioGroup.LayoutParams.MATCH_PARENT,
                 RadioGroup.LayoutParams.WRAP_CONTENT
             )
-            // FIXME remove this
-            when (title) {
-                "Category" -> {
-                    if (currOption == getCategory(exerciseVm.getCurrCategory().toString())) {
-                        radioButton.isChecked = true
-                    }
-                }
 
-                "Body part" -> {
-                    if (currOption == getBodyPart(exerciseVm.getCurrBodyPart().toString())) {
-                        radioButton.isChecked = true
-                    }
-                }
-            }
+            radioButton.isChecked = currOption == currCategory || currOption == currBodyPart
 
             radioGroup.addView(radioButton)
         }
@@ -103,12 +95,10 @@ class ExerciseView @JvmOverloads constructor(
         radioGroup.setOnCheckedChangeListener { _, index ->
             val radioButton = radioGroup.findViewById<RadioButton>(index)
             val selectedOption = radioButton.text.toString()
-            // FIXME replace with listener notification
-//            exerciseVm.buildExercise(title, selectedOption)
+            exerciseChangeListener?.onOptionClicked(selectedOption)
         }
 
-        val scaleUpAnimation = AnimationUtils.loadAnimation(context, R.anim.scale_up)
-        popupView.startAnimation(scaleUpAnimation)
+        popupView.startAnimation(AnimationUtils.loadAnimation(context, R.anim.scale_up))
 
         val popupWindow = PopupWindow(
             popupView,
@@ -119,8 +109,7 @@ class ExerciseView @JvmOverloads constructor(
         popupWindow.showAtLocation(this, Gravity.CENTER, 0, 0)
     }
 
-    private fun getBodyPart(bodyPart: String) = BodyPart.fromKey(bodyPart)
-
-    private fun getCategory(category: String) = Category.fromKey(category)
+    interface ExerciseChangeListener<T> {
+        fun onOptionClicked(item: T)
+    }
 }
-
