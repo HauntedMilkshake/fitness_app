@@ -1,17 +1,19 @@
 package bg.zahov.app.ui.signup
 
-import android.util.Log
+import android.app.Application
+import androidx.lifecycle.AndroidViewModel
 import androidx.lifecycle.LiveData
 import androidx.lifecycle.MutableLiveData
-import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
-import bg.zahov.app.data.exception.AuthenticationException
-import bg.zahov.app.data.repository.AuthenticationImpl
+import bg.zahov.app.getUserProvider
 import bg.zahov.app.util.isEmail
+import kotlinx.coroutines.CancellationException
 import kotlinx.coroutines.launch
 
-class SignupViewModel : ViewModel() {
-    private val auth = AuthenticationImpl.getInstance()
+class SignupViewModel(application: Application) : AndroidViewModel(application) {
+    private val auth by lazy {
+        application.getUserProvider()
+    }
 
     private val _state = MutableLiveData<State>()
     val state: LiveData<State>
@@ -25,25 +27,37 @@ class SignupViewModel : ViewModel() {
         confirmPassword: String,
     ) {
         if (areFieldsEmpty(userName, email, password)) {
-            _state.value = State.Error("Do not leave empty fields")
+            _state.value = State.Notify("Do not leave empty fields")
             return
         }
 
         if (!email.isEmail()) {
-            _state.value = State.Error("Email is not valid")
+            _state.value = State.Notify("Email is not valid")
             return
         }
 
         if (password != confirmPassword || password.length < 6) {
             _state.value =
-                State.Error("Make sure the passwords are matching and at least 6 characters long")
+                State.Notify("Make sure the passwords are matching and at least 6 characters long")
             return
         }
 
         viewModelScope.launch {
-            Log.d("VM", "VM")
-            auth.signup(userName, email, password)
-            _state.postValue(State.Authentication(true))
+            try {
+                val result = auth.signup(userName, email, password)
+                if (result.isSuccessful) {
+                    _state.postValue(State.Authentication(true))
+                } else {
+                    _state.postValue(
+                        State.Error(
+                            result.exception?.message ?: "Error when logging in try again", false
+                        )
+                    )
+                }
+            } catch (e: CancellationException) {
+                _state.postValue(State.Error(e.message ?: "Fatal error", true))
+            }
+
         }
 
     }
@@ -52,11 +66,10 @@ class SignupViewModel : ViewModel() {
         listOf(userName, email, pass).any { it.isNullOrEmpty() }
 
     sealed interface State {
-        object Default : State
-
         data class Authentication(val isAuthenticated: Boolean) : State
-
-        data class Error(val message: String?) : State
+        data class Error(val eMessage: String, val shutdown: Boolean) : State
+        data class Notify(val nMessage: String) : State
     }
 }
+
 

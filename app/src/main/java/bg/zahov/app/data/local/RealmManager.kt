@@ -66,12 +66,10 @@ class RealmManager {
     }
 
     suspend fun createRealm() = withContext(Dispatchers.IO) {
-        Log.d("REALM", "BEFORE CREATION")
         //try catch
         openRealm()
         realmInstance?.write {
             try {
-                Log.d("REALM", "CREATION")
                 copyToRealm(Settings())
             } catch (e: IllegalArgumentException) {
                 throw e

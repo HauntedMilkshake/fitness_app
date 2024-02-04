@@ -11,7 +11,6 @@ import androidx.fragment.app.viewModels
 import androidx.lifecycle.map
 import androidx.navigation.fragment.findNavController
 import bg.zahov.app.data.model.LoginUiMapper
-import bg.zahov.app.data.model.LoginUiModel
 import bg.zahov.app.hideBottomNav
 import bg.zahov.fitness.app.R
 import bg.zahov.fitness.app.databinding.FragmentLogInBinding
@@ -60,16 +59,14 @@ class LoginFragment : Fragment() {
 
             loginViewModel.state.map { LoginUiMapper.map(it) }.observe(viewLifecycleOwner) {
                 if (it.isAuthenticated) {
-                    findNavController().navigate(R.id.login_to_home)
-                } else {
-                    it.notifyMessage.let { message ->
-                        Toast.makeText(
-                            context,
-                            message,
-                            Toast.LENGTH_SHORT
-                        ).show()
-                    }
+                    findNavController().navigate(R.id.login_to_loading)
                 }
+                if (it.shutdown) {
+                    //TODO(BAD)
+                }
+
+                showToast(it.notifyMessage)
+                showToast(it.errorMessage)
             }
 
             createAccount.setOnClickListener {
@@ -85,7 +82,7 @@ class LoginFragment : Fragment() {
 
     private fun showToast(message: String?) {
         message?.let {
-            Toast.makeText(requireContext(), it, Toast.LENGTH_SHORT).show()
+            Toast.makeText(context, it, Toast.LENGTH_SHORT).show()
         }
     }
 }

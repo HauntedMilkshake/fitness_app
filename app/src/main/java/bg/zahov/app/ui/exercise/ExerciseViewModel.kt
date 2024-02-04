@@ -1,19 +1,23 @@
 package bg.zahov.app.ui.exercise
 
+import android.app.Application
+import androidx.lifecycle.AndroidViewModel
 import androidx.lifecycle.LiveData
 import androidx.lifecycle.MutableLiveData
-import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
+import bg.zahov.app.data.exception.CriticalDataNullException
 import bg.zahov.app.data.model.BodyPart
 import bg.zahov.app.data.model.Category
 import bg.zahov.app.data.model.Exercise
 import bg.zahov.app.data.model.SelectableFilter
-import bg.zahov.app.data.repository.WorkoutRepositoryImpl
+import bg.zahov.app.getWorkoutProvider
 import kotlinx.coroutines.launch
 
 
-class ExerciseViewModel : ViewModel() {
-    private val repo = WorkoutRepositoryImpl.getInstance()
+class ExerciseViewModel(application: Application) : AndroidViewModel(application) {
+    private val repo by lazy {
+        application.getWorkoutProvider()
+    }
 
     private val _state = MutableLiveData<State>()
     val state: LiveData<State>
@@ -38,17 +42,20 @@ class ExerciseViewModel : ViewModel() {
     fun getExercises() {
         _state.value = State.Loading(true)
         viewModelScope.launch {
+            try {
+                repo.getTemplateExercises().collect {
+                    _userExercises.postValue(it)
+                    allExercises.apply {
+                        clear()
+                        addAll(it)
+                    }
 
-            repo.getTemplateExercises()?.collect {
-                _userExercises.postValue(it)
-                allExercises.apply {
-                    clear()
-                    addAll(it)
+                    _state.postValue(State.Default)
                 }
 
-                _state.postValue(State.Default)
+            } catch (e: CriticalDataNullException) {
+                _state.postValue(State.ErrorFetching(e.message, true))
             }
-                ?: _state.postValue(State.ErrorFetching("There was an error fetching your exercises please try again later :)"))
         }
     }
 
@@ -124,7 +131,7 @@ class ExerciseViewModel : ViewModel() {
 
         data class Loading(val isLoading: Boolean) : State
 
-        data class ErrorFetching(val error: String) : State
+        data class ErrorFetching(val error: String?, val shutdown: Boolean) : State
 
         data class NoResults(val areThereResults: Boolean) : State
     }

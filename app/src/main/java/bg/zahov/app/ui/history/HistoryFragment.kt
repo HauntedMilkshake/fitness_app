@@ -11,7 +11,9 @@ import bg.zahov.fitness.app.databinding.FragmentHistoryBinding
 
 class HistoryFragment : Fragment() {
     private var _binding: FragmentHistoryBinding? = null
-    private val binding get() = _binding!!
+    private val binding
+        get() = requireNotNull(_binding!!)
+
     override fun onCreateView(
         inflater: LayoutInflater, container: ViewGroup?, savedInstanceState: Bundle?,
     ): View {

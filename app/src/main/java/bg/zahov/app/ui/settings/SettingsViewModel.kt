@@ -6,23 +6,28 @@ import androidx.lifecycle.LiveData
 import androidx.lifecycle.MutableLiveData
 import androidx.lifecycle.viewModelScope
 import bg.zahov.app.data.local.Settings
-import bg.zahov.app.data.repository.AuthenticationImpl
-import bg.zahov.app.data.repository.SettingsRepositoryImpl
+import bg.zahov.app.getSettingsProvider
+import bg.zahov.app.getUserProvider
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.launch
 
 class SettingsViewModel(application: Application) : AndroidViewModel(application) {
 
-    private val repo = SettingsRepositoryImpl.getInstance()
-    private val auth = AuthenticationImpl.getInstance()
+    private val repo by lazy {
+        application.getSettingsProvider()
+    }
+
+    private val auth by lazy {
+        application.getUserProvider()
+    }
+
     private val _settings = MutableLiveData<Settings>()
     val settings: LiveData<Settings>
         get() = _settings
 
-
     init {
         viewModelScope.launch {
-            repo.getSettings()?.collect {
+            repo.getSettings().collect {
                 _settings.postValue(it.obj)
             }
         }
@@ -51,5 +56,4 @@ class SettingsViewModel(application: Application) : AndroidViewModel(application
             auth.deleteAccount()
         }
     }
-
 }

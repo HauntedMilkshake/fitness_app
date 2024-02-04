@@ -9,6 +9,5 @@ data class AuthUiModel(
 object AuthUiModelMapper {
     fun map(state : AuthViewModel.State) = when(state) {
         is AuthViewModel.State.Authenticated -> AuthUiModel(state.isAuthenticated)
-        AuthViewModel.State.Default -> AuthUiModel()
     }
 }

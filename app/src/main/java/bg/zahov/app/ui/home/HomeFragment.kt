@@ -7,9 +7,7 @@ import android.view.View
 import android.view.ViewGroup
 import androidx.fragment.app.Fragment
 import androidx.fragment.app.viewModels
-import androidx.lifecycle.map
 import androidx.navigation.fragment.findNavController
-import bg.zahov.app.data.model.HomeUiMapper
 import bg.zahov.app.showBottomNav
 import bg.zahov.fitness.app.R
 import bg.zahov.fitness.app.databinding.FragmentHomeBinding
@@ -39,12 +37,6 @@ class HomeFragment : Fragment() {
         binding.apply {
             settings.setOnClickListener {
                 findNavController().navigate(R.id.home_to_settings)
-            }
-
-            homeViewModel.state.map { HomeUiMapper.map(it) }.observe(viewLifecycleOwner) {
-                if (it.isLoading) {
-                    LoadingDialogFragment().show(childFragmentManager, LoadingDialogFragment.TAG)
-                }
             }
 
             homeViewModel.userName.observe(viewLifecycleOwner) {

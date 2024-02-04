@@ -85,7 +85,7 @@ class SignupFragment : Fragment() {
 
             signupViewModel.state.map { SignupUiMapper.map(it) }.observe(viewLifecycleOwner) {
                 if (it.authenticated) {
-                    findNavController().navigate(R.id.signup_to_home)
+                    findNavController().navigate(R.id.signup_to_loading)
                 } else {
                     Toast.makeText(context, it.errorMessage, Toast.LENGTH_SHORT).show()
                 }

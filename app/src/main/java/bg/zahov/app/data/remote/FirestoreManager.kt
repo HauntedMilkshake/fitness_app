@@ -1,5 +1,6 @@
 package bg.zahov.app.data.remote
 
+import bg.zahov.app.data.exception.CriticalDataNullException
 import bg.zahov.app.data.model.Exercise
 import bg.zahov.app.data.model.FirestoreFields
 import bg.zahov.app.data.model.User
@@ -8,12 +9,12 @@ import bg.zahov.app.util.toFirestoreMap
 import com.google.firebase.firestore.CollectionReference
 import com.google.firebase.firestore.DocumentReference
 import com.google.firebase.firestore.FirebaseFirestore
+import kotlinx.coroutines.CancellationException
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.async
 import kotlinx.coroutines.awaitAll
 import kotlinx.coroutines.flow.Flow
 import kotlinx.coroutines.flow.channelFlow
-import kotlinx.coroutines.flow.filter
 import kotlinx.coroutines.flow.first
 import kotlinx.coroutines.flow.map
 import kotlinx.coroutines.tasks.await
@@ -32,117 +33,81 @@ class FirestoreManager {
         }
     }
 
-    private var userId: String? = null
+    private lateinit var userId: String
 
     private val firestore = FirebaseFirestore.getInstance()
 
-    private var userDocRef: DocumentReference? = null
-
-    private var workoutsCollectionRef: CollectionReference? = null
-
-    private var templateExercisesCollectionRef: CollectionReference? = null
-
-
     fun initUser(id: String) {
         userId = id
-        userDocRef = userId?.let { firestore.collection(USERS_COLLECTION).document(it) }
-        workoutsCollectionRef = userDocRef?.collection(WORKOUTS_SUB_COLLECTION)
-        templateExercisesCollectionRef = userDocRef?.collection(TEMPLATE_EXERCISES)
     }
 
-    fun resetUser() {
-        userId = null
-        userDocRef = null
-        workoutsCollectionRef = null
-        templateExercisesCollectionRef = null
-    }
-
-    suspend fun createFirestore(username: String) {
-        withContext(Dispatchers.Default) {
-            userDocRef?.set(User(username).toFirestoreMap())
-        }
+    suspend fun createFirestore(username: String) = withContext(Dispatchers.IO) {
+        firestore.collection(USERS_COLLECTION).document(userId).set(User(username).toFirestoreMap())
     }
 
     private suspend fun <T> getDocData(
         reference: DocumentReference,
-        mapper: (Map<String, Any>) -> T,
+        mapper: (Map<String, Any>?) -> T,
     ): Flow<T> = channelFlow {
-//        reference.get()
-//            .addOnSuccessListener { snapshot ->
-//                snapshot.data?.let { data ->
-//                    trySend(mapper(data))
-//                    //CLOSE AND THROW ON THIS LINE
-//                } ?: close()
-//            }
-//            .addOnFailureListener {
-////                    throw smth
-//                close(it)
-//            }
-//        awaitClose { close() }
+        try {
+            val result = reference.get().await()
 
-        val result = reference.get().await()
-
-        result.data?.let {
-            trySend(mapper(it))
+            trySend(mapper(result.data))
+        } catch (e: CancellationException) {
+            close()
+            throw e
         }
-
     }
 
     private suspend fun <T> getCollectionData(
         reference: CollectionReference,
-        mapper: (Map<String, Any>) -> T,
+        mapper: (Map<String, Any>?) -> T,
     ): Flow<List<T>> = channelFlow {
+        try {
+            val snapshots = reference.get().await()
 
-        //I DON'T LIKE THIS
-//        reference.get()
-//            .addOnSuccessListener {
-//                CoroutineScope(Dispatchers.Default).launch {
-//                    val results = it.documents.map {
-//                        async(Dispatchers.Default) {
-//                            getDocData(it.reference, mapper).first()
-//                        }
-//                    }.awaitAll()
-//
-//                    trySend(results)
-//                }
-//            }
+            val results = snapshots.documents.map {
+                async {
+                    getDocData(it.reference, mapper).first()
+                }
+            }.awaitAll()
 
-        val snapshopts = reference.get().await()
+            trySend(results)
 
-        val results = snapshopts.documents.map {
-            async {
-                getDocData(it.reference, mapper).first()
-            }
-        }.awaitAll()
+        } catch (e: CancellationException) {
+            close()
+            throw e
+        }
 
-        trySend(results)
+
     }
 
 
-    suspend fun getUser(): Flow<User>? =
-        userDocRef?.let { getDocData(it) { info -> User.fromFirestoreMap(info) } }
-
-    suspend fun getWorkouts(): Flow<List<Workout>>? =
-        workoutsCollectionRef?.let {
-            getCollectionData(it) { info ->
-                Workout.fromFirestoreMap(
-                    info
-                )
-            }
+    suspend fun getUser(): Flow<User> =
+        getDocData(firestore.collection(USERS_COLLECTION).document(userId)) { info ->
+            User.fromFirestoreMap(info) ?: throw CriticalDataNullException("Critical data missing!")
         }
 
-    suspend fun getTemplateWorkouts(): Flow<List<Workout>>? = getWorkouts()?.map { it.filter { it.isTemplate} }
-    suspend fun getTemplateExercises(): Flow<List<Exercise>>? =
-        templateExercisesCollectionRef?.let {
-            getCollectionData(it) { info ->
-                Exercise.fromFirestoreMap(info)
-            }
-        }
 
-    suspend fun addTemplateExercise(newExercise: Exercise) {
-        withContext(Dispatchers.Default) {
-            templateExercisesCollectionRef?.add(newExercise)
-        }
+    suspend fun getWorkouts(): Flow<List<Workout>> = getCollectionData(
+        firestore.collection(USERS_COLLECTION).document(userId).collection(WORKOUTS_SUB_COLLECTION)
+    ) { info ->
+        Workout.fromFirestoreMap(info) ?: throw CriticalDataNullException("Critical data missing!")
+    }
+
+    suspend fun getTemplateWorkouts(): Flow<List<Workout>> =
+        getWorkouts().map { workouts -> workouts.filter { workout -> workout.isTemplate } }
+
+
+    suspend fun getTemplateExercises(): Flow<List<Exercise>> = getCollectionData(
+        firestore.collection(USERS_COLLECTION).document(userId).collection(TEMPLATE_EXERCISES)
+    ) {
+        Exercise.fromFirestoreMap(it) ?: throw CriticalDataNullException("Critical data missing!")
+    }
+
+    suspend fun addTemplateExercise(newExercise: Exercise) = withContext(Dispatchers.IO) {
+        firestore.collection(USERS_COLLECTION).document(userId).collection(TEMPLATE_EXERCISES)
+            .add(newExercise)
     }
 
     private fun deleteFirestore() {
@@ -162,7 +127,8 @@ class FirestoreManager {
 //        }
     }
 
-    suspend fun updateUsername(newUsername: String) {
-        userDocRef?.update(FirestoreFields.USER_NAME, newUsername)
+    suspend fun updateUsername(newUsername: String) = withContext(Dispatchers.IO) {
+        firestore.collection(USERS_COLLECTION).document(userId)
+            .update(FirestoreFields.USER_NAME, newUsername)
     }
 }

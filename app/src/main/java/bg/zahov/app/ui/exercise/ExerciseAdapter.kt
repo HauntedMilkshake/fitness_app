@@ -11,7 +11,7 @@ import com.google.android.material.textview.MaterialTextView
 class ExerciseAdapter(
     private val selectable: Boolean,
 ) : BaseAdapter<SelectableExercise>(
-    areItemsTheSame = { oldItem, newItem -> oldItem.exercise == newItem.exercise },
+    areItemsTheSame = { oldItem, newItem -> oldItem.exercise.name == newItem.exercise.name },
     areContentsTheSame = { oldItem, newItem -> oldItem.exercise == newItem.exercise },
     layoutResId = R.layout.item_exercise
 ) {

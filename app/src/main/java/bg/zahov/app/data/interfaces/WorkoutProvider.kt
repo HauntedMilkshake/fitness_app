@@ -3,8 +3,8 @@ package bg.zahov.app.data.interfaces
 import bg.zahov.app.data.model.Exercise
 import bg.zahov.app.data.model.Workout
 import kotlinx.coroutines.flow.Flow
-//TODO(would be good for addWorkout and addTemplateExercise to return a task or something)
-interface WorkoutRepository {
+
+interface WorkoutProvider {
     suspend fun getTemplateWorkouts(): Flow<List<Workout>>
     suspend fun getPastWorkouts(): Flow<List<Workout>>
     suspend fun addWorkout(newWorkout: Workout)

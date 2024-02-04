@@ -17,7 +17,7 @@ class SettingsRepositoryImpl : SettingsRepository {
 
     private val realm = RealmManager.getInstance()
 
-    override suspend fun getSettings(): Flow<ObjectChange<Settings>>? = realm.getSettings()
+    override suspend fun getSettings(): Flow<ObjectChange<Settings>> = realm.getSettings()
 
     override suspend fun addSetting(title: String, value: Any) {
         realm.updateSetting(title, value)

@@ -18,15 +18,15 @@ class WorkoutRepositoryImpl : WorkoutRepository {
 
     private val firestore = FirestoreManager.getInstance()
 
-    override suspend fun getTemplateWorkouts(): Flow<List<Workout>>? = firestore.getTemplateWorkouts()
+    override suspend fun getTemplateWorkouts(): Flow<List<Workout>> = firestore.getTemplateWorkouts()
 
-    override suspend fun getPastWorkouts(): Flow<List<Workout>>? = firestore.getWorkouts()
+    override suspend fun getPastWorkouts(): Flow<List<Workout>> = firestore.getWorkouts()
 
     override suspend fun addWorkout(newWorkout: Workout) {
         TODO("Not yet implemented")
     }
 
-    override suspend fun getTemplateExercises(): Flow<List<Exercise>>? =
+    override suspend fun getTemplateExercises(): Flow<List<Exercise>> =
         firestore.getTemplateExercises()
 
     override suspend fun addTemplateExercise(newExercise: Exercise) {

@@ -5,19 +5,22 @@ import android.transition.TransitionInflater
 import android.view.LayoutInflater
 import android.view.View
 import android.view.ViewGroup
+import android.widget.Toast
 import androidx.fragment.app.Fragment
 import androidx.fragment.app.viewModels
+import androidx.lifecycle.map
 import androidx.navigation.fragment.findNavController
 import androidx.recyclerview.widget.LinearLayoutManager
 import bg.zahov.app.data.model.Workout
+import bg.zahov.app.data.model.WorkoutUiMapper
 import bg.zahov.app.util.applyScaleAnimation
 import bg.zahov.fitness.app.R
 import bg.zahov.fitness.app.databinding.FragmentWorkoutBinding
 
-//FIXME clear binding
 class WorkoutFragment : Fragment() {
     private var _binding: FragmentWorkoutBinding? = null
-    private val binding get() = _binding!!
+    private val binding
+        get() = requireNotNull(_binding)
     private val workoutViewModel: WorkoutViewModel by viewModels()
     override fun onCreateView(
         inflater: LayoutInflater, container: ViewGroup?, savedInstanceState: Bundle?,
@@ -60,6 +63,18 @@ class WorkoutFragment : Fragment() {
             workoutViewModel.templates.observe(viewLifecycleOwner) {
                 workoutAdapter.updateItems(it)
             }
+
+            workoutViewModel.state.map { WorkoutUiMapper.map(it) }.observe(viewLifecycleOwner) {
+                Toast.makeText(context, it.errorMessage, Toast.LENGTH_SHORT).show()
+                if(it.shutdown) {
+                    //TODO()
+                }
+            }
         }
+    }
+
+    override fun onDestroyView() {
+        super.onDestroyView()
+        _binding = null
     }
 }

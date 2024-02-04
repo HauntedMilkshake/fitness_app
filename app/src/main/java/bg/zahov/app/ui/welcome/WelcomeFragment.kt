@@ -1,6 +1,5 @@
 package bg.zahov.app.ui.welcome
 
-import android.annotation.SuppressLint
 import android.os.Bundle
 import android.view.LayoutInflater
 import android.view.View
@@ -11,10 +10,10 @@ import bg.zahov.app.hideBottomNav
 import bg.zahov.fitness.app.R
 import bg.zahov.fitness.app.databinding.FragmentWelcomeBinding
 
-//FIXME clear _binding...
 class WelcomeFragment : Fragment() {
     private var _binding: FragmentWelcomeBinding? = null
-    private val binding get() = _binding!!
+    private val binding
+        get() = requireNotNull(_binding)
     override fun onCreateView(
         inflater: LayoutInflater, container: ViewGroup?, savedInstanceState: Bundle?,
     ): View {
@@ -27,7 +26,6 @@ class WelcomeFragment : Fragment() {
         requireActivity().hideBottomNav()
     }
 
-    @SuppressLint("ResourceAsColor")
     override fun onViewCreated(view: View, savedInstanceState: Bundle?) {
         super.onViewCreated(view, savedInstanceState)
         binding.apply {

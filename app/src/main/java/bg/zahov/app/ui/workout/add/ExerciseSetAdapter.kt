@@ -1,4 +1,4 @@
-package bg.zahov.app.ui.workout
+package bg.zahov.app.ui.workout.add
 
 import android.util.Log
 import android.view.View
@@ -54,7 +54,6 @@ class ExerciseSetAdapter : BaseAdapter<Exercise>(
             }
 
             addSetButton.setOnClickListener {
-                Log.d("SET CLICKED", "CLICKED")
                 exerciseItemClickListener?.onAddSet(
                     adapterPosition,
                     ClickableSet(Sets(type = SetType.DEFAULT.key, 0.0, 0), false)

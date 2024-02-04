@@ -32,7 +32,7 @@ class MainActivity : AppCompatActivity() {
         binding.bottomNavigation.setupWithNavController(navController)
 
         authViewModel.state.map { AuthUiModelMapper.map(it) }.observe(this) {
-            if(it.isAuthenticated) navController.navigate(R.id.welcome_to_home)
+            if(it.isAuthenticated) navController.navigate(R.id.welcome_to_loading)
         }
     }
 

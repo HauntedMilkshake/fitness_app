@@ -18,12 +18,9 @@ class UserRepositoryImpl : UserRepository {
 
     private val firestore = FirestoreManager.getInstance()
 
-    override suspend fun getUser(): Flow<User>?  {
+    override suspend fun getUser(): Flow<User> {
         return firestore.getUser()
     }
 
-    override suspend fun changeUserName(newUsername: String) {
-        firestore.updateUsername(newUsername)
-
-    }
+    override suspend fun changeUserName(newUsername: String) = firestore.updateUsername(newUsername)
 }

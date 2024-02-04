@@ -17,8 +17,8 @@
             android:id="@+id/welcome_to_signup"
             app:destination="@id/signup" />
         <action
-            android:id="@+id/welcome_to_home"
-            app:destination="@id/home"
+            android:id="@+id/welcome_to_loading"
+            app:destination="@id/loading"
             app:popUpTo="@id/welcome"
             app:popUpToInclusive="true" />
     </fragment>
@@ -32,8 +32,8 @@
             android:id="@+id/login_to_signup"
             app:destination="@id/signup" />
         <action
-            android:id="@+id/login_to_home"
-            app:destination="@id/home"
+            android:id="@+id/login_to_loading"
+            app:destination="@id/loading"
             app:popUpTo="@id/welcome"
             app:popUpToInclusive="true" />
     </fragment>
@@ -47,16 +47,27 @@
             android:id="@+id/signup_to_login"
             app:destination="@id/log_in" />
         <action
-            android:id="@+id/signup_to_home"
-            app:destination="@id/home"
+            android:id="@+id/signup_to_loading"
+            app:destination="@id/loading"
             app:popUpTo="@id/welcome"
             app:popUpToInclusive="true" />
     </fragment>
 
     <fragment
+        android:id="@+id/loading"
+        android:name="bg.zahov.app.ui.loading.LoadingFragment"
+        tools:layout="@layout/fragment_loading">
+        <action
+            android:id="@+id/loading_to_home"
+            app:destination="@id/home"
+            app:popUpToInclusive="true"
+            app:popUpTo="@id/loading"
+            />
+    </fragment>
+
+    <fragment
         android:id="@+id/home"
         android:name="bg.zahov.app.ui.home.HomeFragment"
-        android:label="@string/home"
         tools:layout="@layout/fragment_home">
         <action
             android:id="@+id/home_to_settings"

@@ -1,20 +1,18 @@
 package bg.zahov.app.ui.home
 
+import android.app.Application
+import androidx.lifecycle.AndroidViewModel
 import androidx.lifecycle.LiveData
 import androidx.lifecycle.MutableLiveData
-import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
-import bg.zahov.app.data.repository.UserRepositoryImpl
 import bg.zahov.app.data.model.Workout
+import bg.zahov.app.getUserProvider
 import kotlinx.coroutines.launch
 
-class HomeViewModel : ViewModel() {
+class HomeViewModel(application: Application) : AndroidViewModel(application) {
     private val repo by lazy {
-        UserRepositoryImpl.getInstance()
+        application.getUserProvider()
     }
-    private val _state = MutableLiveData<State>()
-    val state: LiveData<State>
-        get() = _state
 
     private val _userName = MutableLiveData<String>()
     val userName: LiveData<String>
@@ -29,21 +27,10 @@ class HomeViewModel : ViewModel() {
 
     init {
         viewModelScope.launch {
-            _state.postValue(State.Loading(true))
-
-            repo.getUser()?.collect {
+            //potential redundant try catch because of the check in loading ヽ(✿ﾟ▽ﾟ)ノ
+            repo.getUser().collect {
                 _userName.postValue(it.name)
-                _state.postValue(State.Loading(false))
-            } ?: _state.postValue(State.Error("Try reloading the app"))
-
+            }
         }
-    }
-
-    sealed interface State {
-        object Default : State
-
-        data class Loading(val isLoading: Boolean) : State
-
-        data class Error(val message: String) : State
     }
 }

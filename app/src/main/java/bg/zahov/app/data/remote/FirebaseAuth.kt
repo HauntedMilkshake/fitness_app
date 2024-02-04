@@ -2,19 +2,20 @@ package bg.zahov.app.data.remote
 
 import android.util.Log
 import bg.zahov.app.data.exception.AuthenticationException
+import bg.zahov.app.data.exception.CriticalDataNullException
+import bg.zahov.app.data.exception.DeleteRealmException
 import bg.zahov.app.data.local.RealmManager
+import com.google.android.gms.tasks.Task
+import com.google.android.gms.tasks.Tasks
 import com.google.firebase.auth.EmailAuthProvider
 import com.google.firebase.auth.FirebaseAuth
 import com.google.firebase.auth.FirebaseAuthException
 import com.google.firebase.auth.FirebaseAuthInvalidUserException
-import kotlinx.coroutines.CoroutineScope
+import com.google.firebase.auth.FirebaseAuthRecentLoginRequiredException
 import kotlinx.coroutines.Dispatchers
-import kotlinx.coroutines.channels.awaitClose
-import kotlinx.coroutines.flow.callbackFlow
-import kotlinx.coroutines.launch
-import kotlinx.coroutines.tasks.await
-import kotlin.coroutines.resume
-import kotlin.coroutines.suspendCoroutine
+import kotlinx.coroutines.flow.flow
+import kotlinx.coroutines.withContext
+import java.lang.IllegalStateException
 
 class FirebaseAuthentication {
     companion object {
@@ -30,32 +31,27 @@ class FirebaseAuthentication {
     private val firestore = FirestoreManager.getInstance()
     private val realm = RealmManager.getInstance()
 
-    suspend fun signup(username: String, email: String, password: String) {
-        val signupResult = auth.createUserWithEmailAndPassword(email, password).await()
-//            .addOnFailureListener { throw AuthenticationException("TODO(Handle later)") }
-
-        signupResult.user?.uid?.let {
-            init()
-            CoroutineScope(Dispatchers.IO).launch {
+    suspend fun signup(username: String, email: String, password: String) =
+        auth.createUserWithEmailAndPassword(email, password).also {
+            if (it.isSuccessful) {
+                init()
                 firestore.createFirestore(username)
                 realm.createRealm()
             }
         }
-    }
 
-    suspend fun login(email: String, password: String) {
-        Log.d("login", "calling from source")
-        val loginResult = auth.signInWithEmailAndPassword(email, password).await()
-        Log.d("login", "success")
-
-        loginResult.user?.uid?.let {
-            Log.d("login", it)
-            init()
-            CoroutineScope(Dispatchers.IO).launch {
+    suspend fun login(email: String, password: String) =
+        auth.signInWithEmailAndPassword(email, password).also {
+            if (it.isSuccessful) {
+                init()
                 realm.createRealm()
             }
         }
-    }
+
+//    suspend fun onLoginSuccess() {
+//        init()
+//        realm.createRealm()
+//    }
 
     suspend fun logout() {
         resetResources()
@@ -63,32 +59,31 @@ class FirebaseAuthentication {
     }
 
     suspend fun deleteAccount() {
-        resetResources()
+        try {
+            resetResources()
+        } catch (e: IllegalStateException) {
+            throw DeleteRealmException(e.message)
+        }
+
         try {
             auth.currentUser?.delete()
-        } catch (e : FirebaseAuthInvalidUserException) {
-            throw e
+        } catch (e: FirebaseAuthInvalidUserException) {
+            throw AuthenticationException(e.message)
+        } catch (e: FirebaseAuthRecentLoginRequiredException) {
+            throw AuthenticationException(e.message)
         }
     }
 
     private suspend fun resetResources() {
-        firestore.resetUser()
         realm.deleteRealm()
     }
-    suspend fun passwordResetByEmail(email: String): Boolean = suspendCoroutine {
-        auth.sendPasswordResetEmail(email)
-            .addOnCompleteListener { task ->
-                it.resume(task.isSuccessful)
-            }
+
+    suspend fun passwordResetForLoggedUser(): Task<Void> = withContext(Dispatchers.IO) {
+        auth.uid?.let { auth.sendPasswordResetEmail(it) } ?: Tasks.forResult(null)
     }
 
-    suspend fun passwordResetForLoggedUser(): Boolean = suspendCoroutine {
-        auth.currentUser?.email?.let { id ->
-            auth.sendPasswordResetEmail(id)
-                .addOnCompleteListener { task ->
-                    it.resume(task.isSuccessful)
-                }
-        }
+    suspend fun passwordResetByEmail(email: String) = withContext(Dispatchers.IO) {
+        auth.sendPasswordResetEmail(email)
     }
 
     fun isAuthenticated() = auth.currentUser != null
@@ -100,25 +95,27 @@ class FirebaseAuthentication {
         }
     }
 
-    suspend fun updatePassword(newPassword: String) {
-        auth.currentUser?.updatePassword(newPassword)
+    suspend fun updatePassword(newPassword: String): Task<Void> = withContext(Dispatchers.IO) {
+        auth.currentUser?.updatePassword(newPassword) ?: Tasks.forResult(null)
     }
 
-    suspend fun updateEmail(newEmail: String) {
+    suspend fun updateEmail(newEmail: String): Task<Void> = withContext(Dispatchers.IO) {
         try {
-            auth.currentUser?.updateEmail(newEmail)
+            auth.currentUser?.let { updateEmail(newEmail) } ?: Tasks.forResult(null)
         } catch (e: FirebaseAuthException) {
             throw AuthenticationException(e.message ?: "tough luck")
         }
     }
 
-    suspend fun reauthenticate(password: String) = callbackFlow {
+    suspend fun reauthenticate(password: String): Task<Void> = withContext(Dispatchers.IO) {
         auth.currentUser?.email?.let {
             auth.currentUser?.reauthenticate(EmailAuthProvider.getCredential(it, password))
-                ?.addOnCompleteListener {
-                    trySend(true)
-                } ?: trySend(false)
+        } ?: Tasks.forResult(null)
+    }
+    suspend fun getEmail() = withContext(Dispatchers.IO) {
+        flow<String> {
+            auth.currentUser?.email ?: throw CriticalDataNullException("NO EMAIL FOUND")
         }
-        awaitClose { close() }
     }
 }
+

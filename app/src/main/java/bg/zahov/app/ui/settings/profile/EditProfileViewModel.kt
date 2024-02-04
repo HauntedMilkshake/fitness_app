@@ -1,86 +1,131 @@
 package bg.zahov.app.ui.settings.profile
 
-import android.app.Application
 import androidx.lifecycle.AndroidViewModel
 import androidx.lifecycle.LiveData
 import androidx.lifecycle.MutableLiveData
 import androidx.lifecycle.viewModelScope
-import bg.zahov.app.data.exception.AuthenticationException
-import bg.zahov.app.data.repository.AuthenticationImpl
-import bg.zahov.app.data.repository.UserRepositoryImpl
+import bg.zahov.app.MyApplication
+import bg.zahov.app.data.exception.CriticalDataNullException
 import kotlinx.coroutines.launch
 
-class EditProfileViewModel(application: Application) : AndroidViewModel(application) {
-    private val repo = UserRepositoryImpl.getInstance()
-    private val auth = AuthenticationImpl.getInstance()
+class EditProfileViewModel(application: MyApplication) : AndroidViewModel(application) {
+    private val repo by lazy {
+        application.userProvider
+    }
     private val _state = MutableLiveData<State>()
     val state: LiveData<State>
         get() = _state
+
+    private val _name = MutableLiveData<String>()
+    val name: LiveData<String>
+        get() = _name
+
+    private val _email = MutableLiveData<String>()
+    val email: LiveData<String>
+        get() = _email
+
+    private val _isUnlocked = MutableLiveData(false)
+    val isUnlocked: LiveData<Boolean>
+        get() = _isUnlocked
 
     private var userPassword: String? = null
 
     //
     init {
         viewModelScope.launch {
-            repo.getUser()?.collect {
-                _state.postValue(State.Username(it.name))
+            try {
+                repo.getUser().collect {
+                    _name.postValue(it.name)
+                }
+            } catch (e: CriticalDataNullException) {
+                _state.postValue(State.Error(e.message, true))
+            }
+
+            try {
+                repo.getEmail().collect() {
+                    _email.postValue(it)
+                }
+            } catch (e: CriticalDataNullException) {
+                _state.postValue(State.Error(e.message, true))
             }
         }
     }
 
     fun updateUsername(newUsername: String) {
+        if (newUsername.isEmpty()) {
+            _state.postValue(State.Error("Username cannot be empty", false))
+            return
+        }
+
         viewModelScope.launch {
-            if (newUsername.isNotEmpty()) {
-                repo.changeUserName(newUsername)
-                _state.postValue(State.Username(newUsername))
+
+            val result = repo.changeUserName(newUsername)
+
+            if (result.isSuccessful) {
+                _name.postValue(newUsername)
+                _state.postValue(State.Error("Successfully updated username", false))
             } else {
-                _state.postValue(State.Error("Username cannot be empty"))
+                _state.postValue(
+                    State.Error(
+                        result.exception?.message ?: "Couldn't update username", false
+                    )
+                )
             }
         }
     }
 
     fun updateEmail(newEmail: String) {
         viewModelScope.launch {
-            auth.updateEmail(newEmail)
+            //TODO()
+            //auth.updateEmail(newEmail)
         }
     }
 
     fun unlockFields(password: String) {
+        if (password.isEmpty() || password.length < 6) {
+            _state.postValue(State.Notify("Incorrect password!"))
+            return
+        }
+
         viewModelScope.launch {
-            if (password.isNotEmpty() && password.length >= 6) {
-                auth.reauthenticate(password).collect {
-                    //TODO(ADD Message here)
-                    _state.postValue(State.Unlocked(it))
-                }
-            } else {
-                _state.postValue(State.Unlocked(false))
+
+            val result = repo.reauthenticate(password)
+
+            if (result.isSuccessful) {
+                _state.postValue(State.Notify("Successfully reauthenticated!"))
+                _isUnlocked.postValue(true)
             }
+
         }
     }
 
     fun sendPasswordResetLink() {
         viewModelScope.launch {
-            auth.passwordResetForLoggedUser()
-            _state.postValue(State.Notify("Successfully updated password"))
-        }
-    }
 
-    fun updatePassword(newPassword: String) {
-        if (newPassword.isNotEmpty() && newPassword.length >= 6) {
-            viewModelScope.launch {
-                auth.updatePassword(newPassword)
+            val result = repo.passwordResetForLoggedUser()
+
+            if (result.isSuccessful) {
                 _state.postValue(State.Notify("Successfully updated password"))
+            } else {
+                _state.postValue(State.Error("Failed to send password reset link", false))
             }
         }
     }
 
-    sealed interface State {
-        object Default : State
+    fun updatePassword(newPassword: String) {
+        if (newPassword.isEmpty() && newPassword.length < 6) {
+            _state.postValue(State.Error("Password must be atleast 6 characters long", false))
+            return
+        }
 
-        data class Unlocked(val isUnlocked: Boolean) : State
-        data class Error(val error: String) : State
-        data class Username(val username: String) : State
-        data class Email(val email: String) : State
+        viewModelScope.launch {
+            repo.updatePassword(newPassword)
+            _state.postValue(State.Notify("Successfully updated password"))
+        }
+    }
+
+    sealed interface State {
+        data class Error(val error: String?, val shutdown: Boolean) : State
         data class Notify(val message: String) : State
     }
 }

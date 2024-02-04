@@ -1,24 +1,25 @@
 package bg.zahov.app.ui.workout.add
 
-import android.util.Log
+import android.app.Application
+import androidx.lifecycle.AndroidViewModel
 import androidx.lifecycle.LiveData
 import androidx.lifecycle.MutableLiveData
-import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
 import bg.zahov.app.data.model.ClickableSet
 import bg.zahov.app.data.model.Exercise
 import bg.zahov.app.data.model.SelectableExercise
 import bg.zahov.app.data.model.Workout
-import bg.zahov.app.data.repository.WorkoutRepositoryImpl
+import bg.zahov.app.getWorkoutProvider
 import bg.zahov.app.util.toExerciseList
 import kotlinx.coroutines.launch
 import java.time.LocalDate
 import java.time.format.DateTimeFormatter
 import java.util.Locale
 
-//FIXME see comments in AuthViewModel and EditProfileViewModel
-class AddWorkoutViewModel : ViewModel() {
-    private val repo = WorkoutRepositoryImpl.getInstance()
+class AddWorkoutViewModel(application: Application) : AndroidViewModel(application) {
+    private val repo by lazy {
+        application.getWorkoutProvider()
+    }
 
     private val _state = MutableLiveData<State>()
     val state: LiveData<State>
@@ -29,57 +30,65 @@ class AddWorkoutViewModel : ViewModel() {
         get() = _currExercises
 
     fun addWorkout(name: String, ids: List<String>) {
-        if (ids.isNotEmpty()) {
-            viewModelScope.launch {
-                repo.addWorkout(
-                    Workout(
-                        name = name,
-                        duration = 0.0,
-                        date = LocalDate.now().format(DateTimeFormatter.ofPattern("dd-MM-yyyy", Locale.getDefault())),
-                        isTemplate = true,
-                        exercises = emptyList(),
-                        ids = ids
-                    )
-                )
-            }
-        } else {
+        if (ids.isEmpty()) {
             _state.value = State.Error("Cannot create workout template without exercises!")
+            return
         }
 
+        viewModelScope.launch {
+            repo.addWorkout(
+                Workout(
+                    name = name,
+                    duration = 0.0,
+                    date = LocalDate.now()
+                        .format(DateTimeFormatter.ofPattern("dd-MM-yyyy", Locale.getDefault())),
+                    isTemplate = true,
+                    exercises = emptyList(),
+                    ids = ids
+                )
+            )
+        }
     }
 
     fun addSelectedExercises(selectedExercises: List<SelectableExercise>) {
-        val captured = _currExercises.value?.toMutableList()
-        captured?.addAll(selectedExercises.toExerciseList())
-        _currExercises.value = captured ?: listOf()
+        val captured = _currExercises.value?.toMutableList() ?: mutableListOf()
+        captured.addAll(selectedExercises.toExerciseList())
+        _currExercises.value = captured
     }
 
     fun addExercise(newExercise: SelectableExercise) {
         val captured = _currExercises.value?.toMutableList() ?: mutableListOf()
         captured.add(newExercise.exercise)
-        _currExercises.value = captured ?: listOf()
+        _currExercises.value = captured
     }
 
     fun removeExercise(position: Int) {
         val captured = _currExercises.value?.toMutableList() ?: mutableListOf()
         captured.removeAt(position)
-        _currExercises.value = captured ?: listOf()
+        _currExercises.value = captured
 
     }
 
     fun addSet(ePosition: Int, set: ClickableSet) {
-        _currExercises.value?.toMutableList()?.getOrNull(ePosition)?.let { exercise ->
-            exercise.sets.toMutableList().add(set.set)
-            Log.d("SET", "${exercise.name} ${exercise.sets.size}")
-            _currExercises.value = _currExercises.value
-        }
+        val exercises = _currExercises.value?.toMutableList() ?: emptyList()
+        val sets = exercises[ePosition].sets.toMutableList()
+
+        sets.add(set.set)
+
+        exercises[ePosition].sets = sets
+
+        _currExercises.value = exercises
     }
 
     fun removeSet(ePosition: Int, sPosition: Int) {
-        _currExercises.value?.toMutableList()?.getOrNull(ePosition)?.let { exercise ->
-            exercise.sets.toMutableList().removeAt(sPosition)
-            _currExercises.value = _currExercises.value
-        }
+        val exercises = _currExercises.value?.toMutableList() ?: emptyList()
+        val sets = exercises[ePosition].sets.toMutableList()
+
+        sets.removeAt(sPosition)
+
+        exercises[ePosition].sets = sets
+
+        _currExercises.value = exercises
     }
 
     fun resetSelectedExercises() {
@@ -87,7 +96,7 @@ class AddWorkoutViewModel : ViewModel() {
     }
 
     sealed interface State {
-        object Default : State
-        data class Error(val message: String) : State
+        data class Error(val eMessage: String) : State
+        data class Notify(val nMessage: String) : State
     }
 }

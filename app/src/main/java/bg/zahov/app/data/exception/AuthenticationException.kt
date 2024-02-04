@@ -1,3 +1,3 @@
 package bg.zahov.app.data.exception
 
-class AuthenticationException(message: String) : Exception(message)
+class AuthenticationException(message: String?) : Exception(message)

@@ -13,10 +13,10 @@ import bg.zahov.app.data.model.EditProfileUiMapper
 import bg.zahov.fitness.app.R
 import bg.zahov.fitness.app.databinding.FragmentEditProfileBinding
 
-//FIXME _binding should be set to null in onDestroyView() to prevent memory leaks
 class EditProfileFragment : Fragment() {
     private var _binding: FragmentEditProfileBinding? = null
-    private val binding get() = _binding!!
+    private val binding
+        get() = requireNotNull(_binding)
     private val editProfileViewModel: EditProfileViewModel by viewModels({ requireActivity() })
     override fun onCreateView(
         inflater: LayoutInflater,
@@ -38,23 +38,21 @@ class EditProfileFragment : Fragment() {
             resetPassword.setOnClickListener {
                 editProfileViewModel.sendPasswordResetLink()
             }
-            editProfileViewModel.state.map { EditProfileUiMapper.map(it) }.observe(viewLifecycleOwner) {
-                usernameFieldText.setText(it.username)
-                emailFieldText.setText(it.email)
 
-                lock.setImageResource(if(it.isUnlocked) R.drawable.ic_open_lock else R.drawable.ic_closed_lock)
-                usernameField.isEnabled = it.isUnlocked
-                emailField.isEnabled = it.isUnlocked
+            editProfileViewModel.name.observe(viewLifecycleOwner) {
+                usernameFieldText.setText(it)
+            }
 
-                if(!it.errorMessage.isNullOrEmpty()) {
-                    Toast.makeText(context, it.errorMessage, Toast.LENGTH_SHORT).show()
-                }
+            editProfileViewModel.email.observe(viewLifecycleOwner) {
+                emailFieldText.setText(it)
+            }
 
-                if(!it.notifyMessage.isNullOrEmpty()) {
-                    Toast.makeText(context, it.notifyMessage, Toast.LENGTH_SHORT).show()
-                }
+            editProfileViewModel.isUnlocked.observe(viewLifecycleOwner) {
+                lock.setImageResource(if (it) R.drawable.ic_open_lock else R.drawable.ic_closed_lock)
+                usernameField.isEnabled = it
+                emailField.isEnabled = it
 
-                if(it.isUnlocked) {
+                if (it) {
                     saveChanges.setOnClickListener {
                         editProfileViewModel.updateEmail(emailFieldText.toString())
                         editProfileViewModel.updateUsername(usernameFieldText.toString())
@@ -62,6 +60,13 @@ class EditProfileFragment : Fragment() {
                     }
                 }
             }
+
+            editProfileViewModel.state.map { EditProfileUiMapper.map(it) }
+                .observe(viewLifecycleOwner) {
+
+                    showToast(it.errorMessage)
+                    showToast(it.notifyMessage)
+                }
 
             lock.setOnClickListener {
                 AuthenticationDialog().show(childFragmentManager, AuthenticationDialog.TAG)
@@ -74,7 +79,7 @@ class EditProfileFragment : Fragment() {
         _binding = null
     }
 
-    private fun showToast(message: String) {
+    private fun showToast(message: String?) {
         Toast.makeText(requireContext(), message, Toast.LENGTH_SHORT).show()
     }
 }

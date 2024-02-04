@@ -12,7 +12,6 @@ import androidx.navigation.fragment.findNavController
 import androidx.recyclerview.widget.LinearLayoutManager
 import bg.zahov.app.data.model.ClickableSet
 import bg.zahov.app.data.model.Workout
-import bg.zahov.app.ui.workout.ExerciseSetAdapter
 import bg.zahov.app.util.applyScaleAnimation
 import bg.zahov.fitness.app.R
 import bg.zahov.fitness.app.databinding.FragmentNewWorkoutTemplateBinding

@@ -9,7 +9,6 @@ import bg.zahov.app.data.model.Exercise
 import bg.zahov.app.data.model.FirestoreFields
 import bg.zahov.app.data.model.SelectableExercise
 import bg.zahov.app.data.model.Sets
-import bg.zahov.app.data.model.Settings
 import bg.zahov.app.data.model.User
 import bg.zahov.app.data.model.Workout
 import bg.zahov.fitness.app.R
@@ -46,20 +45,21 @@ fun Sets.toFirestoreMap(): Map<String, Any?> {
     )
 }
 
-fun Settings.toFirestoreMap(): Map<String, Any?> {
-    return mapOf(
-        FirestoreFields.SETTINGS_LANGUAGE to language,
-        FirestoreFields.SETTINGS_UNITS to units,
-        FirestoreFields.SETTINGS_SOUND_EFFECTS to soundEffects,
-        FirestoreFields.SETTINGS_THEME to theme,
-        FirestoreFields.SETTINGS_REST_TIMER to restTimer,
-        FirestoreFields.SETTINGS_VIBRATION to vibration,
-        FirestoreFields.SETTINGS_SOUND_SETTINGS to soundSettings,
-        FirestoreFields.SETTINGS_UPDATE_TEMPLATE to updateTemplate,
-        FirestoreFields.SETTINGS_FIT to fit,
-        FirestoreFields.SETTINGS_AUTOMATIC_SYNC to automaticSync
-    )
-}
+//fun Settings.toFirestoreMap(): Map<String, Any?> {
+//    return mapOf(
+//
+//        FirestoreFields.SETTINGS_LANGUAGE to language,
+//        FirestoreFields.SETTINGS_UNITS to units,
+//        FirestoreFields.SETTINGS_SOUND_EFFECTS to soundEffects,
+//        FirestoreFields.SETTINGS_THEME to theme,
+//        FirestoreFields.SETTINGS_REST_TIMER to restTimer,
+//        FirestoreFields.SETTINGS_VIBRATION to vibration,
+//        FirestoreFields.SETTINGS_SOUND_SETTINGS to soundSettings,
+//        FirestoreFields.SETTINGS_UPDATE_TEMPLATE to updateTemplate,
+//        FirestoreFields.SETTINGS_FIT to fit,
+//        FirestoreFields.SETTINGS_AUTOMATIC_SYNC to automaticSync
+//    )
+//}
 
 fun String.isEmail() = Regex("^\\S+@\\S+\\.\\S+$").matches(this)
 fun Exercise.toSelectable() = SelectableExercise(this)

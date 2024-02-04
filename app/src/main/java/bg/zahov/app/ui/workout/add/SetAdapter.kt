@@ -1,4 +1,4 @@
-package bg.zahov.app.ui.workout
+package bg.zahov.app.ui.workout.add
 
 import android.view.View
 import bg.zahov.app.data.model.Category

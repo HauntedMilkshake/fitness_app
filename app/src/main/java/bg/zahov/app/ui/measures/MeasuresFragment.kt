@@ -9,10 +9,10 @@ import androidx.fragment.app.Fragment
 import bg.zahov.fitness.app.R
 import bg.zahov.fitness.app.databinding.FragmentMeasuresBinding
 
-//FIXME clear _binding...
 class MeasuresFragment : Fragment() {
     private var _binding: FragmentMeasuresBinding? = null
-    private val binding get() = _binding!!
+    private val binding
+        get() = requireNotNull( _binding)
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
         val inflater = TransitionInflater.from(requireContext())
