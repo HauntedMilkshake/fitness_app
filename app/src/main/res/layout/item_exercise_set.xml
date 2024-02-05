@@ -77,17 +77,6 @@
         app:layout_constraintStart_toEndOf="@id/first_input_column_indicator"
         app:layout_constraintTop_toTopOf="@id/first_input_column_indicator" />
 
-    <androidx.recyclerview.widget.RecyclerView
-        android:id="@+id/set_recycler_view"
-        android:layout_width="0dp"
-        android:layout_height="wrap_content"
-        android:layout_marginTop="20dp"
-        android:padding="5dp"
-        app:layout_constraintBottom_toTopOf="@+id/add_set"
-        app:layout_constraintEnd_toEndOf="parent"
-        app:layout_constraintStart_toStartOf="parent"
-        app:layout_constraintTop_toBottomOf="@+id/set_column_indicator" />
-
     <com.google.android.material.button.MaterialButton
         android:id="@+id/add_set"
         android:layout_width="0dp"
@@ -97,8 +86,10 @@
         android:backgroundTint="@color/background"
         android:text="@string/add_set"
         android:textColor="@color/blue_text"
+        android:layout_marginTop="15dp"
         app:layout_constraintBottom_toBottomOf="parent"
         app:layout_constraintEnd_toEndOf="parent"
-        app:layout_constraintStart_toStartOf="parent" />
+        app:layout_constraintStart_toStartOf="parent"
+        app:layout_constraintTop_toBottomOf="@+id/first_input_column_indicator" />
 
 </androidx.constraintlayout.widget.ConstraintLayout>
