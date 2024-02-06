@@ -9,6 +9,7 @@ import androidx.lifecycle.viewModelScope
 import bg.zahov.app.data.model.ClickableSet
 import bg.zahov.app.data.model.Exercise
 import bg.zahov.app.data.model.SelectableExercise
+import bg.zahov.app.data.model.Sets
 import bg.zahov.app.data.model.Workout
 import bg.zahov.app.getWorkoutProvider
 import bg.zahov.app.util.toExerciseList
@@ -51,48 +52,51 @@ class AddWorkoutViewModel(application: Application) : AndroidViewModel(applicati
         }
     }
 
-    fun addSelectedExercises(selectedExercises: List<SelectableExercise>) {
-        val captured = _currExercises.value?.toMutableList() ?: mutableListOf()
-        captured.addAll(selectedExercises.toExerciseList())
-        _currExercises.value = captured
-    }
+//    fun addSelectedExercises(selectedExercises: List<SelectableExercise>) {
+//        val captured = _currExercises.value?.toMutableList() ?: mutableListOf()
+//        captured.addAll(selectedExercises.toExerciseList())
+//        _currExercises.value = captured
+//    }
 
-    fun addExercise(newExercise: SelectableExercise) {
+    fun addExercise(newExercise: Exercise) {
         val captured = _currExercises.value?.toMutableList() ?: mutableListOf()
-        captured.add(newExercise.exercise)
+        captured.add(newExercise)
         _currExercises.value = captured
         captured.forEach {
             Log.d("ADD", it.name)
         }
     }
 
-    fun removeExercise(position: Int) {
+    fun removeExercise(item: Exercise) {
         val captured = _currExercises.value?.toMutableList() ?: mutableListOf()
-        if(captured.isNotEmpty()) captured.removeAt(position)
+        captured.remove(item)
         _currExercises.value = captured
         captured.forEach {
             Log.d("DELETE", it.name)
         }
     }
 
-    fun addSet(ePosition: Int, set: ClickableSet) {
+    fun addSet(exercise: Exercise, set: Sets) {
         val exercises = _currExercises.value?.toMutableList() ?: emptyList()
-        val sets = exercises[ePosition].sets.toMutableList()
-
-        sets.add(set.set)
-
-        exercises[ePosition].sets = sets
-
+        val foundExercise = exercises.find { it == exercise }
+        foundExercise?.let {
+            val newSets = it.sets.toMutableList()
+            newSets.add(set)
+            it.sets = newSets
+        }
         _currExercises.value = exercises
     }
 
-    fun removeSet(ePosition: Int, sPosition: Int) {
+    fun removeSet(exercise: Exercise, set: Sets) {
         val exercises = _currExercises.value?.toMutableList() ?: emptyList()
-        val sets = exercises[ePosition].sets.toMutableList()
-
-        sets.removeAt(sPosition)
-
-        exercises[ePosition].sets = sets
+        val foundExercise = exercises.find { it == exercise }
+        foundExercise?.let {
+            if (it.sets.isEmpty()) {
+                val newSets = it.sets.toMutableList()
+                newSets.remove(set)
+                it.sets = newSets
+            }
+        }
 
         _currExercises.value = exercises
     }

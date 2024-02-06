@@ -89,7 +89,7 @@ class ExercisesFragment : Fragment() {
                                 clickedView: View,
                             ) {
                                 if(selectable) {
-                                    if(item.isSelected) addWorkoutViewModel.addExercise(item) else addWorkoutViewModel.removeExercise(itemPosition)
+                                    if(item.isSelected) addWorkoutViewModel.addExercise(item.exercise) else addWorkoutViewModel.removeExercise(item.exercise)
                                 } else {
                                     //GO TO EXERCISE INFO FRAGMENT
                                 }

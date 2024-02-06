@@ -60,7 +60,6 @@ class AddExerciseFragment : Fragment() {
     private fun initViews() {
         binding.apply {
             addExerciseViewModel.category.observe(viewLifecycleOwner) {
-                Log.d("LIVEDATA", "INVOKE")
                 category.initViewInformation(
                     "Body part",
                     listOf(
@@ -84,7 +83,6 @@ class AddExerciseFragment : Fragment() {
                     }
             }
             addExerciseViewModel.bodyPart.observe(viewLifecycleOwner) {
-                Log.d("LIVEDATA", "INVOKE")
                 bodyPart.initViewInformation(
                     "Category",
                     listOf(

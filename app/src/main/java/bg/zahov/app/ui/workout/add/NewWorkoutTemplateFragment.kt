@@ -2,6 +2,7 @@ package bg.zahov.app.ui.workout.add
 
 import android.os.Bundle
 import android.transition.TransitionInflater
+import android.util.Log
 import android.view.LayoutInflater
 import android.view.View
 import android.view.ViewGroup
@@ -11,6 +12,7 @@ import androidx.fragment.app.viewModels
 import androidx.navigation.fragment.findNavController
 import androidx.recyclerview.widget.LinearLayoutManager
 import bg.zahov.app.data.model.ClickableSet
+import bg.zahov.app.data.model.Exercise
 import bg.zahov.app.data.model.Workout
 import bg.zahov.app.util.applyScaleAnimation
 import bg.zahov.fitness.app.R
@@ -46,9 +48,9 @@ class NewWorkoutTemplateFragment : Fragment() {
             }
 
             val exerciseSetAdapter = ExerciseSetAdapter().apply {
-                object : ExerciseSetAdapter.ItemClickListener<Workout> {
-                    override fun onOptionsClicked(item: Workout, clickedView: View) {
-                        //TODO(Open popup)
+                itemClickListener = object : ExerciseSetAdapter.ItemClickListener<WorkoutEntry> {
+                    override fun onOptionsClicked(item: Exercise, clickedView: View) {
+                        TODO("Not yet implemented")
                     }
 
                     override fun onSetClicked(item: ClickableSet, clickedView: View) {
@@ -59,12 +61,14 @@ class NewWorkoutTemplateFragment : Fragment() {
                         TODO("Not yet implemented")
                     }
 
-                    override fun onAddSet(exercisePosition: Int, set: ClickableSet) {
-                        addWorkoutViewModel.addSet(exercisePosition, set)
+                    override fun onAddSet(item: Exercise, set: ClickableSet) {
+                        Log.d("ONADDSET", "FRAG,EMT")
+                        addWorkoutViewModel.addSet(item, set.set)
                     }
 
-                    override fun onDeleteSet(exercisePosition: Int, setPosition: Int) {
-                        addWorkoutViewModel.removeSet(exercisePosition, setPosition)
+                    override fun onDeleteSet(item: Exercise, set: ClickableSet) {
+                        addWorkoutViewModel.removeSet(item, set.set)
+
                     }
                 }
             }
@@ -82,7 +86,7 @@ class NewWorkoutTemplateFragment : Fragment() {
             }
 
             addWorkoutViewModel.currExercises.observe(viewLifecycleOwner) {
-//                exerciseSetAdapter.updateItems(it)
+                exerciseSetAdapter.updateItems(it)
             }
 
             save.setOnClickListener {

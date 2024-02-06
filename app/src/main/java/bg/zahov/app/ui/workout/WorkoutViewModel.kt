@@ -40,6 +40,6 @@ class WorkoutViewModel(application: Application) : AndroidViewModel(application)
     }
 
     sealed interface State {
-        data class Error(val error: String?, val shutdown: Boolean): State
+        data class Error(val error: String?, val shutdown: Boolean) : State
     }
 }
