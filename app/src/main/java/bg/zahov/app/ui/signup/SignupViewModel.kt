@@ -44,18 +44,15 @@ class SignupViewModel(application: Application) : AndroidViewModel(application) 
 
         viewModelScope.launch {
             try {
-                val result = auth.signup(userName, email, password)
-                if (result.isSuccessful) {
-                    _state.postValue(State.Authentication(true))
-                } else {
-                    _state.postValue(
-                        State.Error(
-                            result.exception?.message ?: "Error when logging in try again", false
-                        )
-                    )
-                }
+                auth.signup(userName, email, password)
+                    .addOnSuccessListener {
+                        _state.value = State.Authentication(true)
+                    }
+                    .addOnFailureListener {
+                        _state.value = State.Error(it.message, false)
+                    }
             } catch (e: CancellationException) {
-                _state.postValue(State.Error(e.message ?: "Fatal error", true))
+                _state.postValue(State.Error(e.message, true))
             }
 
         }
@@ -67,7 +64,7 @@ class SignupViewModel(application: Application) : AndroidViewModel(application) 
 
     sealed interface State {
         data class Authentication(val isAuthenticated: Boolean) : State
-        data class Error(val eMessage: String, val shutdown: Boolean) : State
+        data class Error(val eMessage: String?, val shutdown: Boolean) : State
         data class Notify(val nMessage: String) : State
     }
 }

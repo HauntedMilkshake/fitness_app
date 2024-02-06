@@ -40,12 +40,10 @@ class FirebaseAuthentication {
             }
         }
 
-    suspend fun login(email: String, password: String) =
-        auth.signInWithEmailAndPassword(email, password).also {
-            if (it.isSuccessful) {
-                init()
-                realm.createRealm()
-            }
+    suspend fun login(email: String, password: String) = auth.signInWithEmailAndPassword(email, password).also {
+            Log.d("SEX", "INVOCATION")
+            init()
+            realm.createRealm()
         }
 
 //    suspend fun onLoginSuccess() {

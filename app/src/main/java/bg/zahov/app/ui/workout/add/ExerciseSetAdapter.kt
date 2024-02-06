@@ -104,6 +104,6 @@ class ExerciseSetAdapter: RecyclerView.Adapter<RecyclerView.ViewHolder>(), Swipe
     }
 
     override fun onSwipe(position: Int) {
-        itemClickListener?.onDeleteSet(, position)
+//        itemClickListener?.onDeleteSet(, position)
     }
 }

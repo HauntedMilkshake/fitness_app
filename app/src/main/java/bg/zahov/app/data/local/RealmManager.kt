@@ -78,18 +78,10 @@ class RealmManager {
     }
 
     suspend fun deleteRealm() {
-//        withRealm {
-//            it.write {
-//                deleteAll()
-//            }
-//        }
-        withContext(Dispatchers.IO) {
-            try {
-                Realm.deleteRealm(realmConfig)
-            } catch (e: IllegalStateException) {
-                throw e
+        withRealm {
+            it.write {
+                deleteAll()
             }
-
         }
     }
 

@@ -55,6 +55,10 @@ class NewWorkoutTemplateFragment : Fragment() {
                         TODO("Not yet implemented")
                     }
 
+                    override fun onSetCheckClicked(item: ClickableSet, clickedView: View) {
+                        TODO("Not yet implemented")
+                    }
+
                     override fun onAddSet(exercisePosition: Int, set: ClickableSet) {
                         addWorkoutViewModel.addSet(exercisePosition, set)
                     }
@@ -78,7 +82,7 @@ class NewWorkoutTemplateFragment : Fragment() {
             }
 
             addWorkoutViewModel.currExercises.observe(viewLifecycleOwner) {
-                exerciseSetAdapter.updateItems(it)
+//                exerciseSetAdapter.updateItems(it)
             }
 
             save.setOnClickListener {

@@ -42,7 +42,7 @@ class EditProfileViewModel(application: MyApplication) : AndroidViewModel(applic
             }
 
             try {
-                repo.getEmail().collect() {
+                repo.getEmail().collect {
                     _email.postValue(it)
                 }
             } catch (e: CriticalDataNullException) {
@@ -53,24 +53,21 @@ class EditProfileViewModel(application: MyApplication) : AndroidViewModel(applic
 
     fun updateUsername(newUsername: String) {
         if (newUsername.isEmpty()) {
-            _state.postValue(State.Error("Username cannot be empty", false))
+            _state.value = State.Error("Username cannot be empty", false)
             return
         }
 
         viewModelScope.launch {
 
-            val result = repo.changeUserName(newUsername)
+            repo.changeUserName(newUsername)
+                .addOnSuccessListener {
+                    _name.postValue(newUsername)
+                    _state.value = State.Notify("Successfully updated username")
+                }
+                .addOnFailureListener {
+                    _state.value = State.Error("Successfully updated username", false)
+                }
 
-            if (result.isSuccessful) {
-                _name.postValue(newUsername)
-                _state.postValue(State.Error("Successfully updated username", false))
-            } else {
-                _state.postValue(
-                    State.Error(
-                        result.exception?.message ?: "Couldn't update username", false
-                    )
-                )
-            }
         }
     }
 
@@ -83,44 +80,50 @@ class EditProfileViewModel(application: MyApplication) : AndroidViewModel(applic
 
     fun unlockFields(password: String) {
         if (password.isEmpty() || password.length < 6) {
-            _state.postValue(State.Notify("Incorrect password!"))
+            _state.value = State.Error("Incorrect password!", false)
             return
         }
 
         viewModelScope.launch {
 
-            val result = repo.reauthenticate(password)
+            repo.reauthenticate(password)
+                .addOnSuccessListener {
+                    _state.postValue(State.Notify("Successfully reauthenticated!"))
+                    _isUnlocked.postValue(true)
+                }
+                .addOnFailureListener {
 
-            if (result.isSuccessful) {
-                _state.postValue(State.Notify("Successfully reauthenticated!"))
-                _isUnlocked.postValue(true)
-            }
-
+                }
         }
     }
 
     fun sendPasswordResetLink() {
         viewModelScope.launch {
 
-            val result = repo.passwordResetForLoggedUser()
-
-            if (result.isSuccessful) {
-                _state.postValue(State.Notify("Successfully updated password"))
-            } else {
-                _state.postValue(State.Error("Failed to send password reset link", false))
-            }
+            repo.passwordResetForLoggedUser()
+                .addOnSuccessListener {
+                    _state.postValue(State.Notify("Successfully updated password"))
+                }
+                .addOnFailureListener {
+                    _state.postValue(State.Error("Failed to send password reset link", false))
+                }
         }
     }
 
     fun updatePassword(newPassword: String) {
         if (newPassword.isEmpty() && newPassword.length < 6) {
-            _state.postValue(State.Error("Password must be atleast 6 characters long", false))
+            _state.value = State.Error("Password must be atleast 6 characters long", false)
             return
         }
 
         viewModelScope.launch {
             repo.updatePassword(newPassword)
-            _state.postValue(State.Notify("Successfully updated password"))
+                .addOnSuccessListener {
+                    _state.postValue(State.Notify("Successfully updated password"))
+                }
+                .addOnFailureListener {
+                    _state.postValue(State.Error("Failed to update password", false))
+                }
         }
     }
 

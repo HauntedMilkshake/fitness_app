@@ -18,6 +18,7 @@ class LoginViewModel(application: Application) : AndroidViewModel(application) {
     val state: LiveData<State>
         get() = _state
 
+
     fun login(email: String, password: String) {
         if (email.isEmpty() || password.isEmpty()) {
             _state.value = State.Error("Don't leave empty fields", false)
@@ -31,12 +32,13 @@ class LoginViewModel(application: Application) : AndroidViewModel(application) {
 
         viewModelScope.launch {
             try {
-                val loginTask = auth.login(email, password)
-                if (loginTask.isSuccessful) {
-                    _state.postValue(State.Authenticated(true))
-                } else {
-                    _state.postValue(State.Error(loginTask.exception?.message, false))
-                }
+                auth.login(email, password)
+                    .addOnSuccessListener {
+                        _state.value = State.Authenticated(true)
+                    }
+                    .addOnFailureListener {
+                        _state.value = State.Error(it.message, false)
+                    }
             } catch (e: IllegalArgumentException) {
                 _state.postValue(State.Error("There was a failure with initialization", true))
 
@@ -56,12 +58,13 @@ class LoginViewModel(application: Application) : AndroidViewModel(application) {
         }
 
         viewModelScope.launch {
-            val result = auth.passwordResetByEmail(email)
-            _state.postValue(
-                if (result.isSuccessful) State.Notify("Password link sent successfully") else State.Notify(
-                    "Couldn't send password link"
-                )
-            )
+            auth.passwordResetByEmail(email)
+                .addOnSuccessListener {
+                    _state.value = State.Notify("Rest password email has been sent")
+                }
+                .addOnFailureListener {
+                    _state.value = State.Error("Couldn't send reset password email!", false)
+                }
         }
     }
 
