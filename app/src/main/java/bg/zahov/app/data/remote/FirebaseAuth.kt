@@ -1,6 +1,5 @@
 package bg.zahov.app.data.remote
 
-import android.util.Log
 import bg.zahov.app.data.exception.AuthenticationException
 import bg.zahov.app.data.exception.CriticalDataNullException
 import bg.zahov.app.data.exception.DeleteRealmException
@@ -13,7 +12,6 @@ import com.google.firebase.auth.FirebaseAuthException
 import com.google.firebase.auth.FirebaseAuthInvalidUserException
 import com.google.firebase.auth.FirebaseAuthRecentLoginRequiredException
 import kotlinx.coroutines.Dispatchers
-import kotlinx.coroutines.flow.flow
 import kotlinx.coroutines.withContext
 import java.lang.IllegalStateException
 
@@ -31,25 +29,12 @@ class FirebaseAuthentication {
     private val firestore = FirestoreManager.getInstance()
     private val realm = RealmManager.getInstance()
 
+    //username could be removed
     suspend fun signup(username: String, email: String, password: String) =
-        auth.createUserWithEmailAndPassword(email, password).also {
-            if (it.isSuccessful) {
-                init()
-                firestore.createFirestore(username)
-                realm.createRealm()
-            }
-        }
+        withContext(Dispatchers.IO) { auth.createUserWithEmailAndPassword(email, password) }
 
-    suspend fun login(email: String, password: String) = auth.signInWithEmailAndPassword(email, password).also {
-            Log.d("SEX", "INVOCATION")
-            init()
-            realm.createRealm()
-        }
-
-//    suspend fun onLoginSuccess() {
-//        init()
-//        realm.createRealm()
-//    }
+    suspend fun login(email: String, password: String) =
+        withContext(Dispatchers.IO) { auth.signInWithEmailAndPassword(email, password) }
 
     suspend fun logout() {
         resetResources()
@@ -86,11 +71,17 @@ class FirebaseAuthentication {
 
     fun isAuthenticated() = auth.currentUser != null
 
-    fun init() {
-        Log.d("init", "${auth.currentUser?.uid}")
+    suspend fun init(username: String? = null) {
+
         auth.currentUser?.uid?.let {
             firestore.initUser(it)
         }
+
+        username?.let {
+            firestore.createFirestore(username)
+        }
+
+        realm.createRealm()
     }
 
     suspend fun updatePassword(newPassword: String): Task<Void> = withContext(Dispatchers.IO) {
@@ -110,10 +101,9 @@ class FirebaseAuthentication {
             auth.currentUser?.reauthenticate(EmailAuthProvider.getCredential(it, password))
         } ?: Tasks.forResult(null)
     }
+
     suspend fun getEmail() = withContext(Dispatchers.IO) {
-        flow<String> {
-            auth.currentUser?.email ?: throw CriticalDataNullException("NO EMAIL FOUND")
-        }
+        auth.currentUser?.email ?: throw CriticalDataNullException("NO EMAIL FOUND")
     }
 }
 

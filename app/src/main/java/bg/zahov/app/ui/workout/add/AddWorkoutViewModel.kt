@@ -1,6 +1,7 @@
 package bg.zahov.app.ui.workout.add
 
 import android.app.Application
+import android.util.Log
 import androidx.lifecycle.AndroidViewModel
 import androidx.lifecycle.LiveData
 import androidx.lifecycle.MutableLiveData
@@ -60,13 +61,18 @@ class AddWorkoutViewModel(application: Application) : AndroidViewModel(applicati
         val captured = _currExercises.value?.toMutableList() ?: mutableListOf()
         captured.add(newExercise.exercise)
         _currExercises.value = captured
+        captured.forEach {
+            Log.d("ADD", it.name)
+        }
     }
 
     fun removeExercise(position: Int) {
         val captured = _currExercises.value?.toMutableList() ?: mutableListOf()
-        captured.removeAt(position)
+        if(captured.isNotEmpty()) captured.removeAt(position)
         _currExercises.value = captured
-
+        captured.forEach {
+            Log.d("DELETE", it.name)
+        }
     }
 
     fun addSet(ePosition: Int, set: ClickableSet) {

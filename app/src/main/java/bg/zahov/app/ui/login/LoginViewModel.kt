@@ -7,7 +7,10 @@ import androidx.lifecycle.MutableLiveData
 import androidx.lifecycle.viewModelScope
 import bg.zahov.app.getUserProvider
 import bg.zahov.app.util.isEmail
+import kotlinx.coroutines.CoroutineScope
+import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.launch
+import kotlinx.coroutines.tasks.await
 import java.lang.IllegalArgumentException
 
 class LoginViewModel(application: Application) : AndroidViewModel(application) {
@@ -32,9 +35,12 @@ class LoginViewModel(application: Application) : AndroidViewModel(application) {
 
         viewModelScope.launch {
             try {
-                auth.login(email, password)
-                    .addOnSuccessListener {
+                 auth.login(email, password)
+                     .addOnSuccessListener {
                         _state.value = State.Authenticated(true)
+                        CoroutineScope(Dispatchers.IO).launch {
+                            auth.initDataSources()
+                        }
                     }
                     .addOnFailureListener {
                         _state.value = State.Error(it.message, false)

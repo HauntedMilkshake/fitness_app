@@ -87,7 +87,13 @@ class SignupFragment : Fragment() {
                 if (it.authenticated) {
                     findNavController().navigate(R.id.signup_to_loading)
                 } else {
-                    Toast.makeText(context, it.errorMessage, Toast.LENGTH_SHORT).show()
+                    it.errorMessage?.let { message ->
+                        showToast(message)
+                    }
+                    it.notifyMessage?.let { message ->
+                        showToast(message)
+                    }
+
                 }
             }
 
@@ -100,5 +106,11 @@ class SignupFragment : Fragment() {
     override fun onDestroyView() {
         super.onDestroyView()
         _binding = null
+    }
+
+    fun showToast(message: String?) {
+        message?.let {
+            Toast.makeText(context, it, Toast.LENGTH_SHORT).show()
+        }
     }
 }

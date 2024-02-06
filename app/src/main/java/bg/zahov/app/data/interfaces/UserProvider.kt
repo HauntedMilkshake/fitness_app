@@ -15,10 +15,10 @@ interface UserProvider {
     suspend fun passwordResetByEmail(email: String): Task<Void>
     suspend fun passwordResetForLoggedUser(): Task<Void>
     fun isAuthenticated(): Boolean
-    suspend fun initDataSources()
+    suspend fun initDataSources(username: String? = null)
     suspend fun updatePassword(newPassword: String): Task<Void>
     suspend fun updateEmail(newEmail: String): Task<Void>
     suspend fun reauthenticate(password: String): Task<Void>
-    suspend fun getEmail(): Flow<String>
+    suspend fun getEmail(): String
 
 }

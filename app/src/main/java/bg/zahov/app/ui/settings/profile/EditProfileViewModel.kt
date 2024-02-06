@@ -1,16 +1,18 @@
 package bg.zahov.app.ui.settings.profile
 
+import android.app.Application
 import androidx.lifecycle.AndroidViewModel
 import androidx.lifecycle.LiveData
 import androidx.lifecycle.MutableLiveData
 import androidx.lifecycle.viewModelScope
 import bg.zahov.app.MyApplication
 import bg.zahov.app.data.exception.CriticalDataNullException
+import bg.zahov.app.getUserProvider
 import kotlinx.coroutines.launch
 
-class EditProfileViewModel(application: MyApplication) : AndroidViewModel(application) {
+class EditProfileViewModel(application: Application) : AndroidViewModel(application) {
     private val repo by lazy {
-        application.userProvider
+        application.getUserProvider()
     }
     private val _state = MutableLiveData<State>()
     val state: LiveData<State>
@@ -42,9 +44,7 @@ class EditProfileViewModel(application: MyApplication) : AndroidViewModel(applic
             }
 
             try {
-                repo.getEmail().collect {
-                    _email.postValue(it)
-                }
+                _email.postValue(repo.getEmail())
             } catch (e: CriticalDataNullException) {
                 _state.postValue(State.Error(e.message, true))
             }
@@ -90,9 +90,6 @@ class EditProfileViewModel(application: MyApplication) : AndroidViewModel(applic
                 .addOnSuccessListener {
                     _state.postValue(State.Notify("Successfully reauthenticated!"))
                     _isUnlocked.postValue(true)
-                }
-                .addOnFailureListener {
-
                 }
         }
     }

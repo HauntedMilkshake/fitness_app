@@ -80,6 +80,8 @@ class EditProfileFragment : Fragment() {
     }
 
     private fun showToast(message: String?) {
-        Toast.makeText(requireContext(), message, Toast.LENGTH_SHORT).show()
+        message?.let {
+            Toast.makeText(requireContext(), message, Toast.LENGTH_SHORT).show()
+        }
     }
 }

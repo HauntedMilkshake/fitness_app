@@ -31,7 +31,7 @@ class AuthenticationImpl : Authentication {
 
     override fun isAuthenticated() = auth.isAuthenticated()
 
-    override suspend fun initDataSources() = auth.init()
+    override suspend fun initDataSources(username: String?) = auth.init(username)
 
     override suspend fun updatePassword(newPassword: String) = auth.updatePassword(newPassword)
 
@@ -39,5 +39,5 @@ class AuthenticationImpl : Authentication {
 
     override suspend fun reauthenticate(password: String) = auth.reauthenticate(password)
 
-    override suspend fun getEmail() = auth.getEmail()
+    override suspend fun getEmail(): String = auth.getEmail()
 }

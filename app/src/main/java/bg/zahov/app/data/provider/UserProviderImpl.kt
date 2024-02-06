@@ -39,12 +39,12 @@ class UserProviderImpl: UserProvider {
 
     override fun isAuthenticated(): Boolean = auth.isAuthenticated()
 
-    override suspend fun initDataSources() = auth.initDataSources()
+    override suspend fun initDataSources(username: String?) = auth.initDataSources(username)
 
     override suspend fun updatePassword(newPassword: String): Task<Void> = auth.updatePassword(newPassword)
 
     override suspend fun updateEmail(newEmail: String): Task<Void> = auth.updateEmail(newEmail)
 
     override suspend fun reauthenticate(password: String): Task<Void> = auth.reauthenticate(password)
-    override suspend fun getEmail(): Flow<String> = auth.getEmail()
+    override suspend fun getEmail(): String = auth.getEmail()
 }

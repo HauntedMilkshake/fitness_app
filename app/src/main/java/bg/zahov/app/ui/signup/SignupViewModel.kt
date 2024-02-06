@@ -8,6 +8,8 @@ import androidx.lifecycle.viewModelScope
 import bg.zahov.app.getUserProvider
 import bg.zahov.app.util.isEmail
 import kotlinx.coroutines.CancellationException
+import kotlinx.coroutines.CoroutineScope
+import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.launch
 
 class SignupViewModel(application: Application) : AndroidViewModel(application) {
@@ -47,6 +49,9 @@ class SignupViewModel(application: Application) : AndroidViewModel(application) 
                 auth.signup(userName, email, password)
                     .addOnSuccessListener {
                         _state.value = State.Authentication(true)
+                        CoroutineScope(Dispatchers.IO).launch {
+                            auth.initDataSources(userName)
+                        }
                     }
                     .addOnFailureListener {
                         _state.value = State.Error(it.message, false)

@@ -25,6 +25,7 @@ class ExerciseSetAdapter: RecyclerView.Adapter<RecyclerView.ViewHolder>(), Swipe
     var itemClickListener: ItemClickListener<Exercise>? = null
 
     override fun getItemViewType(position: Int): Int {
+        //nqmam ideq kak tova stava currently e prosto filler :)
         return if(position == 0) VIEW_TYPE_EXERCISE else VIEW_TYPE_SETS
     }
 
