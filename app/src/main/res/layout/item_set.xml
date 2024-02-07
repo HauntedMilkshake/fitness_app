@@ -2,17 +2,19 @@
 <androidx.constraintlayout.widget.ConstraintLayout xmlns:android="http://schemas.android.com/apk/res/android"
     xmlns:app="http://schemas.android.com/apk/res-auto"
     android:layout_width="match_parent"
-    android:layout_height="match_parent">
+    android:layout_height="wrap_content"
+    android:paddingTop="3dp">
 
     <com.google.android.material.textview.MaterialTextView
         android:id="@+id/set_number"
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
-        android:layout_marginStart="5dp"
+        android:layout_marginStart="20dp"
         android:textColor="@color/blue_text"
         android:textSize="12sp"
+        app:layout_constraintBottom_toBottomOf="@+id/first_input_field"
         app:layout_constraintStart_toStartOf="parent"
-        app:layout_constraintTop_toTopOf="parent" />
+        app:layout_constraintTop_toTopOf="@+id/first_input_field" />
 
     <com.google.android.material.textview.MaterialTextView
         android:id="@+id/previous"
@@ -21,14 +23,15 @@
         android:layout_marginStart="50dp"
         android:textColor="@color/white"
         android:textSize="12sp"
+        app:layout_constraintBottom_toBottomOf="@+id/first_input_field"
         app:layout_constraintStart_toEndOf="@id/set_number"
-        app:layout_constraintTop_toTopOf="@id/set_number" />
+        app:layout_constraintTop_toTopOf="@+id/first_input_field" />
 
     <com.google.android.material.textfield.TextInputLayout
         android:id="@+id/first_input_field"
-        android:layout_width="70dp"
+        android:layout_width="75dp"
         android:layout_height="wrap_content"
-        android:layout_marginStart="70dp"
+        android:layout_marginStart="50dp"
         app:boxCornerRadiusBottomEnd="10dp"
         app:boxCornerRadiusBottomStart="10dp"
         app:boxCornerRadiusTopEnd="10dp"
@@ -36,24 +39,25 @@
         app:boxStrokeColor="@color/background"
         app:boxStrokeWidth="0dp"
         app:boxStrokeWidthFocused="0dp"
-        app:hintTextColor="@color/background"
+        app:cursorColor="@color/blue_text"
+        app:layout_constraintBottom_toBottomOf="parent"
         app:layout_constraintStart_toEndOf="@id/previous"
-        app:layout_constraintTop_toTopOf="@id/set_number">
+        app:layout_constraintTop_toTopOf="parent">
 
         <com.google.android.material.textfield.TextInputEditText
             android:id="@+id/first_input_field_text"
             android:layout_width="match_parent"
-            android:layout_height="wrap_content"
+            android:layout_height="35dp"
             android:backgroundTint="@color/input_field_background"
-            android:inputType="numberDecimal" />
+            android:inputType="numberDecimal"
+            android:textColor="@color/white" />
     </com.google.android.material.textfield.TextInputLayout>
 
     <com.google.android.material.textfield.TextInputLayout
         android:id="@+id/second_input_field"
-        android:layout_width="70dp"
+        android:layout_width="75dp"
         android:layout_height="wrap_content"
-        android:layout_marginStart="50dp"
-        android:layout_marginEnd="30dp"
+        android:layout_marginEnd="10dp"
         app:boxCornerRadiusBottomEnd="10dp"
         app:boxCornerRadiusBottomStart="10dp"
         app:boxCornerRadiusTopEnd="10dp"
@@ -61,23 +65,25 @@
         app:boxStrokeColor="@color/background"
         app:boxStrokeWidth="0dp"
         app:boxStrokeWidthFocused="0dp"
-        app:hintTextColor="@color/background"
-        app:layout_constraintEnd_toEndOf="@id/check"
+        app:cursorColor="@color/blue_text"
+        app:layout_constraintBottom_toBottomOf="@+id/first_input_field"
+        app:layout_constraintEnd_toStartOf="@+id/check"
         app:layout_constraintStart_toEndOf="@id/first_input_field"
-        app:layout_constraintTop_toTopOf="@id/set_number">
+        app:layout_constraintTop_toTopOf="@+id/first_input_field">
 
         <com.google.android.material.textfield.TextInputEditText
             android:id="@+id/second_input_field_text"
             android:layout_width="match_parent"
-            android:layout_height="wrap_content"
+            android:layout_height="35dp"
             android:backgroundTint="@color/input_field_background"
-            android:inputType="numberDecimal" />
+            android:inputType="numberDecimal"
+            android:textColor="@color/blue_text" />
     </com.google.android.material.textfield.TextInputLayout>
 
     <com.google.android.material.imageview.ShapeableImageView
         android:id="@+id/check"
-        android:layout_width="wrap_content"
-        android:layout_height="wrap_content"
+        android:layout_width="27dp"
+        android:layout_height="27dp"
         android:layout_marginEnd="5dp"
         android:src="@drawable/ic_check"
         app:layout_constraintBottom_toBottomOf="@+id/second_input_field"
