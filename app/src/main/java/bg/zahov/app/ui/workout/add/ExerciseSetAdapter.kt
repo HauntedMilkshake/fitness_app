@@ -6,7 +6,7 @@ import android.view.LayoutInflater
 import android.view.MotionEvent
 import android.view.View
 import android.view.ViewGroup
-import androidx.recyclerview.widget.DiffUtil
+import androidx.recyclerview.widget.ItemTouchHelper
 import androidx.recyclerview.widget.RecyclerView
 import bg.zahov.app.data.model.ClickableSet
 import bg.zahov.app.data.model.Exercise
@@ -145,7 +145,7 @@ class ExerciseSetAdapter : RecyclerView.Adapter<RecyclerView.ViewHolder>() {
         }
     }
 
-    inner class SetViewHolder(view: View) : RecyclerView.ViewHolder(view), SwipeGesture.OnSwipeListener {
+    inner class SetViewHolder(view: View) : RecyclerView.ViewHolder(view){
         private val setIndicator = view.findViewById<MaterialTextView>(R.id.set_number)
         private val previous = view.findViewById<MaterialTextView>(R.id.previous)
         private val firstInputLayout = view.findViewById<TextInputLayout>(R.id.first_input_field)
@@ -168,71 +168,81 @@ class ExerciseSetAdapter : RecyclerView.Adapter<RecyclerView.ViewHolder>() {
                 //TODO(Change background and play dopamine inducing animation)
             }
 
+            val swipeGesture = object : SwipeGesture() {
+                override fun onSwiped(viewHolder: RecyclerView.ViewHolder, direction: Int) {
+                    super.onSwiped(viewHolder, direction)
+
+                }
+            }
+
             val gestureDetector =
-                GestureDetector(itemView.context, object : GestureDetector.OnGestureListener {
-                    override fun onDown(e: MotionEvent): Boolean {
-                        TODO("Not yet implemented")
-                    }
-
-                    override fun onShowPress(e: MotionEvent) {
-                        TODO("Not yet implemented")
-                    }
-
-                    override fun onSingleTapUp(e: MotionEvent): Boolean {
-                        TODO("Not yet implemented")
-                    }
-
-                    override fun onScroll(
-                        e1: MotionEvent?,
-                        e2: MotionEvent,
-                        distanceX: Float,
-                        distanceY: Float
-                    ): Boolean {
-                        val diffX = e2.x - e1!!.x
-
-                        if (abs(diffX) > (itemView.width * 0.2f).toInt()) {
-                            if (diffX > 0) {
-                            } else {
-                                // LQV SWIPE
-                            }
-                            return true
-                        }
-                        return false
-                    }
-
-                    override fun onLongPress(e: MotionEvent) {
-                        TODO("Not yet implemented")
-                    }
-
+                GestureDetector(itemView.context, object : GestureDetector.SimpleOnGestureListener() {
                     override fun onFling(
                         e1: MotionEvent?,
                         e2: MotionEvent,
                         velocityX: Float,
                         velocityY: Float
                     ): Boolean {
-                        TODO("Not yet implemented")
-                    }
+                        Log.d("ONFLING", "INSIDE ON FLING")
+                        val SWIPE_THRESHOLD = 400
+                        val SWIPE_VELOCITY_THRESHOLD = 100
+                        try {
+                            if (e1 != null) {
+                                val diffY = e2.y - e1.y
+                                val diffX = e2.x - e1.x
 
+                                if (abs(diffX) >abs(diffY) &&
+                                    abs(diffX) > SWIPE_THRESHOLD &&
+                                    abs(velocityX) > SWIPE_VELOCITY_THRESHOLD
+                                ) {
+                                    if (diffX > 0) {
+//                                        for (i in position downTo 0) {
+//                                            if(items[i] is ExerciseEntry) {
+//                                                Log.d("ON SWIPE", "EXERCISE IS FOUND")
+//                                                itemClickListener?.onDeleteSet((items[i] as ExerciseEntry).exercise , (items[position] as SetEntry).set)
+//                                            }
+//                                        }
+                                        // Swiping right (not implemented in this example)
+                                    } else {
+                                        for (i in position downTo 0) {
+                                            if(items[i] is ExerciseEntry) {
+                                                Log.d("ON SWIPE", "EXERCISE IS FOUND")
+                                                itemClickListener?.onDeleteSet((items[i] as ExerciseEntry).exercise , (items[position] as SetEntry).set)
+                                            }
+                                        }
+                                        // Swiping left
+                                        // Perform deletion here
+                                        // For example:
+                                        // deleteItem(adapterPosition)
+                                    }
+                                    return true
+                                }
+                            }
+                        } catch (exception: Exception) {
+                            exception.printStackTrace()
+                        }
+
+                        return false
+                    }
                 })
             itemView.setOnTouchListener { _, event ->
                 gestureDetector.onTouchEvent(event)
             }
         }
-
-        override fun onSwipe(position: Int) {
-            if(position < 1 || position >= items.size) {
-                return
-            }
-            for (i in position downTo 0) {
-                if(items[i] is ExerciseEntry) {
-                    Log.d("ON SWIPE", "EXERCISE IS FOUND")
-                    itemClickListener?.onDeleteSet((items[i] as ExerciseEntry).exercise , (items[position] as SetEntry).set)
-                }
-            }
-
-        }
     }
 
+//            override fun onSwipe(position: Int) {
+//            if(position < 1 || position >= items.size) {
+//                return
+//            }
+//            for (i in position downTo 0) {
+//                if(items[i] is ExerciseEntry) {
+//                    Log.d("ON SWIPE", "EXERCISE IS FOUND")
+//                    itemClickListener?.onDeleteSet((items[i] as ExerciseEntry).exercise , (items[position] as SetEntry).set)
+//                }
+//            }
+//
+//        }
     interface ItemClickListener<T> {
         fun onOptionsClicked(item: Exercise, clickedView: View)
         fun onSetClicked(item: ClickableSet, clickedView: View)

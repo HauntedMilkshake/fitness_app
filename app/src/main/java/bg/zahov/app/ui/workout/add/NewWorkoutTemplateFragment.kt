@@ -67,6 +67,7 @@ class NewWorkoutTemplateFragment : Fragment() {
                     }
 
                     override fun onDeleteSet(item: Exercise, set: ClickableSet) {
+                        Log.d("SWIPE", "FRAGMENT")
                         addWorkoutViewModel.removeSet(item, set.set)
 
                     }
