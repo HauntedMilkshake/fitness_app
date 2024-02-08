@@ -6,14 +6,20 @@ import android.util.Log
 import android.view.LayoutInflater
 import android.view.View
 import android.view.ViewGroup
+import android.widget.Toast
 import androidx.core.os.bundleOf
 import androidx.fragment.app.Fragment
 import androidx.fragment.app.viewModels
+import androidx.lifecycle.map
 import androidx.navigation.fragment.findNavController
+import androidx.recyclerview.widget.ItemTouchHelper
 import androidx.recyclerview.widget.LinearLayoutManager
+import androidx.recyclerview.widget.RecyclerView
+import bg.zahov.app.data.model.AddTemplateWorkoutUiMapper
 import bg.zahov.app.data.model.ClickableSet
 import bg.zahov.app.data.model.Exercise
 import bg.zahov.app.data.model.Workout
+import bg.zahov.app.util.SwipeGesture
 import bg.zahov.app.util.applyScaleAnimation
 import bg.zahov.fitness.app.R
 import bg.zahov.fitness.app.databinding.FragmentNewWorkoutTemplateBinding
@@ -47,6 +53,7 @@ class NewWorkoutTemplateFragment : Fragment() {
                 findNavController().navigate(R.id.create_workout_template_to_workout)
             }
 
+
             val exerciseSetAdapter = ExerciseSetAdapter().apply {
                 itemClickListener = object : ExerciseSetAdapter.ItemClickListener<WorkoutEntry> {
                     override fun onOptionsClicked(item: Exercise, clickedView: View) {
@@ -65,19 +72,34 @@ class NewWorkoutTemplateFragment : Fragment() {
                         Log.d("ONADDSET", "FRAG,EMT")
                         addWorkoutViewModel.addSet(item, set.set)
                     }
-
+                }
+                swipeActionListener = object: ExerciseSetAdapter.SwipeActionListener {
                     override fun onDeleteSet(item: Exercise, set: ClickableSet) {
-                        Log.d("SWIPE", "FRAGMENT")
                         addWorkoutViewModel.removeSet(item, set.set)
-
                     }
                 }
+
             }
 
             exercisesRecyclerView.apply {
                 adapter = exerciseSetAdapter
                 layoutManager = LinearLayoutManager(requireContext())
             }
+
+//            val swipeGesture = object : SwipeGesture() {
+//                override fun onSwiped(viewHolder: RecyclerView.ViewHolder, direction: Int) {
+//                    when(direction){
+//                        ItemTouchHelper.LEFT -> {
+//                            if(viewHolder is  ExerciseSetAdapter.SetViewHolder && viewHolder.itemViewType == R.layout.item_set) {
+//                                viewHolder.deleteSet()
+//                            }
+//                        }
+//                    }
+//                }
+//            }
+//            val itemTouchHelper = ItemTouchHelper(swipeGesture)
+//            itemTouchHelper.attachToRecyclerView(exercisesRecyclerView)
+
 
             addExercise.setOnClickListener {
                 findNavController().navigate(
@@ -90,10 +112,16 @@ class NewWorkoutTemplateFragment : Fragment() {
                 exerciseSetAdapter.updateItems(it)
             }
 
+            addWorkoutViewModel.state.map { AddTemplateWorkoutUiMapper.map(it) }.observe(viewLifecycleOwner) {
+                showToast(it.eMessage)
+                if(showToast(it.nMessage)) {
+                    findNavController().navigate(R.id.create_workout_template_to_workout)
+                }
+            }
+
             save.setOnClickListener {
                 it.applyScaleAnimation()
-//                addWorkoutViewModel.addWorkout(workoutNameFieldText.text.toString(), )
-//                findNavController().navigate(R.id.create_workout_template_to_workout)
+                addWorkoutViewModel.addWorkout(workoutNameFieldText.text.toString(), )
             }
 
             cancel.setOnClickListener {
@@ -101,6 +129,13 @@ class NewWorkoutTemplateFragment : Fragment() {
                 findNavController().navigate(R.id.create_workout_template_to_workout)
             }
         }
+    }
+
+    fun showToast(message: String?): Boolean {
+        return message?.let {
+            Toast.makeText(context, it, Toast.LENGTH_SHORT).show()
+            true
+        } ?: false
     }
 
     override fun onDestroy() {

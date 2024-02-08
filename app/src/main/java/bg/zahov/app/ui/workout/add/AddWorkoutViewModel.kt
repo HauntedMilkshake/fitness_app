@@ -31,24 +31,49 @@ class AddWorkoutViewModel(application: Application) : AndroidViewModel(applicati
     val currExercises: LiveData<List<Exercise>>
         get() = _currExercises
 
-    fun addWorkout(name: String, ids: List<String>) {
-        if (ids.isEmpty()) {
-            _state.value = State.Error("Cannot create workout template without exercises!")
-            return
+    lateinit var templates: List<Workout>
+    init {
+        viewModelScope.launch {
+            repo.getTemplateWorkouts().collect {
+                templates = it
+            }
+        }
+    }
+
+    fun addWorkout(name: String) {
+        if(name.isEmpty()) {
+            _state.value = State.Error("Cannot create a workout template without a name!")
         }
 
-        viewModelScope.launch {
-            repo.addWorkout(
-                Workout(
-                    name = name,
-                    duration = 0.0,
-                    date = LocalDate.now()
-                        .format(DateTimeFormatter.ofPattern("dd-MM-yyyy", Locale.getDefault())),
-                    isTemplate = true,
-                    exercises = emptyList(),
-                    ids = ids
-                )
-            )
+        if(templates.map { it.name }.contains(name)) {
+            _state.value = State.Error("Each workout must have a unique name!")
+        }
+        _currExercises.value?.let {exercises ->
+            if (exercises .isEmpty()) {
+                _state.value = State.Error("Each workout must have a unique name!")
+                return
+            } else {
+                viewModelScope.launch {
+                    repo.addWorkout(
+                        Workout(
+                            name = name,
+                            duration = 0.0,
+                            date = LocalDate.now()
+                                .format(
+                                    DateTimeFormatter.ofPattern(
+                                        "dd-MM-yyyy",
+                                        Locale.getDefault()
+                                    )
+                                ),
+                            isTemplate = true,
+                            exercises = emptyList(),
+                            ids = exercises.map{ it.name }
+                        )
+                    )
+
+                    _state.postValue(State.Success("Template workout $name successfully created!"))
+                }
+            }
         }
     }
 
@@ -79,10 +104,12 @@ class AddWorkoutViewModel(application: Application) : AndroidViewModel(applicati
     fun addSet(exercise: Exercise, set: Sets) {
         val exercises = _currExercises.value?.toMutableList() ?: emptyList()
         val foundExercise = exercises.find { it == exercise }
+        Log.d("ADDING SET", "OLD SET SIZE ${foundExercise?.sets?.size}")
         foundExercise?.let {
             val newSets = it.sets.toMutableList()
             newSets.add(set)
             it.sets = newSets
+            Log.d("ADDING SET", "NEW SET SIZE ${foundExercise.sets.size}")
         }
         _currExercises.value = exercises
     }
@@ -90,10 +117,12 @@ class AddWorkoutViewModel(application: Application) : AndroidViewModel(applicati
     fun removeSet(exercise: Exercise, set: Sets) {
         val exercises = _currExercises.value?.toMutableList() ?: emptyList()
         val foundExercise = exercises.find { it == exercise }
+        Log.d("REMOVING SET", "OLD SET SIZE ${foundExercise?.sets?.size}")
         foundExercise?.let {
             if (it.sets.isEmpty()) {
                 val newSets = it.sets.toMutableList()
                 newSets.remove(set)
+                Log.d("REMOVING SET", "NEW SET SIZE ${foundExercise.sets.size}")
                 it.sets = newSets
             }
         }
@@ -107,6 +136,6 @@ class AddWorkoutViewModel(application: Application) : AndroidViewModel(applicati
 
     sealed interface State {
         data class Error(val eMessage: String) : State
-        data class Notify(val nMessage: String) : State
+        data class Success(val nMessage: String) : State
     }
 }
