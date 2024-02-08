@@ -5,10 +5,12 @@ import android.view.View
 import androidx.activity.viewModels
 import androidx.appcompat.app.AppCompatActivity
 import androidx.fragment.app.FragmentActivity
+import androidx.lifecycle.map
 import androidx.navigation.findNavController
 import androidx.navigation.ui.AppBarConfiguration
 import androidx.navigation.ui.navigateUp
 import androidx.navigation.ui.setupWithNavController
+import bg.zahov.app.data.model.AuthUiModelMapper
 import bg.zahov.fitness.app.R
 import bg.zahov.fitness.app.databinding.ActivityMainBinding
 import com.google.android.material.bottomnavigation.BottomNavigationView
@@ -26,15 +28,11 @@ class MainActivity : AppCompatActivity() {
         setContentView(binding.root)
 
         val navController = findNavController(R.id.nav_host_fragment)
-        val bottomNav = findViewById<BottomNavigationView>(R.id.bottom_navigation)
 
-        bottomNav?.setupWithNavController(navController)
+        binding.bottomNavigation.setupWithNavController(navController)
 
-        authViewModel.isAuthenticated.observe(this) { isAuthenticated ->
-            val currentDestinationId = navController.currentDestination?.id
-            if (isAuthenticated && currentDestinationId != R.id.welcome || currentDestinationId != R.id.signup || currentDestinationId != R.id.log_in) {
-                authViewModel.initiateSync(applicationContext)
-            }
+        authViewModel.state.map { AuthUiModelMapper.map(it) }.observe(this) {
+            if (it.isAuthenticated) navController.navigate(R.id.welcome_to_loading)
         }
     }
 
@@ -46,13 +44,13 @@ class MainActivity : AppCompatActivity() {
 }
 
 fun FragmentActivity.hideBottomNav() {
-    findViewById<BottomNavigationView>(R.id.bottom_navigation).apply {
+    findViewById<BottomNavigationView>(R.id.bottom_navigation)?.apply {
         visibility = View.GONE
     }
 }
 
 fun FragmentActivity.showBottomNav() {
-    findViewById<BottomNavigationView>(R.id.bottom_navigation).apply {
+    findViewById<BottomNavigationView>(R.id.bottom_navigation)?.apply {
         visibility = View.VISIBLE
     }
 }
