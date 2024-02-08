@@ -2,7 +2,8 @@
 <androidx.constraintlayout.widget.ConstraintLayout xmlns:android="http://schemas.android.com/apk/res/android"
     xmlns:app="http://schemas.android.com/apk/res-auto"
     android:layout_width="match_parent"
-    android:layout_height="match_parent"
+    android:layout_height="wrap_content"
+    android:background="@drawable/template_workout_border"
     android:id="@+id/template_layout">
     <com.google.android.material.textview.MaterialTextView
         android:id="@+id/workout_title"
@@ -10,7 +11,7 @@
         android:layout_height="wrap_content"
         android:textColor="@color/white"
         android:textStyle="bold"
-        android:textSize="12sp"
+        android:textSize="22sp"
         android:layout_marginStart="10dp"
         android:layout_marginTop="10dp"
         app:layout_constraintStart_toStartOf="parent"
@@ -23,8 +24,8 @@
         android:textColor="@color/white"
         android:textSize="12sp"
         android:layout_marginTop="5dp"
-        app:layout_constraintTop_toBottomOf="@id/last_performed"
-        app:layout_constraintStart_toStartOf="@id/last_performed"/>
+        app:layout_constraintTop_toBottomOf="@id/workout_title"
+        app:layout_constraintStart_toStartOf="@id/workout_title"/>
     
     <com.google.android.material.imageview.ShapeableImageView
         android:id="@+id/settings"
@@ -41,7 +42,7 @@
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
         android:textColor="@color/text"
-        android:textSize="12sp"
+        android:textSize="20sp"
         android:layout_marginTop="5dp"
         app:layout_constraintTop_toBottomOf="@id/last_performed"
         app:layout_constraintStart_toStartOf="@id/last_performed"/>

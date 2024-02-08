@@ -1,6 +1,8 @@
 package bg.zahov.app.ui.workout.add
 
 import android.os.Bundle
+import android.text.Editable
+import android.text.TextWatcher
 import android.transition.TransitionInflater
 import android.util.Log
 import android.view.LayoutInflater
@@ -8,18 +10,16 @@ import android.view.View
 import android.view.ViewGroup
 import android.widget.Toast
 import androidx.core.os.bundleOf
+import androidx.core.widget.addTextChangedListener
+import androidx.core.widget.doOnTextChanged
 import androidx.fragment.app.Fragment
 import androidx.fragment.app.viewModels
 import androidx.lifecycle.map
 import androidx.navigation.fragment.findNavController
-import androidx.recyclerview.widget.ItemTouchHelper
 import androidx.recyclerview.widget.LinearLayoutManager
-import androidx.recyclerview.widget.RecyclerView
 import bg.zahov.app.data.model.AddTemplateWorkoutUiMapper
 import bg.zahov.app.data.model.ClickableSet
 import bg.zahov.app.data.model.Exercise
-import bg.zahov.app.data.model.Workout
-import bg.zahov.app.util.SwipeGesture
 import bg.zahov.app.util.applyScaleAnimation
 import bg.zahov.fitness.app.R
 import bg.zahov.fitness.app.databinding.FragmentNewWorkoutTemplateBinding
@@ -53,7 +53,6 @@ class NewWorkoutTemplateFragment : Fragment() {
                 findNavController().navigate(R.id.create_workout_template_to_workout)
             }
 
-
             val exerciseSetAdapter = ExerciseSetAdapter().apply {
                 itemClickListener = object : ExerciseSetAdapter.ItemClickListener<WorkoutEntry> {
                     override fun onOptionsClicked(item: Exercise, clickedView: View) {
@@ -69,11 +68,10 @@ class NewWorkoutTemplateFragment : Fragment() {
                     }
 
                     override fun onAddSet(item: Exercise, set: ClickableSet) {
-                        Log.d("ONADDSET", "FRAG,EMT")
                         addWorkoutViewModel.addSet(item, set.set)
                     }
                 }
-                swipeActionListener = object: ExerciseSetAdapter.SwipeActionListener {
+                swipeActionListener = object : ExerciseSetAdapter.SwipeActionListener {
                     override fun onDeleteSet(item: Exercise, set: ClickableSet) {
                         addWorkoutViewModel.removeSet(item, set.set)
                     }
@@ -112,16 +110,18 @@ class NewWorkoutTemplateFragment : Fragment() {
                 exerciseSetAdapter.updateItems(it)
             }
 
-            addWorkoutViewModel.state.map { AddTemplateWorkoutUiMapper.map(it) }.observe(viewLifecycleOwner) {
-                showToast(it.eMessage)
-                if(showToast(it.nMessage)) {
-                    findNavController().navigate(R.id.create_workout_template_to_workout)
+            addWorkoutViewModel.state.map { AddTemplateWorkoutUiMapper.map(it) }
+                .observe(viewLifecycleOwner) {
+                    showToast(it.eMessage)
+                    showToast(it.nMessage)
+
+                    if (it.success) findNavController().navigate(R.id.create_workout_template_to_workout)
                 }
-            }
 
             save.setOnClickListener {
                 it.applyScaleAnimation()
-                addWorkoutViewModel.addWorkout(workoutNameFieldText.text.toString(), )
+                addWorkoutViewModel.setWorkoutName(workoutNameFieldText.text.toString())
+                addWorkoutViewModel.addWorkout()
             }
 
             cancel.setOnClickListener {
@@ -131,11 +131,22 @@ class NewWorkoutTemplateFragment : Fragment() {
         }
     }
 
-    fun showToast(message: String?): Boolean {
-        return message?.let {
+    private fun showToast(message: String?) {
+        message?.let {
             Toast.makeText(context, it, Toast.LENGTH_SHORT).show()
-            true
-        } ?: false
+        }
+    }
+
+    override fun onResume() {
+        super.onResume()
+        addWorkoutViewModel.workoutName.observe(viewLifecycleOwner) {
+            binding.workoutNameFieldText.setText(it)
+        }
+    }
+
+    override fun onPause() {
+        super.onPause()
+        addWorkoutViewModel.setWorkoutName(binding.workoutNameFieldText.text.toString())
     }
 
     override fun onDestroy() {

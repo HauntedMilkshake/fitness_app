@@ -91,6 +91,7 @@
         android:layout_height="wrap_content"
         android:layout_marginTop="15dp"
         android:text="@string/forgot_password"
+        android:textColor="@color/less_vibrant_text"
         app:layout_constraintStart_toStartOf="@+id/password_field"
         app:layout_constraintTop_toBottomOf="@+id/password_field" />
 

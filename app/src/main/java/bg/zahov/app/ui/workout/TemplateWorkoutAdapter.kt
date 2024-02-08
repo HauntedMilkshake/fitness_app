@@ -8,7 +8,7 @@ import com.google.android.material.imageview.ShapeableImageView
 import com.google.android.material.textview.MaterialTextView
 
 class TemplateWorkoutAdapter : BaseAdapter<Workout>(
-    areItemsTheSame = { oldItem, newItem -> oldItem == newItem },
+    areItemsTheSame = { oldItem, newItem -> oldItem.name == newItem.name },
     areContentsTheSame = { oldItem, newItem -> oldItem == newItem },
     layoutResId = R.layout.item_template
 ) {
@@ -32,8 +32,13 @@ class TemplateWorkoutAdapter : BaseAdapter<Workout>(
             itemView.setOnClickListener {
                 itemClickListener?.onWorkoutClicked(item, itemView)
             }
-            exercises.text =
-                item.exercises.joinToString("\n") { "${it.sets.size} x ${it.name}" }
+            if(item.isTemplate) {
+                exercises.text =
+                    item.ids.joinToString("\n") { "$it x 99" }
+            } else {
+                exercises.text =
+                    item.exercises.joinToString("\n") { "${it.sets.size} x ${it.name}" }
+            }
         }
     }
 

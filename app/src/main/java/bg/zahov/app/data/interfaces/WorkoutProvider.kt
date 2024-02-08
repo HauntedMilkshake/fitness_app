@@ -7,7 +7,7 @@ import kotlinx.coroutines.flow.Flow
 interface WorkoutProvider {
     suspend fun getTemplateWorkouts(): Flow<List<Workout>>
     suspend fun getPastWorkouts(): Flow<List<Workout>>
-    suspend fun addWorkout(newWorkout: Workout)
+    suspend fun addTemplateWorkout(newWorkout: Workout)
     suspend fun getTemplateExercises(): Flow<List<Exercise>>
     suspend fun addTemplateExercise(newExercise: Exercise)
 }

@@ -22,9 +22,9 @@ import kotlinx.coroutines.withContext
 
 class FirestoreManager {
     companion object {
-        const val USERS_COLLECTION = "users"
-        const val TEMPLATE_EXERCISES = "templateExercises"
-        const val WORKOUTS_SUB_COLLECTION = "workouts"
+        const val USERS_COLLECTION = FirestoreFields.USERS
+        const val TEMPLATE_EXERCISES = FirestoreFields.USER_TEMPLATE_EXERCISES
+        const val WORKOUTS_SUB_COLLECTION = FirestoreFields.USER_WORKOUTS
 
         @Volatile
         private var instance: FirestoreManager? = null
@@ -108,6 +108,11 @@ class FirestoreManager {
     suspend fun addTemplateExercise(newExercise: Exercise) = withContext(Dispatchers.IO) {
         firestore.collection(USERS_COLLECTION).document(userId).collection(TEMPLATE_EXERCISES)
             .add(newExercise)
+    }
+
+    suspend fun addTemplateWorkout(newWorkoutTemplate: Workout) = withContext(Dispatchers.IO) {
+        firestore.collection(USERS_COLLECTION).document(userId).collection(WORKOUTS_SUB_COLLECTION)
+            .add(newWorkoutTemplate.toFirestoreMap())
     }
 
     private fun deleteFirestore() {

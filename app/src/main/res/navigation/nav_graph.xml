@@ -146,6 +146,7 @@
 
         <action
             android:id="@+id/create_workout_template_to_workout"
+            app:destination="@id/workout"
             app:popUpTo="@id/create_workout_template"
             app:popUpToInclusive="true" />
         <action

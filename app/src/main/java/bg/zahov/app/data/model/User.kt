@@ -1,11 +1,13 @@
 package bg.zahov.app.data.model
 
 object FirestoreFields {
+    const val USERS = "users"
+
     // User fields
     const val USER_NAME = "name"
     const val USER_WORKOUTS = "workouts"
     const val USER_TEMPLATE_EXERCISES = "templateExercises"
-    const val USER_SETTINGS = "settings"
+//    const val USER_SETTINGS = "settings"
 
     // Workout fields
     const val WORKOUT_NAME = "name"
@@ -60,19 +62,20 @@ data class Workout(
     companion object {
         fun fromFirestoreMap(data: Map<String, Any>?) = data?.let {
             Workout(
-                name = it[FirestoreFields.WORKOUT_NAME] as String,
-                duration = it[FirestoreFields.WORKOUT_DURATION] as? Double,
-                date = it[FirestoreFields.WORKOUT_DATE] as String,
-                isTemplate = it[FirestoreFields.WORKOUT_IS_TEMPLATE] as Boolean,
-                exercises = (it[FirestoreFields.WORKOUT_EXERCISES] as? List<Map<String, Any>>)?.mapNotNull { map ->
-                    Exercise.fromFirestoreMap(
-                        map
-                    )
-                } ?: listOf(),
-                ids = (it[FirestoreFields.WORKOUT_IDS] as? List<Map<String, Any>>)?.map { name -> name as String }
-                    ?: listOf()
+                name = it.getOrDefault(FirestoreFields.WORKOUT_NAME, "") as? String ?: "",
+                duration = it.get(FirestoreFields.WORKOUT_DURATION) as? Double,
+                date = it.getOrDefault(FirestoreFields.WORKOUT_DATE, "") as? String ?: "",
+                isTemplate = it.getOrDefault(FirestoreFields.WORKOUT_IS_TEMPLATE, false) as? Boolean
+                    ?: false,
+                exercises = (it[FirestoreFields.WORKOUT_EXERCISES] as? List<Map<String, Any>>)
+                    ?.mapNotNull { map ->
+                        Exercise.fromFirestoreMap(map)
+                    } ?: emptyList(),
+                ids = (it[FirestoreFields.WORKOUT_IDS] as? List<String>) ?: emptyList()
             )
         }
+        //TODO(RETURN THIS INSTEAD OF THROWING)
+        //?: Workout("", null, "", false, emptyList(), emptyList())
     }
 }
 

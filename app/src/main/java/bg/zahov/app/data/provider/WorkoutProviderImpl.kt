@@ -21,7 +21,7 @@ class WorkoutProviderImpl: WorkoutProvider {
 
     override suspend fun getPastWorkouts(): Flow<List<Workout>> = workoutRepo.getPastWorkouts()
 
-    override suspend fun addWorkout(newWorkout: Workout) = workoutRepo.addWorkout(newWorkout)
+    override suspend fun addTemplateWorkout(newWorkout: Workout) = workoutRepo.addTemplateWorkout(newWorkout)
 
     override suspend fun getTemplateExercises(): Flow<List<Exercise>> = workoutRepo.getTemplateExercises()
 
