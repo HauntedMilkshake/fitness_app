@@ -1,6 +1,6 @@
 package bg.zahov.app.data.model
 
-import bg.zahov.app.ui.workout.WorkoutViewModel
+import bg.zahov.app.ui.workout.start.WorkoutViewModel
 
 data class WorkoutUiModel(
     val errorMessage: String? = null,

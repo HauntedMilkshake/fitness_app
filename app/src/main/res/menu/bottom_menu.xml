@@ -13,7 +13,7 @@
         android:icon="@drawable/ic_history"
         android:title="@string/history"/>
     <item
-        android:id="@+id/workout"
+        android:id="@+id/start_workout"
         android:enabled="true"
         android:menuCategory="secondary"
         android:icon="@drawable/ic_plus"

@@ -90,6 +90,8 @@
     <string name="reps_column_text">reps</string>
     <string name="add_set">add set</string>
     <string name="cancel_text">cancel</string>
+    <!-- Strings used for workout fragment    -->
+    <string name="finish_workout">Finish</string>
 
 
 </resources>
