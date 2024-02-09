@@ -92,6 +92,7 @@
     <string name="cancel_text">cancel</string>
     <!-- Strings used for workout fragment    -->
     <string name="finish_workout">Finish</string>
+    <string name="cancel_workout">cancel workout</string>
 
 
 </resources>

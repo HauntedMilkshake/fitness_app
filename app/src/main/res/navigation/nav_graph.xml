@@ -60,9 +60,8 @@
         <action
             android:id="@+id/loading_to_home"
             app:destination="@id/home"
-            app:popUpToInclusive="true"
             app:popUpTo="@id/loading"
-            />
+            app:popUpToInclusive="true" />
     </fragment>
 
     <fragment
@@ -161,6 +160,16 @@
         <action
             android:id="@+id/workout_to_create_workout_template"
             app:destination="@+id/create_workout_template" />
+    </fragment>
+
+    <fragment
+        android:id="@+id/workout"
+        android:name="bg.zahov.app.ui.workout.WorkoutFragment"
+        tools:layout="@layout/fragment_workout">
+
+        <action
+            android:id="@+id/workout_to_add_exercise"
+            app:destination="@id/exercises" />
     </fragment>
 
 </navigation>

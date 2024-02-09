@@ -1,8 +1,11 @@
 package bg.zahov.app.util
 
+import android.animation.AnimatorSet
 import android.animation.ArgbEvaluator
 import android.animation.ObjectAnimator
 import android.animation.PropertyValuesHolder
+import android.graphics.Color
+import android.graphics.drawable.ColorDrawable
 import android.view.View
 import androidx.core.content.ContextCompat
 import bg.zahov.app.data.model.Exercise
@@ -77,17 +80,44 @@ fun SelectableExercise.toExercise(): Exercise {
 }
 
 fun List<SelectableExercise>.toExerciseList(): List<Exercise> = this.map { it.toExercise() }
-fun View.applyScaleAnimation() {
-    val scaleAnimation = ObjectAnimator.ofPropertyValuesHolder(
-        this,
-        PropertyValuesHolder.ofFloat("scaleX", 1.4f),
-        PropertyValuesHolder.ofFloat("scaleY", 1.4f)
-    )
-    scaleAnimation.duration = 140
-    scaleAnimation.repeatCount = 1
-    scaleAnimation.repeatMode = ObjectAnimator.REVERSE
+//fun View.applyScaleAnimation() {
+//    val scaleAnimation = ObjectAnimator.ofPropertyValuesHolder(
+//        this,
+//        PropertyValuesHolder.ofFloat("scaleX", 1.4f),
+//        PropertyValuesHolder.ofFloat("scaleY", 1.4f)
+//    )
+//    scaleAnimation.duration = 140
+//    scaleAnimation.repeatCount = 1
+//    scaleAnimation.repeatMode = ObjectAnimator.REVERSE
+//
+//    scaleAnimation.start()
+//}
 
-    scaleAnimation.start()
+fun View.applyScaleAnimation() {
+    val duration = 140L // Adjust the duration as needed
+    val highlightColor = Color.WHITE // Color for the highlight
+
+    val originalColor = this.background?.let { it as? ColorDrawable }?.color ?: Color.TRANSPARENT
+
+    // Create an ObjectAnimator to animate the background color
+    val colorAnimator = ObjectAnimator.ofObject(this, "backgroundColor", ArgbEvaluator(), originalColor, highlightColor).apply {
+        this.duration = duration
+    }
+
+    // Create an ObjectAnimator to revert back to the original color
+    val revertColorAnimator = ObjectAnimator.ofObject(this, "backgroundColor", ArgbEvaluator(), highlightColor, originalColor).apply {
+        this.duration = duration
+    }
+
+    // Combine the animations into an AnimatorSet
+    val animatorSet = AnimatorSet().apply {
+        playSequentially(colorAnimator, revertColorAnimator)
+    }
+
+    // Start the animation when the view is clicked
+    this.setOnClickListener {
+        animatorSet.start()
+    }
 }
 
 fun View.applySelectAnimation(

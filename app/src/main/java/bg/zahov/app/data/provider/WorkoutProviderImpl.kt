@@ -6,7 +6,7 @@ import bg.zahov.app.data.model.Workout
 import bg.zahov.app.data.repository.WorkoutRepositoryImpl
 import kotlinx.coroutines.flow.Flow
 
-class WorkoutProviderImpl: WorkoutProvider {
+class WorkoutProviderImpl : WorkoutProvider {
     companion object {
 
         @Volatile
@@ -17,13 +17,20 @@ class WorkoutProviderImpl: WorkoutProvider {
     }
 
     private val workoutRepo = WorkoutRepositoryImpl.getInstance()
-    override suspend fun getTemplateWorkouts(): Flow<List<Workout>> = workoutRepo.getTemplateWorkouts()
+    override suspend fun getTemplateWorkouts(): Flow<List<Workout>> =
+        workoutRepo.getTemplateWorkouts()
 
     override suspend fun getPastWorkouts(): Flow<List<Workout>> = workoutRepo.getPastWorkouts()
 
-    override suspend fun addTemplateWorkout(newWorkout: Workout) = workoutRepo.addTemplateWorkout(newWorkout)
+    override suspend fun addTemplateWorkout(newWorkout: Workout) =
+        workoutRepo.addTemplateWorkout(newWorkout)
 
-    override suspend fun getTemplateExercises(): Flow<List<Exercise>> = workoutRepo.getTemplateExercises()
+    override suspend fun getTemplateExercises(): Flow<List<Exercise>> =
+        workoutRepo.getTemplateExercises()
 
-    override suspend fun addTemplateExercise(newExercise: Exercise) = workoutRepo.addTemplateExercise(newExercise)
+    override suspend fun addTemplateExercise(newExercise: Exercise) =
+        workoutRepo.addTemplateExercise(newExercise)
+
+    override suspend fun addWorkoutToHistory(newWorkout: Workout) =
+        workoutRepo.addWorkoutToHistory(newWorkout)
 }

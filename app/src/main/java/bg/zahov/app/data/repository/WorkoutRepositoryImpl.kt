@@ -33,4 +33,8 @@ class WorkoutRepositoryImpl : WorkoutRepository {
     override suspend fun addTemplateExercise(newExercise: Exercise) {
         firestore.addTemplateExercise(newExercise)
     }
+
+    override suspend fun addWorkoutToHistory(newWorkout: Workout) {
+        firestore.addWorkoutToHistory(newWorkout)
+    }
 }

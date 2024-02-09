@@ -12,7 +12,7 @@ import androidx.lifecycle.map
 import androidx.navigation.fragment.findNavController
 import androidx.recyclerview.widget.LinearLayoutManager
 import bg.zahov.app.data.model.Workout
-import bg.zahov.app.data.model.WorkoutUiMapper
+import bg.zahov.app.data.model.StartWorkoutUiMapper
 import bg.zahov.app.ui.workout.TemplateWorkoutAdapter
 import bg.zahov.app.util.applyScaleAnimation
 import bg.zahov.fitness.app.R
@@ -22,10 +22,7 @@ class StartWorkoutFragment : Fragment() {
     private var _binding: FragmentStartWorkoutBinding? = null
     private val binding
         get() = requireNotNull(_binding)
-    private val workoutViewModel: WorkoutViewModel by viewModels()
-    private val selectable by lazy {
-        arguments?.getBoolean("WORKOUT") ?: false
-    }
+    private val startWorkoutViewModel: StartWorkoutViewModel by viewModels()
     override fun onCreateView(
         inflater: LayoutInflater, container: ViewGroup?, savedInstanceState: Bundle?,
     ): View {
@@ -44,16 +41,10 @@ class StartWorkoutFragment : Fragment() {
         super.onViewCreated(view, savedInstanceState)
         binding.apply {
 
-
-            addTemplate.setOnClickListener {
-                it.applyScaleAnimation()
-                findNavController().navigate(R.id.workout_to_create_workout_template)
-            }
-
-
             val workoutAdapter = TemplateWorkoutAdapter().apply {
                 object : TemplateWorkoutAdapter.ItemClickListener<Workout> {
                     override fun onSettingsClicked(item: Workout, clickedView: View) {
+                        //TODO(Open popup with options to start workout
                     }
 
                     override fun onWorkoutClicked(item: Workout, clickedView: View) {
@@ -66,15 +57,33 @@ class StartWorkoutFragment : Fragment() {
                 adapter = workoutAdapter
             }
 
-            workoutViewModel.templates.observe(viewLifecycleOwner) {
+            startWorkoutViewModel.templates.observe(viewLifecycleOwner) {
                 workoutAdapter.updateItems(it)
             }
 
-            workoutViewModel.state.map { WorkoutUiMapper.map(it) }.observe(viewLifecycleOwner) {
-                Toast.makeText(context, it.errorMessage, Toast.LENGTH_SHORT).show()
+            startWorkoutViewModel.state.map { StartWorkoutUiMapper.map(it) }.observe(viewLifecycleOwner) {
+                it.errorMessage?.let {message ->
+                    Toast.makeText(context, message, Toast.LENGTH_SHORT).show()
+                }
+
+                it.message?.let { message ->
+                    Toast.makeText(context, message, Toast.LENGTH_SHORT).show()
+                }
+
                 if (it.shutdown) {
                     //TODO()
                 }
+
+                addTemplate.setOnClickListener {view ->
+                    view.applyScaleAnimation()
+                    if(!it.isWorkoutActive){
+                        findNavController().navigate(R.id.workout_to_create_workout_template)
+                    }
+                }
+            }
+
+            startEmptyWorkout.setOnClickListener {
+                startWorkoutViewModel.startEmptyWorkout()
             }
         }
     }

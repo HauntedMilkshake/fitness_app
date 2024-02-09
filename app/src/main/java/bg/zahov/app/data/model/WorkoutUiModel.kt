@@ -1,14 +1,13 @@
 package bg.zahov.app.data.model
 
-import bg.zahov.app.ui.workout.start.WorkoutViewModel
+import bg.zahov.app.WorkoutManagerViewModel
 
-data class WorkoutUiModel(
-    val errorMessage: String? = null,
-    val shutdown: Boolean = false
+data class WorkoutManagerUiModel(
+    val state: WorkoutState = WorkoutState.INACTIVE,
 )
 
-object WorkoutUiMapper {
-    fun map(state: WorkoutViewModel.State) = when(state) {
-        is WorkoutViewModel.State.Error -> WorkoutUiModel(state.error, state.shutdown)
+object WorkoutManagerUiMapper {
+    fun map(state: WorkoutManagerViewModel.State) = when (state) {
+        is WorkoutManagerViewModel.State.Active -> WorkoutManagerUiModel(state.state)
     }
 }

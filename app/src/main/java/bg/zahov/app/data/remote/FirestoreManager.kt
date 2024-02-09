@@ -136,4 +136,8 @@ class FirestoreManager {
         firestore.collection(USERS_COLLECTION).document(userId)
             .update(FirestoreFields.USER_NAME, newUsername)
     }
+
+    suspend fun addWorkoutToHistory(newWorkout: Workout) = withContext(Dispatchers.IO) {
+        firestore.collection(USERS_COLLECTION).document(userId).collection(WORKOUTS_SUB_COLLECTION).add(newWorkout.toFirestoreMap())
+    }
 }

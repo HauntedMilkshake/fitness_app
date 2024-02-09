@@ -18,9 +18,9 @@ import androidx.recyclerview.widget.LinearLayoutManager
 import bg.zahov.app.data.model.ExerciseUiMapper
 import bg.zahov.app.data.model.SelectableFilter
 import bg.zahov.app.data.model.SelectableExercise
-import bg.zahov.app.util.applyScaleAnimation
 import bg.zahov.app.util.toSelectableList
 import bg.zahov.app.ui.workout.add.AddWorkoutViewModel
+import bg.zahov.app.util.applyScaleAnimation
 import bg.zahov.fitness.app.R
 import bg.zahov.fitness.app.databinding.FragmentExercisesBinding
 import com.google.android.flexbox.FlexDirection

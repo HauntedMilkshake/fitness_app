@@ -25,14 +25,14 @@ class TemplateWorkoutAdapter : BaseAdapter<Workout>(
 
         override fun bind(item: Workout) {
             title.text = item.name
-            lastPerformed.text = item.date
+            lastPerformed.text = "Last performed: ${item.date}"
             settings.setOnClickListener {
                 itemClickListener?.onSettingsClicked(item, settings)
             }
             itemView.setOnClickListener {
                 itemClickListener?.onWorkoutClicked(item, itemView)
             }
-            if(item.isTemplate) {
+            if (item.isTemplate) {
                 exercises.text =
                     item.ids.joinToString("\n") { "$it x 99" }
             } else {

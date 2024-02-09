@@ -4,6 +4,7 @@ import android.app.Application
 import bg.zahov.app.data.provider.SettingsProviderImpl
 import bg.zahov.app.data.provider.UserProviderImpl
 import bg.zahov.app.data.provider.WorkoutProviderImpl
+import bg.zahov.app.data.provider.WorkoutStateManager
 import com.google.firebase.Firebase
 import com.google.firebase.initialize
 
@@ -17,6 +18,9 @@ class MyApplication : Application() {
     val workoutProvider by lazy {
         WorkoutProviderImpl.getInstance()
     }
+    val workoutState by lazy {
+        WorkoutStateManager.getInstance()
+    }
 
     override fun onCreate() {
         super.onCreate()
@@ -27,4 +31,5 @@ class MyApplication : Application() {
 fun Application.getUserProvider() = (this as MyApplication).userProvider
 fun Application.getSettingsProvider() = (this as MyApplication).settingsProvider
 fun Application.getWorkoutProvider() = (this as MyApplication).workoutProvider
+fun Application.getWorkoutStateManager() = (this as MyApplication).workoutState
 
