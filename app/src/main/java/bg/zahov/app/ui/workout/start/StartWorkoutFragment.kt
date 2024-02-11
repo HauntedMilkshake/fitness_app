@@ -62,13 +62,7 @@ class StartWorkoutFragment : Fragment() {
             }
 
             startWorkoutViewModel.state.map { StartWorkoutUiMapper.map(it) }.observe(viewLifecycleOwner) {
-                it.errorMessage?.let {message ->
-                    Toast.makeText(context, message, Toast.LENGTH_SHORT).show()
-                }
-
-                it.message?.let { message ->
-                    Toast.makeText(context, message, Toast.LENGTH_SHORT).show()
-                }
+                showToast(it.errorMessage)
 
                 if (it.shutdown) {
                     //TODO()
@@ -83,11 +77,24 @@ class StartWorkoutFragment : Fragment() {
             }
 
             startEmptyWorkout.setOnClickListener {
-                startWorkoutViewModel.startEmptyWorkout()
+                startWorkoutViewModel.state.map { StartWorkoutUiMapper.map(it) }.observe(viewLifecycleOwner) {
+                    if(it.isWorkoutActive) {
+                        //TODO(GIVE THE USER AN OPTION FOR DISCARDING THE CURRENT WORKOUT)
+                        showToast(it.message)
+                    } else {
+                        startWorkoutViewModel.startEmptyWorkout()
+                    }
+                }
+
             }
         }
     }
 
+    private fun showToast(message: String?) {
+        message?.let {
+            Toast.makeText(context, it, Toast.LENGTH_SHORT).show()
+        }
+    }
     override fun onDestroyView() {
         super.onDestroyView()
         _binding = null

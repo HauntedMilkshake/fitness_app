@@ -108,7 +108,9 @@ class WorkoutFragment : Fragment() {
                 it.applyScaleAnimation()
                 onGoingWorkoutViewModel.finishWorkout()
             }
-
+            restTimer.setOnClickListener {
+                it.applyScaleAnimation()
+            }
             finishText.setOnClickListener {
                 it.applyScaleAnimation()
                 onGoingWorkoutViewModel.finishWorkout()

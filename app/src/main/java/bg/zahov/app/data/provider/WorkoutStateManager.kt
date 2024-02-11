@@ -4,9 +4,8 @@ import android.util.Log
 import bg.zahov.app.data.model.Workout
 import bg.zahov.app.data.model.WorkoutState
 import kotlinx.coroutines.Dispatchers
-import kotlinx.coroutines.channels.awaitClose
-import kotlinx.coroutines.flow.callbackFlow
-import kotlinx.coroutines.flow.flow
+import kotlinx.coroutines.flow.MutableStateFlow
+import kotlinx.coroutines.flow.StateFlow
 import kotlinx.coroutines.withContext
 
 class WorkoutStateManager {
@@ -19,25 +18,19 @@ class WorkoutStateManager {
         }
     }
 
-    private var state: WorkoutState = WorkoutState.INACTIVE
+    private val _state = MutableStateFlow(WorkoutState.INACTIVE)
+    val state: StateFlow<WorkoutState>
+        get() = _state
 
-    //MIGHT BE A GOOD IDEA TO KEEP TRACK OF THE WORKOUT HERE( ie save the in progress workout here if the vm doesn't do it already)
-    private var template: Workout? = null
+    private val _template: MutableStateFlow<Workout?> = MutableStateFlow(null)
+    val template: StateFlow<Workout?>
+        get() = _template
 
-    suspend fun setWorkoutState(newState: WorkoutState) = withContext(Dispatchers.Default) {
-        Log.d("STATE", newState.name)
-        state = newState
+    fun updateState(newState: WorkoutState) {
+        _state.value = newState
     }
 
-    suspend fun setTemplate(workout: Workout) = withContext(Dispatchers.Default) {
-        template = workout
-    }
-
-    suspend fun getState() = flow {
-        emit(state)
-    }
-
-    suspend fun getTemplate() = withContext(Dispatchers.Default) {
-        template
+    fun updateTemplate(workout: Workout) {
+        _template.value = workout
     }
 }

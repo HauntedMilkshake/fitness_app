@@ -11,7 +11,6 @@ import bg.zahov.app.data.model.Workout
 import bg.zahov.app.data.model.WorkoutState
 import bg.zahov.app.getWorkoutProvider
 import bg.zahov.app.getWorkoutStateManager
-import kotlinx.coroutines.flow.collect
 import kotlinx.coroutines.launch
 
 class StartWorkoutViewModel(application: Application) : AndroidViewModel(application) {
@@ -34,9 +33,9 @@ class StartWorkoutViewModel(application: Application) : AndroidViewModel(applica
     init {
         getWorkouts()
         viewModelScope.launch {
-            workoutState.getState().collect {
+            workoutState.state.collect {
                 when(it) {
-                    WorkoutState.MINIMIZED -> _state.postValue(State.Active(true, "Cannot create templates during workout"))
+                    WorkoutState.MINIMIZED -> _state.postValue(State.Active(true))
                     WorkoutState.INACTIVE -> _state.postValue(State.Active(false))
                     else -> {}
                 }
@@ -58,15 +57,14 @@ class StartWorkoutViewModel(application: Application) : AndroidViewModel(applica
 
     fun startEmptyWorkout() {
         viewModelScope.launch {
-            Log.d("WORKOUT","Starting workout fragment")
-            workoutState.setWorkoutState(WorkoutState.ACTIVE)
+            workoutState.updateState(WorkoutState.ACTIVE)
         }
     }
 
     fun startWorkoutFromTemplate(workout: Workout) {
         viewModelScope.launch {
-            workoutState.setTemplate(workout)
-            workoutState.setWorkoutState(WorkoutState.ACTIVE)
+            workoutState.updateTemplate(workout)
+            workoutState.updateState(WorkoutState.ACTIVE)
         }
     }
 

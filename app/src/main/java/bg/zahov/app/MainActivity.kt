@@ -40,29 +40,48 @@ class MainActivity : AppCompatActivity() {
             if (it.isAuthenticated) navController.navigate(R.id.welcome_to_loading)
         }
 
+        hideBottomNav()
+
         workoutManagerViewModel.state.map { WorkoutManagerUiMapper.map(it) }.observe(this) {
-            Log.d("WORKOUT UI", it.state.name)
+            Log.d("WORKOUT UI", it.state.toString())
             when (it.state) {
                 WorkoutState.MINIMIZED -> {
+                    Log.d("WOW ACTIVE", "minimized")
+                    showBottomNav()
                     setWorkoutVisibility(View.VISIBLE)
                     stopWorkoutFragment()
                 }
 
                 WorkoutState.ACTIVE -> {
-                    setWorkoutVisibility(View.VISIBLE)
+                    Log.d("WOW ACTIVE", "ACTIVE")
+                    hideBottomNav()
+                    setWorkoutVisibility(View.GONE)
                     startWorkoutFragment()
                 }
 
                 WorkoutState.INACTIVE -> {
+                    Log.d("WOW ACTIVE", "inactive")
+                    showBottomNav()
                     setWorkoutVisibility(View.GONE)
                     stopWorkoutFragment()
                 }
             }
         }
+
+        workoutManagerViewModel.template.observe(this) {
+            binding.workoutName.text = it.name
+            binding.timer.text = ""
+        }
+
+        binding.trailingWorkout.setOnClickListener {
+            workoutManagerViewModel.updateStateToActive()
+        }
     }
 
     private fun setWorkoutVisibility(visibility: Int) {
         binding.apply {
+            Log.d("WORKOUT VISIBILITY", "SETTING WORKOUT VISIBILITY")
+            trailingWorkout.visibility = visibility
             timer.visibility = visibility
             workoutName.visibility = visibility
             shadow.visibility = visibility
@@ -76,23 +95,18 @@ class MainActivity : AppCompatActivity() {
     }
 
     private fun startWorkoutFragment() {
-        val fragmentManager = supportFragmentManager
-        val fragmentTransaction = fragmentManager.beginTransaction()
+        val fragmentTransaction = supportFragmentManager.beginTransaction()
 
-        val existingFragment = fragmentManager.findFragmentByTag(WORKOUT_FRAGMENT)
-        if (existingFragment == null) {
-            val fragment = WorkoutFragment()
-            fragmentTransaction.add(R.id.container, fragment, WORKOUT_FRAGMENT)
+        if (supportFragmentManager.findFragmentByTag(WORKOUT_FRAGMENT) == null) {
+            fragmentTransaction.add(R.id.nav_host_fragment, WorkoutFragment(), WORKOUT_FRAGMENT)
         }
 
         fragmentTransaction.commit()
     }
 
     private fun stopWorkoutFragment() {
-        val fragmentManager = supportFragmentManager
-        val fragment = fragmentManager.findFragmentByTag(WORKOUT_FRAGMENT)
-        fragment?.let {
-            val fragmentTransaction = fragmentManager.beginTransaction()
+        supportFragmentManager.findFragmentByTag(WORKOUT_FRAGMENT)?.let {
+            val fragmentTransaction = supportFragmentManager.beginTransaction()
             fragmentTransaction.remove(it)
             fragmentTransaction.commit()
         }

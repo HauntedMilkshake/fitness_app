@@ -10,6 +10,9 @@ import bg.zahov.app.data.model.WorkoutState
 import bg.zahov.app.getWorkoutProvider
 import bg.zahov.app.getWorkoutStateManager
 import kotlinx.coroutines.launch
+import java.time.LocalDate
+import java.time.format.DateTimeFormatter
+import java.util.Locale
 
 class OnGoingWorkoutViewModel(application: Application) : AndroidViewModel(application) {
     private val workoutStateManager by lazy {
@@ -24,9 +27,33 @@ class OnGoingWorkoutViewModel(application: Application) : AndroidViewModel(appli
     val workout: LiveData<Workout>
         get() = _workout
 
+    init {
+        viewModelScope.launch {
+            workoutStateManager.template.collect {
+                val date = LocalDate.now()
+                    .format(
+                        DateTimeFormatter.ofPattern(
+                            "dd-MM-yyyy",
+                            Locale.getDefault()
+                        )
+                    )
+                it?.let { _workout.postValue(it) } ?: _workout.postValue(
+                    Workout(
+                        "New workout",
+                        null,
+                        date,
+                        false,
+                        listOf(),
+                        listOf()
+                    )
+                )
+            }
+        }
+    }
+
     fun minimize() {
         viewModelScope.launch {
-            workoutStateManager.setWorkoutState(WorkoutState.MINIMIZED)
+            workoutStateManager.updateState(WorkoutState.MINIMIZED)
         }
     }
 
@@ -37,15 +64,7 @@ class OnGoingWorkoutViewModel(application: Application) : AndroidViewModel(appli
 //            newWorkout?.let {
 //                repo.addWorkoutToHistory(it)
 //            }
-            workoutStateManager.setWorkoutState(WorkoutState.INACTIVE)
-        }
-    }
-
-    init {
-        viewModelScope.launch {
-            workoutStateManager.getTemplate()?.let {
-                _workout.value = it
-            }
+            workoutStateManager.updateState(WorkoutState.INACTIVE)
         }
     }
 }

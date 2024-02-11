@@ -1,6 +1,8 @@
 <?xml version="1.0" encoding="utf-8"?>
 <androidx.constraintlayout.widget.ConstraintLayout xmlns:android="http://schemas.android.com/apk/res/android"
     xmlns:app="http://schemas.android.com/apk/res-auto"
+    android:id="@+id/id_fragment_workout"
+    android:background="@color/background"
     android:layout_width="match_parent"
     android:layout_height="match_parent">
 
@@ -30,11 +32,11 @@
                     android:id="@+id/minimize"
                     android:layout_width="wrap_content"
                     android:layout_height="wrap_content"
-                    android:layout_marginStart="15dp"
                     android:src="@drawable/ic_minimize"
-                    app:layout_constraintBottom_toBottomOf="parent"
-                    app:layout_constraintStart_toStartOf="parent"
-                    app:layout_constraintTop_toTopOf="parent" />
+                    android:layout_marginStart="15dp"
+                    app:layout_constraintBottom_toBottomOf="@+id/rest_timer"
+                    app:layout_constraintStart_toEndOf="@+id/rest_timer"
+                    app:layout_constraintTop_toTopOf="@+id/rest_timer" />
 
                 <com.google.android.material.textview.MaterialTextView
                     android:id="@+id/finish_text"
@@ -58,9 +60,9 @@
                     android:layout_gravity="end"
                     android:layout_marginStart="15dp"
                     android:src="@drawable/ic_rest_timer"
-                    app:layout_constraintBottom_toBottomOf="@+id/back"
-                    app:layout_constraintStart_toEndOf="@+id/back"
-                    app:layout_constraintTop_toTopOf="@+id/back" />
+                    app:layout_constraintBottom_toBottomOf="parent"
+                    app:layout_constraintStart_toStartOf="parent"
+                    app:layout_constraintTop_toTopOf="parent" />
             </androidx.constraintlayout.widget.ConstraintLayout>
         </com.google.android.material.appbar.CollapsingToolbarLayout>
     </com.google.android.material.appbar.AppBarLayout>
