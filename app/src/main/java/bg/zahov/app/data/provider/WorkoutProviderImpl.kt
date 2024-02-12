@@ -33,4 +33,12 @@ class WorkoutProviderImpl : WorkoutProvider {
 
     override suspend fun addWorkoutToHistory(newWorkout: Workout) =
         workoutRepo.addWorkoutToHistory(newWorkout)
+
+    override suspend fun deleteTemplateWorkout(workout: Workout) {
+        workoutRepo.deleteTemplateWorkout(workout)
+    }
+
+    override suspend fun deleteWorkout(workout: Workout) {
+        workoutRepo.deleteWorkout(workout)
+    }
 }

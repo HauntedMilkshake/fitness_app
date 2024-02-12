@@ -8,7 +8,9 @@ import android.util.Log
 import android.view.LayoutInflater
 import android.view.View
 import android.view.ViewGroup
+import android.widget.PopupMenu
 import android.widget.Toast
+import androidx.appcompat.view.ContextThemeWrapper
 import androidx.core.os.bundleOf
 import androidx.core.widget.addTextChangedListener
 import androidx.core.widget.doOnTextChanged
@@ -20,15 +22,19 @@ import androidx.recyclerview.widget.LinearLayoutManager
 import bg.zahov.app.data.model.AddTemplateWorkoutUiMapper
 import bg.zahov.app.data.model.ClickableSet
 import bg.zahov.app.data.model.Exercise
+import bg.zahov.app.data.model.Workout
 import bg.zahov.app.util.applyScaleAnimation
 import bg.zahov.fitness.app.R
 import bg.zahov.fitness.app.databinding.FragmentNewWorkoutTemplateBinding
 
 class NewWorkoutTemplateFragment : Fragment() {
+
     private var _binding: FragmentNewWorkoutTemplateBinding? = null
     private val binding
         get() = requireNotNull(_binding)
+
     private val addWorkoutViewModel: AddWorkoutViewModel by viewModels({ requireActivity() })
+
     override fun onCreateView(
         inflater: LayoutInflater,
         container: ViewGroup?,
@@ -56,15 +62,15 @@ class NewWorkoutTemplateFragment : Fragment() {
             val exerciseSetAdapter = ExerciseSetAdapter().apply {
                 itemClickListener = object : ExerciseSetAdapter.ItemClickListener<WorkoutEntry> {
                     override fun onOptionsClicked(item: Exercise, clickedView: View) {
-                        TODO("Not yet implemented")
+                        showCustomLayout(item, clickedView)
                     }
 
                     override fun onSetClicked(item: ClickableSet, clickedView: View) {
-                        TODO("Not yet implemented")
+                        //TODO(popup menu with custom items ig)
                     }
 
                     override fun onSetCheckClicked(item: ClickableSet, clickedView: View) {
-                        TODO("Not yet implemented")
+                        //NOOP
                     }
 
                     override fun onAddSet(item: Exercise, set: ClickableSet) {
@@ -129,6 +135,28 @@ class NewWorkoutTemplateFragment : Fragment() {
                 findNavController().navigate(R.id.create_workout_template_to_workout)
             }
         }
+    }
+
+    private fun showCustomLayout(exercise: Exercise, view: View) {
+        val popupMenu = PopupMenu(ContextThemeWrapper(context, R.style.MyPopUp), view)
+        popupMenu.menuInflater.inflate(R.menu.popup_exercise_menu, popupMenu.menu)
+        popupMenu.setOnMenuItemClickListener { item ->
+            when (item.itemId) {
+                R.id.action_add_note -> {
+                    //TODO(Show material text input)
+                }
+
+                R.id.action_replace -> {
+                    //TODO(add exercises except they replace)
+                }
+
+                R.id.action_remove -> {
+                    addWorkoutViewModel.removeExercise(exercise)
+                }
+            }
+            true
+        }
+        popupMenu.show()
     }
 
     private fun showToast(message: String?) {

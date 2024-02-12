@@ -1,11 +1,8 @@
 package bg.zahov.app.util
 
-import android.animation.AnimatorSet
 import android.animation.ArgbEvaluator
 import android.animation.ObjectAnimator
 import android.animation.PropertyValuesHolder
-import android.graphics.Color
-import android.graphics.drawable.ColorDrawable
 import android.view.View
 import androidx.core.content.ContextCompat
 import bg.zahov.app.data.model.Exercise
@@ -15,6 +12,11 @@ import bg.zahov.app.data.model.Sets
 import bg.zahov.app.data.model.User
 import bg.zahov.app.data.model.Workout
 import bg.zahov.fitness.app.R
+import com.google.common.hash.Hashing
+import java.nio.charset.StandardCharsets
+import java.time.LocalDate
+import java.time.format.DateTimeFormatter
+import java.util.Locale
 
 fun User.toFirestoreMap(): Map<String, Any?> {
     return mapOf(FirestoreFields.USER_NAME to name)
@@ -22,6 +24,7 @@ fun User.toFirestoreMap(): Map<String, Any?> {
 
 fun Workout.toFirestoreMap(): Map<String, Any?> {
     return mapOf(
+        FirestoreFields.WORKOUT_ID to id,
         FirestoreFields.WORKOUT_NAME to name,
         FirestoreFields.WORKOUT_DURATION to duration,
         FirestoreFields.WORKOUT_DATE to date,
@@ -37,7 +40,8 @@ fun Exercise.toFirestoreMap(): Map<String, Any?> {
         FirestoreFields.EXERCISE_BODY_PART to bodyPart.toString(),
         FirestoreFields.EXERCISE_CATEGORY to category.toString(),
         FirestoreFields.EXERCISE_IS_TEMPLATE to isTemplate,
-        FirestoreFields.EXERCISE_SETS to sets.map { it.toFirestoreMap() }
+        FirestoreFields.EXERCISE_SETS to sets.map { it.toFirestoreMap() },
+        FirestoreFields.EXERCISE_NOTE to note
     )
 }
 
@@ -66,59 +70,58 @@ fun Sets.toFirestoreMap(): Map<String, Any?> {
 //}
 
 fun String.isEmail() = Regex("^\\S+@\\S+\\.\\S+$").matches(this)
+
+//TODO(Are these functions really needed)
 fun Exercise.toSelectable() = SelectableExercise(this)
 fun List<Exercise>.toSelectableList() = this.map { it.toSelectable() }
 
-fun SelectableExercise.toExercise(): Exercise {
-    return Exercise(
-        name = this.exercise.name,
-        bodyPart = this.exercise.bodyPart,
-        category = this.exercise.category,
-        isTemplate = this.exercise.isTemplate,
-        sets = this.exercise.sets
-    )
-}
-
-fun List<SelectableExercise>.toExerciseList(): List<Exercise> = this.map { it.toExercise() }
-//fun View.applyScaleAnimation() {
-//    val scaleAnimation = ObjectAnimator.ofPropertyValuesHolder(
-//        this,
-//        PropertyValuesHolder.ofFloat("scaleX", 1.4f),
-//        PropertyValuesHolder.ofFloat("scaleY", 1.4f)
-//    )
-//    scaleAnimation.duration = 140
-//    scaleAnimation.repeatCount = 1
-//    scaleAnimation.repeatMode = ObjectAnimator.REVERSE
-//
-//    scaleAnimation.start()
-//}
-
 fun View.applyScaleAnimation() {
-    val duration = 140L // Adjust the duration as needed
-    val highlightColor = Color.WHITE // Color for the highlight
+    val scaleAnimation = ObjectAnimator.ofPropertyValuesHolder(
+        this,
+        PropertyValuesHolder.ofFloat("scaleX", 1.4f),
+        PropertyValuesHolder.ofFloat("scaleY", 1.4f)
+    )
+    scaleAnimation.duration = 140
+    scaleAnimation.repeatCount = 1
+    scaleAnimation.repeatMode = ObjectAnimator.REVERSE
 
-    val originalColor = this.background?.let { it as? ColorDrawable }?.color ?: Color.TRANSPARENT
-
-    // Create an ObjectAnimator to animate the background color
-    val colorAnimator = ObjectAnimator.ofObject(this, "backgroundColor", ArgbEvaluator(), originalColor, highlightColor).apply {
-        this.duration = duration
-    }
-
-    // Create an ObjectAnimator to revert back to the original color
-    val revertColorAnimator = ObjectAnimator.ofObject(this, "backgroundColor", ArgbEvaluator(), highlightColor, originalColor).apply {
-        this.duration = duration
-    }
-
-    // Combine the animations into an AnimatorSet
-    val animatorSet = AnimatorSet().apply {
-        playSequentially(colorAnimator, revertColorAnimator)
-    }
-
-    // Start the animation when the view is clicked
-    this.setOnClickListener {
-        animatorSet.start()
-    }
+    scaleAnimation.start()
 }
+
+//fun View.applyScaleAnimation() {
+//    val duration = 140L
+//    val highlightColor = Color.WHITE
+//
+//    val originalColor = this.background?.let { it as? ColorDrawable }?.color ?: Color.TRANSPARENT
+//
+//    val colorAnimator = ObjectAnimator.ofObject(
+//        this,
+//        "backgroundColor",
+//        ArgbEvaluator(),
+//        originalColor,
+//        highlightColor
+//    ).apply {
+//        this.duration = duration
+//    }
+//
+//    val revertColorAnimator = ObjectAnimator.ofObject(
+//        this,
+//        "backgroundColor",
+//        ArgbEvaluator(),
+//        highlightColor,
+//        originalColor
+//    ).apply {
+//        this.duration = duration
+//    }
+//
+//    val animatorSet = AnimatorSet().apply {
+//        playSequentially(colorAnimator, revertColorAnimator)
+//    }
+//
+//    this.setOnClickListener {
+//        animatorSet.start()
+//    }
+//}
 
 fun View.applySelectAnimation(
     isSelected: Boolean,
@@ -138,3 +141,12 @@ fun View.applySelectAnimation(
     animator.start()
 }
 
+fun hashString(input: String) =
+    Hashing.sha256().hashString(input, StandardCharsets.UTF_8).toString()
+
+fun currDateToString(): String = LocalDate.now().format(
+    DateTimeFormatter.ofPattern(
+        "dd-MM-yyyy",
+        Locale.getDefault()
+    )
+)

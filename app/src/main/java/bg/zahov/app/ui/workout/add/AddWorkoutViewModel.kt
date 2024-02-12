@@ -10,7 +10,11 @@ import bg.zahov.app.data.model.Exercise
 import bg.zahov.app.data.model.Sets
 import bg.zahov.app.data.model.Workout
 import bg.zahov.app.getWorkoutProvider
+import bg.zahov.app.util.currDateToString
+import bg.zahov.app.util.hashString
+import com.google.common.hash.Hashing
 import kotlinx.coroutines.launch
+import java.nio.charset.StandardCharsets
 import java.time.LocalDate
 import java.time.format.DateTimeFormatter
 import java.util.Locale
@@ -47,6 +51,7 @@ class AddWorkoutViewModel(application: Application) : AndroidViewModel(applicati
     fun setWorkoutName(name: String) {
         _workoutName.value = name
     }
+
     fun addWorkout() {
         if (_workoutName.value.isNullOrEmpty()) {
             _state.value = State.Error("Cannot create a workout template without a name!")
@@ -57,34 +62,32 @@ class AddWorkoutViewModel(application: Application) : AndroidViewModel(applicati
             _state.value = State.Error("Each workout must have a unique name!")
             return
         }
+
         _currExercises.value?.let { exercises ->
             if (exercises.isEmpty()) {
                 _state.value = State.Error("Cannot create a workout without exercises!")
                 return
-            } else {
-                exercises.forEach {
-                    Log.d("exercise", it.name)
-                }
-                viewModelScope.launch {
-                    repo.addTemplateWorkout(
-                        Workout(
-                            name = _workoutName.value!!,
-                            duration = 0.0,
-                            date = LocalDate.now()
-                                .format(
-                                    DateTimeFormatter.ofPattern(
-                                        "dd-MM-yyyy",
-                                        Locale.getDefault()
-                                    )
-                                ),
-                            isTemplate = true,
-                            exercises = emptyList(),
-                            ids = exercises.map { it.name }
-                        )
+            }
+            exercises.forEach {
+                Log.d("exercise", it.name)
+            }
+            viewModelScope.launch {
+                repo.addTemplateWorkout(
+                    Workout(
+                        id = hashString(_workoutName.value!!),
+                        name = _workoutName.value!!,
+                        duration = 0.0,
+                        date = currDateToString(),
+                        isTemplate = true,
+                        exercises = emptyList(),
+                        ids = exercises.map { it.name }
                     )
+                )
 
-                    _state.postValue(State.Success("Template workout ${_workoutName.value} successfully created!"))
-                }
+                _workoutName.postValue("")
+                _currExercises.postValue(listOf())
+
+                _state.postValue(State.Success("Template workout ${_workoutName.value} successfully created!"))
             }
         }
     }

@@ -97,6 +97,9 @@
     <string name="duplicate">Duplicate</string>
     <string name="delete">Delete</string>
     <string name="start_workout">Start workout</string>
+    <string name="add_note">Add note</string>
+    <string name="replace_exercise">Replace</string>
+    <string name="remove_exercise">Remove</string>
 
 
 </resources>

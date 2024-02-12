@@ -11,6 +11,8 @@ import bg.zahov.app.data.model.Workout
 import bg.zahov.app.data.model.WorkoutState
 import bg.zahov.app.getWorkoutProvider
 import bg.zahov.app.getWorkoutStateManager
+import bg.zahov.app.util.currDateToString
+import bg.zahov.app.util.hashString
 import kotlinx.coroutines.launch
 
 class StartWorkoutViewModel(application: Application) : AndroidViewModel(application) {
@@ -68,6 +70,27 @@ class StartWorkoutViewModel(application: Application) : AndroidViewModel(applica
         }
     }
 
+    fun deleteTemplateWorkout(workout: Workout) {
+        viewModelScope.launch {
+            repo.deleteTemplateWorkout(workout)
+        }
+    }
+
+    fun addDuplicateTemplateWorkout(workout: Workout) {
+        viewModelScope.launch {
+            repo.addTemplateWorkout(
+                Workout(
+                    id = hashString(workout.name + "copy"),
+                    name = "${workout.id} + copy",
+                    duration = null,
+                    date = currDateToString(),
+                    isTemplate = true,
+                    exercises = listOf(),
+                    ids = workout.ids
+                )
+            )
+        }
+    }
     sealed interface State {
         data class Error(val error: String?, val shutdown: Boolean) : State
 

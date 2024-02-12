@@ -1,7 +1,6 @@
 package bg.zahov.app
 
 import android.os.Bundle
-import android.util.Log
 import android.view.View
 import androidx.activity.viewModels
 import androidx.appcompat.app.AppCompatActivity
@@ -32,7 +31,6 @@ class MainActivity : AppCompatActivity() {
         binding = ActivityMainBinding.inflate(layoutInflater)
         setContentView(binding.root)
 
-        workoutManagerViewModel.getWorkout()
         val navController = findNavController(R.id.nav_host_fragment)
 
         binding.bottomNavigation.setupWithNavController(navController)
@@ -41,6 +39,7 @@ class MainActivity : AppCompatActivity() {
             if (it.isAuthenticated) navController.navigate(R.id.welcome_to_loading)
         }
 
+        //?
         hideBottomNav()
 
         workoutManagerViewModel.state.map { WorkoutManagerUiMapper.map(it) }.observe(this) {
@@ -78,9 +77,7 @@ class MainActivity : AppCompatActivity() {
     private fun setWorkoutVisibility(visibility: Int) {
         binding.apply {
             trailingWorkout.visibility = visibility
-            timer.visibility = visibility
-            workoutName.visibility = visibility
-            shadow.visibility = visibility
+
         }
     }
 

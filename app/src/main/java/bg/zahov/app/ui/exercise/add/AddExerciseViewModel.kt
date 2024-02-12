@@ -59,7 +59,8 @@ class AddExerciseViewModel(application: Application) : AndroidViewModel(applicat
                     BodyPart.fromKey(_bodyPart.value!!)!!,
                     Category.fromKey(_category.value!!)!!,
                     true,
-                    emptyList()
+                    emptyList(),
+                    ""
                 )
             )
             _state.postValue(State.Added(true, "Successfully added an exercise"))

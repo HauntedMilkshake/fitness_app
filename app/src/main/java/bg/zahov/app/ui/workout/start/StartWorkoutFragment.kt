@@ -3,7 +3,6 @@ package bg.zahov.app.ui.workout.start
 import android.os.Bundle
 import android.transition.TransitionInflater
 import android.util.Log
-import android.view.Gravity
 import android.view.LayoutInflater
 import android.view.View
 import android.view.ViewGroup
@@ -47,11 +46,11 @@ class StartWorkoutFragment : Fragment() {
             val workoutAdapter = TemplateWorkoutAdapter().apply {
                 itemClickListener = object : TemplateWorkoutAdapter.ItemClickListener<Workout> {
                     override fun onSettingsClicked(item: Workout, clickedView: View) {
-                        Log.d("click", "detected")
                         showCustomLayout(item, clickedView)
                     }
+
                     override fun onWorkoutClicked(item: Workout, clickedView: View) {
-                        Log.d("click", "detected")
+                        //TODO(CUSTOM WORKOUT FRAGMENT)
                     }
                 }
             }
@@ -71,13 +70,6 @@ class StartWorkoutFragment : Fragment() {
 
                     if (it.shutdown) {
                         //TODO()
-                    }
-
-                    addTemplate.setOnClickListener { view ->
-                        view.applyScaleAnimation()
-                        if (!it.isWorkoutActive) {
-                            findNavController().navigate(R.id.workout_to_create_workout_template)
-                        }
                     }
                 }
 
@@ -101,19 +93,18 @@ class StartWorkoutFragment : Fragment() {
         popupMenu.setOnMenuItemClickListener { item ->
             when (item.itemId) {
                 R.id.action_delete -> {
-                    //TODO(Add a dialog where it asks for permission and then delete workout)
+                    startWorkoutViewModel.deleteTemplateWorkout(workout)
                 }
 
                 R.id.action_duplicate -> {
-                    //TODO(Add template again)
+                    startWorkoutViewModel.addDuplicateTemplateWorkout(workout)
                 }
 
                 R.id.action_edit -> {
-                    //TODO(Go to another fragment)
+
                 }
 
                 R.id.action_start_workout -> {
-                    Log.d("START", "WORKOUT")
                     startWorkoutViewModel.startWorkoutFromTemplate(workout)
                 }
             }

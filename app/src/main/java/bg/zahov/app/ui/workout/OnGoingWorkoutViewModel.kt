@@ -9,10 +9,9 @@ import bg.zahov.app.data.model.Workout
 import bg.zahov.app.data.model.WorkoutState
 import bg.zahov.app.getWorkoutProvider
 import bg.zahov.app.getWorkoutStateManager
+import bg.zahov.app.util.currDateToString
+import bg.zahov.app.util.hashString
 import kotlinx.coroutines.launch
-import java.time.LocalDate
-import java.time.format.DateTimeFormatter
-import java.util.Locale
 
 class OnGoingWorkoutViewModel(application: Application) : AndroidViewModel(application) {
     private val workoutStateManager by lazy {
@@ -30,21 +29,15 @@ class OnGoingWorkoutViewModel(application: Application) : AndroidViewModel(appli
     init {
         viewModelScope.launch {
             workoutStateManager.template.collect {
-                val date = LocalDate.now()
-                    .format(
-                        DateTimeFormatter.ofPattern(
-                            "dd-MM-yyyy",
-                            Locale.getDefault()
-                        )
-                    )
                 it?.let { _workout.postValue(it) } ?: _workout.postValue(
                     Workout(
+                        hashString("New workout"),
                         "New workout",
-                        null,
-                        date,
-                        false,
-                        listOf(),
-                        listOf()
+                        duration = null,
+                        date = currDateToString(),
+                        isTemplate = false,
+                        exercises = listOf(),
+                        ids = listOf()
                     )
                 )
             }
@@ -59,11 +52,9 @@ class OnGoingWorkoutViewModel(application: Application) : AndroidViewModel(appli
 
     fun finishWorkout(newWorkout: Workout? = null) {
         viewModelScope.launch {
-            //TODO(ADD WORKOUT TO HISTORY)
-            //Optional parameter so I can reuse the function for cancel
-//            newWorkout?.let {
-//                repo.addWorkoutToHistory(it)
-//            }
+            newWorkout?.let {
+                repo.addWorkoutToHistory(it)
+            }
             workoutStateManager.updateState(WorkoutState.INACTIVE)
         }
     }

@@ -25,6 +25,7 @@ class FirestoreManager {
         const val USERS_COLLECTION = FirestoreFields.USERS
         const val TEMPLATE_EXERCISES = FirestoreFields.USER_TEMPLATE_EXERCISES
         const val WORKOUTS_SUB_COLLECTION = FirestoreFields.USER_WORKOUTS
+        const val TEMPLATE_WORKOUTS_SUB_COLLECTION = FirestoreFields.USER_TEMPLATE_WORKOUTS
 
         @Volatile
         private var instance: FirestoreManager? = null
@@ -95,26 +96,35 @@ class FirestoreManager {
         Workout.fromFirestoreMap(info) ?: throw CriticalDataNullException("Critical data missing!")
     }
 
-    suspend fun getTemplateWorkouts(): Flow<List<Workout>> =
-        getWorkouts().map { workouts -> workouts.filter { workout -> workout.isTemplate } }
+    suspend fun getTemplateWorkouts(): Flow<List<Workout>> = getCollectionData(
+        firestore.collection(USERS_COLLECTION).document(userId)
+            .collection(TEMPLATE_WORKOUTS_SUB_COLLECTION)
+    ) { info ->
+        Workout.fromFirestoreMap(info)
+            ?: throw CriticalDataNullException("Critical data missing!")
+    }
 
 
     suspend fun getTemplateExercises(): Flow<List<Exercise>> = getCollectionData(
         firestore.collection(USERS_COLLECTION).document(userId).collection(TEMPLATE_EXERCISES)
     ) {
-        Exercise.fromFirestoreMap(it) ?: throw CriticalDataNullException("Critical data missing!")
+        Exercise.fromFirestoreMap(it)
+            ?: throw CriticalDataNullException("Critical data missing!")
     }
 
-    suspend fun addTemplateExercise(newExercise: Exercise) = withContext(Dispatchers.IO) {
-        firestore.collection(USERS_COLLECTION).document(userId).collection(TEMPLATE_EXERCISES)
-            .add(newExercise)
-    }
+    suspend fun addTemplateExercise(newExercise: Exercise) =
+        withContext(Dispatchers.IO) {
+            firestore.collection(USERS_COLLECTION).document(userId)
+                .collection(TEMPLATE_EXERCISES)
+                .add(newExercise)
+        }
 
-    suspend fun addTemplateWorkout(newWorkoutTemplate: Workout) = withContext(Dispatchers.IO) {
-        firestore.collection(USERS_COLLECTION).document(userId).collection(WORKOUTS_SUB_COLLECTION)
-            .add(newWorkoutTemplate.toFirestoreMap())
-    }
-
+    suspend fun addTemplateWorkout(newWorkoutTemplate: Workout) =
+        withContext(Dispatchers.IO) {
+            firestore.collection(USERS_COLLECTION).document(userId)
+                .collection(TEMPLATE_WORKOUTS_SUB_COLLECTION)
+                .add(newWorkoutTemplate.toFirestoreMap())
+        }
     private fun deleteFirestore() {
 //        return userDocRef.listCollections().fold(Tasks.forResult(null as Void?)) { task, collectionRef ->
 //            task.continueWithTask { _ ->
@@ -132,12 +142,26 @@ class FirestoreManager {
 //        }
     }
 
-    suspend fun updateUsername(newUsername: String) = withContext(Dispatchers.IO) {
-        firestore.collection(USERS_COLLECTION).document(userId)
-            .update(FirestoreFields.USER_NAME, newUsername)
-    }
+    suspend fun updateUsername(newUsername: String) =
+        withContext(Dispatchers.IO) {
+            firestore.collection(USERS_COLLECTION).document(userId)
+                .update(FirestoreFields.USER_NAME, newUsername)
+        }
 
-    suspend fun addWorkoutToHistory(newWorkout: Workout) = withContext(Dispatchers.IO) {
-        firestore.collection(USERS_COLLECTION).document(userId).collection(WORKOUTS_SUB_COLLECTION).add(newWorkout.toFirestoreMap())
+    suspend fun addWorkoutToHistory(newWorkout: Workout) =
+        withContext(Dispatchers.IO) {
+            firestore.collection(USERS_COLLECTION).document(userId)
+                .collection(WORKOUTS_SUB_COLLECTION)
+                .add(newWorkout.toFirestoreMap())
+        }
+
+    suspend fun deleteTemplateWorkouts(workout: Workout) =
+        withContext(Dispatchers.IO) {
+            firestore.collection(USERS_COLLECTION).document(userId)
+                .collection(WORKOUTS_SUB_COLLECTION).document(workout.name).delete()
+        }
+
+    suspend fun deleteWorkout(workout: Workout) = withContext(Dispatchers.IO) {
+        firestore.collection(USERS_COLLECTION).document(userId).collection(WORKOUTS_SUB_COLLECTION).document(workout.id).delete()
     }
 }

@@ -6,10 +6,12 @@ object FirestoreFields {
     // User fields
     const val USER_NAME = "name"
     const val USER_WORKOUTS = "workouts"
+    const val USER_TEMPLATE_WORKOUTS = "templateWorkouts"
     const val USER_TEMPLATE_EXERCISES = "templateExercises"
 //    const val USER_SETTINGS = "settings"
 
     // Workout fields
+    const val WORKOUT_ID = "id"
     const val WORKOUT_NAME = "name"
     const val WORKOUT_DURATION = "duration"
     const val WORKOUT_DATE = "date"
@@ -23,6 +25,7 @@ object FirestoreFields {
     const val EXERCISE_CATEGORY = "category"
     const val EXERCISE_IS_TEMPLATE = "template"
     const val EXERCISE_SETS = "sets"
+    const val EXERCISE_NOTE = "note"
 
     // Sets fields
     const val SETS_TYPE = "type"
@@ -52,6 +55,7 @@ data class User(
 }
 
 data class Workout(
+    var id: String,
     var name: String,
     var duration: Double?,
     var date: String,
@@ -62,16 +66,16 @@ data class Workout(
     companion object {
         fun fromFirestoreMap(data: Map<String, Any>?) = data?.let {
             Workout(
-                name = it.getOrDefault(FirestoreFields.WORKOUT_NAME, "") as? String ?: "",
-                duration = it.get(FirestoreFields.WORKOUT_DURATION) as? Double,
-                date = it.getOrDefault(FirestoreFields.WORKOUT_DATE, "") as? String ?: "",
-                isTemplate = it.getOrDefault(FirestoreFields.WORKOUT_IS_TEMPLATE, false) as? Boolean
-                    ?: false,
-                exercises = (it[FirestoreFields.WORKOUT_EXERCISES] as? List<Map<String, Any>>)
-                    ?.mapNotNull { map ->
+                id = it[FirestoreFields.WORKOUT_ID] as String,
+                name = it[FirestoreFields.WORKOUT_NAME] as String,
+                duration = it[FirestoreFields.WORKOUT_DURATION] as Double,
+                date = it[FirestoreFields.WORKOUT_DATE] as String,
+                isTemplate = it[FirestoreFields.WORKOUT_IS_TEMPLATE] as Boolean,
+                exercises = (it[FirestoreFields.WORKOUT_EXERCISES] as List<Map<String, Any>>)
+                    .mapNotNull { map ->
                         Exercise.fromFirestoreMap(map)
-                    } ?: emptyList(),
-                ids = (it[FirestoreFields.WORKOUT_IDS] as? List<String>) ?: emptyList()
+                    },
+                ids = it[FirestoreFields.WORKOUT_IDS] as List<String>
             )
         }
         //TODO(RETURN THIS INSTEAD OF THROWING)
@@ -86,6 +90,7 @@ data class Exercise(
     var category: Category,
     var isTemplate: Boolean,
     var sets: List<Sets>,
+    var note: String?,
 ) {
     companion object {
         fun fromFirestoreMap(data: Map<String, Any>?) = data?.let {
@@ -96,11 +101,12 @@ data class Exercise(
                 category = it[FirestoreFields.EXERCISE_CATEGORY].toString()
                     .let { string -> Category.valueOf(string) },
                 isTemplate = it[FirestoreFields.EXERCISE_IS_TEMPLATE] as Boolean,
-                sets = (it[FirestoreFields.EXERCISE_SETS] as? List<Map<String, Any>>)?.mapNotNull { map ->
+                sets = (it[FirestoreFields.EXERCISE_SETS] as List<Map<String, Any>>).mapNotNull { map ->
                     Sets.fromFirestoreMap(
                         map
                     )
-                } ?: listOf()
+                },
+                note = it[FirestoreFields.EXERCISE_NOTE] as? String
             )
         }
     }
