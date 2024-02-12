@@ -5,16 +5,18 @@ import android.transition.TransitionInflater
 import android.view.LayoutInflater
 import android.view.View
 import android.view.ViewGroup
-import android.widget.Toast
 import androidx.core.os.bundleOf
 import androidx.fragment.app.Fragment
 import androidx.fragment.app.viewModels
 import androidx.navigation.fragment.findNavController
+import androidx.recyclerview.widget.ItemTouchHelper
 import androidx.recyclerview.widget.LinearLayoutManager
+import androidx.recyclerview.widget.RecyclerView
 import bg.zahov.app.data.model.ClickableSet
 import bg.zahov.app.data.model.Exercise
 import bg.zahov.app.ui.workout.add.ExerciseSetAdapter
 import bg.zahov.app.ui.workout.add.WorkoutEntry
+import bg.zahov.app.util.SwipeGesture
 import bg.zahov.app.util.applyScaleAnimation
 import bg.zahov.fitness.app.R
 import bg.zahov.fitness.app.databinding.FragmentWorkoutBinding
@@ -72,19 +74,19 @@ class WorkoutFragment : Fragment() {
                 layoutManager = LinearLayoutManager(requireContext())
             }
 
-//            val swipeGesture = object : SwipeGesture() {
-//                override fun onSwiped(viewHolder: RecyclerView.ViewHolder, direction: Int) {
-//                    when(direction){
-//                        ItemTouchHelper.LEFT -> {
-//                            if(viewHolder is  ExerciseSetAdapter.SetViewHolder && viewHolder.itemViewType == R.layout.item_set) {
-//                                viewHolder.deleteSet()
-//                            }
-//                        }
-//                    }
-//                }
-//            }
-//            val itemTouchHelper = ItemTouchHelper(swipeGesture)
-//            itemTouchHelper.attachToRecyclerView(exercisesRecyclerView)
+            val swipeGesture = object : SwipeGesture() {
+                override fun onSwiped(viewHolder: RecyclerView.ViewHolder, direction: Int) {
+                    when (direction) {
+                        ItemTouchHelper.LEFT -> {
+                            if (viewHolder is ExerciseSetAdapter.SetViewHolder && viewHolder.itemViewType == R.layout.item_set) {
+                                viewHolder.deleteSet()
+                            }
+                        }
+                    }
+                }
+            }
+            val itemTouchHelper = ItemTouchHelper(swipeGesture)
+            itemTouchHelper.attachToRecyclerView(workoutRecyclerView)
 
 
             addExercise.setOnClickListener {

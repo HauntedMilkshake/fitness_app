@@ -186,7 +186,7 @@ class ExercisesFragment : Fragment() {
     }
 
     private fun showCustomLayout() {
-        val inflater = LayoutInflater.from(requireContext())
+        val inflater = LayoutInflater.from(context)
         val customView = inflater.inflate(R.layout.popup_simple, null)
         val textView = customView.findViewById<MaterialTextView>(R.id.create_exercise_view)
 

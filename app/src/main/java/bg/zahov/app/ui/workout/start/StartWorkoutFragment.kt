@@ -2,10 +2,14 @@ package bg.zahov.app.ui.workout.start
 
 import android.os.Bundle
 import android.transition.TransitionInflater
+import android.util.Log
+import android.view.Gravity
 import android.view.LayoutInflater
 import android.view.View
 import android.view.ViewGroup
+import android.widget.PopupMenu
 import android.widget.Toast
+import androidx.appcompat.view.ContextThemeWrapper
 import androidx.fragment.app.Fragment
 import androidx.fragment.app.viewModels
 import androidx.lifecycle.map
@@ -13,7 +17,6 @@ import androidx.navigation.fragment.findNavController
 import androidx.recyclerview.widget.LinearLayoutManager
 import bg.zahov.app.data.model.Workout
 import bg.zahov.app.data.model.StartWorkoutUiMapper
-import bg.zahov.app.ui.workout.TemplateWorkoutAdapter
 import bg.zahov.app.util.applyScaleAnimation
 import bg.zahov.fitness.app.R
 import bg.zahov.fitness.app.databinding.FragmentStartWorkoutBinding
@@ -42,12 +45,13 @@ class StartWorkoutFragment : Fragment() {
         binding.apply {
 
             val workoutAdapter = TemplateWorkoutAdapter().apply {
-                object : TemplateWorkoutAdapter.ItemClickListener<Workout> {
+                itemClickListener = object : TemplateWorkoutAdapter.ItemClickListener<Workout> {
                     override fun onSettingsClicked(item: Workout, clickedView: View) {
-                        //TODO(Open popup with options to start workout
+                        Log.d("click", "detected")
+                        showCustomLayout(item, clickedView)
                     }
-
                     override fun onWorkoutClicked(item: Workout, clickedView: View) {
+                        Log.d("click", "detected")
                     }
                 }
             }
@@ -61,33 +65,61 @@ class StartWorkoutFragment : Fragment() {
                 workoutAdapter.updateItems(it)
             }
 
-            startWorkoutViewModel.state.map { StartWorkoutUiMapper.map(it) }.observe(viewLifecycleOwner) {
-                showToast(it.errorMessage)
+            startWorkoutViewModel.state.map { StartWorkoutUiMapper.map(it) }
+                .observe(viewLifecycleOwner) {
+                    showToast(it.errorMessage)
 
-                if (it.shutdown) {
-                    //TODO()
-                }
+                    if (it.shutdown) {
+                        //TODO()
+                    }
 
-                addTemplate.setOnClickListener {view ->
-                    view.applyScaleAnimation()
-                    if(!it.isWorkoutActive){
-                        findNavController().navigate(R.id.workout_to_create_workout_template)
+                    addTemplate.setOnClickListener { view ->
+                        view.applyScaleAnimation()
+                        if (!it.isWorkoutActive) {
+                            findNavController().navigate(R.id.workout_to_create_workout_template)
+                        }
                     }
                 }
-            }
 
             startEmptyWorkout.setOnClickListener {
-                startWorkoutViewModel.state.map { StartWorkoutUiMapper.map(it) }.observe(viewLifecycleOwner) {
-                    if(it.isWorkoutActive) {
-                        //TODO(GIVE THE USER AN OPTION FOR DISCARDING THE CURRENT WORKOUT)
-                        showToast(it.message)
-                    } else {
-                        startWorkoutViewModel.startEmptyWorkout()
+                startWorkoutViewModel.state.map { StartWorkoutUiMapper.map(it) }
+                    .observe(viewLifecycleOwner) {
+                        if (it.isWorkoutActive) {
+                            //TODO(GIVE THE USER AN OPTION FOR DISCARDING THE CURRENT WORKOUT)
+                            showToast(it.message)
+                        } else {
+                            startWorkoutViewModel.startEmptyWorkout()
+                        }
                     }
-                }
-
             }
         }
+    }
+
+    private fun showCustomLayout(workout: Workout, view: View) {
+        val popupMenu = PopupMenu(ContextThemeWrapper(context, R.style.MyPopUp), view)
+        popupMenu.menuInflater.inflate(R.menu.popup_workout_menu, popupMenu.menu)
+        popupMenu.setOnMenuItemClickListener { item ->
+            when (item.itemId) {
+                R.id.action_delete -> {
+                    //TODO(Add a dialog where it asks for permission and then delete workout)
+                }
+
+                R.id.action_duplicate -> {
+                    //TODO(Add template again)
+                }
+
+                R.id.action_edit -> {
+                    //TODO(Go to another fragment)
+                }
+
+                R.id.action_start_workout -> {
+                    Log.d("START", "WORKOUT")
+                    startWorkoutViewModel.startWorkoutFromTemplate(workout)
+                }
+            }
+            true
+        }
+        popupMenu.show()
     }
 
     private fun showToast(message: String?) {
@@ -95,6 +127,7 @@ class StartWorkoutFragment : Fragment() {
             Toast.makeText(context, it, Toast.LENGTH_SHORT).show()
         }
     }
+
     override fun onDestroyView() {
         super.onDestroyView()
         _binding = null

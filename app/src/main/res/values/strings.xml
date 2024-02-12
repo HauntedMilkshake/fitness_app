@@ -93,6 +93,10 @@
     <!-- Strings used for workout fragment    -->
     <string name="finish_workout">Finish</string>
     <string name="cancel_workout">cancel workout</string>
+    <string name="edit_workout">Edit</string>
+    <string name="duplicate">Duplicate</string>
+    <string name="delete">Delete</string>
+    <string name="start_workout">Start workout</string>
 
 
 </resources>

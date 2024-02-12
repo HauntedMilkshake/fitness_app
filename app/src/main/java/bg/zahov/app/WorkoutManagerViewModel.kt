@@ -7,6 +7,7 @@ import androidx.lifecycle.MutableLiveData
 import androidx.lifecycle.viewModelScope
 import bg.zahov.app.data.model.Workout
 import bg.zahov.app.data.model.WorkoutState
+import kotlinx.coroutines.flow.combine
 import kotlinx.coroutines.launch
 
 class WorkoutManagerViewModel(application: Application) : AndroidViewModel(application) {
@@ -24,8 +25,18 @@ class WorkoutManagerViewModel(application: Application) : AndroidViewModel(appli
 
     init {
         viewModelScope.launch {
-            workoutStateManager.state.collect {
-                _state.postValue(State.Active(it))
+            combine(workoutStateManager.state, workoutStateManager.template) { state, template ->
+                _state.postValue(State.Active(state))
+                template?.let { _template.postValue(it) }
+
+            }
+        }
+    }
+
+    fun getWorkout() {
+        viewModelScope.launch {
+            workoutStateManager.template.collect {
+                it?.let { _template.postValue(it) }
             }
         }
     }
@@ -37,4 +48,5 @@ class WorkoutManagerViewModel(application: Application) : AndroidViewModel(appli
     sealed interface State {
         data class Active(val state: WorkoutState) : State
     }
+
 }

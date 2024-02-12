@@ -1,4 +1,4 @@
-package bg.zahov.app.ui.workout
+package bg.zahov.app.ui.workout.start
 
 import android.view.View
 import bg.zahov.app.data.model.Workout
@@ -27,8 +27,10 @@ class TemplateWorkoutAdapter : BaseAdapter<Workout>(
             title.text = item.name
             lastPerformed.text = "Last performed: ${item.date}"
             settings.setOnClickListener {
+
                 itemClickListener?.onSettingsClicked(item, settings)
             }
+
             itemView.setOnClickListener {
                 itemClickListener?.onWorkoutClicked(item, itemView)
             }

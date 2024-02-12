@@ -32,6 +32,7 @@ class MainActivity : AppCompatActivity() {
         binding = ActivityMainBinding.inflate(layoutInflater)
         setContentView(binding.root)
 
+        workoutManagerViewModel.getWorkout()
         val navController = findNavController(R.id.nav_host_fragment)
 
         binding.bottomNavigation.setupWithNavController(navController)
@@ -43,24 +44,20 @@ class MainActivity : AppCompatActivity() {
         hideBottomNav()
 
         workoutManagerViewModel.state.map { WorkoutManagerUiMapper.map(it) }.observe(this) {
-            Log.d("WORKOUT UI", it.state.toString())
             when (it.state) {
                 WorkoutState.MINIMIZED -> {
-                    Log.d("WOW ACTIVE", "minimized")
                     showBottomNav()
                     setWorkoutVisibility(View.VISIBLE)
                     stopWorkoutFragment()
                 }
 
                 WorkoutState.ACTIVE -> {
-                    Log.d("WOW ACTIVE", "ACTIVE")
                     hideBottomNav()
                     setWorkoutVisibility(View.GONE)
                     startWorkoutFragment()
                 }
 
                 WorkoutState.INACTIVE -> {
-                    Log.d("WOW ACTIVE", "inactive")
                     showBottomNav()
                     setWorkoutVisibility(View.GONE)
                     stopWorkoutFragment()
@@ -80,7 +77,6 @@ class MainActivity : AppCompatActivity() {
 
     private fun setWorkoutVisibility(visibility: Int) {
         binding.apply {
-            Log.d("WORKOUT VISIBILITY", "SETTING WORKOUT VISIBILITY")
             trailingWorkout.visibility = visibility
             timer.visibility = visibility
             workoutName.visibility = visibility
