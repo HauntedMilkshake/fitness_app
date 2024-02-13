@@ -12,12 +12,7 @@ import bg.zahov.app.data.model.Workout
 import bg.zahov.app.getWorkoutProvider
 import bg.zahov.app.util.currDateToString
 import bg.zahov.app.util.hashString
-import com.google.common.hash.Hashing
 import kotlinx.coroutines.launch
-import java.nio.charset.StandardCharsets
-import java.time.LocalDate
-import java.time.format.DateTimeFormatter
-import java.util.Locale
 
 class AddWorkoutViewModel(application: Application) : AndroidViewModel(application) {
     private val repo by lazy {
@@ -68,63 +63,49 @@ class AddWorkoutViewModel(application: Application) : AndroidViewModel(applicati
                 _state.value = State.Error("Cannot create a workout without exercises!")
                 return
             }
-            exercises.forEach {
-                Log.d("exercise", it.name)
-            }
+
             viewModelScope.launch {
-                repo.addTemplateWorkout(
-                    Workout(
-                        id = hashString(_workoutName.value!!),
-                        name = _workoutName.value!!,
-                        duration = 0.0,
-                        date = currDateToString(),
-                        isTemplate = true,
-                        exercises = emptyList(),
-                        ids = exercises.map { it.name }
+                    repo.addTemplateWorkout(
+                        Workout(
+                            id = hashString(_workoutName.value!!),
+                            name = _workoutName.value!!,
+                            duration = 0.0,
+                            date = currDateToString(),
+                            isTemplate = true,
+                            exercises = emptyList(),
+                            ids = exercises.map { it.name }
+                        )
                     )
-                )
 
-                _workoutName.postValue("")
-                _currExercises.postValue(listOf())
+                    _workoutName.postValue("")
+                    _currExercises.postValue(listOf())
 
-                _state.postValue(State.Success("Template workout ${_workoutName.value} successfully created!"))
+                    _state.postValue(State.Default)
             }
         }
     }
-
-//    fun addSelectedExercises(selectedExercises: List<SelectableExercise>) {
-//        val captured = _currExercises.value?.toMutableList() ?: mutableListOf()
-//        captured.addAll(selectedExercises.toExerciseList())
-//        _currExercises.value = captured
-//    }
 
     fun addExercise(newExercise: Exercise) {
         val captured = _currExercises.value?.toMutableList() ?: mutableListOf()
         captured.add(newExercise)
         _currExercises.value = captured
-        captured.forEach {
-            Log.d("ADD", it.name)
-        }
+
     }
 
     fun removeExercise(item: Exercise) {
         val captured = _currExercises.value?.toMutableList() ?: mutableListOf()
         captured.remove(item)
         _currExercises.value = captured
-        captured.forEach {
-            Log.d("DELETE", it.name)
-        }
+
     }
 
     fun addSet(exercise: Exercise, set: Sets) {
         val exercises = _currExercises.value?.toMutableList() ?: emptyList()
         val foundExercise = exercises.find { it == exercise }
-        Log.d("ADDING SET", "OLD SET SIZE ${foundExercise?.sets?.size}")
         foundExercise?.let {
             val newSets = it.sets.toMutableList()
             newSets.add(set)
             it.sets = newSets
-            Log.d("ADDING SET", "NEW SET SIZE ${foundExercise.sets.size}")
         }
         _currExercises.value = exercises
     }
@@ -132,12 +113,10 @@ class AddWorkoutViewModel(application: Application) : AndroidViewModel(applicati
     fun removeSet(exercise: Exercise, set: Sets) {
         val exercises = _currExercises.value?.toMutableList() ?: emptyList()
         val foundExercise = exercises.find { it == exercise }
-        Log.d("REMOVING SET", "OLD SET SIZE ${foundExercise?.sets?.size}")
         foundExercise?.let {
             if (it.sets.isEmpty()) {
                 val newSets = it.sets.toMutableList()
                 newSets.remove(set)
-                Log.d("REMOVING SET", "NEW SET SIZE ${foundExercise.sets.size}")
                 it.sets = newSets
             }
         }
@@ -150,6 +129,7 @@ class AddWorkoutViewModel(application: Application) : AndroidViewModel(applicati
     }
 
     sealed interface State {
+        object Default : State
         data class Error(val eMessage: String) : State
         data class Success(val nMessage: String) : State
     }

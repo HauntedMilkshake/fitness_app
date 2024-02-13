@@ -11,7 +11,6 @@ import kotlinx.coroutines.flow.MutableSharedFlow
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.SharedFlow
 import kotlinx.coroutines.flow.StateFlow
-import kotlinx.coroutines.flow.flow
 import kotlinx.coroutines.launch
 
 class WorkoutStateManager {
@@ -36,46 +35,38 @@ class WorkoutStateManager {
     val timer: SharedFlow<Long>
         get() = _timer
 
-    private suspend fun startTimer() = CoroutineScope(Dispatchers.Default).launch {
-        _timer.emit(lastTime)
-        while (true) {
-            delay(1000)
-            Log.d("EMIT", lastTime.toString())
-            lastTime += 1000
+    private var job: Job? = null
+
+    private suspend fun startTimer() {
+
+        job = CoroutineScope(Dispatchers.Default).launch {
+            while (true) {
+                _timer.emit(lastTime)
+                delay(1000)
+                lastTime += 1000
+            }
         }
     }
 
+    private fun stopTimer() = job?.cancel().also { job = null }
 
-    private suspend fun stopTimer() = startTimer().cancel()
-
-
-//    private val _timer =  flow {
-//        while (timerFlag) {
-//            emit(lastTime)
-//            delay(1000)
-//            lastTime += 1000
-//
-//            Log.d("time", lastTime.toString())
-//        }
-//    }
-//
-//    val timer
-//        get() = _timer
-
-    private var timerFlag: Boolean = false
     private var lastTime: Long = 0L
     suspend fun updateState(newState: WorkoutState) {
         when (newState) {
             WorkoutState.INACTIVE -> {
                 stopTimer()
+                lastTime = 0L
+                _template.value = null
+
             }
 
             else -> {
-                if (!startTimer().isActive) {
+                if(job == null) {
                     startTimer()
                 }
             }
         }
+        Log.d("POSTING STATE", newState.name)
         _state.value = newState
     }
 

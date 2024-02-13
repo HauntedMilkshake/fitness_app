@@ -1,6 +1,7 @@
 package bg.zahov.app
 
 import android.app.Application
+import android.util.Log
 import androidx.lifecycle.AndroidViewModel
 import androidx.lifecycle.LiveData
 import androidx.lifecycle.MutableLiveData
@@ -42,13 +43,17 @@ class WorkoutManagerViewModel(application: Application) : AndroidViewModel(appli
     init {
         viewModelScope.launch {
             launch {
-                combine(
-                    workoutStateManager.state,
-                    workoutStateManager.template,
-                ) { state, template ->
-                    _state.postValue(State.Active(state))
-                    template?.let { _template.postValue(it) }
-                }.stateIn(viewModelScope)
+                workoutStateManager.template.collect {
+                    it?.let { _template.postValue(it) }
+                }
+            }
+
+            launch {
+                workoutStateManager.state.collect {
+                    Log.d("STATE", it.name)
+                    _state.postValue(State.Active(it))
+
+                }
             }
 
             launch {
@@ -69,6 +74,7 @@ class WorkoutManagerViewModel(application: Application) : AndroidViewModel(appli
 
     fun updateStateToActive() {
         viewModelScope.launch {
+            Log.d("UPDATING STATE FROM ACTIVITY", "ACTIVE")
             workoutStateManager.updateState(WorkoutState.ACTIVE)
         }
     }

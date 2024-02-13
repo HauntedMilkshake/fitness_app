@@ -59,6 +59,7 @@ class StartWorkoutViewModel(application: Application) : AndroidViewModel(applica
 
     fun startEmptyWorkout() {
         viewModelScope.launch {
+            Log.d("UPDATING STATE FROM START WOKROUT", "ACTIVE")
             workoutState.updateState(WorkoutState.ACTIVE)
         }
     }
@@ -78,10 +79,11 @@ class StartWorkoutViewModel(application: Application) : AndroidViewModel(applica
 
     fun addDuplicateTemplateWorkout(workout: Workout) {
         viewModelScope.launch {
+            val count = _templates.value?.count { workout.name == it.name }
             repo.addTemplateWorkout(
                 Workout(
-                    id = hashString(workout.name + "copy"),
-                    name = "${workout.id} + copy",
+                    id = hashString(workout.name + "copy $count"),
+                    name = "${workout.name} + copy $count",
                     duration = null,
                     date = currDateToString(),
                     isTemplate = true,

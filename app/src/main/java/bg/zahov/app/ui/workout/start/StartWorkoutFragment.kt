@@ -2,7 +2,6 @@ package bg.zahov.app.ui.workout.start
 
 import android.os.Bundle
 import android.transition.TransitionInflater
-import android.util.Log
 import android.view.LayoutInflater
 import android.view.View
 import android.view.ViewGroup
@@ -16,7 +15,6 @@ import androidx.navigation.fragment.findNavController
 import androidx.recyclerview.widget.LinearLayoutManager
 import bg.zahov.app.data.model.Workout
 import bg.zahov.app.data.model.StartWorkoutUiMapper
-import bg.zahov.app.util.applyScaleAnimation
 import bg.zahov.fitness.app.R
 import bg.zahov.fitness.app.databinding.FragmentStartWorkoutBinding
 
@@ -74,18 +72,14 @@ class StartWorkoutFragment : Fragment() {
                 }
 
             startEmptyWorkout.setOnClickListener {
-                startWorkoutViewModel.state.map { StartWorkoutUiMapper.map(it) }
-                    .observe(viewLifecycleOwner) {
-                        if (it.isWorkoutActive) {
-                            //TODO(GIVE THE USER AN OPTION FOR DISCARDING THE CURRENT WORKOUT)
-                            showToast(it.message)
-                        } else {
-                            startWorkoutViewModel.startEmptyWorkout()
-                        }
-                    }
+                startWorkoutViewModel.startEmptyWorkout()
+            }
+            addTemplate.setOnClickListener {
+                findNavController().navigate(R.id.workout_to_create_workout_template)
             }
         }
     }
+
 
     private fun showCustomLayout(workout: Workout, view: View) {
         val popupMenu = PopupMenu(ContextThemeWrapper(context, R.style.MyPopUp), view)

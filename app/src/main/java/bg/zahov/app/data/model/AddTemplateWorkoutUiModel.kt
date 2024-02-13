@@ -12,5 +12,6 @@ object AddTemplateWorkoutUiMapper {
     fun map(state: AddWorkoutViewModel.State) = when(state) {
         is AddWorkoutViewModel.State.Error -> AddTemplateWorkoutUiModel(eMessage = state.eMessage, null)
         is AddWorkoutViewModel.State.Success -> AddTemplateWorkoutUiModel(null, nMessage = state.nMessage, true)
+        AddWorkoutViewModel.State.Default -> AddTemplateWorkoutUiModel()
     }
 }

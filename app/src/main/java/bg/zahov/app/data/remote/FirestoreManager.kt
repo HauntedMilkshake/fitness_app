@@ -1,5 +1,6 @@
 package bg.zahov.app.data.remote
 
+import android.util.Log
 import bg.zahov.app.data.exception.CriticalDataNullException
 import bg.zahov.app.data.model.Exercise
 import bg.zahov.app.data.model.FirestoreFields
@@ -123,7 +124,7 @@ class FirestoreManager {
         withContext(Dispatchers.IO) {
             firestore.collection(USERS_COLLECTION).document(userId)
                 .collection(TEMPLATE_WORKOUTS_SUB_COLLECTION)
-                .add(newWorkoutTemplate.toFirestoreMap())
+                .document(newWorkoutTemplate.name).set(newWorkoutTemplate.toFirestoreMap())
         }
     private fun deleteFirestore() {
 //        return userDocRef.listCollections().fold(Tasks.forResult(null as Void?)) { task, collectionRef ->
@@ -158,7 +159,9 @@ class FirestoreManager {
     suspend fun deleteTemplateWorkouts(workout: Workout) =
         withContext(Dispatchers.IO) {
             firestore.collection(USERS_COLLECTION).document(userId)
-                .collection(WORKOUTS_SUB_COLLECTION).document(workout.name).delete()
+                .collection(WORKOUTS_SUB_COLLECTION).document(workout.name).delete().addOnSuccessListener {
+                    Log.d("DELETE", "asd")
+                }
         }
 
     suspend fun deleteWorkout(workout: Workout) = withContext(Dispatchers.IO) {

@@ -92,7 +92,9 @@
             app:destination="@+id/create_exercise" />
         <action
             android:id="@+id/exercises_to_create_workout_template"
-            app:destination="@+id/create_workout_template" />
+            app:destination="@+id/create_workout_template"
+            app:popUpTo="@id/exercises"
+            app:popUpToInclusive="true" />
     </fragment>
 
     <fragment
@@ -159,7 +161,9 @@
         tools:layout="@layout/fragment_start_workout">
         <action
             android:id="@+id/workout_to_create_workout_template"
-            app:destination="@+id/create_workout_template" />
+            app:destination="@+id/create_workout_template"
+            app:popUpTo="@id/create_workout_template"
+            app:popUpToInclusive="true" />
     </fragment>
 
     <fragment

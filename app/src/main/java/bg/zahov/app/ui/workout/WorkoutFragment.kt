@@ -112,7 +112,7 @@ class WorkoutFragment : Fragment() {
 
             cancel.setOnClickListener {
                 it.applyScaleAnimation()
-                onGoingWorkoutViewModel.finishWorkout()
+                onGoingWorkoutViewModel.cancel()
             }
             restTimer.setOnClickListener {
                 it.applyScaleAnimation()

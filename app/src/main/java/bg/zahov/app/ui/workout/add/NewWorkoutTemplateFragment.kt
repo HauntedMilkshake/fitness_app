@@ -121,13 +121,13 @@ class NewWorkoutTemplateFragment : Fragment() {
                     showToast(it.eMessage)
                     showToast(it.nMessage)
 
-                    if (it.success) findNavController().navigate(R.id.create_workout_template_to_workout)
                 }
 
             save.setOnClickListener {
                 it.applyScaleAnimation()
                 addWorkoutViewModel.setWorkoutName(workoutNameFieldText.text.toString())
                 addWorkoutViewModel.addWorkout()
+                findNavController().navigate(R.id.create_workout_template_to_workout)
             }
 
             cancel.setOnClickListener {

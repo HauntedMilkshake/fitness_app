@@ -100,6 +100,7 @@
     <string name="add_note">Add note</string>
     <string name="replace_exercise">Replace</string>
     <string name="remove_exercise">Remove</string>
+    <string name="time">00:00:00</string>
 
 
 </resources>

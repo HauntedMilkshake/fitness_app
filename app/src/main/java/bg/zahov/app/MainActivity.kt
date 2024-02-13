@@ -70,7 +70,6 @@ class MainActivity : AppCompatActivity() {
         }
 
         workoutManagerViewModel.timer.observe(this) {
-            Log.d("TIMER ACTIVITY", it)
             binding.timer.text = it
         }
 
