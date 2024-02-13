@@ -1,6 +1,7 @@
 package bg.zahov.app
 
 import android.os.Bundle
+import android.util.Log
 import android.view.View
 import androidx.activity.viewModels
 import androidx.appcompat.app.AppCompatActivity
@@ -66,7 +67,11 @@ class MainActivity : AppCompatActivity() {
 
         workoutManagerViewModel.template.observe(this) {
             binding.workoutName.text = it.name
-            binding.timer.text = ""
+        }
+
+        workoutManagerViewModel.timer.observe(this) {
+            Log.d("TIMER ACTIVITY", it)
+            binding.timer.text = it
         }
 
         binding.trailingWorkout.setOnClickListener {
@@ -101,6 +106,7 @@ class MainActivity : AppCompatActivity() {
         supportFragmentManager.findFragmentByTag(WORKOUT_FRAGMENT)?.let {
             val fragmentTransaction = supportFragmentManager.beginTransaction()
             fragmentTransaction.remove(it)
+            Log.d("REMOVED", "FRAGMETN")
             fragmentTransaction.commit()
         }
     }

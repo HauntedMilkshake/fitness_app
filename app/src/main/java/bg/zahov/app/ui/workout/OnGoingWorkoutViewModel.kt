@@ -4,6 +4,7 @@ import android.app.Application
 import androidx.lifecycle.AndroidViewModel
 import androidx.lifecycle.LiveData
 import androidx.lifecycle.MutableLiveData
+import androidx.lifecycle.asLiveData
 import androidx.lifecycle.viewModelScope
 import bg.zahov.app.data.model.Workout
 import bg.zahov.app.data.model.WorkoutState
@@ -11,6 +12,12 @@ import bg.zahov.app.getWorkoutProvider
 import bg.zahov.app.getWorkoutStateManager
 import bg.zahov.app.util.currDateToString
 import bg.zahov.app.util.hashString
+import kotlinx.coroutines.Dispatchers
+import kotlinx.coroutines.flow.collect
+import kotlinx.coroutines.flow.combine
+import kotlinx.coroutines.flow.flowOn
+import kotlinx.coroutines.flow.map
+import kotlinx.coroutines.flow.stateIn
 import kotlinx.coroutines.launch
 
 class OnGoingWorkoutViewModel(application: Application) : AndroidViewModel(application) {
@@ -26,21 +33,63 @@ class OnGoingWorkoutViewModel(application: Application) : AndroidViewModel(appli
     val workout: LiveData<Workout>
         get() = _workout
 
+    //    val timer = workoutStateManager.timer.map {
+//        String.format("%02d:%02d:%02d", (it / (1000 * 60 * 60)) % 24, (it / (1000 * 60)) % 60,  (it / 1000) % 60)
+//    }
+//        .asLiveData(viewModelScope.coroutineContext)
+//
+    private val _timer = MutableLiveData<String>()
+    val timer: LiveData<String>
+        get() = _timer
+
     init {
         viewModelScope.launch {
-            workoutStateManager.template.collect {
-                it?.let { _workout.postValue(it) } ?: _workout.postValue(
-                    Workout(
-                        hashString("New workout"),
-                        "New workout",
-                        duration = null,
-                        date = currDateToString(),
-                        isTemplate = false,
-                        exercises = listOf(),
-                        ids = listOf()
-                    )
-                )
+//            combine(workoutStateManager.template, workoutStateManager.timer) {template, timer ->
+//                template?.let { _workout.postValue(it) } ?: run {
+//                    val workout = Workout(
+//                        hashString("New workout"),
+//                        "New workout",
+//                        duration = null,
+//                        date = currDateToString(),
+//                        isTemplate = false,
+//                        exercises = listOf(),
+//                        ids = listOf()
+//                    )
+//                    _workout.postValue(workout)
+//                    workoutStateManager.updateTemplate(workout)
+//                }
+//                _timer.postValue(String.format("%02d:%02d:%02d", (timer / (1000 * 60 * 60)) % 24, (timer / (1000 * 60)) % 60,  (timer / 1000) % 60))
+//            }.stateIn(viewModelScope)
+            launch {
+                workoutStateManager.template.collect {
+                    it?.let { _workout.postValue(it) } ?: run {
+                        val workout = Workout(
+                            hashString("New workout"),
+                            "New workout",
+                            duration = null,
+                            date = currDateToString(),
+                            isTemplate = false,
+                            exercises = listOf(),
+                            ids = listOf()
+                        )
+                        _workout.postValue(workout)
+                        workoutStateManager.updateTemplate(workout)
+                    }
+                }
             }
+            launch {
+                workoutStateManager.timer.collect {
+                    _timer.postValue(
+                        String.format(
+                            "%02d:%02d:%02d",
+                            (it / (1000 * 60 * 60)) % 24,
+                            (it / (1000 * 60)) % 60,
+                            (it / 1000) % 60
+                        )
+                    )
+                }
+            }
+
         }
     }
 

@@ -1,14 +1,15 @@
 package bg.zahov.app
 
 import android.app.Application
-import android.util.Log
 import androidx.lifecycle.AndroidViewModel
 import androidx.lifecycle.LiveData
 import androidx.lifecycle.MutableLiveData
+import androidx.lifecycle.asLiveData
 import androidx.lifecycle.viewModelScope
 import bg.zahov.app.data.model.Workout
 import bg.zahov.app.data.model.WorkoutState
 import kotlinx.coroutines.flow.combine
+import kotlinx.coroutines.flow.map
 import kotlinx.coroutines.flow.stateIn
 import kotlinx.coroutines.launch
 
@@ -25,19 +26,51 @@ class WorkoutManagerViewModel(application: Application) : AndroidViewModel(appli
     val template: LiveData<Workout>
         get() = _template
 
+    //    val timer = workoutStateManager.timer.map {
+//        String.format(
+//            "%02d:%02d:%02d",
+//            (it / (1000 * 60 * 60)) % 24,
+//            (it / (1000 * 60)) % 60,
+//            (it / 1000) % 60
+//        )
+//    }
+//        .asLiveData(viewModelScope.coroutineContext)
+    private val _timer = MutableLiveData<String>()
+    val timer: LiveData<String>
+        get() = _timer
+
     init {
         viewModelScope.launch {
-            combine(workoutStateManager.state, workoutStateManager.template) { state, template ->
-                Log.d("EMITTING", "${state.name} and ${template?.name}")
-                _state.postValue(State.Active(state))
-                template?.let { _template.postValue(it) }
+            launch {
+                combine(
+                    workoutStateManager.state,
+                    workoutStateManager.template,
+                ) { state, template ->
+                    _state.postValue(State.Active(state))
+                    template?.let { _template.postValue(it) }
+                }.stateIn(viewModelScope)
+            }
 
-            }.stateIn(viewModelScope)
+            launch {
+                workoutStateManager.timer.collect {
+                    _timer.postValue(
+                        String.format(
+                            "%02d:%02d:%02d",
+                            (it / (1000 * 60 * 60)) % 24,
+                            (it / (1000 * 60)) % 60,
+                            (it / 1000) % 60
+                        )
+                    )
+                }
+            }
         }
     }
 
+
     fun updateStateToActive() {
-        workoutStateManager.updateState(WorkoutState.ACTIVE)
+        viewModelScope.launch {
+            workoutStateManager.updateState(WorkoutState.ACTIVE)
+        }
     }
 
     sealed interface State {

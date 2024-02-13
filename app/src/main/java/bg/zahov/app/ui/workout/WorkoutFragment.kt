@@ -101,6 +101,10 @@ class WorkoutFragment : Fragment() {
                 exerciseSetAdapter.updateItems(it.exercises)
             }
 
+            onGoingWorkoutViewModel.timer.observe(viewLifecycleOwner) {
+                timer.text = it
+            }
+
             minimize.setOnClickListener {
                 it.applyScaleAnimation()
                 onGoingWorkoutViewModel.minimize()
