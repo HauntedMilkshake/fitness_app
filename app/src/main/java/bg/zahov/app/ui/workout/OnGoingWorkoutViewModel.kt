@@ -42,8 +42,7 @@ class OnGoingWorkoutViewModel(application: Application) : AndroidViewModel(appli
                             duration = null,
                             date = currDateToString(),
                             isTemplate = false,
-                            exercises = listOf(),
-                            ids = listOf()
+                            exercises = listOf()
                         )
                         _workout.postValue(workout)
                         workoutStateManager.updateTemplate(workout)

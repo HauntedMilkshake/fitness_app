@@ -36,10 +36,9 @@ class TemplateWorkoutAdapter : BaseAdapter<Workout>(
             }
             if (item.isTemplate) {
                 exercises.text =
-                    item.ids.joinToString("\n") { "$it x 99" }
-            } else {
-                exercises.text =
-                    item.exercises.joinToString("\n") { "${it.sets.size} x ${it.name}" }
+                    item.exercises.joinToString("\n") {
+                        "${it.name} x ${it.sets.size}"
+                    }
             }
         }
     }

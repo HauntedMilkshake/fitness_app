@@ -116,8 +116,8 @@ class FirestoreManager {
     suspend fun addTemplateExercise(newExercise: Exercise) =
         withContext(Dispatchers.IO) {
             firestore.collection(USERS_COLLECTION).document(userId)
-                .collection(TEMPLATE_EXERCISES)
-                .add(newExercise)
+                .collection(TEMPLATE_EXERCISES).document(newExercise.name)
+                .set(newExercise.toFirestoreMap())
         }
 
     suspend fun addTemplateWorkout(newWorkoutTemplate: Workout) =
@@ -126,6 +126,7 @@ class FirestoreManager {
                 .collection(TEMPLATE_WORKOUTS_SUB_COLLECTION)
                 .document(newWorkoutTemplate.name).set(newWorkoutTemplate.toFirestoreMap())
         }
+
     private fun deleteFirestore() {
 //        return userDocRef.listCollections().fold(Tasks.forResult(null as Void?)) { task, collectionRef ->
 //            task.continueWithTask { _ ->
@@ -156,15 +157,17 @@ class FirestoreManager {
                 .add(newWorkout.toFirestoreMap())
         }
 
-    suspend fun deleteTemplateWorkouts(workout: Workout) =
+    suspend fun deleteTemplateWorkouts(workout: Workout) {
         withContext(Dispatchers.IO) {
             firestore.collection(USERS_COLLECTION).document(userId)
-                .collection(WORKOUTS_SUB_COLLECTION).document(workout.name).delete().addOnSuccessListener {
-                    Log.d("DELETE", "asd")
+                .collection(TEMPLATE_WORKOUTS_SUB_COLLECTION).document(workout.name).delete().addOnSuccessListener {
+                    Log.d("LISTEN", "deleted")
                 }
         }
+    }
 
     suspend fun deleteWorkout(workout: Workout) = withContext(Dispatchers.IO) {
-        firestore.collection(USERS_COLLECTION).document(userId).collection(WORKOUTS_SUB_COLLECTION).document(workout.id).delete()
+        firestore.collection(USERS_COLLECTION).document(userId).collection(WORKOUTS_SUB_COLLECTION)
+            .document(workout.id).delete()
     }
 }

@@ -101,6 +101,10 @@
     <string name="replace_exercise">Replace</string>
     <string name="remove_exercise">Remove</string>
     <string name="time">00:00:00</string>
+    <string name="warmup_set"> <font color="#FF0000"><b>W</b></font>  Warm up    <b>?</b></string>
+
+    <string name="drop_set"><font color="#FF0000"><b>D</b></font>  Drop set    <b>?</b></string>
+    <string name="failure_set"><font color="#FF0000"><b>F</b></font>   Failure    <b>?</b></string>
 
 
 </resources>

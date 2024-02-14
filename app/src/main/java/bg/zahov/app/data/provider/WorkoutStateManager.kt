@@ -71,6 +71,7 @@ class WorkoutStateManager {
     }
 
     fun updateTemplate(workout: Workout) {
+        Log.d("TEMPLATE POSTED", workout.name)
         _template.value = workout
     }
 }

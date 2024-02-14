@@ -88,6 +88,7 @@ class StartWorkoutFragment : Fragment() {
             when (item.itemId) {
                 R.id.action_delete -> {
                     startWorkoutViewModel.deleteTemplateWorkout(workout)
+
                 }
 
                 R.id.action_duplicate -> {
@@ -95,7 +96,7 @@ class StartWorkoutFragment : Fragment() {
                 }
 
                 R.id.action_edit -> {
-
+                    //TODO(Go to fragment workout with edit preference
                 }
 
                 R.id.action_start_workout -> {

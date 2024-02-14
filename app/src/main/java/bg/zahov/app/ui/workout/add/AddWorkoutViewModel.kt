@@ -72,8 +72,7 @@ class AddWorkoutViewModel(application: Application) : AndroidViewModel(applicati
                             duration = 0.0,
                             date = currDateToString(),
                             isTemplate = true,
-                            exercises = emptyList(),
-                            ids = exercises.map { it.name }
+                            exercises = _currExercises.value!!,
                         )
                     )
 

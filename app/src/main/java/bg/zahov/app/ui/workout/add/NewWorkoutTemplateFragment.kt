@@ -1,19 +1,17 @@
 package bg.zahov.app.ui.workout.add
 
+import android.graphics.drawable.shapes.Shape
 import android.os.Bundle
-import android.text.Editable
-import android.text.TextWatcher
 import android.transition.TransitionInflater
-import android.util.Log
 import android.view.LayoutInflater
 import android.view.View
 import android.view.ViewGroup
 import android.widget.PopupMenu
 import android.widget.Toast
 import androidx.appcompat.view.ContextThemeWrapper
+import androidx.constraintlayout.widget.ConstraintLayout
 import androidx.core.os.bundleOf
-import androidx.core.widget.addTextChangedListener
-import androidx.core.widget.doOnTextChanged
+import androidx.core.view.forEach
 import androidx.fragment.app.Fragment
 import androidx.fragment.app.viewModels
 import androidx.lifecycle.map
@@ -22,10 +20,13 @@ import androidx.recyclerview.widget.LinearLayoutManager
 import bg.zahov.app.data.model.AddTemplateWorkoutUiMapper
 import bg.zahov.app.data.model.ClickableSet
 import bg.zahov.app.data.model.Exercise
-import bg.zahov.app.data.model.Workout
+import bg.zahov.app.data.model.Sets
+import bg.zahov.app.ui.exercise.FilterDialog
 import bg.zahov.app.util.applyScaleAnimation
 import bg.zahov.fitness.app.R
 import bg.zahov.fitness.app.databinding.FragmentNewWorkoutTemplateBinding
+import com.google.android.material.imageview.ShapeableImageView
+import com.google.android.material.textview.MaterialTextView
 
 class NewWorkoutTemplateFragment : Fragment() {
 
@@ -62,11 +63,11 @@ class NewWorkoutTemplateFragment : Fragment() {
             val exerciseSetAdapter = ExerciseSetAdapter().apply {
                 itemClickListener = object : ExerciseSetAdapter.ItemClickListener<WorkoutEntry> {
                     override fun onOptionsClicked(item: Exercise, clickedView: View) {
-                        showCustomLayout(item, clickedView)
+                        showExerciseMenu(item, clickedView)
                     }
 
                     override fun onSetClicked(item: ClickableSet, clickedView: View) {
-                        //TODO(popup menu with custom items ig)
+                        showSetMenu(item.set, clickedView)
                     }
 
                     override fun onSetCheckClicked(item: ClickableSet, clickedView: View) {
@@ -137,13 +138,13 @@ class NewWorkoutTemplateFragment : Fragment() {
         }
     }
 
-    private fun showCustomLayout(exercise: Exercise, view: View) {
+    private fun showExerciseMenu(exercise: Exercise, view: View) {
         val popupMenu = PopupMenu(ContextThemeWrapper(context, R.style.MyPopUp), view)
         popupMenu.menuInflater.inflate(R.menu.popup_exercise_menu, popupMenu.menu)
         popupMenu.setOnMenuItemClickListener { item ->
             when (item.itemId) {
                 R.id.action_add_note -> {
-                    //TODO(Show material text input)
+                    binding
                 }
 
                 R.id.action_replace -> {
@@ -156,6 +157,36 @@ class NewWorkoutTemplateFragment : Fragment() {
             }
             true
         }
+        popupMenu.show()
+    }
+
+    private fun showSetMenu(set: Sets, view: View) {
+        val popupMenu = PopupMenu(ContextThemeWrapper(context, R.style.MyPopUp), view)
+        popupMenu.menuInflater.inflate(R.menu.popup_set_menu, popupMenu.menu)
+
+        popupMenu.menu.forEach {
+            it.setActionView(R.layout.item_menu_popup_set)
+
+            it.actionView?.findViewById<MaterialTextView>(R.id.action)?.setText(
+                when (it.itemId) {
+                    R.id.action_drop_set -> R.string.drop_set
+                    R.id.action_failure_set -> R.string.failure_set
+                    R.id.action_warmup_set -> R.string.warmup_set
+                    else -> {
+                        R.string.drop_set
+                    }
+                }
+            )
+
+            it.actionView?.findViewById<ConstraintLayout>(R.id.item)?.setOnClickListener {
+                //TODO(Propagate to adapter / update live data)
+            }
+
+            it.actionView?.findViewById<ShapeableImageView>(R.id.openInfo)?.setOnClickListener {
+                SetInfoDialogFragment().show(childFragmentManager, SetInfoDialogFragment.TAG)
+            }
+        }
+
         popupMenu.show()
     }
 

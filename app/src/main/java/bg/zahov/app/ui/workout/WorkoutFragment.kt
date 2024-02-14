@@ -5,6 +5,7 @@ import android.transition.TransitionInflater
 import android.view.LayoutInflater
 import android.view.View
 import android.view.ViewGroup
+import androidx.activity.OnBackPressedCallback
 import androidx.core.os.bundleOf
 import androidx.fragment.app.Fragment
 import androidx.fragment.app.viewModels
@@ -121,6 +122,12 @@ class WorkoutFragment : Fragment() {
                 it.applyScaleAnimation()
                 onGoingWorkoutViewModel.finishWorkout()
             }
+
+            activity?.onBackPressedDispatcher?.addCallback(object : OnBackPressedCallback(true) {
+                override fun handleOnBackPressed() {
+                    onGoingWorkoutViewModel.minimize()
+                }
+            })
         }
     }
 

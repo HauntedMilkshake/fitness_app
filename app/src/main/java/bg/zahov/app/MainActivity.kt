@@ -40,25 +40,19 @@ class MainActivity : AppCompatActivity() {
             if (it.isAuthenticated) navController.navigate(R.id.welcome_to_loading)
         }
 
-        //?
-        hideBottomNav()
-
         workoutManagerViewModel.state.map { WorkoutManagerUiMapper.map(it) }.observe(this) {
             when (it.state) {
                 WorkoutState.MINIMIZED -> {
-                    showBottomNav()
                     setWorkoutVisibility(View.VISIBLE)
                     stopWorkoutFragment()
                 }
 
                 WorkoutState.ACTIVE -> {
-                    hideBottomNav()
                     setWorkoutVisibility(View.GONE)
                     startWorkoutFragment()
                 }
 
                 WorkoutState.INACTIVE -> {
-                    showBottomNav()
                     setWorkoutVisibility(View.GONE)
                     stopWorkoutFragment()
                 }
@@ -96,6 +90,7 @@ class MainActivity : AppCompatActivity() {
 
         if (supportFragmentManager.findFragmentByTag(WORKOUT_FRAGMENT) == null) {
             fragmentTransaction.add(R.id.nav_host_fragment, WorkoutFragment(), WORKOUT_FRAGMENT)
+            hideBottomNav()
         }
 
         fragmentTransaction.commit()
@@ -105,8 +100,8 @@ class MainActivity : AppCompatActivity() {
         supportFragmentManager.findFragmentByTag(WORKOUT_FRAGMENT)?.let {
             val fragmentTransaction = supportFragmentManager.beginTransaction()
             fragmentTransaction.remove(it)
-            Log.d("REMOVED", "FRAGMETN")
             fragmentTransaction.commit()
+            showBottomNav()
         }
     }
 

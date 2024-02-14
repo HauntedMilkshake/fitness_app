@@ -60,8 +60,7 @@ data class Workout(
     var duration: Double?,
     var date: String,
     var isTemplate: Boolean,
-    val exercises: List<Exercise>,
-    val ids: List<String>,
+    val exercises: List<Exercise>
 ) {
     companion object {
         fun fromFirestoreMap(data: Map<String, Any>?) = data?.let {
@@ -74,8 +73,7 @@ data class Workout(
                 exercises = (it[FirestoreFields.WORKOUT_EXERCISES] as List<Map<String, Any>>)
                     .mapNotNull { map ->
                         Exercise.fromFirestoreMap(map)
-                    },
-                ids = it[FirestoreFields.WORKOUT_IDS] as List<String>
+                    }
             )
         }
         //TODO(RETURN THIS INSTEAD OF THROWING)

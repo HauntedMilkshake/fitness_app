@@ -159,11 +159,10 @@ class ExerciseSetAdapter : RecyclerView.Adapter<RecyclerView.ViewHolder>() {
             setIndicator.text = "$position"
             previous.text = "-" //TODO()
             setIndicator.setOnClickListener {
-                itemClickListener?.onSetClicked(item, itemView)
-                //TODO(Add animation where it drops down and you can change the set type)
+                itemClickListener?.onSetClicked(item, it)
             }
             check.setOnClickListener {
-                itemClickListener?.onSetCheckClicked(item, itemView)
+                itemClickListener?.onSetCheckClicked(item, it)
                 //TODO(Change background and play dopamine inducing animation)
             }
         }

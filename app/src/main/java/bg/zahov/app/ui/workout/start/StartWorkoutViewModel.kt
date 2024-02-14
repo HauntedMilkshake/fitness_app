@@ -36,7 +36,7 @@ class StartWorkoutViewModel(application: Application) : AndroidViewModel(applica
         getWorkouts()
         viewModelScope.launch {
             workoutState.state.collect {
-                when(it) {
+                when (it) {
                     WorkoutState.MINIMIZED -> _state.postValue(State.Active(true))
                     WorkoutState.INACTIVE -> _state.postValue(State.Active(false))
                     else -> {}
@@ -59,7 +59,6 @@ class StartWorkoutViewModel(application: Application) : AndroidViewModel(applica
 
     fun startEmptyWorkout() {
         viewModelScope.launch {
-            Log.d("UPDATING STATE FROM START WOKROUT", "ACTIVE")
             workoutState.updateState(WorkoutState.ACTIVE)
         }
     }
@@ -72,30 +71,38 @@ class StartWorkoutViewModel(application: Application) : AndroidViewModel(applica
     }
 
     fun deleteTemplateWorkout(workout: Workout) {
+        val list = _templates.value?.toMutableList()
+        list?.remove(workout)
+        _templates.value = list ?: listOf()
         viewModelScope.launch {
             repo.deleteTemplateWorkout(workout)
         }
     }
 
     fun addDuplicateTemplateWorkout(workout: Workout) {
+        val count = _templates.value?.count { workout.name == it.name }
+        val dupe = Workout(
+            id = hashString(workout.name + "copy $count"),
+            name = "${workout.name} + copy $count",
+            duration = null,
+            date = currDateToString(),
+            isTemplate = true,
+            exercises = workout.exercises
+        )
+
+        val list = _templates.value?.toMutableList()
+        list?.add(dupe)
+        _templates.value = list ?: listOf()
         viewModelScope.launch {
-            val count = _templates.value?.count { workout.name == it.name }
             repo.addTemplateWorkout(
-                Workout(
-                    id = hashString(workout.name + "copy $count"),
-                    name = "${workout.name} + copy $count",
-                    duration = null,
-                    date = currDateToString(),
-                    isTemplate = true,
-                    exercises = listOf(),
-                    ids = workout.ids
-                )
+                dupe
             )
         }
     }
+
     sealed interface State {
         data class Error(val error: String?, val shutdown: Boolean) : State
 
-        data class Active(val isWorkoutActive: Boolean, val message: String? = null): State
+        data class Active(val isWorkoutActive: Boolean, val message: String? = null) : State
     }
 }

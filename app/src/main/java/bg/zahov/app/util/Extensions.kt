@@ -29,8 +29,7 @@ fun Workout.toFirestoreMap(): Map<String, Any?> {
         FirestoreFields.WORKOUT_DURATION to duration,
         FirestoreFields.WORKOUT_DATE to date,
         FirestoreFields.WORKOUT_IS_TEMPLATE to isTemplate,
-        FirestoreFields.WORKOUT_EXERCISES to exercises.map { it.toFirestoreMap() },
-        FirestoreFields.WORKOUT_IDS to ids.map { it }
+        FirestoreFields.WORKOUT_EXERCISES to exercises.map { it.toFirestoreMap() }
     )
 }
 
