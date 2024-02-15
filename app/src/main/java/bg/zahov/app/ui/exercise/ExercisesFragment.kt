@@ -19,7 +19,6 @@ import bg.zahov.app.data.model.ExerciseUiMapper
 import bg.zahov.app.data.model.SelectableFilter
 import bg.zahov.app.data.model.SelectableExercise
 import bg.zahov.app.util.toSelectableList
-import bg.zahov.app.ui.workout.add.AddWorkoutViewModel
 import bg.zahov.app.util.applyScaleAnimation
 import bg.zahov.fitness.app.R
 import bg.zahov.fitness.app.databinding.FragmentExercisesBinding
@@ -33,10 +32,15 @@ class ExercisesFragment : Fragment() {
     private val binding
         get() = requireNotNull(_binding)
     private val exerciseViewModel: ExerciseViewModel by viewModels({ requireActivity() })
-    private val addWorkoutViewModel: AddWorkoutViewModel by viewModels({ requireActivity() })
+
     private val selectable by lazy {
         arguments?.getBoolean("SELECTABLE") ?: false
     }
+
+    private val replaceable by lazy {
+        arguments?.getBoolean("REPLACING") ?: false
+    }
+
     override fun onCreateView(
         inflater: LayoutInflater,
         container: ViewGroup?,
@@ -56,12 +60,24 @@ class ExercisesFragment : Fragment() {
     override fun onViewCreated(view: View, savedInstanceState: Bundle?) {
         super.onViewCreated(view, savedInstanceState)
         binding.apply {
-            exerciseText.text =
-                if (selectable) "Add exercises" else "Exercises"
+            exerciseText.text = when {
+                selectable -> {
+                    "Add exercises"
+                }
+
+                replaceable -> {
+                    "Replace exercise"
+                }
+
+                else -> {
+                    "Exercises"
+                }
+            }
 
             val filterAdapter = FilterAdapter(true).apply {
                 itemClickListener = object : FilterAdapter.ItemClickListener<SelectableFilter> {
                     override fun onItemClicked(item: SelectableFilter, clickedView: View) {
+                        //FIXME(filter provider)
                         exerciseViewModel.removeFilter(item)
                     }
                 }
@@ -85,13 +101,19 @@ class ExercisesFragment : Fragment() {
                         object : ExerciseAdapter.ItemClickListener<SelectableExercise> {
                             override fun onItemClicked(
                                 item: SelectableExercise,
-                                itemPosition: Int,
-                                clickedView: View,
                             ) {
-                                if(selectable) {
-                                    if(item.isSelected) addWorkoutViewModel.addExercise(item.exercise) else addWorkoutViewModel.removeExercise(item.exercise)
-                                } else {
-                                    //GO TO EXERCISE INFO FRAGMENT
+                                when {
+                                    selectable -> {
+                                        exerciseViewModel.onSelectableExerciseClicked(item)
+                                    }
+
+                                    replaceable -> {
+                                        //TODO(Go to selectable exercise fragment)
+                                    }
+
+                                    else -> {
+                                        //TODO(go to exercise info fragment)
+                                    }
                                 }
                             }
                         }
@@ -172,6 +194,9 @@ class ExercisesFragment : Fragment() {
             confirm.apply {
                 visibility =
                     if (selectable) View.VISIBLE else View.GONE
+                when {
+                    selectable -> { exerciseViewModel.resetSelectableExercises() }
+                }
                 setOnClickListener {
                     it.applyScaleAnimation()
                     findNavController().navigate(R.id.exercises_to_create_workout_template)

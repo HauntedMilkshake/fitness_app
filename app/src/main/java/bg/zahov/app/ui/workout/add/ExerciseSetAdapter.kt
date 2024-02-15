@@ -4,6 +4,7 @@ import android.util.Log
 import android.view.LayoutInflater
 import android.view.View
 import android.view.ViewGroup
+import androidx.recyclerview.widget.DiffUtil
 import androidx.recyclerview.widget.ItemTouchHelper
 import androidx.recyclerview.widget.RecyclerView
 import bg.zahov.app.data.model.ClickableSet
@@ -77,7 +78,6 @@ class ExerciseSetAdapter : RecyclerView.Adapter<RecyclerView.ViewHolder>() {
 
     fun updateItems(newItems: List<Exercise>) {
         val oldList = items
-        items.clear()
         val workoutEntry = mutableListOf<WorkoutEntry>()
         newItems.forEach { exercise ->
             workoutEntry.add(ExerciseEntry(exercise))
@@ -85,7 +85,9 @@ class ExerciseSetAdapter : RecyclerView.Adapter<RecyclerView.ViewHolder>() {
                 workoutEntry.add(SetEntry(ClickableSet(set, false)))
             }
         }
+        items.clear()
         items.addAll(workoutEntry)
+
 //        DiffUtil.calculateDiff(object : DiffUtil.Callback() {
 //            override fun getOldListSize(): Int = oldList.size
 //
@@ -97,28 +99,18 @@ class ExerciseSetAdapter : RecyclerView.Adapter<RecyclerView.ViewHolder>() {
 //                        (oldList[oldItemPosition] as ExerciseEntry).exercise.name == (items[newItemPosition] as ExerciseEntry).exercise.name
 //                    }
 //
-//                    else -> {
-//                        false
-//                    }
-//                }
-//            }
-//
-//            override fun areContentsTheSame(oldItemPosition: Int, newItemPosition: Int): Boolean {
-//                return when {
-//                    oldList[oldItemPosition] is ExerciseEntry && items[newItemPosition] is ExerciseEntry -> {
-//                        (oldList[oldItemPosition] as ExerciseEntry).exercise == (items[newItemPosition] as ExerciseEntry).exercise
-//                    }
-//
 //                    oldList[oldItemPosition] is SetEntry && items[newItemPosition] is SetEntry -> {
-//                        (oldList[oldItemPosition] as SetEntry).set == (items[newItemPosition] as SetEntry).set
+//                        (oldList[oldItemPosition] as SetEntry).set.set == (items[newItemPosition] as SetEntry).set.set
 //                    }
 //
 //                    else -> {
 //                        false
 //                    }
 //                }
-//
 //            }
+//
+//            override fun areContentsTheSame(oldItemPosition: Int, newItemPosition: Int): Boolean =
+//                oldList[oldItemPosition] == items[newItemPosition]
 //        }).dispatchUpdatesTo(this)
         notifyDataSetChanged()
     }

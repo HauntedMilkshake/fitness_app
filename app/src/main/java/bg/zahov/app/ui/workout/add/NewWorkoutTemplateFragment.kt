@@ -1,6 +1,5 @@
 package bg.zahov.app.ui.workout.add
 
-import android.graphics.drawable.shapes.Shape
 import android.os.Bundle
 import android.transition.TransitionInflater
 import android.view.LayoutInflater
@@ -21,7 +20,6 @@ import bg.zahov.app.data.model.AddTemplateWorkoutUiMapper
 import bg.zahov.app.data.model.ClickableSet
 import bg.zahov.app.data.model.Exercise
 import bg.zahov.app.data.model.Sets
-import bg.zahov.app.ui.exercise.FilterDialog
 import bg.zahov.app.util.applyScaleAnimation
 import bg.zahov.fitness.app.R
 import bg.zahov.fitness.app.databinding.FragmentNewWorkoutTemplateBinding
@@ -34,7 +32,7 @@ class NewWorkoutTemplateFragment : Fragment() {
     private val binding
         get() = requireNotNull(_binding)
 
-    private val addWorkoutViewModel: AddWorkoutViewModel by viewModels({ requireActivity() })
+    private val addWorkoutViewModel: AddWorkoutViewModel by viewModels()
 
     override fun onCreateView(
         inflater: LayoutInflater,
@@ -148,6 +146,8 @@ class NewWorkoutTemplateFragment : Fragment() {
                 }
 
                 R.id.action_replace -> {
+                    addWorkoutViewModel.setReplaceableExercise(exercise)
+                    findNavController().navigate(R.id.create_workout_template_to_add_exercise, bundleOf("SELECTABLE" to true, "REPLACING" to true))
                     //TODO(add exercises except they replace)
                 }
 

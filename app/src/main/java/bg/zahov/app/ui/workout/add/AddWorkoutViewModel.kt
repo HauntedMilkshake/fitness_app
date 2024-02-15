@@ -1,14 +1,16 @@
 package bg.zahov.app.ui.workout.add
 
 import android.app.Application
-import android.util.Log
 import androidx.lifecycle.AndroidViewModel
 import androidx.lifecycle.LiveData
 import androidx.lifecycle.MutableLiveData
 import androidx.lifecycle.viewModelScope
 import bg.zahov.app.data.model.Exercise
+import bg.zahov.app.data.model.SelectableExercise
 import bg.zahov.app.data.model.Sets
 import bg.zahov.app.data.model.Workout
+import bg.zahov.app.getReplaceableExerciseProvider
+import bg.zahov.app.getSelectableExerciseProvider
 import bg.zahov.app.getWorkoutProvider
 import bg.zahov.app.util.currDateToString
 import bg.zahov.app.util.hashString
@@ -17,6 +19,14 @@ import kotlinx.coroutines.launch
 class AddWorkoutViewModel(application: Application) : AndroidViewModel(application) {
     private val repo by lazy {
         application.getWorkoutProvider()
+    }
+
+    private val selectableExerciseProvider by lazy {
+        application.getSelectableExerciseProvider()
+    }
+
+    private val replaceableExerciseProvider by lazy {
+        application.getReplaceableExerciseProvider()
     }
 
     private val _state = MutableLiveData<State>()
@@ -32,15 +42,42 @@ class AddWorkoutViewModel(application: Application) : AndroidViewModel(applicati
     val workoutName: LiveData<String>
         get() = _workoutName
 
+    private var exerciseToReplaceIndex: Int = -1
 
-    lateinit var templates: List<Workout>
+    private lateinit var templates: List<Workout>
 
     init {
         viewModelScope.launch {
-            repo.getTemplateWorkouts().collect {
-                templates = it
+            launch {
+                repo.getTemplateWorkouts().collect {
+                    templates = it
+                }
+            }
+
+            launch {
+                selectableExerciseProvider.selectedExercises.collect {
+                    _currExercises.postValue( it.map {selectable -> selectable.exercise })
+                }
+            }
+
+            launch {
+                replaceableExerciseProvider.exerciseToReplace.collect {
+                    it?.let { replaced ->
+                        if((_currExercises.value?.get(exerciseToReplaceIndex)
+                                ?: replaced.exercise) != replaced.exercise
+                        ) {
+                            val captured = _currExercises.value?.toMutableList() ?: mutableListOf()
+                            captured[exerciseToReplaceIndex] = replaced.exercise
+                            _currExercises.value = captured
+                        }
+                    }
+                }
             }
         }
+    }
+
+    fun setReplaceableExercise(item: Exercise) {
+        exerciseToReplaceIndex = _currExercises.value?.indexOf(item) ?: -1
     }
 
     fun setWorkoutName(name: String) {
@@ -65,37 +102,36 @@ class AddWorkoutViewModel(application: Application) : AndroidViewModel(applicati
             }
 
             viewModelScope.launch {
-                    repo.addTemplateWorkout(
-                        Workout(
-                            id = hashString(_workoutName.value!!),
-                            name = _workoutName.value!!,
-                            duration = 0.0,
-                            date = currDateToString(),
-                            isTemplate = true,
-                            exercises = _currExercises.value!!,
-                        )
+                repo.addTemplateWorkout(
+                    Workout(
+                        id = hashString(_workoutName.value!!),
+                        name = _workoutName.value!!,
+                        duration = 0.0,
+                        date = currDateToString(),
+                        isTemplate = true,
+                        exercises = _currExercises.value!!,
                     )
+                )
 
-                    _workoutName.postValue("")
-                    _currExercises.postValue(listOf())
+                _workoutName.postValue("")
+                _currExercises.postValue(listOf())
 
-                    _state.postValue(State.Default)
+                _state.postValue(State.Default)
             }
         }
     }
 
-    fun addExercise(newExercise: Exercise) {
+//    fun onReplaceableExerciseClicked(newExercise: SelectableExercise) {
+//        val captured = _currExercises.value?.toMutableList() ?: mutableListOf()
+////        captured.find { it }
+////        captured.remove( captured.find { it } )
+//        _currExercises.value = captured
+//    }
+
+    fun removeExercise(exercise: Exercise) {
         val captured = _currExercises.value?.toMutableList() ?: mutableListOf()
-        captured.add(newExercise)
+        captured.remove(exercise)
         _currExercises.value = captured
-
-    }
-
-    fun removeExercise(item: Exercise) {
-        val captured = _currExercises.value?.toMutableList() ?: mutableListOf()
-        captured.remove(item)
-        _currExercises.value = captured
-
     }
 
     fun addSet(exercise: Exercise, set: Sets) {
@@ -123,9 +159,9 @@ class AddWorkoutViewModel(application: Application) : AndroidViewModel(applicati
         _currExercises.value = exercises
     }
 
-    fun resetSelectedExercises() {
-        _currExercises.value = listOf()
-    }
+//    fun resetSelectedExercises() {
+//        selectableExerciseProvider.resetSelectedExercises()
+//    }
 
     sealed interface State {
         object Default : State

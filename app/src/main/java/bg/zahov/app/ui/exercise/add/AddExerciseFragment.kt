@@ -62,16 +62,7 @@ class AddExerciseFragment : Fragment() {
             addExerciseViewModel.category.observe(viewLifecycleOwner) {
                 category.initViewInformation(
                     "Body part",
-                    listOf(
-                        Category.Barbell.name,
-                        Category.Dumbbell.name,
-                        Category.Machine.name,
-                        Category.AdditionalWeight.name,
-                        Category.AssistedWeight.name,
-                        Category.RepsOnly.name,
-                        Category.Cardio.name,
-                        Category.Timed.name
-                    ),
+                    enumValues<Category>().map { enum -> enum.key },
                     currCategory = it,
                     currBodyPart = null
                 )
@@ -85,16 +76,7 @@ class AddExerciseFragment : Fragment() {
             addExerciseViewModel.bodyPart.observe(viewLifecycleOwner) {
                 bodyPart.initViewInformation(
                     "Category",
-                    listOf(
-                        BodyPart.Arms.name,
-                        BodyPart.Other.name,
-                        BodyPart.Back.name,
-                        BodyPart.Chest.name,
-                        BodyPart.Core.name,
-                        BodyPart.Legs.name,
-                        BodyPart.Olympic.name,
-                        BodyPart.Shoulders.name
-                    ),
+                    enumValues<BodyPart>().map { enum -> enum.key },
                     currBodyPart = it,
                     currCategory = null
                 )

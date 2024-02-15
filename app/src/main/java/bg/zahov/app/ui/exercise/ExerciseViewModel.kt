@@ -9,7 +9,9 @@ import bg.zahov.app.data.exception.CriticalDataNullException
 import bg.zahov.app.data.model.BodyPart
 import bg.zahov.app.data.model.Category
 import bg.zahov.app.data.model.Exercise
+import bg.zahov.app.data.model.SelectableExercise
 import bg.zahov.app.data.model.SelectableFilter
+import bg.zahov.app.getSelectableExerciseProvider
 import bg.zahov.app.getWorkoutProvider
 import kotlinx.coroutines.launch
 
@@ -19,18 +21,23 @@ class ExerciseViewModel(application: Application) : AndroidViewModel(application
         application.getWorkoutProvider()
     }
 
+    private val selectableExerciseProvider by lazy {
+        application.getSelectableExerciseProvider()
+    }
+
     private val _state = MutableLiveData<State>()
     val state: LiveData<State>
         get() = _state
 
-    private val _userExercises = MutableLiveData<List<Exercise>>()
-    val userExercises: LiveData<List<Exercise>>
+    private val _userExercises = MutableLiveData<List<SelectableExercise>>()
+    val userExercises: LiveData<List<SelectableExercise>>
         get() = _userExercises
 
     private val _searchFilters = MutableLiveData<List<SelectableFilter>>(listOf())
     val searchFilters: LiveData<List<SelectableFilter>>
         get() = _searchFilters
 
+    private var replaceable = false
     private var search: String? = null
     private val allExercises: MutableList<Exercise> = mutableListOf()
     private var selectedFilters: MutableList<SelectableFilter> = mutableListOf()
@@ -39,12 +46,37 @@ class ExerciseViewModel(application: Application) : AndroidViewModel(application
         getExercises()
     }
 
+    fun onSelectableExerciseClicked(exercise: SelectableExercise) {
+        if (exercise.isSelected) {
+            if (replaceable) {
+                //TODO(REPLACEABLE)
+            } else {
+                selectableExerciseProvider.removeExercise(exercise)
+            }
+        } else {
+            if (replaceable) {
+                //TODO(REPLACEABLE)
+            } else {
+                selectableExerciseProvider.addExercise(exercise)
+            }
+        }
+    }
+
+    fun resetSelectableExercises() {
+        selectableExerciseProvider.resetSelectedExercises()
+    }
+
     fun getExercises() {
         _state.value = State.Loading(true)
         viewModelScope.launch {
             try {
                 repo.getTemplateExercises().collect {
-                    _userExercises.postValue(it)
+                    _userExercises.postValue(it.map { exercise ->
+                        SelectableExercise(
+                            exercise,
+                            false
+                        )
+                    })
                     allExercises.apply {
                         clear()
                         addAll(it)
@@ -94,6 +126,7 @@ class ExerciseViewModel(application: Application) : AndroidViewModel(application
 
     fun searchExercises(name: String?) {
         val newExercises = _userExercises.value?.let {
+            //TODO(Test it vs allExercises)
             when {
                 name.isNullOrEmpty() && selectedFilters.isEmpty() -> allExercises
                 name.isNullOrEmpty() && selectedFilters.isNotEmpty() -> {
@@ -121,7 +154,7 @@ class ExerciseViewModel(application: Application) : AndroidViewModel(application
         } ?: emptyList()
 
         search = name
-        _userExercises.value = newExercises
+        _userExercises.value = newExercises.map { SelectableExercise(it, false) }
 
         if (newExercises.isEmpty()) _state.value = State.NoResults(true)
     }

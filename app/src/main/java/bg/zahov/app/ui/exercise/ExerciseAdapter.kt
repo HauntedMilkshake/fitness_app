@@ -27,33 +27,26 @@ class ExerciseAdapter(
         override fun bind(item: SelectableExercise) {
             exerciseTitle.text = item.exercise.name
             exerciseSubtitle.text = item.exercise.bodyPart.name
+            //TODO(add actual image resources and determine which one for which exercise)
+            exerciseImage.setImageResource(if (item.isSelected) R.drawable.ic_closed_lock else R.drawable.ic_check)
             itemView.setBackgroundResource(if (item.isSelected) R.color.selected else R.color.background)
 
-            when (selectable) {
-                true -> {
-                    itemView.setOnClickListener {
-                        exerciseImage.setImageResource(if (item.isSelected) R.drawable.ic_closed_lock else R.drawable.ic_check)
-                        it.applySelectAnimation(
-                            !item.isSelected,
-                            R.color.selected,
-                            R.color.background
-                        )
-                        it.setBackgroundResource(if (item.isSelected) R.color.selected else R.color.background)
-                        item.isSelected = !item.isSelected
-                        itemClickListener?.onItemClicked(item, adapterPosition, itemView)
-                    }
+            itemView.setOnClickListener {
+
+                if(selectable) {
+                    it.applySelectAnimation(
+                        !item.isSelected,
+                        R.color.selected,
+                        R.color.background
+                    )
                 }
 
-                false -> {
-                    itemView.setOnClickListener {
-                        itemClickListener?.onItemClicked(item, adapterPosition, itemView)
-                    }
-                }
+                itemClickListener?.onItemClicked(item)
             }
         }
     }
 
     interface ItemClickListener<T> {
-        fun onItemClicked(item: T, itemPosition: Int, clickedView: View)
+        fun onItemClicked(item: T)
     }
 }
