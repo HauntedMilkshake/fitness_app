@@ -7,9 +7,9 @@ import kotlinx.coroutines.flow.StateFlow
 class ReplaceableExerciseProvider {
     companion object {
         @Volatile
-        var instance: ReplaceableExerciseProvider? = null
+        private var instance: ReplaceableExerciseProvider? = null
 
-        fun getInstance() = instance ?: synchronized(this){
+        fun getInstance() = instance ?: synchronized(this) {
             instance ?: ReplaceableExerciseProvider().also { instance = it }
         }
     }

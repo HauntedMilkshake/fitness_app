@@ -1,10 +1,7 @@
 package bg.zahov.app.data.provider
 
-import bg.zahov.app.data.model.Exercise
 import bg.zahov.app.data.model.SelectableExercise
-import kotlinx.coroutines.flow.MutableSharedFlow
 import kotlinx.coroutines.flow.MutableStateFlow
-import kotlinx.coroutines.flow.SharedFlow
 import kotlinx.coroutines.flow.StateFlow
 
 class SelectableExerciseProvider {
@@ -17,23 +14,13 @@ class SelectableExerciseProvider {
         }
     }
 
-    private val _exercises = MutableStateFlow<List<SelectableExercise>>(mutableListOf())
-    val exercises: StateFlow<List<SelectableExercise>>
-        get() = _exercises
-
     private val _selectedExercises = MutableStateFlow<List<SelectableExercise>>(mutableListOf())
     val selectedExercises: StateFlow<List<SelectableExercise>>
         get() = _selectedExercises
 
-    fun initExercises(exercises: List<Exercise>) {
-        _exercises.value = exercises.map { SelectableExercise(it, false) }
-    }
-
-    fun addExercise(newExercise: SelectableExercise) {
+    fun addExercises(newExercises: List<SelectableExercise>) {
         val selected = _selectedExercises.value.toMutableList()
-        newExercise.isSelected = true
-        selected.add(newExercise)
-
+        selected.addAll(newExercises)
         _selectedExercises.value = selected
     }
 
@@ -41,7 +28,6 @@ class SelectableExerciseProvider {
         val selected = _selectedExercises.value.toMutableList()
         exercise.isSelected = false
         selected.remove(exercise)
-
         _selectedExercises.value = selected
     }
 

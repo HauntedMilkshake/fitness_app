@@ -8,19 +8,24 @@ import androidx.lifecycle.MutableLiveData
 import androidx.lifecycle.viewModelScope
 import bg.zahov.app.data.model.Workout
 import bg.zahov.app.data.model.WorkoutState
+import bg.zahov.app.getSelectableExerciseProvider
 import bg.zahov.app.getWorkoutProvider
 import bg.zahov.app.getWorkoutStateManager
 import bg.zahov.app.util.currDateToString
 import bg.zahov.app.util.hashString
 import kotlinx.coroutines.launch
 
-class OnGoingWorkoutViewModel(application: Application) : AndroidViewModel(application) {
+class WorkoutViewModel(application: Application) : AndroidViewModel(application) {
     private val workoutStateManager by lazy {
         application.getWorkoutStateManager()
     }
 
     private val repo by lazy {
         application.getWorkoutProvider()
+    }
+
+    private val selectedExercisesProvider by lazy {
+        application.getSelectableExerciseProvider()
     }
 
     private val _workout = MutableLiveData<Workout>()
@@ -61,6 +66,17 @@ class OnGoingWorkoutViewModel(application: Application) : AndroidViewModel(appli
                     )
                 }
             }
+            launch {
+                selectedExercisesProvider.selectedExercises.collect {
+                    Log.d("COLLECTING IN WORKOUT", it.size.toString())
+                    val new = _workout.value
+                    new?.exercises?.toMutableList()
+                        ?.addAll(it.map { selectable -> selectable.exercise })
+                    new?.let { workout ->
+                        _workout.postValue(workout)
+                    }
+                }
+            }
 
         }
     }
@@ -73,7 +89,6 @@ class OnGoingWorkoutViewModel(application: Application) : AndroidViewModel(appli
 
     fun cancel() {
         viewModelScope.launch {
-            Log.d("UPDATING STATE FROM WORKOUT", "INACTIVE")
             workoutStateManager.updateState(WorkoutState.INACTIVE)
         }
     }

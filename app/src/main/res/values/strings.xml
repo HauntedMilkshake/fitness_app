@@ -105,6 +105,7 @@
 
     <string name="drop_set"><font color="#FF0000"><b>D</b></font>  Drop set    <b>?</b></string>
     <string name="failure_set"><font color="#FF0000"><b>F</b></font>   Failure    <b>?</b></string>
+    <string name="workout_template_note">note</string>
 
 
 </resources>

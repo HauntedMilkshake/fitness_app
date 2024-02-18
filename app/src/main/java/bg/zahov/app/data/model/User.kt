@@ -17,7 +17,7 @@ object FirestoreFields {
     const val WORKOUT_DATE = "date"
     const val WORKOUT_IS_TEMPLATE = "isTemplate"
     const val WORKOUT_EXERCISES = "exercises"
-    const val WORKOUT_IDS = "ids"
+    const val WORKOUT_NOTE = "note"
 
     // Exercise fields
     const val EXERCISE_NAME = "name"
@@ -60,7 +60,8 @@ data class Workout(
     var duration: Double?,
     var date: String,
     var isTemplate: Boolean,
-    val exercises: List<Exercise>
+    val exercises: List<Exercise>,
+    val note: String? = null
 ) {
     companion object {
         fun fromFirestoreMap(data: Map<String, Any>?) = data?.let {
@@ -73,7 +74,8 @@ data class Workout(
                 exercises = (it[FirestoreFields.WORKOUT_EXERCISES] as List<Map<String, Any>>)
                     .mapNotNull { map ->
                         Exercise.fromFirestoreMap(map)
-                    }
+                    },
+                note = (it[FirestoreFields.WORKOUT_NOTE]) as? String
             )
         }
         //TODO(RETURN THIS INSTEAD OF THROWING)

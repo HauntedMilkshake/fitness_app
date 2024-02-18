@@ -14,7 +14,7 @@ import androidx.recyclerview.widget.ItemTouchHelper
 import androidx.recyclerview.widget.LinearLayoutManager
 import androidx.recyclerview.widget.RecyclerView
 import bg.zahov.app.data.model.ClickableSet
-import bg.zahov.app.data.model.Exercise
+import bg.zahov.app.data.model.ExerciseWithNoteVisibility
 import bg.zahov.app.ui.workout.add.ExerciseSetAdapter
 import bg.zahov.app.ui.workout.add.WorkoutEntry
 import bg.zahov.app.util.SwipeGesture
@@ -27,7 +27,7 @@ class WorkoutFragment : Fragment() {
     private val binding
         get() = requireNotNull(_binding)
 
-    private val onGoingWorkoutViewModel: OnGoingWorkoutViewModel by viewModels()
+    private val onGoingWorkoutViewModel: WorkoutViewModel by viewModels()
     override fun onCreateView(
         inflater: LayoutInflater,
         container: ViewGroup?,
@@ -50,7 +50,10 @@ class WorkoutFragment : Fragment() {
 
             val exerciseSetAdapter = ExerciseSetAdapter().apply {
                 itemClickListener = object : ExerciseSetAdapter.ItemClickListener<WorkoutEntry> {
-                    override fun onOptionsClicked(item: Exercise, clickedView: View) {
+                    override fun onOptionsClicked(
+                        item: ExerciseWithNoteVisibility,
+                        clickedView: View,
+                    ) {
                     }
 
                     override fun onSetClicked(item: ClickableSet, clickedView: View) {
@@ -59,12 +62,12 @@ class WorkoutFragment : Fragment() {
                     override fun onSetCheckClicked(item: ClickableSet, clickedView: View) {
                     }
 
-                    override fun onAddSet(item: Exercise, set: ClickableSet) {
+                    override fun onAddSet(item: ExerciseWithNoteVisibility, set: ClickableSet) {
 //                        addWorkoutViewModel.addSet(item, set.set)
                     }
                 }
                 swipeActionListener = object : ExerciseSetAdapter.SwipeActionListener {
-                    override fun onDeleteSet(item: Exercise, set: ClickableSet) {
+                    override fun onDeleteSet(item: ExerciseWithNoteVisibility, set: ClickableSet) {
                     }
                 }
 
@@ -99,7 +102,12 @@ class WorkoutFragment : Fragment() {
 
             onGoingWorkoutViewModel.workout.observe(viewLifecycleOwner) {
                 workoutName.text = it.name
-                exerciseSetAdapter.updateItems(it.exercises)
+                //TODO(CHANGE SIGNATURE OF ONGOINGWORKOUTVIEWMODEL
+                exerciseSetAdapter.updateItems(it.exercises.map { exercise ->
+                    ExerciseWithNoteVisibility(
+                        exercise
+                    )
+                })
             }
 
             onGoingWorkoutViewModel.timer.observe(viewLifecycleOwner) {
@@ -109,11 +117,14 @@ class WorkoutFragment : Fragment() {
             minimize.setOnClickListener {
                 it.applyScaleAnimation()
                 onGoingWorkoutViewModel.minimize()
+                findNavController().navigateUp()
             }
 
             cancel.setOnClickListener {
                 it.applyScaleAnimation()
                 onGoingWorkoutViewModel.cancel()
+                findNavController().navigateUp()
+
             }
             restTimer.setOnClickListener {
                 it.applyScaleAnimation()
@@ -121,11 +132,13 @@ class WorkoutFragment : Fragment() {
             finishText.setOnClickListener {
                 it.applyScaleAnimation()
                 onGoingWorkoutViewModel.finishWorkout()
+                findNavController().navigateUp()
             }
 
             activity?.onBackPressedDispatcher?.addCallback(object : OnBackPressedCallback(true) {
                 override fun handleOnBackPressed() {
                     onGoingWorkoutViewModel.minimize()
+                    findNavController().navigateUp()
                 }
             })
         }

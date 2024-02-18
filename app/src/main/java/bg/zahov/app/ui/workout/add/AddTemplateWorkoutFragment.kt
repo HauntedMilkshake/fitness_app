@@ -18,28 +18,28 @@ import androidx.navigation.fragment.findNavController
 import androidx.recyclerview.widget.LinearLayoutManager
 import bg.zahov.app.data.model.AddTemplateWorkoutUiMapper
 import bg.zahov.app.data.model.ClickableSet
-import bg.zahov.app.data.model.Exercise
+import bg.zahov.app.data.model.ExerciseWithNoteVisibility
 import bg.zahov.app.data.model.Sets
 import bg.zahov.app.util.applyScaleAnimation
 import bg.zahov.fitness.app.R
-import bg.zahov.fitness.app.databinding.FragmentNewWorkoutTemplateBinding
+import bg.zahov.fitness.app.databinding.FragmentAddWorkoutTemplateBinding
 import com.google.android.material.imageview.ShapeableImageView
 import com.google.android.material.textview.MaterialTextView
 
-class NewWorkoutTemplateFragment : Fragment() {
+class AddTemplateWorkoutFragment : Fragment() {
 
-    private var _binding: FragmentNewWorkoutTemplateBinding? = null
+    private var _binding: FragmentAddWorkoutTemplateBinding? = null
     private val binding
         get() = requireNotNull(_binding)
 
-    private val addWorkoutViewModel: AddWorkoutViewModel by viewModels()
+    private val addWorkoutViewModel: AddTemplateWorkoutViewModel by viewModels()
 
     override fun onCreateView(
         inflater: LayoutInflater,
         container: ViewGroup?,
         savedInstanceState: Bundle?,
     ): View {
-        _binding = FragmentNewWorkoutTemplateBinding.inflate(inflater, container, false)
+        _binding = FragmentAddWorkoutTemplateBinding.inflate(inflater, container, false)
         return binding.root
     }
 
@@ -60,7 +60,10 @@ class NewWorkoutTemplateFragment : Fragment() {
 
             val exerciseSetAdapter = ExerciseSetAdapter().apply {
                 itemClickListener = object : ExerciseSetAdapter.ItemClickListener<WorkoutEntry> {
-                    override fun onOptionsClicked(item: Exercise, clickedView: View) {
+                    override fun onOptionsClicked(
+                        item: ExerciseWithNoteVisibility,
+                        clickedView: View,
+                    ) {
                         showExerciseMenu(item, clickedView)
                     }
 
@@ -72,12 +75,12 @@ class NewWorkoutTemplateFragment : Fragment() {
                         //NOOP
                     }
 
-                    override fun onAddSet(item: Exercise, set: ClickableSet) {
+                    override fun onAddSet(item: ExerciseWithNoteVisibility, set: ClickableSet) {
                         addWorkoutViewModel.addSet(item, set.set)
                     }
                 }
                 swipeActionListener = object : ExerciseSetAdapter.SwipeActionListener {
-                    override fun onDeleteSet(item: Exercise, set: ClickableSet) {
+                    override fun onDeleteSet(item: ExerciseWithNoteVisibility, set: ClickableSet) {
                         addWorkoutViewModel.removeSet(item, set.set)
                     }
                 }
@@ -124,30 +127,37 @@ class NewWorkoutTemplateFragment : Fragment() {
 
             save.setOnClickListener {
                 it.applyScaleAnimation()
-                addWorkoutViewModel.setWorkoutName(workoutNameFieldText.text.toString())
+                addWorkoutViewModel.workoutName = workoutNameFieldText.text.toString()
+                addWorkoutViewModel.workoutNote = workoutNoteFieldText.text.toString()
                 addWorkoutViewModel.addWorkout()
+                addWorkoutViewModel.resetSelectedExercises()
                 findNavController().navigate(R.id.create_workout_template_to_workout)
             }
 
             cancel.setOnClickListener {
                 it.applyScaleAnimation()
+                addWorkoutViewModel.resetSelectedExercises()
                 findNavController().navigate(R.id.create_workout_template_to_workout)
             }
         }
     }
 
-    private fun showExerciseMenu(exercise: Exercise, view: View) {
+    private fun showExerciseMenu(exercise: ExerciseWithNoteVisibility, view: View) {
         val popupMenu = PopupMenu(ContextThemeWrapper(context, R.style.MyPopUp), view)
         popupMenu.menuInflater.inflate(R.menu.popup_exercise_menu, popupMenu.menu)
         popupMenu.setOnMenuItemClickListener { item ->
             when (item.itemId) {
                 R.id.action_add_note -> {
-                    binding
+                    addWorkoutViewModel.toggleExerciseNoteField(exercise)
                 }
 
                 R.id.action_replace -> {
                     addWorkoutViewModel.setReplaceableExercise(exercise)
-                    findNavController().navigate(R.id.create_workout_template_to_add_exercise, bundleOf("SELECTABLE" to true, "REPLACING" to true))
+                    findNavController().navigate(
+                        R.id.create_workout_template_to_add_exercise,
+                        bundleOf("REPLACING" to true)
+                    )
+//                    addWorkoutViewMode
                     //TODO(add exercises except they replace)
                 }
 
@@ -198,14 +208,14 @@ class NewWorkoutTemplateFragment : Fragment() {
 
     override fun onResume() {
         super.onResume()
-        addWorkoutViewModel.workoutName.observe(viewLifecycleOwner) {
-            binding.workoutNameFieldText.setText(it)
-        }
+        binding.workoutNameFieldText.setText(addWorkoutViewModel.workoutName)
+        binding.workoutNoteFieldText.setText(addWorkoutViewModel.workoutNote)
     }
 
     override fun onPause() {
         super.onPause()
-        addWorkoutViewModel.setWorkoutName(binding.workoutNameFieldText.text.toString())
+        addWorkoutViewModel.workoutName = binding.workoutNameFieldText.text.toString()
+        addWorkoutViewModel.workoutNote = binding.workoutNoteFieldText.text.toString()
     }
 
     override fun onDestroy() {

@@ -5,7 +5,7 @@ import androidx.lifecycle.AndroidViewModel
 import androidx.lifecycle.LiveData
 import androidx.lifecycle.MutableLiveData
 import androidx.lifecycle.viewModelScope
-import bg.zahov.app.data.model.Exercise
+import bg.zahov.app.data.model.ExerciseWithNoteVisibility
 import bg.zahov.app.data.model.SelectableExercise
 import bg.zahov.app.data.model.Sets
 import bg.zahov.app.data.model.Workout
@@ -16,7 +16,7 @@ import bg.zahov.app.util.currDateToString
 import bg.zahov.app.util.hashString
 import kotlinx.coroutines.launch
 
-class AddWorkoutViewModel(application: Application) : AndroidViewModel(application) {
+class AddTemplateWorkoutViewModel(application: Application) : AndroidViewModel(application) {
     private val repo by lazy {
         application.getWorkoutProvider()
     }
@@ -33,14 +33,12 @@ class AddWorkoutViewModel(application: Application) : AndroidViewModel(applicati
     val state: LiveData<State>
         get() = _state
 
-    private val _currExercises = MutableLiveData<List<Exercise>>()
-    val currExercises: LiveData<List<Exercise>>
+    private val _currExercises = MutableLiveData<List<ExerciseWithNoteVisibility>>()
+    val currExercises: LiveData<List<ExerciseWithNoteVisibility>>
         get() = _currExercises
 
-    private val _workoutName = MutableLiveData<String>()
-
-    val workoutName: LiveData<String>
-        get() = _workoutName
+    var workoutNote: String = ""
+    var workoutName: String = ""
 
     private var exerciseToReplaceIndex: Int = -1
 
@@ -56,18 +54,23 @@ class AddWorkoutViewModel(application: Application) : AndroidViewModel(applicati
 
             launch {
                 selectableExerciseProvider.selectedExercises.collect {
-                    _currExercises.postValue( it.map {selectable -> selectable.exercise })
+                    _currExercises.postValue(it.map { selectable ->
+                        ExerciseWithNoteVisibility(
+                            selectable.exercise
+                        )
+                    })
                 }
             }
 
             launch {
                 replaceableExerciseProvider.exerciseToReplace.collect {
                     it?.let { replaced ->
-                        if((_currExercises.value?.get(exerciseToReplaceIndex)
+                        if ((_currExercises.value?.get(exerciseToReplaceIndex)
                                 ?: replaced.exercise) != replaced.exercise
                         ) {
                             val captured = _currExercises.value?.toMutableList() ?: mutableListOf()
-                            captured[exerciseToReplaceIndex] = replaced.exercise
+                            captured[exerciseToReplaceIndex] =
+                                ExerciseWithNoteVisibility(replaced.exercise)
                             _currExercises.value = captured
                         }
                     }
@@ -76,21 +79,21 @@ class AddWorkoutViewModel(application: Application) : AndroidViewModel(applicati
         }
     }
 
-    fun setReplaceableExercise(item: Exercise) {
+    fun resetSelectedExercises() {
+        selectableExerciseProvider.resetSelectedExercises()
+    }
+
+    fun setReplaceableExercise(item: ExerciseWithNoteVisibility) {
         exerciseToReplaceIndex = _currExercises.value?.indexOf(item) ?: -1
     }
 
-    fun setWorkoutName(name: String) {
-        _workoutName.value = name
-    }
-
     fun addWorkout() {
-        if (_workoutName.value.isNullOrEmpty()) {
+        if (workoutName.isEmpty()) {
             _state.value = State.Error("Cannot create a workout template without a name!")
             return
         }
 
-        if (templates.map { it.name }.contains(_workoutName.value)) {
+        if (templates.map { it.name }.contains(workoutName)) {
             _state.value = State.Error("Each workout must have a unique name!")
             return
         }
@@ -104,21 +107,28 @@ class AddWorkoutViewModel(application: Application) : AndroidViewModel(applicati
             viewModelScope.launch {
                 repo.addTemplateWorkout(
                     Workout(
-                        id = hashString(_workoutName.value!!),
-                        name = _workoutName.value!!,
+                        id = hashString(workoutName),
+                        name = workoutName,
                         duration = 0.0,
                         date = currDateToString(),
                         isTemplate = true,
-                        exercises = _currExercises.value!!,
+                        exercises = _currExercises.value!!.map { it.exercise },
                     )
                 )
 
-                _workoutName.postValue("")
+                workoutName = ""
                 _currExercises.postValue(listOf())
 
                 _state.postValue(State.Default)
             }
         }
+    }
+
+    fun toggleExerciseNoteField(item: ExerciseWithNoteVisibility) {
+        val captured = _currExercises.value ?: listOf()
+        captured.find { it == item }?.noteVisibility = !item.noteVisibility
+
+        _currExercises.value = captured
     }
 
 //    fun onReplaceableExerciseClicked(newExercise: SelectableExercise) {
@@ -128,31 +138,32 @@ class AddWorkoutViewModel(application: Application) : AndroidViewModel(applicati
 //        _currExercises.value = captured
 //    }
 
-    fun removeExercise(exercise: Exercise) {
+    fun removeExercise(item: ExerciseWithNoteVisibility) {
         val captured = _currExercises.value?.toMutableList() ?: mutableListOf()
-        captured.remove(exercise)
+        selectableExerciseProvider.removeExercise(SelectableExercise(item.exercise, true))
+        captured.remove(item)
         _currExercises.value = captured
     }
 
-    fun addSet(exercise: Exercise, set: Sets) {
+    fun addSet(item: ExerciseWithNoteVisibility, set: Sets) {
         val exercises = _currExercises.value?.toMutableList() ?: emptyList()
-        val foundExercise = exercises.find { it == exercise }
+        val foundExercise = exercises.find { it == item }
         foundExercise?.let {
-            val newSets = it.sets.toMutableList()
+            val newSets = it.exercise.sets.toMutableList()
             newSets.add(set)
-            it.sets = newSets
+            it.exercise.sets = newSets
         }
         _currExercises.value = exercises
     }
 
-    fun removeSet(exercise: Exercise, set: Sets) {
+    fun removeSet(item: ExerciseWithNoteVisibility, set: Sets) {
         val exercises = _currExercises.value?.toMutableList() ?: emptyList()
-        val foundExercise = exercises.find { it == exercise }
+        val foundExercise = exercises.find { it == item }
         foundExercise?.let {
-            if (it.sets.isEmpty()) {
-                val newSets = it.sets.toMutableList()
+            if (it.exercise.sets.isEmpty()) {
+                val newSets = it.exercise.sets.toMutableList()
                 newSets.remove(set)
-                it.sets = newSets
+                it.exercise.sets = newSets
             }
         }
 

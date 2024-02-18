@@ -18,7 +18,6 @@ import androidx.recyclerview.widget.LinearLayoutManager
 import bg.zahov.app.data.model.ExerciseUiMapper
 import bg.zahov.app.data.model.SelectableFilter
 import bg.zahov.app.data.model.SelectableExercise
-import bg.zahov.app.util.toSelectableList
 import bg.zahov.app.util.applyScaleAnimation
 import bg.zahov.fitness.app.R
 import bg.zahov.fitness.app.databinding.FragmentExercisesBinding
@@ -55,6 +54,8 @@ class ExercisesFragment : Fragment() {
         val inflater = TransitionInflater.from(requireContext())
         enterTransition = inflater.inflateTransition(R.transition.slide_up)
         exitTransition = inflater.inflateTransition(R.transition.fade_out)
+        exerciseViewModel.replaceable = replaceable
+        exerciseViewModel.selectable = selectable && !replaceable
     }
 
     override fun onViewCreated(view: View, savedInstanceState: Bundle?) {
@@ -77,7 +78,6 @@ class ExercisesFragment : Fragment() {
             val filterAdapter = FilterAdapter(true).apply {
                 itemClickListener = object : FilterAdapter.ItemClickListener<SelectableFilter> {
                     override fun onItemClicked(item: SelectableFilter, clickedView: View) {
-                        //FIXME(filter provider)
                         exerciseViewModel.removeFilter(item)
                     }
                 }
@@ -96,25 +96,17 @@ class ExercisesFragment : Fragment() {
             }
 
             val exerciseAdapter =
-                ExerciseAdapter(selectable).apply {
+                ExerciseAdapter(selectable || replaceable).apply {
                     itemClickListener =
                         object : ExerciseAdapter.ItemClickListener<SelectableExercise> {
                             override fun onItemClicked(
                                 item: SelectableExercise,
                             ) {
-                                when {
-                                    selectable -> {
-                                        exerciseViewModel.onSelectableExerciseClicked(item)
-                                    }
-
-                                    replaceable -> {
-                                        //TODO(Go to selectable exercise fragment)
-                                    }
-
-                                    else -> {
-                                        //TODO(go to exercise info fragment)
-                                    }
+                                if (replaceable || selectable) {
+                                    exerciseViewModel.onSelectableExerciseClicked(item)
                                 }
+                                //TODO(OR GO TO ANOTHER EXERCISE FRAGMENT)
+
                             }
                         }
                 }
@@ -125,7 +117,7 @@ class ExercisesFragment : Fragment() {
             }
 
             exerciseViewModel.userExercises.observe(viewLifecycleOwner) {
-                exerciseAdapter.updateItems(it.toSelectableList())
+                exerciseAdapter.updateItems(it)
             }
 
             searchIcon.setOnClickListener {
@@ -187,19 +179,18 @@ class ExercisesFragment : Fragment() {
                     if (selectable) View.VISIBLE else View.GONE
                 setOnClickListener {
                     it.applyScaleAnimation()
+                    exerciseViewModel.onConfirm()
                     findNavController().navigate(R.id.exercises_to_create_workout_template)
                 }
             }
 
             confirm.apply {
-                visibility =
-                    if (selectable) View.VISIBLE else View.GONE
-                when {
-                    selectable -> { exerciseViewModel.resetSelectableExercises() }
-                }
+                visibility = if (selectable || replaceable) View.VISIBLE else View.GONE
                 setOnClickListener {
                     it.applyScaleAnimation()
-                    findNavController().navigate(R.id.exercises_to_create_workout_template)
+                    exerciseViewModel.confirmSelectedExercises()
+                    findNavController().navigateUp()
+//                    findNavController().navigate(R.id.exercises_to_create_workout_template)
                 }
             }
 
@@ -241,9 +232,15 @@ class ExercisesFragment : Fragment() {
         popupWindow.showAsDropDown(binding.settingsDots, 80, 70)
     }
 
+    override fun onPause() {
+        super.onPause()
+        exerciseViewModel.onConfirm()
+    }
+
     override fun onResume() {
         super.onResume()
         exerciseViewModel.getExercises()
+//        exerciseViewModel.resetQueue()
     }
 
     override fun onDestroyView() {

@@ -4,11 +4,9 @@ import android.util.Log
 import android.view.LayoutInflater
 import android.view.View
 import android.view.ViewGroup
-import androidx.recyclerview.widget.DiffUtil
-import androidx.recyclerview.widget.ItemTouchHelper
 import androidx.recyclerview.widget.RecyclerView
 import bg.zahov.app.data.model.ClickableSet
-import bg.zahov.app.data.model.Exercise
+import bg.zahov.app.data.model.ExerciseWithNoteVisibility
 import bg.zahov.app.data.model.SetType
 import bg.zahov.app.data.model.Sets
 import bg.zahov.app.util.SwipeGesture
@@ -29,7 +27,7 @@ class ExerciseSetAdapter : RecyclerView.Adapter<RecyclerView.ViewHolder>() {
     private val items = ArrayList<WorkoutEntry>()
     var itemClickListener: ItemClickListener<WorkoutEntry>? = null
     var swipeActionListener: SwipeActionListener? = null
-    var swipeGesture: SwipeGesture? = null
+//    var swipeGesture: SwipeGesture? = null
 
     override fun getItemViewType(position: Int): Int {
         return when (items[position]) {
@@ -69,19 +67,19 @@ class ExerciseSetAdapter : RecyclerView.Adapter<RecyclerView.ViewHolder>() {
             }
 
             is SetViewHolder -> {
-                holder.bind((items[position] as SetEntry).set, items.count { it is SetEntry })
+                holder.bind((items[position] as SetEntry).setEntry, items.count { it is SetEntry })
             }
         }
     }
 
     override fun getItemCount(): Int = items.size
 
-    fun updateItems(newItems: List<Exercise>) {
+    fun updateItems(newItems: List<ExerciseWithNoteVisibility>) {
         val oldList = items
         val workoutEntry = mutableListOf<WorkoutEntry>()
-        newItems.forEach { exercise ->
-            workoutEntry.add(ExerciseEntry(exercise))
-            exercise.sets.forEach { set ->
+        newItems.forEach { item ->
+            workoutEntry.add(ExerciseEntry(item))
+            item.exercise.sets.forEach { set ->
                 workoutEntry.add(SetEntry(ClickableSet(set, false)))
             }
         }
@@ -118,18 +116,21 @@ class ExerciseSetAdapter : RecyclerView.Adapter<RecyclerView.ViewHolder>() {
     inner class ExerciseViewHolder(view: View) : RecyclerView.ViewHolder(view) {
         private val title = view.findViewById<MaterialTextView>(R.id.exercise_title)
         private val options = view.findViewById<ShapeableImageView>(R.id.options)
+        private val note = view.findViewById<TextInputLayout>(R.id.workout_note)
         private val addSetButton = view.findViewById<MaterialButton>(R.id.add_set)
 
         fun bind(item: ExerciseEntry) {
-            title.text = item.exercise.name
+            title.text = item.exerciseEntry.exercise.name
+
+            note.visibility = if (item.exerciseEntry.noteVisibility) View.VISIBLE else View.GONE
 
             options.setOnClickListener {
-                itemClickListener?.onOptionsClicked(item.exercise, it)
+                itemClickListener?.onOptionsClicked(item.exerciseEntry, it)
             }
 
             addSetButton.setOnClickListener {
                 itemClickListener?.onAddSet(
-                    item.exercise,
+                    item.exerciseEntry,
                     ClickableSet(Sets(type = SetType.DEFAULT.key, 0.0, 0), false)
                 )
             }
@@ -164,8 +165,8 @@ class ExerciseSetAdapter : RecyclerView.Adapter<RecyclerView.ViewHolder>() {
                 if (items[i] is ExerciseEntry) {
                     Log.d("on swipe", "exericse found on swipe")
                     swipeActionListener?.onDeleteSet(
-                        (items[i] as ExerciseEntry).exercise,
-                        (items[adapterPosition] as SetEntry).set
+                        (items[i] as ExerciseEntry).exerciseEntry,
+                        (items[adapterPosition] as SetEntry).setEntry
                     )
                 }
             }
@@ -174,19 +175,19 @@ class ExerciseSetAdapter : RecyclerView.Adapter<RecyclerView.ViewHolder>() {
 
 
     interface ItemClickListener<T> {
-        fun onOptionsClicked(item: Exercise, clickedView: View)
+        fun onOptionsClicked(item: ExerciseWithNoteVisibility, clickedView: View)
         fun onSetClicked(item: ClickableSet, clickedView: View)
         fun onSetCheckClicked(item: ClickableSet, clickedView: View)
-        fun onAddSet(item: Exercise, set: ClickableSet)
+        fun onAddSet(item: ExerciseWithNoteVisibility, set: ClickableSet)
     }
 
     interface SwipeActionListener {
-        fun onDeleteSet(item: Exercise, set: ClickableSet)
+        fun onDeleteSet(item: ExerciseWithNoteVisibility, set: ClickableSet)
     }
 }
 
 sealed class WorkoutEntry
 
-data class ExerciseEntry(var exercise: Exercise) : WorkoutEntry()
+data class ExerciseEntry(var exerciseEntry: ExerciseWithNoteVisibility) : WorkoutEntry()
 
-data class SetEntry(val set: ClickableSet) : WorkoutEntry()
+data class SetEntry(val setEntry: ClickableSet) : WorkoutEntry()

@@ -30,20 +30,18 @@
     <com.google.android.material.textfield.TextInputLayout
         android:id="@+id/workout_note"
         android:layout_width="0dp"
-        android:layout_height="30dp"
+        android:layout_height="wrap_content"
         android:layout_marginStart="15dp"
         android:layout_marginTop="20dp"
         android:layout_marginEnd="15dp"
         android:visibility="gone"
-        android:hint="@string/new_workout_template_hint"
-        android:textColorHint="@color/less_vibrant_text"
         app:boxCornerRadiusBottomEnd="5dp"
         app:boxCornerRadiusBottomStart="5dp"
         app:boxCornerRadiusTopEnd="5dp"
         app:boxCornerRadiusTopStart="5dp"
         app:boxStrokeWidth="0dp"
         app:boxStrokeWidthFocused="0dp"
-        app:hintTextColor="@color/white"
+        app:hintEnabled="false"
         app:layout_constraintEnd_toEndOf="parent"
         app:layout_constraintStart_toStartOf="parent"
         app:layout_constraintTop_toBottomOf="@+id/exercise_title">
@@ -53,7 +51,7 @@
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
             android:backgroundTint="@color/input_field_background"
-            android:maxLines="1"
+            android:maxLines="5"
             android:textColor="@color/white" />
     </com.google.android.material.textfield.TextInputLayout>
 
@@ -61,8 +59,8 @@
         android:id="@+id/set_column_indicator"
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
-        android:layout_marginTop="35dp"
         android:layout_marginStart="5dp"
+        android:layout_marginTop="35dp"
         android:text="@string/set_column_text"
         android:textAllCaps="true"
         android:textColor="@color/white"

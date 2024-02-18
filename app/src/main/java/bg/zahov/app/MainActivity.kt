@@ -44,17 +44,15 @@ class MainActivity : AppCompatActivity() {
             when (it.state) {
                 WorkoutState.MINIMIZED -> {
                     setWorkoutVisibility(View.VISIBLE)
-                    stopWorkoutFragment()
                 }
 
                 WorkoutState.ACTIVE -> {
                     setWorkoutVisibility(View.GONE)
-                    startWorkoutFragment()
+                    navController.navigate(R.id.to_workout_fragment)
                 }
 
                 WorkoutState.INACTIVE -> {
                     setWorkoutVisibility(View.GONE)
-                    stopWorkoutFragment()
                 }
             }
         }
@@ -83,30 +81,6 @@ class MainActivity : AppCompatActivity() {
         val navController = findNavController(R.id.nav_host_fragment)
         return navController.navigateUp(appBarConfiguration)
                 || super.onSupportNavigateUp()
-    }
-
-    private fun startWorkoutFragment() {
-        val fragmentTransaction = supportFragmentManager.beginTransaction()
-
-        if (supportFragmentManager.findFragmentByTag(WORKOUT_FRAGMENT) == null) {
-            fragmentTransaction.add(R.id.nav_host_fragment, WorkoutFragment(), WORKOUT_FRAGMENT)
-            hideBottomNav()
-        }
-
-        fragmentTransaction.commit()
-    }
-
-    private fun stopWorkoutFragment() {
-        supportFragmentManager.findFragmentByTag(WORKOUT_FRAGMENT)?.let {
-            val fragmentTransaction = supportFragmentManager.beginTransaction()
-            fragmentTransaction.remove(it)
-            fragmentTransaction.commit()
-            showBottomNav()
-        }
-    }
-
-    companion object {
-        const val WORKOUT_FRAGMENT = "WorkoutFragment"
     }
 }
 

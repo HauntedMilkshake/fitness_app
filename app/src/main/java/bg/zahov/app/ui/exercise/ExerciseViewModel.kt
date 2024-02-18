@@ -11,6 +11,7 @@ import bg.zahov.app.data.model.Category
 import bg.zahov.app.data.model.Exercise
 import bg.zahov.app.data.model.SelectableExercise
 import bg.zahov.app.data.model.SelectableFilter
+import bg.zahov.app.getReplaceableExerciseProvider
 import bg.zahov.app.getSelectableExerciseProvider
 import bg.zahov.app.getWorkoutProvider
 import kotlinx.coroutines.launch
@@ -25,6 +26,10 @@ class ExerciseViewModel(application: Application) : AndroidViewModel(application
         application.getSelectableExerciseProvider()
     }
 
+    private val replaceableExerciseProvider by lazy {
+        application.getReplaceableExerciseProvider()
+    }
+
     private val _state = MutableLiveData<State>()
     val state: LiveData<State>
         get() = _state
@@ -37,7 +42,8 @@ class ExerciseViewModel(application: Application) : AndroidViewModel(application
     val searchFilters: LiveData<List<SelectableFilter>>
         get() = _searchFilters
 
-    private var replaceable = false
+    var replaceable = false
+    var selectable = false
     private var search: String? = null
     private val allExercises: MutableList<Exercise> = mutableListOf()
     private var selectedFilters: MutableList<SelectableFilter> = mutableListOf()
@@ -47,23 +53,76 @@ class ExerciseViewModel(application: Application) : AndroidViewModel(application
     }
 
     fun onSelectableExerciseClicked(exercise: SelectableExercise) {
-        if (exercise.isSelected) {
-            if (replaceable) {
-                //TODO(REPLACEABLE)
-            } else {
-                selectableExerciseProvider.removeExercise(exercise)
+        when {
+            replaceable -> {
+                when(exercise.isSelected) {
+                    true -> {
+                        val captured = _userExercises.value.orEmpty()
+                        captured.find { it == exercise }?.isSelected = false
+                        _userExercises.value = captured
+                    }
+                    false -> {
+                        val captured = _userExercises.value.orEmpty()
+                        captured.find { it == exercise }?.isSelected = true
+                        captured.find { it.isSelected }?.isSelected = false
+                        _userExercises.value = captured
+                    }
+                }
             }
-        } else {
-            if (replaceable) {
-                //TODO(REPLACEABLE)
-            } else {
-                selectableExerciseProvider.addExercise(exercise)
+            selectable -> {
+                when(exercise.isSelected) {
+                    true -> {
+                        val captured = _userExercises.value.orEmpty()
+                        captured.find { it == exercise }?.isSelected = false
+                        _userExercises.value = captured
+
+                    }
+                    false -> {
+                        val captured = _userExercises.value.orEmpty()
+                        captured.find { it == exercise }?.isSelected = true
+                        _userExercises.value = captured
+                    }
+                }
             }
         }
     }
 
-    fun resetSelectableExercises() {
-        selectableExerciseProvider.resetSelectedExercises()
+    fun onConfirm() {
+        replaceable = false
+        selectable = false
+
+        val selectedExercises = _userExercises.value.orEmpty()
+        selectedExercises.forEach {
+            if(it.isSelected) {
+                it.isSelected = false
+            }
+        }
+        _userExercises.value = selectedExercises
+    }
+
+    fun confirmSelectedExercises() {
+        when {
+            replaceable -> {
+                _userExercises.value?.find { it.isSelected }?.let {
+                    replaceableExerciseProvider.updateExerciseToReplace(it)
+                }
+            }
+            selectable -> {
+                val selectedExercises = mutableListOf<SelectableExercise>()
+                _userExercises.value?.forEach {
+                    if (it.isSelected) {
+                        selectedExercises.add(it)
+                    }
+                }
+
+                if (selectedExercises.isNotEmpty()) {
+                    selectableExerciseProvider.addExercises(selectedExercises)
+                }
+            }
+        }
+
+        onConfirm()
+
     }
 
     fun getExercises() {
@@ -108,7 +167,7 @@ class ExerciseViewModel(application: Application) : AndroidViewModel(application
     }
 
     fun addFilter(filter: SelectableFilter) {
-        selectedFilters = _searchFilters.value?.toMutableList() ?: mutableListOf()
+        selectedFilters = _searchFilters.value.orEmpty().toMutableList()
         selectedFilters.add(filter)
 
         _searchFilters.value = selectedFilters
@@ -117,7 +176,7 @@ class ExerciseViewModel(application: Application) : AndroidViewModel(application
     }
 
     fun removeFilter(filter: SelectableFilter) {
-        selectedFilters = _searchFilters.value?.toMutableList() ?: mutableListOf()
+        selectedFilters = _searchFilters.value.orEmpty().toMutableList()
         selectedFilters.remove(filter)
         _searchFilters.value = selectedFilters
 

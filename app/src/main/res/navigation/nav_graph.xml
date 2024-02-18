@@ -5,6 +5,10 @@
     android:id="@+id/nav_graph"
     app:startDestination="@id/welcome">
 
+    <action
+        android:id="@+id/to_workout_fragment"
+        app:destination="@id/workout" />
+
     <fragment
         android:id="@+id/welcome"
         android:name="bg.zahov.app.ui.welcome.WelcomeFragment"
@@ -95,6 +99,11 @@
             app:destination="@+id/create_workout_template"
             app:popUpTo="@id/exercises"
             app:popUpToInclusive="true" />
+        <action
+            android:id="@+id/exercises_to_workout"
+            app:destination="@id/workout"
+            app:popUpTo="@id/exercises"
+            app:popUpToInclusive="true" />
     </fragment>
 
     <fragment
@@ -142,8 +151,8 @@
 
     <fragment
         android:id="@+id/create_workout_template"
-        android:name="bg.zahov.app.ui.workout.add.NewWorkoutTemplateFragment"
-        tools:layout="@layout/fragment_new_workout_template">
+        android:name="bg.zahov.app.ui.workout.add.AddTemplateWorkoutFragment"
+        tools:layout="@layout/fragment_add_workout_template">
 
         <action
             android:id="@+id/create_workout_template_to_workout"
@@ -175,5 +184,4 @@
             android:id="@+id/workout_to_add_exercise"
             app:destination="@id/exercises" />
     </fragment>
-
 </navigation>
