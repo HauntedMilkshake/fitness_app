@@ -30,7 +30,7 @@ class ExercisesFragment : Fragment() {
     private var _binding: FragmentExercisesBinding? = null
     private val binding
         get() = requireNotNull(_binding)
-    private val exerciseViewModel: ExerciseViewModel by viewModels({ requireActivity() })
+    private val exerciseViewModel: ExerciseViewModel by viewModels()
 
     private val selectable by lazy {
         arguments?.getBoolean("SELECTABLE") ?: false
@@ -40,6 +40,9 @@ class ExercisesFragment : Fragment() {
         arguments?.getBoolean("REPLACING") ?: false
     }
 
+    private val addable by lazy {
+        arguments?.getBoolean("ADDABLE") ?: false
+    }
     override fun onCreateView(
         inflater: LayoutInflater,
         container: ViewGroup?,
@@ -56,13 +59,14 @@ class ExercisesFragment : Fragment() {
         exitTransition = inflater.inflateTransition(R.transition.fade_out)
         exerciseViewModel.replaceable = replaceable
         exerciseViewModel.selectable = selectable && !replaceable
+        exerciseViewModel.addable = addable
     }
 
     override fun onViewCreated(view: View, savedInstanceState: Bundle?) {
         super.onViewCreated(view, savedInstanceState)
         binding.apply {
             exerciseText.text = when {
-                selectable -> {
+                selectable || addable -> {
                     "Add exercises"
                 }
 
@@ -96,13 +100,13 @@ class ExercisesFragment : Fragment() {
             }
 
             val exerciseAdapter =
-                ExerciseAdapter(selectable || replaceable).apply {
+                ExerciseAdapter(selectable || replaceable || addable).apply {
                     itemClickListener =
                         object : ExerciseAdapter.ItemClickListener<SelectableExercise> {
                             override fun onItemClicked(
                                 item: SelectableExercise,
                             ) {
-                                if (replaceable || selectable) {
+                                if (replaceable || selectable || addable) {
                                     exerciseViewModel.onSelectableExerciseClicked(item)
                                 }
                                 //TODO(OR GO TO ANOTHER EXERCISE FRAGMENT)
@@ -185,7 +189,7 @@ class ExercisesFragment : Fragment() {
             }
 
             confirm.apply {
-                visibility = if (selectable || replaceable) View.VISIBLE else View.GONE
+                visibility = if (selectable || replaceable || addable) View.VISIBLE else View.GONE
                 setOnClickListener {
                     it.applyScaleAnimation()
                     exerciseViewModel.confirmSelectedExercises()

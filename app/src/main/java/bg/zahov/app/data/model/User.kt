@@ -60,7 +60,7 @@ data class Workout(
     var duration: Double?,
     var date: String,
     var isTemplate: Boolean,
-    val exercises: List<Exercise>,
+    var exercises: List<Exercise>,
     val note: String? = null
 ) {
     companion object {

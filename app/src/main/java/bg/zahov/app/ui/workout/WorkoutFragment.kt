@@ -96,7 +96,7 @@ class WorkoutFragment : Fragment() {
             addExercise.setOnClickListener {
                 findNavController().navigate(
                     R.id.workout_to_add_exercise,
-                    bundleOf("SELECTABLE" to true)
+                    bundleOf("ADDABLE" to true)
                 )
             }
 

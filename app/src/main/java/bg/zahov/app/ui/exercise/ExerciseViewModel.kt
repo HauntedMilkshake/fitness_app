@@ -1,6 +1,7 @@
 package bg.zahov.app.ui.exercise
 
 import android.app.Application
+import android.util.Log
 import androidx.lifecycle.AndroidViewModel
 import androidx.lifecycle.LiveData
 import androidx.lifecycle.MutableLiveData
@@ -11,6 +12,7 @@ import bg.zahov.app.data.model.Category
 import bg.zahov.app.data.model.Exercise
 import bg.zahov.app.data.model.SelectableExercise
 import bg.zahov.app.data.model.SelectableFilter
+import bg.zahov.app.getAddExerciseToWorkoutProvider
 import bg.zahov.app.getReplaceableExerciseProvider
 import bg.zahov.app.getSelectableExerciseProvider
 import bg.zahov.app.getWorkoutProvider
@@ -30,6 +32,9 @@ class ExerciseViewModel(application: Application) : AndroidViewModel(application
         application.getReplaceableExerciseProvider()
     }
 
+    private val addExerciseToWorkoutProvider by lazy {
+        application.getAddExerciseToWorkoutProvider()
+    }
     private val _state = MutableLiveData<State>()
     val state: LiveData<State>
         get() = _state
@@ -44,6 +49,7 @@ class ExerciseViewModel(application: Application) : AndroidViewModel(application
 
     var replaceable = false
     var selectable = false
+    var addable = false
     private var search: String? = null
     private val allExercises: MutableList<Exercise> = mutableListOf()
     private var selectedFilters: MutableList<SelectableFilter> = mutableListOf()
@@ -55,12 +61,13 @@ class ExerciseViewModel(application: Application) : AndroidViewModel(application
     fun onSelectableExerciseClicked(exercise: SelectableExercise) {
         when {
             replaceable -> {
-                when(exercise.isSelected) {
+                when (exercise.isSelected) {
                     true -> {
                         val captured = _userExercises.value.orEmpty()
                         captured.find { it == exercise }?.isSelected = false
                         _userExercises.value = captured
                     }
+
                     false -> {
                         val captured = _userExercises.value.orEmpty()
                         captured.find { it == exercise }?.isSelected = true
@@ -69,14 +76,17 @@ class ExerciseViewModel(application: Application) : AndroidViewModel(application
                     }
                 }
             }
-            selectable -> {
-                when(exercise.isSelected) {
+            //addable and selectable actions to the live data are the same
+            //TODO(make the recycler view update according to livedata changes)
+            else -> {
+                when (exercise.isSelected) {
                     true -> {
                         val captured = _userExercises.value.orEmpty()
                         captured.find { it == exercise }?.isSelected = false
                         _userExercises.value = captured
 
                     }
+
                     false -> {
                         val captured = _userExercises.value.orEmpty()
                         captured.find { it == exercise }?.isSelected = true
@@ -90,10 +100,11 @@ class ExerciseViewModel(application: Application) : AndroidViewModel(application
     fun onConfirm() {
         replaceable = false
         selectable = false
+        addable = false
 
         val selectedExercises = _userExercises.value.orEmpty()
         selectedExercises.forEach {
-            if(it.isSelected) {
+            if (it.isSelected) {
                 it.isSelected = false
             }
         }
@@ -107,7 +118,8 @@ class ExerciseViewModel(application: Application) : AndroidViewModel(application
                     replaceableExerciseProvider.updateExerciseToReplace(it)
                 }
             }
-            selectable -> {
+
+            else -> {
                 val selectedExercises = mutableListOf<SelectableExercise>()
                 _userExercises.value?.forEach {
                     if (it.isSelected) {
@@ -116,13 +128,17 @@ class ExerciseViewModel(application: Application) : AndroidViewModel(application
                 }
 
                 if (selectedExercises.isNotEmpty()) {
-                    selectableExerciseProvider.addExercises(selectedExercises)
+                    Log.d("adding to providers", "adding to providers")
+                    if (addable) {
+                        Log.d("ADDABLE", "ADDABLE")
+                        addExerciseToWorkoutProvider.addExercises(selectedExercises)
+                    }
+                    if (selectable) selectableExerciseProvider.addExercises(selectedExercises)
                 }
             }
         }
 
         onConfirm()
-
     }
 
     fun getExercises() {

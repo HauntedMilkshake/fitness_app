@@ -184,4 +184,9 @@
             android:id="@+id/workout_to_add_exercise"
             app:destination="@id/exercises" />
     </fragment>
+    <fragment
+        android:id="@+id/rest_timer"
+        android:name="bg.zahov.app.ui.workout.rest.RestTimerFragment"
+        tools:layout="@layout/fragment_rest_timer">
+    </fragment>
 </navigation>

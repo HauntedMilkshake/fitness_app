@@ -1,6 +1,7 @@
 package bg.zahov.app
 
 import android.app.Application
+import bg.zahov.app.data.provider.AddExerciseToWorkoutProvider
 import bg.zahov.app.data.provider.ReplaceableExerciseProvider
 import bg.zahov.app.data.provider.SelectableExerciseProvider
 import bg.zahov.app.data.provider.SettingsProviderImpl
@@ -29,6 +30,9 @@ class MyApplication : Application() {
     val replaceableExerciseProvider by lazy {
         ReplaceableExerciseProvider.getInstance()
     }
+    val workoutAddedExerciseProvider by lazy {
+        AddExerciseToWorkoutProvider.getInstance()
+    }
     override fun onCreate() {
         super.onCreate()
         Firebase.initialize(this)
@@ -41,3 +45,4 @@ fun Application.getWorkoutProvider() = (this as MyApplication).workoutProvider
 fun Application.getWorkoutStateManager() = (this as MyApplication).workoutState
 fun Application.getSelectableExerciseProvider() = (this as MyApplication).selectedExerciseProvider
 fun Application.getReplaceableExerciseProvider() = (this as MyApplication).replaceableExerciseProvider
+fun Application.getAddExerciseToWorkoutProvider() = (this as MyApplication).workoutAddedExerciseProvider

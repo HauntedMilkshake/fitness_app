@@ -8,6 +8,7 @@ import androidx.lifecycle.MutableLiveData
 import androidx.lifecycle.viewModelScope
 import bg.zahov.app.data.model.Workout
 import bg.zahov.app.data.model.WorkoutState
+import bg.zahov.app.getAddExerciseToWorkoutProvider
 import bg.zahov.app.getSelectableExerciseProvider
 import bg.zahov.app.getWorkoutProvider
 import bg.zahov.app.getWorkoutStateManager
@@ -24,8 +25,8 @@ class WorkoutViewModel(application: Application) : AndroidViewModel(application)
         application.getWorkoutProvider()
     }
 
-    private val selectedExercisesProvider by lazy {
-        application.getSelectableExerciseProvider()
+    private val addExerciseToWorkoutProvider by lazy {
+        application.getAddExerciseToWorkoutProvider()
     }
 
     private val _workout = MutableLiveData<Workout>()
@@ -67,11 +68,12 @@ class WorkoutViewModel(application: Application) : AndroidViewModel(application)
                 }
             }
             launch {
-                selectedExercisesProvider.selectedExercises.collect {
-                    Log.d("COLLECTING IN WORKOUT", it.size.toString())
+                addExerciseToWorkoutProvider.selectedExercises.collect {
                     val new = _workout.value
-                    new?.exercises?.toMutableList()
-                        ?.addAll(it.map { selectable -> selectable.exercise })
+                    val exercises = new?.exercises.orEmpty().toMutableList()
+                    exercises.addAll(it.map { selectable -> selectable.exercise })
+                    new?.exercises = exercises
+
                     new?.let { workout ->
                         _workout.postValue(workout)
                     }

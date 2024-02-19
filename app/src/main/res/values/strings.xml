@@ -106,6 +106,10 @@
     <string name="drop_set"><font color="#FF0000"><b>D</b></font>  Drop set    <b>?</b></string>
     <string name="failure_set"><font color="#FF0000"><b>F</b></font>   Failure    <b>?</b></string>
     <string name="workout_template_note">note</string>
+    <string name="rest_fragment_info">Choose a duration below or set your own. Custom durations are saved for next time.</string>
+    <string name="create_custom_timer">create custom timer</string>
+    <string name="minute">1:00</string>
+    <string name="minute_and_half">2:00</string>
 
 
 </resources>
