@@ -9,6 +9,7 @@ import androidx.lifecycle.asLiveData
 import androidx.lifecycle.viewModelScope
 import bg.zahov.app.data.model.Workout
 import bg.zahov.app.data.model.WorkoutState
+import bg.zahov.app.util.timeToString
 import kotlinx.coroutines.flow.combine
 import kotlinx.coroutines.flow.map
 import kotlinx.coroutines.flow.stateIn
@@ -59,12 +60,7 @@ class WorkoutManagerViewModel(application: Application) : AndroidViewModel(appli
             launch {
                 workoutStateManager.timer.collect {
                     _timer.postValue(
-                        String.format(
-                            "%02d:%02d:%02d",
-                            (it / (1000 * 60 * 60)) % 24,
-                            (it / (1000 * 60)) % 60,
-                            (it / 1000) % 60
-                        )
+                        it.timeToString()
                     )
                 }
             }

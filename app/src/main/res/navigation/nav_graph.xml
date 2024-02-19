@@ -179,7 +179,9 @@
         android:id="@+id/workout"
         android:name="bg.zahov.app.ui.workout.WorkoutFragment"
         tools:layout="@layout/fragment_workout">
-
+        <action
+            android:id="@+id/workout_to_rest_timer"
+            app:destination="@id/rest_timer" />
         <action
             android:id="@+id/workout_to_add_exercise"
             app:destination="@id/exercises" />
@@ -188,5 +190,10 @@
         android:id="@+id/rest_timer"
         android:name="bg.zahov.app.ui.workout.rest.RestTimerFragment"
         tools:layout="@layout/fragment_rest_timer">
+        <action
+            android:id="@+id/rest_timer_to_workout"
+            app:destination="@id/workout"
+            app:popUpTo="@id/rest_timer"
+            app:popUpToInclusive="true" />
     </fragment>
 </navigation>

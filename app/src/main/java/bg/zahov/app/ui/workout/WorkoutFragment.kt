@@ -128,6 +128,7 @@ class WorkoutFragment : Fragment() {
             }
             restTimer.setOnClickListener {
                 it.applyScaleAnimation()
+                findNavController().navigate(R.id.workout_to_rest_timer)
             }
             finishText.setOnClickListener {
                 it.applyScaleAnimation()

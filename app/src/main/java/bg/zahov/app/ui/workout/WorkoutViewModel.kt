@@ -1,7 +1,6 @@
 package bg.zahov.app.ui.workout
 
 import android.app.Application
-import android.util.Log
 import androidx.lifecycle.AndroidViewModel
 import androidx.lifecycle.LiveData
 import androidx.lifecycle.MutableLiveData
@@ -9,7 +8,6 @@ import androidx.lifecycle.viewModelScope
 import bg.zahov.app.data.model.Workout
 import bg.zahov.app.data.model.WorkoutState
 import bg.zahov.app.getAddExerciseToWorkoutProvider
-import bg.zahov.app.getSelectableExerciseProvider
 import bg.zahov.app.getWorkoutProvider
 import bg.zahov.app.getWorkoutStateManager
 import bg.zahov.app.util.currDateToString

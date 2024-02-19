@@ -3,7 +3,9 @@ package bg.zahov.app.util
 import android.animation.ArgbEvaluator
 import android.animation.ObjectAnimator
 import android.animation.PropertyValuesHolder
+import android.graphics.drawable.ColorDrawable
 import android.view.View
+import android.widget.NumberPicker
 import androidx.core.content.ContextCompat
 import bg.zahov.app.data.model.Exercise
 import bg.zahov.app.data.model.FirestoreFields
@@ -150,3 +152,19 @@ fun currDateToString(): String = LocalDate.now().format(
         Locale.getDefault()
     )
 )
+
+fun Long.timeToString(): String = String.format(
+    "%02d:%02d:%02d",
+    (this / (1000 * 60 * 60)) % 24,
+    (this / (1000 * 60)) % 60,
+    (this / 1000) % 60
+)
+
+fun String.parseTimeStringToLong(): Long {
+    val parts = this.split(":")
+    if (parts.size != 3) {
+        throw IllegalArgumentException("Invalid time string format")
+    }
+
+    return ((parts[0].toLong() * 60 * 60) + (parts[1].toLong() * 60) + parts[2].toLong()) * 1000
+}
