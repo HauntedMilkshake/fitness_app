@@ -4,6 +4,7 @@ import android.animation.ArgbEvaluator
 import android.animation.ObjectAnimator
 import android.animation.PropertyValuesHolder
 import android.graphics.drawable.ColorDrawable
+import android.util.Log
 import android.view.View
 import android.widget.NumberPicker
 import androidx.core.content.ContextCompat
@@ -162,9 +163,15 @@ fun Long.timeToString(): String = String.format(
 
 fun String.parseTimeStringToLong(): Long {
     val parts = this.split(":")
-    if (parts.size != 3) {
+    if (parts.size !in 1..3) {
+        Log.d("SIZE OF PARSE", parts.size.toString())
         throw IllegalArgumentException("Invalid time string format")
     }
 
-    return ((parts[0].toLong() * 60 * 60) + (parts[1].toLong() * 60) + parts[2].toLong()) * 1000
+    val hours =  parts[0].toLong()
+    val minutes = if (parts.size >= 2) parts[1].toLong() else 0
+    val seconds = if (parts.size == 3) parts[2].toLong() else 0
+
+    return ((hours * 60 * 60) + (minutes * 60) + seconds) * 1000
 }
+

@@ -1,11 +1,13 @@
 package bg.zahov.app.ui.workout.rest
 
 import android.app.Application
-import android.os.CountDownTimer
+import android.util.Log
 import androidx.lifecycle.AndroidViewModel
 import androidx.lifecycle.LiveData
 import androidx.lifecycle.MutableLiveData
 import androidx.lifecycle.viewModelScope
+import bg.zahov.app.data.model.RestState
+import bg.zahov.app.getRestTimerProvider
 import bg.zahov.app.getSettingsProvider
 import bg.zahov.app.util.parseTimeStringToLong
 import bg.zahov.app.util.timeToString
@@ -15,6 +17,10 @@ import java.lang.IllegalArgumentException
 class RestTimerViewModel(application: Application) : AndroidViewModel(application) {
     private val settingsProvider by lazy {
         application.getSettingsProvider()
+    }
+
+    private val restManager by lazy {
+        application.getRestTimerProvider()
     }
     private val _state = MutableLiveData<State>(State.Default)
     val state: LiveData<State>
@@ -28,24 +34,44 @@ class RestTimerViewModel(application: Application) : AndroidViewModel(applicatio
     val startingTime: LiveData<String>
         get() = _startingTime
 
-    val rests: MutableList<String> = mutableListOf()
+    private val rests: MutableList<String> = mutableListOf()
 
-    private lateinit var timer: CountDownTimer
-    private var remainingTime: Long = 0
     private var timerDelta: Long = 0
 
     init {
         viewModelScope.launch {
-            settingsProvider.getSettings().collect {
-                _increment.postValue("${(it.obj?.restTimer ?: 30)} s")
-                timerDelta = (it.obj?.restTimer?: 30).toLong() * 1000
+            launch {
+                settingsProvider.getSettings().collect {
+                    _increment.postValue("${(it.obj?.restTimer ?: 30)} s")
+                    timerDelta = (it.obj?.restTimer ?: 30).toLong() * 1000
+                }
+            }
+            launch {
+                restManager.restTimer.collect {
+                    if (!(it.elapsedTime.isNullOrEmpty()) && !(it.fullRest.isNullOrEmpty())) {
+                        Log.d("TIME", it.elapsedTime ?: "sss")
+                        _state.postValue(State.CountDown(it.elapsedTime!!))
+                        _startingTime.postValue(it.fullRest!!)
+                    }
+                }
+            }
+            launch {
+                restManager.restState.collect {
+                    _state.postValue(
+                        when (it) {
+                            RestState.Active -> State.CountDown("00:00")
+                            RestState.Finished -> State.OnTimerFinished
+                            RestState.Default -> State.Default
+                        }
+                    )
+                }
             }
         }
     }
 
     fun getRestsArray(): List<String> {
-        return if(rests.isEmpty()) {
-            for(seconds in 0 .. 10*60 step 5) {
+        return if (rests.isEmpty()) {
+            for (seconds in 0..10 * 60 step 5) {
                 rests.add(String.format("%02d:%02d", seconds / 60, seconds % 60))
             }
             rests
@@ -80,47 +106,29 @@ class RestTimerViewModel(application: Application) : AndroidViewModel(applicatio
     }
 
     private fun startTimer(time: Long) {
-        remainingTime = time
+
         _startingTime.value = _startingTime.value ?: time.timeToString()
-
-        timer = object : CountDownTimer(time, 1000) {
-            override fun onTick(p0: Long) {
-                remainingTime = p0
-                _state.value = State.CountDown((p0).timeToString())
-            }
-
-            override fun onFinish() {
-                _state.value = State.OnTimerFinished
-            }
-
-        }.start()
+        viewModelScope.launch {
+            restManager.startRest(time)
+        }
     }
 
     fun addTime() {
-        var newTime = _startingTime.value?.parseTimeStringToLong()
-
-        if(newTime != null) {
-            newTime += timerDelta
+        viewModelScope.launch {
+            restManager.addTime(timerDelta)
         }
-        _startingTime.value = newTime?.timeToString()
-
-        remainingTime += timerDelta
-        timer.cancel()
-        startTimer(remainingTime)
     }
 
     fun removeTime() {
-        if (remainingTime >= timerDelta) {
-            remainingTime -= timerDelta
-            timer.cancel()
-            startTimer(remainingTime)
+        viewModelScope.launch {
+            restManager.removeTime(timerDelta)
         }
-
     }
 
     fun cancelTimer() {
-        timer.cancel()
-        remainingTime = 0
+        viewModelScope.launch {
+            restManager.stopTimer()
+        }
     }
 
     sealed interface State {

@@ -2,6 +2,7 @@ package bg.zahov.app.ui.workout
 
 import android.os.Bundle
 import android.transition.TransitionInflater
+import android.util.Log
 import android.view.LayoutInflater
 import android.view.View
 import android.view.ViewGroup
@@ -9,12 +10,14 @@ import androidx.activity.OnBackPressedCallback
 import androidx.core.os.bundleOf
 import androidx.fragment.app.Fragment
 import androidx.fragment.app.viewModels
+import androidx.lifecycle.map
 import androidx.navigation.fragment.findNavController
 import androidx.recyclerview.widget.ItemTouchHelper
 import androidx.recyclerview.widget.LinearLayoutManager
 import androidx.recyclerview.widget.RecyclerView
 import bg.zahov.app.data.model.ClickableSet
 import bg.zahov.app.data.model.ExerciseWithNoteVisibility
+import bg.zahov.app.data.model.OnGoingWorkoutUiMapper
 import bg.zahov.app.ui.workout.add.ExerciseSetAdapter
 import bg.zahov.app.ui.workout.add.WorkoutEntry
 import bg.zahov.app.util.SwipeGesture
@@ -47,6 +50,12 @@ class WorkoutFragment : Fragment() {
     override fun onViewCreated(view: View, savedInstanceState: Bundle?) {
         super.onViewCreated(view, savedInstanceState)
         binding.apply {
+            onGoingWorkoutViewModel.restTimer.map { OnGoingWorkoutUiMapper.map(it) }
+                .observe(viewLifecycleOwner) {
+                    restTimerIndicator.visibility = if (it.isRestActive) View.VISIBLE else View.GONE
+                    restTimerCounter.visibility = if (it.isRestActive) View.VISIBLE else View.GONE
+                    restTimerCounter.text = it.rest
+                }
 
             val exerciseSetAdapter = ExerciseSetAdapter().apply {
                 itemClickListener = object : ExerciseSetAdapter.ItemClickListener<WorkoutEntry> {
@@ -138,6 +147,7 @@ class WorkoutFragment : Fragment() {
 
             activity?.onBackPressedDispatcher?.addCallback(object : OnBackPressedCallback(true) {
                 override fun handleOnBackPressed() {
+                    Log.d("MINIMIZE", "MINIMIZE")
                     onGoingWorkoutViewModel.minimize()
                     findNavController().navigateUp()
                 }

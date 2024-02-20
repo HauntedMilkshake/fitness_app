@@ -3,6 +3,7 @@ package bg.zahov.app
 import android.app.Application
 import bg.zahov.app.data.provider.AddExerciseToWorkoutProvider
 import bg.zahov.app.data.provider.ReplaceableExerciseProvider
+import bg.zahov.app.data.provider.RestTimerProvider
 import bg.zahov.app.data.provider.SelectableExerciseProvider
 import bg.zahov.app.data.provider.SettingsProviderImpl
 import bg.zahov.app.data.provider.UserProviderImpl
@@ -33,6 +34,9 @@ class MyApplication : Application() {
     val workoutAddedExerciseProvider by lazy {
         AddExerciseToWorkoutProvider.getInstance()
     }
+    val restTimerProvider by lazy {
+        RestTimerProvider.getInstance()
+    }
     override fun onCreate() {
         super.onCreate()
         Firebase.initialize(this)
@@ -46,3 +50,5 @@ fun Application.getWorkoutStateManager() = (this as MyApplication).workoutState
 fun Application.getSelectableExerciseProvider() = (this as MyApplication).selectedExerciseProvider
 fun Application.getReplaceableExerciseProvider() = (this as MyApplication).replaceableExerciseProvider
 fun Application.getAddExerciseToWorkoutProvider() = (this as MyApplication).workoutAddedExerciseProvider
+fun Application.getRestTimerProvider() = (this as MyApplication).restTimerProvider
+

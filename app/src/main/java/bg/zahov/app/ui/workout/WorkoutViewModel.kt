@@ -1,17 +1,21 @@
 package bg.zahov.app.ui.workout
 
 import android.app.Application
+import android.util.Log
 import androidx.lifecycle.AndroidViewModel
 import androidx.lifecycle.LiveData
 import androidx.lifecycle.MutableLiveData
 import androidx.lifecycle.viewModelScope
+import bg.zahov.app.data.model.RestState
 import bg.zahov.app.data.model.Workout
 import bg.zahov.app.data.model.WorkoutState
 import bg.zahov.app.getAddExerciseToWorkoutProvider
+import bg.zahov.app.getRestTimerProvider
 import bg.zahov.app.getWorkoutProvider
 import bg.zahov.app.getWorkoutStateManager
 import bg.zahov.app.util.currDateToString
 import bg.zahov.app.util.hashString
+import kotlinx.coroutines.flow.combine
 import kotlinx.coroutines.launch
 
 class WorkoutViewModel(application: Application) : AndroidViewModel(application) {
@@ -27,6 +31,10 @@ class WorkoutViewModel(application: Application) : AndroidViewModel(application)
         application.getAddExerciseToWorkoutProvider()
     }
 
+    private val restTimerProvider by lazy {
+        application.getRestTimerProvider()
+    }
+
     private val _workout = MutableLiveData<Workout>()
     val workout: LiveData<Workout>
         get() = _workout
@@ -34,6 +42,10 @@ class WorkoutViewModel(application: Application) : AndroidViewModel(application)
     private val _timer = MutableLiveData<String>()
     val timer: LiveData<String>
         get() = _timer
+
+    private val _restTimerState = MutableLiveData<State>(State.Default(false))
+    val restTimer: LiveData<State>
+        get() = _restTimerState
 
     init {
         viewModelScope.launch {
@@ -77,7 +89,39 @@ class WorkoutViewModel(application: Application) : AndroidViewModel(application)
                     }
                 }
             }
+//            launch {
+//                restTimerProvider.restTimer.collect {
+//                    Log.d("rest", it)
+//                    it.elapsedTime?.let { time ->
+//                        _restTimerState.postValue(State.Rest(time))
+//                    }
+//                }
+//            }
+//            launch {
+//                restTimerProvider.restState.collect {
+//                    Log.d("collecting state", it.name)
+//                    _restTimerState.postValue(
+//                        when (it) {
+//                            RestState.Active -> State.Default(true)
+//                            else -> State.Default(false)
+//                        }
+//                    )
+//                }
+//            }
+            launch {
+                combine(restTimerProvider.restState, restTimerProvider.restTimer) { state, timer ->
+                    timer.elapsedTime?.let {
+                        _restTimerState.postValue(State.Rest(it))
+                    }
 
+                    _restTimerState.postValue(
+                        when (state) {
+                            RestState.Active -> State.Default(true)
+                            else -> State.Default(false)
+                        }
+                    )
+                }
+            }
         }
     }
 
@@ -100,5 +144,10 @@ class WorkoutViewModel(application: Application) : AndroidViewModel(application)
             }
             workoutStateManager.updateState(WorkoutState.INACTIVE)
         }
+    }
+
+    sealed interface State {
+        data class Default(val restState: Boolean) : State
+        data class Rest(val time: String) : State
     }
 }

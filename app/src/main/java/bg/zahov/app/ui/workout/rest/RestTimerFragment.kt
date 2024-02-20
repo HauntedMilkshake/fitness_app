@@ -1,6 +1,7 @@
 package bg.zahov.app.ui.workout.rest
 
 import android.os.Bundle
+import android.util.Log
 import android.view.LayoutInflater
 import android.view.View
 import android.view.ViewGroup
@@ -55,7 +56,7 @@ class RestTimerFragment : Fragment() {
 
                     if (it.finished) findNavController().navigate(R.id.rest_timer_to_workout)
 
-                    if (it.isCountdown) progressBar.setProgressWithAnimation(
+                    if (it.isCountdown && it.time.isNotEmpty()) progressBar.setProgressWithAnimation(
                         it.time.parseTimeStringToLong().toFloat(), 1000
                     )
                 }
@@ -72,6 +73,7 @@ class RestTimerFragment : Fragment() {
             restTimerViewModel.startingTime.observe(viewLifecycleOwner) {
                 setTimer.text = it
                 progressBar.apply {
+                    Log.d("BEFORE PARSE", it)
                     if (it.isNotEmpty()) progressMax = it.parseTimeStringToLong().toFloat()
                 }
             }
