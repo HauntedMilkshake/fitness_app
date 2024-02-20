@@ -1,15 +1,14 @@
 package bg.zahov.app.ui.workout.add
 
-import android.util.Log
 import android.view.LayoutInflater
 import android.view.View
 import android.view.ViewGroup
 import androidx.recyclerview.widget.RecyclerView
+import bg.zahov.app.data.model.Category
 import bg.zahov.app.data.model.ClickableSet
 import bg.zahov.app.data.model.ExerciseWithNoteVisibility
 import bg.zahov.app.data.model.SetType
 import bg.zahov.app.data.model.Sets
-import bg.zahov.app.util.SwipeGesture
 import bg.zahov.fitness.app.R
 import com.google.android.material.button.MaterialButton
 import com.google.android.material.imageview.ShapeableImageView
@@ -67,7 +66,7 @@ class ExerciseSetAdapter : RecyclerView.Adapter<RecyclerView.ViewHolder>() {
             }
 
             is SetViewHolder -> {
-                holder.bind((items[position] as SetEntry).setEntry, items.count { it is SetEntry })
+                holder.bind((items[position] as SetEntry).setEntry)
             }
         }
     }
@@ -118,9 +117,26 @@ class ExerciseSetAdapter : RecyclerView.Adapter<RecyclerView.ViewHolder>() {
         private val options = view.findViewById<ShapeableImageView>(R.id.options)
         private val note = view.findViewById<TextInputLayout>(R.id.workout_note)
         private val addSetButton = view.findViewById<MaterialButton>(R.id.add_set)
+        private val firstInputColumnIndicator =
+            view.findViewById<MaterialTextView>(R.id.first_input_column_indicator)
+        private val secondInputColumnIndicator =
+            view.findViewById<MaterialTextView>(R.id.second_input_column_indicator)
 
         fun bind(item: ExerciseEntry) {
             title.text = item.exerciseEntry.exercise.name
+            firstInputColumnIndicator.text = when (item.exerciseEntry.exercise.category) {
+                Category.AssistedWeight -> "-KG"
+                Category.RepsOnly -> "REPS"
+                Category.Cardio -> "DURATION"
+                Category.Timed -> "DURATION"
+                else -> "+KG"
+            }
+            secondInputColumnIndicator.visibility = when (item.exerciseEntry.exercise.category) {
+                Category.RepsOnly -> View.GONE
+                Category.Cardio -> View.GONE
+                Category.Timed -> View.GONE
+                else -> View.VISIBLE
+            }
 
             note.visibility = if (item.exerciseEntry.noteVisibility) View.VISIBLE else View.GONE
 
@@ -148,9 +164,17 @@ class ExerciseSetAdapter : RecyclerView.Adapter<RecyclerView.ViewHolder>() {
             view.findViewById<TextInputEditText>(R.id.second_input_field_text)
         private val check = view.findViewById<ShapeableImageView>(R.id.check)
 
-        fun bind(item: ClickableSet, position: Int) {
-            setIndicator.text = "$position"
+        fun bind(item: ClickableSet) {
+            setIndicator.text = "$adapterPosition"
             previous.text = "-" //TODO()
+            secondInputLayout.visibility = when (getExerciseForSet()?.exercise?.category) {
+                Category.RepsOnly -> View.GONE
+                Category.Cardio -> View.GONE
+                Category.Timed -> View.GONE
+                else -> {
+                    View.VISIBLE
+                }
+            }
             setIndicator.setOnClickListener {
                 itemClickListener?.onSetClicked(item, it)
             }
@@ -163,13 +187,21 @@ class ExerciseSetAdapter : RecyclerView.Adapter<RecyclerView.ViewHolder>() {
         fun deleteSet() {
             for (i in adapterPosition downTo 0) {
                 if (items[i] is ExerciseEntry) {
-                    Log.d("on swipe", "exericse found on swipe")
                     swipeActionListener?.onDeleteSet(
                         (items[i] as ExerciseEntry).exerciseEntry,
                         (items[adapterPosition] as SetEntry).setEntry
                     )
                 }
             }
+        }
+
+        private fun getExerciseForSet(): ExerciseWithNoteVisibility? {
+            for (i in adapterPosition downTo 0) {
+                if (items[i] is ExerciseEntry) {
+                    return (items[i] as ExerciseEntry).exerciseEntry
+                }
+            }
+            return null
         }
     }
 

@@ -49,7 +49,6 @@ class RestTimerViewModel(application: Application) : AndroidViewModel(applicatio
             launch {
                 restManager.restTimer.collect {
                     if (!(it.elapsedTime.isNullOrEmpty()) && !(it.fullRest.isNullOrEmpty())) {
-                        Log.d("TIME", it.elapsedTime ?: "sss")
                         _state.postValue(State.CountDown(it.elapsedTime!!))
                         _startingTime.postValue(it.fullRest!!)
                     }
@@ -99,6 +98,7 @@ class RestTimerViewModel(application: Application) : AndroidViewModel(applicatio
 
     fun onCustomTimerStart(customTime: String) {
         try {
+            Log.d("CUSTOM TIME START", customTime)
             startTimer("00:$customTime".parseTimeStringToLong())
         } catch (e: IllegalArgumentException) {
             //TODO()
@@ -106,8 +106,6 @@ class RestTimerViewModel(application: Application) : AndroidViewModel(applicatio
     }
 
     private fun startTimer(time: Long) {
-
-        _startingTime.value = _startingTime.value ?: time.timeToString()
         viewModelScope.launch {
             restManager.startRest(time)
         }

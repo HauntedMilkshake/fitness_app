@@ -15,6 +15,7 @@ import androidx.fragment.app.Fragment
 import androidx.fragment.app.viewModels
 import androidx.lifecycle.map
 import androidx.navigation.fragment.findNavController
+import androidx.navigation.navGraphViewModels
 import androidx.recyclerview.widget.LinearLayoutManager
 import bg.zahov.app.data.model.AddTemplateWorkoutUiMapper
 import bg.zahov.app.data.model.ClickableSet
@@ -122,6 +123,8 @@ class AddTemplateWorkoutFragment : Fragment() {
                 .observe(viewLifecycleOwner) {
                     showToast(it.eMessage)
                     showToast(it.nMessage)
+                    if(it.success) findNavController().navigate(R.id.create_workout_template_to_workout)
+
 
                 }
 
@@ -130,8 +133,6 @@ class AddTemplateWorkoutFragment : Fragment() {
                 addWorkoutViewModel.workoutName = workoutNameFieldText.text.toString()
                 addWorkoutViewModel.workoutNote = workoutNoteFieldText.text.toString()
                 addWorkoutViewModel.addWorkout()
-                addWorkoutViewModel.resetSelectedExercises()
-                findNavController().navigate(R.id.create_workout_template_to_workout)
             }
 
             cancel.setOnClickListener {

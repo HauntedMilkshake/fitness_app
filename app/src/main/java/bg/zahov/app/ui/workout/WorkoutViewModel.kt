@@ -89,33 +89,18 @@ class WorkoutViewModel(application: Application) : AndroidViewModel(application)
                     }
                 }
             }
-//            launch {
-//                restTimerProvider.restTimer.collect {
-//                    Log.d("rest", it)
-//                    it.elapsedTime?.let { time ->
-//                        _restTimerState.postValue(State.Rest(time))
-//                    }
-//                }
-//            }
-//            launch {
-//                restTimerProvider.restState.collect {
-//                    Log.d("collecting state", it.name)
-//                    _restTimerState.postValue(
-//                        when (it) {
-//                            RestState.Active -> State.Default(true)
-//                            else -> State.Default(false)
-//                        }
-//                    )
-//                }
-//            }
             launch {
-                combine(restTimerProvider.restState, restTimerProvider.restTimer) { state, timer ->
-                    timer.elapsedTime?.let {
-                        _restTimerState.postValue(State.Rest(it))
+                restTimerProvider.restTimer.collect {
+                    it.elapsedTime?.let { time ->
+                        _restTimerState.postValue(State.Rest(time))
                     }
-
+                }
+            }
+            launch {
+                restTimerProvider.restState.collect {
+                    Log.d("collecting state", it.name)
                     _restTimerState.postValue(
-                        when (state) {
+                        when (it) {
                             RestState.Active -> State.Default(true)
                             else -> State.Default(false)
                         }

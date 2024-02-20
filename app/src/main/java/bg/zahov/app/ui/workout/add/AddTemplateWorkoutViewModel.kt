@@ -1,6 +1,7 @@
 package bg.zahov.app.ui.workout.add
 
 import android.app.Application
+import android.util.Log
 import androidx.lifecycle.AndroidViewModel
 import androidx.lifecycle.LiveData
 import androidx.lifecycle.MutableLiveData
@@ -118,9 +119,11 @@ class AddTemplateWorkoutViewModel(application: Application) : AndroidViewModel(a
 
                 workoutName = ""
                 _currExercises.postValue(listOf())
+                resetSelectedExercises()
 
-                _state.postValue(State.Default)
             }
+            _state.value = State.Success("Successfully added workout!")
+            _state.value = State.Default
         }
     }
 

@@ -29,6 +29,5 @@ enum class Category(val key: String) {
 
     companion object {
         fun fromKey(key: String) = values().firstOrNull { it.key == key }
-
     }
 }

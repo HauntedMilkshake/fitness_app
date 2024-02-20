@@ -36,7 +36,7 @@ class RestTimerProvider {
 
     suspend fun startRest(time: Long) {
         _restState.emit(RestState.Active)
-        if(_restTimer.value.fullRest == null) {
+        if (remainingTime == 0L) {
             _restTimer.value.fullRest = time.timeToString()
         }
         remainingTime = time
@@ -65,7 +65,8 @@ class RestTimerProvider {
 
     suspend fun addTime(time: Long) {
         timer.cancel()
-        _restTimer.value.fullRest = (_restTimer.value.fullRest!!.parseTimeStringToLong() + time).timeToString()
+        _restTimer.value.fullRest =
+            (_restTimer.value.fullRest!!.parseTimeStringToLong() + time).timeToString()
         startRest(remainingTime + time)
     }
 

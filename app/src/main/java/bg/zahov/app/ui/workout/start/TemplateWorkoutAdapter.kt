@@ -27,7 +27,6 @@ class TemplateWorkoutAdapter : BaseAdapter<Workout>(
             title.text = item.name
             lastPerformed.text = "Last performed: ${item.date}"
             settings.setOnClickListener {
-
                 itemClickListener?.onSettingsClicked(item, settings)
             }
 
@@ -37,7 +36,7 @@ class TemplateWorkoutAdapter : BaseAdapter<Workout>(
             if (item.isTemplate) {
                 exercises.text =
                     item.exercises.joinToString("\n") {
-                        "${it.name} x ${it.sets.size}"
+                        "${if (it.sets.isNotEmpty()) "${it.sets.size} X " else ""}${it.name} "
                     }
             }
         }

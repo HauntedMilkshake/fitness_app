@@ -18,6 +18,7 @@ import androidx.recyclerview.widget.RecyclerView
 import bg.zahov.app.data.model.ClickableSet
 import bg.zahov.app.data.model.ExerciseWithNoteVisibility
 import bg.zahov.app.data.model.OnGoingWorkoutUiMapper
+import bg.zahov.app.hideBottomNav
 import bg.zahov.app.ui.workout.add.ExerciseSetAdapter
 import bg.zahov.app.ui.workout.add.WorkoutEntry
 import bg.zahov.app.util.SwipeGesture
@@ -45,6 +46,8 @@ class WorkoutFragment : Fragment() {
         val inflater = TransitionInflater.from(requireContext())
         enterTransition = inflater.inflateTransition(R.transition.slide_up)
         exitTransition = inflater.inflateTransition(R.transition.fade_out)
+        requireActivity().hideBottomNav()
+
     }
 
     override fun onViewCreated(view: View, savedInstanceState: Bundle?) {

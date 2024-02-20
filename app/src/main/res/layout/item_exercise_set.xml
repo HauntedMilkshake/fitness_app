@@ -52,6 +52,7 @@
             android:layout_height="wrap_content"
             android:backgroundTint="@color/input_field_background"
             android:maxLines="5"
+            android:padding="10dp"
             android:textColor="@color/white" />
     </com.google.android.material.textfield.TextInputLayout>
 
