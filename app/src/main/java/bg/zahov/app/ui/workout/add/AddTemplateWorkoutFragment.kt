@@ -20,6 +20,7 @@ import androidx.recyclerview.widget.LinearLayoutManager
 import bg.zahov.app.data.model.AddTemplateWorkoutUiMapper
 import bg.zahov.app.data.model.ClickableSet
 import bg.zahov.app.data.model.ExerciseWithNoteVisibility
+import bg.zahov.app.data.model.SetType
 import bg.zahov.app.data.model.Sets
 import bg.zahov.app.util.applyScaleAnimation
 import bg.zahov.fitness.app.R
@@ -61,17 +62,6 @@ class AddTemplateWorkoutFragment : Fragment() {
 
             val exerciseSetAdapter = ExerciseSetAdapter().apply {
                 itemClickListener = object : ExerciseSetAdapter.ItemClickListener<WorkoutEntry> {
-                    override fun onOptionsClicked(
-                        item: ExerciseWithNoteVisibility,
-                        clickedView: View,
-                    ) {
-                        showExerciseMenu(item, clickedView)
-                    }
-
-                    override fun onSetClicked(item: ClickableSet, clickedView: View) {
-                        showSetMenu(item.set, clickedView)
-                    }
-
                     override fun onSetCheckClicked(item: ClickableSet, clickedView: View) {
                         //NOOP
                     }
@@ -79,13 +69,46 @@ class AddTemplateWorkoutFragment : Fragment() {
                     override fun onAddSet(item: ExerciseWithNoteVisibility, set: ClickableSet) {
                         addWorkoutViewModel.addSet(item, set.set)
                     }
+
+                    override fun onNoteToggle(item: ExerciseWithNoteVisibility) {
+                        addWorkoutViewModel.toggleExerciseNoteField(item)
+                    }
+
+                    override fun onReplaceExercise(item: ExerciseWithNoteVisibility) {
+                        addWorkoutViewModel.setReplaceableExercise(item)
+                        findNavController().navigate(
+                            R.id.create_workout_template_to_add_exercise,
+                            bundleOf("REPLACING" to true)
+                        )
+                    }
+
+                    override fun onRemoveExercise(item: ExerciseWithNoteVisibility) {
+                        addWorkoutViewModel.removeExercise(item)
+                    }
+
+                    override fun onSetTypeChanged(
+                        item: ExerciseWithNoteVisibility,
+                        set: Sets,
+                        setType: SetType
+                    ) {
+                        TODO("Not yet implemented")
+                    }
                 }
                 swipeActionListener = object : ExerciseSetAdapter.SwipeActionListener {
                     override fun onDeleteSet(item: ExerciseWithNoteVisibility, set: ClickableSet) {
                         addWorkoutViewModel.removeSet(item, set.set)
                     }
                 }
-
+                textChangeListener = object : ExerciseSetAdapter.TextActionListener {
+                    override fun onInputFieldChanged(
+                        exercise: ExerciseWithNoteVisibility,
+                        set: ClickableSet,
+                        metric: String,
+                        id: Int
+                    ) {
+                        addWorkoutViewModel.onInputFieldTextChanged(exercise, set.set, metric, id)
+                    }
+                }
             }
 
             exercisesRecyclerView.apply {
@@ -123,7 +146,7 @@ class AddTemplateWorkoutFragment : Fragment() {
                 .observe(viewLifecycleOwner) {
                     showToast(it.eMessage)
                     showToast(it.nMessage)
-                    if(it.success) findNavController().navigate(R.id.create_workout_template_to_workout)
+                    if (it.success) findNavController().navigate(R.id.create_workout_template_to_workout)
 
 
                 }
@@ -141,64 +164,6 @@ class AddTemplateWorkoutFragment : Fragment() {
                 findNavController().navigate(R.id.create_workout_template_to_workout)
             }
         }
-    }
-
-    private fun showExerciseMenu(exercise: ExerciseWithNoteVisibility, view: View) {
-        val popupMenu = PopupMenu(ContextThemeWrapper(context, R.style.MyPopUp), view)
-        popupMenu.menuInflater.inflate(R.menu.popup_exercise_menu, popupMenu.menu)
-        popupMenu.setOnMenuItemClickListener { item ->
-            when (item.itemId) {
-                R.id.action_add_note -> {
-                    addWorkoutViewModel.toggleExerciseNoteField(exercise)
-                }
-
-                R.id.action_replace -> {
-                    addWorkoutViewModel.setReplaceableExercise(exercise)
-                    findNavController().navigate(
-                        R.id.create_workout_template_to_add_exercise,
-                        bundleOf("REPLACING" to true)
-                    )
-//                    addWorkoutViewMode
-                    //TODO(add exercises except they replace)
-                }
-
-                R.id.action_remove -> {
-                    addWorkoutViewModel.removeExercise(exercise)
-                }
-            }
-            true
-        }
-        popupMenu.show()
-    }
-
-    private fun showSetMenu(set: Sets, view: View) {
-        val popupMenu = PopupMenu(ContextThemeWrapper(context, R.style.MyPopUp), view)
-        popupMenu.menuInflater.inflate(R.menu.popup_set_menu, popupMenu.menu)
-
-        popupMenu.menu.forEach {
-            it.setActionView(R.layout.item_menu_popup_set)
-
-            it.actionView?.findViewById<MaterialTextView>(R.id.action)?.setText(
-                when (it.itemId) {
-                    R.id.action_drop_set -> R.string.drop_set
-                    R.id.action_failure_set -> R.string.failure_set
-                    R.id.action_warmup_set -> R.string.warmup_set
-                    else -> {
-                        R.string.drop_set
-                    }
-                }
-            )
-
-            it.actionView?.findViewById<ConstraintLayout>(R.id.item)?.setOnClickListener {
-                //TODO(Propagate to adapter / update live data)
-            }
-
-            it.actionView?.findViewById<ShapeableImageView>(R.id.openInfo)?.setOnClickListener {
-                SetInfoDialogFragment().show(childFragmentManager, SetInfoDialogFragment.TAG)
-            }
-        }
-
-        popupMenu.show()
     }
 
     private fun showToast(message: String?) {

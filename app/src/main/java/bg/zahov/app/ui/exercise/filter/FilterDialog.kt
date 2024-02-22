@@ -1,4 +1,4 @@
-package bg.zahov.app.ui.exercise
+package bg.zahov.app.ui.exercise.filter
 
 import android.os.Bundle
 import android.view.LayoutInflater
@@ -7,7 +7,10 @@ import android.view.ViewGroup
 import androidx.fragment.app.DialogFragment
 import androidx.fragment.app.viewModels
 import androidx.recyclerview.widget.RecyclerView
+import bg.zahov.app.data.model.BodyPart
+import bg.zahov.app.data.model.Category
 import bg.zahov.app.data.model.SelectableFilter
+import bg.zahov.app.ui.exercise.ExerciseViewModel
 import bg.zahov.app.util.SpacingItemDecoration
 import bg.zahov.app.util.applyScaleAnimation
 import bg.zahov.fitness.app.R
@@ -21,7 +24,7 @@ class FilterDialog : DialogFragment() {
     private val binding
         get() = requireNotNull(_binding)
 
-    private val exerciseViewModel: ExerciseViewModel by viewModels({ requireActivity() })
+    private val filterViewModel: FilterViewModel by viewModels()
 
     override fun onCreateView(
         inflater: LayoutInflater,
@@ -47,17 +50,30 @@ class FilterDialog : DialogFragment() {
                 it.applyScaleAnimation()
                 dismiss()
             }
+            val bodyPartAdapter = configureFilterRecyclerView(
+                bodyPartRecyclerView,
+                enumValues<BodyPart>().map { SelectableFilter(it.name) })
+            filterViewModel.bodyPartFilters.observe(viewLifecycleOwner) {
+                bodyPartAdapter.updateItems(it)
+            }
 
-            configureFilterRecyclerView(bodyPartRecyclerView, exerciseViewModel.getBodyPartItems())
-            configureFilterRecyclerView(categoryRecyclerView, exerciseViewModel.getCategoryItems())
+            val categoryAdapter =configureFilterRecyclerView(
+                categoryRecyclerView,
+                enumValues<Category>().map { SelectableFilter(it.name) })
+            filterViewModel.categoryFilters.observe(viewLifecycleOwner) {
+                categoryAdapter.updateItems(it)
+            }
         }
     }
 
-    private fun configureFilterRecyclerView(recyclerView: RecyclerView, items: List<SelectableFilter>) {
+    private fun configureFilterRecyclerView(
+        recyclerView: RecyclerView,
+        items: List<SelectableFilter>
+    ): FilterAdapter {
         val filterAdapter = FilterAdapter(false).apply {
             itemClickListener = object : FilterAdapter.ItemClickListener<SelectableFilter> {
                 override fun onItemClicked(item: SelectableFilter, clickedView: View) {
-                    if (item.selected) exerciseViewModel.addFilter(item) else exerciseViewModel.removeFilter(item)
+                    filterViewModel.onFilterClicked(item)
                 }
             }
             updateItems(items)
@@ -78,6 +94,7 @@ class FilterDialog : DialogFragment() {
                 )
             )
         }
+        return filterAdapter
     }
 
     override fun onDestroyView() {

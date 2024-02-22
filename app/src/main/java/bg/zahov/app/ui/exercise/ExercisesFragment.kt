@@ -18,6 +18,8 @@ import androidx.recyclerview.widget.LinearLayoutManager
 import bg.zahov.app.data.model.ExerciseUiMapper
 import bg.zahov.app.data.model.SelectableFilter
 import bg.zahov.app.data.model.SelectableExercise
+import bg.zahov.app.ui.exercise.filter.FilterAdapter
+import bg.zahov.app.ui.exercise.filter.FilterDialog
 import bg.zahov.app.util.applyScaleAnimation
 import bg.zahov.fitness.app.R
 import bg.zahov.fitness.app.databinding.FragmentExercisesBinding
@@ -43,6 +45,7 @@ class ExercisesFragment : Fragment() {
     private val addable by lazy {
         arguments?.getBoolean("ADDABLE") ?: false
     }
+
     override fun onCreateView(
         inflater: LayoutInflater,
         container: ViewGroup?,

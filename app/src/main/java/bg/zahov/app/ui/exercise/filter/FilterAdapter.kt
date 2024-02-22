@@ -1,4 +1,4 @@
-package bg.zahov.app.ui.exercise
+package bg.zahov.app.ui.exercise.filter
 
 import android.view.View
 import bg.zahov.app.util.BaseAdapter
@@ -39,5 +39,6 @@ class FilterAdapter(private val isRemovable: Boolean) : BaseAdapter<SelectableFi
         fun onItemClicked(item: T, clickedView: View)
     }
 
-    override fun createViewHolder(view: View): BaseViewHolder<SelectableFilter> = FilterAdapterViewHolder(view)
+    override fun createViewHolder(view: View): BaseViewHolder<SelectableFilter> =
+        FilterAdapterViewHolder(view)
 }

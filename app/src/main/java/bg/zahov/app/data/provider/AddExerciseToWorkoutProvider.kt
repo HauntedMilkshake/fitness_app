@@ -6,12 +6,12 @@ import kotlinx.coroutines.flow.StateFlow
 
 class AddExerciseToWorkoutProvider {
     companion object {
-        @Volatile
-        private var instance: AddExerciseToWorkoutProvider? = null
+            @Volatile
+            private var instance: AddExerciseToWorkoutProvider? = null
 
-        fun getInstance() = instance ?: synchronized(this) {
-            instance ?: AddExerciseToWorkoutProvider().also { instance = it }
-        }
+            fun getInstance() = instance ?: synchronized(this) {
+                instance ?: AddExerciseToWorkoutProvider().also { instance = it }
+            }
     }
 
     private val _selectedExercises = MutableStateFlow<List<SelectableExercise>>(mutableListOf())

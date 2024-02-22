@@ -7,12 +7,11 @@ import androidx.lifecycle.LiveData
 import androidx.lifecycle.MutableLiveData
 import androidx.lifecycle.viewModelScope
 import bg.zahov.app.data.exception.CriticalDataNullException
-import bg.zahov.app.data.model.BodyPart
-import bg.zahov.app.data.model.Category
 import bg.zahov.app.data.model.Exercise
 import bg.zahov.app.data.model.SelectableExercise
 import bg.zahov.app.data.model.SelectableFilter
 import bg.zahov.app.getAddExerciseToWorkoutProvider
+import bg.zahov.app.getFilterProvider
 import bg.zahov.app.getReplaceableExerciseProvider
 import bg.zahov.app.getSelectableExerciseProvider
 import bg.zahov.app.getWorkoutProvider
@@ -35,6 +34,10 @@ class ExerciseViewModel(application: Application) : AndroidViewModel(application
     private val addExerciseToWorkoutProvider by lazy {
         application.getAddExerciseToWorkoutProvider()
     }
+
+    private val filterProvider by lazy {
+        application.getFilterProvider()
+    }
     private val _state = MutableLiveData<State>()
     val state: LiveData<State>
         get() = _state
@@ -52,10 +55,10 @@ class ExerciseViewModel(application: Application) : AndroidViewModel(application
     var addable = false
     private var search: String? = null
     private val allExercises: MutableList<Exercise> = mutableListOf()
-    private var selectedFilters: MutableList<SelectableFilter> = mutableListOf()
 
     init {
         getExercises()
+        getFilters()
     }
 
     fun onSelectableExerciseClicked(exercise: SelectableExercise) {
@@ -142,8 +145,8 @@ class ExerciseViewModel(application: Application) : AndroidViewModel(application
     }
 
     fun getExercises() {
-        _state.value = State.Loading(true)
         viewModelScope.launch {
+            _state.postValue(State.Loading(true))
             try {
                 repo.getTemplateExercises().collect {
                     _userExercises.postValue(it.map { exercise ->
@@ -166,40 +169,18 @@ class ExerciseViewModel(application: Application) : AndroidViewModel(application
         }
     }
 
-    fun getBodyPartItems(): List<SelectableFilter> {
-        val bodyPartFilters = enumValues<BodyPart>().map { SelectableFilter(it.name) }
-        bodyPartFilters.forEach {
-            it.selected = _searchFilters.value?.any { filter -> filter.name == it.name } == true
+    private fun getFilters() {
+        viewModelScope.launch {
+            filterProvider.filters.collect {
+                _searchFilters.postValue(it)
+                searchExercises(search)
+            }
         }
-        return bodyPartFilters
-    }
-
-    fun getCategoryItems(): List<SelectableFilter> {
-        val categoryFilters = enumValues<Category>().map { SelectableFilter(it.name) }
-        categoryFilters.forEach {
-            it.selected = _searchFilters.value?.any { filter -> filter.name == it.name } == true
-        }
-        return categoryFilters
-    }
-
-    fun addFilter(filter: SelectableFilter) {
-        selectedFilters = _searchFilters.value.orEmpty().toMutableList()
-        selectedFilters.add(filter)
-
-        _searchFilters.value = selectedFilters
-
-        searchExercises(search)
-    }
-
-    fun removeFilter(filter: SelectableFilter) {
-        selectedFilters = _searchFilters.value.orEmpty().toMutableList()
-        selectedFilters.remove(filter)
-        _searchFilters.value = selectedFilters
-
-        searchExercises(search)
     }
 
     fun searchExercises(name: String?) {
+        Log.d("search", "search")
+        val selectedFilters = _searchFilters.value ?: mutableListOf()
         val newExercises = _userExercises.value?.let {
             //TODO(Test it vs allExercises)
             when {
@@ -232,6 +213,16 @@ class ExerciseViewModel(application: Application) : AndroidViewModel(application
         _userExercises.value = newExercises.map { SelectableExercise(it, false) }
 
         if (newExercises.isEmpty()) _state.value = State.NoResults(true)
+    }
+
+    fun removeFilter(filter: SelectableFilter) {
+//        selectedFilters = searchFilters.value.orEmpty().toMutableList()
+//        selectedFilters.remove(filter)
+//        _searchFilters.value = selectedFilters
+        viewModelScope.launch {
+            filterProvider.removeFilter(filter)
+        }
+        searchExercises(search)
     }
 
     sealed interface State {

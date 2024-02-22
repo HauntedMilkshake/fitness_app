@@ -3,6 +3,9 @@ package bg.zahov.app.ui.workout.add
 import android.view.LayoutInflater
 import android.view.View
 import android.view.ViewGroup
+import android.widget.PopupMenu
+import androidx.appcompat.view.ContextThemeWrapper
+import androidx.core.widget.addTextChangedListener
 import androidx.recyclerview.widget.RecyclerView
 import bg.zahov.app.data.model.Category
 import bg.zahov.app.data.model.ClickableSet
@@ -26,6 +29,7 @@ class ExerciseSetAdapter : RecyclerView.Adapter<RecyclerView.ViewHolder>() {
     private val items = ArrayList<WorkoutEntry>()
     var itemClickListener: ItemClickListener<WorkoutEntry>? = null
     var swipeActionListener: SwipeActionListener? = null
+    var textChangeListener: TextActionListener? = null
 //    var swipeGesture: SwipeGesture? = null
 
     override fun getItemViewType(position: Int): Int {
@@ -141,7 +145,8 @@ class ExerciseSetAdapter : RecyclerView.Adapter<RecyclerView.ViewHolder>() {
             note.visibility = if (item.exerciseEntry.noteVisibility) View.VISIBLE else View.GONE
 
             options.setOnClickListener {
-                itemClickListener?.onOptionsClicked(item.exerciseEntry, it)
+                showExerciseMenu(item.exerciseEntry, it)
+//                itemClickListener?.onOptionsClicked(item.exerciseEntry, it)
             }
 
             addSetButton.setOnClickListener {
@@ -176,13 +181,36 @@ class ExerciseSetAdapter : RecyclerView.Adapter<RecyclerView.ViewHolder>() {
                 }
             }
             setIndicator.setOnClickListener {
-                itemClickListener?.onSetClicked(item, it)
+                getExerciseForSet()?.let { exercise ->
+                    showSetMenu(exercise, item.set, it)
+                }
             }
             check.setOnClickListener {
                 itemClickListener?.onSetCheckClicked(item, it)
                 //TODO(Change background and play dopamine inducing animation)
             }
+            firstInputEditText.addTextChangedListener {
+                getExerciseForSet()?.let { exercise ->
+                    textChangeListener?.onInputFieldChanged(
+                        exercise,
+                        item,
+                        it.toString(),
+                        firstInputEditText.id
+                    )
+                }
+            }
+            secondInputEditText.addTextChangedListener {
+                getExerciseForSet()?.let { exercise ->
+                    textChangeListener?.onInputFieldChanged(
+                        exercise,
+                        item,
+                        it.toString(),
+                        secondInputEditText.id
+                    )
+                }
+            }
         }
+
 
         fun deleteSet() {
             for (i in adapterPosition downTo 0) {
@@ -207,15 +235,75 @@ class ExerciseSetAdapter : RecyclerView.Adapter<RecyclerView.ViewHolder>() {
 
 
     interface ItemClickListener<T> {
-        fun onOptionsClicked(item: ExerciseWithNoteVisibility, clickedView: View)
-        fun onSetClicked(item: ClickableSet, clickedView: View)
         fun onSetCheckClicked(item: ClickableSet, clickedView: View)
         fun onAddSet(item: ExerciseWithNoteVisibility, set: ClickableSet)
+        fun onNoteToggle(item: ExerciseWithNoteVisibility)
+        fun onReplaceExercise(item: ExerciseWithNoteVisibility)
+        fun onRemoveExercise(item: ExerciseWithNoteVisibility)
+        fun onSetTypeChanged(item: ExerciseWithNoteVisibility, set: Sets, setType: SetType)
     }
 
     interface SwipeActionListener {
         fun onDeleteSet(item: ExerciseWithNoteVisibility, set: ClickableSet)
     }
+
+    interface TextActionListener {
+        fun onInputFieldChanged(
+            exercise: ExerciseWithNoteVisibility,
+            set: ClickableSet,
+            metric: String,
+            id: Int
+        )
+    }
+
+    private fun showExerciseMenu(exercise: ExerciseWithNoteVisibility, view: View) {
+        val popupMenu = PopupMenu(ContextThemeWrapper(view.context, R.style.MyPopUp), view)
+        popupMenu.menuInflater.inflate(R.menu.popup_exercise_menu, popupMenu.menu)
+        popupMenu.setOnMenuItemClickListener { item ->
+            when (item.itemId) {
+                R.id.action_add_note -> {
+                    itemClickListener?.onNoteToggle(exercise)
+                }
+
+                R.id.action_replace -> {
+                    itemClickListener?.onReplaceExercise(exercise)
+                }
+
+                R.id.action_remove -> {
+                    itemClickListener?.onRemoveExercise(exercise)
+                }
+            }
+            true
+        }
+        popupMenu.show()
+    }
+
+    private fun showSetMenu(exercise: ExerciseWithNoteVisibility, set: Sets, view: View) {
+        val popupMenu = PopupMenu(ContextThemeWrapper(view.context, R.style.MyPopUp), view)
+        popupMenu.menuInflater.inflate(R.menu.popup_set_menu, popupMenu.menu)
+        popupMenu.setOnMenuItemClickListener { item ->
+            when (item.itemId) {
+                R.id.action_drop_set -> {
+                    itemClickListener?.onSetTypeChanged(exercise, set, SetType.DROP_SET)
+                }
+
+                R.id.action_failure_set -> {
+                    itemClickListener?.onSetTypeChanged(exercise, set, SetType.FAILURE)
+                }
+
+                R.id.action_warmup_set -> {
+                    itemClickListener?.onSetTypeChanged(exercise, set, SetType.WARMUP)
+                }
+
+                else -> {
+                    itemClickListener?.onSetTypeChanged(exercise, set, SetType.DEFAULT)
+                }
+            }
+            true
+        }
+        popupMenu.show()
+    }
+
 }
 
 sealed class WorkoutEntry

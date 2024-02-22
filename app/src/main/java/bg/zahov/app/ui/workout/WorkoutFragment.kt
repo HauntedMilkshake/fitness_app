@@ -18,6 +18,8 @@ import androidx.recyclerview.widget.RecyclerView
 import bg.zahov.app.data.model.ClickableSet
 import bg.zahov.app.data.model.ExerciseWithNoteVisibility
 import bg.zahov.app.data.model.OnGoingWorkoutUiMapper
+import bg.zahov.app.data.model.SetType
+import bg.zahov.app.data.model.Sets
 import bg.zahov.app.hideBottomNav
 import bg.zahov.app.ui.workout.add.ExerciseSetAdapter
 import bg.zahov.app.ui.workout.add.WorkoutEntry
@@ -62,25 +64,47 @@ class WorkoutFragment : Fragment() {
 
             val exerciseSetAdapter = ExerciseSetAdapter().apply {
                 itemClickListener = object : ExerciseSetAdapter.ItemClickListener<WorkoutEntry> {
-                    override fun onOptionsClicked(
-                        item: ExerciseWithNoteVisibility,
-                        clickedView: View,
-                    ) {
-                    }
-
-                    override fun onSetClicked(item: ClickableSet, clickedView: View) {
-                    }
-
                     override fun onSetCheckClicked(item: ClickableSet, clickedView: View) {
                     }
 
                     override fun onAddSet(item: ExerciseWithNoteVisibility, set: ClickableSet) {
 //                        addWorkoutViewModel.addSet(item, set.set)
                     }
+
+                    override fun onNoteToggle(item: ExerciseWithNoteVisibility) {
+                        TODO("Not yet implemented")
+                    }
+
+                    override fun onReplaceExercise(item: ExerciseWithNoteVisibility) {
+                        TODO("Not yet implemented")
+                    }
+
+                    override fun onRemoveExercise(item: ExerciseWithNoteVisibility) {
+                        TODO("Not yet implemented")
+                    }
+
+                    override fun onSetTypeChanged(
+                        item: ExerciseWithNoteVisibility,
+                        set: Sets,
+                        setType: SetType
+                    ) {
+                        TODO("Not yet implemented")
+                    }
                 }
                 swipeActionListener = object : ExerciseSetAdapter.SwipeActionListener {
                     override fun onDeleteSet(item: ExerciseWithNoteVisibility, set: ClickableSet) {
                     }
+                }
+                textChangeListener = object : ExerciseSetAdapter.TextActionListener {
+                    override fun onInputFieldChanged(
+                        exercise: ExerciseWithNoteVisibility,
+                        set: ClickableSet,
+                        metric: String,
+                        id: Int
+                    ) {
+                        TODO("Not yet implemented")
+                    }
+
                 }
 
             }
@@ -150,8 +174,9 @@ class WorkoutFragment : Fragment() {
 
             activity?.onBackPressedDispatcher?.addCallback(object : OnBackPressedCallback(true) {
                 override fun handleOnBackPressed() {
-                    Log.d("MINIMIZE", "MINIMIZE")
-                    onGoingWorkoutViewModel.minimize()
+                    if (findNavController().currentDestination?.id == R.id.workout) {
+                        onGoingWorkoutViewModel.minimize()
+                    }
                     findNavController().navigateUp()
                 }
             })

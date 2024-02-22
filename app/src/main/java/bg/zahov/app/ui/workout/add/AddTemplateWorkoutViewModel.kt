@@ -6,6 +6,7 @@ import androidx.lifecycle.AndroidViewModel
 import androidx.lifecycle.LiveData
 import androidx.lifecycle.MutableLiveData
 import androidx.lifecycle.viewModelScope
+import bg.zahov.app.data.model.ClickableSet
 import bg.zahov.app.data.model.ExerciseWithNoteVisibility
 import bg.zahov.app.data.model.SelectableExercise
 import bg.zahov.app.data.model.Sets
@@ -15,6 +16,7 @@ import bg.zahov.app.getSelectableExerciseProvider
 import bg.zahov.app.getWorkoutProvider
 import bg.zahov.app.util.currDateToString
 import bg.zahov.app.util.hashString
+import bg.zahov.fitness.app.R
 import kotlinx.coroutines.launch
 
 class AddTemplateWorkoutViewModel(application: Application) : AndroidViewModel(application) {
@@ -173,9 +175,23 @@ class AddTemplateWorkoutViewModel(application: Application) : AndroidViewModel(a
         _currExercises.value = exercises
     }
 
-//    fun resetSelectedExercises() {
-//        selectableExerciseProvider.resetSelectedExercises()
-//    }
+    fun onInputFieldTextChanged(
+        exercise: ExerciseWithNoteVisibility,
+        set: Sets,
+        metric: String,
+        viewId: Int
+    ) {
+        val new = currExercises.value?.find { it == exercise }
+        when (viewId) {
+            R.id.first_input_field_text -> {
+                new?.exercise?.sets?.find { it == set }?.firstMetric = metric.toDoubleOrNull()
+            }
+
+            R.id.second_input_field_text -> {
+                new?.exercise?.sets?.find { it == set }?.secondMetric = metric.toIntOrNull()
+            }
+        }
+    }
 
     sealed interface State {
         object Default : State
