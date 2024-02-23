@@ -64,38 +64,16 @@ class ExerciseViewModel(application: Application) : AndroidViewModel(application
     fun onSelectableExerciseClicked(exercise: SelectableExercise) {
         when {
             replaceable -> {
-                when (exercise.isSelected) {
-                    true -> {
-                        val captured = _userExercises.value.orEmpty()
-                        captured.find { it == exercise }?.isSelected = false
-                        _userExercises.value = captured
-                    }
-
-                    false -> {
-                        val captured = _userExercises.value.orEmpty()
-                        captured.find { it == exercise }?.isSelected = true
-                        captured.find { it.isSelected }?.isSelected = false
-                        _userExercises.value = captured
-                    }
-                }
+                val captured = _userExercises.value.orEmpty()
+                captured.find { it == exercise }?.let { it.isSelected = !it.isSelected }
+                captured.find { it.isSelected }?.isSelected = false
+                _userExercises.value = captured
             }
-            //addable and selectable actions to the live data are the same
-            //TODO(make the recycler view update according to livedata changes)
+
             else -> {
-                when (exercise.isSelected) {
-                    true -> {
-                        val captured = _userExercises.value.orEmpty()
-                        captured.find { it == exercise }?.isSelected = false
-                        _userExercises.value = captured
-
-                    }
-
-                    false -> {
-                        val captured = _userExercises.value.orEmpty()
-                        captured.find { it == exercise }?.isSelected = true
-                        _userExercises.value = captured
-                    }
-                }
+                val captured = _userExercises.value.orEmpty()
+                captured.find { it == exercise }?.let { it.isSelected = !it.isSelected }
+                _userExercises.value = captured
             }
         }
     }

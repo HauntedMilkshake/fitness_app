@@ -42,6 +42,7 @@ abstract class BaseAdapter<T>(
         result.dispatchUpdatesTo(this)
 
     }
+    fun getRecyclerViewItems() = items
 
     //SUSSY
 //    internal fun deleteItem(position: Int) {

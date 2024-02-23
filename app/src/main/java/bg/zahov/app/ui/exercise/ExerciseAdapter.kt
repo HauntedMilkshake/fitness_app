@@ -12,6 +12,7 @@ import com.google.android.material.textview.MaterialTextView
 //issue with livedata not calling the rebind
 class ExerciseAdapter(
     private val selectable: Boolean,
+    private val replaceable: Boolean
 ) : BaseAdapter<SelectableExercise>(
     areItemsTheSame = { oldItem, newItem -> oldItem.exercise.name == newItem.exercise.name },
     areContentsTheSame = { oldItem, newItem -> oldItem == newItem },
@@ -38,12 +39,33 @@ class ExerciseAdapter(
 
             itemView.setOnClickListener {
                 itemClickListener?.onItemClicked(item)
-                if (selectable) {
-                    item.isSelected = !item.isSelected
-                    exerciseBackground.setBackgroundResource(if (item.isSelected) R.color.selected else R.color.background)
+                when {
+                    selectable -> {
+                        onClick(item)
+                    }
+
+                    replaceable -> {
+                        Log.d("REPLACABLE", "REPLACABLE")
+                        onClick(item)
+                        deselectRemainingExercise(item)
+                    }
                 }
             }
         }
+
+        private fun onClick(item: SelectableExercise) {
+            item.isSelected = !item.isSelected
+            exerciseBackground.setBackgroundResource(if (item.isSelected) R.color.selected else R.color.background)
+        }
+    }
+
+    private fun deselectRemainingExercise(ignoreItem: SelectableExercise) {
+        getRecyclerViewItems().forEach {
+            if (it != ignoreItem && it.isSelected) {
+                it.isSelected = false
+            }
+        }
+        notifyDataSetChanged()
     }
 
     interface ItemClickListener<T> {

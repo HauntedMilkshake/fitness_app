@@ -1,5 +1,6 @@
 package bg.zahov.app.ui.workout.add
 
+import android.util.Log
 import android.view.LayoutInflater
 import android.view.View
 import android.view.ViewGroup
@@ -10,6 +11,7 @@ import androidx.recyclerview.widget.RecyclerView
 import bg.zahov.app.data.model.Category
 import bg.zahov.app.data.model.ClickableSet
 import bg.zahov.app.data.model.ExerciseWithNoteVisibility
+import bg.zahov.app.data.model.SelectableExercise
 import bg.zahov.app.data.model.SetType
 import bg.zahov.app.data.model.Sets
 import bg.zahov.fitness.app.R
@@ -158,6 +160,7 @@ class ExerciseSetAdapter : RecyclerView.Adapter<RecyclerView.ViewHolder>() {
         }
     }
 
+
     inner class SetViewHolder(view: View) : RecyclerView.ViewHolder(view) {
         private val setIndicator = view.findViewById<MaterialTextView>(R.id.set_number)
         private val previous = view.findViewById<MaterialTextView>(R.id.previous)
@@ -176,9 +179,8 @@ class ExerciseSetAdapter : RecyclerView.Adapter<RecyclerView.ViewHolder>() {
                 Category.RepsOnly -> View.GONE
                 Category.Cardio -> View.GONE
                 Category.Timed -> View.GONE
-                else -> {
-                    View.VISIBLE
-                }
+                else -> View.VISIBLE
+
             }
             setIndicator.setOnClickListener {
                 getExerciseForSet()?.let { exercise ->
@@ -190,7 +192,9 @@ class ExerciseSetAdapter : RecyclerView.Adapter<RecyclerView.ViewHolder>() {
                 //TODO(Change background and play dopamine inducing animation)
             }
             firstInputEditText.addTextChangedListener {
+                Log.d("TEXT CHANGED", "text changed on first field")
                 getExerciseForSet()?.let { exercise ->
+                    Log.d("Calling text changed", "calling text changed")
                     textChangeListener?.onInputFieldChanged(
                         exercise,
                         item,

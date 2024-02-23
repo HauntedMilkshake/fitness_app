@@ -184,6 +184,7 @@ class AddTemplateWorkoutViewModel(application: Application) : AndroidViewModel(a
         val new = currExercises.value?.find { it == exercise }
         when (viewId) {
             R.id.first_input_field_text -> {
+                Log.d("onChange", "writing ${set.firstMetric}")
                 new?.exercise?.sets?.find { it == set }?.firstMetric = metric.toDoubleOrNull()
             }
 

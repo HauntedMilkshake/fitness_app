@@ -5,6 +5,7 @@ import android.animation.AnimatorListenerAdapter
 import android.animation.ObjectAnimator
 import android.os.Bundle
 import android.transition.TransitionInflater
+import android.util.Log
 import android.view.LayoutInflater
 import android.view.View
 import android.view.ViewGroup
@@ -103,17 +104,18 @@ class ExercisesFragment : Fragment() {
             }
 
             val exerciseAdapter =
-                ExerciseAdapter(selectable || replaceable || addable).apply {
+                ExerciseAdapter(selectable || addable, replaceable).apply {
                     itemClickListener =
                         object : ExerciseAdapter.ItemClickListener<SelectableExercise> {
                             override fun onItemClicked(
                                 item: SelectableExercise,
                             ) {
-                                if (replaceable || selectable || addable) {
-                                    exerciseViewModel.onSelectableExerciseClicked(item)
+                                when {
+                                    replaceable || selectable || addable -> exerciseViewModel.onSelectableExerciseClicked(
+                                        item
+                                    )
+//                                    else -> //TODO(Exercise fragment)
                                 }
-                                //TODO(OR GO TO ANOTHER EXERCISE FRAGMENT)
-
                             }
                         }
                 }
@@ -124,6 +126,7 @@ class ExercisesFragment : Fragment() {
             }
 
             exerciseViewModel.userExercises.observe(viewLifecycleOwner) {
+                Log.d("UPDATING ITEMS", "LIVE DATA")
                 exerciseAdapter.updateItems(it)
             }
 
