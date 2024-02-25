@@ -10,8 +10,7 @@ import androidx.core.widget.addTextChangedListener
 import androidx.recyclerview.widget.RecyclerView
 import bg.zahov.app.data.model.Category
 import bg.zahov.app.data.model.ClickableSet
-import bg.zahov.app.data.model.ExerciseWithNoteVisibility
-import bg.zahov.app.data.model.SelectableExercise
+import bg.zahov.app.data.model.InteractableExerciseWrapper
 import bg.zahov.app.data.model.SetType
 import bg.zahov.app.data.model.Sets
 import bg.zahov.fitness.app.R
@@ -79,13 +78,13 @@ class ExerciseSetAdapter : RecyclerView.Adapter<RecyclerView.ViewHolder>() {
 
     override fun getItemCount(): Int = items.size
 
-    fun updateItems(newItems: List<ExerciseWithNoteVisibility>) {
-        val oldList = items
+    fun updateItems(newItems: List<InteractableExerciseWrapper>) {
+//        val oldList = items
         val workoutEntry = mutableListOf<WorkoutEntry>()
         newItems.forEach { item ->
             workoutEntry.add(ExerciseEntry(item))
-            item.exercise.sets.forEach { set ->
-                workoutEntry.add(SetEntry(ClickableSet(set, false)))
+            item.sets.forEach { set ->
+                workoutEntry.add(SetEntry(set))
             }
         }
         items.clear()
@@ -129,25 +128,25 @@ class ExerciseSetAdapter : RecyclerView.Adapter<RecyclerView.ViewHolder>() {
             view.findViewById<MaterialTextView>(R.id.second_input_column_indicator)
 
         fun bind(item: ExerciseEntry) {
-            title.text = item.exerciseEntry.exercise.name
-            firstInputColumnIndicator.text = when (item.exerciseEntry.exercise.category) {
+            title.text = item.exerciseEntry.name
+            firstInputColumnIndicator.text = when (item.exerciseEntry.category) {
                 Category.AssistedWeight -> "-KG"
                 Category.RepsOnly -> "REPS"
                 Category.Cardio -> "DURATION"
                 Category.Timed -> "DURATION"
                 else -> "+KG"
             }
-            secondInputColumnIndicator.visibility = when (item.exerciseEntry.exercise.category) {
+            secondInputColumnIndicator.visibility = when (item.exerciseEntry.category) {
                 Category.RepsOnly -> View.GONE
                 Category.Cardio -> View.GONE
                 Category.Timed -> View.GONE
                 else -> View.VISIBLE
             }
 
-            note.visibility = if (item.exerciseEntry.noteVisibility) View.VISIBLE else View.GONE
+            note.visibility = if (item.exerciseEntry.isNoteVisible) View.VISIBLE else View.GONE
 
             options.setOnClickListener {
-                showExerciseMenu(item.exerciseEntry, it)
+                showExerciseMenu(item.exerciseEntry, adapterPosition, it)
 //                itemClickListener?.onOptionsClicked(item.exerciseEntry, it)
             }
 
@@ -175,7 +174,7 @@ class ExerciseSetAdapter : RecyclerView.Adapter<RecyclerView.ViewHolder>() {
         fun bind(item: ClickableSet) {
             setIndicator.text = "$adapterPosition"
             previous.text = "-" //TODO()
-            secondInputLayout.visibility = when (getExerciseForSet()?.exercise?.category) {
+            secondInputLayout.visibility = when (getExerciseForSet()?.category) {
                 Category.RepsOnly -> View.GONE
                 Category.Cardio -> View.GONE
                 Category.Timed -> View.GONE
@@ -184,11 +183,14 @@ class ExerciseSetAdapter : RecyclerView.Adapter<RecyclerView.ViewHolder>() {
             }
             setIndicator.setOnClickListener {
                 getExerciseForSet()?.let { exercise ->
-                    showSetMenu(exercise, item.set, it)
+                    showSetMenu(exercise, item, it)
                 }
             }
-            check.setOnClickListener {
-                itemClickListener?.onSetCheckClicked(item, it)
+            check.setOnClickListener { view ->
+                getExerciseForSet()?.let {
+                    itemClickListener?.onSetCheckClicked(it, item, view)
+                }
+
                 //TODO(Change background and play dopamine inducing animation)
             }
             firstInputEditText.addTextChangedListener {
@@ -215,7 +217,6 @@ class ExerciseSetAdapter : RecyclerView.Adapter<RecyclerView.ViewHolder>() {
             }
         }
 
-
         fun deleteSet() {
             for (i in adapterPosition downTo 0) {
                 if (items[i] is ExerciseEntry) {
@@ -227,7 +228,7 @@ class ExerciseSetAdapter : RecyclerView.Adapter<RecyclerView.ViewHolder>() {
             }
         }
 
-        private fun getExerciseForSet(): ExerciseWithNoteVisibility? {
+        private fun getExerciseForSet(): InteractableExerciseWrapper? {
             for (i in adapterPosition downTo 0) {
                 if (items[i] is ExerciseEntry) {
                     return (items[i] as ExerciseEntry).exerciseEntry
@@ -239,34 +240,43 @@ class ExerciseSetAdapter : RecyclerView.Adapter<RecyclerView.ViewHolder>() {
 
 
     interface ItemClickListener<T> {
-        fun onSetCheckClicked(item: ClickableSet, clickedView: View)
-        fun onAddSet(item: ExerciseWithNoteVisibility, set: ClickableSet)
-        fun onNoteToggle(item: ExerciseWithNoteVisibility)
-        fun onReplaceExercise(item: ExerciseWithNoteVisibility)
-        fun onRemoveExercise(item: ExerciseWithNoteVisibility)
-        fun onSetTypeChanged(item: ExerciseWithNoteVisibility, set: Sets, setType: SetType)
+        fun onSetCheckClicked(
+            exercise: InteractableExerciseWrapper,
+            set: ClickableSet,
+            clickedView: View,
+        )
+
+        fun onAddSet(item: InteractableExerciseWrapper, set: ClickableSet)
+        fun onNoteToggle(itemPosition: Int)
+        fun onReplaceExercise(item: InteractableExerciseWrapper)
+        fun onRemoveExercise(item: InteractableExerciseWrapper)
+        fun onSetTypeChanged(item: InteractableExerciseWrapper, set: ClickableSet, setType: SetType)
     }
 
     interface SwipeActionListener {
-        fun onDeleteSet(item: ExerciseWithNoteVisibility, set: ClickableSet)
+        fun onDeleteSet(item: InteractableExerciseWrapper, set: ClickableSet)
     }
 
     interface TextActionListener {
         fun onInputFieldChanged(
-            exercise: ExerciseWithNoteVisibility,
+            exercise: InteractableExerciseWrapper,
             set: ClickableSet,
             metric: String,
-            id: Int
+            id: Int,
         )
     }
 
-    private fun showExerciseMenu(exercise: ExerciseWithNoteVisibility, view: View) {
+    private fun showExerciseMenu(
+        exercise: InteractableExerciseWrapper,
+        itemPosition: Int,
+        view: View,
+    ) {
         val popupMenu = PopupMenu(ContextThemeWrapper(view.context, R.style.MyPopUp), view)
         popupMenu.menuInflater.inflate(R.menu.popup_exercise_menu, popupMenu.menu)
         popupMenu.setOnMenuItemClickListener { item ->
             when (item.itemId) {
                 R.id.action_add_note -> {
-                    itemClickListener?.onNoteToggle(exercise)
+                    itemClickListener?.onNoteToggle(itemPosition)
                 }
 
                 R.id.action_replace -> {
@@ -282,7 +292,7 @@ class ExerciseSetAdapter : RecyclerView.Adapter<RecyclerView.ViewHolder>() {
         popupMenu.show()
     }
 
-    private fun showSetMenu(exercise: ExerciseWithNoteVisibility, set: Sets, view: View) {
+    private fun showSetMenu(exercise: InteractableExerciseWrapper, set: ClickableSet, view: View) {
         val popupMenu = PopupMenu(ContextThemeWrapper(view.context, R.style.MyPopUp), view)
         popupMenu.menuInflater.inflate(R.menu.popup_set_menu, popupMenu.menu)
         popupMenu.setOnMenuItemClickListener { item ->
@@ -312,6 +322,6 @@ class ExerciseSetAdapter : RecyclerView.Adapter<RecyclerView.ViewHolder>() {
 
 sealed class WorkoutEntry
 
-data class ExerciseEntry(var exerciseEntry: ExerciseWithNoteVisibility) : WorkoutEntry()
+data class ExerciseEntry(var exerciseEntry: InteractableExerciseWrapper) : WorkoutEntry()
 
 data class SetEntry(val setEntry: ClickableSet) : WorkoutEntry()

@@ -1,4 +1,4 @@
-package bg.zahov.app.data.model
+package bg.zahov.app.data.model.state
 
 import bg.zahov.app.ui.loading.LoadingViewModel
 

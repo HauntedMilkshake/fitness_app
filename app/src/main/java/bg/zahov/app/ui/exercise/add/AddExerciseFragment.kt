@@ -1,7 +1,6 @@
 package bg.zahov.app.ui.exercise.add
 
 import android.os.Bundle
-import android.util.Log
 import android.view.LayoutInflater
 import android.view.View
 import android.view.ViewGroup
@@ -10,7 +9,7 @@ import androidx.fragment.app.Fragment
 import androidx.fragment.app.viewModels
 import androidx.lifecycle.map
 import androidx.navigation.fragment.findNavController
-import bg.zahov.app.data.model.AddExerciseUiMapper
+import bg.zahov.app.data.model.state.AddExerciseUiMapper
 import bg.zahov.app.data.model.BodyPart
 import bg.zahov.app.data.model.Category
 import bg.zahov.app.ui.custom.ExerciseView

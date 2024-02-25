@@ -8,15 +8,15 @@ import androidx.lifecycle.MutableLiveData
 import androidx.lifecycle.viewModelScope
 import bg.zahov.app.data.exception.CriticalDataNullException
 import bg.zahov.app.data.model.Exercise
-import bg.zahov.app.data.model.SelectableExercise
+import bg.zahov.app.data.model.InteractableExerciseWrapper
 import bg.zahov.app.data.model.SelectableFilter
 import bg.zahov.app.getAddExerciseToWorkoutProvider
 import bg.zahov.app.getFilterProvider
 import bg.zahov.app.getReplaceableExerciseProvider
 import bg.zahov.app.getSelectableExerciseProvider
 import bg.zahov.app.getWorkoutProvider
+import bg.zahov.app.util.toInteractableExerciseWrapper
 import kotlinx.coroutines.launch
-
 
 class ExerciseViewModel(application: Application) : AndroidViewModel(application) {
     private val repo by lazy {
@@ -42,8 +42,8 @@ class ExerciseViewModel(application: Application) : AndroidViewModel(application
     val state: LiveData<State>
         get() = _state
 
-    private val _userExercises = MutableLiveData<List<SelectableExercise>>()
-    val userExercises: LiveData<List<SelectableExercise>>
+    private val _userExercises = MutableLiveData<List<InteractableExerciseWrapper>>()
+    val userExercises: LiveData<List<InteractableExerciseWrapper>>
         get() = _userExercises
 
     private val _searchFilters = MutableLiveData<List<SelectableFilter>>(listOf())
@@ -62,7 +62,7 @@ class ExerciseViewModel(application: Application) : AndroidViewModel(application
         getFilters()
     }
 
-    fun onSelectableExerciseClicked(exercise: SelectableExercise, position: Int) {
+    fun onInteractableExerciseClicked(exercise: InteractableExerciseWrapper, position: Int) {
         val captured = _userExercises.value.orEmpty()
         if (replaceable) {
             currentlySelectedExerciseToReplace?.let {
@@ -102,7 +102,7 @@ class ExerciseViewModel(application: Application) : AndroidViewModel(application
             }
 
             else -> {
-                val selectedExercises = mutableListOf<SelectableExercise>()
+                val selectedExercises = mutableListOf<InteractableExerciseWrapper>()
                 _userExercises.value?.forEach {
                     if (it.isSelected) {
                         selectedExercises.add(it)
@@ -128,12 +128,8 @@ class ExerciseViewModel(application: Application) : AndroidViewModel(application
             _state.postValue(State.Loading(true))
             try {
                 repo.getTemplateExercises().collect {
-                    _userExercises.postValue(it.map { exercise ->
-                        SelectableExercise(
-                            exercise,
-                            false
-                        )
-                    })
+                    _userExercises.postValue(it.map { exercise -> exercise.toInteractableExerciseWrapper() })
+
                     allExercises.apply {
                         clear()
                         addAll(it)
@@ -141,7 +137,6 @@ class ExerciseViewModel(application: Application) : AndroidViewModel(application
 
                     _state.postValue(State.Default)
                 }
-
             } catch (e: CriticalDataNullException) {
                 _state.postValue(State.ErrorFetching(e.message, true))
             }
@@ -158,7 +153,6 @@ class ExerciseViewModel(application: Application) : AndroidViewModel(application
     }
 
     fun searchExercises(name: String?) {
-        Log.d("search", "search")
         val selectedFilters = _searchFilters.value ?: mutableListOf()
         val newExercises = _userExercises.value?.let {
             //TODO(Test it vs allExercises)
@@ -189,15 +183,12 @@ class ExerciseViewModel(application: Application) : AndroidViewModel(application
         } ?: emptyList()
 
         search = name
-        _userExercises.value = newExercises.map { SelectableExercise(it, false) }
+        _userExercises.value = newExercises.map { it.toInteractableExerciseWrapper() }
 
         if (newExercises.isEmpty()) _state.value = State.NoResults(true)
     }
 
     fun removeFilter(filter: SelectableFilter) {
-//        selectedFilters = searchFilters.value.orEmpty().toMutableList()
-//        selectedFilters.remove(filter)
-//        _searchFilters.value = selectedFilters
         viewModelScope.launch {
             filterProvider.removeFilter(filter)
         }

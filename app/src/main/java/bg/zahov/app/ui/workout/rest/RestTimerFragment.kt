@@ -9,7 +9,7 @@ import androidx.fragment.app.Fragment
 import androidx.fragment.app.viewModels
 import androidx.lifecycle.map
 import androidx.navigation.fragment.findNavController
-import bg.zahov.app.data.model.RestTimerUiModelMapper
+import bg.zahov.app.data.model.state.RestTimerUiModelMapper
 import bg.zahov.app.util.parseTimeStringToLong
 import bg.zahov.fitness.app.R
 import bg.zahov.fitness.app.databinding.FragmentRestTimerBinding
@@ -43,8 +43,8 @@ class RestTimerFragment : Fragment() {
                     createCustomTimer.visibility =
                         if (it.isCountdown) View.GONE else View.VISIBLE
 
-                    createCustomTimer.setText(if(it.isAddingCustomTimer) R.string.start_custom_rest else R.string.create_custom_timer)
-                    if(it.isAddingCustomTimer) {
+                    createCustomTimer.setText(if (it.isAddingCustomTimer) R.string.start_custom_rest else R.string.create_custom_timer)
+                    if (it.isAddingCustomTimer) {
                         createCustomTimer.setOnClickListener {
                             restTimerViewModel.onCustomTimerStart(restTimerViewModel.getRestsArray()[customRestTimerPicker.value])
                         }

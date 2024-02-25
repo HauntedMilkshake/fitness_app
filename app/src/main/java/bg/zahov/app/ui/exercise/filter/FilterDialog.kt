@@ -57,7 +57,7 @@ class FilterDialog : DialogFragment() {
                 bodyPartAdapter.updateItems(it)
             }
 
-            val categoryAdapter =configureFilterRecyclerView(
+            val categoryAdapter = configureFilterRecyclerView(
                 categoryRecyclerView,
                 enumValues<Category>().map { SelectableFilter(it.name) })
             filterViewModel.categoryFilters.observe(viewLifecycleOwner) {
@@ -68,7 +68,7 @@ class FilterDialog : DialogFragment() {
 
     private fun configureFilterRecyclerView(
         recyclerView: RecyclerView,
-        items: List<SelectableFilter>
+        items: List<SelectableFilter>,
     ): FilterAdapter {
         val filterAdapter = FilterAdapter(false).apply {
             itemClickListener = object : FilterAdapter.ItemClickListener<SelectableFilter> {

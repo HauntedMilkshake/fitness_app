@@ -57,7 +57,7 @@ data class User(
 data class Workout(
     var id: String,
     var name: String,
-    var duration: Double?,
+    var duration: Long?,
     var date: String,
     var isTemplate: Boolean,
     var exercises: List<Exercise>,
@@ -68,7 +68,7 @@ data class Workout(
             Workout(
                 id = it[FirestoreFields.WORKOUT_ID] as String,
                 name = it[FirestoreFields.WORKOUT_NAME] as String,
-                duration = it[FirestoreFields.WORKOUT_DURATION] as? Double,
+                duration = it[FirestoreFields.WORKOUT_DURATION] as? Long,
                 date = it[FirestoreFields.WORKOUT_DATE] as String,
                 isTemplate = it[FirestoreFields.WORKOUT_IS_TEMPLATE] as Boolean,
                 exercises = (it[FirestoreFields.WORKOUT_EXERCISES] as List<Map<String, Any>>)

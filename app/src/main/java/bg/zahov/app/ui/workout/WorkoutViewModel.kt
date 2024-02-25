@@ -5,9 +5,10 @@ import androidx.lifecycle.AndroidViewModel
 import androidx.lifecycle.LiveData
 import androidx.lifecycle.MutableLiveData
 import androidx.lifecycle.viewModelScope
-import bg.zahov.app.data.model.ExerciseWithNoteVisibility
+import bg.zahov.app.data.model.ClickableSet
+import bg.zahov.app.data.model.InteractableExerciseWrapper
 import bg.zahov.app.data.model.RestState
-import bg.zahov.app.data.model.Sets
+import bg.zahov.app.data.model.SetType
 import bg.zahov.app.data.model.Workout
 import bg.zahov.app.data.model.WorkoutState
 import bg.zahov.app.getAddExerciseToWorkoutProvider
@@ -16,7 +17,13 @@ import bg.zahov.app.getWorkoutProvider
 import bg.zahov.app.getWorkoutStateManager
 import bg.zahov.app.util.currDateToString
 import bg.zahov.app.util.hashString
+import bg.zahov.app.util.parseTimeStringToLong
+import bg.zahov.app.util.toExercise
+import bg.zahov.app.util.toInteractableExerciseWrapper
+import bg.zahov.fitness.app.R
 import kotlinx.coroutines.launch
+import java.time.LocalTime
+import java.util.Random
 
 class WorkoutViewModel(application: Application) : AndroidViewModel(application) {
     private val workoutStateManager by lazy {
@@ -35,11 +42,13 @@ class WorkoutViewModel(application: Application) : AndroidViewModel(application)
         application.getRestTimerProvider()
     }
 
-    private val _exercises = MutableLiveData<OnGoin>
+    private val _exercises = MutableLiveData<List<InteractableExerciseWrapper>>(mutableListOf())
+    val exercises: LiveData<List<InteractableExerciseWrapper>>
+        get() = _exercises
 
-    private val _workout = MutableLiveData<Workout>()
-    val workout: LiveData<Workout>
-        get() = _workout
+    private val _name = MutableLiveData("New workout")
+    val name: LiveData<String>
+        get() = _name
 
     private val _timer = MutableLiveData<String>()
     val timer: LiveData<String>
@@ -49,21 +58,32 @@ class WorkoutViewModel(application: Application) : AndroidViewModel(application)
     val restTimer: LiveData<State>
         get() = _restTimerState
 
+    private val _note = MutableLiveData<String>()
+    val note: LiveData<String>
+        get() = _note
+
+    private var exerciseToReplaceIndex: Int? = null
+
     init {
         viewModelScope.launch {
             launch {
                 workoutStateManager.template.collect {
-                    it?.let { _workout.postValue(it) } ?: run {
-                        val workout = Workout(
-                            hashString("New workout"),
-                            "New workout",
-                            duration = null,
-                            date = currDateToString(),
-                            isTemplate = false,
-                            exercises = listOf()
+                    it?.let {
+                        _exercises.postValue(it.exercises.map { exercises -> exercises.toInteractableExerciseWrapper() })
+                        _name.postValue(it.name)
+                    } ?: run {
+                        _name.postValue("New Workout")
+                        //TODO(Technically this manager does not perceive state for notes)
+                        workoutStateManager.updateTemplate(
+                            Workout(
+                                hashString("New workout"),
+                                "New workout",
+                                duration = null,
+                                date = currDateToString(),
+                                isTemplate = false,
+                                exercises = listOf()
+                            )
                         )
-                        _workout.postValue(workout)
-                        workoutStateManager.updateTemplate(workout)
                     }
                 }
             }
@@ -81,14 +101,9 @@ class WorkoutViewModel(application: Application) : AndroidViewModel(application)
             }
             launch {
                 addExerciseToWorkoutProvider.selectedExercises.collect {
-                    val new = _workout.value
-                    val exercises = new?.exercises.orEmpty().toMutableList()
-                    exercises.addAll(it.map { selectable -> selectable.exercise })
-                    new?.exercises = exercises
-
-                    new?.let { workout ->
-                        _workout.postValue(workout)
-                    }
+                    val updatedExercises = _exercises.value.orEmpty().toMutableList()
+                    updatedExercises.addAll(it)
+                    _exercises.postValue(updatedExercises)
                 }
             }
             launch {
@@ -111,36 +126,74 @@ class WorkoutViewModel(application: Application) : AndroidViewModel(application)
         }
     }
 
-    fun removeExercise(item: ExerciseWithNoteVisibility) {
-        val captured = _workout.value
-        captured?.exercises.orEmpty().toMutableList().remove(item.exercise)
-        captured?.let {
-            _workout.value = it
-        }
+    fun onExerciseReplace(item: InteractableExerciseWrapper) {
+        exerciseToReplaceIndex = _exercises.value?.indexOf(item)
     }
 
-    fun addSet(item: ExerciseWithNoteVisibility, set: Sets) {
-        val captured = _workout.value
-        captured?.exercises?.find { it == item.exercise }?.let {
+    fun onSetCheckClicked(exercise: InteractableExerciseWrapper, set: ClickableSet) {
+        val captured = _exercises.value.orEmpty()
+        captured.find { it == exercise }?.sets?.find { it == set }?.clicked = !(captured.find { it == exercise }?.sets?.find { it == set }?.clicked ?: true)
+        _exercises.value = captured
+    }
+
+    fun onNoteToggle(position: Int) {
+        val captured = _exercises.value.orEmpty()
+        captured[position].isNoteVisible = !captured[position].isNoteVisible
+        _exercises.value = captured
+    }
+
+    fun removeExercise(item: InteractableExerciseWrapper) {
+        val captured = _exercises.value.orEmpty().toMutableList()
+        captured.remove(item)
+    }
+
+    fun addSet(item: InteractableExerciseWrapper, set: ClickableSet) {
+        val captured = _exercises.value.orEmpty().toMutableList()
+        captured.find { it == item }?.let {
             val newSets = it.sets.toMutableList()
             newSets.add(set)
             newSets.let { sets ->
                 it.sets = sets
             }
         }
-        captured?.let { _workout.value = it }
+        _exercises.value = captured
     }
 
-    fun removeSet(item: ExerciseWithNoteVisibility, set: Sets) {
-        val captured = _workout.value
-        captured?.exercises?.find { it == item.exercise }?.let {
+    fun removeSet(item: InteractableExerciseWrapper, set: ClickableSet) {
+        val captured = _exercises.value.orEmpty().toMutableList()
+        captured.find { it == item }?.let {
             val newSets = it.sets.toMutableList()
             newSets.remove(set)
             newSets.let { sets ->
                 it.sets = sets
             }
         }
-        captured?.let { _workout.value = it }
+        _exercises.value = captured
+    }
+
+    fun onInputFieldTextChanged(
+        exercise: InteractableExerciseWrapper,
+        set: ClickableSet,
+        metric: String,
+        viewId: Int,
+    ) {
+        val new = _exercises.value.orEmpty()
+        when (viewId) {
+            R.id.first_input_field_text -> {
+                new.find { it == exercise }?.sets?.find { it == set }?.set?.firstMetric = metric.toDoubleOrNull()
+            }
+
+            R.id.second_input_field_text -> {
+                new.find { it == exercise }?.sets?.find { it == set }?.set?.secondMetric = metric.toIntOrNull()
+            }
+        }
+        _exercises.value = new
+    }
+
+    fun onSetTypeChanged(exercise: InteractableExerciseWrapper, set: ClickableSet, newType: SetType) {
+        val captured = _exercises.value.orEmpty()
+        captured.find { it == exercise }?.sets?.find { it == set }?.set?.type = newType.key
+        _exercises.value = captured
     }
 
     fun minimize() {
@@ -157,11 +210,31 @@ class WorkoutViewModel(application: Application) : AndroidViewModel(application)
 
     fun finishWorkout() {
         viewModelScope.launch {
-            _workout.value?.let {
-                repo.addWorkoutToHistory(it)
-            }
+            repo.addWorkoutToHistory(
+                Workout(
+                    id = hashString("${Random().nextInt(Int.MAX_VALUE)}"),
+                    name = "${getTimePeriodAsString()} ${_name.value}",
+                    date = currDateToString(),
+                    exercises = _exercises.value?.map { it.toExercise() } ?: emptyList(),
+                    note = _note.value,
+                    duration = _timer.value?.parseTimeStringToLong() ?: 0L,
+                    isTemplate = false
+                )
+            )
+            addExerciseToWorkoutProvider.resetSelectedExercises()
             workoutStateManager.updateState(WorkoutState.INACTIVE)
         }
+    }
+
+    fun onNoteChange(newNote: String) {
+        _note.value = newNote
+    }
+
+    private fun getTimePeriodAsString() = when (LocalTime.now().hour) {
+        in 6..11 -> "Morning"
+        in 12..16 -> "Noon"
+        in 17..20 -> "Afternoon"
+        else -> "Night"
     }
 
     sealed interface State {

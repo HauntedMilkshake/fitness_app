@@ -16,9 +16,9 @@ import androidx.fragment.app.viewModels
 import androidx.lifecycle.map
 import androidx.navigation.fragment.findNavController
 import androidx.recyclerview.widget.LinearLayoutManager
-import bg.zahov.app.data.model.ExerciseUiMapper
+import bg.zahov.app.data.model.InteractableExerciseWrapper
+import bg.zahov.app.data.model.state.ExerciseUiMapper
 import bg.zahov.app.data.model.SelectableFilter
-import bg.zahov.app.data.model.SelectableExercise
 import bg.zahov.app.ui.exercise.filter.FilterAdapter
 import bg.zahov.app.ui.exercise.filter.FilterDialog
 import bg.zahov.app.util.applyScaleAnimation
@@ -105,14 +105,13 @@ class ExercisesFragment : Fragment() {
 
             val exerciseAdapter =
                 ExerciseAdapter(replaceable).apply {
-                    itemClickListener =
-                        object : ExerciseAdapter.ItemClickListener<SelectableExercise> {
+                    itemClickListener = object : ExerciseAdapter.ItemClickListener<InteractableExerciseWrapper> {
                             override fun onItemClicked(
-                                item: SelectableExercise,
+                                item: InteractableExerciseWrapper,
                                 position: Int
                             ) {
                                 when {
-                                    replaceable || selectable || addable -> exerciseViewModel.onSelectableExerciseClicked(
+                                    replaceable || selectable || addable -> exerciseViewModel.onInteractableExerciseClicked(
                                         item, position
                                     )
 //                                    else -> //TODO(Exercise fragment)

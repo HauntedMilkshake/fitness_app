@@ -1,7 +1,6 @@
 package bg.zahov.app.ui.exercise.filter
 
 import android.app.Application
-import android.util.Log
 import androidx.lifecycle.AndroidViewModel
 import androidx.lifecycle.LiveData
 import androidx.lifecycle.MutableLiveData
@@ -10,8 +9,6 @@ import bg.zahov.app.data.model.BodyPart
 import bg.zahov.app.data.model.Category
 import bg.zahov.app.data.model.SelectableFilter
 import bg.zahov.app.getFilterProvider
-import kotlinx.coroutines.flow.collect
-import kotlinx.coroutines.flow.map
 import kotlinx.coroutines.launch
 
 class FilterViewModel(application: Application) : AndroidViewModel(application) {
@@ -29,10 +26,7 @@ class FilterViewModel(application: Application) : AndroidViewModel(application) 
         get() = _categoryFilters
 
     init {
-//        viewModelScope.launch {
-//            filterManager.filters.collect {
         filterManager.getCachedFilters().forEach { item ->
-//            it.forEach { item ->
             when {
                 BodyPart.fromKey(item.name) != null -> {
                     val new = _bodyPartFilters.value?.toMutableList()
@@ -48,11 +42,8 @@ class FilterViewModel(application: Application) : AndroidViewModel(application) 
                     _categoryFilters.postValue(new)
                 }
             }
-//            }
 
         }
-//            }
-//        }
     }
 
     fun onFilterClicked(item: SelectableFilter) {

@@ -5,28 +5,21 @@ import android.transition.TransitionInflater
 import android.view.LayoutInflater
 import android.view.View
 import android.view.ViewGroup
-import android.widget.PopupMenu
 import android.widget.Toast
-import androidx.appcompat.view.ContextThemeWrapper
-import androidx.constraintlayout.widget.ConstraintLayout
 import androidx.core.os.bundleOf
-import androidx.core.view.forEach
 import androidx.fragment.app.Fragment
 import androidx.fragment.app.viewModels
 import androidx.lifecycle.map
 import androidx.navigation.fragment.findNavController
-import androidx.navigation.navGraphViewModels
 import androidx.recyclerview.widget.LinearLayoutManager
-import bg.zahov.app.data.model.AddTemplateWorkoutUiMapper
+import bg.zahov.app.data.model.state.AddTemplateWorkoutUiMapper
 import bg.zahov.app.data.model.ClickableSet
-import bg.zahov.app.data.model.ExerciseWithNoteVisibility
+import bg.zahov.app.data.model.InteractableExerciseWrapper
 import bg.zahov.app.data.model.SetType
 import bg.zahov.app.data.model.Sets
 import bg.zahov.app.util.applyScaleAnimation
 import bg.zahov.fitness.app.R
 import bg.zahov.fitness.app.databinding.FragmentAddWorkoutTemplateBinding
-import com.google.android.material.imageview.ShapeableImageView
-import com.google.android.material.textview.MaterialTextView
 
 class AddTemplateWorkoutFragment : Fragment() {
 
@@ -62,19 +55,19 @@ class AddTemplateWorkoutFragment : Fragment() {
 
             val exerciseSetAdapter = ExerciseSetAdapter().apply {
                 itemClickListener = object : ExerciseSetAdapter.ItemClickListener<WorkoutEntry> {
-                    override fun onSetCheckClicked(item: ClickableSet, clickedView: View) {
+                    override fun onSetCheckClicked(exercise: InteractableExerciseWrapper, item: ClickableSet, clickedView: View) {
                         //NOOP
                     }
 
-                    override fun onAddSet(item: ExerciseWithNoteVisibility, set: ClickableSet) {
-                        addWorkoutViewModel.addSet(item, set.set)
+                    override fun onAddSet(item: InteractableExerciseWrapper, set: ClickableSet) {
+                        addWorkoutViewModel.addSet(item, set)
                     }
 
-                    override fun onNoteToggle(item: ExerciseWithNoteVisibility) {
-                        addWorkoutViewModel.toggleExerciseNoteField(item)
+                    override fun onNoteToggle(itemPosition: Int) {
+                        addWorkoutViewModel.toggleExerciseNoteField(itemPosition)
                     }
 
-                    override fun onReplaceExercise(item: ExerciseWithNoteVisibility) {
+                    override fun onReplaceExercise(item: InteractableExerciseWrapper) {
                         addWorkoutViewModel.setReplaceableExercise(item)
                         findNavController().navigate(
                             R.id.create_workout_template_to_add_exercise,
@@ -82,31 +75,31 @@ class AddTemplateWorkoutFragment : Fragment() {
                         )
                     }
 
-                    override fun onRemoveExercise(item: ExerciseWithNoteVisibility) {
+                    override fun onRemoveExercise(item: InteractableExerciseWrapper) {
                         addWorkoutViewModel.removeExercise(item)
                     }
 
                     override fun onSetTypeChanged(
-                        item: ExerciseWithNoteVisibility,
-                        set: Sets,
-                        setType: SetType
+                        item: InteractableExerciseWrapper,
+                        set: ClickableSet,
+                        setType: SetType,
                     ) {
                         TODO("Not yet implemented")
                     }
                 }
                 swipeActionListener = object : ExerciseSetAdapter.SwipeActionListener {
-                    override fun onDeleteSet(item: ExerciseWithNoteVisibility, set: ClickableSet) {
-                        addWorkoutViewModel.removeSet(item, set.set)
+                    override fun onDeleteSet(item: InteractableExerciseWrapper, set: ClickableSet) {
+                        addWorkoutViewModel.removeSet(item, set)
                     }
                 }
                 textChangeListener = object : ExerciseSetAdapter.TextActionListener {
                     override fun onInputFieldChanged(
-                        exercise: ExerciseWithNoteVisibility,
+                        exercise: InteractableExerciseWrapper,
                         set: ClickableSet,
                         metric: String,
-                        id: Int
+                        id: Int,
                     ) {
-                        addWorkoutViewModel.onInputFieldTextChanged(exercise, set.set, metric, id)
+                        addWorkoutViewModel.onInputFieldTextChanged(exercise, set, metric, id)
                     }
                 }
             }

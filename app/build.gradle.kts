@@ -53,7 +53,6 @@ android {
 }
 
 dependencies {
-
     implementation("com.google.firebase:firebase-functions-ktx:20.4.0")
     implementation("io.realm:realm-android-kotlin-extensions:10.10.0")
     implementation("com.google.firebase:firebase-auth-ktx:22.3.1")
@@ -72,7 +71,8 @@ dependencies {
     androidTestImplementation("androidx.test.espresso:espresso-core:3.5.1")
     implementation("io.realm.kotlin:library-base:1.11.0")
     implementation("io.realm.kotlin:library-sync:1.11.0")
-    implementation("org.jetbrains.kotlinx:kotlinx-coroutines-android:1.7.1")
+    implementation("org.jetbrains.kotlinx:kotlinx-coroutines-android:1.7.3")
     implementation("androidx.lifecycle:lifecycle-livedata-ktx:2.7.0")
     implementation("com.google.android.flexbox:flexbox:3.0.0")
+    implementation("com.github.PhilJay:MPAndroidChart:v3.1.0")
 }

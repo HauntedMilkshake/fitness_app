@@ -10,7 +10,7 @@ import androidx.fragment.app.Fragment
 import androidx.fragment.app.viewModels
 import androidx.lifecycle.map
 import androidx.navigation.fragment.findNavController
-import bg.zahov.app.data.model.SignupUiMapper
+import bg.zahov.app.data.model.state.SignupUiMapper
 import bg.zahov.app.hideBottomNav
 import bg.zahov.fitness.app.R
 import bg.zahov.fitness.app.databinding.FragmentSignUpBinding

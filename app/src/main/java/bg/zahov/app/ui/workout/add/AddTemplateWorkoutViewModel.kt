@@ -1,23 +1,22 @@
 package bg.zahov.app.ui.workout.add
 
 import android.app.Application
-import android.util.Log
 import androidx.lifecycle.AndroidViewModel
 import androidx.lifecycle.LiveData
 import androidx.lifecycle.MutableLiveData
 import androidx.lifecycle.viewModelScope
 import bg.zahov.app.data.model.ClickableSet
-import bg.zahov.app.data.model.ExerciseWithNoteVisibility
-import bg.zahov.app.data.model.SelectableExercise
-import bg.zahov.app.data.model.Sets
+import bg.zahov.app.data.model.InteractableExerciseWrapper
 import bg.zahov.app.data.model.Workout
 import bg.zahov.app.getReplaceableExerciseProvider
 import bg.zahov.app.getSelectableExerciseProvider
 import bg.zahov.app.getWorkoutProvider
 import bg.zahov.app.util.currDateToString
 import bg.zahov.app.util.hashString
+import bg.zahov.app.util.toExercise
 import bg.zahov.fitness.app.R
 import kotlinx.coroutines.launch
+import java.text.FieldPosition
 
 class AddTemplateWorkoutViewModel(application: Application) : AndroidViewModel(application) {
     private val repo by lazy {
@@ -36,8 +35,8 @@ class AddTemplateWorkoutViewModel(application: Application) : AndroidViewModel(a
     val state: LiveData<State>
         get() = _state
 
-    private val _currExercises = MutableLiveData<List<ExerciseWithNoteVisibility>>()
-    val currExercises: LiveData<List<ExerciseWithNoteVisibility>>
+    private val _currExercises = MutableLiveData<List<InteractableExerciseWrapper>>()
+    val currExercises: LiveData<List<InteractableExerciseWrapper>>
         get() = _currExercises
 
     var workoutNote: String = ""
@@ -57,11 +56,7 @@ class AddTemplateWorkoutViewModel(application: Application) : AndroidViewModel(a
 
             launch {
                 selectableExerciseProvider.selectedExercises.collect {
-                    _currExercises.postValue(it.map { selectable ->
-                        ExerciseWithNoteVisibility(
-                            selectable.exercise
-                        )
-                    })
+                    _currExercises.postValue(it)
                 }
             }
 
@@ -69,11 +64,10 @@ class AddTemplateWorkoutViewModel(application: Application) : AndroidViewModel(a
                 replaceableExerciseProvider.exerciseToReplace.collect {
                     it?.let { replaced ->
                         exerciseToReplaceIndex?.let { indexToReplace ->
-                            if (_currExercises.value?.get(indexToReplace)?.exercise != replaced.exercise) {
+                            if (_currExercises.value?.get(indexToReplace) != replaced) {
                                 val captured =
                                     _currExercises.value?.toMutableList() ?: mutableListOf()
-                                captured[indexToReplace] =
-                                    ExerciseWithNoteVisibility(replaced.exercise)
+                                captured[indexToReplace] = replaced
                                 _currExercises.postValue(captured)
                                 replaceableExerciseProvider.resetExerciseToReplace()
                             }
@@ -88,7 +82,7 @@ class AddTemplateWorkoutViewModel(application: Application) : AndroidViewModel(a
         selectableExerciseProvider.resetSelectedExercises()
     }
 
-    fun setReplaceableExercise(item: ExerciseWithNoteVisibility) {
+    fun setReplaceableExercise(item: InteractableExerciseWrapper) {
         exerciseToReplaceIndex = _currExercises.value?.indexOf(item)
     }
 
@@ -113,10 +107,10 @@ class AddTemplateWorkoutViewModel(application: Application) : AndroidViewModel(a
                     Workout(
                         id = hashString(workoutName),
                         name = workoutName,
-                        duration = 0.0,
+                        duration = 0L,
                         date = currDateToString(),
                         isTemplate = true,
-                        exercises = _currExercises.value!!.map { it.exercise },
+                        exercises = _currExercises.value!!.map { it.toExercise() },
                     )
                 )
 
@@ -130,10 +124,9 @@ class AddTemplateWorkoutViewModel(application: Application) : AndroidViewModel(a
         }
     }
 
-    fun toggleExerciseNoteField(item: ExerciseWithNoteVisibility) {
+    fun toggleExerciseNoteField(position: Int) {
         val captured = _currExercises.value ?: listOf()
-        captured.find { it == item }?.noteVisibility = !item.noteVisibility
-
+        captured[position].isNoteVisible = !captured[position].isNoteVisible
         _currExercises.value = captured
     }
 
@@ -144,32 +137,31 @@ class AddTemplateWorkoutViewModel(application: Application) : AndroidViewModel(a
 //        _currExercises.value = captured
 //    }
 
-    fun removeExercise(item: ExerciseWithNoteVisibility) {
+    fun removeExercise(item: InteractableExerciseWrapper) {
         val captured = _currExercises.value?.toMutableList() ?: mutableListOf()
-        selectableExerciseProvider.removeExercise(SelectableExercise(item.exercise, true))
+        selectableExerciseProvider.removeExercise(item)
         captured.remove(item)
         _currExercises.value = captured
     }
 
-    fun addSet(item: ExerciseWithNoteVisibility, set: Sets) {
+    fun addSet(item: InteractableExerciseWrapper, set: ClickableSet) {
         val exercises = _currExercises.value?.toMutableList() ?: emptyList()
         val foundExercise = exercises.find { it == item }
         foundExercise?.let {
-            val newSets = it.exercise.sets.toMutableList()
+            val newSets = it.sets.toMutableList()
             newSets.add(set)
-            it.exercise.sets = newSets
+            it.sets = newSets
         }
         _currExercises.value = exercises
     }
 
-    fun removeSet(item: ExerciseWithNoteVisibility, set: Sets) {
+    fun removeSet(item: InteractableExerciseWrapper, set: ClickableSet) {
         val exercises = _currExercises.value?.toMutableList() ?: emptyList()
-        val foundExercise = exercises.find { it == item }
-        foundExercise?.let {
-            if (it.exercise.sets.isEmpty()) {
-                val newSets = it.exercise.sets.toMutableList()
+        exercises.find { it == item }?.let {
+            if (it.sets.isNotEmpty()) {
+                val newSets = it.sets.toMutableList()
                 newSets.remove(set)
-                it.exercise.sets = newSets
+                it.sets = newSets
             }
         }
 
@@ -177,20 +169,19 @@ class AddTemplateWorkoutViewModel(application: Application) : AndroidViewModel(a
     }
 
     fun onInputFieldTextChanged(
-        exercise: ExerciseWithNoteVisibility,
-        set: Sets,
+        exercise: InteractableExerciseWrapper,
+        set: ClickableSet,
         metric: String,
         viewId: Int,
     ) {
         val new = currExercises.value?.find { it == exercise }
         when (viewId) {
             R.id.first_input_field_text -> {
-                Log.d("onChange", "writing ${set.firstMetric}")
-                new?.exercise?.sets?.find { it == set }?.firstMetric = metric.toDoubleOrNull()
+                new?.sets?.find { it == set }?.set?.firstMetric = metric.toDoubleOrNull()
             }
 
             R.id.second_input_field_text -> {
-                new?.exercise?.sets?.find { it == set }?.secondMetric = metric.toIntOrNull()
+                new?.sets?.find { it == set }?.set?.secondMetric = metric.toIntOrNull()
             }
         }
     }

@@ -14,7 +14,7 @@ import androidx.lifecycle.map
 import androidx.navigation.fragment.findNavController
 import androidx.recyclerview.widget.LinearLayoutManager
 import bg.zahov.app.data.model.Workout
-import bg.zahov.app.data.model.StartWorkoutUiMapper
+import bg.zahov.app.data.model.state.StartWorkoutUiMapper
 import bg.zahov.fitness.app.R
 import bg.zahov.fitness.app.databinding.FragmentStartWorkoutBinding
 

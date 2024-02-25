@@ -1,6 +1,6 @@
 package bg.zahov.app.data.provider
 
-import bg.zahov.app.data.model.SelectableExercise
+import bg.zahov.app.data.model.InteractableExerciseWrapper
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.StateFlow
 
@@ -14,17 +14,17 @@ class AddExerciseToWorkoutProvider {
             }
     }
 
-    private val _selectedExercises = MutableStateFlow<List<SelectableExercise>>(mutableListOf())
-    val selectedExercises: StateFlow<List<SelectableExercise>>
+    private val _selectedExercises = MutableStateFlow<List<InteractableExerciseWrapper>>(mutableListOf())
+    val selectedExercises: StateFlow<List<InteractableExerciseWrapper>>
         get() = _selectedExercises
 
-    fun addExercises(newExercises: List<SelectableExercise>) {
+    fun addExercises(newExercises: List<InteractableExerciseWrapper>) {
         val selected = _selectedExercises.value.toMutableList()
         selected.addAll(newExercises)
         _selectedExercises.value = selected
     }
 
-    fun removeExercise(exercise: SelectableExercise) {
+    fun removeExercise(exercise: InteractableExerciseWrapper) {
         val selected = _selectedExercises.value.toMutableList()
         exercise.isSelected = false
         selected.remove(exercise)

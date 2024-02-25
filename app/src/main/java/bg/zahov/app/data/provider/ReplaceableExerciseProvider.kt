@@ -1,6 +1,6 @@
 package bg.zahov.app.data.provider
 
-import bg.zahov.app.data.model.SelectableExercise
+import bg.zahov.app.data.model.InteractableExerciseWrapper
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.StateFlow
 
@@ -13,12 +13,12 @@ class ReplaceableExerciseProvider {
             instance ?: ReplaceableExerciseProvider().also { instance = it }
         }
     }
-    private val _exerciseToReplace = MutableStateFlow<SelectableExercise?>(null)
+    private val _exerciseToReplace = MutableStateFlow<InteractableExerciseWrapper?>(null)
 
-    val exerciseToReplace: StateFlow<SelectableExercise?>
+    val exerciseToReplace: StateFlow<InteractableExerciseWrapper?>
         get() = _exerciseToReplace
 
-    fun updateExerciseToReplace(exercise: SelectableExercise) {
+    fun updateExerciseToReplace(exercise: InteractableExerciseWrapper) {
         _exerciseToReplace.value = exercise
     }
     fun resetExerciseToReplace() {

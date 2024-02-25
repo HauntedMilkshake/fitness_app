@@ -15,11 +15,11 @@ import androidx.recyclerview.widget.ItemTouchHelper
 import androidx.recyclerview.widget.LinearLayoutManager
 import androidx.recyclerview.widget.RecyclerView
 import bg.zahov.app.data.model.ClickableSet
-import bg.zahov.app.data.model.ExerciseWithNoteVisibility
-import bg.zahov.app.data.model.OnGoingWorkoutUiMapper
+import bg.zahov.app.data.model.InteractableExerciseWrapper
+import bg.zahov.app.data.model.state.OnGoingWorkoutUiMapper
 import bg.zahov.app.data.model.SetType
-import bg.zahov.app.data.model.Sets
 import bg.zahov.app.hideBottomNav
+import bg.zahov.app.showBottomNav
 import bg.zahov.app.ui.workout.add.ExerciseSetAdapter
 import bg.zahov.app.ui.workout.add.WorkoutEntry
 import bg.zahov.app.util.SwipeGesture
@@ -33,6 +33,7 @@ class WorkoutFragment : Fragment() {
         get() = requireNotNull(_binding)
 
     private val onGoingWorkoutViewModel: WorkoutViewModel by viewModels()
+
     override fun onCreateView(
         inflater: LayoutInflater,
         container: ViewGroup?,
@@ -48,7 +49,6 @@ class WorkoutFragment : Fragment() {
         enterTransition = inflater.inflateTransition(R.transition.slide_up)
         exitTransition = inflater.inflateTransition(R.transition.fade_out)
         requireActivity().hideBottomNav()
-
     }
 
     override fun onViewCreated(view: View, savedInstanceState: Bundle?) {
@@ -63,54 +63,62 @@ class WorkoutFragment : Fragment() {
 
             val exerciseSetAdapter = ExerciseSetAdapter().apply {
                 itemClickListener = object : ExerciseSetAdapter.ItemClickListener<WorkoutEntry> {
-                    override fun onSetCheckClicked(item: ClickableSet, clickedView: View) {
+                    override fun onSetCheckClicked(
+                        exercise: InteractableExerciseWrapper,
+                        set: ClickableSet,
+                        clickedView: View,
+                    ) {
+                        onGoingWorkoutViewModel.onSetCheckClicked(exercise, set)
                     }
 
-                    override fun onAddSet(item: ExerciseWithNoteVisibility, set: ClickableSet) {
-                        onGoingWorkoutViewModel.addSet(item, set.set)
+                    override fun onAddSet(item: InteractableExerciseWrapper, set: ClickableSet) {
+                        onGoingWorkoutViewModel.addSet(item, set)
                     }
 
-                    override fun onNoteToggle(item: ExerciseWithNoteVisibility) {
-
+                    override fun onNoteToggle(itemPosition: Int) {
+                        onGoingWorkoutViewModel.onNoteToggle(itemPosition)
                     }
 
-                    override fun onReplaceExercise(item: ExerciseWithNoteVisibility) {
+                    override fun onReplaceExercise(item: InteractableExerciseWrapper) {
+                        onGoingWorkoutViewModel.onExerciseReplace(item)
                         findNavController().navigate(
                             R.id.workout_to_add_exercise,
                             bundleOf("REPLACEABLE" to true)
                         )
                     }
 
-                    override fun onRemoveExercise(item: ExerciseWithNoteVisibility) {
+                    override fun onRemoveExercise(item: InteractableExerciseWrapper) {
                         onGoingWorkoutViewModel.removeExercise(item)
                     }
 
                     override fun onSetTypeChanged(
-                        item: ExerciseWithNoteVisibility,
-                        set: Sets,
-                        setType: SetType
+                        item: InteractableExerciseWrapper,
+                        set: ClickableSet,
+                        setType: SetType,
                     ) {
-                        TODO("Not yet implemented")
+                        onGoingWorkoutViewModel.onSetTypeChanged(item, set, setType)
                     }
+
                 }
                 swipeActionListener = object : ExerciseSetAdapter.SwipeActionListener {
-                    override fun onDeleteSet(item: ExerciseWithNoteVisibility, set: ClickableSet) {
-                        onGoingWorkoutViewModel.removeSet(item, set.set)
+                    override fun onDeleteSet(item: InteractableExerciseWrapper, set: ClickableSet) {
+                        onGoingWorkoutViewModel.removeSet(item, set)
                     }
+
                 }
                 textChangeListener = object : ExerciseSetAdapter.TextActionListener {
                     override fun onInputFieldChanged(
-                        exercise: ExerciseWithNoteVisibility,
+                        exercise: InteractableExerciseWrapper,
                         set: ClickableSet,
                         metric: String,
-                        id: Int
+                        id: Int,
                     ) {
-                        TODO("Not yet implemented")
+                        onGoingWorkoutViewModel.onInputFieldTextChanged(exercise, set, metric, id)
                     }
                 }
             }
 
-            workoutRecyclerView.apply {
+            exercisesRecyclerView.apply {
                 adapter = exerciseSetAdapter
                 layoutManager = LinearLayoutManager(requireContext())
             }
@@ -126,25 +134,27 @@ class WorkoutFragment : Fragment() {
                     }
                 }
             }
-            val itemTouchHelper = ItemTouchHelper(swipeGesture)
-            itemTouchHelper.attachToRecyclerView(workoutRecyclerView)
 
+            onGoingWorkoutViewModel.exercises.observe(viewLifecycleOwner) {
+                exerciseSetAdapter.updateItems(it)
+            }
+
+            onGoingWorkoutViewModel.name.observe(viewLifecycleOwner) {
+                workoutName.text = it
+            }
+
+            onGoingWorkoutViewModel.note.observe(viewLifecycleOwner) {
+                workoutNoteFieldText.setText(it)
+            }
+
+            val itemTouchHelper = ItemTouchHelper(swipeGesture)
+            itemTouchHelper.attachToRecyclerView(exercisesRecyclerView)
 
             addExercise.setOnClickListener {
                 findNavController().navigate(
                     R.id.workout_to_add_exercise,
                     bundleOf("ADDABLE" to true)
                 )
-            }
-
-            onGoingWorkoutViewModel.workout.observe(viewLifecycleOwner) {
-                workoutName.text = it.name
-                //TODO(CHANGE SIGNATURE OF ONGOINGWORKOUTVIEWMODEL
-                exerciseSetAdapter.updateItems(it.exercises.map { exercise ->
-                    ExerciseWithNoteVisibility(
-                        exercise
-                    )
-                })
             }
 
             onGoingWorkoutViewModel.timer.observe(viewLifecycleOwner) {
@@ -163,13 +173,16 @@ class WorkoutFragment : Fragment() {
                 findNavController().navigateUp()
 
             }
+
             restTimer.setOnClickListener {
                 it.applyScaleAnimation()
                 findNavController().navigate(R.id.workout_to_rest_timer)
             }
+
             finishText.setOnClickListener {
                 it.applyScaleAnimation()
                 onGoingWorkoutViewModel.finishWorkout()
+                requireActivity().showBottomNav()
                 findNavController().navigateUp()
             }
 
@@ -177,6 +190,7 @@ class WorkoutFragment : Fragment() {
                 override fun handleOnBackPressed() {
                     if (findNavController().currentDestination?.id == R.id.workout) {
                         onGoingWorkoutViewModel.minimize()
+                        requireActivity().showBottomNav()
                     }
                     findNavController().navigateUp()
                 }

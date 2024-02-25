@@ -1,7 +1,6 @@
 package bg.zahov.app
 
 import android.os.Bundle
-import android.util.Log
 import android.view.View
 import androidx.activity.viewModels
 import androidx.appcompat.app.AppCompatActivity
@@ -11,10 +10,9 @@ import androidx.navigation.findNavController
 import androidx.navigation.ui.AppBarConfiguration
 import androidx.navigation.ui.navigateUp
 import androidx.navigation.ui.setupWithNavController
-import bg.zahov.app.data.model.AuthUiModelMapper
-import bg.zahov.app.data.model.WorkoutManagerUiMapper
+import bg.zahov.app.data.model.state.AuthUiModelMapper
+import bg.zahov.app.data.model.state.WorkoutManagerUiMapper
 import bg.zahov.app.data.model.WorkoutState
-import bg.zahov.app.ui.workout.WorkoutFragment
 import bg.zahov.fitness.app.R
 import bg.zahov.fitness.app.databinding.ActivityMainBinding
 import com.google.android.material.bottomnavigation.BottomNavigationView

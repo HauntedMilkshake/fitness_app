@@ -3,14 +3,13 @@ package bg.zahov.app.util
 import android.animation.ArgbEvaluator
 import android.animation.ObjectAnimator
 import android.animation.PropertyValuesHolder
-import android.graphics.drawable.ColorDrawable
 import android.util.Log
 import android.view.View
-import android.widget.NumberPicker
 import androidx.core.content.ContextCompat
+import bg.zahov.app.data.model.ClickableSet
 import bg.zahov.app.data.model.Exercise
 import bg.zahov.app.data.model.FirestoreFields
-import bg.zahov.app.data.model.SelectableExercise
+import bg.zahov.app.data.model.InteractableExerciseWrapper
 import bg.zahov.app.data.model.Sets
 import bg.zahov.app.data.model.User
 import bg.zahov.app.data.model.Workout
@@ -75,8 +74,6 @@ fun Sets.toFirestoreMap(): Map<String, Any?> {
 fun String.isEmail() = Regex("^\\S+@\\S+\\.\\S+$").matches(this)
 
 //TODO(Are these functions really needed)
-fun Exercise.toSelectable() = SelectableExercise(this)
-fun List<Exercise>.toSelectableList() = this.map { it.toSelectable() }
 
 fun View.applyScaleAnimation() {
     val scaleAnimation = ObjectAnimator.ofPropertyValuesHolder(
@@ -168,10 +165,28 @@ fun String.parseTimeStringToLong(): Long {
         throw IllegalArgumentException("Invalid time string format")
     }
 
-    val hours =  parts[0].toLong()
+    val hours = parts[0].toLong()
     val minutes = if (parts.size >= 2) parts[1].toLong() else 0
     val seconds = if (parts.size == 3) parts[2].toLong() else 0
 
     return ((hours * 60 * 60) + (minutes * 60) + seconds) * 1000
 }
+
+fun InteractableExerciseWrapper.toExercise() = Exercise(
+    name = this.name,
+    bodyPart = this.bodyPart,
+    category = this.category,
+    isTemplate = this.isTemplate,
+    sets = this.sets.map { it.set },
+    note = this.note
+)
+fun Exercise.toInteractableExerciseWrapper() = InteractableExerciseWrapper (
+    name = this.name,
+    bodyPart = this.bodyPart,
+    category = this.category,
+    isTemplate = this.isTemplate,
+    sets = this.sets.map { ClickableSet(it, false) },
+    note = this.note
+)
+
 

@@ -137,44 +137,53 @@
     <ScrollView
         android:id="@+id/exercises_scroll_view"
         android:layout_width="0dp"
-        android:layout_height="wrap_content"
+        android:layout_height="0dp"
         android:layout_marginStart="10dp"
         android:layout_marginTop="10dp"
         android:layout_marginEnd="10dp"
+        app:layout_constraintBottom_toBottomOf="parent"
         app:layout_constraintEnd_toEndOf="parent"
         app:layout_constraintStart_toStartOf="parent"
         app:layout_constraintTop_toBottomOf="@+id/workout_note_field">
 
-        <androidx.recyclerview.widget.RecyclerView
-            android:id="@+id/exercises_recycler_view"
+        <androidx.constraintlayout.widget.ConstraintLayout
             android:layout_width="match_parent"
-            android:layout_height="wrap_content" />
+            android:layout_height="wrap_content">
+
+            <androidx.recyclerview.widget.RecyclerView
+                android:id="@+id/exercises_recycler_view"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                app:layout_constraintEnd_toEndOf="parent"
+                app:layout_constraintStart_toStartOf="parent"
+                app:layout_constraintTop_toTopOf="parent" />
+
+            <com.google.android.material.button.MaterialButton
+                android:id="@+id/add_exercise"
+                android:layout_width="0dp"
+                android:layout_height="wrap_content"
+                android:layout_marginStart="10dp"
+                android:layout_marginTop="10dp"
+                android:layout_marginEnd="10dp"
+                android:backgroundTint="@color/background"
+                android:text="@string/add_exercise"
+                android:textColor="@color/blue_text"
+                app:layout_constraintEnd_toEndOf="parent"
+                app:layout_constraintStart_toStartOf="parent"
+                app:layout_constraintTop_toBottomOf="@+id/exercises_recycler_view" />
+
+            <com.google.android.material.button.MaterialButton
+                android:id="@+id/cancel"
+                android:layout_width="0dp"
+                android:layout_height="wrap_content"
+                android:layout_marginStart="10dp"
+                android:layout_marginEnd="10dp"
+                android:backgroundTint="@color/background"
+                android:text="@string/cancel_text"
+                android:textColor="@color/red"
+                app:layout_constraintEnd_toEndOf="parent"
+                app:layout_constraintStart_toStartOf="parent"
+                app:layout_constraintTop_toBottomOf="@+id/add_exercise" />
+        </androidx.constraintlayout.widget.ConstraintLayout>
     </ScrollView>
-
-    <com.google.android.material.button.MaterialButton
-        android:id="@+id/add_exercise"
-        android:layout_width="0dp"
-        android:layout_height="wrap_content"
-        android:layout_marginStart="10dp"
-        android:layout_marginTop="10dp"
-        android:layout_marginEnd="10dp"
-        android:backgroundTint="@color/background"
-        android:text="@string/add_exercise"
-        android:textColor="@color/blue_text"
-        app:layout_constraintEnd_toEndOf="parent"
-        app:layout_constraintStart_toStartOf="parent"
-        app:layout_constraintTop_toBottomOf="@+id/exercises_scroll_view" />
-
-    <com.google.android.material.button.MaterialButton
-        android:id="@+id/cancel"
-        android:layout_width="0dp"
-        android:layout_height="wrap_content"
-        android:layout_marginStart="10dp"
-        android:layout_marginEnd="10dp"
-        android:backgroundTint="@color/background"
-        android:text="@string/cancel_text"
-        android:textColor="@color/red"
-        app:layout_constraintEnd_toEndOf="parent"
-        app:layout_constraintStart_toStartOf="parent"
-        app:layout_constraintTop_toBottomOf="@+id/add_exercise" />
 </androidx.constraintlayout.widget.ConstraintLayout>

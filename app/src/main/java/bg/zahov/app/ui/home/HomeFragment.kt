@@ -1,5 +1,6 @@
 package bg.zahov.app.ui.home
 
+import android.graphics.Color
 import android.os.Bundle
 import android.transition.TransitionInflater
 import android.view.LayoutInflater
@@ -11,6 +12,12 @@ import androidx.navigation.fragment.findNavController
 import bg.zahov.app.showBottomNav
 import bg.zahov.fitness.app.R
 import bg.zahov.fitness.app.databinding.FragmentHomeBinding
+import com.github.mikephil.charting.components.Legend
+import com.github.mikephil.charting.components.XAxis
+import com.github.mikephil.charting.data.BarData
+import com.github.mikephil.charting.data.BarDataSet
+import com.github.mikephil.charting.formatter.IAxisValueFormatter
+import com.github.mikephil.charting.formatter.ValueFormatter
 
 class HomeFragment : Fragment() {
     private var _binding: FragmentHomeBinding? = null
@@ -46,6 +53,44 @@ class HomeFragment : Fragment() {
             homeViewModel.numberOfWorkouts.observe(viewLifecycleOwner) {
                 numberOfWorkouts.text = it.toString()
             }
+
+            homeViewModel.workoutEntries.observe(viewLifecycleOwner) {
+                val dataSet = BarDataSet(it, "workouts")
+                dataSet.setDrawValues(false)
+                dataSet.barBorderWidth = 1f
+                val data = BarData(dataSet)
+                data.barWidth = 0.7F
+
+                weeklyWorkoutsChart.data = data
+                weeklyWorkoutsChart.invalidate()
+            }
+
+            weeklyWorkoutsChart.apply {
+                setPinchZoom(false)
+                setDrawGridBackground(false)
+                setDrawBarShadow(false)
+                setDrawValueAboveBar(false)
+                isHighlightFullBarEnabled = false
+
+                description.setPosition(250f, 60f)
+                description.text = "Weekly workouts"
+                description.textColor = Color.WHITE
+
+                xAxis.apply {
+                    isEnabled = false
+                    position = XAxis.XAxisPosition.BOTTOM
+                    textColor = Color.WHITE
+                }
+
+                legend.textColor = Color.WHITE
+                axisLeft.isEnabled = false
+                axisRight.textColor = Color.WHITE
+                isDragEnabled = false
+                isDoubleTapToZoomEnabled = false
+                setFitBars(true)
+                legend.isEnabled = false
+            }
+
         }
     }
 
