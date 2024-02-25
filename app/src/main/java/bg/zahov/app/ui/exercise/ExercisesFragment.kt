@@ -104,15 +104,16 @@ class ExercisesFragment : Fragment() {
             }
 
             val exerciseAdapter =
-                ExerciseAdapter(selectable || addable, replaceable).apply {
+                ExerciseAdapter(replaceable).apply {
                     itemClickListener =
                         object : ExerciseAdapter.ItemClickListener<SelectableExercise> {
                             override fun onItemClicked(
                                 item: SelectableExercise,
+                                position: Int
                             ) {
                                 when {
                                     replaceable || selectable || addable -> exerciseViewModel.onSelectableExerciseClicked(
-                                        item
+                                        item, position
                                     )
 //                                    else -> //TODO(Exercise fragment)
                                 }

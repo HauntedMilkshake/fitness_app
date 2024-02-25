@@ -55,27 +55,28 @@ class ExerciseViewModel(application: Application) : AndroidViewModel(application
     var addable = false
     private var search: String? = null
     private val allExercises: MutableList<Exercise> = mutableListOf()
+    private var currentlySelectedExerciseToReplace: Int? = null
 
     init {
         getExercises()
         getFilters()
     }
 
-    fun onSelectableExerciseClicked(exercise: SelectableExercise) {
-        when {
-            replaceable -> {
-                val captured = _userExercises.value.orEmpty()
-                captured.find { it == exercise }?.let { it.isSelected = !it.isSelected }
-                captured.find { it.isSelected }?.isSelected = false
-                _userExercises.value = captured
-            }
-
-            else -> {
-                val captured = _userExercises.value.orEmpty()
-                captured.find { it == exercise }?.let { it.isSelected = !it.isSelected }
-                _userExercises.value = captured
+    fun onSelectableExerciseClicked(exercise: SelectableExercise, position: Int) {
+        val captured = _userExercises.value.orEmpty()
+        if (replaceable) {
+            currentlySelectedExerciseToReplace?.let {
+                if (captured[it] != exercise) {
+                    captured[it].isSelected = false
+                }
             }
         }
+        captured[position].let {
+            it.isSelected = !it.isSelected
+            currentlySelectedExerciseToReplace =
+                if (replaceable && it.isSelected) captured.indexOf(it) else null
+        }
+        _userExercises.value = captured
     }
 
     fun onConfirm() {

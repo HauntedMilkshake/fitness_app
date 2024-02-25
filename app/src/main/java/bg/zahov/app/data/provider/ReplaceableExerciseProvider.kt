@@ -21,4 +21,7 @@ class ReplaceableExerciseProvider {
     fun updateExerciseToReplace(exercise: SelectableExercise) {
         _exerciseToReplace.value = exercise
     }
+    fun resetExerciseToReplace() {
+        _exerciseToReplace.value = null
+    }
 }

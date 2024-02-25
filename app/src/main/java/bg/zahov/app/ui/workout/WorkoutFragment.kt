@@ -2,7 +2,6 @@ package bg.zahov.app.ui.workout
 
 import android.os.Bundle
 import android.transition.TransitionInflater
-import android.util.Log
 import android.view.LayoutInflater
 import android.view.View
 import android.view.ViewGroup
@@ -68,19 +67,22 @@ class WorkoutFragment : Fragment() {
                     }
 
                     override fun onAddSet(item: ExerciseWithNoteVisibility, set: ClickableSet) {
-//                        addWorkoutViewModel.addSet(item, set.set)
+                        onGoingWorkoutViewModel.addSet(item, set.set)
                     }
 
                     override fun onNoteToggle(item: ExerciseWithNoteVisibility) {
-                        TODO("Not yet implemented")
+
                     }
 
                     override fun onReplaceExercise(item: ExerciseWithNoteVisibility) {
-                        TODO("Not yet implemented")
+                        findNavController().navigate(
+                            R.id.workout_to_add_exercise,
+                            bundleOf("REPLACEABLE" to true)
+                        )
                     }
 
                     override fun onRemoveExercise(item: ExerciseWithNoteVisibility) {
-                        TODO("Not yet implemented")
+                        onGoingWorkoutViewModel.removeExercise(item)
                     }
 
                     override fun onSetTypeChanged(
@@ -93,6 +95,7 @@ class WorkoutFragment : Fragment() {
                 }
                 swipeActionListener = object : ExerciseSetAdapter.SwipeActionListener {
                     override fun onDeleteSet(item: ExerciseWithNoteVisibility, set: ClickableSet) {
+                        onGoingWorkoutViewModel.removeSet(item, set.set)
                     }
                 }
                 textChangeListener = object : ExerciseSetAdapter.TextActionListener {
@@ -104,9 +107,7 @@ class WorkoutFragment : Fragment() {
                     ) {
                         TODO("Not yet implemented")
                     }
-
                 }
-
             }
 
             workoutRecyclerView.apply {

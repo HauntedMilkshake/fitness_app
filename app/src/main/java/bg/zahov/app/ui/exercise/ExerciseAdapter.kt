@@ -1,6 +1,5 @@
 package bg.zahov.app.ui.exercise
 
-import android.util.Log
 import android.view.View
 import androidx.constraintlayout.widget.ConstraintLayout
 import bg.zahov.app.util.BaseAdapter
@@ -9,9 +8,7 @@ import bg.zahov.fitness.app.R
 import com.google.android.material.imageview.ShapeableImageView
 import com.google.android.material.textview.MaterialTextView
 
-//issue with livedata not calling the rebind
 class ExerciseAdapter(
-    private val selectable: Boolean,
     private val replaceable: Boolean
 ) : BaseAdapter<SelectableExercise>(
     areItemsTheSame = { oldItem, newItem -> oldItem.exercise.name == newItem.exercise.name },
@@ -30,7 +27,6 @@ class ExerciseAdapter(
         private val exerciseSubtitle = view.findViewById<MaterialTextView>(R.id.body_part)
 
         override fun bind(item: SelectableExercise) {
-            Log.d("BIND", "${item.exercise.name} is ${item.isSelected}")
             exerciseTitle.text = item.exercise.name
             exerciseSubtitle.text = item.exercise.bodyPart.name
             //TODO(add actual image resources and determine which one for which exercise)
@@ -38,37 +34,22 @@ class ExerciseAdapter(
             exerciseBackground.setBackgroundResource(if (item.isSelected) R.color.selected else R.color.background)
 
             itemView.setOnClickListener {
-                itemClickListener?.onItemClicked(item)
-                when {
-                    selectable -> {
-                        onClick(item)
-                    }
-
-                    replaceable -> {
-                        Log.d("REPLACABLE", "REPLACABLE")
-                        onClick(item)
-                        deselectRemainingExercise(item)
-                    }
-                }
+                itemClickListener?.onItemClicked(item, adapterPosition)
+                notifyItemChanged(adapterPosition)
+                if(replaceable) deselectRemainingExercise(item)
             }
-        }
-
-        private fun onClick(item: SelectableExercise) {
-            item.isSelected = !item.isSelected
-            exerciseBackground.setBackgroundResource(if (item.isSelected) R.color.selected else R.color.background)
         }
     }
 
     private fun deselectRemainingExercise(ignoreItem: SelectableExercise) {
-        getRecyclerViewItems().forEach {
-            if (it != ignoreItem && it.isSelected) {
-                it.isSelected = false
+        getRecyclerViewItems().forEachIndexed { index, selectableExercise ->
+            if (selectableExercise != ignoreItem && selectableExercise.isSelected) {
+                notifyItemChanged(index)
             }
         }
-        notifyDataSetChanged()
     }
 
     interface ItemClickListener<T> {
-        fun onItemClicked(item: T)
+        fun onItemClicked(item: T, position: Int)
     }
 }

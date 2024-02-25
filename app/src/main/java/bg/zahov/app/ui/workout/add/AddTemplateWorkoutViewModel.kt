@@ -43,7 +43,7 @@ class AddTemplateWorkoutViewModel(application: Application) : AndroidViewModel(a
     var workoutNote: String = ""
     var workoutName: String = ""
 
-    private var exerciseToReplaceIndex: Int = -1
+    private var exerciseToReplaceIndex: Int? = null
 
     private lateinit var templates: List<Workout>
 
@@ -68,13 +68,15 @@ class AddTemplateWorkoutViewModel(application: Application) : AndroidViewModel(a
             launch {
                 replaceableExerciseProvider.exerciseToReplace.collect {
                     it?.let { replaced ->
-                        if ((_currExercises.value?.get(exerciseToReplaceIndex)
-                                ?: replaced.exercise) != replaced.exercise
-                        ) {
-                            val captured = _currExercises.value?.toMutableList() ?: mutableListOf()
-                            captured[exerciseToReplaceIndex] =
-                                ExerciseWithNoteVisibility(replaced.exercise)
-                            _currExercises.value = captured
+                        exerciseToReplaceIndex?.let { indexToReplace ->
+                            if (_currExercises.value?.get(indexToReplace)?.exercise != replaced.exercise) {
+                                val captured =
+                                    _currExercises.value?.toMutableList() ?: mutableListOf()
+                                captured[indexToReplace] =
+                                    ExerciseWithNoteVisibility(replaced.exercise)
+                                _currExercises.postValue(captured)
+                                replaceableExerciseProvider.resetExerciseToReplace()
+                            }
                         }
                     }
                 }
@@ -87,7 +89,7 @@ class AddTemplateWorkoutViewModel(application: Application) : AndroidViewModel(a
     }
 
     fun setReplaceableExercise(item: ExerciseWithNoteVisibility) {
-        exerciseToReplaceIndex = _currExercises.value?.indexOf(item) ?: -1
+        exerciseToReplaceIndex = _currExercises.value?.indexOf(item)
     }
 
     fun addWorkout() {
@@ -95,7 +97,6 @@ class AddTemplateWorkoutViewModel(application: Application) : AndroidViewModel(a
             _state.value = State.Error("Cannot create a workout template without a name!")
             return
         }
-
         if (templates.map { it.name }.contains(workoutName)) {
             _state.value = State.Error("Each workout must have a unique name!")
             return
@@ -179,7 +180,7 @@ class AddTemplateWorkoutViewModel(application: Application) : AndroidViewModel(a
         exercise: ExerciseWithNoteVisibility,
         set: Sets,
         metric: String,
-        viewId: Int
+        viewId: Int,
     ) {
         val new = currExercises.value?.find { it == exercise }
         when (viewId) {
