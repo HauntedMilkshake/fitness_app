@@ -116,6 +116,7 @@
     <string name="about_rests">About rests</string>
     <string name="rest_info">Rests are crucial for optimising gains. Make sure you not only feel ready not only physically but mentally as well. And don\'t forget to go hard!</string>
     <string name="start_custom_rest">Start custom rest</string>
+    <string name="dialog_fragment_placeholder_title">Title</string>
 
 
 </resources>

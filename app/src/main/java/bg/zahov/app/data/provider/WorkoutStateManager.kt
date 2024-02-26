@@ -1,6 +1,5 @@
 package bg.zahov.app.data.provider
 
-import android.util.Log
 import bg.zahov.app.data.model.Workout
 import bg.zahov.app.data.model.WorkoutState
 import kotlinx.coroutines.CoroutineScope
@@ -66,12 +65,10 @@ class WorkoutStateManager {
                 }
             }
         }
-        Log.d("POSTING STATE", newState.name)
         _state.value = newState
     }
 
     fun updateTemplate(workout: Workout) {
-        Log.d("TEMPLATE POSTED", workout.name)
         _template.value = workout
     }
 }

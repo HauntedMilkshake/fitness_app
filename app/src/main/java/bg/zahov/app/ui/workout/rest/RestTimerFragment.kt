@@ -1,7 +1,6 @@
 package bg.zahov.app.ui.workout.rest
 
 import android.os.Bundle
-import android.util.Log
 import android.view.LayoutInflater
 import android.view.View
 import android.view.ViewGroup
@@ -73,7 +72,6 @@ class RestTimerFragment : Fragment() {
             restTimerViewModel.startingTime.observe(viewLifecycleOwner) {
                 setTimer.text = it
                 progressBar.apply {
-                    Log.d("BEFORE PARSE", it)
                     if (it.isNotEmpty()) progressMax = it.parseTimeStringToLong().toFloat()
                 }
             }
@@ -105,11 +103,11 @@ class RestTimerFragment : Fragment() {
                 restTimerViewModel.onDefaultTimerClick("2:30")
             }
             close.setOnClickListener {
-                findNavController().navigate(R.id.rest_timer_to_workout)
+                findNavController().navigateUp()
             }
             skip.setOnClickListener {
                 restTimerViewModel.cancelTimer()
-                findNavController().navigate(R.id.rest_timer_to_workout)
+                findNavController().navigateUp()
             }
         }
     }

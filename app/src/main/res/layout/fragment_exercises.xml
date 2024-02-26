@@ -41,8 +41,8 @@
 
                 <com.google.android.material.imageview.ShapeableImageView
                     android:id="@+id/remove_search_bar"
-                    android:layout_width="22dp"
-                    android:layout_height="22dp"
+                    android:layout_width="21dp"
+                    android:layout_height="21dp"
                     android:layout_marginStart="30dp"
                     android:scaleX="-1"
                     android:src="@drawable/ic_back_arrow"
@@ -60,6 +60,7 @@
                     android:layout_marginEnd="15dp"
                     android:layout_marginBottom="5dp"
                     android:visibility="gone"
+                    android:background="@color/less_vibrant_text"
                     app:layout_constraintBottom_toBottomOf="parent"
                     app:layout_constraintEnd_toStartOf="@+id/settings_filters"
                     app:layout_constraintStart_toEndOf="@+id/remove_search_bar"

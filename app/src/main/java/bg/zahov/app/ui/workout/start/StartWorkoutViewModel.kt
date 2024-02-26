@@ -1,7 +1,6 @@
 package bg.zahov.app.ui.workout.start
 
 import android.app.Application
-import android.util.Log
 import androidx.lifecycle.AndroidViewModel
 import androidx.lifecycle.LiveData
 import androidx.lifecycle.MutableLiveData
@@ -12,7 +11,6 @@ import bg.zahov.app.data.model.WorkoutState
 import bg.zahov.app.getWorkoutProvider
 import bg.zahov.app.getWorkoutStateManager
 import bg.zahov.app.util.currDateToString
-import bg.zahov.app.util.hashString
 import kotlinx.coroutines.launch
 
 class StartWorkoutViewModel(application: Application) : AndroidViewModel(application) {
@@ -63,40 +61,44 @@ class StartWorkoutViewModel(application: Application) : AndroidViewModel(applica
         }
     }
 
-    fun startWorkoutFromTemplate(workout: Workout) {
+    fun startWorkoutFromTemplate(position: Int) {
         viewModelScope.launch {
-            workoutState.updateTemplate(workout)
+            _templates.value?.get(position)?.let {
+                workoutState.updateTemplate(it)
+            }
             workoutState.updateState(WorkoutState.ACTIVE)
         }
     }
 
-    fun deleteTemplateWorkout(workout: Workout) {
+    fun deleteTemplateWorkout(position: Int) {
         val list = _templates.value?.toMutableList()
-        list?.remove(workout)
+        val toBeRemoved = list?.removeAt(position)
         _templates.value = list ?: listOf()
         viewModelScope.launch {
-            repo.deleteTemplateWorkout(workout)
+            toBeRemoved?.let { repo.deleteTemplateWorkout(it) }
         }
     }
 
-    fun addDuplicateTemplateWorkout(workout: Workout) {
-        val count = _templates.value?.count { workout.name == it.name }
-        val dupe = Workout(
-            id = hashString(workout.name + "copy $count"),
-            name = "${workout.name} + copy $count",
-            duration = null,
-            date = currDateToString(),
-            isTemplate = true,
-            exercises = workout.exercises
-        )
-
-        val list = _templates.value?.toMutableList()
-        list?.add(dupe)
-        _templates.value = list ?: listOf()
-        viewModelScope.launch {
-            repo.addTemplateWorkout(
-                dupe
+    fun addDuplicateTemplateWorkout(position: Int) {
+        val template = _templates.value?.get(position)
+        val count = _templates.value?.count { template?.id == it.id }
+        template?.let { workout ->
+            val dupe = Workout(
+                id = workout.id,
+                name = "${workout.name} duplicate $count",
+                duration = null,
+                date = currDateToString(),
+                isTemplate = true,
+                exercises = workout.exercises
             )
+            val list = _templates.value?.toMutableList()
+            list?.add(dupe)
+            _templates.value = list ?: listOf()
+            viewModelScope.launch {
+                repo.addTemplateWorkout(
+                    dupe
+                )
+            }
         }
     }
 

@@ -5,9 +5,7 @@ import android.transition.TransitionInflater
 import android.view.LayoutInflater
 import android.view.View
 import android.view.ViewGroup
-import android.widget.PopupMenu
 import android.widget.Toast
-import androidx.appcompat.view.ContextThemeWrapper
 import androidx.fragment.app.Fragment
 import androidx.fragment.app.viewModels
 import androidx.lifecycle.map
@@ -40,15 +38,25 @@ class StartWorkoutFragment : Fragment() {
     override fun onViewCreated(view: View, savedInstanceState: Bundle?) {
         super.onViewCreated(view, savedInstanceState)
         binding.apply {
-
             val workoutAdapter = TemplateWorkoutAdapter().apply {
                 itemClickListener = object : TemplateWorkoutAdapter.ItemClickListener<Workout> {
-                    override fun onSettingsClicked(item: Workout, clickedView: View) {
-                        showCustomLayout(item, clickedView)
-                    }
-
                     override fun onWorkoutClicked(item: Workout, clickedView: View) {
                         //TODO(CUSTOM WORKOUT FRAGMENT)
+                    }
+
+                    override fun onWorkoutStart(position: Int) {
+                        startWorkoutViewModel.startWorkoutFromTemplate(position)
+                    }
+
+                    override fun onWorkoutDelete(position: Int) {
+                        startWorkoutViewModel.deleteTemplateWorkout(position)
+                    }
+
+                    override fun onWorkoutDuplicate(position: Int) {
+                        startWorkoutViewModel.addDuplicateTemplateWorkout(position)
+                    }
+
+                    override fun onWorkoutEdit(position: Int) {
                     }
                 }
             }
@@ -66,9 +74,7 @@ class StartWorkoutFragment : Fragment() {
                 .observe(viewLifecycleOwner) {
                     showToast(it.errorMessage)
 
-                    if (it.shutdown) {
-                        //TODO()
-                    }
+//                    if (it.shutdown) TODO()
                 }
 
             startEmptyWorkout.setOnClickListener {
@@ -78,34 +84,6 @@ class StartWorkoutFragment : Fragment() {
                 findNavController().navigate(R.id.workout_to_create_workout_template)
             }
         }
-    }
-
-
-    private fun showCustomLayout(workout: Workout, view: View) {
-        val popupMenu = PopupMenu(ContextThemeWrapper(context, R.style.MyPopUp), view)
-        popupMenu.menuInflater.inflate(R.menu.popup_workout_menu, popupMenu.menu)
-        popupMenu.setOnMenuItemClickListener { item ->
-            when (item.itemId) {
-                R.id.action_delete -> {
-                    startWorkoutViewModel.deleteTemplateWorkout(workout)
-
-                }
-
-                R.id.action_duplicate -> {
-                    startWorkoutViewModel.addDuplicateTemplateWorkout(workout)
-                }
-
-                R.id.action_edit -> {
-                    //TODO(Go to fragment workout with edit preference
-                }
-
-                R.id.action_start_workout -> {
-                    startWorkoutViewModel.startWorkoutFromTemplate(workout)
-                }
-            }
-            true
-        }
-        popupMenu.show()
     }
 
     private fun showToast(message: String?) {

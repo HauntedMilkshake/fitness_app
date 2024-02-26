@@ -1,6 +1,7 @@
 package bg.zahov.app.ui.workout
 
 import android.app.Application
+import android.util.Log
 import androidx.lifecycle.AndroidViewModel
 import androidx.lifecycle.LiveData
 import androidx.lifecycle.MutableLiveData
@@ -42,7 +43,7 @@ class WorkoutViewModel(application: Application) : AndroidViewModel(application)
         application.getRestTimerProvider()
     }
 
-    private val _exercises = MutableLiveData<List<InteractableExerciseWrapper>>(mutableListOf())
+    private val _exercises = MutableLiveData<List<InteractableExerciseWrapper>>()
     val exercises: LiveData<List<InteractableExerciseWrapper>>
         get() = _exercises
 
@@ -69,7 +70,8 @@ class WorkoutViewModel(application: Application) : AndroidViewModel(application)
             launch {
                 workoutStateManager.template.collect {
                     it?.let {
-                        _exercises.postValue(it.exercises.map { exercises -> exercises.toInteractableExerciseWrapper() })
+                        Log.d("POSTED EXERCISES", it.exercises.size.toString())
+                        _exercises.postValue(it.exercises.map { exercise -> exercise.toInteractableExerciseWrapper() })
                         _name.postValue(it.name)
                     } ?: run {
                         _name.postValue("New Workout")
@@ -103,7 +105,7 @@ class WorkoutViewModel(application: Application) : AndroidViewModel(application)
                 addExerciseToWorkoutProvider.selectedExercises.collect {
                     val updatedExercises = _exercises.value.orEmpty().toMutableList()
                     updatedExercises.addAll(it)
-                    _exercises.postValue(updatedExercises)
+                    if(updatedExercises.isNotEmpty()) _exercises.postValue(updatedExercises)
                 }
             }
             launch {
@@ -145,6 +147,7 @@ class WorkoutViewModel(application: Application) : AndroidViewModel(application)
     fun removeExercise(item: InteractableExerciseWrapper) {
         val captured = _exercises.value.orEmpty().toMutableList()
         captured.remove(item)
+        _exercises.value = captured
     }
 
     fun addSet(item: InteractableExerciseWrapper, set: ClickableSet) {

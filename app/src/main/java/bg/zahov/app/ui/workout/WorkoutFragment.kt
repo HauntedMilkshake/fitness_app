@@ -2,6 +2,7 @@ package bg.zahov.app.ui.workout
 
 import android.os.Bundle
 import android.transition.TransitionInflater
+import android.util.Log
 import android.view.LayoutInflater
 import android.view.View
 import android.view.ViewGroup
@@ -136,6 +137,7 @@ class WorkoutFragment : Fragment() {
             }
 
             onGoingWorkoutViewModel.exercises.observe(viewLifecycleOwner) {
+                Log.d("COLLECTING", it.size.toString())
                 exerciseSetAdapter.updateItems(it)
             }
 
@@ -170,6 +172,7 @@ class WorkoutFragment : Fragment() {
             cancel.setOnClickListener {
                 it.applyScaleAnimation()
                 onGoingWorkoutViewModel.cancel()
+                requireActivity().showBottomNav()
                 findNavController().navigateUp()
 
             }

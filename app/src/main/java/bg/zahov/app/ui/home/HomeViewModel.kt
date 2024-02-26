@@ -8,6 +8,8 @@ import androidx.lifecycle.viewModelScope
 import bg.zahov.app.data.model.Workout
 import bg.zahov.app.getUserProvider
 import bg.zahov.app.getWorkoutProvider
+import com.github.mikephil.charting.data.BarData
+import com.github.mikephil.charting.data.BarDataSet
 import com.github.mikephil.charting.data.BarEntry
 import kotlinx.coroutines.flow.collect
 import kotlinx.coroutines.flow.combine
@@ -37,6 +39,11 @@ class HomeViewModel(application: Application) : AndroidViewModel(application) {
         get() = _numberOfWorkouts
 
     private val _workoutEntries = MutableLiveData<List<BarEntry>>()
+
+    private val _xAxisLabels = MutableLiveData<List<String>>()
+    val xAxisLabels: LiveData<List<String>>
+        get() = _xAxisLabels
+
     val workoutEntries: LiveData<List<BarEntry>>
         get() = _workoutEntries
     init {
@@ -51,16 +58,26 @@ class HomeViewModel(application: Application) : AndroidViewModel(application) {
                     _numberOfWorkouts.postValue(pastWorkouts.size)
                     val workoutsByWeek = groupWorkoutsByWeek(pastWorkouts)
                     val barEntries = mutableListOf<BarEntry>()
+                    val xAxisLabels = mutableListOf<String>()
 
                     workoutsByWeek.forEach { (weekIndex, workoutsInWeek) ->
+                        val weekStartDate = workoutsInWeek.firstOrNull()?.date
+                        weekStartDate?.let {
+                            val startDate = LocalDate.parse(weekStartDate, DateTimeFormatter.ofPattern("dd-MM-yyyy", Locale.getDefault()))
+                            val dayOfWeek = startDate.dayOfWeek.toString().take(3)
+
+                            xAxisLabels.add("$dayOfWeek\n${startDate.format(DateTimeFormatter.ofPattern("MM/dd", Locale.getDefault()))}")
+                        }
+
                         barEntries.add(BarEntry(weekIndex.toFloat(), workoutsInWeek.size.toFloat()))
                     }
-
                     _workoutEntries.postValue(barEntries)
+                    _xAxisLabels.postValue(xAxisLabels)
                 }
             }
         }
     }
+
     private fun groupWorkoutsByWeek(workouts: List<Workout>): Map<Int, List<Workout>> {
         val firstDayOfMonth = LocalDate.now().with(TemporalAdjusters.firstDayOfMonth())
         val lastDayOfMonth = LocalDate.now().with(TemporalAdjusters.lastDayOfMonth())

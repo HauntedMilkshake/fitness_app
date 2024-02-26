@@ -17,6 +17,7 @@ import com.github.mikephil.charting.components.XAxis
 import com.github.mikephil.charting.data.BarData
 import com.github.mikephil.charting.data.BarDataSet
 import com.github.mikephil.charting.formatter.IAxisValueFormatter
+import com.github.mikephil.charting.formatter.IndexAxisValueFormatter
 import com.github.mikephil.charting.formatter.ValueFormatter
 
 class HomeFragment : Fragment() {
@@ -52,6 +53,16 @@ class HomeFragment : Fragment() {
 
             homeViewModel.numberOfWorkouts.observe(viewLifecycleOwner) {
                 numberOfWorkouts.text = it.toString()
+            }
+
+            homeViewModel.xAxisLabels.observe(viewLifecycleOwner) {
+                weeklyWorkoutsChart.apply {
+                    xAxis.valueFormatter = IndexAxisValueFormatter(it)
+                    xAxis.position = XAxis.XAxisPosition.BOTTOM
+                    xAxis.granularity = 1f
+                    xAxis.setCenterAxisLabels(true)
+                    xAxis.isGranularityEnabled = true
+                }
             }
 
             homeViewModel.workoutEntries.observe(viewLifecycleOwner) {

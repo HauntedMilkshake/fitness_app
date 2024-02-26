@@ -40,7 +40,6 @@ class AddExerciseFragment : Fragment() {
                     it.notify?.let { message ->
                         Toast.makeText(context, message, Toast.LENGTH_SHORT).show()
                     }
-
                     if (it.isAdded) findNavController().navigate(R.id.add_exercise_to_exercises)
                 }
 
@@ -60,7 +59,7 @@ class AddExerciseFragment : Fragment() {
         binding.apply {
             addExerciseViewModel.category.observe(viewLifecycleOwner) {
                 category.initViewInformation(
-                    "Body part",
+                    "Category",
                     enumValues<Category>().map { enum -> enum.key },
                     currCategory = it,
                     currBodyPart = null
@@ -74,7 +73,7 @@ class AddExerciseFragment : Fragment() {
             }
             addExerciseViewModel.bodyPart.observe(viewLifecycleOwner) {
                 bodyPart.initViewInformation(
-                    "Category",
+                    "Body part",
                     enumValues<BodyPart>().map { enum -> enum.key },
                     currBodyPart = it,
                     currCategory = null

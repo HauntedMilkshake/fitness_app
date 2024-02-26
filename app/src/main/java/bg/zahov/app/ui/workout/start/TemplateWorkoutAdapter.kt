@@ -1,6 +1,8 @@
 package bg.zahov.app.ui.workout.start
 
 import android.view.View
+import android.widget.PopupMenu
+import androidx.appcompat.view.ContextThemeWrapper
 import bg.zahov.app.data.model.Workout
 import bg.zahov.app.util.BaseAdapter
 import bg.zahov.fitness.app.R
@@ -27,7 +29,7 @@ class TemplateWorkoutAdapter : BaseAdapter<Workout>(
             title.text = item.name
             lastPerformed.text = "Last performed: ${item.date}"
             settings.setOnClickListener {
-                itemClickListener?.onSettingsClicked(item, settings)
+                showCustomLayout(adapterPosition, it)
             }
 
             itemView.setOnClickListener {
@@ -42,8 +44,38 @@ class TemplateWorkoutAdapter : BaseAdapter<Workout>(
         }
     }
 
+    private fun showCustomLayout(itemPosition: Int, view: View) {
+        val popupMenu = PopupMenu(ContextThemeWrapper(view.context, R.style.MyPopUp), view)
+        popupMenu.menuInflater.inflate(R.menu.popup_workout_menu, popupMenu.menu)
+        popupMenu.setOnMenuItemClickListener { item ->
+            when (item.itemId) {
+                R.id.action_delete -> {
+                    itemClickListener?.onWorkoutDelete(itemPosition)
+                }
+
+                R.id.action_duplicate -> {
+                    itemClickListener?.onWorkoutDuplicate(itemPosition)
+                }
+
+                R.id.action_edit -> {
+                    itemClickListener?.onWorkoutEdit(itemPosition)
+
+                }
+
+                R.id.action_start_workout -> {
+                    itemClickListener?.onWorkoutStart(itemPosition)
+                }
+            }
+            true
+        }
+        popupMenu.show()
+    }
+
     interface ItemClickListener<T> {
-        fun onSettingsClicked(item: T, clickedView: View)
+        fun onWorkoutStart(position: Int)
+        fun onWorkoutDelete(position: Int)
+        fun onWorkoutDuplicate(position: Int)
+        fun onWorkoutEdit(position: Int)
         fun onWorkoutClicked(item: T, clickedView: View)
     }
 }
