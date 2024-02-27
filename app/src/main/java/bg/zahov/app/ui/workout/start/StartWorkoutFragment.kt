@@ -6,6 +6,7 @@ import android.view.LayoutInflater
 import android.view.View
 import android.view.ViewGroup
 import android.widget.Toast
+import androidx.core.os.bundleOf
 import androidx.fragment.app.Fragment
 import androidx.fragment.app.viewModels
 import androidx.lifecycle.map
@@ -56,7 +57,11 @@ class StartWorkoutFragment : Fragment() {
                         startWorkoutViewModel.addDuplicateTemplateWorkout(position)
                     }
 
-                    override fun onWorkoutEdit(position: Int) {
+                    override fun onWorkoutEdit(item: Workout) {
+                        findNavController().navigate(
+                            R.id.workout_to_create_workout_template,
+                            bundleOf("EDIT" to true, "WORKOUT_ID" to item.id)
+                        )
                     }
                 }
             }

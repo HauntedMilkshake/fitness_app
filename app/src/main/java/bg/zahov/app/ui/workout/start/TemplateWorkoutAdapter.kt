@@ -29,7 +29,7 @@ class TemplateWorkoutAdapter : BaseAdapter<Workout>(
             title.text = item.name
             lastPerformed.text = "Last performed: ${item.date}"
             settings.setOnClickListener {
-                showCustomLayout(adapterPosition, it)
+                showCustomLayout(item, adapterPosition, it)
             }
 
             itemView.setOnClickListener {
@@ -44,7 +44,7 @@ class TemplateWorkoutAdapter : BaseAdapter<Workout>(
         }
     }
 
-    private fun showCustomLayout(itemPosition: Int, view: View) {
+    private fun showCustomLayout(workout: Workout, itemPosition: Int, view: View) {
         val popupMenu = PopupMenu(ContextThemeWrapper(view.context, R.style.MyPopUp), view)
         popupMenu.menuInflater.inflate(R.menu.popup_workout_menu, popupMenu.menu)
         popupMenu.setOnMenuItemClickListener { item ->
@@ -58,7 +58,7 @@ class TemplateWorkoutAdapter : BaseAdapter<Workout>(
                 }
 
                 R.id.action_edit -> {
-                    itemClickListener?.onWorkoutEdit(itemPosition)
+                    itemClickListener?.onWorkoutEdit(workout)
 
                 }
 
@@ -75,7 +75,7 @@ class TemplateWorkoutAdapter : BaseAdapter<Workout>(
         fun onWorkoutStart(position: Int)
         fun onWorkoutDelete(position: Int)
         fun onWorkoutDuplicate(position: Int)
-        fun onWorkoutEdit(position: Int)
+        fun onWorkoutEdit(item: T)
         fun onWorkoutClicked(item: T, clickedView: View)
     }
 }

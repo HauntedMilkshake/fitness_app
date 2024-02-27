@@ -126,7 +126,6 @@ class ExercisesFragment : Fragment() {
             }
 
             exerciseViewModel.userExercises.observe(viewLifecycleOwner) {
-                Log.d("UPDATING ITEMS", "LIVE DATA")
                 exerciseAdapter.updateItems(it)
             }
 
@@ -190,7 +189,8 @@ class ExercisesFragment : Fragment() {
                 setOnClickListener {
                     it.applyScaleAnimation()
                     exerciseViewModel.onConfirm()
-                    findNavController().navigate(R.id.exercises_to_create_workout_template)
+                    findNavController().navigateUp()
+                    //R.id.exercises_to_create_workout_template
                 }
             }
 

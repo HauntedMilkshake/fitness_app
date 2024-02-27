@@ -17,8 +17,10 @@ import kotlinx.coroutines.flow.zip
 import kotlinx.coroutines.launch
 import java.time.DayOfWeek
 import java.time.LocalDate
+import java.time.ZoneId
 import java.time.format.DateTimeFormatter
 import java.time.temporal.TemporalAdjusters
+import java.util.Calendar
 import java.util.Locale
 
 class HomeViewModel(application: Application) : AndroidViewModel(application) {
@@ -46,6 +48,11 @@ class HomeViewModel(application: Application) : AndroidViewModel(application) {
 
     val workoutEntries: LiveData<List<BarEntry>>
         get() = _workoutEntries
+
+    private val _state = MutableLiveData<State>(State.Default)
+    val state: LiveData<State>
+        get() = _state
+
     init {
         viewModelScope.launch {
             launch {
@@ -54,26 +61,44 @@ class HomeViewModel(application: Application) : AndroidViewModel(application) {
                 }
             }
             launch {
+                _state.postValue(State.Loading(true))
                 workoutRepo.getPastWorkouts().collect { pastWorkouts ->
                     _numberOfWorkouts.postValue(pastWorkouts.size)
+
                     val workoutsByWeek = groupWorkoutsByWeek(pastWorkouts)
                     val barEntries = mutableListOf<BarEntry>()
                     val xAxisLabels = mutableListOf<String>()
 
-                    workoutsByWeek.forEach { (weekIndex, workoutsInWeek) ->
-                        val weekStartDate = workoutsInWeek.firstOrNull()?.date
-                        weekStartDate?.let {
-                            val startDate = LocalDate.parse(weekStartDate, DateTimeFormatter.ofPattern("dd-MM-yyyy", Locale.getDefault()))
-                            val dayOfWeek = startDate.dayOfWeek.toString().take(3)
+                    // Get the current month and year
+                    val currentDate = LocalDate.now()
+                    val year = currentDate.year
+                    val month = currentDate.month
 
-                            xAxisLabels.add("$dayOfWeek\n${startDate.format(DateTimeFormatter.ofPattern("MM/dd", Locale.getDefault()))}")
-                        }
+                    // Iterate over each week of the month
+                    val calendar = Calendar.getInstance()
+                    calendar.clear()
+                    calendar.set(year, month.value - 1, 1) // Set the calendar to the first day of the month
+                    val weeksInMonth = calendar.getActualMaximum(Calendar.WEEK_OF_MONTH)
 
+                    for (weekIndex in 1..weeksInMonth) {
+                        val startDateOfWeek = calendar.time.toInstant().atZone(ZoneId.systemDefault()).toLocalDate()
+                        val endDateOfWeek = startDateOfWeek.plusDays(6)
+                        val weekLabel = "${startDateOfWeek.monthValue}/${startDateOfWeek.dayOfMonth}-${endDateOfWeek.monthValue}/${endDateOfWeek.dayOfMonth}"
+                        xAxisLabels.add(weekLabel)
+
+                        // Check if there are workouts for this week
+                        val workoutsInWeek = workoutsByWeek[weekIndex] ?: emptyList()
                         barEntries.add(BarEntry(weekIndex.toFloat(), workoutsInWeek.size.toFloat()))
+
+                        // Move to the next week
+                        calendar.add(Calendar.WEEK_OF_MONTH, 1)
                     }
+
                     _workoutEntries.postValue(barEntries)
                     _xAxisLabels.postValue(xAxisLabels)
+                    _state.postValue(State.Default)
                 }
+
             }
         }
     }
@@ -92,8 +117,11 @@ class HomeViewModel(application: Application) : AndroidViewModel(application) {
             val endOfWeek = currentDate.with(TemporalAdjusters.nextOrSame(DayOfWeek.SUNDAY))
 
             val workoutsInWeek = workouts.filter { workout ->
-                val workoutDate = LocalDate.parse(workout.date, DateTimeFormatter.ofPattern("dd-MM-yyyy", Locale.getDefault()))
-                workoutDate in startOfWeek..endOfWeek
+                val workoutDate = LocalDate.parse(
+                    workout.date,
+                    DateTimeFormatter.ofPattern("dd-MM-yyyy", Locale.getDefault())
+                )
+                workout.date. in startOfWeek..endOfWeek
             }
 
             workoutsByWeek[weekIndex] = workoutsInWeek.toMutableList()
@@ -103,5 +131,10 @@ class HomeViewModel(application: Application) : AndroidViewModel(application) {
         }
 
         return workoutsByWeek
+    }
+
+    sealed interface State {
+        object Default : State
+        data class Loading(val isLoading: Boolean) : State
     }
 }

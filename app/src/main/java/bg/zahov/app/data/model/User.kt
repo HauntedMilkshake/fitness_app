@@ -1,5 +1,11 @@
 package bg.zahov.app.data.model
 
+import bg.zahov.app.data.exception.CriticalDataNullException
+import java.sql.Timestamp
+import java.time.LocalDate
+import java.time.ZoneId
+import java.util.Date
+
 object FirestoreFields {
     const val USERS = "users"
 
@@ -58,7 +64,7 @@ data class Workout(
     var id: String,
     var name: String,
     var duration: Long?,
-    var date: String,
+    var date: LocalDate,
     var isTemplate: Boolean,
     var exercises: List<Exercise>,
     val note: String? = null
@@ -66,12 +72,16 @@ data class Workout(
     companion object {
         fun fromFirestoreMap(data: Map<String, Any>?) = data?.let {
             Workout(
-                id = it[FirestoreFields.WORKOUT_ID] as String,
-                name = it[FirestoreFields.WORKOUT_NAME] as String,
+                id = it[FirestoreFields.WORKOUT_ID] as? String
+                    ?: throw CriticalDataNullException(""),
+                name = it[FirestoreFields.WORKOUT_NAME] as? String
+                    ?: throw CriticalDataNullException(""),
                 duration = it[FirestoreFields.WORKOUT_DURATION] as? Long,
-                date = it[FirestoreFields.WORKOUT_DATE] as String,
-                isTemplate = it[FirestoreFields.WORKOUT_IS_TEMPLATE] as Boolean,
-                exercises = (it[FirestoreFields.WORKOUT_EXERCISES] as List<Map<String, Any>>)
+                date = (it[FirestoreFields.WORKOUT_DATE] as? Timestamp)?.toInstant()?.atZone(
+                    ZoneId.systemDefault()
+                )?.toLocalDate() ?: throw CriticalDataNullException(""),
+                isTemplate = it[FirestoreFields.WORKOUT_IS_TEMPLATE] as? Boolean ?: false,
+                exercises = (it[FirestoreFields.WORKOUT_EXERCISES] as List<Map<String, Any>?>)
                     .mapNotNull { map ->
                         Exercise.fromFirestoreMap(map)
                     },

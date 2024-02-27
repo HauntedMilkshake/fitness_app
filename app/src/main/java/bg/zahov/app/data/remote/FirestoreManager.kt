@@ -124,7 +124,7 @@ class FirestoreManager {
         withContext(Dispatchers.IO) {
             firestore.collection(USERS_COLLECTION).document(userId)
                 .collection(TEMPLATE_WORKOUTS_SUB_COLLECTION)
-                .document(newWorkoutTemplate.name).set(newWorkoutTemplate.toFirestoreMap())
+                .document(newWorkoutTemplate.id).set(newWorkoutTemplate.toFirestoreMap())
         }
 
     private fun deleteFirestore() {

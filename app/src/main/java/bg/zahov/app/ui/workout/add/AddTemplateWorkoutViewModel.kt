@@ -1,6 +1,7 @@
 package bg.zahov.app.ui.workout.add
 
 import android.app.Application
+import android.util.Log
 import androidx.lifecycle.AndroidViewModel
 import androidx.lifecycle.LiveData
 import androidx.lifecycle.MutableLiveData
@@ -12,11 +13,13 @@ import bg.zahov.app.getReplaceableExerciseProvider
 import bg.zahov.app.getSelectableExerciseProvider
 import bg.zahov.app.getWorkoutProvider
 import bg.zahov.app.util.currDateToString
-import bg.zahov.app.util.hashString
+import bg.zahov.app.util.generateRandomId
 import bg.zahov.app.util.toExercise
+import bg.zahov.app.util.toInteractableExerciseWrapper
 import bg.zahov.fitness.app.R
+import kotlinx.coroutines.flow.filter
 import kotlinx.coroutines.launch
-import java.text.FieldPosition
+import java.time.LocalDate
 
 class AddTemplateWorkoutViewModel(application: Application) : AndroidViewModel(application) {
     private val repo by lazy {
@@ -41,10 +44,10 @@ class AddTemplateWorkoutViewModel(application: Application) : AndroidViewModel(a
 
     var workoutNote: String = ""
     var workoutName: String = ""
-
     private var exerciseToReplaceIndex: Int? = null
-
     private lateinit var templates: List<Workout>
+    private var edit = false
+    private lateinit var workoutIdToEdit: String
 
     init {
         viewModelScope.launch {
@@ -56,7 +59,11 @@ class AddTemplateWorkoutViewModel(application: Application) : AndroidViewModel(a
 
             launch {
                 selectableExerciseProvider.selectedExercises.collect {
-                    _currExercises.postValue(it)
+                    if (it.isNotEmpty()) {
+                        val captured = _currExercises.value.orEmpty().toMutableList()
+                        captured.addAll(it)
+                        _currExercises.postValue(captured)
+                    }
                 }
             }
 
@@ -78,6 +85,22 @@ class AddTemplateWorkoutViewModel(application: Application) : AndroidViewModel(a
         }
     }
 
+    fun initEditWorkoutId(editFlag: Boolean, workoutId: String) {
+        edit = editFlag
+        workoutIdToEdit = workoutId
+        if (workoutIdToEdit.isNotEmpty()) {
+            viewModelScope.launch {
+                repo.getTemplateWorkouts()
+                    .filter { it.find { workout -> workout.id == workoutId } != null }.collect {
+                        Log.d("ITEMS + ID", "${it.size} ${it.first().id}")
+                        it.first().note?.let { note -> workoutNote = note }
+                        workoutName = it.first().name
+                        _currExercises.postValue(it.first().exercises.map { exercise -> exercise.toInteractableExerciseWrapper() })
+                    }
+            }
+        }
+    }
+
     fun resetSelectedExercises() {
         selectableExerciseProvider.resetSelectedExercises()
     }
@@ -86,13 +109,9 @@ class AddTemplateWorkoutViewModel(application: Application) : AndroidViewModel(a
         exerciseToReplaceIndex = _currExercises.value?.indexOf(item)
     }
 
-    fun addWorkout() {
+    fun onSave() {
         if (workoutName.isEmpty()) {
             _state.value = State.Error("Cannot create a workout template without a name!")
-            return
-        }
-        if (templates.map { it.name }.contains(workoutName)) {
-            _state.value = State.Error("Each workout must have a unique name!")
             return
         }
 
@@ -105,23 +124,26 @@ class AddTemplateWorkoutViewModel(application: Application) : AndroidViewModel(a
             viewModelScope.launch {
                 repo.addTemplateWorkout(
                     Workout(
-                        id = hashString(workoutName),
+                        id = if (edit) workoutIdToEdit else generateRandomId(),
                         name = workoutName,
+                        note = workoutNote,
                         duration = 0L,
-                        date = currDateToString(),
+                        date = LocalDate.now(),
                         isTemplate = true,
                         exercises = _currExercises.value!!.map { it.toExercise() },
                     )
                 )
-
-                workoutName = ""
-                _currExercises.postValue(listOf())
-                resetSelectedExercises()
-
             }
-            _state.value = State.Success("Successfully added workout!")
-            _state.value = State.Default
+
+            workoutName = ""
+            workoutNote = ""
+            _currExercises.postValue(listOf())
+            resetSelectedExercises()
+
         }
+        _state.value =
+            State.Success(if (!edit) "Successfully added workout!" else "Successfully edited workout")
+        _state.value = State.Default
     }
 
     fun toggleExerciseNoteField(position: Int) {
@@ -164,7 +186,6 @@ class AddTemplateWorkoutViewModel(application: Application) : AndroidViewModel(a
                 it.sets = newSets
             }
         }
-
         _currExercises.value = exercises
     }
 

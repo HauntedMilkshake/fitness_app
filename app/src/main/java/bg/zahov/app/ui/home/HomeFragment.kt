@@ -8,7 +8,9 @@ import android.view.View
 import android.view.ViewGroup
 import androidx.fragment.app.Fragment
 import androidx.fragment.app.viewModels
+import androidx.lifecycle.map
 import androidx.navigation.fragment.findNavController
+import bg.zahov.app.data.model.state.HomeUiMapper
 import bg.zahov.app.showBottomNav
 import bg.zahov.fitness.app.R
 import bg.zahov.fitness.app.databinding.FragmentHomeBinding
@@ -47,6 +49,10 @@ class HomeFragment : Fragment() {
                 findNavController().navigate(R.id.home_to_settings)
             }
 
+            homeViewModel.state.map { HomeUiMapper.map(it) }.observe(viewLifecycleOwner) {
+                loadingIndicator.visibility = if (it.isLoading) View.VISIBLE else View.GONE
+                weeklyWorkoutsChart.visibility = if (it.isLoading) View.GONE else View.VISIBLE
+            }
             homeViewModel.userName.observe(viewLifecycleOwner) {
                 profileName.text = it
             }

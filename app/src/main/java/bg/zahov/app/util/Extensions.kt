@@ -15,10 +15,13 @@ import bg.zahov.app.data.model.User
 import bg.zahov.app.data.model.Workout
 import bg.zahov.fitness.app.R
 import com.google.common.hash.Hashing
+import com.google.firebase.Timestamp
 import java.nio.charset.StandardCharsets
 import java.time.LocalDate
 import java.time.format.DateTimeFormatter
+import java.util.Date
 import java.util.Locale
+import java.util.UUID
 
 fun User.toFirestoreMap(): Map<String, Any?> {
     return mapOf(FirestoreFields.USER_NAME to name)
@@ -144,6 +147,8 @@ fun View.applySelectAnimation(
 fun hashString(input: String) =
     Hashing.sha256().hashString(input, StandardCharsets.UTF_8).toString()
 
+fun generateRandomId(): String = UUID.randomUUID().toString().take(16)
+
 fun currDateToString(): String = LocalDate.now().format(
     DateTimeFormatter.ofPattern(
         "dd-MM-yyyy",
@@ -180,7 +185,8 @@ fun InteractableExerciseWrapper.toExercise() = Exercise(
     sets = this.sets.map { it.set },
     note = this.note
 )
-fun Exercise.toInteractableExerciseWrapper() = InteractableExerciseWrapper (
+
+fun Exercise.toInteractableExerciseWrapper() = InteractableExerciseWrapper(
     name = this.name,
     bodyPart = this.bodyPart,
     category = this.category,
@@ -189,4 +195,5 @@ fun Exercise.toInteractableExerciseWrapper() = InteractableExerciseWrapper (
     note = this.note
 )
 
+fun Date.toTimeStamp() = Timestamp(this)
 

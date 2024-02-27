@@ -7,6 +7,7 @@ import android.view.View
 import android.view.ViewGroup
 import android.widget.Toast
 import androidx.core.os.bundleOf
+import androidx.core.widget.addTextChangedListener
 import androidx.fragment.app.Fragment
 import androidx.fragment.app.viewModels
 import androidx.lifecycle.map
@@ -16,7 +17,6 @@ import bg.zahov.app.data.model.state.AddTemplateWorkoutUiMapper
 import bg.zahov.app.data.model.ClickableSet
 import bg.zahov.app.data.model.InteractableExerciseWrapper
 import bg.zahov.app.data.model.SetType
-import bg.zahov.app.data.model.Sets
 import bg.zahov.app.util.applyScaleAnimation
 import bg.zahov.fitness.app.R
 import bg.zahov.fitness.app.databinding.FragmentAddWorkoutTemplateBinding
@@ -28,6 +28,13 @@ class AddTemplateWorkoutFragment : Fragment() {
         get() = requireNotNull(_binding)
 
     private val addWorkoutViewModel: AddTemplateWorkoutViewModel by viewModels()
+
+    private val edit by lazy {
+        arguments?.getBoolean("EDIT") ?: false
+    }
+    private val id by lazy {
+        arguments?.getString("WORKOUT_ID")
+    }
 
     override fun onCreateView(
         inflater: LayoutInflater,
@@ -43,11 +50,15 @@ class AddTemplateWorkoutFragment : Fragment() {
         val inflater = TransitionInflater.from(requireContext())
         enterTransition = inflater.inflateTransition(R.transition.slide_up)
         exitTransition = inflater.inflateTransition(R.transition.fade_out)
+        addWorkoutViewModel.initEditWorkoutId(edit,
+            id ?: "")
     }
 
     override fun onViewCreated(view: View, savedInstanceState: Bundle?) {
         super.onViewCreated(view, savedInstanceState)
         binding.apply {
+            newWorkoutText.setText(if(edit) R.string.edit_workout_template else R.string.new_workout_template)
+
             stopCreatingWorkout.setOnClickListener {
                 it.applyScaleAnimation()
                 findNavController().navigate(R.id.create_workout_template_to_workout)
@@ -55,7 +66,7 @@ class AddTemplateWorkoutFragment : Fragment() {
 
             val exerciseSetAdapter = ExerciseSetAdapter().apply {
                 itemClickListener = object : ExerciseSetAdapter.ItemClickListener<WorkoutEntry> {
-                    override fun onSetCheckClicked(exercise: InteractableExerciseWrapper, item: ClickableSet, clickedView: View) {
+                    override fun onSetCheckClicked(exercise: InteractableExerciseWrapper, set: ClickableSet, clickedView: View) {
                         //NOOP
                     }
 
@@ -148,7 +159,7 @@ class AddTemplateWorkoutFragment : Fragment() {
                 it.applyScaleAnimation()
                 addWorkoutViewModel.workoutName = workoutNameFieldText.text.toString()
                 addWorkoutViewModel.workoutNote = workoutNoteFieldText.text.toString()
-                addWorkoutViewModel.addWorkout()
+                addWorkoutViewModel.onSave()
             }
 
             cancel.setOnClickListener {
