@@ -8,6 +8,7 @@ import bg.zahov.app.util.BaseAdapter
 import bg.zahov.fitness.app.R
 import com.google.android.material.imageview.ShapeableImageView
 import com.google.android.material.textview.MaterialTextView
+import java.time.format.DateTimeFormatter
 
 class TemplateWorkoutAdapter : BaseAdapter<Workout>(
     areItemsTheSame = { oldItem, newItem -> oldItem.name == newItem.name },
@@ -27,7 +28,7 @@ class TemplateWorkoutAdapter : BaseAdapter<Workout>(
 
         override fun bind(item: Workout) {
             title.text = item.name
-            lastPerformed.text = "Last performed: ${item.date}"
+            lastPerformed.text = "Last performed: ${item.date.format(DateTimeFormatter.ofPattern("dd.MM.yyyy"))}"
             settings.setOnClickListener {
                 showCustomLayout(item, adapterPosition, it)
             }

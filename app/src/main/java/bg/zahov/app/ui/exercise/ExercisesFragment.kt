@@ -69,19 +69,21 @@ class ExercisesFragment : Fragment() {
     override fun onViewCreated(view: View, savedInstanceState: Bundle?) {
         super.onViewCreated(view, savedInstanceState)
         binding.apply {
-            exerciseText.text = when {
-                selectable || addable -> {
-                    "Add exercises"
-                }
+            exerciseText.setText(
+                when {
+                    selectable || addable -> {
+                        R.string.add_exercise
+                    }
 
-                replaceable -> {
-                    "Replace exercise"
-                }
+                    replaceable -> {
+                        R.string.replace_exercise
+                    }
 
-                else -> {
-                    "Exercises"
+                    else -> {
+                        R.string.exercise
+                    }
                 }
-            }
+            )
 
             val filterAdapter = FilterAdapter(true).apply {
                 itemClickListener = object : FilterAdapter.ItemClickListener<SelectableFilter> {
@@ -105,10 +107,11 @@ class ExercisesFragment : Fragment() {
 
             val exerciseAdapter =
                 ExerciseAdapter(replaceable).apply {
-                    itemClickListener = object : ExerciseAdapter.ItemClickListener<InteractableExerciseWrapper> {
+                    itemClickListener =
+                        object : ExerciseAdapter.ItemClickListener<InteractableExerciseWrapper> {
                             override fun onItemClicked(
                                 item: InteractableExerciseWrapper,
-                                position: Int
+                                position: Int,
                             ) {
                                 when {
                                     replaceable || selectable || addable -> exerciseViewModel.onInteractableExerciseClicked(

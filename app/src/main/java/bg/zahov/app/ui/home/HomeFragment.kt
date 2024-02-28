@@ -15,10 +15,12 @@ import bg.zahov.app.data.model.state.HomeUiMapper
 import bg.zahov.app.showBottomNav
 import bg.zahov.fitness.app.R
 import bg.zahov.fitness.app.databinding.FragmentHomeBinding
+import com.github.mikephil.charting.components.AxisBase
 import com.github.mikephil.charting.components.Legend
 import com.github.mikephil.charting.components.XAxis
 import com.github.mikephil.charting.data.BarData
 import com.github.mikephil.charting.data.BarDataSet
+import com.github.mikephil.charting.data.BarEntry
 import com.github.mikephil.charting.formatter.IAxisValueFormatter
 import com.github.mikephil.charting.formatter.IndexAxisValueFormatter
 import com.github.mikephil.charting.formatter.ValueFormatter
@@ -61,27 +63,13 @@ class HomeFragment : Fragment() {
             homeViewModel.numberOfWorkouts.observe(viewLifecycleOwner) {
                 numberOfWorkouts.text = it.toString()
             }
-//
-//            homeViewModel.xAxisLabels.observe(viewLifecycleOwner) {
-//                weeklyWorkoutsChart.apply {
-//                    xAxis.valueFormatter = IndexAxisValueFormatter(it)
-//                    xAxis.position = XAxis.XAxisPosition.BOTTOM
-//                    xAxis.granularity = 1f
-//                    xAxis.axisMinimum = 0f
-//                    xAxis.textColor = Color.WHITE
-//                    xAxis.axisMaximum = (it.size - 1).toFloat()
-//                    xAxis.setCenterAxisLabels(true)
-//                    xAxis.isGranularityEnabled = true
-//                }
-//            }
 
             homeViewModel.workoutEntries.observe(viewLifecycleOwner) {
                 val dataSet = BarDataSet(it, "workouts")
                 dataSet.setDrawValues(false)
-                dataSet.barBorderWidth = 1f
                 val data = BarData(dataSet)
-
                 weeklyWorkoutsChart.data = data
+                weeklyWorkoutsChart.notifyDataSetChanged()
                 weeklyWorkoutsChart.invalidate()
             }
 
@@ -97,19 +85,20 @@ class HomeFragment : Fragment() {
                 description.text = "Weekly workouts"
                 description.textColor = Color.WHITE
 
-//                xAxis.apply {
-                xAxis.valueFormatter =
-                    IndexAxisValueFormatter(homeViewModel.getWeekRangesForCurrentMonth())
-                xAxis.position = XAxis.XAxisPosition.BOTTOM
-                xAxis.granularity = 1f
-                xAxis.axisMinimum = 0f
-                xAxis.textColor = Color.WHITE
-                xAxis.axisMaximum =
-                    (homeViewModel.getWeekRangesForCurrentMonth().size - 1).toFloat()
-                xAxis.setCenterAxisLabels(true)
-                xAxis.isGranularityEnabled = true
+                xAxis.apply {
+                    valueFormatter = IndexAxisValueFormatter(
+                        homeViewModel.getWeekRangesForCurrentMonth().toTypedArray()
+                    )
+                    position = XAxis.XAxisPosition.BOTTOM
+                    granularity = 1f
+                    axisMinimum = 0f
+                    textColor = Color.WHITE
+                    axisMaximum =
+                        (homeViewModel.getWeekRangesForCurrentMonth().size).toFloat()
+                    setCenterAxisLabels(true)
+                    isGranularityEnabled = true
+                }
 
-//                }
                 axisRight.apply {
                     textColor = Color.WHITE
                     granularity = 1f
