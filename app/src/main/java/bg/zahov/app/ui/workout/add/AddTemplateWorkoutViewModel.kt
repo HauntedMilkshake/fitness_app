@@ -6,6 +6,7 @@ import androidx.lifecycle.AndroidViewModel
 import androidx.lifecycle.LiveData
 import androidx.lifecycle.MutableLiveData
 import androidx.lifecycle.viewModelScope
+import bg.zahov.app.data.exception.CriticalDataNullException
 import bg.zahov.app.data.model.ClickableSet
 import bg.zahov.app.data.model.InteractableExerciseWrapper
 import bg.zahov.app.data.model.Workout
@@ -20,6 +21,7 @@ import bg.zahov.fitness.app.R
 import kotlinx.coroutines.flow.filter
 import kotlinx.coroutines.launch
 import java.time.LocalDate
+import java.time.LocalDateTime
 
 class AddTemplateWorkoutViewModel(application: Application) : AndroidViewModel(application) {
     private val repo by lazy {
@@ -52,8 +54,12 @@ class AddTemplateWorkoutViewModel(application: Application) : AndroidViewModel(a
     init {
         viewModelScope.launch {
             launch {
-                repo.getTemplateWorkouts().collect {
-                    templates = it
+                try {
+                    repo.getTemplateWorkouts().collect {
+                        templates = it
+                    }
+                } catch (e: CriticalDataNullException) {
+                    //todo()
                 }
             }
 
@@ -128,7 +134,7 @@ class AddTemplateWorkoutViewModel(application: Application) : AndroidViewModel(a
                         name = workoutName,
                         note = workoutNote,
                         duration = 0L,
-                        date = LocalDate.now(),
+                        date = LocalDateTime.now(),
                         isTemplate = true,
                         exercises = _currExercises.value!!.map { it.toExercise() },
                     )

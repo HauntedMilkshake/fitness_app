@@ -3,6 +3,7 @@ package bg.zahov.app.ui.home
 import android.graphics.Color
 import android.os.Bundle
 import android.transition.TransitionInflater
+import android.util.Log
 import android.view.LayoutInflater
 import android.view.View
 import android.view.ViewGroup
@@ -60,23 +61,25 @@ class HomeFragment : Fragment() {
             homeViewModel.numberOfWorkouts.observe(viewLifecycleOwner) {
                 numberOfWorkouts.text = it.toString()
             }
-
-            homeViewModel.xAxisLabels.observe(viewLifecycleOwner) {
-                weeklyWorkoutsChart.apply {
-                    xAxis.valueFormatter = IndexAxisValueFormatter(it)
-                    xAxis.position = XAxis.XAxisPosition.BOTTOM
-                    xAxis.granularity = 1f
-                    xAxis.setCenterAxisLabels(true)
-                    xAxis.isGranularityEnabled = true
-                }
-            }
+//
+//            homeViewModel.xAxisLabels.observe(viewLifecycleOwner) {
+//                weeklyWorkoutsChart.apply {
+//                    xAxis.valueFormatter = IndexAxisValueFormatter(it)
+//                    xAxis.position = XAxis.XAxisPosition.BOTTOM
+//                    xAxis.granularity = 1f
+//                    xAxis.axisMinimum = 0f
+//                    xAxis.textColor = Color.WHITE
+//                    xAxis.axisMaximum = (it.size - 1).toFloat()
+//                    xAxis.setCenterAxisLabels(true)
+//                    xAxis.isGranularityEnabled = true
+//                }
+//            }
 
             homeViewModel.workoutEntries.observe(viewLifecycleOwner) {
                 val dataSet = BarDataSet(it, "workouts")
                 dataSet.setDrawValues(false)
                 dataSet.barBorderWidth = 1f
                 val data = BarData(dataSet)
-                data.barWidth = 0.7F
 
                 weeklyWorkoutsChart.data = data
                 weeklyWorkoutsChart.invalidate()
@@ -87,22 +90,33 @@ class HomeFragment : Fragment() {
                 setDrawGridBackground(false)
                 setDrawBarShadow(false)
                 setDrawValueAboveBar(false)
+                isDragEnabled = false
                 isHighlightFullBarEnabled = false
 
                 description.setPosition(250f, 60f)
                 description.text = "Weekly workouts"
                 description.textColor = Color.WHITE
 
-                xAxis.apply {
-                    isEnabled = false
-                    position = XAxis.XAxisPosition.BOTTOM
+//                xAxis.apply {
+                xAxis.valueFormatter =
+                    IndexAxisValueFormatter(homeViewModel.getWeekRangesForCurrentMonth())
+                xAxis.position = XAxis.XAxisPosition.BOTTOM
+                xAxis.granularity = 1f
+                xAxis.axisMinimum = 0f
+                xAxis.textColor = Color.WHITE
+                xAxis.axisMaximum =
+                    (homeViewModel.getWeekRangesForCurrentMonth().size - 1).toFloat()
+                xAxis.setCenterAxisLabels(true)
+                xAxis.isGranularityEnabled = true
+
+//                }
+                axisRight.apply {
                     textColor = Color.WHITE
+                    granularity = 1f
+                    axisMinimum = 0f
                 }
 
-                legend.textColor = Color.WHITE
                 axisLeft.isEnabled = false
-                axisRight.textColor = Color.WHITE
-                isDragEnabled = false
                 isDoubleTapToZoomEnabled = false
                 setFitBars(true)
                 legend.isEnabled = false

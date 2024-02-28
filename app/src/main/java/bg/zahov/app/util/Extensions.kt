@@ -17,7 +17,10 @@ import bg.zahov.fitness.app.R
 import com.google.common.hash.Hashing
 import com.google.firebase.Timestamp
 import java.nio.charset.StandardCharsets
+import java.time.Instant
 import java.time.LocalDate
+import java.time.LocalDateTime
+import java.time.ZoneOffset
 import java.time.format.DateTimeFormatter
 import java.util.Date
 import java.util.Locale
@@ -26,13 +29,19 @@ import java.util.UUID
 fun User.toFirestoreMap(): Map<String, Any?> {
     return mapOf(FirestoreFields.USER_NAME to name)
 }
+fun Timestamp.toLocalDateTime(): LocalDateTime {
+    return LocalDateTime.ofInstant(Instant.ofEpochSecond(this.seconds, this.nanoseconds.toLong()), ZoneOffset.UTC)
+}
 
+fun LocalDateTime.toTimestamp(): Timestamp {
+    return Timestamp(Date.from(this.toInstant(ZoneOffset.UTC)))
+}
 fun Workout.toFirestoreMap(): Map<String, Any?> {
     return mapOf(
         FirestoreFields.WORKOUT_ID to id,
         FirestoreFields.WORKOUT_NAME to name,
         FirestoreFields.WORKOUT_DURATION to duration,
-        FirestoreFields.WORKOUT_DATE to date,
+        FirestoreFields.WORKOUT_DATE to date.toTimestamp(),
         FirestoreFields.WORKOUT_IS_TEMPLATE to isTemplate,
         FirestoreFields.WORKOUT_EXERCISES to exercises.map { it.toFirestoreMap() },
         FirestoreFields.WORKOUT_NOTE to note

@@ -1,6 +1,7 @@
 package bg.zahov.app.ui.home
 
 import android.app.Application
+import android.util.Log
 import androidx.lifecycle.AndroidViewModel
 import androidx.lifecycle.LiveData
 import androidx.lifecycle.MutableLiveData
@@ -17,9 +18,11 @@ import kotlinx.coroutines.flow.zip
 import kotlinx.coroutines.launch
 import java.time.DayOfWeek
 import java.time.LocalDate
+import java.time.YearMonth
 import java.time.ZoneId
 import java.time.format.DateTimeFormatter
 import java.time.temporal.TemporalAdjusters
+import java.time.temporal.WeekFields
 import java.util.Calendar
 import java.util.Locale
 
@@ -53,6 +56,7 @@ class HomeViewModel(application: Application) : AndroidViewModel(application) {
     val state: LiveData<State>
         get() = _state
 
+
     init {
         viewModelScope.launch {
             launch {
@@ -64,38 +68,12 @@ class HomeViewModel(application: Application) : AndroidViewModel(application) {
                 _state.postValue(State.Loading(true))
                 workoutRepo.getPastWorkouts().collect { pastWorkouts ->
                     _numberOfWorkouts.postValue(pastWorkouts.size)
-
-                    val workoutsByWeek = groupWorkoutsByWeek(pastWorkouts)
-                    val barEntries = mutableListOf<BarEntry>()
-                    val xAxisLabels = mutableListOf<String>()
-
-                    // Get the current month and year
-                    val currentDate = LocalDate.now()
-                    val year = currentDate.year
-                    val month = currentDate.month
-
-                    // Iterate over each week of the month
-                    val calendar = Calendar.getInstance()
-                    calendar.clear()
-                    calendar.set(year, month.value - 1, 1) // Set the calendar to the first day of the month
-                    val weeksInMonth = calendar.getActualMaximum(Calendar.WEEK_OF_MONTH)
-
-                    for (weekIndex in 1..weeksInMonth) {
-                        val startDateOfWeek = calendar.time.toInstant().atZone(ZoneId.systemDefault()).toLocalDate()
-                        val endDateOfWeek = startDateOfWeek.plusDays(6)
-                        val weekLabel = "${startDateOfWeek.monthValue}/${startDateOfWeek.dayOfMonth}-${endDateOfWeek.monthValue}/${endDateOfWeek.dayOfMonth}"
-                        xAxisLabels.add(weekLabel)
-
-                        // Check if there are workouts for this week
-                        val workoutsInWeek = workoutsByWeek[weekIndex] ?: emptyList()
-                        barEntries.add(BarEntry(weekIndex.toFloat(), workoutsInWeek.size.toFloat()))
-
-                        // Move to the next week
-                        calendar.add(Calendar.WEEK_OF_MONTH, 1)
-                    }
-
-                    _workoutEntries.postValue(barEntries)
-                    _xAxisLabels.postValue(xAxisLabels)
+                    _workoutEntries.postValue(getWorkoutsPerWeek(pastWorkouts).map {
+                        BarEntry(
+                            it.key.toFloat(),
+                            it.value.toFloat()
+                        )
+                    })
                     _state.postValue(State.Default)
                 }
 
@@ -103,34 +81,30 @@ class HomeViewModel(application: Application) : AndroidViewModel(application) {
         }
     }
 
-    private fun groupWorkoutsByWeek(workouts: List<Workout>): Map<Int, List<Workout>> {
-        val firstDayOfMonth = LocalDate.now().with(TemporalAdjusters.firstDayOfMonth())
-        val lastDayOfMonth = LocalDate.now().with(TemporalAdjusters.lastDayOfMonth())
+    private fun getWorkoutsPerWeek(workouts: List<Workout>): Map<Int, Int> =
+        workouts.groupBy {
+            it.date.get(WeekFields.of(Locale.getDefault()).weekOfMonth())
+        }.mapValues { (_, workoutsInWeek) -> workoutsInWeek.size }
 
-        val workoutsByWeek = mutableMapOf<Int, MutableList<Workout>>()
+    fun getWeekRangesForCurrentMonth(): List<String> {
+        val today = LocalDate.now()
+        val firstDayOfMonth = today.with(TemporalAdjusters.firstDayOfMonth())
+        val lastDayOfMonth = today.with(TemporalAdjusters.lastDayOfMonth())
 
-        var weekIndex = 1
-        var currentDate = firstDayOfMonth
+        val weekRanges = mutableListOf<ClosedRange<LocalDate>>()
+        var startOfWeek = firstDayOfMonth
+        var endOfWeek = startOfWeek.with(TemporalAdjusters.nextOrSame(DayOfWeek.SUNDAY))
 
-        while (currentDate <= lastDayOfMonth) {
-            val startOfWeek = currentDate.with(TemporalAdjusters.previousOrSame(DayOfWeek.MONDAY))
-            val endOfWeek = currentDate.with(TemporalAdjusters.nextOrSame(DayOfWeek.SUNDAY))
-
-            val workoutsInWeek = workouts.filter { workout ->
-                val workoutDate = LocalDate.parse(
-                    workout.date,
-                    DateTimeFormatter.ofPattern("dd-MM-yyyy", Locale.getDefault())
-                )
-                workout.date. in startOfWeek..endOfWeek
+        while (startOfWeek.isBefore(lastDayOfMonth)) {
+            weekRanges.add(startOfWeek..endOfWeek.minusDays(1))
+            startOfWeek = endOfWeek
+            endOfWeek = startOfWeek.plusDays(7)
+            if (endOfWeek > lastDayOfMonth) {
+                endOfWeek = lastDayOfMonth.plusDays(1)
             }
-
-            workoutsByWeek[weekIndex] = workoutsInWeek.toMutableList()
-
-            weekIndex++
-            currentDate = currentDate.plusWeeks(1)
         }
 
-        return workoutsByWeek
+        return weekRanges.map { "${it.start.dayOfMonth} - ${it.endInclusive.dayOfMonth}"}
     }
 
     sealed interface State {

@@ -23,6 +23,8 @@ import bg.zahov.app.util.toExercise
 import bg.zahov.app.util.toInteractableExerciseWrapper
 import bg.zahov.fitness.app.R
 import kotlinx.coroutines.launch
+import java.time.LocalDate
+import java.time.LocalDateTime
 import java.time.LocalTime
 import java.util.Random
 
@@ -81,7 +83,7 @@ class WorkoutViewModel(application: Application) : AndroidViewModel(application)
                                 hashString("New workout"),
                                 "New workout",
                                 duration = null,
-                                date = currDateToString(),
+                                date = LocalDateTime.now(),
                                 isTemplate = false,
                                 exercises = listOf()
                             )
@@ -217,7 +219,7 @@ class WorkoutViewModel(application: Application) : AndroidViewModel(application)
                 Workout(
                     id = hashString("${Random().nextInt(Int.MAX_VALUE)}"),
                     name = "${getTimePeriodAsString()} ${_name.value}",
-                    date = currDateToString(),
+                    date = LocalDateTime.now(),
                     exercises = _exercises.value?.map { it.toExercise() } ?: emptyList(),
                     note = _note.value,
                     duration = _timer.value?.parseTimeStringToLong() ?: 0L,

@@ -1,10 +1,9 @@
 package bg.zahov.app.data.model
 
 import bg.zahov.app.data.exception.CriticalDataNullException
+import bg.zahov.app.util.toLocalDateTime
 import java.sql.Timestamp
-import java.time.LocalDate
-import java.time.ZoneId
-import java.util.Date
+import java.time.LocalDateTime
 
 object FirestoreFields {
     const val USERS = "users"
@@ -64,7 +63,7 @@ data class Workout(
     var id: String,
     var name: String,
     var duration: Long?,
-    var date: LocalDate,
+    var date: LocalDateTime,
     var isTemplate: Boolean,
     var exercises: List<Exercise>,
     val note: String? = null
@@ -77,9 +76,7 @@ data class Workout(
                 name = it[FirestoreFields.WORKOUT_NAME] as? String
                     ?: throw CriticalDataNullException(""),
                 duration = it[FirestoreFields.WORKOUT_DURATION] as? Long,
-                date = (it[FirestoreFields.WORKOUT_DATE] as? Timestamp)?.toInstant()?.atZone(
-                    ZoneId.systemDefault()
-                )?.toLocalDate() ?: throw CriticalDataNullException(""),
+                date = (it[FirestoreFields.WORKOUT_DATE] as? com.google.firebase.Timestamp)?.toLocalDateTime() ?: throw CriticalDataNullException(""),
                 isTemplate = it[FirestoreFields.WORKOUT_IS_TEMPLATE] as? Boolean ?: false,
                 exercises = (it[FirestoreFields.WORKOUT_EXERCISES] as List<Map<String, Any>?>)
                     .mapNotNull { map ->
@@ -92,7 +89,6 @@ data class Workout(
         //?: Workout("", null, "", false, emptyList(), emptyList())
     }
 }
-
 
 data class Exercise(
     var name: String,

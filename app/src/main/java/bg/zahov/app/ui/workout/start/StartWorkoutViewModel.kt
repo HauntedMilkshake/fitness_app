@@ -12,6 +12,8 @@ import bg.zahov.app.getWorkoutProvider
 import bg.zahov.app.getWorkoutStateManager
 import bg.zahov.app.util.currDateToString
 import kotlinx.coroutines.launch
+import java.time.LocalDate
+import java.time.LocalDateTime
 
 class StartWorkoutViewModel(application: Application) : AndroidViewModel(application) {
     private val repo by lazy {
@@ -87,7 +89,7 @@ class StartWorkoutViewModel(application: Application) : AndroidViewModel(applica
                 id = workout.id,
                 name = "${workout.name} duplicate $count",
                 duration = null,
-                date = currDateToString(),
+                date = LocalDateTime.now(),
                 isTemplate = true,
                 exercises = workout.exercises
             )
