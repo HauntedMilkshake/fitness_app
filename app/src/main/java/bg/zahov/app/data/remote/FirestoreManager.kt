@@ -105,6 +105,14 @@ class FirestoreManager {
             ?: throw CriticalDataNullException("Critical data missing!")
     }
 
+    //TODO(we could make the request work if the initial result is null to search for the template it belongs to so it isn't null
+    suspend fun getWorkoutById(id: String): Flow<Workout?> = getDocData(
+        firestore.collection(
+            USERS_COLLECTION
+        ).document(userId).collection(WORKOUTS_SUB_COLLECTION).document(id)
+    ) { info ->
+        Workout.fromFirestoreMap(info)
+    }
 
     suspend fun getTemplateExercises(): Flow<List<Exercise>> = getCollectionData(
         firestore.collection(USERS_COLLECTION).document(userId).collection(TEMPLATE_EXERCISES)
@@ -160,7 +168,8 @@ class FirestoreManager {
     suspend fun deleteTemplateWorkouts(workout: Workout) {
         withContext(Dispatchers.IO) {
             firestore.collection(USERS_COLLECTION).document(userId)
-                .collection(TEMPLATE_WORKOUTS_SUB_COLLECTION).document(workout.name).delete().addOnSuccessListener {
+                .collection(TEMPLATE_WORKOUTS_SUB_COLLECTION).document(workout.name).delete()
+                .addOnSuccessListener {
                     Log.d("LISTEN", "deleted")
                 }
         }

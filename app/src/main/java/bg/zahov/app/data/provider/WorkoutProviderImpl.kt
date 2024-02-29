@@ -41,4 +41,6 @@ class WorkoutProviderImpl : WorkoutProvider {
     override suspend fun deleteWorkout(workout: Workout) {
         workoutRepo.deleteWorkout(workout)
     }
+
+    override suspend fun getWorkoutById(id: String) = workoutRepo.getWorkoutById(id)
 }

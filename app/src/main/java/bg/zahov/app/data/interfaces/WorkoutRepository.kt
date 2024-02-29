@@ -13,4 +13,5 @@ interface WorkoutRepository {
     suspend fun addWorkoutToHistory(newWorkout: Workout)
     suspend fun deleteTemplateWorkout(workout: Workout)
     suspend fun deleteWorkout(workout: Workout)
+    suspend fun getWorkoutById(id: String): Flow<Workout?>
 }

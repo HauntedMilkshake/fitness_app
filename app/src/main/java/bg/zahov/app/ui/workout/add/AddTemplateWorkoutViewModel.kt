@@ -40,8 +40,8 @@ class AddTemplateWorkoutViewModel(application: Application) : AndroidViewModel(a
     val state: LiveData<State>
         get() = _state
 
-    private val _currExercises = MutableLiveData<List<InteractableExerciseWrapper>>()
-    val currExercises: LiveData<List<InteractableExerciseWrapper>>
+    private val _currExercises = MutableLiveData<List<WorkoutEntry>>()
+    val currExercises: LiveData<List<WorkoutEntry>>
         get() = _currExercises
 
     var workoutNote: String = ""

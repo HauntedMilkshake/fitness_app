@@ -45,4 +45,6 @@ class WorkoutRepositoryImpl : WorkoutRepository {
     override suspend fun deleteWorkout(workout: Workout) {
         firestore.deleteWorkout(workout)
     }
+
+    override suspend fun getWorkoutById(id: String) = firestore.getWorkoutById(id)
 }

@@ -1,6 +1,5 @@
 package bg.zahov.app.ui.workout.add
 
-import android.util.Log
 import android.view.LayoutInflater
 import android.view.View
 import android.view.ViewGroup
@@ -8,9 +7,6 @@ import android.widget.PopupMenu
 import androidx.appcompat.view.ContextThemeWrapper
 import androidx.core.widget.addTextChangedListener
 import androidx.recyclerview.widget.RecyclerView
-import bg.zahov.app.data.model.Category
-import bg.zahov.app.data.model.ClickableSet
-import bg.zahov.app.data.model.InteractableExerciseWrapper
 import bg.zahov.app.data.model.SetType
 import bg.zahov.app.data.model.Sets
 import bg.zahov.fitness.app.R
@@ -67,7 +63,7 @@ class ExerciseSetAdapter : RecyclerView.Adapter<RecyclerView.ViewHolder>() {
     override fun onBindViewHolder(holder: RecyclerView.ViewHolder, position: Int) {
         when (holder) {
             is ExerciseViewHolder -> {
-                holder.bind(items[position] as ExerciseEntry)
+                holder.bind((items[position] as ExerciseEntry).exerciseEntry)
             }
 
             is SetViewHolder -> {
@@ -78,17 +74,10 @@ class ExerciseSetAdapter : RecyclerView.Adapter<RecyclerView.ViewHolder>() {
 
     override fun getItemCount(): Int = items.size
 
-    fun updateItems(newItems: List<InteractableExerciseWrapper>) {
+    fun updateItems(newItems: List<WorkoutEntry>) {
 //        val oldList = items
-        val workoutEntry = mutableListOf<WorkoutEntry>()
-        newItems.forEach { item ->
-            workoutEntry.add(ExerciseEntry(item))
-            item.sets.forEach { set ->
-                workoutEntry.add(SetEntry(set))
-            }
-        }
         items.clear()
-        items.addAll(workoutEntry)
+        items.addAll(newItems)
 
 //        DiffUtil.calculateDiff(object : DiffUtil.Callback() {
 //            override fun getOldListSize(): Int = oldList.size
@@ -120,47 +109,81 @@ class ExerciseSetAdapter : RecyclerView.Adapter<RecyclerView.ViewHolder>() {
     inner class ExerciseViewHolder(view: View) : RecyclerView.ViewHolder(view) {
         private val title = view.findViewById<MaterialTextView>(R.id.exercise_title)
         private val options = view.findViewById<ShapeableImageView>(R.id.options)
-        private val note = view.findViewById<TextInputLayout>(R.id.workout_note)
+        private val noteLayout = view.findViewById<TextInputLayout>(R.id.workout_note)
+        private val noteEditText = view.findViewById<TextInputEditText>(R.id.workout_note_text)
         private val addSetButton = view.findViewById<MaterialButton>(R.id.add_set)
         private val firstInputColumnIndicator =
             view.findViewById<MaterialTextView>(R.id.first_input_column_indicator)
         private val secondInputColumnIndicator =
             view.findViewById<MaterialTextView>(R.id.second_input_column_indicator)
 
-        fun bind(item: ExerciseEntry) {
-            title.text = item.exerciseEntry.name
-            firstInputColumnIndicator.text = when (item.exerciseEntry.category) {
-                Category.AssistedWeight -> "-KG"
-                Category.RepsOnly -> "REPS"
-                Category.Cardio -> "DURATION"
-                Category.Timed -> "DURATION"
-                else -> "+KG"
+        fun bind(item: ExerciseSetAdapterExerciseWrapper) {
+            title.text = item.name
+            firstInputColumnIndicator.apply {
+                visibility = item.firstInputColumnVisibility
+                setText(item.firstInputColumnResource)
             }
-            secondInputColumnIndicator.visibility = when (item.exerciseEntry.category) {
-                Category.RepsOnly -> View.GONE
-                Category.Cardio -> View.GONE
-                Category.Timed -> View.GONE
-                else -> View.VISIBLE
+            secondInputColumnIndicator.apply {
+                visibility = item.secondInputColumnVisibility
+                setText(item.secondInputColumnResource)
             }
+            noteLayout.visibility = item.noteVisibility
+            noteEditText.setText(item.note)
 
-            note.visibility = if (item.exerciseEntry.isNoteVisible) View.VISIBLE else View.GONE
+            //item.exerciseEntry.name
+//            firstInputColumnIndicator.text = when (item.exerciseEntry.category) {
+//                Category.AssistedWeight -> "-KG"
+//                Category.RepsOnly -> "REPS"
+//                Category.Cardio -> "DURATION"
+//                Category.Timed -> "DURATION"
+//                else -> "+KG"
+//            }
+//            secondInputColumnIndicator.visibility = when (item.exerciseEntry.category) {
+//                Category.RepsOnly -> View.GONE
+//                Category.Cardio -> View.GONE
+//                Category.Timed -> View.GONE
+//                else -> View.VISIBLE
+//            }
 
             options.setOnClickListener {
-                showExerciseMenu(item.exerciseEntry, adapterPosition, it)
-//                itemClickListener?.onOptionsClicked(item.exerciseEntry, it)
+                showExerciseMenu(adapterPosition, adapterPosition, it)
             }
 
             addSetButton.setOnClickListener {
-                itemClickListener?.onAddSet(
-                    item.exerciseEntry,
-                    ClickableSet(Sets(type = SetType.DEFAULT.key, 0.0, 0), false)
-                )
+                itemClickListener?.onAddSet(adapterPosition)
             }
+        }
+
+        private fun showExerciseMenu(
+            exerciseId: Int,
+            itemPosition: Int,
+            view: View,
+        ) {
+            val popupMenu = PopupMenu(ContextThemeWrapper(view.context, R.style.MyPopUp), view)
+            popupMenu.menuInflater.inflate(R.menu.popup_exercise_menu, popupMenu.menu)
+            popupMenu.setOnMenuItemClickListener { item ->
+                when (item.itemId) {
+                    R.id.action_add_note -> {
+                        itemClickListener?.onNoteToggle(itemPosition)
+                    }
+
+                    R.id.action_replace -> {
+                        itemClickListener?.onReplaceExercise(exerciseId)
+                    }
+
+                    R.id.action_remove -> {
+                        itemClickListener?.onRemoveExercise(exerciseId)
+                    }
+                }
+                true
+            }
+            popupMenu.show()
         }
     }
 
 
     inner class SetViewHolder(view: View) : RecyclerView.ViewHolder(view) {
+        //TODO(add id to layout and when check is clicked play animation)
         private val setIndicator = view.findViewById<MaterialTextView>(R.id.set_number)
         private val previous = view.findViewById<MaterialTextView>(R.id.previous)
         private val firstInputLayout = view.findViewById<TextInputLayout>(R.id.first_input_field)
@@ -171,157 +194,143 @@ class ExerciseSetAdapter : RecyclerView.Adapter<RecyclerView.ViewHolder>() {
             view.findViewById<TextInputEditText>(R.id.second_input_field_text)
         private val check = view.findViewById<ShapeableImageView>(R.id.check)
 
-        fun bind(item: ClickableSet) {
-            setIndicator.text = "$adapterPosition"
-            previous.text = "-" //TODO()
-            secondInputLayout.visibility = when (getExerciseForSet()?.category) {
-                Category.RepsOnly -> View.GONE
-                Category.Cardio -> View.GONE
-                Category.Timed -> View.GONE
-                else -> View.VISIBLE
-
+        fun bind(item: ExerciseSetAdapterSetWrapper) {
+            previous.text = item.previousResults
+            secondInputLayout.visibility = item.secondInputFieldVisibility
+            setIndicator.apply {
+                setText(item.setIndicatorResource)
+                if (item.setIndicatorResource == R.string.default_set_indicator) text =
+                    "${item.setNumber}"
             }
+//            secondInputLayout.visibility = when (getExerciseForSet()?.category) {
+//                Category.RepsOnly -> View.GONE
+//                Category.Cardio -> View.GONE
+//                Category.Timed -> View.GONE
+//                else -> View.VISIBLE
+//
+//            }
             setIndicator.setOnClickListener {
-                getExerciseForSet()?.let { exercise ->
-                    showSetMenu(exercise, item, it)
-                }
+                showSetMenu(adapterPosition, it)
             }
-            check.setOnClickListener { view ->
-                getExerciseForSet()?.let {
-                    itemClickListener?.onSetCheckClicked(it, item, view)
-                }
 
-                //TODO(Change background and play dopamine inducing animation)
+            check.setOnClickListener {
+                itemClickListener?.onSetCheckClicked(adapterPosition)
             }
+
             firstInputEditText.addTextChangedListener {
-                Log.d("TEXT CHANGED", "text changed on first field")
-                getExerciseForSet()?.let { exercise ->
-                    Log.d("Calling text changed", "calling text changed")
-                    textChangeListener?.onInputFieldChanged(
-                        exercise,
-                        item,
-                        it.toString(),
-                        firstInputEditText.id
-                    )
-                }
+                textChangeListener?.onInputFieldChanged(
+                    adapterPosition,
+                    it.toString(),
+                    firstInputEditText.id
+                )
             }
             secondInputEditText.addTextChangedListener {
-                getExerciseForSet()?.let { exercise ->
-                    textChangeListener?.onInputFieldChanged(
-                        exercise,
-                        item,
-                        it.toString(),
-                        secondInputEditText.id
-                    )
-                }
+                textChangeListener?.onInputFieldChanged(
+                    adapterPosition,
+                    it.toString(),
+                    secondInputEditText.id
+                )
             }
         }
 
-        fun deleteSet() {
-            for (i in adapterPosition downTo 0) {
-                if (items[i] is ExerciseEntry) {
-                    swipeActionListener?.onDeleteSet(
-                        (items[i] as ExerciseEntry).exerciseEntry,
-                        (items[adapterPosition] as SetEntry).setEntry
-                    )
-                }
-            }
-        }
+//        fun deleteSet() {
+//            for (i in adapterPosition downTo 0) {
+//                if (items[i] is ExerciseEntry) {
+//                    swipeActionListener?.onDeleteSet(
+//                        (items[i] as ExerciseEntry).exerciseEntry,
+//                        (items[adapterPosition] as SetEntry).setEntry
+//                    )
+//                }
+//            }
+//        }
 
-        private fun getExerciseForSet(): InteractableExerciseWrapper? {
-            for (i in adapterPosition downTo 0) {
-                if (items[i] is ExerciseEntry) {
-                    return (items[i] as ExerciseEntry).exerciseEntry
-                }
+//        private fun getExerciseForSet(): InteractableExerciseWrapper? {
+//            for (i in adapterPosition downTo 0) {
+//                if (items[i] is ExerciseEntry) {
+//                    return (items[i] as ExerciseEntry).exerciseEntry
+//                }
+//            }
+//            return null
+//        }
+
+        private fun showSetMenu(itemPosition: Int, clickedView: View) {
+            val popupMenu =
+                PopupMenu(ContextThemeWrapper(clickedView.context, R.style.MyPopUp), clickedView)
+            popupMenu.menuInflater.inflate(R.menu.popup_set_menu, popupMenu.menu)
+            popupMenu.setOnMenuItemClickListener { item ->
+                itemClickListener?.onSetTypeChanged(
+                    itemPosition,
+                    when (item.itemId) {
+                        R.id.action_drop_set -> {
+                            SetType.DROP_SET
+                        }
+
+                        R.id.action_failure_set -> {
+                            SetType.FAILURE
+                        }
+
+                        R.id.action_warmup_set -> {
+                            SetType.WARMUP
+                        }
+
+                        else -> {
+                            SetType.DEFAULT
+                        }
+                    }
+                )
+                true
             }
-            return null
+            popupMenu.show()
         }
     }
 
 
     interface ItemClickListener<T> {
-        fun onSetCheckClicked(
-            exercise: InteractableExerciseWrapper,
-            set: ClickableSet,
-            clickedView: View,
-        )
-
-        fun onAddSet(item: InteractableExerciseWrapper, set: ClickableSet)
+        fun onSetCheckClicked(itemPosition: Int)
+        fun onAddSet(itemPosition: Int)
         fun onNoteToggle(itemPosition: Int)
-        fun onReplaceExercise(item: InteractableExerciseWrapper)
-        fun onRemoveExercise(item: InteractableExerciseWrapper)
-        fun onSetTypeChanged(item: InteractableExerciseWrapper, set: ClickableSet, setType: SetType)
+        fun onReplaceExercise(itemPosition: Int)
+        fun onRemoveExercise(itemPosition: Int)
+        fun onSetTypeChanged(itemPosition: Int, setType: SetType)
     }
 
     interface SwipeActionListener {
-        fun onDeleteSet(item: InteractableExerciseWrapper, set: ClickableSet)
+        fun onDeleteSet(itemPosition: Int)
     }
 
     interface TextActionListener {
         fun onInputFieldChanged(
-            exercise: InteractableExerciseWrapper,
-            set: ClickableSet,
+            itemPosition: Int,
             metric: String,
             id: Int,
         )
     }
-
-    private fun showExerciseMenu(
-        exercise: InteractableExerciseWrapper,
-        itemPosition: Int,
-        view: View,
-    ) {
-        val popupMenu = PopupMenu(ContextThemeWrapper(view.context, R.style.MyPopUp), view)
-        popupMenu.menuInflater.inflate(R.menu.popup_exercise_menu, popupMenu.menu)
-        popupMenu.setOnMenuItemClickListener { item ->
-            when (item.itemId) {
-                R.id.action_add_note -> {
-                    itemClickListener?.onNoteToggle(itemPosition)
-                }
-
-                R.id.action_replace -> {
-                    itemClickListener?.onReplaceExercise(exercise)
-                }
-
-                R.id.action_remove -> {
-                    itemClickListener?.onRemoveExercise(exercise)
-                }
-            }
-            true
-        }
-        popupMenu.show()
-    }
-
-    private fun showSetMenu(exercise: InteractableExerciseWrapper, set: ClickableSet, view: View) {
-        val popupMenu = PopupMenu(ContextThemeWrapper(view.context, R.style.MyPopUp), view)
-        popupMenu.menuInflater.inflate(R.menu.popup_set_menu, popupMenu.menu)
-        popupMenu.setOnMenuItemClickListener { item ->
-            when (item.itemId) {
-                R.id.action_drop_set -> {
-                    itemClickListener?.onSetTypeChanged(exercise, set, SetType.DROP_SET)
-                }
-
-                R.id.action_failure_set -> {
-                    itemClickListener?.onSetTypeChanged(exercise, set, SetType.FAILURE)
-                }
-
-                R.id.action_warmup_set -> {
-                    itemClickListener?.onSetTypeChanged(exercise, set, SetType.WARMUP)
-                }
-
-                else -> {
-                    itemClickListener?.onSetTypeChanged(exercise, set, SetType.DEFAULT)
-                }
-            }
-            true
-        }
-        popupMenu.show()
-    }
-
 }
 
 sealed class WorkoutEntry
 
-data class ExerciseEntry(var exerciseEntry: InteractableExerciseWrapper) : WorkoutEntry()
+data class ExerciseEntry(var exerciseEntry: ExerciseSetAdapterExerciseWrapper) : WorkoutEntry()
 
-data class SetEntry(val setEntry: ClickableSet) : WorkoutEntry()
+data class SetEntry(val setEntry: ExerciseSetAdapterSetWrapper) : WorkoutEntry()
+
+data class ExerciseSetAdapterExerciseWrapper(
+    val id: String,
+    val name: String,
+    var backgroundResource: Int,
+    var firstInputColumnResource: Int,
+    var secondInputColumnResource: Int,
+    var firstInputColumnVisibility: Int = View.VISIBLE,
+    var secondInputColumnVisibility: Int = View.VISIBLE,
+    val noteVisibility: Int = View.GONE,
+    val note: String? = null
+)
+
+data class ExerciseSetAdapterSetWrapper(
+    var setIndicatorResource: Int = R.string.default_set_indicator,
+    var firstInputFieldVisibility: Int = View.VISIBLE,
+    var secondInputFieldVisibility: Int = View.VISIBLE,
+    val setNumber: Int,
+    val previousResults: String,
+    val set: Sets,
+    var backgroundResourcse: Int
+)

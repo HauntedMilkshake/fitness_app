@@ -13,6 +13,7 @@ import bg.zahov.app.data.model.InteractableExerciseWrapper
 import bg.zahov.app.data.model.Sets
 import bg.zahov.app.data.model.User
 import bg.zahov.app.data.model.Workout
+import bg.zahov.app.ui.workout.add.ExerciseSetAdapterExerciseWrapper
 import bg.zahov.fitness.app.R
 import com.google.common.hash.Hashing
 import com.google.firebase.Timestamp
@@ -29,13 +30,18 @@ import java.util.UUID
 fun User.toFirestoreMap(): Map<String, Any?> {
     return mapOf(FirestoreFields.USER_NAME to name)
 }
+
 fun Timestamp.toLocalDateTime(): LocalDateTime {
-    return LocalDateTime.ofInstant(Instant.ofEpochSecond(this.seconds, this.nanoseconds.toLong()), ZoneOffset.UTC)
+    return LocalDateTime.ofInstant(
+        Instant.ofEpochSecond(this.seconds, this.nanoseconds.toLong()),
+        ZoneOffset.UTC
+    )
 }
 
 fun LocalDateTime.toTimestamp(): Timestamp {
     return Timestamp(Date.from(this.toInstant(ZoneOffset.UTC)))
 }
+
 fun Workout.toFirestoreMap(): Map<String, Any?> {
     return mapOf(
         FirestoreFields.WORKOUT_ID to id,
@@ -44,7 +50,8 @@ fun Workout.toFirestoreMap(): Map<String, Any?> {
         FirestoreFields.WORKOUT_DATE to date.toTimestamp(),
         FirestoreFields.WORKOUT_IS_TEMPLATE to isTemplate,
         FirestoreFields.WORKOUT_EXERCISES to exercises.map { it.toFirestoreMap() },
-        FirestoreFields.WORKOUT_NOTE to note
+        FirestoreFields.WORKOUT_NOTE to note,
+        FirestoreFields.WORKOUT_VOLUME to volume
     )
 }
 
@@ -205,4 +212,13 @@ fun Exercise.toInteractableExerciseWrapper() = InteractableExerciseWrapper(
 )
 
 fun Date.toTimeStamp() = Timestamp(this)
+
+fun ExerciseSetAdapterExerciseWrapper.toExercise(): Exercise {
+    return Exercise(
+        name = this.name,
+
+
+
+    )
+}
 

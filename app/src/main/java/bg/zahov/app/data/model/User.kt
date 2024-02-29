@@ -23,6 +23,7 @@ object FirestoreFields {
     const val WORKOUT_IS_TEMPLATE = "isTemplate"
     const val WORKOUT_EXERCISES = "exercises"
     const val WORKOUT_NOTE = "note"
+    const val WORKOUT_VOLUME = "volume"
 
     // Exercise fields
     const val EXERCISE_NAME = "name"
@@ -63,6 +64,7 @@ data class Workout(
     var id: String,
     var name: String,
     var duration: Long?,
+    var volume: Double?,
     var date: LocalDateTime,
     var isTemplate: Boolean,
     var exercises: List<Exercise>,
@@ -76,13 +78,15 @@ data class Workout(
                 name = it[FirestoreFields.WORKOUT_NAME] as? String
                     ?: throw CriticalDataNullException(""),
                 duration = it[FirestoreFields.WORKOUT_DURATION] as? Long,
-                date = (it[FirestoreFields.WORKOUT_DATE] as? com.google.firebase.Timestamp)?.toLocalDateTime() ?: throw CriticalDataNullException(""),
+                date = (it[FirestoreFields.WORKOUT_DATE] as? com.google.firebase.Timestamp)?.toLocalDateTime()
+                    ?: throw CriticalDataNullException(""),
                 isTemplate = it[FirestoreFields.WORKOUT_IS_TEMPLATE] as? Boolean ?: false,
                 exercises = (it[FirestoreFields.WORKOUT_EXERCISES] as List<Map<String, Any>?>)
                     .mapNotNull { map ->
                         Exercise.fromFirestoreMap(map)
                     },
-                note = (it[FirestoreFields.WORKOUT_NOTE]) as? String
+                note = it[FirestoreFields.WORKOUT_NOTE] as? String,
+                volume = it[FirestoreFields.WORKOUT_VOLUME] as? Double
             )
         }
         //TODO(RETURN THIS INSTEAD OF THROWING)
@@ -119,20 +123,21 @@ data class Exercise(
 }
 
 data class Sets(
-    var type: String,
+    var type: SetType,
     var firstMetric: Double?,
     var secondMetric: Int?,
 ) {
     companion object {
         fun fromFirestoreMap(data: Map<String, Any>?) = data?.let {
             Sets(
-                type = it[FirestoreFields.SETS_TYPE] as String,
+                type = (it[FirestoreFields.SETS_TYPE] as? String)?.let { string -> SetType.valueOf(string) } ?: SetType.DEFAULT,
                 firstMetric = it[FirestoreFields.SETS_FIRST_METRIC] as? Double,
                 secondMetric = (it[FirestoreFields.SETS_SECOND_METRIC] as? Long)?.toInt()
             )
         }
     }
 }
+
 //data class Settings(
 //    var language: String = Language.fromKey(LanguageKeys.ENGLISH),
 //    var units: String = Units.fromKey(UnitsKeys.METRIC),
