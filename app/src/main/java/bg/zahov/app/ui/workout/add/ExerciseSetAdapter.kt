@@ -7,6 +7,8 @@ import android.widget.PopupMenu
 import androidx.appcompat.view.ContextThemeWrapper
 import androidx.core.widget.addTextChangedListener
 import androidx.recyclerview.widget.RecyclerView
+import bg.zahov.app.data.model.BodyPart
+import bg.zahov.app.data.model.Category
 import bg.zahov.app.data.model.SetType
 import bg.zahov.app.data.model.Sets
 import bg.zahov.fitness.app.R
@@ -124,7 +126,7 @@ class ExerciseSetAdapter : RecyclerView.Adapter<RecyclerView.ViewHolder>() {
                 setText(item.firstInputColumnResource)
             }
             secondInputColumnIndicator.apply {
-                visibility = item.secondInputColumnVisibility
+//                visibility = item.secondInputColumnVisibility
                 setText(item.secondInputColumnResource)
             }
             noteLayout.visibility = item.noteVisibility
@@ -198,17 +200,10 @@ class ExerciseSetAdapter : RecyclerView.Adapter<RecyclerView.ViewHolder>() {
             previous.text = item.previousResults
             secondInputLayout.visibility = item.secondInputFieldVisibility
             setIndicator.apply {
-                setText(item.setIndicatorResource)
-                if (item.setIndicatorResource == R.string.default_set_indicator) text =
-                    "${item.setNumber}"
+                setText(item.setIndicator)
+                if (item.setIndicator == R.string.default_set_indicator) text = item.setNumber
             }
-//            secondInputLayout.visibility = when (getExerciseForSet()?.category) {
-//                Category.RepsOnly -> View.GONE
-//                Category.Cardio -> View.GONE
-//                Category.Timed -> View.GONE
-//                else -> View.VISIBLE
-//
-//            }
+
             setIndicator.setOnClickListener {
                 showSetMenu(adapterPosition, it)
             }
@@ -314,23 +309,24 @@ data class ExerciseEntry(var exerciseEntry: ExerciseSetAdapterExerciseWrapper) :
 data class SetEntry(val setEntry: ExerciseSetAdapterSetWrapper) : WorkoutEntry()
 
 data class ExerciseSetAdapterExerciseWrapper(
-    val id: String,
     val name: String,
     var backgroundResource: Int,
     var firstInputColumnResource: Int,
     var secondInputColumnResource: Int,
     var firstInputColumnVisibility: Int = View.VISIBLE,
-    var secondInputColumnVisibility: Int = View.VISIBLE,
     val noteVisibility: Int = View.GONE,
-    val note: String? = null
+    var note: String? = null,
+    val bodyPart: BodyPart,
+    val category: Category,
+    val isTemplate: Boolean
 )
 
 data class ExerciseSetAdapterSetWrapper(
-    var setIndicatorResource: Int = R.string.default_set_indicator,
+    var setIndicator: Int = R.string.default_set_indicator,
     var firstInputFieldVisibility: Int = View.VISIBLE,
     var secondInputFieldVisibility: Int = View.VISIBLE,
-    val setNumber: Int,
+    val setNumber: String,
     val previousResults: String,
     val set: Sets,
-    var backgroundResourcse: Int
+    var backgroundResource: Int = R.color.background,
 )

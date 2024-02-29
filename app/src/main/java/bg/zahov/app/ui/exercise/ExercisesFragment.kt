@@ -106,18 +106,18 @@ class ExercisesFragment : Fragment() {
             }
 
             val exerciseAdapter =
-                ExerciseAdapter(replaceable).apply {
+                ExerciseAdapter().apply {
                     itemClickListener =
-                        object : ExerciseAdapter.ItemClickListener<InteractableExerciseWrapper> {
+                        object : ExerciseAdapter.ItemClickListener<ExerciseAdapterWrapper> {
                             override fun onItemClicked(
-                                item: InteractableExerciseWrapper,
+                                item: ExerciseAdapterWrapper,
                                 position: Int,
                             ) {
                                 when {
                                     replaceable || selectable || addable -> exerciseViewModel.onInteractableExerciseClicked(
                                         item, position
                                     )
-//                                    else -> //TODO(Exercise fragment)
+                                    //else -> TODO(Exercise fragment)
                                 }
                             }
                         }

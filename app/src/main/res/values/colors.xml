@@ -17,4 +17,5 @@
     <color name="input_field_background">#3D464B</color>
     <color name="blue_text">#3D8BC9</color>
     <color name="less_vibrant_text">#73777A</color>
+    <color name="completed_set">#00FF00</color>
 </resources>

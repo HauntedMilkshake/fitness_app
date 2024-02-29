@@ -6,14 +6,19 @@ import android.animation.PropertyValuesHolder
 import android.util.Log
 import android.view.View
 import androidx.core.content.ContextCompat
+import bg.zahov.app.data.model.Category
 import bg.zahov.app.data.model.ClickableSet
 import bg.zahov.app.data.model.Exercise
 import bg.zahov.app.data.model.FirestoreFields
 import bg.zahov.app.data.model.InteractableExerciseWrapper
+import bg.zahov.app.data.model.SetType
 import bg.zahov.app.data.model.Sets
+import bg.zahov.app.data.model.Units
 import bg.zahov.app.data.model.User
 import bg.zahov.app.data.model.Workout
 import bg.zahov.app.ui.workout.add.ExerciseSetAdapterExerciseWrapper
+import bg.zahov.app.ui.workout.add.ExerciseSetAdapterSetWrapper
+import bg.zahov.app.ui.workout.add.SetEntry
 import bg.zahov.fitness.app.R
 import com.google.common.hash.Hashing
 import com.google.firebase.Timestamp
@@ -202,23 +207,92 @@ fun InteractableExerciseWrapper.toExercise() = Exercise(
     note = this.note
 )
 
-fun Exercise.toInteractableExerciseWrapper() = InteractableExerciseWrapper(
-    name = this.name,
-    bodyPart = this.bodyPart,
-    category = this.category,
-    isTemplate = this.isTemplate,
-    sets = this.sets.map { ClickableSet(it, false) },
-    note = this.note
-)
+//fun Exercise.toInteractableExerciseWrapper() = InteractableExerciseWrapper(
+//    name = this.name,
+//    bodyPart = this.bodyPart,
+//    category = this.category,
+//    isTemplate = this.isTemplate,
+//    sets = this.sets.map { ClickableSet(it, false) },
+//    note = this.note
+//)
 
 fun Date.toTimeStamp() = Timestamp(this)
 
-fun ExerciseSetAdapterExerciseWrapper.toExercise(): Exercise {
-    return Exercise(
+//fun ExerciseSetAdapterExerciseWrapper.toExercise(): Exercise {
+//    return Exercise(
+//        name = this.name,
+//
+//    )
+//}
+fun Exercise.toExerciseSetAdapterWrapper(units: Units): ExerciseSetAdapterExerciseWrapper {
+    return ExerciseSetAdapterExerciseWrapper(
         name = this.name,
+        backgroundResource = R.color.background,
+        firstInputColumnVisibility = when(this.category) {
+            Category.RepsOnly -> View.GONE
+            Category.Cardio -> View.GONE
+            Category.Timed -> View.GONE
+            else -> View.VISIBLE
+        },
+        firstInputColumnResource = when(this.category) {
+            Category.AssistedWeight -> {
+                when(units){
+                    Units.METRIC -> R.string.kg_minus
+                    Units.BANANA -> R.string.lbs_minus
+                }
+            }
+            else -> {
+                when(units) {
+                    Units.METRIC -> R.string.kg_column_text
+                    Units.BANANA -> R.string.lbs_column_text
+                }
+            }
+        },
+        secondInputColumnResource = when(this.category) {
+            Category.Cardio -> R.string.time
+            Category.Timed -> R.string.time
+            else -> {
+                R.string.reps_column_text
+            }
+        },
+        bodyPart = this.bodyPart,
+        category = this.category,
+        isTemplate = this.isTemplate
+    )
+}
 
+fun ExerciseSetAdapterExerciseWrapper.toExercise(): Exercise {
+    return Exercise (
+        name = this.name,
+        bodyPart = this.bodyPart,
+        category = this.category,
+        isTemplate = this.isTemplate,
+        note = this.note,
+        sets = mutableListOf(),
+        bestSet = Sets(SetType.DEFAULT, null, null)
+    )
+}
 
+fun Sets.toExerciseSetAdapterSetWrapper(number: String, category: Category, previousResults: String): ExerciseSetAdapterSetWrapper {
+    return ExerciseSetAdapterSetWrapper(
+        setIndicator = when(this.type) {
+            SetType.WARMUP -> R.string.warmup_set_indicator
+            SetType.DROP_SET -> R.string.drop_set_indicator
+            SetType.DEFAULT -> R.string.default_set_indicator
+            SetType.FAILURE -> R.string.failure_set_indicator
+        },
+        secondInputFieldVisibility = when(category) {
+            Category.RepsOnly -> View.GONE
+            Category.Cardio -> View.GONE
+            Category.Timed -> View.GONE
+            else -> View.VISIBLE
+        },
+        setNumber = number,
+        set = this,
+        backgroundResource = R.color.completed_set,
+        previousResults = previousResults,
 
     )
 }
+
 

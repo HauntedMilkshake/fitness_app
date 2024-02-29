@@ -2,7 +2,6 @@ package bg.zahov.app.data.model
 
 import bg.zahov.app.data.exception.CriticalDataNullException
 import bg.zahov.app.util.toLocalDateTime
-import java.sql.Timestamp
 import java.time.LocalDateTime
 
 object FirestoreFields {
@@ -24,6 +23,7 @@ object FirestoreFields {
     const val WORKOUT_EXERCISES = "exercises"
     const val WORKOUT_NOTE = "note"
     const val WORKOUT_VOLUME = "volume"
+    const val WORKOUT_PERSONAL_RECORD = "personal_record"
 
     // Exercise fields
     const val EXERCISE_NAME = "name"
@@ -32,6 +32,7 @@ object FirestoreFields {
     const val EXERCISE_IS_TEMPLATE = "template"
     const val EXERCISE_SETS = "sets"
     const val EXERCISE_NOTE = "note"
+    const val EXERCISE_BEST_SET = "bestSet"
 
     // Sets fields
     const val SETS_TYPE = "type"
@@ -68,7 +69,8 @@ data class Workout(
     var date: LocalDateTime,
     var isTemplate: Boolean,
     var exercises: List<Exercise>,
-    val note: String? = null
+    val note: String? = null,
+    val personalRecords: Int = 0
 ) {
     companion object {
         fun fromFirestoreMap(data: Map<String, Any>?) = data?.let {
@@ -86,7 +88,8 @@ data class Workout(
                         Exercise.fromFirestoreMap(map)
                     },
                 note = it[FirestoreFields.WORKOUT_NOTE] as? String,
-                volume = it[FirestoreFields.WORKOUT_VOLUME] as? Double
+                volume = it[FirestoreFields.WORKOUT_VOLUME] as? Double,
+                personalRecords = it[FirestoreFields.WORKOUT_PERSONAL_RECORD] as? Int ?: 0
             )
         }
         //TODO(RETURN THIS INSTEAD OF THROWING)
@@ -99,7 +102,8 @@ data class Exercise(
     var bodyPart: BodyPart,
     var category: Category,
     var isTemplate: Boolean,
-    var sets: List<Sets>,
+    val sets: MutableList<Sets>,
+    val bestSet: Sets = Sets(SetType.DEFAULT, null, null),
     var note: String?,
 ) {
     companion object {
@@ -115,8 +119,9 @@ data class Exercise(
                     Sets.fromFirestoreMap(
                         map
                     )
-                },
-                note = it[FirestoreFields.EXERCISE_NOTE] as? String
+                }.toMutableList(),
+                note = it[FirestoreFields.EXERCISE_NOTE] as? String,
+                bestSet = it[FirestoreFields.EXERCISE_BEST_SET] as Sets
             )
         }
     }
