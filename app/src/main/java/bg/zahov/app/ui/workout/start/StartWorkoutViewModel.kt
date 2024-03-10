@@ -10,9 +10,7 @@ import bg.zahov.app.data.model.Workout
 import bg.zahov.app.data.model.WorkoutState
 import bg.zahov.app.getWorkoutProvider
 import bg.zahov.app.getWorkoutStateManager
-import bg.zahov.app.util.currDateToString
 import kotlinx.coroutines.launch
-import java.time.LocalDate
 import java.time.LocalDateTime
 
 class StartWorkoutViewModel(application: Application) : AndroidViewModel(application) {
@@ -88,10 +86,12 @@ class StartWorkoutViewModel(application: Application) : AndroidViewModel(applica
             val dupe = Workout(
                 id = workout.id,
                 name = "${workout.name} duplicate $count",
+                volume = workout.volume,
                 duration = null,
                 date = LocalDateTime.now(),
                 isTemplate = true,
-                exercises = workout.exercises
+                exercises = workout.exercises,
+                note = workout.note
             )
             val list = _templates.value?.toMutableList()
             list?.add(dupe)

@@ -18,11 +18,11 @@ object FirestoreFields {
     const val WORKOUT_ID = "id"
     const val WORKOUT_NAME = "name"
     const val WORKOUT_DURATION = "duration"
+    const val WORKOUT_VOLUME = "volume"
     const val WORKOUT_DATE = "date"
     const val WORKOUT_IS_TEMPLATE = "isTemplate"
     const val WORKOUT_EXERCISES = "exercises"
     const val WORKOUT_NOTE = "note"
-    const val WORKOUT_VOLUME = "volume"
     const val WORKOUT_PERSONAL_RECORD = "personal_record"
 
     // Exercise fields
@@ -70,7 +70,7 @@ data class Workout(
     var isTemplate: Boolean,
     var exercises: List<Exercise>,
     val note: String? = null,
-    val personalRecords: Int = 0
+    val personalRecords: Int = 0,
 ) {
     companion object {
         fun fromFirestoreMap(data: Map<String, Any>?) = data?.let {
@@ -102,9 +102,9 @@ data class Exercise(
     var bodyPart: BodyPart,
     var category: Category,
     var isTemplate: Boolean,
-    val sets: MutableList<Sets>,
-    val bestSet: Sets = Sets(SetType.DEFAULT, null, null),
-    var note: String?,
+    val sets: MutableList<Sets> = mutableListOf(),
+    var bestSet: Sets = Sets(SetType.DEFAULT, null, null),
+    var note: String? = null,
 ) {
     companion object {
         fun fromFirestoreMap(data: Map<String, Any>?) = data?.let {
@@ -121,7 +121,9 @@ data class Exercise(
                     )
                 }.toMutableList(),
                 note = it[FirestoreFields.EXERCISE_NOTE] as? String,
-                bestSet = it[FirestoreFields.EXERCISE_BEST_SET] as Sets
+                bestSet = (it[FirestoreFields.EXERCISE_BEST_SET] as? Map<String, Any>)?.let { map ->
+                    Sets.fromFirestoreMap(map)
+                } ?: Sets(SetType.DEFAULT, null, null)
             )
         }
     }
@@ -135,7 +137,11 @@ data class Sets(
     companion object {
         fun fromFirestoreMap(data: Map<String, Any>?) = data?.let {
             Sets(
-                type = (it[FirestoreFields.SETS_TYPE] as? String)?.let { string -> SetType.valueOf(string) } ?: SetType.DEFAULT,
+                type = (it[FirestoreFields.SETS_TYPE] as? String)?.let { string ->
+                    SetType.fromKey(
+                        string
+                    )
+                } ?: SetType.DEFAULT,
                 firstMetric = it[FirestoreFields.SETS_FIRST_METRIC] as? Double,
                 secondMetric = (it[FirestoreFields.SETS_SECOND_METRIC] as? Long)?.toInt()
             )

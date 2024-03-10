@@ -47,4 +47,7 @@ class WorkoutRepositoryImpl : WorkoutRepository {
     }
 
     override suspend fun getWorkoutById(id: String) = firestore.getWorkoutById(id)
+    override suspend fun updateExercises(exercises: List<Exercise>) {
+        firestore.updateExerciseInBatch(exercises)
+    }
 }

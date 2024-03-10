@@ -1,39 +1,67 @@
 package bg.zahov.app.util
 
-import android.animation.ArgbEvaluator
 import android.animation.ObjectAnimator
 import android.animation.PropertyValuesHolder
 import android.util.Log
 import android.view.View
-import androidx.core.content.ContextCompat
+import bg.zahov.app.data.model.BodyPart
 import bg.zahov.app.data.model.Category
-import bg.zahov.app.data.model.ClickableSet
 import bg.zahov.app.data.model.Exercise
 import bg.zahov.app.data.model.FirestoreFields
-import bg.zahov.app.data.model.InteractableExerciseWrapper
 import bg.zahov.app.data.model.SetType
 import bg.zahov.app.data.model.Sets
 import bg.zahov.app.data.model.Units
 import bg.zahov.app.data.model.User
 import bg.zahov.app.data.model.Workout
+import bg.zahov.app.ui.exercise.ExerciseAdapterWrapper
 import bg.zahov.app.ui.workout.add.ExerciseSetAdapterExerciseWrapper
 import bg.zahov.app.ui.workout.add.ExerciseSetAdapterSetWrapper
-import bg.zahov.app.ui.workout.add.SetEntry
 import bg.zahov.fitness.app.R
 import com.google.common.hash.Hashing
 import com.google.firebase.Timestamp
 import java.nio.charset.StandardCharsets
 import java.time.Instant
-import java.time.LocalDate
 import java.time.LocalDateTime
 import java.time.ZoneOffset
-import java.time.format.DateTimeFormatter
 import java.util.Date
-import java.util.Locale
 import java.util.UUID
 
 fun User.toFirestoreMap(): Map<String, Any?> {
     return mapOf(FirestoreFields.USER_NAME to name)
+}
+
+fun Workout.toFirestoreMap(): Map<String, Any?> {
+    return mapOf(
+        FirestoreFields.WORKOUT_ID to id,
+        FirestoreFields.WORKOUT_NAME to name,
+        FirestoreFields.WORKOUT_DURATION to duration,
+        FirestoreFields.WORKOUT_VOLUME to volume,
+        FirestoreFields.WORKOUT_DATE to date.toTimestamp(),
+        FirestoreFields.WORKOUT_IS_TEMPLATE to isTemplate,
+        FirestoreFields.WORKOUT_EXERCISES to exercises.map { it.toFirestoreMap() },
+        FirestoreFields.WORKOUT_NOTE to note,
+        FirestoreFields.WORKOUT_PERSONAL_RECORD to personalRecords
+    )
+}
+
+fun Exercise.toFirestoreMap(): Map<String, Any?> {
+    return mapOf(
+        FirestoreFields.EXERCISE_NAME to name,
+        FirestoreFields.EXERCISE_BODY_PART to bodyPart.toString(),
+        FirestoreFields.EXERCISE_CATEGORY to category.toString(),
+        FirestoreFields.EXERCISE_IS_TEMPLATE to isTemplate,
+        FirestoreFields.EXERCISE_SETS to sets.map { it.toFirestoreMap() },
+        FirestoreFields.EXERCISE_BEST_SET to bestSet,
+        FirestoreFields.EXERCISE_NOTE to note
+    )
+}
+
+fun Sets.toFirestoreMap(): Map<String, Any?> {
+    return mapOf(
+        FirestoreFields.SETS_TYPE to type,
+        FirestoreFields.SETS_FIRST_METRIC to firstMetric,
+        FirestoreFields.SETS_SECOND_METRIC to secondMetric
+    )
 }
 
 fun Timestamp.toLocalDateTime(): LocalDateTime {
@@ -45,38 +73,6 @@ fun Timestamp.toLocalDateTime(): LocalDateTime {
 
 fun LocalDateTime.toTimestamp(): Timestamp {
     return Timestamp(Date.from(this.toInstant(ZoneOffset.UTC)))
-}
-
-fun Workout.toFirestoreMap(): Map<String, Any?> {
-    return mapOf(
-        FirestoreFields.WORKOUT_ID to id,
-        FirestoreFields.WORKOUT_NAME to name,
-        FirestoreFields.WORKOUT_DURATION to duration,
-        FirestoreFields.WORKOUT_DATE to date.toTimestamp(),
-        FirestoreFields.WORKOUT_IS_TEMPLATE to isTemplate,
-        FirestoreFields.WORKOUT_EXERCISES to exercises.map { it.toFirestoreMap() },
-        FirestoreFields.WORKOUT_NOTE to note,
-        FirestoreFields.WORKOUT_VOLUME to volume
-    )
-}
-
-fun Exercise.toFirestoreMap(): Map<String, Any?> {
-    return mapOf(
-        FirestoreFields.EXERCISE_NAME to name,
-        FirestoreFields.EXERCISE_BODY_PART to bodyPart.toString(),
-        FirestoreFields.EXERCISE_CATEGORY to category.toString(),
-        FirestoreFields.EXERCISE_IS_TEMPLATE to isTemplate,
-        FirestoreFields.EXERCISE_SETS to sets.map { it.toFirestoreMap() },
-        FirestoreFields.EXERCISE_NOTE to note
-    )
-}
-
-fun Sets.toFirestoreMap(): Map<String, Any?> {
-    return mapOf(
-        FirestoreFields.SETS_TYPE to type,
-        FirestoreFields.SETS_FIRST_METRIC to firstMetric,
-        FirestoreFields.SETS_SECOND_METRIC to secondMetric
-    )
 }
 
 //fun Settings.toFirestoreMap(): Map<String, Any?> {
@@ -97,8 +93,6 @@ fun Sets.toFirestoreMap(): Map<String, Any?> {
 
 fun String.isEmail() = Regex("^\\S+@\\S+\\.\\S+$").matches(this)
 
-//TODO(Are these functions really needed)
-
 fun View.applyScaleAnimation() {
     val scaleAnimation = ObjectAnimator.ofPropertyValuesHolder(
         this,
@@ -112,70 +106,18 @@ fun View.applyScaleAnimation() {
     scaleAnimation.start()
 }
 
-//fun View.applyScaleAnimation() {
-//    val duration = 140L
-//    val highlightColor = Color.WHITE
-//
-//    val originalColor = this.background?.let { it as? ColorDrawable }?.color ?: Color.TRANSPARENT
-//
-//    val colorAnimator = ObjectAnimator.ofObject(
-//        this,
-//        "backgroundColor",
-//        ArgbEvaluator(),
-//        originalColor,
-//        highlightColor
-//    ).apply {
-//        this.duration = duration
-//    }
-//
-//    val revertColorAnimator = ObjectAnimator.ofObject(
-//        this,
-//        "backgroundColor",
-//        ArgbEvaluator(),
-//        highlightColor,
-//        originalColor
-//    ).apply {
-//        this.duration = duration
-//    }
-//
-//    val animatorSet = AnimatorSet().apply {
-//        playSequentially(colorAnimator, revertColorAnimator)
-//    }
-//
-//    this.setOnClickListener {
-//        animatorSet.start()
-//    }
-//}
-
-fun View.applySelectAnimation(
-    isSelected: Boolean,
-    selectedColorResId: Int,
-    unselectedColorResId: Int,
-    duration: Long = 300,
-) {
-    val targetColor = ContextCompat.getColor(
-        context,
-        if (isSelected) selectedColorResId else unselectedColorResId
-    )
-
-    val animator = ObjectAnimator.ofInt(this, "backgroundColor", R.color.background, targetColor)
-    animator.setEvaluator(ArgbEvaluator())
-    animator.duration = duration
-    animator.addUpdateListener { animation -> setBackgroundColor(animation.animatedValue as Int) }
-    animator.start()
-}
-
 fun hashString(input: String) =
     Hashing.sha256().hashString(input, StandardCharsets.UTF_8).toString()
 
 fun generateRandomId(): String = UUID.randomUUID().toString().take(16)
 
-fun currDateToString(): String = LocalDate.now().format(
-    DateTimeFormatter.ofPattern(
-        "dd-MM-yyyy",
-        Locale.getDefault()
-    )
-)
+
+//fun currDateToString(): String = LocalDate.now().format(
+//    DateTimeFormatter.ofPattern(
+//        "dd-MM-yyyy",
+//        Locale.getDefault()
+//    )
+//)
 
 fun Long.timeToString(): String = String.format(
     "%02d:%02d:%02d",
@@ -198,57 +140,32 @@ fun String.parseTimeStringToLong(): Long {
     return ((hours * 60 * 60) + (minutes * 60) + seconds) * 1000
 }
 
-fun InteractableExerciseWrapper.toExercise() = Exercise(
-    name = this.name,
-    bodyPart = this.bodyPart,
-    category = this.category,
-    isTemplate = this.isTemplate,
-    sets = this.sets.map { it.set },
-    note = this.note
-)
-
-//fun Exercise.toInteractableExerciseWrapper() = InteractableExerciseWrapper(
-//    name = this.name,
-//    bodyPart = this.bodyPart,
-//    category = this.category,
-//    isTemplate = this.isTemplate,
-//    sets = this.sets.map { ClickableSet(it, false) },
-//    note = this.note
-//)
-
-fun Date.toTimeStamp() = Timestamp(this)
-
-//fun ExerciseSetAdapterExerciseWrapper.toExercise(): Exercise {
-//    return Exercise(
-//        name = this.name,
-//
-//    )
-//}
 fun Exercise.toExerciseSetAdapterWrapper(units: Units): ExerciseSetAdapterExerciseWrapper {
     return ExerciseSetAdapterExerciseWrapper(
         name = this.name,
         backgroundResource = R.color.background,
-        firstInputColumnVisibility = when(this.category) {
+        firstInputColumnVisibility = when (this.category) {
             Category.RepsOnly -> View.GONE
             Category.Cardio -> View.GONE
             Category.Timed -> View.GONE
             else -> View.VISIBLE
         },
-        firstInputColumnResource = when(this.category) {
+        firstInputColumnResource = when (this.category) {
             Category.AssistedWeight -> {
-                when(units){
+                when (units) {
                     Units.METRIC -> R.string.kg_minus
                     Units.BANANA -> R.string.lbs_minus
                 }
             }
+
             else -> {
-                when(units) {
+                when (units) {
                     Units.METRIC -> R.string.kg_column_text
                     Units.BANANA -> R.string.lbs_column_text
                 }
             }
         },
-        secondInputColumnResource = when(this.category) {
+        secondInputColumnResource = when (this.category) {
             Category.Cardio -> R.string.time
             Category.Timed -> R.string.time
             else -> {
@@ -262,7 +179,7 @@ fun Exercise.toExerciseSetAdapterWrapper(units: Units): ExerciseSetAdapterExerci
 }
 
 fun ExerciseSetAdapterExerciseWrapper.toExercise(): Exercise {
-    return Exercise (
+    return Exercise(
         name = this.name,
         bodyPart = this.bodyPart,
         category = this.category,
@@ -273,25 +190,44 @@ fun ExerciseSetAdapterExerciseWrapper.toExercise(): Exercise {
     )
 }
 
-fun Sets.toExerciseSetAdapterSetWrapper(number: String, category: Category, previousResults: String): ExerciseSetAdapterSetWrapper {
+fun Sets.toExerciseSetAdapterSetWrapper(
+    number: String,
+    category: Category,
+    previousResults: String,
+): ExerciseSetAdapterSetWrapper {
     return ExerciseSetAdapterSetWrapper(
-        setIndicator = when(this.type) {
+        setIndicator = when (this.type) {
             SetType.WARMUP -> R.string.warmup_set_indicator
             SetType.DROP_SET -> R.string.drop_set_indicator
             SetType.DEFAULT -> R.string.default_set_indicator
             SetType.FAILURE -> R.string.failure_set_indicator
         },
-        secondInputFieldVisibility = when(category) {
-            Category.RepsOnly -> View.GONE
-            Category.Cardio -> View.GONE
-            Category.Timed -> View.GONE
+        secondInputFieldVisibility = when (category) {
+            Category.RepsOnly, Category.Cardio, Category.Timed -> View.GONE
             else -> View.VISIBLE
         },
         setNumber = number,
         set = this,
         backgroundResource = R.color.completed_set,
         previousResults = previousResults,
+    )
+}
 
+fun Exercise.toExerciseAdapterWrapper(): ExerciseAdapterWrapper {
+    return ExerciseAdapterWrapper(
+        name = this.name,
+        bodyPart = this.bodyPart.key,
+        category = this.category.key,
+        imageResource = when (this.bodyPart) {
+            BodyPart.Core -> R.drawable.ic_abs
+            BodyPart.Arms -> R.drawable.ic_arms
+            BodyPart.Back -> R.drawable.ic_back
+            BodyPart.Chest -> R.drawable.ic_chest
+            BodyPart.Legs -> R.drawable.ic_legs
+            BodyPart.Shoulders -> R.drawable.ic_shoulders
+            else -> R.drawable.ic_olympic
+        },
+        backgroundResource = R.color.background
     )
 }
 

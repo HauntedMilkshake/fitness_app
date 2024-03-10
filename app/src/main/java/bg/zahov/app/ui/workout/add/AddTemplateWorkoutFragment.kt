@@ -7,16 +7,15 @@ import android.view.View
 import android.view.ViewGroup
 import android.widget.Toast
 import androidx.core.os.bundleOf
-import androidx.core.widget.addTextChangedListener
 import androidx.fragment.app.Fragment
 import androidx.fragment.app.viewModels
 import androidx.lifecycle.map
 import androidx.navigation.fragment.findNavController
+import androidx.recyclerview.widget.ItemTouchHelper
 import androidx.recyclerview.widget.LinearLayoutManager
 import bg.zahov.app.data.model.state.AddTemplateWorkoutUiMapper
-import bg.zahov.app.data.model.ClickableSet
-import bg.zahov.app.data.model.InteractableExerciseWrapper
 import bg.zahov.app.data.model.SetType
+import bg.zahov.app.util.SetSwipeGesture
 import bg.zahov.app.util.applyScaleAnimation
 import bg.zahov.fitness.app.R
 import bg.zahov.fitness.app.databinding.FragmentAddWorkoutTemplateBinding
@@ -32,6 +31,7 @@ class AddTemplateWorkoutFragment : Fragment() {
     private val edit by lazy {
         arguments?.getBoolean("EDIT") ?: false
     }
+
     private val id by lazy {
         arguments?.getString("WORKOUT_ID")
     }
@@ -50,14 +50,16 @@ class AddTemplateWorkoutFragment : Fragment() {
         val inflater = TransitionInflater.from(requireContext())
         enterTransition = inflater.inflateTransition(R.transition.slide_up)
         exitTransition = inflater.inflateTransition(R.transition.fade_out)
-        addWorkoutViewModel.initEditWorkoutId(edit,
-            id ?: "")
+        addWorkoutViewModel.initEditWorkoutId(
+            edit,
+            id ?: ""
+        )
     }
 
     override fun onViewCreated(view: View, savedInstanceState: Bundle?) {
         super.onViewCreated(view, savedInstanceState)
         binding.apply {
-            newWorkoutText.setText(if(edit) R.string.edit_workout_template else R.string.new_workout_template)
+            newWorkoutText.setText(if (edit) R.string.edit_workout_template else R.string.new_workout_template)
 
             stopCreatingWorkout.setOnClickListener {
                 it.applyScaleAnimation()
@@ -66,51 +68,39 @@ class AddTemplateWorkoutFragment : Fragment() {
 
             val exerciseSetAdapter = ExerciseSetAdapter().apply {
                 itemClickListener = object : ExerciseSetAdapter.ItemClickListener<WorkoutEntry> {
-                    override fun onSetCheckClicked(exercise: InteractableExerciseWrapper, set: ClickableSet, clickedView: View) {
-                        //NOOP
+                    override fun onSetCheckClicked(itemPosition: Int) {
+                        addWorkoutViewModel.onSetCheckClicked(itemPosition)
                     }
 
-                    override fun onAddSet(item: InteractableExerciseWrapper, set: ClickableSet) {
-                        addWorkoutViewModel.addSet(item, set)
+                    override fun onAddSet(itemPosition: Int) {
+                        addWorkoutViewModel.addSet(itemPosition)
                     }
 
                     override fun onNoteToggle(itemPosition: Int) {
                         addWorkoutViewModel.toggleExerciseNoteField(itemPosition)
                     }
 
-                    override fun onReplaceExercise(item: InteractableExerciseWrapper) {
-                        addWorkoutViewModel.setReplaceableExercise(item)
-                        findNavController().navigate(
-                            R.id.create_workout_template_to_add_exercise,
-                            bundleOf("REPLACING" to true)
-                        )
+                    override fun onReplaceExercise(itemPosition: Int) {
+                        addWorkoutViewModel.setReplaceableExercise(itemPosition)
+                        findNavController().navigate(R.id.create_workout_template_to_add_exercise, bundleOf("REPLACING" to true))
                     }
 
-                    override fun onRemoveExercise(item: InteractableExerciseWrapper) {
-                        addWorkoutViewModel.removeExercise(item)
+                    override fun onRemoveExercise(itemPosition: Int) {
+                        addWorkoutViewModel.removeExercise(itemPosition)
                     }
 
-                    override fun onSetTypeChanged(
-                        item: InteractableExerciseWrapper,
-                        set: ClickableSet,
-                        setType: SetType,
-                    ) {
-                        TODO("Not yet implemented")
+                    override fun onSetTypeChanged(itemPosition: Int, setType: SetType) {
+                        addWorkoutViewModel.onSetTypeChanged(itemPosition, setType)
                     }
                 }
                 swipeActionListener = object : ExerciseSetAdapter.SwipeActionListener {
-                    override fun onDeleteSet(item: InteractableExerciseWrapper, set: ClickableSet) {
-                        addWorkoutViewModel.removeSet(item, set)
+                    override fun onDeleteSet(itemPosition: Int) {
+                        addWorkoutViewModel.removeSet(itemPosition)
                     }
                 }
                 textChangeListener = object : ExerciseSetAdapter.TextActionListener {
-                    override fun onInputFieldChanged(
-                        exercise: InteractableExerciseWrapper,
-                        set: ClickableSet,
-                        metric: String,
-                        id: Int,
-                    ) {
-                        addWorkoutViewModel.onInputFieldTextChanged(exercise, set, metric, id)
+                    override fun onInputFieldChanged(itemPosition: Int, metric: String, id: Int) {
+                        addWorkoutViewModel.onInputFieldChanged(itemPosition, metric, id)
                     }
                 }
             }
@@ -120,20 +110,7 @@ class AddTemplateWorkoutFragment : Fragment() {
                 layoutManager = LinearLayoutManager(requireContext())
             }
 
-//            val swipeGesture = object : SwipeGesture() {
-//                override fun onSwiped(viewHolder: RecyclerView.ViewHolder, direction: Int) {
-//                    when(direction){
-//                        ItemTouchHelper.LEFT -> {
-//                            if(viewHolder is  ExerciseSetAdapter.SetViewHolder && viewHolder.itemViewType == R.layout.item_set) {
-//                                viewHolder.deleteSet()
-//                            }
-//                        }
-//                    }
-//                }
-//            }
-//            val itemTouchHelper = ItemTouchHelper(swipeGesture)
-//            itemTouchHelper.attachToRecyclerView(exercisesRecyclerView)
-
+            ItemTouchHelper(SetSwipeGesture()).attachToRecyclerView(exercisesRecyclerView)
 
             addExercise.setOnClickListener {
                 findNavController().navigate(
@@ -159,7 +136,7 @@ class AddTemplateWorkoutFragment : Fragment() {
                 it.applyScaleAnimation()
                 addWorkoutViewModel.workoutName = workoutNameFieldText.text.toString()
                 addWorkoutViewModel.workoutNote = workoutNoteFieldText.text.toString()
-                addWorkoutViewModel.onSave()
+                addWorkoutViewModel.saveTemplateWorkout()
             }
 
             cancel.setOnClickListener {

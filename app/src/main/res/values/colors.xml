@@ -18,4 +18,6 @@
     <color name="blue_text">#3D8BC9</color>
     <color name="less_vibrant_text">#73777A</color>
     <color name="completed_set">#00FF00</color>
+    <color name="drop_set">#673ab7</color>
+    <color name="warmup_set">#FFA500</color>
 </resources>

@@ -42,11 +42,11 @@ class StartWorkoutFragment : Fragment() {
             val workoutAdapter = TemplateWorkoutAdapter().apply {
                 itemClickListener = object : TemplateWorkoutAdapter.ItemClickListener<Workout> {
                     override fun onWorkoutClicked(item: Workout, clickedView: View) {
-                        //TODO(CUSTOM WORKOUT FRAGMENT)
                     }
 
                     override fun onWorkoutStart(position: Int) {
                         startWorkoutViewModel.startWorkoutFromTemplate(position)
+//                        findNavController().navigate(R.id.to_workout_fragment)
                     }
 
                     override fun onWorkoutDelete(position: Int) {

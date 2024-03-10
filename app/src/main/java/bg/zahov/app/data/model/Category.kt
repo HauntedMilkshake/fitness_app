@@ -5,9 +5,9 @@ class CategoryKeys {
         const val BARBELL = "Barbell"
         const val DUMBBELL = "Dumbbell"
         const val MACHINE = "Machine"
-        const val ADDITIONAL_WEIGHT = "Additional weight"
-        const val ASSISTED_WEIGHT = "Assisted weight"
-        const val REPS_ONLY = "Reps only"
+        const val ADDITIONAL_WEIGHT = "AdditionalWeight"
+        const val ASSISTED_WEIGHT = "AssistedWeight"
+        const val REPS_ONLY = "RepsOnly"
         const val CARDIO = "Cardio"
         const val TIMED = "Timed"
         const val NONE = "None"
@@ -28,6 +28,6 @@ enum class Category(val key: String) {
     Cable(CategoryKeys.CABLE);
 
     companion object {
-        fun fromKey(key: String) = values().firstOrNull { it.key == key }
+        fun fromKey(key: String) = values().firstOrNull { it.key.equals(key, true)}
     }
 }

@@ -165,6 +165,17 @@ class FirestoreManager {
                 .add(newWorkout.toFirestoreMap())
         }
 
+    suspend fun updateExerciseInBatch(exercises: List<Exercise>) {
+        withContext(Dispatchers.IO) {
+            val batch = firestore.batch()
+            exercises.forEach {
+                batch.set(firestore.collection(USERS_COLLECTION).document(userId).collection(
+                    TEMPLATE_EXERCISES).document(it.name), it.toFirestoreMap())
+            }
+            batch.commit()
+        }
+    }
+
     suspend fun deleteTemplateWorkouts(workout: Workout) {
         withContext(Dispatchers.IO) {
             firestore.collection(USERS_COLLECTION).document(userId)

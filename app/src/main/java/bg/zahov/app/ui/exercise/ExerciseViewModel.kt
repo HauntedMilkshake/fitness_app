@@ -1,21 +1,20 @@
 package bg.zahov.app.ui.exercise
 
 import android.app.Application
-import android.util.Log
 import androidx.lifecycle.AndroidViewModel
 import androidx.lifecycle.LiveData
 import androidx.lifecycle.MutableLiveData
 import androidx.lifecycle.viewModelScope
 import bg.zahov.app.data.exception.CriticalDataNullException
 import bg.zahov.app.data.model.Exercise
-import bg.zahov.app.data.model.InteractableExerciseWrapper
 import bg.zahov.app.data.model.SelectableFilter
 import bg.zahov.app.getAddExerciseToWorkoutProvider
 import bg.zahov.app.getFilterProvider
 import bg.zahov.app.getReplaceableExerciseProvider
 import bg.zahov.app.getSelectableExerciseProvider
 import bg.zahov.app.getWorkoutProvider
-import bg.zahov.app.util.toInteractableExerciseWrapper
+import bg.zahov.app.util.toExerciseAdapterWrapper
+import bg.zahov.fitness.app.R
 import kotlinx.coroutines.launch
 
 class ExerciseViewModel(application: Application) : AndroidViewModel(application) {
@@ -42,8 +41,8 @@ class ExerciseViewModel(application: Application) : AndroidViewModel(application
     val state: LiveData<State>
         get() = _state
 
-    private val _userExercises = MutableLiveData<List<InteractableExerciseWrapper>>()
-    val userExercises: LiveData<List<InteractableExerciseWrapper>>
+    private val _userExercises = MutableLiveData<List<ExerciseAdapterWrapper>>()
+    val userExercises: LiveData<List<ExerciseAdapterWrapper>>
         get() = _userExercises
 
     private val _searchFilters = MutableLiveData<List<SelectableFilter>>(listOf())
@@ -54,7 +53,8 @@ class ExerciseViewModel(application: Application) : AndroidViewModel(application
     var selectable = false
     var addable = false
     private var search: String? = null
-    private val allExercises: MutableList<Exercise> = mutableListOf()
+    private var exerciseTemplates = listOf<Exercise>()
+    private val allExercises: MutableList<ExerciseAdapterWrapper> = mutableListOf()
     private var currentlySelectedExerciseToReplace: Int? = null
 
     init {
@@ -62,20 +62,24 @@ class ExerciseViewModel(application: Application) : AndroidViewModel(application
         getFilters()
     }
 
-    fun onInteractableExerciseClicked(exercise: InteractableExerciseWrapper, position: Int) {
-        val captured = _userExercises.value.orEmpty()
+    fun onExerciseClicked(position: Int) {
+        val captured = _userExercises.value.orEmpty().toMutableList()
+
         if (replaceable) {
-            currentlySelectedExerciseToReplace?.let {
-                if (captured[it] != exercise) {
-                    captured[it].isSelected = false
-                }
+            currentlySelectedExerciseToReplace?.let { index ->
+                captured[index].backgroundResource = R.color.background
             }
         }
-        captured[position].let {
-            it.isSelected = !it.isSelected
-            currentlySelectedExerciseToReplace =
-                if (replaceable && it.isSelected) captured.indexOf(it) else null
-        }
+
+        captured[position].backgroundResource =
+            if (captured[position].backgroundResource == R.color.selected) {
+                R.color.background
+            } else {
+                R.color.selected
+            }
+
+        currentlySelectedExerciseToReplace = if (replaceable) position else null
+
         _userExercises.value = captured
     }
 
@@ -86,33 +90,37 @@ class ExerciseViewModel(application: Application) : AndroidViewModel(application
 
         val selectedExercises = _userExercises.value.orEmpty()
         selectedExercises.forEach {
-            if (it.isSelected) {
-                it.isSelected = false
+            if (it.backgroundResource == R.color.selected) {
+                it.backgroundResource = R.color.background
             }
         }
         _userExercises.value = selectedExercises
+        resetSelectedExercises()
     }
 
     fun confirmSelectedExercises() {
         when {
             replaceable -> {
-                _userExercises.value?.find { it.isSelected }?.let {
-                    replaceableExerciseProvider.updateExerciseToReplace(it)
+                _userExercises.value?.find { it.backgroundResource == R.color.selected }?.let {
+                    exerciseTemplates.find { template -> template.name == it.name }?.let {
+                        replaceableExerciseProvider.updateExerciseToReplace(it)
+                    }
                 }
             }
 
             else -> {
-                val selectedExercises = mutableListOf<InteractableExerciseWrapper>()
+                val selectedExercises = mutableListOf<Exercise>()
                 _userExercises.value?.forEach {
-                    if (it.isSelected) {
-                        selectedExercises.add(it)
+                    if (it.backgroundResource == R.color.selected) {
+                        exerciseTemplates.find { exercise -> exercise.name == it.name }
+                            ?.let { found ->
+                                selectedExercises.add(found)
+                            }
                     }
                 }
 
                 if (selectedExercises.isNotEmpty()) {
-                    Log.d("adding to providers", "adding to providers")
                     if (addable) {
-                        Log.d("ADDABLE", "ADDABLE")
                         addExerciseToWorkoutProvider.addExercises(selectedExercises)
                     }
                     if (selectable) selectableExerciseProvider.addExercises(selectedExercises)
@@ -128,11 +136,15 @@ class ExerciseViewModel(application: Application) : AndroidViewModel(application
             _state.postValue(State.Loading(true))
             try {
                 repo.getTemplateExercises().collect {
-                    _userExercises.postValue(it.map { exercise -> exercise.toInteractableExerciseWrapper() })
+                    exerciseTemplates = it
+                    val templateExercises =
+                        it.map { exercise -> exercise.toExerciseAdapterWrapper() }
+
+                    _userExercises.postValue(templateExercises)
 
                     allExercises.apply {
                         clear()
-                        addAll(it)
+                        addAll(templateExercises)
                     }
 
                     _state.postValue(State.Default)
@@ -153,7 +165,7 @@ class ExerciseViewModel(application: Application) : AndroidViewModel(application
     }
 
     fun searchExercises(name: String?) {
-        val selectedFilters = _searchFilters.value ?: mutableListOf()
+        val selectedFilters = _searchFilters.value.orEmpty().toMutableList()
         val newExercises = _userExercises.value?.let {
             //TODO(Test it vs allExercises)
             when {
@@ -161,7 +173,7 @@ class ExerciseViewModel(application: Application) : AndroidViewModel(application
                 name.isNullOrEmpty() && selectedFilters.isNotEmpty() -> {
                     allExercises.filter { exercise ->
                         selectedFilters.any { filter ->
-                            filter.name == exercise.bodyPart.key || filter.name == exercise.category.key
+                            filter.name == exercise.bodyPart || filter.name == exercise.category
                         }
                     }
                 }
@@ -173,9 +185,9 @@ class ExerciseViewModel(application: Application) : AndroidViewModel(application
                 else -> allExercises.filter { exercise ->
                     val nameMatches = name.isNullOrEmpty() || exercise.name.contains(name, true)
                     val categoryMatches =
-                        selectedFilters.any { filter -> filter.name == exercise.category.key }
+                        selectedFilters.any { filter -> filter.name == exercise.category }
                     val bodyPartMatches =
-                        selectedFilters.any { filter -> filter.name == exercise.bodyPart.key }
+                        selectedFilters.any { filter -> filter.name == exercise.bodyPart }
 
                     nameMatches && (categoryMatches || bodyPartMatches)
                 }
@@ -183,7 +195,7 @@ class ExerciseViewModel(application: Application) : AndroidViewModel(application
         } ?: emptyList()
 
         search = name
-        _userExercises.value = newExercises.map { it.toInteractableExerciseWrapper() }
+        _userExercises.value = newExercises
 
         if (newExercises.isEmpty()) _state.value = State.NoResults(true)
     }
@@ -193,6 +205,10 @@ class ExerciseViewModel(application: Application) : AndroidViewModel(application
             filterProvider.removeFilter(filter)
         }
         searchExercises(search)
+    }
+
+    private fun resetSelectedExercises() {
+        selectableExerciseProvider.resetSelectedExercises()
     }
 
     sealed interface State {

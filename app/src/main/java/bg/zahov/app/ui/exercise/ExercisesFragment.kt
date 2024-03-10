@@ -5,7 +5,6 @@ import android.animation.AnimatorListenerAdapter
 import android.animation.ObjectAnimator
 import android.os.Bundle
 import android.transition.TransitionInflater
-import android.util.Log
 import android.view.LayoutInflater
 import android.view.View
 import android.view.ViewGroup
@@ -16,7 +15,6 @@ import androidx.fragment.app.viewModels
 import androidx.lifecycle.map
 import androidx.navigation.fragment.findNavController
 import androidx.recyclerview.widget.LinearLayoutManager
-import bg.zahov.app.data.model.InteractableExerciseWrapper
 import bg.zahov.app.data.model.state.ExerciseUiMapper
 import bg.zahov.app.data.model.SelectableFilter
 import bg.zahov.app.ui.exercise.filter.FilterAdapter
@@ -114,9 +112,7 @@ class ExercisesFragment : Fragment() {
                                 position: Int,
                             ) {
                                 when {
-                                    replaceable || selectable || addable -> exerciseViewModel.onInteractableExerciseClicked(
-                                        item, position
-                                    )
+                                    replaceable || selectable || addable -> exerciseViewModel.onExerciseClicked(position)
                                     //else -> TODO(Exercise fragment)
                                 }
                             }
@@ -203,7 +199,6 @@ class ExercisesFragment : Fragment() {
                     it.applyScaleAnimation()
                     exerciseViewModel.confirmSelectedExercises()
                     findNavController().navigateUp()
-//                    findNavController().navigate(R.id.exercises_to_create_workout_template)
                 }
             }
 
@@ -253,7 +248,6 @@ class ExercisesFragment : Fragment() {
     override fun onResume() {
         super.onResume()
         exerciseViewModel.getExercises()
-//        exerciseViewModel.resetQueue()
     }
 
     override fun onDestroyView() {

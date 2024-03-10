@@ -43,4 +43,7 @@ class WorkoutProviderImpl : WorkoutProvider {
     }
 
     override suspend fun getWorkoutById(id: String) = workoutRepo.getWorkoutById(id)
+    override suspend fun updateExercises(exercises: List<Exercise>) {
+        workoutRepo.updateExercises(exercises)
+    }
 }

@@ -91,6 +91,18 @@
             android:layout_width="match_parent"
             android:layout_height="wrap_content">
 
+            <com.google.android.material.textview.MaterialTextView
+                android:id="@+id/workout_title_label"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:text="@string/new_workout_template_hint"
+                app:layout_constraintStart_toStartOf="parent"
+                app:layout_constraintTop_toTopOf="parent"
+                android:layout_marginStart="15dp"
+                android:layout_marginTop="15dp"
+                android:textSize="23.5sp"
+                android:textColor="@color/white" />
+
             <com.google.android.material.textfield.TextInputLayout
                 android:id="@+id/workout_name_field"
                 android:layout_width="250dp"
@@ -105,7 +117,7 @@
                 app:boxStrokeWidthFocused="0dp"
                 app:hintTextColor="@color/white"
                 app:layout_constraintStart_toStartOf="parent"
-                app:layout_constraintTop_toBottomOf="@+id/view">
+                app:layout_constraintTop_toBottomOf="@+id/workout_title_label">
 
                 <com.google.android.material.textfield.TextInputEditText
                     android:id="@+id/workout_name_field_text"
@@ -114,17 +126,27 @@
                     android:backgroundTint="@color/input_field_background"
                     android:maxLines="1"
                     android:padding="10dp"
-                    android:text="@string/new_workout_template_hint"
                     android:textColor="@color/white" />
             </com.google.android.material.textfield.TextInputLayout>
 
+            <com.google.android.material.textview.MaterialTextView
+                android:id="@+id/workout_note_label"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:text="@string/workout_template_note"
+                app:layout_constraintStart_toStartOf="parent"
+                app:layout_constraintTop_toBottomOf="@id/workout_name_field"
+                android:layout_marginStart="15dp"
+                android:layout_marginTop="15dp"
+                android:textSize="23.5sp"
+                android:textColor="@color/white" />
+
             <com.google.android.material.textfield.TextInputLayout
                 android:id="@+id/workout_note_field"
-                android:layout_width="0dp"
+                android:layout_width="250dp"
                 android:layout_height="wrap_content"
-                android:layout_marginStart="25dp"
+                android:layout_marginStart="15dp"
                 android:layout_marginTop="15dp"
-                android:layout_marginEnd="25dp"
                 android:visibility="visible"
                 app:boxCornerRadiusBottomEnd="5dp"
                 app:boxCornerRadiusBottomStart="5dp"
@@ -133,9 +155,8 @@
                 app:boxStrokeWidth="0dp"
                 app:boxStrokeWidthFocused="0dp"
                 app:hintTextColor="@color/white"
-                app:layout_constraintEnd_toEndOf="parent"
                 app:layout_constraintStart_toStartOf="parent"
-                app:layout_constraintTop_toBottomOf="@+id/workout_name_field">
+                app:layout_constraintTop_toBottomOf="@+id/workout_note_label">
 
                 <com.google.android.material.textfield.TextInputEditText
                     android:id="@+id/workout_note_field_text"
@@ -144,7 +165,6 @@
                     android:backgroundTint="@color/input_field_background"
                     android:maxLines="1"
                     android:padding="10dp"
-                    android:text="@string/workout_template_note"
                     android:textColor="@color/white" />
             </com.google.android.material.textfield.TextInputLayout>
 

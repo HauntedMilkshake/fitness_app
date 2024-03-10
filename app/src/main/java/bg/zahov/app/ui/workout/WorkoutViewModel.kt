@@ -1,29 +1,34 @@
 package bg.zahov.app.ui.workout
 
 import android.app.Application
-import android.util.Log
+import android.view.View
 import androidx.lifecycle.AndroidViewModel
 import androidx.lifecycle.LiveData
 import androidx.lifecycle.MutableLiveData
 import androidx.lifecycle.viewModelScope
-import bg.zahov.app.data.model.ClickableSet
-import bg.zahov.app.data.model.InteractableExerciseWrapper
+import bg.zahov.app.data.model.Category
+import bg.zahov.app.data.model.Exercise
 import bg.zahov.app.data.model.RestState
 import bg.zahov.app.data.model.SetType
+import bg.zahov.app.data.model.Sets
+import bg.zahov.app.data.model.Units
 import bg.zahov.app.data.model.Workout
 import bg.zahov.app.data.model.WorkoutState
 import bg.zahov.app.getAddExerciseToWorkoutProvider
 import bg.zahov.app.getRestTimerProvider
+import bg.zahov.app.getSettingsProvider
 import bg.zahov.app.getWorkoutProvider
 import bg.zahov.app.getWorkoutStateManager
-import bg.zahov.app.util.currDateToString
+import bg.zahov.app.ui.workout.add.ExerciseEntry
+import bg.zahov.app.ui.workout.add.ExerciseSetAdapterSetWrapper
+import bg.zahov.app.ui.workout.add.SetEntry
+import bg.zahov.app.ui.workout.add.WorkoutEntry
 import bg.zahov.app.util.hashString
 import bg.zahov.app.util.parseTimeStringToLong
-import bg.zahov.app.util.toExercise
-import bg.zahov.app.util.toInteractableExerciseWrapper
+import bg.zahov.app.util.toExerciseSetAdapterSetWrapper
+import bg.zahov.app.util.toExerciseSetAdapterWrapper
 import bg.zahov.fitness.app.R
 import kotlinx.coroutines.launch
-import java.time.LocalDate
 import java.time.LocalDateTime
 import java.time.LocalTime
 import java.util.Random
@@ -45,8 +50,16 @@ class WorkoutViewModel(application: Application) : AndroidViewModel(application)
         application.getRestTimerProvider()
     }
 
-    private val _exercises = MutableLiveData<List<InteractableExerciseWrapper>>()
-    val exercises: LiveData<List<InteractableExerciseWrapper>>
+    private val workoutProvider by lazy {
+        application.getWorkoutProvider()
+    }
+
+    private val settingsProvider by lazy {
+        application.getSettingsProvider()
+    }
+
+    private val _exercises = MutableLiveData<List<WorkoutEntry>>(listOf())
+    val exercises: LiveData<List<WorkoutEntry>>
         get() = _exercises
 
     private val _name = MutableLiveData("New workout")
@@ -66,29 +79,26 @@ class WorkoutViewModel(application: Application) : AndroidViewModel(application)
         get() = _note
 
     private var exerciseToReplaceIndex: Int? = null
+    private var templateExercises = listOf<Exercise>()
+    private lateinit var units: Units
+    private var workoutId: String? = null
 
     init {
         viewModelScope.launch {
             launch {
-                workoutStateManager.template.collect {
-                    it?.let {
-                        Log.d("POSTED EXERCISES", it.exercises.size.toString())
-                        _exercises.postValue(it.exercises.map { exercise -> exercise.toInteractableExerciseWrapper() })
-                        _name.postValue(it.name)
-                    } ?: run {
-                        _name.postValue("New Workout")
-                        //TODO(Technically this manager does not perceive state for notes)
-                        workoutStateManager.updateTemplate(
-                            Workout(
-                                hashString("New workout"),
-                                "New workout",
-                                duration = null,
-                                date = LocalDateTime.now(),
-                                isTemplate = false,
-                                exercises = listOf()
-                            )
-                        )
+                settingsProvider.getSettings().collect { objectChange ->
+                    objectChange.obj?.units?.let {
+                        units = Units.valueOf(it)
                     }
+                }
+            }
+            launch {
+                workoutStateManager.template.collect {
+                    val exercises = _exercises.value.orEmpty().toMutableList()
+                    exercises.addAll(createWorkoutEntryArray(it.exercises))
+                    _name.postValue(it.name)
+                    _exercises.postValue(exercises)
+                    workoutId = it.id
                 }
             }
             launch {
@@ -105,9 +115,9 @@ class WorkoutViewModel(application: Application) : AndroidViewModel(application)
             }
             launch {
                 addExerciseToWorkoutProvider.selectedExercises.collect {
-                    val updatedExercises = _exercises.value.orEmpty().toMutableList()
-                    updatedExercises.addAll(it)
-                    if(updatedExercises.isNotEmpty()) _exercises.postValue(updatedExercises)
+                    val exercisesToUpdate = _exercises.value.orEmpty().toMutableList()
+                    exercisesToUpdate.addAll(createWorkoutEntryArray(it))
+                    _exercises.postValue(exercisesToUpdate)
                 }
             }
             launch {
@@ -127,77 +137,154 @@ class WorkoutViewModel(application: Application) : AndroidViewModel(application)
                     )
                 }
             }
-        }
-    }
-
-    fun onExerciseReplace(item: InteractableExerciseWrapper) {
-        exerciseToReplaceIndex = _exercises.value?.indexOf(item)
-    }
-
-    fun onSetCheckClicked(exercise: InteractableExerciseWrapper, set: ClickableSet) {
-        val captured = _exercises.value.orEmpty()
-        captured.find { it == exercise }?.sets?.find { it == set }?.clicked = !(captured.find { it == exercise }?.sets?.find { it == set }?.clicked ?: true)
-        _exercises.value = captured
-    }
-
-    fun onNoteToggle(position: Int) {
-        val captured = _exercises.value.orEmpty()
-        captured[position].isNoteVisible = !captured[position].isNoteVisible
-        _exercises.value = captured
-    }
-
-    fun removeExercise(item: InteractableExerciseWrapper) {
-        val captured = _exercises.value.orEmpty().toMutableList()
-        captured.remove(item)
-        _exercises.value = captured
-    }
-
-    fun addSet(item: InteractableExerciseWrapper, set: ClickableSet) {
-        val captured = _exercises.value.orEmpty().toMutableList()
-        captured.find { it == item }?.let {
-            val newSets = it.sets.toMutableList()
-            newSets.add(set)
-            newSets.let { sets ->
-                it.sets = sets
+            launch {
+                workoutProvider.getTemplateExercises().collect {
+                    templateExercises = it
+                }
             }
         }
+    }
+
+    private fun createWorkoutEntryArray(exercises: List<Exercise>): List<WorkoutEntry> {
+        val workoutEntries = mutableListOf<WorkoutEntry>()
+        exercises.forEach {
+            workoutEntries.add(ExerciseEntry(it.toExerciseSetAdapterWrapper(units)))
+            it.sets.forEachIndexed { index, set ->
+                workoutEntries.add(
+                    SetEntry(
+                        set.toExerciseSetAdapterSetWrapper(
+                            index.toString(),
+                            it.category,
+                            "${(set.secondMetric)} x ${set.firstMetric}"
+                        )
+                    )
+                )
+            }
+        }
+        return workoutEntries
+    }
+
+    fun onExerciseReplace(itemPosition: Int) {
+        exerciseToReplaceIndex = itemPosition
+    }
+
+    fun onSetCheckClicked(itemPosition: Int) {
+        val captured = _exercises.value.orEmpty()
+        (captured[itemPosition] as? SetEntry)?.setEntry?.backgroundResource =
+            if ((captured[itemPosition] as? SetEntry)?.setEntry?.backgroundResource == R.color.background) R.color.completed_set else R.color.background
         _exercises.value = captured
     }
 
-    fun removeSet(item: InteractableExerciseWrapper, set: ClickableSet) {
+    fun toggleExerciseNoteField(position: Int) {
+        val captured = _exercises.value.orEmpty()
+        (captured[position] as? ExerciseEntry)?.exerciseEntry?.noteVisibility =
+            if ((captured[position] as? ExerciseEntry)?.exerciseEntry?.noteVisibility == View.GONE) View.VISIBLE else View.GONE
+        _exercises.value = captured
+    }
+
+    fun removeExercise(position: Int) {
         val captured = _exercises.value.orEmpty().toMutableList()
-        captured.find { it == item }?.let {
-            val newSets = it.sets.toMutableList()
-            newSets.remove(set)
-            newSets.let { sets ->
-                it.sets = sets
-            }
+        captured.removeAt(position)
+        while (position < captured.size && captured[position] is SetEntry) {
+            captured.removeAt(position)
         }
         _exercises.value = captured
+    }
+
+    fun addSet(position: Int) {
+        val exercises = _exercises.value.orEmpty().toMutableList()
+        val exercise =
+            templateExercises.find { it.name == (exercises[position] as? ExerciseEntry)?.exerciseEntry?.name }
+        if (position == 0 || position == exercises.size - 1) {
+            exercise?.let {
+                val set = if (position + 1 <= it.sets.size) {
+                    SetEntry(
+                        it.sets[position].toExerciseSetAdapterSetWrapper(
+                            (position + 1).toString(),
+                            it.category,
+                            "${exercise.sets[position + 1].firstMetric} * ${exercise.sets[position + 1].secondMetric}"
+                        )
+                    )
+                } else {
+                    SetEntry(
+                        ExerciseSetAdapterSetWrapper(
+                            secondInputFieldVisibility = when (it.category) {
+                                Category.RepsOnly -> View.GONE
+                                Category.Cardio -> View.GONE
+                                Category.Timed -> View.GONE
+                                else -> View.VISIBLE
+                            },
+                            setNumber = (position + 1).toString(),
+                            previousResults = "-/-",
+                            set = Sets(SetType.DEFAULT, 0.0, 0)
+                        )
+                    )
+                }
+                exercises.add(position + 1, set)
+            }
+        } else {
+            for (index in position + 1 until exercises.size) {
+                exercise?.let {
+                    val set = if (index - position <= it.sets.size) {
+                        SetEntry(
+                            it.sets[index - position].toExerciseSetAdapterSetWrapper(
+                                (index - position).toString(),
+                                it.category,
+                                "${exercise.sets[index - position].firstMetric} * ${exercise.sets[index - position].secondMetric}"
+                            )
+                        )
+                    } else {
+                        SetEntry(
+                            ExerciseSetAdapterSetWrapper(
+                                secondInputFieldVisibility = when (it.category) {
+                                    Category.RepsOnly -> View.GONE
+                                    Category.Cardio -> View.GONE
+                                    Category.Timed -> View.GONE
+                                    else -> View.VISIBLE
+                                },
+                                setNumber = (position + 1).toString(),
+                                previousResults = "-/-",
+                                set = Sets(SetType.DEFAULT, 0.0, 0)
+                            )
+                        )
+                    }
+                    //index or index + 1
+                    exercises.add(index, set)
+                }
+            }
+        }
+        _exercises.value = exercises
+    }
+
+    fun removeSet(position: Int) {
+        val exercises = _exercises.value.orEmpty().toMutableList()
+        exercises.removeAt(position)
+        _exercises.value = exercises
     }
 
     fun onInputFieldTextChanged(
-        exercise: InteractableExerciseWrapper,
-        set: ClickableSet,
+        itemPosition: Int,
         metric: String,
-        viewId: Int,
+        id: Int,
     ) {
-        val new = _exercises.value.orEmpty()
-        when (viewId) {
+        val captured = _exercises.value.orEmpty().toMutableList()
+        when (id) {
             R.id.first_input_field_text -> {
-                new.find { it == exercise }?.sets?.find { it == set }?.set?.firstMetric = metric.toDoubleOrNull()
+                (captured[itemPosition] as? SetEntry)?.setEntry?.set?.firstMetric =
+                    metric.toDoubleOrNull()
             }
 
             R.id.second_input_field_text -> {
-                new.find { it == exercise }?.sets?.find { it == set }?.set?.secondMetric = metric.toIntOrNull()
+                (captured[itemPosition] as? SetEntry)?.setEntry?.set?.secondMetric =
+                    metric.toIntOrNull()
             }
         }
-        _exercises.value = new
+        _exercises.value = captured
     }
 
-    fun onSetTypeChanged(exercise: InteractableExerciseWrapper, set: ClickableSet, newType: SetType) {
+    fun onSetTypeChanged(itemPosition: Int, setType: SetType) {
         val captured = _exercises.value.orEmpty()
-        captured.find { it == exercise }?.sets?.find { it == set }?.set?.type = newType.key
+        (captured[itemPosition] as? SetEntry)?.setEntry?.set?.type = setType
         _exercises.value = captured
     }
 
@@ -214,16 +301,24 @@ class WorkoutViewModel(application: Application) : AndroidViewModel(application)
     }
 
     fun finishWorkout() {
+        if (_exercises.value.isNullOrEmpty()) {
+            _restTimerState.postValue(State.Error("Cannot finish a workout without any exercises!"))
+            return
+        }
+
         viewModelScope.launch {
+            val (exercises, prs, volume) = getExerciseArrayAndPRs(_exercises.value!!)
             repo.addWorkoutToHistory(
                 Workout(
-                    id = hashString("${Random().nextInt(Int.MAX_VALUE)}"),
+                    id = workoutId ?: hashString("${Random().nextInt(Int.MAX_VALUE)}"),
                     name = "${getTimePeriodAsString()} ${_name.value}",
                     date = LocalDateTime.now(),
-                    exercises = _exercises.value?.map { it.toExercise() } ?: emptyList(),
+                    exercises = exercises,
                     note = _note.value,
                     duration = _timer.value?.parseTimeStringToLong() ?: 0L,
-                    isTemplate = false
+                    isTemplate = false,
+                    personalRecords = prs,
+                    volume = volume
                 )
             )
             addExerciseToWorkoutProvider.resetSelectedExercises()
@@ -231,8 +326,87 @@ class WorkoutViewModel(application: Application) : AndroidViewModel(application)
         }
     }
 
-    fun onNoteChange(newNote: String) {
-        _note.value = newNote
+    private fun getExerciseArrayAndPRs(entries: List<WorkoutEntry>): Triple<List<Exercise>, Int, Double> {
+        val exercises = linkedMapOf<String, Exercise>()
+        var prs = 0
+        var volume = 0.0
+        entries.forEach { entry ->
+            when (entry) {
+                is ExerciseEntry -> {
+                    exercises.getOrPut(entry.exerciseEntry.name) {
+                        Exercise(
+                            name = entry.exerciseEntry.name,
+                            bodyPart = entry.exerciseEntry.bodyPart,
+                            category = entry.exerciseEntry.category,
+                            isTemplate = false,
+                            note = entry.exerciseEntry.note
+                        )
+                    }
+                }
+
+                is SetEntry -> {
+                    exercises.entries.last().value.apply {
+                        sets.add(entry.setEntry.set)
+                        if (entry.setEntry.set.type == SetType.DEFAULT || entry.setEntry.set.type == SetType.FAILURE) {
+                            when (category) {
+                                Category.RepsOnly -> {
+                                    if ((entry.setEntry.set.secondMetric
+                                            ?: 0) > (bestSet.secondMetric ?: 0)
+                                    ) {
+                                        bestSet = entry.setEntry.set
+                                    }
+                                }
+
+                                else -> {
+                                    if ((entry.setEntry.set.firstMetric
+                                            ?: 0.0) > (bestSet.firstMetric ?: 0.0)
+                                    ) {
+                                        bestSet = entry.setEntry.set
+                                    }
+                                    if (category != Category.Cardio && category != Category.Timed && category != Category.AssistedWeight) {
+                                        volume += entry.setEntry.set.firstMetric
+                                            ?: (1.0 * (entry.setEntry.set.secondMetric
+                                                ?: 1).toInt())
+                                    }
+                                }
+                            }
+                        }
+                    }
+                }
+            }
+        }
+
+        viewModelScope.launch {
+            val temp = exercises.values.toMutableList()
+            temp.forEach { currExercise ->
+                templateExercises.find { it.name == currExercise.name }?.let { template ->
+                    when (currExercise.category) {
+                        Category.RepsOnly -> {
+                            if ((currExercise.bestSet.secondMetric
+                                    ?: 0) <= (template.bestSet.secondMetric ?: 0)
+                            ) {
+                                currExercise.bestSet = template.bestSet
+                            } else {
+                                prs++
+                            }
+                        }
+
+                        else -> {
+                            if ((currExercise.bestSet.firstMetric
+                                    ?: 0.0) <= (template.bestSet.firstMetric ?: 0.0)
+                            ) {
+                                currExercise.bestSet = template.bestSet
+                            } else {
+                                prs++
+                            }
+                        }
+                    }
+                    currExercise.isTemplate = true
+                }
+            }
+            workoutProvider.updateExercises(exercises.values.toList())
+        }
+        return Triple(exercises.values.toList(), prs, volume)
     }
 
     private fun getTimePeriodAsString() = when (LocalTime.now().hour) {
@@ -245,5 +419,6 @@ class WorkoutViewModel(application: Application) : AndroidViewModel(application)
     sealed interface State {
         data class Default(val restState: Boolean) : State
         data class Rest(val time: String) : State
+        data class Error(val message: String?) : State
     }
 }

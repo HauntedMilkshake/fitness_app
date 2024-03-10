@@ -81,7 +81,7 @@
     <string name="new_workout_template">New workout template</string>
     <string name="add_exercise">Add exercise</string>
     <string name="template_name_placeholder">Example</string>
-    <string name="new_workout_template_hint">Workout template name</string>
+    <string name="new_workout_template_hint">Workout template name:</string>
     <!-- Strings used for exercise template creation   -->
     <string name="set_column_text">Set</string>
     <string name="previous_column_text">Previous</string>
@@ -101,13 +101,13 @@
     <string name="replace_exercise">Replace</string>
     <string name="remove_exercise">Remove</string>
     <string name="time">00:00:00</string>
-    <string name="warmup_set"> <font color="#FF0000"><b>W</b></font>  Warm up    <b>?</b></string>
-    <string name="warmup_set_indicator"><font color="#FF0000"><b>W</b></font></string>
+    <string name="warmup_set"> <font color="#FFA500"><b>W</b></font>  Warm up</string>
+    <string name="warmup_set_indicator"><font color="#FFA500"><b>W</b></font></string>
     <string name="default_set_indicator"><font color="#3D8BC9"><b>1</b></font></string>
-    <string name="drop_set_indicator"><font color="#3D8BC9"><b>D</b></font></string>
-    <string name="failure_set_indicator"><font color="#3D8BC9"><b>F</b></font></string>
-    <string name="drop_set"><font color="#FF0000"><b>D</b></font>  Drop set    <b>?</b></string>
-    <string name="failure_set"><font color="#FF0000"><b>F</b></font>   Failure    <b>?</b></string>
+    <string name="drop_set_indicator"><font color="#673ab7"><b>D</b></font></string>
+    <string name="failure_set_indicator"><font color="#ff0000"><b>F</b></font></string>
+    <string name="drop_set"><font color="#673ab7"><b>D</b></font>  Drop set</string>
+    <string name="failure_set"><font color="#ff0000"><b>F</b></font>   Failure</string>
     <string name="workout_template_note">note</string>
     <string name="rest_fragment_info">Choose a duration below or set your own. Custom durations are saved for next time.</string>
     <string name="create_custom_timer">create custom timer</string>
