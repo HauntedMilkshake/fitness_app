@@ -66,7 +66,6 @@ class StartWorkoutViewModel(application: Application) : AndroidViewModel(applica
             _templates.value?.get(position)?.let {
                 workoutState.updateTemplate(it)
             }
-            workoutState.updateState(WorkoutState.ACTIVE)
         }
     }
 

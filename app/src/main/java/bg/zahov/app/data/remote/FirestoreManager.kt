@@ -80,16 +80,12 @@ class FirestoreManager {
             close()
             throw e
         }
-
-
     }
-
 
     suspend fun getUser(): Flow<User> =
         getDocData(firestore.collection(USERS_COLLECTION).document(userId)) { info ->
             User.fromFirestoreMap(info) ?: throw CriticalDataNullException("Critical data missing!")
         }
-
 
     suspend fun getWorkouts(): Flow<List<Workout>> = getCollectionData(
         firestore.collection(USERS_COLLECTION).document(userId).collection(WORKOUTS_SUB_COLLECTION)
@@ -106,12 +102,20 @@ class FirestoreManager {
     }
 
     //TODO(we could make the request work if the initial result is null to search for the template it belongs to so it isn't null
-    suspend fun getWorkoutById(id: String): Flow<Workout?> = getDocData(
+    suspend fun getWorkoutById(id: String): Flow<Workout> = getDocData(
         firestore.collection(
             USERS_COLLECTION
         ).document(userId).collection(WORKOUTS_SUB_COLLECTION).document(id)
     ) { info ->
         Workout.fromFirestoreMap(info)
+    }
+
+    suspend fun getTemplateWorkoutByName(name: String): Flow<Workout> = getDocData(
+        firestore.collection(USERS_COLLECTION).document(userId).collection(
+            TEMPLATE_WORKOUTS_SUB_COLLECTION
+        ).document(name)
+    ) {
+        Workout.fromFirestoreMap(it)
     }
 
     suspend fun getTemplateExercises(): Flow<List<Exercise>> = getCollectionData(
@@ -169,8 +173,11 @@ class FirestoreManager {
         withContext(Dispatchers.IO) {
             val batch = firestore.batch()
             exercises.forEach {
-                batch.set(firestore.collection(USERS_COLLECTION).document(userId).collection(
-                    TEMPLATE_EXERCISES).document(it.name), it.toFirestoreMap())
+                batch.set(
+                    firestore.collection(USERS_COLLECTION).document(userId).collection(
+                        TEMPLATE_EXERCISES
+                    ).document(it.name), it.toFirestoreMap()
+                )
             }
             batch.commit()
         }

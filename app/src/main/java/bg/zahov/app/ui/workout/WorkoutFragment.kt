@@ -2,6 +2,7 @@ package bg.zahov.app.ui.workout
 
 import android.os.Bundle
 import android.transition.TransitionInflater
+import android.util.Log
 import android.view.LayoutInflater
 import android.view.View
 import android.view.ViewGroup
@@ -53,8 +54,8 @@ class WorkoutFragment : Fragment() {
         binding.apply {
             onGoingWorkoutViewModel.restTimer.map { OnGoingWorkoutUiMapper.map(it) }
                 .observe(viewLifecycleOwner) {
-                    restTimerIndicator.visibility = if (it.isRestActive) View.VISIBLE else View.GONE
-                    restTimerCounter.visibility = if (it.isRestActive) View.VISIBLE else View.GONE
+                    restTimerIndicator.visibility = it.restTimerVisibility
+                    restTimerCounter.visibility = it.restTimerVisibility
                     restTimerCounter.text = it.rest
                 }
 
@@ -103,6 +104,10 @@ class WorkoutFragment : Fragment() {
                     ) {
                         onGoingWorkoutViewModel.onInputFieldChanged(itemPosition, metric, id)
                     }
+
+                    override fun onNoteChanged(itemPosition: Int, text: String) {
+                        onGoingWorkoutViewModel.changeNote(itemPosition, text)
+                    }
                 }
             }
 
@@ -114,6 +119,7 @@ class WorkoutFragment : Fragment() {
             ItemTouchHelper(SetSwipeGesture()).attachToRecyclerView(exercisesRecyclerView)
 
             onGoingWorkoutViewModel.exercises.observe(viewLifecycleOwner) {
+                Log.d("LIVE DATA ITEMS", it.size.toString())
                 exerciseSetAdapter.updateItems(it)
             }
 
@@ -124,7 +130,6 @@ class WorkoutFragment : Fragment() {
             onGoingWorkoutViewModel.note.observe(viewLifecycleOwner) {
                 workoutNoteFieldText.setText(it)
             }
-
 
             addExercise.setOnClickListener {
                 findNavController().navigate(

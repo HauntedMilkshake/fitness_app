@@ -91,7 +91,7 @@ data class Workout(
                 volume = it[FirestoreFields.WORKOUT_VOLUME] as? Double,
                 personalRecords = it[FirestoreFields.WORKOUT_PERSONAL_RECORD] as? Int ?: 0
             )
-        }
+        } ?: throw CriticalDataNullException("No firestore data found")
         //TODO(RETURN THIS INSTEAD OF THROWING)
         //?: Workout("", null, "", false, emptyList(), emptyList())
     }

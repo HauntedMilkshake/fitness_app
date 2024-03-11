@@ -46,4 +46,7 @@ class WorkoutProviderImpl : WorkoutProvider {
     override suspend fun updateExercises(exercises: List<Exercise>) {
         workoutRepo.updateExercises(exercises)
     }
+
+    override suspend fun getTemplateWorkoutByName(name: String): Flow<Workout> =
+        workoutRepo.getWorkoutByName(name)
 }

@@ -229,7 +229,7 @@ class AddTemplateWorkoutViewModel(application: Application) : AndroidViewModel(a
         entries.forEachIndexed { index, entry ->
             when (entry) {
                 is ExerciseEntry -> {
-                    if(index != 0) currentExercisesIndex++
+                    if (index != 0) currentExercisesIndex++
                     exercises.add(entry.exerciseEntry.toExercise())
                 }
 
@@ -315,9 +315,10 @@ class AddTemplateWorkoutViewModel(application: Application) : AndroidViewModel(a
     fun removeSet(position: Int) {
         val exercises = _currExercises.value.orEmpty().toMutableList()
         exercises.removeAt(position)
-        for(index in position until exercises.size) {
-            if(exercises[index] is SetEntry) {
-                (exercises[index] as SetEntry).setEntry.setNumber = ((exercises[index] as SetEntry).setEntry.setNumber.toInt() - 1).toString()
+        for (index in position until exercises.size) {
+            if (exercises[index] is SetEntry) {
+                (exercises[index] as SetEntry).setEntry.setNumber =
+                    ((exercises[index] as SetEntry).setEntry.setNumber.toInt() - 1).toString()
             } else {
                 break
             }
@@ -349,6 +350,10 @@ class AddTemplateWorkoutViewModel(application: Application) : AndroidViewModel(a
         val captured = _currExercises.value.orEmpty()
         (captured[itemPosition] as? SetEntry)?.setEntry?.set?.type = setType
         _currExercises.value = captured
+    }
+
+    fun changeNote(itemPosition: Int, text: String) {
+        (_currExercises.value?.get(itemPosition) as? ExerciseEntry)?.exerciseEntry?.note = text
     }
 
     sealed interface State {

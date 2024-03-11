@@ -173,6 +173,9 @@
             app:destination="@+id/create_workout_template"
             app:popUpTo="@id/create_workout_template"
             app:popUpToInclusive="true" />
+        <action
+            android:id="@+id/start_workout_to_template_workout_info"
+            app:destination="@id/template_workout_info" />
     </fragment>
 
     <fragment
@@ -195,5 +198,10 @@
             app:destination="@id/workout"
             app:popUpTo="@id/rest_timer"
             app:popUpToInclusive="true" />
+    </fragment>
+    <fragment
+        android:id="@+id/template_workout_info"
+        android:name="bg.zahov.app.ui.workout.info.TemplateWorkoutInfoFragment"
+        tools:layout="@layout/fragment_template_workout_info">
     </fragment>
 </navigation>

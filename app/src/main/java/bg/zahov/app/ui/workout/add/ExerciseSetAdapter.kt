@@ -6,6 +6,7 @@ import android.view.ViewGroup
 import android.widget.PopupMenu
 import androidx.appcompat.view.ContextThemeWrapper
 import androidx.core.widget.addTextChangedListener
+import androidx.core.widget.doAfterTextChanged
 import androidx.recyclerview.widget.RecyclerView
 import bg.zahov.app.data.model.BodyPart
 import bg.zahov.app.data.model.Category
@@ -129,6 +130,9 @@ class ExerciseSetAdapter : RecyclerView.Adapter<RecyclerView.ViewHolder>() {
             }
             noteLayout.visibility = item.noteVisibility
             noteEditText.setText(item.note)
+            noteEditText.doAfterTextChanged {
+                textChangeListener?.onNoteChanged(adapterPosition, it.toString())
+            }
 
             options.setOnClickListener {
                 showExerciseMenu(adapterPosition, it)
@@ -271,6 +275,8 @@ class ExerciseSetAdapter : RecyclerView.Adapter<RecyclerView.ViewHolder>() {
             metric: String,
             id: Int,
         )
+
+        fun onNoteChanged(itemPosition: Int, text: String)
     }
 }
 

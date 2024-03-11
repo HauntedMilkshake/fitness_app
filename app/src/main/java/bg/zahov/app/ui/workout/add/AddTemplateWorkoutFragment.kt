@@ -82,7 +82,10 @@ class AddTemplateWorkoutFragment : Fragment() {
 
                     override fun onReplaceExercise(itemPosition: Int) {
                         addWorkoutViewModel.setReplaceableExercise(itemPosition)
-                        findNavController().navigate(R.id.create_workout_template_to_add_exercise, bundleOf("REPLACING" to true))
+                        findNavController().navigate(
+                            R.id.create_workout_template_to_add_exercise,
+                            bundleOf("REPLACING" to true)
+                        )
                     }
 
                     override fun onRemoveExercise(itemPosition: Int) {
@@ -101,6 +104,10 @@ class AddTemplateWorkoutFragment : Fragment() {
                 textChangeListener = object : ExerciseSetAdapter.TextActionListener {
                     override fun onInputFieldChanged(itemPosition: Int, metric: String, id: Int) {
                         addWorkoutViewModel.onInputFieldChanged(itemPosition, metric, id)
+                    }
+
+                    override fun onNoteChanged(itemPosition: Int, text: String) {
+                        addWorkoutViewModel.changeNote(itemPosition, text)
                     }
                 }
             }

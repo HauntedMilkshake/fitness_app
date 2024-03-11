@@ -2,6 +2,7 @@ package bg.zahov.app.ui.workout.start
 
 import android.os.Bundle
 import android.transition.TransitionInflater
+import android.util.Log
 import android.view.LayoutInflater
 import android.view.View
 import android.view.ViewGroup
@@ -42,6 +43,7 @@ class StartWorkoutFragment : Fragment() {
             val workoutAdapter = TemplateWorkoutAdapter().apply {
                 itemClickListener = object : TemplateWorkoutAdapter.ItemClickListener<Workout> {
                     override fun onWorkoutClicked(item: Workout, clickedView: View) {
+                        findNavController().navigate(R.id.start_workout_to_template_workout_info, bundleOf("WORKOUT_NAME" to item.name))
                     }
 
                     override fun onWorkoutStart(position: Int) {

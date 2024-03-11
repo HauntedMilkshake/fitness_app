@@ -58,7 +58,7 @@ class WorkoutViewModel(application: Application) : AndroidViewModel(application)
         application.getSettingsProvider()
     }
 
-    private val _exercises = MutableLiveData<List<WorkoutEntry>>(listOf())
+    private val _exercises = MutableLiveData<List<WorkoutEntry>>()
     val exercises: LiveData<List<WorkoutEntry>>
         get() = _exercises
 
@@ -94,11 +94,17 @@ class WorkoutViewModel(application: Application) : AndroidViewModel(application)
             }
             launch {
                 workoutStateManager.template.collect {
-                    val exercises = _exercises.value.orEmpty().toMutableList()
-                    exercises.addAll(createWorkoutEntryArray(it.exercises))
-                    _name.postValue(it.name)
-                    _exercises.postValue(exercises)
-                    workoutId = it.id
+                    it?.let { workout ->
+                        val exercisesToAdd = createWorkoutEntryArray(workout.exercises)
+                        val exercises = _exercises.value.orEmpty().toMutableList()
+                        if (exercisesToAdd.isNotEmpty()) {
+                            exercises.addAll(exercisesToAdd)
+                            _exercises.postValue(exercises)
+                        }
+                        _name.postValue(workout.name)
+                        _note.postValue(workout.note ?: "")
+                        workoutId = workout.id
+                    }
                 }
             }
             launch {
@@ -115,9 +121,11 @@ class WorkoutViewModel(application: Application) : AndroidViewModel(application)
             }
             launch {
                 addExerciseToWorkoutProvider.selectedExercises.collect {
-                    val exercisesToUpdate = _exercises.value.orEmpty().toMutableList()
-                    exercisesToUpdate.addAll(createWorkoutEntryArray(it))
-                    _exercises.postValue(exercisesToUpdate)
+                    if (it.isNotEmpty()) {
+                        val exercisesToUpdate = _exercises.value.orEmpty().toMutableList()
+                        exercisesToUpdate.addAll(createWorkoutEntryArray(it))
+                        _exercises.postValue(exercisesToUpdate)
+                    }
                 }
             }
             launch {
@@ -148,7 +156,7 @@ class WorkoutViewModel(application: Application) : AndroidViewModel(application)
     private fun createWorkoutEntryArray(exercises: List<Exercise>): List<WorkoutEntry> {
         val workoutEntries = mutableListOf<WorkoutEntry>()
         exercises.forEach {
-            workoutEntries.add(ExerciseEntry(it.toExerciseSetAdapterWrapper(units)))
+            workoutEntries.add(ExerciseEntry(it.toExerciseSetAdapterWrapper(if (::units.isInitialized) units else Units.METRIC)))
             it.sets.forEachIndexed { index, set ->
                 workoutEntries.add(
                     SetEntry(
@@ -249,9 +257,10 @@ class WorkoutViewModel(application: Application) : AndroidViewModel(application)
     fun removeSet(position: Int) {
         val exercises = _exercises.value.orEmpty().toMutableList()
         exercises.removeAt(position)
-        for(index in position until exercises.size) {
-            if(exercises[index] is SetEntry) {
-                (exercises[index] as SetEntry).setEntry.setNumber = ((exercises[index] as SetEntry).setEntry.setNumber.toInt() - 1).toString()
+        for (index in position until exercises.size) {
+            if (exercises[index] is SetEntry) {
+                (exercises[index] as SetEntry).setEntry.setNumber =
+                    ((exercises[index] as SetEntry).setEntry.setNumber.toInt() - 1).toString()
             } else {
                 break
             }
@@ -411,6 +420,10 @@ class WorkoutViewModel(application: Application) : AndroidViewModel(application)
         in 12..16 -> "Noon"
         in 17..20 -> "Afternoon"
         else -> "Night"
+    }
+
+    fun changeNote(itemPosition: Int, text: String) {
+        (_exercises.value?.get(itemPosition) as? ExerciseEntry)?.exerciseEntry?.note = text
     }
 
     sealed interface State {

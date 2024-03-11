@@ -6,7 +6,6 @@ import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.Job
 import kotlinx.coroutines.delay
-import kotlinx.coroutines.flow.Flow
 import kotlinx.coroutines.flow.MutableSharedFlow
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.SharedFlow
@@ -27,8 +26,8 @@ class WorkoutStateManager {
     val state: SharedFlow<WorkoutState>
         get() = _state
 
-    private val _template = MutableSharedFlow<Workout>()
-    val template: Flow<Workout>
+    private val _template = MutableStateFlow<Workout?>(null)
+    val template: StateFlow<Workout?>
         get() = _template
 
     private val _timer = MutableSharedFlow<Long>()
@@ -56,11 +55,10 @@ class WorkoutStateManager {
             WorkoutState.INACTIVE -> {
                 stopTimer()
                 lastTime = 0L
-//                _template.value = null
-
             }
+
             else -> {
-                if(job == null) {
+                if (job == null) {
                     startTimer()
                 }
             }
@@ -69,6 +67,7 @@ class WorkoutStateManager {
     }
 
     suspend fun updateTemplate(workout: Workout) {
-        _template.emit(workout)
+        updateState(WorkoutState.ACTIVE)
+        _template.value = workout
     }
 }

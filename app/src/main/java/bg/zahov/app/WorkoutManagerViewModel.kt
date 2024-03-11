@@ -33,7 +33,7 @@ class WorkoutManagerViewModel(application: Application) : AndroidViewModel(appli
             //TODO(Questionable)
             launch {
                 workoutStateManager.template.collect {
-                    it.let { _template.postValue(it) }
+                    it?.let { _template.postValue(it) }
                 }
             }
 
