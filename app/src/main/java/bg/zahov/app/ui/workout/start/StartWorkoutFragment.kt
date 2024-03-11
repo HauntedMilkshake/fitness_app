@@ -46,7 +46,6 @@ class StartWorkoutFragment : Fragment() {
 
                     override fun onWorkoutStart(position: Int) {
                         startWorkoutViewModel.startWorkoutFromTemplate(position)
-//                        findNavController().navigate(R.id.to_workout_fragment)
                     }
 
                     override fun onWorkoutDelete(position: Int) {

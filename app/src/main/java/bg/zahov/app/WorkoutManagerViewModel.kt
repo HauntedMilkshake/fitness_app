@@ -1,18 +1,14 @@
 package bg.zahov.app
 
 import android.app.Application
-import android.util.Log
+import android.view.View
 import androidx.lifecycle.AndroidViewModel
 import androidx.lifecycle.LiveData
 import androidx.lifecycle.MutableLiveData
-import androidx.lifecycle.asLiveData
 import androidx.lifecycle.viewModelScope
 import bg.zahov.app.data.model.Workout
 import bg.zahov.app.data.model.WorkoutState
 import bg.zahov.app.util.timeToString
-import kotlinx.coroutines.flow.combine
-import kotlinx.coroutines.flow.map
-import kotlinx.coroutines.flow.stateIn
 import kotlinx.coroutines.launch
 
 class WorkoutManagerViewModel(application: Application) : AndroidViewModel(application) {
@@ -20,7 +16,7 @@ class WorkoutManagerViewModel(application: Application) : AndroidViewModel(appli
         application.getWorkoutStateManager()
     }
 
-    private val _state = MutableLiveData<State>(State.Active(WorkoutState.INACTIVE))
+    private val _state = MutableLiveData<State>(State.Inactive(View.GONE))
     val state: LiveData<State>
         get() = _state
 
@@ -28,31 +24,28 @@ class WorkoutManagerViewModel(application: Application) : AndroidViewModel(appli
     val template: LiveData<Workout>
         get() = _template
 
-    //    val timer = workoutStateManager.timer.map {
-//        String.format(
-//            "%02d:%02d:%02d",
-//            (it / (1000 * 60 * 60)) % 24,
-//            (it / (1000 * 60)) % 60,
-//            (it / 1000) % 60
-//        )
-//    }
-//        .asLiveData(viewModelScope.coroutineContext)
     private val _timer = MutableLiveData<String>()
     val timer: LiveData<String>
         get() = _timer
 
     init {
         viewModelScope.launch {
+            //TODO(Questionable)
             launch {
                 workoutStateManager.template.collect {
-                    it?.let { _template.postValue(it) }
+                    it.let { _template.postValue(it) }
                 }
             }
 
             launch {
                 workoutStateManager.state.collect {
-                    Log.d("STATE", it.name)
-                    _state.postValue(State.Active(it))
+                    _state.postValue(
+                        when (it) {
+                            WorkoutState.MINIMIZED -> State.Minimized(View.VISIBLE)
+                            WorkoutState.ACTIVE -> State.Active(View.GONE, true)
+                            else -> State.Inactive(View.GONE)
+                        }
+                    )
 
                 }
             }
@@ -70,13 +63,14 @@ class WorkoutManagerViewModel(application: Application) : AndroidViewModel(appli
 
     fun updateStateToActive() {
         viewModelScope.launch {
-            Log.d("UPDATING STATE FROM ACTIVITY", "ACTIVE")
             workoutStateManager.updateState(WorkoutState.ACTIVE)
         }
     }
 
     sealed interface State {
-        data class Active(val state: WorkoutState) : State
+        data class Active(val visibility: Int, val openWorkout: Boolean = false) : State
+        data class Minimized(val visibility: Int) : State
+        data class Inactive(val visibility: Int) : State
     }
 
 }

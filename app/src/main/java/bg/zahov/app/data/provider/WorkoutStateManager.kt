@@ -23,8 +23,8 @@ class WorkoutStateManager {
         }
     }
 
-    private val _state = MutableStateFlow(WorkoutState.INACTIVE)
-    val state: StateFlow<WorkoutState>
+    private val _state = MutableSharedFlow<WorkoutState>()
+    val state: SharedFlow<WorkoutState>
         get() = _state
 
     private val _template = MutableSharedFlow<Workout>()
@@ -65,7 +65,7 @@ class WorkoutStateManager {
                 }
             }
         }
-        _state.value = newState
+        _state.emit(newState)
     }
 
     suspend fun updateTemplate(workout: Workout) {

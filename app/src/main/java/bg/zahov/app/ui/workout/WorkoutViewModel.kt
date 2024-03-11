@@ -192,94 +192,91 @@ class WorkoutViewModel(application: Application) : AndroidViewModel(application)
     }
 
     fun addSet(position: Int) {
+        var edgeCaseFlag = false
         val exercises = _exercises.value.orEmpty().toMutableList()
-        val exercise =
+        val templateExercise =
             templateExercises.find { it.name == (exercises[position] as? ExerciseEntry)?.exerciseEntry?.name }
-        if (position == 0 || position == exercises.size - 1) {
-            exercise?.let {
-                val set = if (position + 1 <= it.sets.size) {
-                    SetEntry(
-                        it.sets[position].toExerciseSetAdapterSetWrapper(
-                            (position + 1).toString(),
-                            it.category,
-                            "${exercise.sets[position + 1].firstMetric} * ${exercise.sets[position + 1].secondMetric}"
-                        )
-                    )
-                } else {
-                    SetEntry(
-                        ExerciseSetAdapterSetWrapper(
-                            secondInputFieldVisibility = when (it.category) {
-                                Category.RepsOnly -> View.GONE
-                                Category.Cardio -> View.GONE
-                                Category.Timed -> View.GONE
-                                else -> View.VISIBLE
-                            },
-                            setNumber = (position + 1).toString(),
-                            previousResults = "-/-",
-                            set = Sets(SetType.DEFAULT, 0.0, 0)
-                        )
-                    )
-                }
-                exercises.add(position + 1, set)
-            }
-        } else {
-            for (index in position + 1 until exercises.size) {
-                exercise?.let {
-                    val set = if (index - position <= it.sets.size) {
-                        SetEntry(
-                            it.sets[index - position].toExerciseSetAdapterSetWrapper(
-                                (index - position).toString(),
-                                it.category,
-                                "${exercise.sets[index - position].firstMetric} * ${exercise.sets[index - position].secondMetric}"
-                            )
-                        )
-                    } else {
-                        SetEntry(
-                            ExerciseSetAdapterSetWrapper(
-                                secondInputFieldVisibility = when (it.category) {
-                                    Category.RepsOnly -> View.GONE
-                                    Category.Cardio -> View.GONE
-                                    Category.Timed -> View.GONE
-                                    else -> View.VISIBLE
-                                },
-                                setNumber = (position + 1).toString(),
-                                previousResults = "-/-",
-                                set = Sets(SetType.DEFAULT, 0.0, 0)
-                            )
-                        )
-                    }
-                    //index or index + 1
-                    exercises.add(index, set)
-                }
-            }
+
+        if (exercises.size == 1 || position == exercises.size - 1) {
+            insertSetAtIndex(exercises, position + 1, position, templateExercise)
+            edgeCaseFlag = true
         }
+
+        if (!edgeCaseFlag) {
+            var index = position + 1
+
+            while (index < exercises.size && exercises[index] !is ExerciseEntry) {
+                index++
+            }
+
+            insertSetAtIndex(exercises, index, position, templateExercise)
+        }
+
         _exercises.value = exercises
+    }
+
+    private fun insertSetAtIndex(
+        exercises: MutableList<WorkoutEntry>,
+        insertIndex: Int,
+        exercisePosition: Int,
+        templateExercise: Exercise?,
+    ) {
+        val setNumber = insertIndex - exercisePosition
+        val setEntry = if (templateExercise != null && setNumber <= templateExercise.sets.size) {
+            SetEntry(
+                templateExercise.sets[setNumber].toExerciseSetAdapterSetWrapper(
+                    setNumber.toString(),
+                    templateExercise.category,
+                    "${templateExercise.sets[setNumber].secondMetric} x  ${templateExercise.sets[setNumber].secondMetric}"
+                )
+            )
+        } else {
+            SetEntry(
+                ExerciseSetAdapterSetWrapper(
+                    secondInputFieldVisibility = when (templateExercise?.category) {
+                        Category.RepsOnly, Category.Cardio, Category.Timed -> View.GONE
+                        else -> View.VISIBLE
+                    },
+                    setNumber = setNumber.toString(),
+                    previousResults = "-/-",
+                    set = Sets(SetType.DEFAULT, 0.0, 0)
+                )
+            )
+        }
+        exercises.add(insertIndex, setEntry)
     }
 
     fun removeSet(position: Int) {
         val exercises = _exercises.value.orEmpty().toMutableList()
         exercises.removeAt(position)
+        for(index in position until exercises.size) {
+            if(exercises[index] is SetEntry) {
+                (exercises[index] as SetEntry).setEntry.setNumber = ((exercises[index] as SetEntry).setEntry.setNumber.toInt() - 1).toString()
+            } else {
+                break
+            }
+        }
         _exercises.value = exercises
     }
 
-    fun onInputFieldTextChanged(
-        itemPosition: Int,
+    fun onInputFieldChanged(
+        position: Int,
         metric: String,
-        id: Int,
+        viewId: Int,
     ) {
-        val captured = _exercises.value.orEmpty().toMutableList()
-        when (id) {
-            R.id.first_input_field_text -> {
-                (captured[itemPosition] as? SetEntry)?.setEntry?.set?.firstMetric =
-                    metric.toDoubleOrNull()
-            }
+        if (position != -1 && position < (_exercises.value?.size ?: -1)) {
+            when (viewId) {
+                R.id.first_input_field_text -> {
+                    (_exercises.value?.get(position) as? SetEntry)?.setEntry?.set?.firstMetric =
+                        metric.toDoubleOrNull()
+                }
 
-            R.id.second_input_field_text -> {
-                (captured[itemPosition] as? SetEntry)?.setEntry?.set?.secondMetric =
-                    metric.toIntOrNull()
+                R.id.second_input_field_text -> {
+                    (_exercises.value?.get(position) as? SetEntry)?.setEntry?.set?.secondMetric =
+                        metric.toIntOrNull()
+                }
             }
         }
-        _exercises.value = captured
     }
 
     fun onSetTypeChanged(itemPosition: Int, setType: SetType) {

@@ -71,12 +71,13 @@ class StartWorkoutViewModel(application: Application) : AndroidViewModel(applica
     }
 
     fun deleteTemplateWorkout(position: Int) {
-        val list = _templates.value?.toMutableList()
-        val toBeRemoved = list?.removeAt(position)
-        _templates.value = list ?: listOf()
+        val list = _templates.value.orEmpty().toMutableList()
+        val toBeRemoved = list.removeAt(position)
         viewModelScope.launch {
-            toBeRemoved?.let { repo.deleteTemplateWorkout(it) }
+            toBeRemoved.let { repo.deleteTemplateWorkout(it) }
         }
+        _templates.value = list
+
     }
 
     fun addDuplicateTemplateWorkout(position: Int) {

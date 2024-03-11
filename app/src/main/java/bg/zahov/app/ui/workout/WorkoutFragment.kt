@@ -101,7 +101,7 @@ class WorkoutFragment : Fragment() {
                         metric: String,
                         id: Int,
                     ) {
-                        onGoingWorkoutViewModel.onInputFieldTextChanged(itemPosition, metric, id)
+                        onGoingWorkoutViewModel.onInputFieldChanged(itemPosition, metric, id)
                     }
                 }
             }

@@ -179,7 +179,7 @@ class FirestoreManager {
     suspend fun deleteTemplateWorkouts(workout: Workout) {
         withContext(Dispatchers.IO) {
             firestore.collection(USERS_COLLECTION).document(userId)
-                .collection(TEMPLATE_WORKOUTS_SUB_COLLECTION).document(workout.name).delete()
+                .collection(TEMPLATE_WORKOUTS_SUB_COLLECTION).document(workout.id).delete()
                 .addOnSuccessListener {
                     Log.d("LISTEN", "deleted")
                 }

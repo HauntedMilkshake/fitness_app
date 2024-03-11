@@ -229,7 +229,7 @@ class AddTemplateWorkoutViewModel(application: Application) : AndroidViewModel(a
         entries.forEachIndexed { index, entry ->
             when (entry) {
                 is ExerciseEntry -> {
-                    currentExercisesIndex = index
+                    if(index != 0) currentExercisesIndex++
                     exercises.add(entry.exerciseEntry.toExercise())
                 }
 
@@ -312,7 +312,6 @@ class AddTemplateWorkoutViewModel(application: Application) : AndroidViewModel(a
         exercises.add(insertIndex, setEntry)
     }
 
-    //TODO(REORDER SETS BEHIND IT)
     fun removeSet(position: Int) {
         val exercises = _currExercises.value.orEmpty().toMutableList()
         exercises.removeAt(position)
