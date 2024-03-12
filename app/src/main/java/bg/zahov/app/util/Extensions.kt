@@ -23,7 +23,9 @@ import java.nio.charset.StandardCharsets
 import java.time.Instant
 import java.time.LocalDateTime
 import java.time.ZoneOffset
+import java.time.format.DateTimeFormatter
 import java.util.Date
+import java.util.Locale
 import java.util.UUID
 
 fun User.toFirestoreMap(): Map<String, Any?> {
@@ -230,5 +232,9 @@ fun Exercise.toExerciseAdapterWrapper(): ExerciseAdapterWrapper {
         backgroundResource = R.color.background
     )
 }
+
+
+fun LocalDateTime.toFormattedString() = "${this.format(DateTimeFormatter.ofPattern("d"))} ${this.format(DateTimeFormatter.ofPattern("MMMM", Locale.ENGLISH))}"
+
 
 

@@ -123,5 +123,6 @@
     <string name="edit_workout_template">Edit workout template</string>
     <string name="kg_minus">-kg</string>
     <string name="lbs_minus">-lbs</string>
+    <string name="best_set">Best set</string>
 
 </resources>
