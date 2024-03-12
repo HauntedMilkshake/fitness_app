@@ -80,7 +80,18 @@
     <fragment
         android:id="@+id/history"
         android:name="bg.zahov.app.ui.history.HistoryFragment"
-        tools:layout="@layout/fragment_history" />
+        tools:layout="@layout/fragment_history" >
+        <action
+            android:id="@+id/history_to_calendar"
+            app:destination="@id/calendar"/>
+
+    </fragment>
+
+    <fragment
+        android:id="@+id/calendar"
+        android:name="bg.zahov.app.ui.history.calendar.CalendarFragment"
+        tools:layout="@layout/fragment_calendar">
+    </fragment>
 
     <fragment
         android:id="@+id/measures"
@@ -204,4 +215,6 @@
         android:name="bg.zahov.app.ui.workout.info.TemplateWorkoutInfoFragment"
         tools:layout="@layout/fragment_template_workout_info">
     </fragment>
+
+
 </navigation>

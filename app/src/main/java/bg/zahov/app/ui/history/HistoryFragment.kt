@@ -57,6 +57,9 @@ class HistoryFragment : Fragment() {
                 historyAdapter.updateItems(it.workouts)
                 if (it.shutdown) findNavController().navigateUp()
             }
+            calendar.setOnClickListener {
+                findNavController().navigate(R.id.history_to_calendar)
+            }
         }
     }
 

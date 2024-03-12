@@ -32,7 +32,7 @@ class HistoryAdapter(private val units: Units = Units.METRIC) : BaseAdapter<Work
             title.text = item.name
             date.text = item.date.toFormattedString()
             duration.text = item.duration?.timeToString()
-            volume.text = "${item.volume} ${if (units == Units.METRIC) "kg" else "lbs"}"
+            volume.text = "${item.volume ?: 0} ${if (units == Units.METRIC) "kg" else "lbs"}"
             prs.text = item.personalRecords.toString()
             exercises.text = item.exercises.joinToString("\n") {
                 "${if (it.sets.isNotEmpty()) "${it.sets.size} X " else ""}${it.name} "
