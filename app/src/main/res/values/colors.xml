@@ -20,4 +20,5 @@
     <color name="completed_set">#00FF00</color>
     <color name="drop_set">#673ab7</color>
     <color name="warmup_set">#FFA500</color>
+    <color name="cool_green">#32CD72</color>
 </resources>

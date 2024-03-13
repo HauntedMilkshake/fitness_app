@@ -2,16 +2,21 @@ package bg.zahov.app.ui.home
 
 import android.graphics.Color
 import android.os.Bundle
-import android.transition.TransitionInflater
 import android.view.LayoutInflater
+import android.view.Menu
+import android.view.MenuInflater
+import android.view.MenuItem
 import android.view.View
 import android.view.ViewGroup
+import androidx.core.view.MenuProvider
 import androidx.fragment.app.Fragment
 import androidx.fragment.app.viewModels
 import androidx.lifecycle.map
 import androidx.navigation.fragment.findNavController
 import bg.zahov.app.data.model.state.HomeUiMapper
+import bg.zahov.app.setToolBarTitle
 import bg.zahov.app.showBottomNav
+import bg.zahov.app.showTopBar
 import bg.zahov.fitness.app.R
 import bg.zahov.fitness.app.databinding.FragmentHomeBinding
 import com.github.mikephil.charting.components.XAxis
@@ -28,25 +33,37 @@ class HomeFragment : Fragment() {
         inflater: LayoutInflater, container: ViewGroup?, savedInstanceState: Bundle?,
     ): View {
         _binding = FragmentHomeBinding.inflate(inflater, container, false)
-        return binding.root
-    }
-
-    override fun onCreate(savedInstanceState: Bundle?) {
-        super.onCreate(savedInstanceState)
         requireActivity().showBottomNav()
-        val inflater = TransitionInflater.from(requireContext())
-        enterTransition = inflater.inflateTransition(R.transition.slide_up)
-        exitTransition = inflater.inflateTransition(R.transition.fade_out)
+        requireActivity().showTopBar()
+        return binding.root
     }
 
     override fun onViewCreated(view: View, savedInstanceState: Bundle?) {
         super.onViewCreated(view, savedInstanceState)
+        requireActivity().setToolBarTitle(R.string.profile)
+        requireActivity().addMenuProvider(object : MenuProvider {
+            override fun onCreateMenu(menu: Menu, menuInflater: MenuInflater) {
+                menu.clear()
+                menuInflater.inflate(R.menu.menu_toolbar_home, menu)
+            }
+
+            override fun onMenuItemSelected(menuItem: MenuItem): Boolean {
+                return when (menuItem.itemId) {
+                    R.id.settings -> {
+                        findNavController().navigate(R.id.home_to_settings)
+                        true
+                    }
+
+                    else -> false
+                }
+            }
+
+        })
         binding.apply {
 //            requireActivity().setToolbarVisibility(View.VISIBLE)
 //            requireActivity().setToolbarTitle(R.string.top_bar_text)
-            settings.setOnClickListener {
-                findNavController().navigate(R.id.home_to_settings)
-            }
+//            settings.setOnClickListener {
+//            }
 
             homeViewModel.state.map { HomeUiMapper.map(it) }.observe(viewLifecycleOwner) {
                 loadingIndicator.visibility = if (it.isLoading) View.VISIBLE else View.GONE

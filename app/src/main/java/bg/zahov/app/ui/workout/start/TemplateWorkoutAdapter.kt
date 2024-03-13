@@ -47,7 +47,7 @@ class TemplateWorkoutAdapter : BaseAdapter<Workout>(
 
     private fun showCustomLayout(workout: Workout, itemPosition: Int, view: View) {
         val popupMenu = PopupMenu(ContextThemeWrapper(view.context, R.style.MyPopUp), view)
-        popupMenu.menuInflater.inflate(R.menu.popup_workout_menu, popupMenu.menu)
+        popupMenu.menuInflater.inflate(R.menu.menu_popup_workout, popupMenu.menu)
         popupMenu.setOnMenuItemClickListener { item ->
             when (item.itemId) {
                 R.id.action_delete -> {

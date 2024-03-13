@@ -1,8 +1,8 @@
 package bg.zahov.app.ui.workout
 
+import android.media.MediaPlayer
 import android.os.Bundle
 import android.transition.TransitionInflater
-import android.util.Log
 import android.view.LayoutInflater
 import android.view.View
 import android.view.ViewGroup
@@ -31,6 +31,7 @@ class WorkoutFragment : Fragment() {
         get() = requireNotNull(_binding)
 
     private val onGoingWorkoutViewModel: WorkoutViewModel by viewModels()
+    private var mediaPlayer: MediaPlayer? = null
 
     override fun onCreateView(
         inflater: LayoutInflater,
@@ -46,6 +47,7 @@ class WorkoutFragment : Fragment() {
         val inflater = TransitionInflater.from(requireContext())
         enterTransition = inflater.inflateTransition(R.transition.slide_up)
         exitTransition = inflater.inflateTransition(R.transition.fade_out)
+        mediaPlayer = MediaPlayer.create(context, R.raw.nsfw)
         requireActivity().hideBottomNav()
     }
 
@@ -59,7 +61,7 @@ class WorkoutFragment : Fragment() {
                     restTimerCounter.text = it.rest
                 }
 
-            val exerciseSetAdapter = ExerciseSetAdapter().apply {
+            val exerciseSetAdapter = ExerciseSetAdapter(mediaPlayer).apply {
                 itemClickListener = object : ExerciseSetAdapter.ItemClickListener<WorkoutEntry> {
                     override fun onSetCheckClicked(itemPosition: Int) {
                         onGoingWorkoutViewModel.onSetCheckClicked(itemPosition)
@@ -119,7 +121,6 @@ class WorkoutFragment : Fragment() {
             ItemTouchHelper(SetSwipeGesture()).attachToRecyclerView(exercisesRecyclerView)
 
             onGoingWorkoutViewModel.exercises.observe(viewLifecycleOwner) {
-                Log.d("LIVE DATA ITEMS", it.size.toString())
                 exerciseSetAdapter.updateItems(it)
             }
 
@@ -166,7 +167,7 @@ class WorkoutFragment : Fragment() {
                 it.applyScaleAnimation()
                 onGoingWorkoutViewModel.finishWorkout()
                 requireActivity().showBottomNav()
-                findNavController().navigateUp()
+                findNavController().navigate(R.id.workout_to_finish_workout)
             }
 
             activity?.onBackPressedDispatcher?.addCallback(object : OnBackPressedCallback(true) {
@@ -184,5 +185,7 @@ class WorkoutFragment : Fragment() {
     override fun onDestroy() {
         super.onDestroy()
         _binding = null
+        mediaPlayer?.release()
+        mediaPlayer = null
     }
 }

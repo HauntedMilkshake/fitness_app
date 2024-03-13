@@ -80,18 +80,17 @@
     <fragment
         android:id="@+id/history"
         android:name="bg.zahov.app.ui.history.HistoryFragment"
-        tools:layout="@layout/fragment_history" >
+        tools:layout="@layout/fragment_history">
         <action
             android:id="@+id/history_to_calendar"
-            app:destination="@id/calendar"/>
+            app:destination="@id/calendar" />
 
     </fragment>
 
     <fragment
         android:id="@+id/calendar"
         android:name="bg.zahov.app.ui.history.calendar.CalendarFragment"
-        tools:layout="@layout/fragment_calendar">
-    </fragment>
+        tools:layout="@layout/fragment_calendar"></fragment>
 
     <fragment
         android:id="@+id/measures"
@@ -199,6 +198,11 @@
         <action
             android:id="@+id/workout_to_add_exercise"
             app:destination="@id/exercises" />
+        <action
+            android:id="@+id/workout_to_finish_workout"
+            app:destination="@id/finish_workout"
+            app:popUpTo="@id/workout"
+            app:popUpToInclusive="true" />
     </fragment>
     <fragment
         android:id="@+id/rest_timer"
@@ -213,8 +217,9 @@
     <fragment
         android:id="@+id/template_workout_info"
         android:name="bg.zahov.app.ui.workout.info.TemplateWorkoutInfoFragment"
-        tools:layout="@layout/fragment_template_workout_info">
-    </fragment>
-
-
+        tools:layout="@layout/fragment_template_workout_info" />
+    <fragment
+        android:id="@+id/finish_workout"
+        android:name="bg.zahov.app.ui.workout.finish.FragmentWorkoutFinish"
+        tools:layout="@layout/fragment_workout_finish" />
 </navigation>

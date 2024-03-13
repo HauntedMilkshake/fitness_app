@@ -15,6 +15,8 @@ import bg.zahov.app.data.model.state.AuthUiModelMapper
 import bg.zahov.app.data.model.state.WorkoutManagerUiMapper
 import bg.zahov.fitness.app.R
 import bg.zahov.fitness.app.databinding.ActivityMainBinding
+import com.google.android.material.appbar.AppBarLayout
+import com.google.android.material.appbar.MaterialToolbar
 import com.google.android.material.bottomnavigation.BottomNavigationView
 
 class MainActivity : AppCompatActivity() {
@@ -30,11 +32,14 @@ class MainActivity : AppCompatActivity() {
         binding = ActivityMainBinding.inflate(layoutInflater)
         setContentView(binding.root)
 
+        //TODO( define val topLevelDestinations = setOf(R.id.homeFragment, R.id.settingsFragment )
+        //TODO(Finish the hosted app bar for the other fragments)
+        //so that the back arrow is not always present the you don't have to clear the menu"
         val navController = findNavController(R.id.nav_host_fragment)
+        appBarConfiguration = AppBarConfiguration(navController.graph)
 
         binding.bottomNavigation.setupWithNavController(navController)
-//        setSupportActionBar(binding.toolbar)
-//        supportActionBar?.title = "TEST"
+        setSupportActionBar(binding.toolbar)
         authViewModel.state.map { AuthUiModelMapper.map(it) }.observe(this) {
             if (it.isAuthenticated) navController.navigate(R.id.welcome_to_loading)
         }
@@ -75,25 +80,25 @@ class MainActivity : AppCompatActivity() {
 }
 
 fun FragmentActivity.hideBottomNav() {
-    findViewById<BottomNavigationView>(R.id.bottom_navigation)?.apply {
-        visibility = View.GONE
-    }
+    findViewById<BottomNavigationView>(R.id.bottom_navigation)?.visibility = View.GONE
+
 }
 
 fun FragmentActivity.showBottomNav() {
-    findViewById<BottomNavigationView>(R.id.bottom_navigation)?.apply {
-        visibility = View.VISIBLE
-    }
+    findViewById<BottomNavigationView>(R.id.bottom_navigation)?.visibility = View.VISIBLE
+
 }
-//
-//fun FragmentActivity.setToolbarTitle(titleResource: Int) {
-//    findViewById<MaterialTextView>(R.id.title)?.apply {
-//        setTitle(titleResource)
-//    }
-//}
-//
-//fun FragmentActivity.setToolbarVisibility(toolBarVisibility: Int) {
-//    findViewById<CoordinatorLayout>(R.id.coordinatorLayout)?.apply {
-//        visibility = toolBarVisibility
-//    }
-//}
+
+fun FragmentActivity.showTopBar() {
+    findViewById<AppBarLayout>(R.id.top_bar)?.visibility = View.VISIBLE
+}
+
+
+fun FragmentActivity.hideTopBar() {
+    findViewById<AppBarLayout>(R.id.top_bar)?.visibility = View.GONE
+
+}
+
+fun FragmentActivity.setToolBarTitle(title: Int) {
+    findViewById<MaterialToolbar>(R.id.toolbar)?.setTitle(title)
+}

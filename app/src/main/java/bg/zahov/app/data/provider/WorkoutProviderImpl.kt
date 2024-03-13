@@ -16,7 +16,10 @@ class WorkoutProviderImpl : WorkoutProvider {
         }
     }
 
+    private var lastWorkoutPerformed: Workout? = null
     private val workoutRepo = WorkoutRepositoryImpl.getInstance()
+
+    fun getLastWorkout(): Workout? = lastWorkoutPerformed
     override suspend fun getTemplateWorkouts(): Flow<List<Workout>> =
         workoutRepo.getTemplateWorkouts()
 
@@ -31,9 +34,10 @@ class WorkoutProviderImpl : WorkoutProvider {
     override suspend fun addTemplateExercise(newExercise: Exercise) =
         workoutRepo.addTemplateExercise(newExercise)
 
-    override suspend fun addWorkoutToHistory(newWorkout: Workout) =
+    override suspend fun addWorkoutToHistory(newWorkout: Workout) {
+        lastWorkoutPerformed = newWorkout
         workoutRepo.addWorkoutToHistory(newWorkout)
-
+    }
     override suspend fun deleteTemplateWorkout(workout: Workout) {
         workoutRepo.deleteTemplateWorkout(workout)
     }

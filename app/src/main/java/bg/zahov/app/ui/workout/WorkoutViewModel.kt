@@ -179,7 +179,7 @@ class WorkoutViewModel(application: Application) : AndroidViewModel(application)
     fun onSetCheckClicked(itemPosition: Int) {
         val captured = _exercises.value.orEmpty()
         (captured[itemPosition] as? SetEntry)?.setEntry?.backgroundResource =
-            if ((captured[itemPosition] as? SetEntry)?.setEntry?.backgroundResource == R.color.background) R.color.completed_set else R.color.background
+            if ((captured[itemPosition] as? SetEntry)?.setEntry?.backgroundResource == R.color.background) R.color.cool_green else R.color.background
         _exercises.value = captured
     }
 

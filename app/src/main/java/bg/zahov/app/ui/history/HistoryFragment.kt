@@ -3,8 +3,12 @@ package bg.zahov.app.ui.history
 import android.os.Bundle
 import android.transition.TransitionInflater
 import android.view.LayoutInflater
+import android.view.Menu
+import android.view.MenuInflater
+import android.view.MenuItem
 import android.view.View
 import android.view.ViewGroup
+import androidx.core.view.MenuProvider
 import androidx.fragment.app.Fragment
 import androidx.fragment.app.viewModels
 import androidx.lifecycle.map
@@ -12,6 +16,8 @@ import androidx.navigation.fragment.findNavController
 import androidx.recyclerview.widget.LinearLayoutManager
 import bg.zahov.app.data.model.Workout
 import bg.zahov.app.data.model.state.HistoryUiMapper
+import bg.zahov.app.setToolBarTitle
+import bg.zahov.app.showTopBar
 import bg.zahov.fitness.app.R
 import bg.zahov.fitness.app.databinding.FragmentHistoryBinding
 
@@ -26,18 +32,38 @@ class HistoryFragment : Fragment() {
         inflater: LayoutInflater, container: ViewGroup?, savedInstanceState: Bundle?,
     ): View {
         _binding = FragmentHistoryBinding.inflate(inflater, container, false)
+        requireActivity().showTopBar()
         return binding.root
     }
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
-        val inflater = TransitionInflater.from(requireContext())
-        enterTransition = inflater.inflateTransition(R.transition.slide_up)
-        exitTransition = inflater.inflateTransition(R.transition.fade_out)
+        enterTransition =
+            TransitionInflater.from(requireContext()).inflateTransition(R.transition.slide_up)
+        exitTransition =
+            TransitionInflater.from(requireContext()).inflateTransition(R.transition.fade_out)
     }
 
     override fun onViewCreated(view: View, savedInstanceState: Bundle?) {
         super.onViewCreated(view, savedInstanceState)
+        requireActivity().setToolBarTitle(R.string.history)
+        requireActivity().addMenuProvider(object : MenuProvider {
+            override fun onCreateMenu(menu: Menu, menuInflater: MenuInflater) {
+                menu.clear()
+                menuInflater.inflate(R.menu.menu_toolbar_history, menu)
+            }
+
+            override fun onMenuItemSelected(menuItem: MenuItem): Boolean {
+                return when (menuItem.itemId) {
+                    R.id.calendar -> {
+                        findNavController().navigate(R.id.history_to_calendar)
+                        true
+                    }
+
+                    else -> false
+                }
+            }
+        })
         binding.apply {
             val historyAdapter = HistoryAdapter().apply {
                 itemClickListener = object : HistoryAdapter.ItemClickListener<Workout> {
@@ -56,9 +82,6 @@ class HistoryFragment : Fragment() {
                 workouts.visibility = it.workoutVisibility
                 historyAdapter.updateItems(it.workouts)
                 if (it.shutdown) findNavController().navigateUp()
-            }
-            calendar.setOnClickListener {
-                findNavController().navigate(R.id.history_to_calendar)
             }
         }
     }

@@ -1,7 +1,6 @@
 <?xml version="1.0" encoding="utf-8"?>
 <androidx.constraintlayout.widget.ConstraintLayout xmlns:android="http://schemas.android.com/apk/res/android"
     xmlns:app="http://schemas.android.com/apk/res-auto"
-    xmlns:tools="http://schemas.android.com/tools"
     android:layout_width="match_parent"
     android:layout_height="wrap_content"
     android:layout_marginBottom="10dp"
@@ -9,10 +8,10 @@
 
     <com.google.android.material.textview.MaterialTextView
         android:id="@+id/workout_name"
-        android:layout_marginTop="20dp"
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
         android:layout_marginStart="15dp"
+        android:layout_marginTop="20dp"
         android:textColor="@color/white"
         android:textSize="18sp"
         app:layout_constraintStart_toStartOf="parent"
@@ -74,8 +73,8 @@
         android:id="@+id/volume_icon"
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
-        android:src="@drawable/ic_volume"
         android:layout_marginEnd="5dp"
+        android:src="@drawable/ic_volume"
         app:layout_constraintBottom_toBottomOf="@id/duration_icon"
         app:layout_constraintEnd_toStartOf="@+id/volume"
         app:layout_constraintTop_toTopOf="@id/duration_icon" />
@@ -108,9 +107,9 @@
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
         android:layout_marginTop="10dp"
+        android:layout_marginBottom="10dp"
         android:textColor="@color/less_vibrant_text"
         android:textSize="15sp"
-        android:layout_marginBottom="10dp"
         app:layout_constraintBottom_toBottomOf="parent"
         app:layout_constraintStart_toStartOf="@id/exercise_column"
         app:layout_constraintTop_toBottomOf="@id/exercise_column" />

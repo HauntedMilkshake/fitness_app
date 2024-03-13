@@ -1,5 +1,6 @@
 package bg.zahov.app.ui.loading
 
+import android.media.MediaPlayer
 import android.os.Bundle
 import android.view.LayoutInflater
 import android.view.View
@@ -22,7 +23,7 @@ class LoadingFragment : Fragment() {
     private var _binding: FragmentLoadingBinding? = null
     private val binding
         get() = requireNotNull(_binding)
-
+    private var mediaPlayer: MediaPlayer? = null
     private val loadingViewModel: LoadingViewModel by viewModels()
     override fun onCreateView(
         inflater: LayoutInflater,
@@ -30,6 +31,7 @@ class LoadingFragment : Fragment() {
         savedInstanceState: Bundle?,
     ): View {
         _binding = FragmentLoadingBinding.inflate(inflater, container, false)
+        mediaPlayer = MediaPlayer.create(context, R.raw.talic)
         return binding.root
     }
 
@@ -40,6 +42,7 @@ class LoadingFragment : Fragment() {
 
     override fun onViewCreated(view: View, savedInstanceState: Bundle?) {
         super.onViewCreated(view, savedInstanceState)
+        mediaPlayer?.start()
         binding.apply {
             animateView(bottomLeft)
             animateView(bottomRight)
@@ -88,5 +91,7 @@ class LoadingFragment : Fragment() {
         super.onDestroyView()
         requireActivity().showBottomNav()
         _binding = null
+        mediaPlayer?.release()
+        mediaPlayer = null
     }
 }

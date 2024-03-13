@@ -3,7 +3,8 @@
     xmlns:app="http://schemas.android.com/apk/res-auto"
     android:layout_width="match_parent"
     android:layout_height="wrap_content"
-    android:paddingTop="10dp">
+    android:paddingBottom="5dp"
+    android:paddingTop="5dp">
 
     <com.google.android.material.textview.MaterialTextView
         android:id="@+id/set_number"
@@ -41,7 +42,7 @@
         app:boxStrokeWidthFocused="0dp"
         app:cursorColor="@color/blue_text"
         app:hintEnabled="false"
-        android:layout_marginEnd="15dp"
+        android:layout_marginEnd="25dp"
         app:layout_constraintBottom_toBottomOf="parent"
         app:layout_constraintEnd_toStartOf="@+id/second_input_field"
         app:layout_constraintStart_toEndOf="@id/previous"
@@ -94,5 +95,4 @@
         app:layout_constraintBottom_toBottomOf="@+id/second_input_field"
         app:layout_constraintEnd_toEndOf="parent"
         app:layout_constraintTop_toTopOf="@+id/second_input_field" />
-
 </androidx.constraintlayout.widget.ConstraintLayout>

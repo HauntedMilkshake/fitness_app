@@ -1,10 +1,16 @@
 package bg.zahov.app.ui.workout.add
 
+import android.animation.AnimatorSet
+import android.animation.ArgbEvaluator
+import android.animation.ObjectAnimator
+import android.animation.ValueAnimator
+import android.media.MediaPlayer
 import android.view.LayoutInflater
 import android.view.View
 import android.view.ViewGroup
 import android.widget.PopupMenu
 import androidx.appcompat.view.ContextThemeWrapper
+import androidx.core.content.ContextCompat.getColor
 import androidx.core.widget.addTextChangedListener
 import androidx.core.widget.doAfterTextChanged
 import androidx.recyclerview.widget.RecyclerView
@@ -19,7 +25,8 @@ import com.google.android.material.textfield.TextInputEditText
 import com.google.android.material.textfield.TextInputLayout
 import com.google.android.material.textview.MaterialTextView
 
-class ExerciseSetAdapter : RecyclerView.Adapter<RecyclerView.ViewHolder>() {
+class ExerciseSetAdapter(val mediaPLayer: MediaPlayer? = null) :
+    RecyclerView.Adapter<RecyclerView.ViewHolder>() {
 
     companion object {
         const val VIEW_TYPE_EXERCISE = 1
@@ -131,15 +138,15 @@ class ExerciseSetAdapter : RecyclerView.Adapter<RecyclerView.ViewHolder>() {
             noteLayout.visibility = item.noteVisibility
             noteEditText.setText(item.note)
             noteEditText.doAfterTextChanged {
-                textChangeListener?.onNoteChanged(adapterPosition, it.toString())
+                textChangeListener?.onNoteChanged(bindingAdapterPosition, it.toString())
             }
 
             options.setOnClickListener {
-                showExerciseMenu(adapterPosition, it)
+                showExerciseMenu(bindingAdapterPosition, it)
             }
 
             addSetButton.setOnClickListener {
-                itemClickListener?.onAddSet(adapterPosition)
+                itemClickListener?.onAddSet(bindingAdapterPosition)
             }
         }
 
@@ -148,7 +155,7 @@ class ExerciseSetAdapter : RecyclerView.Adapter<RecyclerView.ViewHolder>() {
             view: View,
         ) {
             val popupMenu = PopupMenu(ContextThemeWrapper(view.context, R.style.MyPopUp), view)
-            popupMenu.menuInflater.inflate(R.menu.popup_exercise_menu, popupMenu.menu)
+            popupMenu.menuInflater.inflate(R.menu.menu_popup_exercise, popupMenu.menu)
             popupMenu.setOnMenuItemClickListener { item ->
                 when (item.itemId) {
                     R.id.action_add_note -> {
@@ -189,19 +196,21 @@ class ExerciseSetAdapter : RecyclerView.Adapter<RecyclerView.ViewHolder>() {
                 setText(item.setIndicator)
                 if (item.setIndicator == R.string.default_set_indicator) text = item.setNumber
                 setOnClickListener {
-                    showSetMenu(adapterPosition, it)
+                    showSetMenu(bindingAdapterPosition, it)
                 }
             }
 
             check.setOnClickListener {
-                itemClickListener?.onSetCheckClicked(adapterPosition)
+                mediaPLayer?.start()
+                animateSetBackgroundOnClick(item.backgroundResource)
+                itemClickListener?.onSetCheckClicked(bindingAdapterPosition)
             }
 
             firstInputEditText.apply {
                 setText(item.set.firstMetric.toString())
                 addTextChangedListener {
                     textChangeListener?.onInputFieldChanged(
-                        adapterPosition,
+                        bindingAdapterPosition,
                         it.toString(),
                         firstInputEditText.id
                     )
@@ -212,7 +221,7 @@ class ExerciseSetAdapter : RecyclerView.Adapter<RecyclerView.ViewHolder>() {
                 setText(item.set.secondMetric.toString())
                 addTextChangedListener {
                     textChangeListener?.onInputFieldChanged(
-                        adapterPosition,
+                        bindingAdapterPosition,
                         it.toString(),
                         secondInputEditText.id
                     )
@@ -223,7 +232,7 @@ class ExerciseSetAdapter : RecyclerView.Adapter<RecyclerView.ViewHolder>() {
         private fun showSetMenu(itemPosition: Int, clickedView: View) {
             val popupMenu =
                 PopupMenu(ContextThemeWrapper(clickedView.context, R.style.MyPopUp), clickedView)
-            popupMenu.menuInflater.inflate(R.menu.popup_set_menu, popupMenu.menu)
+            popupMenu.menuInflater.inflate(R.menu.menu_popup_set, popupMenu.menu)
             popupMenu.setOnMenuItemClickListener { item ->
                 itemClickListener?.onSetTypeChanged(
                     itemPosition,
@@ -251,8 +260,39 @@ class ExerciseSetAdapter : RecyclerView.Adapter<RecyclerView.ViewHolder>() {
         }
 
         fun deleteSet() {
-            swipeActionListener?.onDeleteSet(adapterPosition)
-            notifyItemRemoved(adapterPosition)
+            swipeActionListener?.onDeleteSet(bindingAdapterPosition)
+            notifyItemRemoved(bindingAdapterPosition)
+        }
+
+        private fun animateSetBackgroundOnClick(startColor: Int) {
+            val endColor = if (getColor(itemView.context, startColor) == getColor(
+                    itemView.context,
+                    R.color.background
+                )
+            ) {
+                getColor(itemView.context, R.color.cool_green)
+            } else {
+                getColor(itemView.context, R.color.background)
+            }
+
+            ValueAnimator.ofObject(ArgbEvaluator(), startColor, endColor).apply {
+                duration = 1000L
+                addUpdateListener {
+                    itemView.setBackgroundColor(it.animatedValue as Int)
+                }
+            }.start()
+
+            val scaleDownX = ObjectAnimator.ofFloat(itemView, "scaleX", 1.1f)
+            val scaleDownY = ObjectAnimator.ofFloat(itemView, "scaleY", 1.1f)
+            val scaleUpX = ObjectAnimator.ofFloat(itemView, "scaleX", 1f)
+            val scaleUpY = ObjectAnimator.ofFloat(itemView, "scaleY", 1f)
+
+            AnimatorSet().apply {
+                play(scaleDownX).with(scaleDownY)
+                play(scaleUpX).with(scaleUpY).after(scaleDownX)
+                duration = 200L
+                start()
+            }
         }
     }
 
