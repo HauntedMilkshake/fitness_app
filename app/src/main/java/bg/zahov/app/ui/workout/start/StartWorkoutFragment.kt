@@ -1,8 +1,6 @@
 package bg.zahov.app.ui.workout.start
 
 import android.os.Bundle
-import android.transition.TransitionInflater
-import android.util.Log
 import android.view.LayoutInflater
 import android.view.Menu
 import android.view.MenuInflater
@@ -10,6 +8,7 @@ import android.view.MenuItem
 import android.view.View
 import android.view.ViewGroup
 import android.widget.Toast
+import androidx.appcompat.app.AppCompatActivity
 import androidx.core.os.bundleOf
 import androidx.core.view.MenuProvider
 import androidx.fragment.app.Fragment
@@ -20,7 +19,6 @@ import androidx.recyclerview.widget.LinearLayoutManager
 import bg.zahov.app.data.model.Workout
 import bg.zahov.app.data.model.state.StartWorkoutUiMapper
 import bg.zahov.app.setToolBarTitle
-import bg.zahov.app.showTopBar
 import bg.zahov.fitness.app.R
 import bg.zahov.fitness.app.databinding.FragmentStartWorkoutBinding
 
@@ -38,6 +36,7 @@ class StartWorkoutFragment : Fragment() {
 
     override fun onViewCreated(view: View, savedInstanceState: Bundle?) {
         super.onViewCreated(view, savedInstanceState)
+        (activity as? AppCompatActivity)?.supportActionBar?.setDisplayHomeAsUpEnabled(false)
         requireActivity().setToolBarTitle(R.string.workout)
         requireActivity().addMenuProvider(object : MenuProvider {
             override fun onCreateMenu(menu: Menu, menuInflater: MenuInflater) {
@@ -51,7 +50,7 @@ class StartWorkoutFragment : Fragment() {
             val workoutAdapter = TemplateWorkoutAdapter().apply {
                 itemClickListener = object : TemplateWorkoutAdapter.ItemClickListener<Workout> {
                     override fun onWorkoutClicked(item: Workout, clickedView: View) {
-                        findNavController().navigate(R.id.start_workout_to_template_workout_info, bundleOf("WORKOUT_NAME" to item.name))
+                        findNavController().navigate(R.id.start_workout_to_template_workout_info, bundleOf("WORKOUT_ID" to item.id))
                     }
 
                     override fun onWorkoutStart(position: Int) {

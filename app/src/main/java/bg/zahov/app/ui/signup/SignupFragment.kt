@@ -12,6 +12,7 @@ import androidx.lifecycle.map
 import androidx.navigation.fragment.findNavController
 import bg.zahov.app.data.model.state.SignupUiMapper
 import bg.zahov.app.hideBottomNav
+import bg.zahov.app.hideTopBar
 import bg.zahov.fitness.app.R
 import bg.zahov.fitness.app.databinding.FragmentSignUpBinding
 
@@ -32,6 +33,7 @@ class SignupFragment : Fragment() {
     override fun onStart() {
         super.onStart()
         requireActivity().hideBottomNav()
+        requireActivity().hideTopBar()
     }
 
     override fun onViewCreated(view: View, savedInstanceState: Bundle?) {

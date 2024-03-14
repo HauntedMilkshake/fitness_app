@@ -99,3 +99,7 @@ fun FragmentActivity.hideTopBar() {
 fun FragmentActivity.setToolBarTitle(title: Int) {
     findViewById<MaterialToolbar>(R.id.toolbar)?.setTitle(title)
 }
+
+fun FragmentActivity.setToolBarTitle(title: String) {
+    findViewById<MaterialToolbar>(R.id.toolbar)?.title = title
+}

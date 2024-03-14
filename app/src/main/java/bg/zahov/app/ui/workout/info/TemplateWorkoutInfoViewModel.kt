@@ -27,9 +27,13 @@ class TemplateWorkoutInfoViewModel(application: Application) : AndroidViewModel(
         application.getWorkoutStateManager()
     }
     private val _state = MutableLiveData<State>(State.Default)
-    var workoutName: String? = ""
+    var workoutId: String? = ""
     val state: LiveData<State>
         get() = _state
+    private val _workoutName = MutableLiveData<String>()
+    val workoutName: LiveData<String>
+        get() = _workoutName
+
 
     private var workoutState: WorkoutState? = null
     private var workout: Workout? = null
@@ -38,15 +42,16 @@ class TemplateWorkoutInfoViewModel(application: Application) : AndroidViewModel(
         viewModelScope.launch {
             launch {
                 _state.postValue(State.Loading(View.VISIBLE))
-                if (!workoutName.isNullOrEmpty()) {
+                if (!workoutId.isNullOrEmpty()) {
                     try {
                         workoutProvider.getTemplateWorkouts().collect { workouts ->
-                            workouts.find { it.name == workoutName }?.let {
+                            workouts.find { it.id == workoutId }?.let {
                                 _state.postValue(
                                     State.Data(
                                         getDaysDifferenceInString(it.date),
                                         it.exercises.map { exercise -> exercise.toExerciseAdapterWrapper() })
                                 )
+                                _workoutName.postValue(it.name)
                                 workout = it
                             }
 
@@ -82,12 +87,23 @@ class TemplateWorkoutInfoViewModel(application: Application) : AndroidViewModel(
                 }
             } else {
                 (_state.value as? State.Data)?.let { state ->
-                    _state.value = State.WorkoutActive("Cannot start a workout at this time", state.lastPerformed, state.exercises)
+                    _state.value = State.WorkoutActive(
+                        "Cannot start a workout at this time",
+                        state.lastPerformed,
+                        state.exercises
+                    )
                 }
             }
         }
     }
 
+    fun duplicateWorkout() {
+
+    }
+
+    fun deleteWorkout() {
+
+    }
 
     sealed interface State {
         object Default : State

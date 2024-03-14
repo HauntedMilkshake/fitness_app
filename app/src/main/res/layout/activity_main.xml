@@ -21,8 +21,9 @@
             android:layout_width="match_parent"
             android:layout_height="?attr/actionBarSize"
             android:background="@color/background"
-            app:layout_scrollFlags="scroll|enterAlways"
             android:elevation="@dimen/appbar_elevation"
+            app:layout_scrollFlags="scroll|enterAlways"
+            app:theme="@style/AppTheme.Toolbar"
             app:titleMarginStart="15dp"
             app:titleTextColor="@color/white" />
     </com.google.android.material.appbar.AppBarLayout>

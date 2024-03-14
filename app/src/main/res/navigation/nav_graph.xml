@@ -217,7 +217,13 @@
     <fragment
         android:id="@+id/template_workout_info"
         android:name="bg.zahov.app.ui.workout.info.TemplateWorkoutInfoFragment"
-        tools:layout="@layout/fragment_template_workout_info" />
+        tools:layout="@layout/fragment_template_workout_info">
+        <action
+            android:id="@+id/template_workout_info_to_edit_template"
+            app:destination="@id/create_workout_template"
+            app:popUpTo="@id/template_workout_info"
+            app:popUpToInclusive="true" />
+    </fragment>
     <fragment
         android:id="@+id/finish_workout"
         android:name="bg.zahov.app.ui.workout.finish.FragmentWorkoutFinish"
