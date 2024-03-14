@@ -86,17 +86,14 @@ fun FragmentActivity.hideBottomNav() {
 
 fun FragmentActivity.showBottomNav() {
     findViewById<BottomNavigationView>(R.id.bottom_navigation)?.visibility = View.VISIBLE
-
 }
 
 fun FragmentActivity.showTopBar() {
     findViewById<AppBarLayout>(R.id.top_bar)?.visibility = View.VISIBLE
 }
 
-
 fun FragmentActivity.hideTopBar() {
     findViewById<AppBarLayout>(R.id.top_bar)?.visibility = View.GONE
-
 }
 
 fun FragmentActivity.setToolBarTitle(title: Int) {

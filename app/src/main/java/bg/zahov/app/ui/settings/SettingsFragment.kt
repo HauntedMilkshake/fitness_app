@@ -40,7 +40,6 @@ class SettingsFragment : Fragment() {
     ): View {
         _binding = FragmentSettingsBinding.inflate(inflater, container, false)
         requireActivity().hideBottomNav()
-        requireActivity().showTopBar()
         return binding.root
     }
 
@@ -64,7 +63,7 @@ class SettingsFragment : Fragment() {
             override fun onMenuItemSelected(menuItem: MenuItem): Boolean {
                 return when (menuItem.itemId) {
                     R.id.home -> {
-                        findNavController().navigateUp()
+                        findNavController().popBackStack()
                         true
                     }
 

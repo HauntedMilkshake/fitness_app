@@ -36,14 +36,6 @@ class HistoryFragment : Fragment() {
         return binding.root
     }
 
-    override fun onCreate(savedInstanceState: Bundle?) {
-        super.onCreate(savedInstanceState)
-        enterTransition =
-            TransitionInflater.from(requireContext()).inflateTransition(R.transition.slide_up)
-        exitTransition =
-            TransitionInflater.from(requireContext()).inflateTransition(R.transition.fade_out)
-    }
-
     override fun onViewCreated(view: View, savedInstanceState: Bundle?) {
         super.onViewCreated(view, savedInstanceState)
         requireActivity().setToolBarTitle(R.string.history)

@@ -4,10 +4,14 @@ import android.os.Bundle
 import android.transition.TransitionInflater
 import android.util.Log
 import android.view.LayoutInflater
+import android.view.Menu
+import android.view.MenuInflater
+import android.view.MenuItem
 import android.view.View
 import android.view.ViewGroup
 import android.widget.Toast
 import androidx.core.os.bundleOf
+import androidx.core.view.MenuProvider
 import androidx.fragment.app.Fragment
 import androidx.fragment.app.viewModels
 import androidx.lifecycle.map
@@ -15,6 +19,8 @@ import androidx.navigation.fragment.findNavController
 import androidx.recyclerview.widget.LinearLayoutManager
 import bg.zahov.app.data.model.Workout
 import bg.zahov.app.data.model.state.StartWorkoutUiMapper
+import bg.zahov.app.setToolBarTitle
+import bg.zahov.app.showTopBar
 import bg.zahov.fitness.app.R
 import bg.zahov.fitness.app.databinding.FragmentStartWorkoutBinding
 
@@ -30,15 +36,17 @@ class StartWorkoutFragment : Fragment() {
         return binding.root
     }
 
-    override fun onCreate(savedInstanceState: Bundle?) {
-        super.onCreate(savedInstanceState)
-        val inflater = TransitionInflater.from(requireContext())
-        enterTransition = inflater.inflateTransition(R.transition.slide_up)
-        exitTransition = inflater.inflateTransition(R.transition.fade_out)
-    }
-
     override fun onViewCreated(view: View, savedInstanceState: Bundle?) {
         super.onViewCreated(view, savedInstanceState)
+        requireActivity().setToolBarTitle(R.string.workout)
+        requireActivity().addMenuProvider(object : MenuProvider {
+            override fun onCreateMenu(menu: Menu, menuInflater: MenuInflater) {
+                menu.clear()
+                menuInflater.inflate(R.menu.menu_toolbar_workout, menu)
+            }
+
+            override fun onMenuItemSelected(menuItem: MenuItem) = false
+        })
         binding.apply {
             val workoutAdapter = TemplateWorkoutAdapter().apply {
                 itemClickListener = object : TemplateWorkoutAdapter.ItemClickListener<Workout> {

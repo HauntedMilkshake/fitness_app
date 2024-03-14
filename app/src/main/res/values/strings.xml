@@ -125,5 +125,6 @@
     <string name="lbs_minus">-lbs</string>
     <string name="best_set">Best set</string>
     <string name="reset_settings">Reset settings</string>
+    <string name="search">Search</string>
 
 </resources>
