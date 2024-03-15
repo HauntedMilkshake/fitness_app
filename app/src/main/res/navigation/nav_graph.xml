@@ -90,7 +90,13 @@
     <fragment
         android:id="@+id/calendar"
         android:name="bg.zahov.app.ui.history.calendar.CalendarFragment"
-        tools:layout="@layout/fragment_calendar"></fragment>
+        tools:layout="@layout/fragment_calendar">
+        <action
+            android:id="@+id/calendar_to_history"
+            app:destination="@id/history"
+            app:popUpTo="@id/calendar"
+            app:popUpToInclusive="true" />
+    </fragment>
 
     <fragment
         android:id="@+id/measures"

@@ -3,10 +3,15 @@ package bg.zahov.app.ui.workout.add
 import android.os.Bundle
 import android.transition.TransitionInflater
 import android.view.LayoutInflater
+import android.view.Menu
+import android.view.MenuInflater
+import android.view.MenuItem
 import android.view.View
 import android.view.ViewGroup
 import android.widget.Toast
+import androidx.appcompat.app.AppCompatActivity
 import androidx.core.os.bundleOf
+import androidx.core.view.MenuProvider
 import androidx.fragment.app.Fragment
 import androidx.fragment.app.viewModels
 import androidx.lifecycle.map
@@ -15,6 +20,7 @@ import androidx.recyclerview.widget.ItemTouchHelper
 import androidx.recyclerview.widget.LinearLayoutManager
 import bg.zahov.app.data.model.state.AddTemplateWorkoutUiMapper
 import bg.zahov.app.data.model.SetType
+import bg.zahov.app.setToolBarTitle
 import bg.zahov.app.util.SetSwipeGesture
 import bg.zahov.app.util.applyScaleAnimation
 import bg.zahov.fitness.app.R
@@ -58,14 +64,34 @@ class AddTemplateWorkoutFragment : Fragment() {
 
     override fun onViewCreated(view: View, savedInstanceState: Bundle?) {
         super.onViewCreated(view, savedInstanceState)
-        binding.apply {
-            newWorkoutText.setText(if (edit) R.string.edit_workout_template else R.string.new_workout_template)
-
-            stopCreatingWorkout.setOnClickListener {
-                it.applyScaleAnimation()
-                findNavController().navigate(R.id.create_workout_template_to_workout)
+        (activity as? AppCompatActivity)?.supportActionBar?.setDisplayHomeAsUpEnabled(true)
+        (activity as? AppCompatActivity)?.supportActionBar?.setHomeAsUpIndicator(R.drawable.ic_back_arrow)
+        requireActivity().setToolBarTitle(if (edit) R.string.edit_workout_template else R.string.new_workout_template)
+        requireActivity().addMenuProvider(object : MenuProvider {
+            override fun onCreateMenu(menu: Menu, menuInflater: MenuInflater) {
+                menu.clear()
+                menuInflater.inflate(R.menu.menu_toolbar_add_template_workout, menu)
             }
 
+            override fun onMenuItemSelected(menuItem: MenuItem): Boolean = when (menuItem.itemId) {
+                R.id.home -> {
+                    findNavController().navigate(R.id.create_workout_template_to_workout)
+                    true
+                }
+
+                R.id.save -> {
+                    binding.apply {
+                        addWorkoutViewModel.workoutName = workoutNameFieldText.text.toString()
+                        addWorkoutViewModel.workoutNote = workoutNoteFieldText.text.toString()
+                    }
+                    addWorkoutViewModel.saveTemplateWorkout()
+                    true
+                }
+
+                else -> false
+            }
+        })
+        binding.apply {
             val exerciseSetAdapter = ExerciseSetAdapter().apply {
                 itemClickListener = object : ExerciseSetAdapter.ItemClickListener<WorkoutEntry> {
                     override fun onSetCheckClicked(itemPosition: Int) {
@@ -138,13 +164,6 @@ class AddTemplateWorkoutFragment : Fragment() {
 
 
                 }
-
-            save.setOnClickListener {
-                it.applyScaleAnimation()
-                addWorkoutViewModel.workoutName = workoutNameFieldText.text.toString()
-                addWorkoutViewModel.workoutNote = workoutNoteFieldText.text.toString()
-                addWorkoutViewModel.saveTemplateWorkout()
-            }
 
             cancel.setOnClickListener {
                 it.applyScaleAnimation()

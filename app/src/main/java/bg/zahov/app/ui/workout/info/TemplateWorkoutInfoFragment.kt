@@ -76,7 +76,7 @@ class TemplateWorkoutInfoFragment : Fragment() {
 
                 R.id.delete -> {
                     templateWorkoutInfoViewModel.deleteWorkout()
-                    findNavController().popBackStack()
+                    findNavController().navigateUp()
                     true
                 }
 
