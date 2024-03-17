@@ -91,7 +91,7 @@
     <string name="add_set">add set</string>
     <string name="cancel_text">cancel</string>
     <!-- Strings used for workout fragment    -->
-    <string name="finish_workout">Finish</string>
+    <string name="finish_workout"><font color="#3D8BC9">Finish</font></string>
     <string name="cancel_workout">cancel workout</string>
     <string name="edit_workout">Edit</string>
     <string name="duplicate">Duplicate</string>
@@ -127,5 +127,16 @@
     <string name="reset_settings">Reset settings</string>
     <string name="search">Search</string>
     <string name="save">Save</string>
-    <string name="finish">Finish</string>
+    <string name="timers">Timers</string>
+    <string name="save_as_workout_template">Save as workout template</string>
+    <string name="one_rep_max_text">1RM</string>
+    <string name="perform_again">perform again</string>
+    <string name="charts">Charts</string>
+    <string name="records">records</string>
+    <string name="Charts">Charts</string>
+    <string name="sets_performed">Sets performed</string>
+    <string name="personal_records">PERSONAL RECORDS</string>
+    <string name="estimated_1rm">Estimatd 1RM</string>
+    <string name="max_volume">Max volume</string>
+    <string name="max_weight">Max weight</string>
 </resources>

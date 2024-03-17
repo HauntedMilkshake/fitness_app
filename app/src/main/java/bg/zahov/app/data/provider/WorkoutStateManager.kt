@@ -2,6 +2,7 @@ package bg.zahov.app.data.provider
 
 import bg.zahov.app.data.model.Workout
 import bg.zahov.app.data.model.WorkoutState
+import io.realm.kotlin.mongodb.sync.SyncSession
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.Job
@@ -69,5 +70,9 @@ class WorkoutStateManager {
     suspend fun updateTemplate(workout: Workout) {
         updateState(WorkoutState.ACTIVE)
         _template.value = workout
+    }
+
+    suspend fun workoutFinish() {
+        _template.value = null
     }
 }

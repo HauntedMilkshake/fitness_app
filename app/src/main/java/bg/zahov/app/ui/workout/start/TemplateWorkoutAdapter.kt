@@ -5,10 +5,10 @@ import android.widget.PopupMenu
 import androidx.appcompat.view.ContextThemeWrapper
 import bg.zahov.app.data.model.Workout
 import bg.zahov.app.util.BaseAdapter
+import bg.zahov.app.util.toFormattedString
 import bg.zahov.fitness.app.R
 import com.google.android.material.imageview.ShapeableImageView
 import com.google.android.material.textview.MaterialTextView
-import java.time.format.DateTimeFormatter
 
 class TemplateWorkoutAdapter : BaseAdapter<Workout>(
     areItemsTheSame = { oldItem, newItem -> oldItem.name == newItem.name },
@@ -28,9 +28,10 @@ class TemplateWorkoutAdapter : BaseAdapter<Workout>(
 
         override fun bind(item: Workout) {
             title.text = item.name
-            lastPerformed.text = "Last performed: ${item.date.format(DateTimeFormatter.ofPattern("dd.MM.yyyy"))}"
+            //TODO(Fix)
+            lastPerformed.text = "Last performed: ${item.date.toFormattedString()}"
             settings.setOnClickListener {
-                showCustomLayout(item, adapterPosition, it)
+                showCustomLayout(item, bindingAdapterPosition, it)
             }
 
             itemView.setOnClickListener {
@@ -39,7 +40,7 @@ class TemplateWorkoutAdapter : BaseAdapter<Workout>(
             if (item.isTemplate) {
                 exercises.text =
                     item.exercises.joinToString("\n") {
-                        "${if (it.sets.isNotEmpty()) "${it.sets.size} X " else ""}${it.name} "
+                        "${if (it.sets.isNotEmpty()) "${it.sets.size} x " else ""}${it.name} "
                     }
             }
         }

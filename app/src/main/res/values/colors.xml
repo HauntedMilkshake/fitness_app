@@ -13,10 +13,9 @@
     <color name="red">#ff0000</color>
     <color name="selected">#296d98</color>
     <color name="unselected_filter">#23395d</color>
-    <color name="input_field_background">с</color>
+    <color name="input_field_background">#3D464B</color>
     <color name="blue_text">#3D8BC9</color>
-    <color name="less_vibrant_text">#64828f</color>
-
+    <color name="less_vibrant_text">#A5A7A9</color>
     <color name="completed_set">#00FF00</color>
     <color name="drop_set">#673ab7</color>
     <color name="warmup_set">#FFA500</color>

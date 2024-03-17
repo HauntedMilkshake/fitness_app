@@ -70,7 +70,7 @@ class AddTemplateWorkoutFragment : Fragment() {
         requireActivity().addMenuProvider(object : MenuProvider {
             override fun onCreateMenu(menu: Menu, menuInflater: MenuInflater) {
                 menu.clear()
-                menuInflater.inflate(R.menu.menu_toolbar_add_template_workout, menu)
+                menuInflater.inflate(R.menu.menu_toolbar_add_workout, menu)
             }
 
             override fun onMenuItemSelected(menuItem: MenuItem): Boolean = when (menuItem.itemId) {

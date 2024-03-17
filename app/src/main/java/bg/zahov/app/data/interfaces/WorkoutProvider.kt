@@ -2,6 +2,7 @@ package bg.zahov.app.data.interfaces
 
 import bg.zahov.app.data.model.Exercise
 import bg.zahov.app.data.model.Workout
+import bg.zahov.app.ui.exercise.info.history.ExerciseHistoryInfo
 import kotlinx.coroutines.flow.Flow
 
 interface WorkoutProvider {
@@ -16,4 +17,8 @@ interface WorkoutProvider {
     suspend fun getWorkoutById(id: String): Flow<Workout>
     suspend fun updateExercises(exercises: List<Exercise>)
     suspend fun getTemplateWorkoutByName(name: String): Flow<Workout>
+    suspend fun getPastWorkoutById(id: String): Workout
+    fun setClickedTemplateExercise(item: Exercise)
+    fun getClickedTemplateExercise(): Exercise
+    suspend fun getExerciseHistory(): List<ExerciseHistoryInfo>
 }

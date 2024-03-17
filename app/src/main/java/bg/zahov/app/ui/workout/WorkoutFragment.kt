@@ -17,6 +17,7 @@ import androidx.recyclerview.widget.LinearLayoutManager
 import bg.zahov.app.data.model.state.OnGoingWorkoutUiMapper
 import bg.zahov.app.data.model.SetType
 import bg.zahov.app.hideBottomNav
+import bg.zahov.app.hideTopBar
 import bg.zahov.app.showBottomNav
 import bg.zahov.app.ui.workout.add.ExerciseSetAdapter
 import bg.zahov.app.ui.workout.add.WorkoutEntry
@@ -53,6 +54,8 @@ class WorkoutFragment : Fragment() {
 
     override fun onViewCreated(view: View, savedInstanceState: Bundle?) {
         super.onViewCreated(view, savedInstanceState)
+        requireActivity().hideTopBar()
+
         binding.apply {
             onGoingWorkoutViewModel.restTimer.map { OnGoingWorkoutUiMapper.map(it) }
                 .observe(viewLifecycleOwner) {

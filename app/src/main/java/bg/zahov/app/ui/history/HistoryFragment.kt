@@ -9,6 +9,7 @@ import android.view.MenuItem
 import android.view.View
 import android.view.ViewGroup
 import androidx.appcompat.app.AppCompatActivity
+import androidx.core.os.bundleOf
 import androidx.core.view.MenuProvider
 import androidx.fragment.app.Fragment
 import androidx.fragment.app.viewModels
@@ -62,6 +63,7 @@ class HistoryFragment : Fragment() {
             val historyAdapter = HistoryAdapter().apply {
                 itemClickListener = object : HistoryAdapter.ItemClickListener<Workout> {
                     override fun onWorkoutClick(item: Workout, position: Int) {
+                        findNavController().navigate(R.id.history_to_history_info, bundleOf(workoutId to item.id))
                     }
                 }
             }
@@ -83,5 +85,8 @@ class HistoryFragment : Fragment() {
     override fun onDestroyView() {
         super.onDestroyView()
         _binding = null
+    }
+    companion object {
+        const val workoutId = "WORKOUT_ID"
     }
 }

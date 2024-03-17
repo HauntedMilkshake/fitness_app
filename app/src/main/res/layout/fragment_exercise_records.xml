@@ -1,0 +1,84 @@
+<?xml version="1.0" encoding="utf-8"?>
+<androidx.constraintlayout.widget.ConstraintLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:app="http://schemas.android.com/apk/res-auto"
+    android:layout_width="match_parent"
+    android:layout_height="match_parent">
+
+    <com.google.android.material.textview.MaterialTextView
+        android:id="@+id/personal_record_label"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:layout_marginStart="10dp"
+        android:layout_marginTop="10dp"
+        android:text="@string/personal_records"
+        android:textColor="@color/less_vibrant_text"
+        android:textSize="11sp"
+        app:layout_constraintStart_toStartOf="parent"
+        app:layout_constraintTop_toTopOf="parent" />
+
+    <com.google.android.material.textview.MaterialTextView
+        android:id="@+id/estimated_1rm_label"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:layout_marginTop="15dp"
+        android:text="@string/estimated_1rm"
+        android:textColor="@color/white"
+        android:textSize="15sp"
+        app:layout_constraintStart_toStartOf="@+id/personal_record_label"
+        app:layout_constraintTop_toBottomOf="@+id/personal_record_label" />
+
+    <com.google.android.material.textview.MaterialTextView
+        android:id="@+id/max_volume_label"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:layout_marginTop="20dp"
+        android:text="@string/max_volume"
+        android:textColor="@color/white"
+        android:textSize="15sp"
+        app:layout_constraintStart_toStartOf="@+id/personal_record_label"
+        app:layout_constraintTop_toBottomOf="@+id/estimated_1rm_label" />
+
+    <com.google.android.material.textview.MaterialTextView
+        android:id="@+id/max_weight_volume"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:layout_marginTop="20dp"
+        android:text="@string/max_weight"
+        android:textColor="@color/white"
+        android:textSize="15sp"
+        app:layout_constraintStart_toStartOf="@+id/personal_record_label"
+        app:layout_constraintTop_toBottomOf="@+id/max_volume_label" />
+
+    <com.google.android.material.textview.MaterialTextView
+        android:id="@+id/one_rep_max"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:layout_marginEnd="15dp"
+        android:textColor="@color/less_vibrant_text"
+        android:textSize="15sp"
+        app:layout_constraintBottom_toBottomOf="@+id/estimated_1rm_label"
+        app:layout_constraintEnd_toEndOf="parent"
+        app:layout_constraintTop_toTopOf="@+id/estimated_1rm_label" />
+
+    <com.google.android.material.textview.MaterialTextView
+        android:id="@+id/max_volume"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:layout_marginEnd="15dp"
+        android:textColor="@color/less_vibrant_text"
+        android:textSize="15sp"
+        app:layout_constraintBottom_toBottomOf="@+id/max_volume_label"
+        app:layout_constraintEnd_toEndOf="parent"
+        app:layout_constraintTop_toTopOf="@+id/max_volume_label" />
+
+    <com.google.android.material.textview.MaterialTextView
+        android:id="@+id/max_weight"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:layout_marginEnd="15dp"
+        android:textColor="@color/less_vibrant_text"
+        android:textSize="15sp"
+        app:layout_constraintBottom_toBottomOf="@+id/max_weight_volume"
+        app:layout_constraintEnd_toEndOf="parent"
+        app:layout_constraintTop_toTopOf="@+id/max_weight_volume" />
+</androidx.constraintlayout.widget.ConstraintLayout>

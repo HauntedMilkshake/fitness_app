@@ -1,6 +1,7 @@
 package bg.zahov.app.ui.workout
 
 import android.app.Application
+import android.util.Log
 import android.view.View
 import androidx.lifecycle.AndroidViewModel
 import androidx.lifecycle.LiveData
@@ -125,6 +126,7 @@ class WorkoutViewModel(application: Application) : AndroidViewModel(application)
                         val exercisesToUpdate = _exercises.value.orEmpty().toMutableList()
                         exercisesToUpdate.addAll(createWorkoutEntryArray(it))
                         _exercises.postValue(exercisesToUpdate)
+                        addExerciseToWorkoutProvider.resetSelectedExercises()
                     }
                 }
             }
@@ -161,7 +163,7 @@ class WorkoutViewModel(application: Application) : AndroidViewModel(application)
                 workoutEntries.add(
                     SetEntry(
                         set.toExerciseSetAdapterSetWrapper(
-                            index.toString(),
+                            (index + 1).toString(),
                             it.category,
                             "${(set.secondMetric)} x ${set.firstMetric}"
                         )
@@ -230,7 +232,7 @@ class WorkoutViewModel(application: Application) : AndroidViewModel(application)
         templateExercise: Exercise?,
     ) {
         val setNumber = insertIndex - exercisePosition
-        val setEntry = if (templateExercise != null && setNumber <= templateExercise.sets.size) {
+        val setEntry = if (templateExercise != null && setNumber < templateExercise.sets.size) {
             SetEntry(
                 templateExercise.sets[setNumber].toExerciseSetAdapterSetWrapper(
                     setNumber.toString(),
@@ -277,15 +279,29 @@ class WorkoutViewModel(application: Application) : AndroidViewModel(application)
             when (viewId) {
                 R.id.first_input_field_text -> {
                     (_exercises.value?.get(position) as? SetEntry)?.setEntry?.set?.firstMetric =
-                        metric.toDoubleOrNull()
+                        "%.2f".format(metric.toDoubleOrNull() ?: 0.0).toDouble()
+
                 }
 
                 R.id.second_input_field_text -> {
                     (_exercises.value?.get(position) as? SetEntry)?.setEntry?.set?.secondMetric =
-                        metric.toIntOrNull()
+                        filterIntegerInput(metric)
                 }
             }
         }
+        Log.d("Metric inserted in set", metric)
+    }
+
+    private fun filterIntegerInput(input: String): Int {
+        var result = 0
+        if (input.startsWith('0') && input.length > 1) {
+            input.dropWhile { it == '0' }
+        }
+        if (input.contains(",")) {
+            input.dropLast(input.length - input.indexOf(","))
+        }
+        result = input.toIntOrNull() ?: 0
+        return result
     }
 
     fun onSetTypeChanged(itemPosition: Int, setType: SetType) {
@@ -314,6 +330,8 @@ class WorkoutViewModel(application: Application) : AndroidViewModel(application)
 
         viewModelScope.launch {
             val (exercises, prs, volume) = getExerciseArrayAndPRs(_exercises.value!!)
+            Log.d("PRS", prs.toString())
+            Log.d("volume", volume.toString())
             repo.addWorkoutToHistory(
                 Workout(
                     id = workoutId ?: hashString("${Random().nextInt(Int.MAX_VALUE)}"),
@@ -329,6 +347,7 @@ class WorkoutViewModel(application: Application) : AndroidViewModel(application)
             )
             addExerciseToWorkoutProvider.resetSelectedExercises()
             workoutStateManager.updateState(WorkoutState.INACTIVE)
+            workoutStateManager.workoutFinish()
         }
     }
 
@@ -353,6 +372,10 @@ class WorkoutViewModel(application: Application) : AndroidViewModel(application)
                 is SetEntry -> {
                     exercises.entries.last().value.apply {
                         sets.add(entry.setEntry.set)
+                        if (category != Category.Cardio && category != Category.Timed && category != Category.AssistedWeight) {
+                            volume += (entry.setEntry.set.firstMetric
+                                ?: 1.0) * (entry.setEntry.set.secondMetric ?: 1).toInt()
+                        }
                         if (entry.setEntry.set.type == SetType.DEFAULT || entry.setEntry.set.type == SetType.FAILURE) {
                             when (category) {
                                 Category.RepsOnly -> {
@@ -363,17 +386,23 @@ class WorkoutViewModel(application: Application) : AndroidViewModel(application)
                                     }
                                 }
 
+                                Category.AssistedWeight -> {
+                                    if ((bestSet.firstMetric
+                                            ?: 0.0) < (entry.setEntry.set.firstMetric ?: 0.0)
+                                    ) {
+                                        bestSet = entry.setEntry.set
+                                    }
+                                }
+//                                Category.Cardio, Category.Timed -> {
+//                                  potentially if we add the second parameter to be a long os that there is enough space for the time
+//                                }
                                 else -> {
                                     if ((entry.setEntry.set.firstMetric
                                             ?: 0.0) > (bestSet.firstMetric ?: 0.0)
                                     ) {
                                         bestSet = entry.setEntry.set
                                     }
-                                    if (category != Category.Cardio && category != Category.Timed && category != Category.AssistedWeight) {
-                                        volume += entry.setEntry.set.firstMetric
-                                            ?: (1.0 * (entry.setEntry.set.secondMetric
-                                                ?: 1).toInt())
-                                    }
+
                                 }
                             }
                         }

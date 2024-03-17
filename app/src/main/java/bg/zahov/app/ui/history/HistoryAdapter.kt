@@ -35,13 +35,13 @@ class HistoryAdapter(private val units: Units = Units.METRIC) : BaseAdapter<Work
             volume.text = "${item.volume ?: 0} ${if (units == Units.METRIC) "kg" else "lbs"}"
             prs.text = item.personalRecords.toString()
             exercises.text = item.exercises.joinToString("\n") {
-                "${if (it.sets.isNotEmpty()) "${it.sets.size} X " else ""}${it.name} "
+                "${if (it.sets.isNotEmpty()) "${it.sets.size} x " else ""}${it.name} "
             }
             bestSets.text = item.exercises.joinToString("\n") {
-                "${it.bestSet.firstMetric ?: 0} X ${it.bestSet.secondMetric ?: 0}"
+                "${it.bestSet.firstMetric ?: 0} x ${it.bestSet.secondMetric ?: 0}"
             }
             itemView.setOnClickListener {
-                itemClickListener?.onWorkoutClick(item, adapterPosition)
+                itemClickListener?.onWorkoutClick(item, bindingAdapterPosition)
             }
         }
     }

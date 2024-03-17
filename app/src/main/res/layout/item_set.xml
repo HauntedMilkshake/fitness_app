@@ -10,7 +10,7 @@
         android:id="@+id/set_number"
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
-        android:layout_marginStart="20dp"
+        android:layout_marginStart="15dp"
         android:textColor="@color/blue_text"
         android:textSize="12sp"
         app:layout_constraintBottom_toBottomOf="@+id/first_input_field"
@@ -21,7 +21,7 @@
         android:id="@+id/previous"
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
-        android:layout_marginStart="50dp"
+        android:layout_marginStart="35dp"
         android:textColor="@color/white"
         android:textSize="12sp"
         app:layout_constraintBottom_toBottomOf="@+id/first_input_field"
@@ -32,7 +32,7 @@
         android:id="@+id/first_input_field"
         android:layout_width="75dp"
         android:layout_height="wrap_content"
-        android:layout_marginStart="50dp"
+        android:layout_marginEnd="5dp"
         app:boxCornerRadiusBottomEnd="10dp"
         app:boxCornerRadiusBottomStart="10dp"
         app:boxCornerRadiusTopEnd="10dp"
@@ -42,10 +42,8 @@
         app:boxStrokeWidthFocused="0dp"
         app:cursorColor="@color/blue_text"
         app:hintEnabled="false"
-        android:layout_marginEnd="25dp"
         app:layout_constraintBottom_toBottomOf="parent"
         app:layout_constraintEnd_toStartOf="@+id/second_input_field"
-        app:layout_constraintStart_toEndOf="@id/previous"
         app:layout_constraintTop_toTopOf="parent">
 
         <com.google.android.material.textfield.TextInputEditText

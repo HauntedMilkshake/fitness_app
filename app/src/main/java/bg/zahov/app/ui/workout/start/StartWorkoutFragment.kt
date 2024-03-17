@@ -41,7 +41,7 @@ class StartWorkoutFragment : Fragment() {
         requireActivity().addMenuProvider(object : MenuProvider {
             override fun onCreateMenu(menu: Menu, menuInflater: MenuInflater) {
                 menu.clear()
-                menuInflater.inflate(R.menu.menu_toolbar_workout, menu)
+                menuInflater.inflate(R.menu.menu_toolbar_start_workout, menu)
             }
 
             override fun onMenuItemSelected(menuItem: MenuItem) = false

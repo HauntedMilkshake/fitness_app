@@ -83,6 +83,12 @@ class ExerciseViewModel(application: Application) : AndroidViewModel(application
         _userExercises.value = captured
     }
 
+    fun setClickedExercise(name: String) {
+        exerciseTemplates.find { it.name == name }?.let {
+            repo.setClickedTemplateExercise(it)
+        }
+    }
+
     fun onConfirm() {
         replaceable = false
         selectable = false

@@ -263,7 +263,7 @@ class ExerciseSetAdapter(val mediaPLayer: MediaPlayer? = null) :
             swipeActionListener?.onDeleteSet(bindingAdapterPosition)
             notifyItemRemoved(bindingAdapterPosition)
         }
-
+        //TODO(Bug with the first click)
         private fun animateSetBackgroundOnClick(startColor: Int) {
             val endColor = if (getColor(itemView.context, startColor) == getColor(
                     itemView.context,

@@ -2,13 +2,21 @@ package bg.zahov.app.ui.workout.rest
 
 import android.os.Bundle
 import android.view.LayoutInflater
+import android.view.Menu
+import android.view.MenuInflater
+import android.view.MenuItem
 import android.view.View
 import android.view.ViewGroup
+import androidx.appcompat.app.AppCompatActivity
+import androidx.core.os.bundleOf
+import androidx.core.view.MenuProvider
 import androidx.fragment.app.Fragment
 import androidx.fragment.app.viewModels
 import androidx.lifecycle.map
 import androidx.navigation.fragment.findNavController
 import bg.zahov.app.data.model.state.RestTimerUiModelMapper
+import bg.zahov.app.setToolBarTitle
+import bg.zahov.app.showTopBar
 import bg.zahov.app.util.parseTimeStringToLong
 import bg.zahov.fitness.app.R
 import bg.zahov.fitness.app.databinding.FragmentRestTimerBinding
@@ -32,6 +40,25 @@ class RestTimerFragment : Fragment() {
 
     override fun onViewCreated(view: View, savedInstanceState: Bundle?) {
         super.onViewCreated(view, savedInstanceState)
+        requireActivity().showTopBar()
+        (activity as? AppCompatActivity)?.supportActionBar?.setDisplayHomeAsUpEnabled(true)
+        (activity as? AppCompatActivity)?.supportActionBar?.setHomeAsUpIndicator(R.drawable.ic_close)
+        requireActivity().setToolBarTitle(R.string.rest_timer_text)
+        requireActivity().addMenuProvider(object : MenuProvider {
+            override fun onCreateMenu(menu: Menu, menuInflater: MenuInflater) {
+                menu.clear()
+                menuInflater.inflate(R.menu.menu_toolbar_rest_timer, menu)
+            }
+
+            override fun onMenuItemSelected(menuItem: MenuItem): Boolean = when (menuItem.itemId) {
+                R.id.home -> {
+                    findNavController().navigate(R.id.rest_timer_to_workout)
+                    true
+                }
+
+                else -> false
+            }
+        })
         binding.apply {
             restTimerViewModel.state.map { RestTimerUiModelMapper.map(it) }
                 .observe(viewLifecycleOwner) {

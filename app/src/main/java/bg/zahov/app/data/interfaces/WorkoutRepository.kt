@@ -16,4 +16,5 @@ interface WorkoutRepository {
     suspend fun getWorkoutById(id: String): Flow<Workout>
     suspend fun getWorkoutByName(name: String): Flow<Workout>
     suspend fun updateExercises(exercises: List<Exercise>)
+    suspend fun getPastWorkoutById(id: String): Workout
 }

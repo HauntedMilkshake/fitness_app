@@ -84,7 +84,9 @@
         <action
             android:id="@+id/history_to_calendar"
             app:destination="@id/calendar" />
-
+        <action
+            android:id="@+id/history_to_history_info"
+            app:destination="@id/history_info" />
     </fragment>
 
     <fragment
@@ -120,6 +122,9 @@
             app:destination="@id/workout"
             app:popUpTo="@id/exercises"
             app:popUpToInclusive="true" />
+        <action
+            android:id="@+id/exercises_to_exercise_info_navigation"
+            app:destination="@id/exercise_info_navigation" />
     </fragment>
 
     <fragment
@@ -233,5 +238,27 @@
     <fragment
         android:id="@+id/finish_workout"
         android:name="bg.zahov.app.ui.workout.finish.FragmentWorkoutFinish"
-        tools:layout="@layout/fragment_workout_finish" />
+        tools:layout="@layout/fragment_workout_finish">
+        <action
+            android:id="@+id/finish_workout_to_home"
+            app:destination="@id/home"
+            app:popUpTo="@string/finish_workout"
+            app:popUpToInclusive="true" />
+    </fragment>
+    <fragment
+        android:id="@+id/history_info"
+        android:name="bg.zahov.app.ui.history.info.HistoryInfoFragment"
+        tools:layout="@layout/fragment_history_info">
+        <action
+            android:id="@+id/history_info_to_history"
+            app:destination="@id/history"
+            app:popUpTo="@id/history_info"
+            app:popUpToInclusive="true" />
+    </fragment>
+    <fragment
+        android:id="@+id/exercise_info_navigation"
+        android:name="bg.zahov.app.ui.exercise.info.ExerciseNavigationFragment"
+        tools:layout="@layout/fragment_exercise_history" />
+
+
 </navigation>

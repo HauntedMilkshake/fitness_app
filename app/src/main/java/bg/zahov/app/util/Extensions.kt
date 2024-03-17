@@ -233,8 +233,21 @@ fun Exercise.toExerciseAdapterWrapper(): ExerciseAdapterWrapper {
     )
 }
 
+fun LocalDateTime.toFormattedString(): String =
+    this.format(DateTimeFormatter.ofPattern("HH:mm, d MMMM", Locale.ENGLISH))
 
-fun LocalDateTime.toFormattedString() = "${this.format(DateTimeFormatter.ofPattern("d"))} ${this.format(DateTimeFormatter.ofPattern("MMMM", Locale.ENGLISH))}"
+fun getOneRepEstimate(weight: Double, reps: Int): String =
+    (weight *  (1 + (0.0333 * reps))).toInt().toString()
+//   (weight / (1.0278 - (0.0278 * reps)))
+
+fun Exercise.getOneRepMaxes(): List<String> = this.sets.map {
+    when (this.category) {
+        Category.RepsOnly, Category.Cardio, Category.Timed -> " "
+        else -> {
+            getOneRepEstimate(it.firstMetric ?: 1.0, it.secondMetric ?: 1)
+        }
+    }
+}
 
 
 

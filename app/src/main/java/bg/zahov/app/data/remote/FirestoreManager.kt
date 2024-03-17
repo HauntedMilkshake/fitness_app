@@ -17,7 +17,6 @@ import kotlinx.coroutines.awaitAll
 import kotlinx.coroutines.flow.Flow
 import kotlinx.coroutines.flow.channelFlow
 import kotlinx.coroutines.flow.first
-import kotlinx.coroutines.flow.map
 import kotlinx.coroutines.tasks.await
 import kotlinx.coroutines.withContext
 
@@ -45,6 +44,14 @@ class FirestoreManager {
 
     suspend fun createFirestore(username: String) = withContext(Dispatchers.IO) {
         firestore.collection(USERS_COLLECTION).document(userId).set(User(username).toFirestoreMap())
+    }
+
+    private suspend fun <T> getNonObservableDocData(reference: DocumentReference, mapper: (Map<String, Any>?) -> T): T {
+        try {
+            return mapper(reference.get().await().data)
+        } catch (e: Exception) {
+            throw e
+        }
     }
 
     private suspend fun <T> getDocData(
@@ -139,6 +146,13 @@ class FirestoreManager {
                 .document(newWorkoutTemplate.id).set(newWorkoutTemplate.toFirestoreMap())
         }
 
+    suspend fun getPastWorkoutById(id: String): Workout = getNonObservableDocData(
+        firestore.collection(USERS_COLLECTION).document(userId).collection(WORKOUTS_SUB_COLLECTION)
+            .document(id)
+    ) {
+        Workout.fromFirestoreMap(it)
+    }
+
     private fun deleteFirestore() {
 //        return userDocRef.listCollections().fold(Tasks.forResult(null as Void?)) { task, collectionRef ->
 //            task.continueWithTask { _ ->
@@ -165,8 +179,8 @@ class FirestoreManager {
     suspend fun addWorkoutToHistory(newWorkout: Workout) =
         withContext(Dispatchers.IO) {
             firestore.collection(USERS_COLLECTION).document(userId)
-                .collection(WORKOUTS_SUB_COLLECTION)
-                .add(newWorkout.toFirestoreMap())
+                .collection(WORKOUTS_SUB_COLLECTION).document(newWorkout.id)
+                .set(newWorkout.toFirestoreMap())
         }
 
     suspend fun updateExerciseInBatch(exercises: List<Exercise>) {

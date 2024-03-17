@@ -19,6 +19,7 @@ import androidx.recyclerview.widget.LinearLayoutManager
 import bg.zahov.app.data.model.state.ExerciseUiMapper
 import bg.zahov.app.data.model.SelectableFilter
 import bg.zahov.app.setToolBarTitle
+import bg.zahov.app.showBottomNav
 import bg.zahov.app.showTopBar
 import bg.zahov.app.ui.exercise.filter.FilterAdapter
 import bg.zahov.app.ui.exercise.filter.FilterDialog
@@ -58,6 +59,7 @@ class ExercisesFragment : Fragment() {
         exerciseViewModel.selectable = selectable && !replaceable
         exerciseViewModel.addable = addable
         requireActivity().showTopBar()
+        requireActivity().showBottomNav()
         return binding.root
     }
 
@@ -75,7 +77,7 @@ class ExercisesFragment : Fragment() {
                 override fun onMenuItemSelected(menuItem: MenuItem): Boolean {
                     return when (menuItem.itemId) {
                         R.id.home -> {
-                            findNavController().popBackStack()
+                            findNavController().navigateUp()
                             true
                         }
 
@@ -166,7 +168,11 @@ class ExercisesFragment : Fragment() {
                                     replaceable || selectable || addable -> exerciseViewModel.onExerciseClicked(
                                         position
                                     )
-                                    //else -> TODO(Exercise fragment)
+
+                                    else -> {
+                                        exerciseViewModel.setClickedExercise(item.name)
+                                        findNavController().navigate(R.id.exercises_to_exercise_info_navigation)
+                                    }
                                 }
                             }
                         }

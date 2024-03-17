@@ -24,7 +24,7 @@ class HistoryViewModel(application: Application) : AndroidViewModel(application)
             _state.postValue(State.Loading(View.VISIBLE, View.GONE))
             workoutProvider.getPastWorkouts().collect {
                 try {
-                    _state.postValue(State.Data(it))
+                    _state.postValue(State.Data(it.sortedByDescending { item -> item.date }))
                 } catch (e: CriticalDataNullException) {
                     _state.postValue(State.Error(true))
                 }

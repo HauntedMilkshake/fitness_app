@@ -5,6 +5,7 @@ import android.view.Menu
 import android.view.View
 import androidx.activity.viewModels
 import androidx.appcompat.app.AppCompatActivity
+import androidx.fragment.app.Fragment
 import androidx.fragment.app.FragmentActivity
 import androidx.lifecycle.map
 import androidx.navigation.findNavController
@@ -18,6 +19,7 @@ import bg.zahov.fitness.app.databinding.ActivityMainBinding
 import com.google.android.material.appbar.AppBarLayout
 import com.google.android.material.appbar.MaterialToolbar
 import com.google.android.material.bottomnavigation.BottomNavigationView
+import io.realm.kotlin.mongodb.App
 
 class MainActivity : AppCompatActivity() {
 
@@ -32,9 +34,6 @@ class MainActivity : AppCompatActivity() {
         binding = ActivityMainBinding.inflate(layoutInflater)
         setContentView(binding.root)
 
-        //TODO( define val topLevelDestinations = setOf(R.id.homeFragment, R.id.settingsFragment )
-        //TODO(Finish the hosted app bar for the other fragments)
-        //so that the back arrow is not always present the you don't have to clear the menu"
         val navController = findNavController(R.id.nav_host_fragment)
         appBarConfiguration = AppBarConfiguration(navController.graph)
 
@@ -90,10 +89,19 @@ fun FragmentActivity.showBottomNav() {
 
 fun FragmentActivity.showTopBar() {
     findViewById<AppBarLayout>(R.id.top_bar)?.visibility = View.VISIBLE
+    findViewById<MaterialToolbar>(R.id.toolbar)?.visibility = View.VISIBLE
 }
 
 fun FragmentActivity.hideTopBar() {
     findViewById<AppBarLayout>(R.id.top_bar)?.visibility = View.GONE
+    findViewById<MaterialToolbar>(R.id.toolbar)?.visibility = View.GONE
+
+}
+
+fun FragmentActivity.invisibleTopBar() {
+    findViewById<AppBarLayout>(R.id.top_bar)?.visibility = View.INVISIBLE
+    findViewById<MaterialToolbar>(R.id.toolbar)?.visibility = View.INVISIBLE
+
 }
 
 fun FragmentActivity.setToolBarTitle(title: Int) {
