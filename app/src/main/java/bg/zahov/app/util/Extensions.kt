@@ -8,6 +8,7 @@ import bg.zahov.app.data.model.BodyPart
 import bg.zahov.app.data.model.Category
 import bg.zahov.app.data.model.Exercise
 import bg.zahov.app.data.model.FirestoreFields
+import bg.zahov.app.data.model.Measurement
 import bg.zahov.app.data.model.SetType
 import bg.zahov.app.data.model.Sets
 import bg.zahov.app.data.model.Units
@@ -29,7 +30,12 @@ import java.util.Locale
 import java.util.UUID
 
 fun User.toFirestoreMap(): Map<String, Any?> {
-    return mapOf(FirestoreFields.USER_NAME to name)
+    return mapOf(
+        FirestoreFields.USER_NAME to name,
+        FirestoreFields.USER_MEASUREMENTS to measurements.mapValues { (_, value) ->
+            value.map { it.toFirestoreMap() }
+        }
+    )
 }
 
 fun Workout.toFirestoreMap(): Map<String, Any?> {
@@ -63,6 +69,13 @@ fun Sets.toFirestoreMap(): Map<String, Any?> {
         FirestoreFields.SETS_TYPE to type,
         FirestoreFields.SETS_FIRST_METRIC to firstMetric,
         FirestoreFields.SETS_SECOND_METRIC to secondMetric
+    )
+}
+
+fun Measurement.toFirestoreMap(): Map<String, Any?> {
+    return mapOf(
+        FirestoreFields.MEASUREMENT_VALUE to value,
+        FirestoreFields.MEASUREMENT_DATE to date
     )
 }
 
@@ -247,6 +260,3 @@ fun Exercise.getOneRepMaxes(): List<String> = this.sets.map {
         }
     }
 }
-
-
-

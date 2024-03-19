@@ -83,7 +83,7 @@ class AddExerciseFragment : Fragment() {
             addExerciseViewModel.category.observe(viewLifecycleOwner) {
                 category.initViewInformation(
                     "Category",
-                    enumValues<Category>().map { enum -> enum.key },
+                    enumValues<Category>().map { enum -> enum.name },
                     currCategory = it,
                     currBodyPart = null
                 )
@@ -97,7 +97,7 @@ class AddExerciseFragment : Fragment() {
             addExerciseViewModel.bodyPart.observe(viewLifecycleOwner) {
                 bodyPart.initViewInformation(
                     "Body part",
-                    enumValues<BodyPart>().map { enum -> enum.key },
+                    enumValues<BodyPart>().map { enum -> enum.name },
                     currBodyPart = it,
                     currCategory = null
                 )

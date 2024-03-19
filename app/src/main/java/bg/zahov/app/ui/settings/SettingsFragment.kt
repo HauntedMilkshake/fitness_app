@@ -25,7 +25,6 @@ import bg.zahov.app.data.model.Units
 import bg.zahov.app.hideBottomNav
 import bg.zahov.app.data.local.Settings
 import bg.zahov.app.setToolBarTitle
-import bg.zahov.app.showTopBar
 import bg.zahov.fitness.app.R
 import bg.zahov.fitness.app.databinding.FragmentSettingsBinding
 

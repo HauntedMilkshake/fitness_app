@@ -1,14 +1,18 @@
 package bg.zahov.app.data.provider
 
 import bg.zahov.app.data.interfaces.UserProvider
+import bg.zahov.app.data.model.Measurement
+import bg.zahov.app.data.model.MeasurementType
 import bg.zahov.app.data.model.User
 import bg.zahov.app.data.repository.AuthenticationImpl
 import bg.zahov.app.data.repository.UserRepositoryImpl
 import com.google.android.gms.tasks.Task
 import com.google.firebase.auth.AuthResult
 import kotlinx.coroutines.flow.Flow
+import kotlinx.coroutines.flow.MutableSharedFlow
+import kotlinx.coroutines.flow.SharedFlow
 
-class UserProviderImpl: UserProvider {
+class UserProviderImpl : UserProvider {
     companion object {
         @Volatile
         private var instance: UserProviderImpl? = null
@@ -21,30 +25,47 @@ class UserProviderImpl: UserProvider {
     private val userRepo = UserRepositoryImpl.getInstance()
     private val auth = AuthenticationImpl.getInstance()
 
+    private val _selectedMeasurement = MutableSharedFlow<List<Measurement>>()
+    val selectedMeasurement: SharedFlow<List<Measurement>> = _selectedMeasurement
+
     override suspend fun getUser(): Flow<User> = userRepo.getUser()
 
     override suspend fun changeUserName(newUsername: String) = userRepo.changeUserName(newUsername)
 
-    override suspend fun signup(username: String, email: String, password: String,
+    override suspend fun signup(
+        username: String, email: String, password: String,
     ): Task<AuthResult> = auth.signup(username, email, password)
 
-    override suspend fun login(email: String, password: String): Task<AuthResult> = auth.login(email, password)
+    override suspend fun login(email: String, password: String): Task<AuthResult> =
+        auth.login(email, password)
 
     override suspend fun logout() = auth.logout()
 
     override suspend fun deleteAccount() = auth.logout()
-    override suspend fun passwordResetByEmail(email: String): Task<Void> = auth.passwordResetByEmail(email)
+    override suspend fun passwordResetByEmail(email: String): Task<Void> =
+        auth.passwordResetByEmail(email)
 
-    override suspend fun passwordResetForLoggedUser(): Task<Void> = auth.passwordResetForLoggedUser()
+    override suspend fun passwordResetForLoggedUser(): Task<Void> =
+        auth.passwordResetForLoggedUser()
 
     override fun isAuthenticated(): Boolean = auth.isAuthenticated()
 
     override suspend fun initDataSources(username: String?) = auth.initDataSources(username)
 
-    override suspend fun updatePassword(newPassword: String): Task<Void> = auth.updatePassword(newPassword)
+    override suspend fun updatePassword(newPassword: String): Task<Void> =
+        auth.updatePassword(newPassword)
 
     override suspend fun updateEmail(newEmail: String): Task<Void> = auth.updateEmail(newEmail)
 
-    override suspend fun reauthenticate(password: String): Task<Void> = auth.reauthenticate(password)
+    override suspend fun reauthenticate(password: String): Task<Void> =
+        auth.reauthenticate(password)
+
     override suspend fun getEmail(): String = auth.getEmail()
+    override suspend fun selectMeasure(type: MeasurementType) {
+        getUser().collect {
+            _selectedMeasurement.emit(it.measurements[type] ?: listOf())
+        }
+    }
+
+    override suspend fun getSelectedMeasure() = selectedMeasurement
 }

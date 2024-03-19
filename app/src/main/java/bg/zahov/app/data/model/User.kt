@@ -10,11 +10,12 @@ object FirestoreFields {
 
     // User fields
     const val USER_NAME = "name"
+    const val USER_MEASUREMENTS = "measurements"
 
     const val USER_WORKOUTS = "workouts"
     const val USER_TEMPLATE_WORKOUTS = "templateWorkouts"
     const val USER_TEMPLATE_EXERCISES = "templateExercises"
-    const val MEASUREMENTS_COLLECTION: String = "measurements"
+    const val MEASUREMENTS_COLLECTION = "measurements"
 //    const val USER_SETTINGS = "settings"
 
     // Workout fields
@@ -44,6 +45,7 @@ object FirestoreFields {
 
     //Measurements Fields
     const val MEASUREMENT_VALUE = "value"
+    const val MEASUREMENT_DATE = "date"
 
     // Settings fields
 //    const val SETTINGS_LANGUAGE = "language"
@@ -60,11 +62,22 @@ object FirestoreFields {
 
 data class User(
     var name: String,
-    val measurements: Map<MeasurementType, Measurement> = mapOf()
+    val measurements: Map<MeasurementType, List<Measurement>> = mapOf(),
 ) {
     companion object {
-        fun fromFirestoreMap(data: Map<String, Any>?): User = data?.let {
-            User(name = (it[FirestoreFields.USER_NAME] as? String) ?: throw CriticalDataNullException("No user found"))
+        fun fromFirestoreMap(data: Map<String, Any>?): User = data?.let { firestoreData ->
+            User(
+                name = (firestoreData[FirestoreFields.USER_NAME] as? String)
+                    ?: throw CriticalDataNullException("No user found"),
+                measurements = (firestoreData
+                    [FirestoreFields.USER_MEASUREMENTS] as? Map<String, List<Map<String, Any>>>)
+                    ?.mapKeys { (key, _) ->
+                        MeasurementType.valueOf(key)
+                    }
+                    ?.mapValues { (_, value) ->
+                        value.map { measurement ->  Measurement.fromFirestoreMap(measurement) }
+                    } ?: emptyMap()
+            )
         } ?: throw CriticalDataNullException("No user found")
     }
 }
@@ -157,27 +170,16 @@ data class Sets(
     }
 }
 
-data class Measurements(
-    val measurements
-    ) {
-    companion object {
-        fun fromFirestoreMap(data: Map<String, Any>?) = data?.let {
-
-        }
-    }
-}
-
 data class Measurement(
     val date: LocalDateTime,
-    val value: Double
+    val value: Double,
 ) {
     companion object {
         fun fromFirestoreMap(data: Map<String, Any>?) = data?.let {
             Measurement(
-                date = (it[FirestoreFields.WORKOUT_DATE] as? Timestamp)?.toLocalDateTime()
-                    ?: throw CriticalDataNullException("No date for measurement"),
-                value = (it[FirestoreFields.MEASUREMENT_VALUE] as? Double)
-                    ?: throw CriticalDataNullException("No value found")
+                date = (it[FirestoreFields.WORKOUT_DATE] as? Timestamp
+                    ?: Timestamp.now()).toLocalDateTime(),
+                value = (it[FirestoreFields.MEASUREMENT_VALUE] as? Double ?: 0.0)
             )
         } ?: throw CriticalDataNullException("No data received")
     }
