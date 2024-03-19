@@ -5,10 +5,10 @@ import bg.zahov.app.data.model.Exercise
 import bg.zahov.app.data.model.Workout
 import bg.zahov.app.data.repository.WorkoutRepositoryImpl
 import bg.zahov.app.ui.exercise.info.history.ExerciseHistoryInfo
-import bg.zahov.app.ui.exercise.info.history.ExerciseHistoryViewModel
 import bg.zahov.app.util.getOneRepMaxes
 import bg.zahov.app.util.toFormattedString
 import kotlinx.coroutines.flow.Flow
+import kotlinx.coroutines.flow.flow
 
 class WorkoutProviderImpl : WorkoutProvider {
     companion object {
@@ -69,22 +69,24 @@ class WorkoutProviderImpl : WorkoutProvider {
 
     override fun getClickedTemplateExercise(): Exercise = requireNotNull(clickedExercise)
 
-    override suspend fun getExerciseHistory(): List<ExerciseHistoryInfo> {
-        var resultsList = listOf<ExerciseHistoryInfo>()
-        getPastWorkouts().collect { workout ->
-            resultsList = workout.mapNotNull {
-                it.exercises.find { workoutExercise -> workoutExercise.name == clickedExercise?.name }
-                    ?.let { previousExercise ->
-                        ExerciseHistoryInfo(
-                            workoutId = it.id,
-                            workoutName = it.name,
-                            lastPerformed = it.date.toFormattedString(),
-                            sets = previousExercise.sets,
-                            oneRepMaxes = previousExercise.getOneRepMaxes()
-                        )
-                    }
+    override suspend fun getExerciseHistory(): Flow<List<ExerciseHistoryInfo>> =
+        flow {
+            var resultsList = listOf<ExerciseHistoryInfo>()
+            getPastWorkouts().collect { workout ->
+                resultsList = workout.mapNotNull {
+                    it.exercises.find { workoutExercise -> workoutExercise.name == clickedExercise?.name }
+                        ?.let { previousExercise ->
+                            ExerciseHistoryInfo(
+                                workoutId = it.id,
+                                workoutName = it.name,
+                                lastPerformed = it.date.toFormattedString(),
+                                sets = previousExercise.sets,
+                                oneRepMaxes = previousExercise.getOneRepMaxes(),
+                                date = it.date
+                            )
+                        }
+                }
             }
+            emit(resultsList)
         }
-        return resultsList
-    }
 }

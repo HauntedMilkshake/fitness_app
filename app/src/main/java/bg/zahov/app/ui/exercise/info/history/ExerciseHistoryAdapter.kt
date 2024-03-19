@@ -6,6 +6,7 @@ import bg.zahov.app.data.model.Sets
 import bg.zahov.app.util.BaseAdapter
 import bg.zahov.fitness.app.R
 import com.google.android.material.textview.MaterialTextView
+import java.time.LocalDateTime
 
 class ExerciseHistoryAdapter : BaseAdapter<ExerciseHistoryInfo>(
     areItemsTheSame = { oldItem, newItem -> oldItem.workoutId == newItem.workoutId },
@@ -38,4 +39,5 @@ data class ExerciseHistoryInfo(
     val lastPerformed: String,
     val sets: List<Sets>,
     val oneRepMaxes: List<String>,
+    val date: LocalDateTime? = null
 )

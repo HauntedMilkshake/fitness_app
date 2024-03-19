@@ -237,8 +237,7 @@ fun LocalDateTime.toFormattedString(): String =
     this.format(DateTimeFormatter.ofPattern("HH:mm, d MMMM", Locale.ENGLISH))
 
 fun getOneRepEstimate(weight: Double, reps: Int): String =
-    (weight *  (1 + (0.0333 * reps))).toInt().toString()
-//   (weight / (1.0278 - (0.0278 * reps)))
+    (weight * (1 + (0.0333 * reps))).toInt().toString()
 
 fun Exercise.getOneRepMaxes(): List<String> = this.sets.map {
     when (this.category) {

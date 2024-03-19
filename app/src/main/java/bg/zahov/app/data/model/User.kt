@@ -2,6 +2,7 @@ package bg.zahov.app.data.model
 
 import bg.zahov.app.data.exception.CriticalDataNullException
 import bg.zahov.app.util.toLocalDateTime
+import com.google.firebase.Timestamp
 import java.time.LocalDateTime
 
 object FirestoreFields {
@@ -9,9 +10,11 @@ object FirestoreFields {
 
     // User fields
     const val USER_NAME = "name"
+
     const val USER_WORKOUTS = "workouts"
     const val USER_TEMPLATE_WORKOUTS = "templateWorkouts"
     const val USER_TEMPLATE_EXERCISES = "templateExercises"
+    const val MEASUREMENTS_COLLECTION: String = "measurements"
 //    const val USER_SETTINGS = "settings"
 
     // Workout fields
@@ -39,6 +42,9 @@ object FirestoreFields {
     const val SETS_FIRST_METRIC = "firstMetric"
     const val SETS_SECOND_METRIC = "secondMetric"
 
+    //Measurements Fields
+    const val MEASUREMENT_VALUE = "value"
+
     // Settings fields
 //    const val SETTINGS_LANGUAGE = "language"
 //    const val SETTINGS_UNITS = "units"
@@ -54,10 +60,12 @@ object FirestoreFields {
 
 data class User(
     var name: String,
+    val measurements: Map<MeasurementType, Measurement> = mapOf()
 ) {
     companion object {
-        fun fromFirestoreMap(data: Map<String, Any>?) =
-            data?.let { User(name = it[FirestoreFields.USER_NAME] as String) }
+        fun fromFirestoreMap(data: Map<String, Any>?): User = data?.let {
+            User(name = (it[FirestoreFields.USER_NAME] as? String) ?: throw CriticalDataNullException("No user found"))
+        } ?: throw CriticalDataNullException("No user found")
     }
 }
 
@@ -80,7 +88,7 @@ data class Workout(
                 name = it[FirestoreFields.WORKOUT_NAME] as? String
                     ?: throw CriticalDataNullException(""),
                 duration = it[FirestoreFields.WORKOUT_DURATION] as? Long,
-                date = (it[FirestoreFields.WORKOUT_DATE] as? com.google.firebase.Timestamp)?.toLocalDateTime()
+                date = (it[FirestoreFields.WORKOUT_DATE] as? Timestamp)?.toLocalDateTime()
                     ?: throw CriticalDataNullException(""),
                 isTemplate = it[FirestoreFields.WORKOUT_IS_TEMPLATE] as? Boolean ?: false,
                 exercises = (it[FirestoreFields.WORKOUT_EXERCISES] as List<Map<String, Any>?>)
@@ -146,6 +154,32 @@ data class Sets(
                 secondMetric = (it[FirestoreFields.SETS_SECOND_METRIC] as? Long)?.toInt()
             )
         }
+    }
+}
+
+data class Measurements(
+    val measurements
+    ) {
+    companion object {
+        fun fromFirestoreMap(data: Map<String, Any>?) = data?.let {
+
+        }
+    }
+}
+
+data class Measurement(
+    val date: LocalDateTime,
+    val value: Double
+) {
+    companion object {
+        fun fromFirestoreMap(data: Map<String, Any>?) = data?.let {
+            Measurement(
+                date = (it[FirestoreFields.WORKOUT_DATE] as? Timestamp)?.toLocalDateTime()
+                    ?: throw CriticalDataNullException("No date for measurement"),
+                value = (it[FirestoreFields.MEASUREMENT_VALUE] as? Double)
+                    ?: throw CriticalDataNullException("No value found")
+            )
+        } ?: throw CriticalDataNullException("No data received")
     }
 }
 

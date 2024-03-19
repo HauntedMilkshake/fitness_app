@@ -26,7 +26,9 @@ class ExerciseHistoryViewModel(application: Application) : AndroidViewModel(appl
         viewModelScope.launch {
             _state.postValue(State.Loading(View.VISIBLE))
             try {
-                _state.postValue(State.Data(workoutProvider.getExerciseHistory()))
+                workoutProvider.getExerciseHistory().collect {
+                    _state.postValue(State.Data(it))
+                }
             } catch (e: Exception) {
                 _state.postValue(
                     if (e is CriticalDataNullException) State.Error(true) else State.Notify(

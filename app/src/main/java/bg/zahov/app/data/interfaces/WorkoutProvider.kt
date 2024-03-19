@@ -20,5 +20,5 @@ interface WorkoutProvider {
     suspend fun getPastWorkoutById(id: String): Workout
     fun setClickedTemplateExercise(item: Exercise)
     fun getClickedTemplateExercise(): Exercise
-    suspend fun getExerciseHistory(): List<ExerciseHistoryInfo>
+    suspend fun getExerciseHistory(): Flow<List<ExerciseHistoryInfo>>
 }

@@ -75,7 +75,9 @@ class ExerciseNavigationFragment : Fragment() {
             exerciseNavigationViewModel.state.map { ExerciseNavigationUiMapper.map(it) }
                 .observe(viewLifecycleOwner) {
                     toolbarExercise.title = it.exerciseName
-                    Toast.makeText(context, it.message, Toast.LENGTH_SHORT).show()
+                    it.message?.let { message->
+                        Toast.makeText(context, message, Toast.LENGTH_SHORT).show()
+                    }
                 }
             tabLayout.addOnTabSelectedListener(object : TabLayout.OnTabSelectedListener {
                 override fun onTabSelected(tab: TabLayout.Tab?) {

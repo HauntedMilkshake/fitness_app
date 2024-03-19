@@ -139,4 +139,5 @@
     <string name="estimated_1rm">Estimatd 1RM</string>
     <string name="max_volume">Max volume</string>
     <string name="max_weight">Max weight</string>
+    <string name="history_measurement">HISTORY</string>
 </resources>

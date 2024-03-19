@@ -26,6 +26,7 @@ class FirestoreManager {
         const val TEMPLATE_EXERCISES = FirestoreFields.USER_TEMPLATE_EXERCISES
         const val WORKOUTS_SUB_COLLECTION = FirestoreFields.USER_WORKOUTS
         const val TEMPLATE_WORKOUTS_SUB_COLLECTION = FirestoreFields.USER_TEMPLATE_WORKOUTS
+        const val MEASUREMENTS_COLLECTION = FirestoreFields.MEASUREMENTS_COLLECTION
 
         @Volatile
         private var instance: FirestoreManager? = null

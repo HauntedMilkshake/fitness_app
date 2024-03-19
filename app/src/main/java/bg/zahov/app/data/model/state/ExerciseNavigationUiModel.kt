@@ -4,7 +4,7 @@ import bg.zahov.app.ui.exercise.info.ExerciseNavigationViewModel
 
 data class ExerciseNavigationUiModel(
     val exerciseName: String = "",
-    val message: String = ""
+    val message: String? = null
 )
 
 object ExerciseNavigationUiMapper {
