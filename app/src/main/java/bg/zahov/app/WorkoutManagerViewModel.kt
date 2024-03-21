@@ -1,16 +1,17 @@
 package bg.zahov.app
 
 import android.app.Application
+import android.util.Log
 import android.view.View
 import androidx.lifecycle.AndroidViewModel
 import androidx.lifecycle.LiveData
 import androidx.lifecycle.MutableLiveData
 import androidx.lifecycle.viewModelScope
-import bg.zahov.app.data.interfaces.WorkoutStateListener
 import bg.zahov.app.data.model.Workout
 import bg.zahov.app.data.model.WorkoutState
 import bg.zahov.app.util.timeToString
 import kotlinx.coroutines.launch
+import java.util.NoSuchElementException
 
 class WorkoutManagerViewModel(application: Application) : AndroidViewModel(application) {
     private val workoutStateManager by lazy {
@@ -32,11 +33,8 @@ class WorkoutManagerViewModel(application: Application) : AndroidViewModel(appli
     val timer: LiveData<String>
         get() = _timer
 
-    val workoutStateListener: WorkoutStateListener? = null
-
     init {
         viewModelScope.launch {
-            checkPreviousState(workoutProvider.getPreviousWorkoutState())
             launch {
                 workoutStateManager.template.collect {
                     it?.let { _template.postValue(it) }
@@ -73,14 +71,27 @@ class WorkoutManagerViewModel(application: Application) : AndroidViewModel(appli
         }
     }
 
-    private suspend fun checkPreviousState(previousState: bg.zahov.app.data.local.WorkoutState) {
+    private suspend fun checkPreviousState(previousState: bg.zahov.app.data.local.RealmWorkoutState) {
         if (previousState.id != "default") {
             workoutStateManager.resumeWorkout(previousState)
         }
     }
 
     fun saveWorkoutState() {
-        workoutStateListener?.saveWorkoutState()
+        viewModelScope.launch {
+            workoutStateManager.saveWorkout()
+        }
+    }
+
+    fun checkWorkoutState() {
+        viewModelScope.launch {
+            try {
+                checkPreviousState(workoutProvider.getPreviousWorkoutState())
+            } catch (e: NoSuchElementException) {
+                Log.d("NO SUCH LIST", "NO SUCH LIST")
+                //TODO()
+            }
+        }
     }
 
     sealed interface State {

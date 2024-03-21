@@ -1,16 +1,20 @@
 package bg.zahov.app.data.local
 
-import bg.zahov.app.data.model.Exercise
+import bg.zahov.app.data.model.BodyPart
+import bg.zahov.app.data.model.Category
 import bg.zahov.app.data.model.Language
 import bg.zahov.app.data.model.LanguageKeys
+import bg.zahov.app.data.model.SetType
 import bg.zahov.app.data.model.Sound
 import bg.zahov.app.data.model.SoundKeys
 import bg.zahov.app.data.model.Theme
 import bg.zahov.app.data.model.ThemeKeys
 import bg.zahov.app.data.model.Units
 import bg.zahov.app.data.model.UnitsKeys
+import io.realm.kotlin.ext.realmListOf
+import io.realm.kotlin.types.RealmInstant
+import io.realm.kotlin.types.RealmList
 import io.realm.kotlin.types.RealmObject
-import java.time.LocalDateTime
 
 class Settings : RealmObject {
     var language: String = Language.fromKey(LanguageKeys.ENGLISH)
@@ -25,15 +29,31 @@ class Settings : RealmObject {
     var automaticSync: Boolean = true
 }
 
-class WorkoutState: RealmObject {
+class RealmWorkoutState : RealmObject {
     var id: String = "default"
     var name: String = "default"
     var duration: Long = 0L
     var volume: Double = 0.0
-    var date: LocalDateTime = LocalDateTime.now()
+    var date: RealmInstant = RealmInstant.now()
     var isTemplate: Boolean = false
-    var exercises: List<Exercise> = listOf()
+    var exercises: RealmList<RealmExercise> = realmListOf()
     var note: String? = null
     var personalRecords = 0
-    var workoutStart: LocalDateTime = LocalDateTime.now()
+    var workoutStart: RealmInstant = RealmInstant.now()
+}
+
+class RealmExercise : RealmObject {
+    var name: String = "default"
+    var bodyPart: String = BodyPart.Other.key
+    var category: String = Category.None.key
+    var isTemplate: Boolean = false
+    var sets: RealmList<RealmSets> = realmListOf()
+    var bestSet: RealmSets? = null
+    var note: String? = null
+}
+
+class RealmSets : RealmObject {
+    var type: String = SetType.DEFAULT.key
+    var firstMetric: Double = 0.0
+    var secondMetric: Int = 0
 }

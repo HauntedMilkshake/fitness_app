@@ -40,7 +40,10 @@ class MainActivity : AppCompatActivity() {
         binding.bottomNavigation.setupWithNavController(navController)
         setSupportActionBar(binding.toolbar)
         authViewModel.state.map { AuthUiModelMapper.map(it) }.observe(this) {
-            if (it.isAuthenticated) navController.navigate(R.id.welcome_to_loading)
+            if (it.isAuthenticated) {
+                workoutManagerViewModel.checkWorkoutState()
+                navController.navigate(R.id.welcome_to_loading)
+            }
         }
 
         workoutManagerViewModel.state.map { WorkoutManagerUiMapper.map(it) }.observe(this) {

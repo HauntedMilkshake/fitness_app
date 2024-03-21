@@ -4,6 +4,8 @@ import android.animation.ObjectAnimator
 import android.animation.PropertyValuesHolder
 import android.util.Log
 import android.view.View
+import bg.zahov.app.data.local.RealmExercise
+import bg.zahov.app.data.local.RealmSets
 import bg.zahov.app.data.model.BodyPart
 import bg.zahov.app.data.model.Category
 import bg.zahov.app.data.model.Exercise
@@ -20,9 +22,11 @@ import bg.zahov.app.ui.workout.add.ExerciseSetAdapterSetWrapper
 import bg.zahov.fitness.app.R
 import com.google.common.hash.Hashing
 import com.google.firebase.Timestamp
+import io.realm.kotlin.types.RealmInstant
 import java.nio.charset.StandardCharsets
 import java.time.Instant
 import java.time.LocalDateTime
+import java.time.ZoneId
 import java.time.ZoneOffset
 import java.time.format.DateTimeFormatter
 import java.util.Date
@@ -246,6 +250,56 @@ fun Exercise.toExerciseAdapterWrapper(): ExerciseAdapterWrapper {
     )
 }
 
+fun Exercise.toRealmExercise(): RealmExercise {
+    val realmExercise = RealmExercise()
+    realmExercise.name = this.name
+    realmExercise.bodyPart = this.bodyPart.key
+    realmExercise.category = this.category.key
+    realmExercise.isTemplate = this.isTemplate
+    realmExercise.sets.addAll(this.sets.map { it.toRealmSets() })
+    realmExercise.bestSet = this.bestSet.toRealmSets()
+    realmExercise.note = this.note
+    return realmExercise
+}
+
+fun Sets.toRealmSets(): RealmSets {
+    val realmSets = RealmSets()
+    realmSets.type = this.type.key
+    realmSets.firstMetric = this.firstMetric ?: 0.0
+    realmSets.secondMetric = this.secondMetric ?: 0
+    return realmSets
+}
+
+fun RealmExercise.toExercise(): Exercise? {
+    return if (this.name != "default" && BodyPart.fromKey(this.bodyPart) != null && Category.fromKey(
+            this.category
+        ) != null
+    ) {
+        Exercise(
+            name = this.name,
+            bodyPart = BodyPart.fromKey(this.bodyPart)!!,
+            category = Category.fromKey(this.category)!!,
+            isTemplate = this.isTemplate,
+            sets = this.sets.mapNotNull { it.toSets() }.toMutableList(),
+            note = this.note
+        )
+    } else {
+        null
+    }
+}
+
+fun RealmSets.toSets(): Sets? {
+    return if (SetType.fromKey(this.type) != null) {
+        Sets(
+            type = SetType.fromKey(this.type)!!,
+            firstMetric = this.firstMetric,
+            secondMetric = this.secondMetric
+        )
+    } else {
+        null
+    }
+}
+
 fun LocalDateTime.toFormattedString(): String =
     this.format(DateTimeFormatter.ofPattern("HH:mm, d MMMM", Locale.ENGLISH))
 
@@ -259,4 +313,8 @@ fun Exercise.getOneRepMaxes(): List<String> = this.sets.map {
             getOneRepEstimate(it.firstMetric ?: 1.0, it.secondMetric ?: 1)
         }
     }
+}
+
+fun RealmInstant.toLocalDateTime(): LocalDateTime {
+    return LocalDateTime.ofInstant(Instant.ofEpochSecond(this.epochSeconds), ZoneId.systemDefault())
 }

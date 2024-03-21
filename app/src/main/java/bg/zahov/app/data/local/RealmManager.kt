@@ -1,5 +1,6 @@
 package bg.zahov.app.data.local
 
+import android.util.Log
 import bg.zahov.app.data.model.Language
 import bg.zahov.app.data.model.LanguageKeys
 import bg.zahov.app.data.model.Sound
@@ -42,7 +43,14 @@ class RealmManager {
     }
 
     private fun getConfig(): RealmConfiguration.Builder {
-        val config = RealmConfiguration.Builder(setOf(Settings::class))
+        val config = RealmConfiguration.Builder(
+            setOf(
+                Settings::class,
+                RealmWorkoutState::class,
+                RealmExercise::class,
+                RealmSets::class
+            )
+        )
         config.schemaVersion(1)
         config.deleteRealmIfMigrationNeeded()
         config.name("lednafiliiki,studknakutiikibrrrrr.realm")
@@ -84,15 +92,15 @@ class RealmManager {
     }
 
     suspend fun getWorkoutState() = withRealm { realm ->
-        realm.query<WorkoutState>().find().first()
+        realm.query<RealmWorkoutState>().find().first()
     }
 
-    suspend fun updateWorkoutState(workout: WorkoutState) = withRealm { realm ->
-        var state: WorkoutState? = null
-        state = getWorkoutState()
+    suspend fun updateWorkoutState(workout: RealmWorkoutState) = withRealm { realm ->
+        val state = getWorkoutState()
         realm.write {
-            state?.let { coldState ->
+            state.let { coldState ->
                 findLatest(coldState)?.apply {
+                    Log.d("WORKOUT STATE", "UPDATE WORKOUT STATE")
                     id = workout.id
                     name = workout.name
                     duration = workout.duration

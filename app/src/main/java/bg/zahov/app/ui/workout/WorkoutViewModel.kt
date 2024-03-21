@@ -7,7 +7,6 @@ import androidx.lifecycle.AndroidViewModel
 import androidx.lifecycle.LiveData
 import androidx.lifecycle.MutableLiveData
 import androidx.lifecycle.viewModelScope
-import bg.zahov.app.data.interfaces.WorkoutStateListener
 import bg.zahov.app.data.model.Category
 import bg.zahov.app.data.model.Exercise
 import bg.zahov.app.data.model.RestState
@@ -30,13 +29,15 @@ import bg.zahov.app.util.parseTimeStringToLong
 import bg.zahov.app.util.toExerciseSetAdapterSetWrapper
 import bg.zahov.app.util.toExerciseSetAdapterWrapper
 import bg.zahov.fitness.app.R
+import io.realm.kotlin.types.RealmInstant
 import kotlinx.coroutines.launch
 import java.time.LocalDateTime
 import java.time.LocalTime
+import java.time.ZoneOffset
+import java.util.NoSuchElementException
 import java.util.Random
 
-class WorkoutViewModel(application: Application) : AndroidViewModel(application),
-    WorkoutStateListener {
+class WorkoutViewModel(application: Application) : AndroidViewModel(application) {
     private val workoutStateManager by lazy {
         application.getWorkoutStateManager()
     }
@@ -85,9 +86,17 @@ class WorkoutViewModel(application: Application) : AndroidViewModel(application)
     private var templateExercises = listOf<Exercise>()
     private lateinit var units: Units
     private var workoutId: String? = null
+    private val workoutDate: LocalDateTime = LocalDateTime.now()
 
     init {
         viewModelScope.launch {
+            launch {
+                workoutStateManager.shouldSave.collect {
+                    if (it) {
+                        saveWorkoutState()
+                    }
+                }
+            }
             launch {
                 settingsProvider.getSettings().collect { objectChange ->
                     objectChange.obj?.units?.let {
@@ -331,7 +340,7 @@ class WorkoutViewModel(application: Application) : AndroidViewModel(application)
         }
 
         viewModelScope.launch {
-            val (exercises, prs, volume) = getExerciseArrayAndPRs(_exercises.value!!)
+            val (exercises, prs, volume) = getExerciseArrayAndPRs(_exercises.value.orEmpty())
             repo.addWorkoutToHistory(
                 Workout(
                     id = workoutId ?: hashString("${Random().nextInt(Int.MAX_VALUE)}"),
@@ -455,17 +464,38 @@ class WorkoutViewModel(application: Application) : AndroidViewModel(application)
         (_exercises.value?.get(itemPosition) as? ExerciseEntry)?.exerciseEntry?.note = text
     }
 
+    private suspend fun saveWorkoutState() {
+        var (exercises, prs, volume) = getExerciseArrayAndPRs(_exercises.value.orEmpty())
+        val workout = Workout(
+            id = workoutId ?: hashString("${Random().nextInt(Int.MAX_VALUE)}"),
+            name = "${getTimePeriodAsString()} ${_name.value}",
+            date = workoutDate,
+            exercises = exercises,
+            note = _note.value,
+            duration = _timer.value?.parseTimeStringToLong() ?: 0L,
+            isTemplate = false,
+            personalRecords = prs,
+            volume = volume
+        )
+        //ERROR when loading because we havent inserted a value inside this workout
+        workoutProvider.updateWorkoutState(bg.zahov.app.data.local.RealmWorkoutState().apply {
+            id = workout.id
+            name = workout.name
+            duration = _timer.value?.parseTimeStringToLong() ?: 0L
+            volume = workout.volume ?: 0.0
+            date = RealmInstant.now()
+            isTemplate = false
+            exercises = workout.exercises
+            note = _note.value
+            personalRecords = prs
+            workoutStart =
+                RealmInstant.from(workoutDate.toEpochSecond(ZoneOffset.UTC), workoutDate.nano)
+        })
+    }
+
     sealed interface State {
         data class Default(val restState: Boolean) : State
         data class Rest(val time: String) : State
         data class Error(val message: String?) : State
-    }
-
-    override fun saveWorkoutState() {
-        viewModelScope.launch {
-//            repo.updateWorkoutState(WorkoutState(
-//
-//            ))
-        }
     }
 }

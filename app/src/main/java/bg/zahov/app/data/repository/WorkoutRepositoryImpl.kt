@@ -4,7 +4,7 @@ import bg.zahov.app.data.model.Exercise
 import bg.zahov.app.data.model.Workout
 import bg.zahov.app.data.interfaces.WorkoutRepository
 import bg.zahov.app.data.local.RealmManager
-import bg.zahov.app.data.local.WorkoutState
+import bg.zahov.app.data.local.RealmWorkoutState
 import bg.zahov.app.data.remote.FirestoreManager
 import kotlinx.coroutines.flow.Flow
 
@@ -58,8 +58,8 @@ class WorkoutRepositoryImpl : WorkoutRepository {
     }
 
     override suspend fun getPastWorkoutById(id: String): Workout = firestore.getPastWorkoutById(id)
-    override suspend fun getPastWorkoutState(): WorkoutState = realm.getWorkoutState()
-    override suspend fun updateWorkoutState(workoutState: WorkoutState) {
-        realm.updateWorkoutState(workoutState)
+    override suspend fun getPastWorkoutState(): RealmWorkoutState = realm.getWorkoutState()
+    override suspend fun updateWorkoutState(realmWorkoutState: RealmWorkoutState) {
+        realm.updateWorkoutState(realmWorkoutState)
     }
 }

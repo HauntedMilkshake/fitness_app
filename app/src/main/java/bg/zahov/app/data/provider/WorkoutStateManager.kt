@@ -2,11 +2,13 @@ package bg.zahov.app.data.provider
 
 import bg.zahov.app.data.model.Workout
 import bg.zahov.app.data.model.WorkoutState
-import bg.zahov.app.data.repository.WorkoutRepositoryImpl
+import bg.zahov.app.util.toExercise
+import bg.zahov.app.util.toLocalDateTime
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.Job
 import kotlinx.coroutines.delay
+import kotlinx.coroutines.flow.Flow
 import kotlinx.coroutines.flow.MutableSharedFlow
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.SharedFlow
@@ -24,6 +26,9 @@ class WorkoutStateManager {
             instance ?: WorkoutStateManager().also { instance = it }
         }
     }
+
+    private val _shouldSave = MutableStateFlow(false)
+    val shouldSave: Flow<Boolean> = _shouldSave
 
     private val _state = MutableSharedFlow<WorkoutState>()
     val state: SharedFlow<WorkoutState>
@@ -78,17 +83,22 @@ class WorkoutStateManager {
         _template.value = null
     }
 
-    suspend fun resumeWorkout(previousWorkout: bg.zahov.app.data.local.WorkoutState) {
-        lastTime = ChronoUnit.SECONDS.between(previousWorkout.workoutStart, LocalDateTime.now())
+    suspend fun saveWorkout() {
+        _shouldSave.emit(true)
+    }
+
+    suspend fun resumeWorkout(previousWorkout: bg.zahov.app.data.local.RealmWorkoutState) {
+        val previousWorkoutStartDate = previousWorkout.workoutStart.toLocalDateTime()
+        lastTime = ChronoUnit.SECONDS.between(previousWorkoutStartDate, LocalDateTime.now())
         updateTemplate(
             Workout(
                 id = previousWorkout.id,
                 name = previousWorkout.name,
                 duration = previousWorkout.duration,
                 volume = previousWorkout.volume,
-                date = previousWorkout.date,
+                date = previousWorkoutStartDate,
                 isTemplate = false,
-                exercises = previousWorkout.exercises,
+                exercises = previousWorkout.exercises.mapNotNull { it.toExercise() },
                 note = previousWorkout.note,
                 personalRecords = previousWorkout.personalRecords
             )
