@@ -1,6 +1,8 @@
 package bg.zahov.app.data.provider
 
 import bg.zahov.app.data.interfaces.WorkoutProvider
+import bg.zahov.app.data.local.RealmManager
+import bg.zahov.app.data.local.WorkoutState
 import bg.zahov.app.data.model.Exercise
 import bg.zahov.app.data.model.Workout
 import bg.zahov.app.data.repository.WorkoutRepositoryImpl
@@ -9,6 +11,7 @@ import bg.zahov.app.util.getOneRepMaxes
 import bg.zahov.app.util.toFormattedString
 import kotlinx.coroutines.flow.Flow
 import kotlinx.coroutines.flow.flow
+import kotlinx.coroutines.flow.map
 
 class WorkoutProviderImpl : WorkoutProvider {
     companion object {
@@ -23,7 +26,6 @@ class WorkoutProviderImpl : WorkoutProvider {
     private var lastWorkoutPerformed: Workout? = null
     private var clickedExercise: Exercise? = null
     private val workoutRepo = WorkoutRepositoryImpl.getInstance()
-
     fun getLastWorkout(): Workout? = lastWorkoutPerformed
     override suspend fun getTemplateWorkouts(): Flow<List<Workout>> =
         workoutRepo.getTemplateWorkouts()
@@ -89,4 +91,9 @@ class WorkoutProviderImpl : WorkoutProvider {
             }
             emit(resultsList)
         }
+
+    override suspend fun getPreviousWorkoutState(): WorkoutState = workoutRepo.getPastWorkoutState()
+    override suspend fun updateWorkoutState(workoutState: WorkoutState){
+        workoutRepo.updateWorkoutState(workoutState)
+    }
 }

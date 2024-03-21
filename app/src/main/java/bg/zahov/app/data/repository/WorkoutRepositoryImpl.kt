@@ -3,6 +3,8 @@ package bg.zahov.app.data.repository
 import bg.zahov.app.data.model.Exercise
 import bg.zahov.app.data.model.Workout
 import bg.zahov.app.data.interfaces.WorkoutRepository
+import bg.zahov.app.data.local.RealmManager
+import bg.zahov.app.data.local.WorkoutState
 import bg.zahov.app.data.remote.FirestoreManager
 import kotlinx.coroutines.flow.Flow
 
@@ -17,6 +19,7 @@ class WorkoutRepositoryImpl : WorkoutRepository {
     }
 
     private val firestore = FirestoreManager.getInstance()
+    private val realm = RealmManager.getInstance()
 
     override suspend fun getTemplateWorkouts(): Flow<List<Workout>> =
         firestore.getTemplateWorkouts()
@@ -47,11 +50,16 @@ class WorkoutRepositoryImpl : WorkoutRepository {
     }
 
     override suspend fun getWorkoutById(id: String) = firestore.getWorkoutById(id)
-    override suspend fun getWorkoutByName(name: String): Flow<Workout> = firestore.getTemplateWorkoutByName(name)
+    override suspend fun getWorkoutByName(name: String): Flow<Workout> =
+        firestore.getTemplateWorkoutByName(name)
 
     override suspend fun updateExercises(exercises: List<Exercise>) {
         firestore.updateExerciseInBatch(exercises)
     }
 
     override suspend fun getPastWorkoutById(id: String): Workout = firestore.getPastWorkoutById(id)
+    override suspend fun getPastWorkoutState(): WorkoutState = realm.getWorkoutState()
+    override suspend fun updateWorkoutState(workoutState: WorkoutState) {
+        realm.updateWorkoutState(workoutState)
+    }
 }

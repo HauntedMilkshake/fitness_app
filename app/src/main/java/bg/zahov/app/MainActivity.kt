@@ -76,6 +76,15 @@ class MainActivity : AppCompatActivity() {
     override fun onCreateOptionsMenu(menu: Menu?): Boolean {
         return super.onCreateOptionsMenu(menu)
     }
+
+    override fun onPause() {
+        super.onPause()
+        workoutManagerViewModel.saveWorkoutState()
+    }
+    override fun onStop() {
+        super.onStop()
+        workoutManagerViewModel.saveWorkoutState()
+    }
 }
 
 fun FragmentActivity.hideBottomNav() {

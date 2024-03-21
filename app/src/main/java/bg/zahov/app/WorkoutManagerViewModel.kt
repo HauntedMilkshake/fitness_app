@@ -6,6 +6,7 @@ import androidx.lifecycle.AndroidViewModel
 import androidx.lifecycle.LiveData
 import androidx.lifecycle.MutableLiveData
 import androidx.lifecycle.viewModelScope
+import bg.zahov.app.data.interfaces.WorkoutStateListener
 import bg.zahov.app.data.model.Workout
 import bg.zahov.app.data.model.WorkoutState
 import bg.zahov.app.util.timeToString
@@ -14,6 +15,9 @@ import kotlinx.coroutines.launch
 class WorkoutManagerViewModel(application: Application) : AndroidViewModel(application) {
     private val workoutStateManager by lazy {
         application.getWorkoutStateManager()
+    }
+    private val workoutProvider by lazy {
+        application.getWorkoutProvider()
     }
 
     private val _state = MutableLiveData<State>(State.Inactive(View.GONE))
@@ -28,9 +32,11 @@ class WorkoutManagerViewModel(application: Application) : AndroidViewModel(appli
     val timer: LiveData<String>
         get() = _timer
 
+    val workoutStateListener: WorkoutStateListener? = null
+
     init {
         viewModelScope.launch {
-            //TODO(Questionable)
+            checkPreviousState(workoutProvider.getPreviousWorkoutState())
             launch {
                 workoutStateManager.template.collect {
                     it?.let { _template.postValue(it) }
@@ -65,6 +71,16 @@ class WorkoutManagerViewModel(application: Application) : AndroidViewModel(appli
         viewModelScope.launch {
             workoutStateManager.updateState(WorkoutState.ACTIVE)
         }
+    }
+
+    private suspend fun checkPreviousState(previousState: bg.zahov.app.data.local.WorkoutState) {
+        if (previousState.id != "default") {
+            workoutStateManager.resumeWorkout(previousState)
+        }
+    }
+
+    fun saveWorkoutState() {
+        workoutStateListener?.saveWorkoutState()
     }
 
     sealed interface State {

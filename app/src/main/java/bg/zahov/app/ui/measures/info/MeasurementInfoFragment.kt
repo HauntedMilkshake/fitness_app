@@ -18,6 +18,8 @@ import bg.zahov.app.showTopBar
 import bg.zahov.app.ui.measures.MeasuresFragment.Companion.MEASUREMENT_ARGS
 import bg.zahov.fitness.app.R
 import bg.zahov.fitness.app.databinding.FragmentMeasurementInformationBinding
+import com.github.mikephil.charting.data.LineData
+import com.github.mikephil.charting.data.LineDataSet
 
 class MeasurementInfoFragment : Fragment() {
     private var _binding: FragmentMeasurementInformationBinding? = null
@@ -52,6 +54,11 @@ class MeasurementInfoFragment : Fragment() {
                 .observe(viewLifecycleOwner) {
                     circularProgressIndicator.visibility = it.loadingVisibility
                     chart.visibility = it.chartVisibility
+                    chart.apply {
+                        data = LineData(LineDataSet(it.chartData, "results"))
+                        notifyDataSetChanged()
+                        invalidate()
+                    }
                     if (it.shutdown) {
                     }//TODO(BAD)
                 }

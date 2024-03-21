@@ -11,28 +11,39 @@ import bg.zahov.app.getUserProvider
 import com.github.mikephil.charting.data.Entry
 import kotlinx.coroutines.launch
 
-class MeasurementInfoViewModel(application: Application): AndroidViewModel(application) {
+class MeasurementInfoViewModel(application: Application) : AndroidViewModel(application) {
     private val userProvider by lazy {
         application.getUserProvider()
     }
     private val _state = MutableLiveData<State>()
     val state: LiveData<State>
         get() = _state
+
     init {
         viewModelScope.launch {
             _state.postValue(State.Loading(View.VISIBLE))
+            val measureEntries = mutableListOf<Entry>()
             try {
                 userProvider.getSelectedMeasure().collect {
-                    //TODO(GET DATA SOMEHOW)
+                    it.sortedBy { item -> item.date.monthValue }.forEach { measurement ->
+                        measureEntries.add(
+                            Entry(
+                                measurement.value.toFloat(),
+                                measurement.date.dayOfMonth.toFloat()
+                            )
+                        )
+                    }
+                    _state.postValue(State.Data(measureEntries))
                 }
-            } catch(e: CriticalDataNullException) {
+            } catch (e: CriticalDataNullException) {
                 _state.postValue(State.Error(true))
             }
         }
     }
+
     sealed interface State {
-        data class Loading(val loadingVisibility: Int): State
-        data class Data(val entries: List<Entry>): State
-        data class Error(val shutdown: Boolean): State
+        data class Loading(val loadingVisibility: Int) : State
+        data class Data(val entries: List<Entry>) : State
+        data class Error(val shutdown: Boolean) : State
     }
 }

@@ -1,5 +1,6 @@
 package bg.zahov.app.data.interfaces
 
+import bg.zahov.app.data.local.WorkoutState
 import bg.zahov.app.data.model.Exercise
 import bg.zahov.app.data.model.Workout
 import bg.zahov.app.ui.exercise.info.history.ExerciseHistoryInfo
@@ -11,7 +12,7 @@ interface WorkoutProvider {
     suspend fun addTemplateWorkout(newWorkout: Workout)
     suspend fun getTemplateExercises(): Flow<List<Exercise>>
     suspend fun addTemplateExercise(newExercise: Exercise)
-    suspend fun addWorkoutToHistory(newWorkout:Workout)
+    suspend fun addWorkoutToHistory(newWorkout: Workout)
     suspend fun deleteTemplateWorkout(workout: Workout)
     suspend fun deleteWorkout(workout: Workout)
     suspend fun getWorkoutById(id: String): Flow<Workout>
@@ -21,4 +22,6 @@ interface WorkoutProvider {
     fun setClickedTemplateExercise(item: Exercise)
     fun getClickedTemplateExercise(): Exercise
     suspend fun getExerciseHistory(): Flow<List<ExerciseHistoryInfo>>
+    suspend fun getPreviousWorkoutState(): WorkoutState
+    suspend fun updateWorkoutState(workoutState: WorkoutState)
 }

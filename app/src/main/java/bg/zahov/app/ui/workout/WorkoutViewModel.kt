@@ -7,6 +7,7 @@ import androidx.lifecycle.AndroidViewModel
 import androidx.lifecycle.LiveData
 import androidx.lifecycle.MutableLiveData
 import androidx.lifecycle.viewModelScope
+import bg.zahov.app.data.interfaces.WorkoutStateListener
 import bg.zahov.app.data.model.Category
 import bg.zahov.app.data.model.Exercise
 import bg.zahov.app.data.model.RestState
@@ -34,7 +35,8 @@ import java.time.LocalDateTime
 import java.time.LocalTime
 import java.util.Random
 
-class WorkoutViewModel(application: Application) : AndroidViewModel(application) {
+class WorkoutViewModel(application: Application) : AndroidViewModel(application),
+    WorkoutStateListener {
     private val workoutStateManager by lazy {
         application.getWorkoutStateManager()
     }
@@ -330,8 +332,6 @@ class WorkoutViewModel(application: Application) : AndroidViewModel(application)
 
         viewModelScope.launch {
             val (exercises, prs, volume) = getExerciseArrayAndPRs(_exercises.value!!)
-            Log.d("PRS", prs.toString())
-            Log.d("volume", volume.toString())
             repo.addWorkoutToHistory(
                 Workout(
                     id = workoutId ?: hashString("${Random().nextInt(Int.MAX_VALUE)}"),
@@ -459,5 +459,13 @@ class WorkoutViewModel(application: Application) : AndroidViewModel(application)
         data class Default(val restState: Boolean) : State
         data class Rest(val time: String) : State
         data class Error(val message: String?) : State
+    }
+
+    override fun saveWorkoutState() {
+        viewModelScope.launch {
+//            repo.updateWorkoutState(WorkoutState(
+//
+//            ))
+        }
     }
 }

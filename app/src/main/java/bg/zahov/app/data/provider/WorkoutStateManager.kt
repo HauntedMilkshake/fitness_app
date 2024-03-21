@@ -2,7 +2,7 @@ package bg.zahov.app.data.provider
 
 import bg.zahov.app.data.model.Workout
 import bg.zahov.app.data.model.WorkoutState
-import io.realm.kotlin.mongodb.sync.SyncSession
+import bg.zahov.app.data.repository.WorkoutRepositoryImpl
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.Job
@@ -12,6 +12,8 @@ import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.SharedFlow
 import kotlinx.coroutines.flow.StateFlow
 import kotlinx.coroutines.launch
+import java.time.LocalDateTime
+import java.time.temporal.ChronoUnit
 
 class WorkoutStateManager {
     companion object {
@@ -72,7 +74,24 @@ class WorkoutStateManager {
         _template.value = workout
     }
 
-    suspend fun workoutFinish() {
+    fun workoutFinish() {
         _template.value = null
+    }
+
+    suspend fun resumeWorkout(previousWorkout: bg.zahov.app.data.local.WorkoutState) {
+        lastTime = ChronoUnit.SECONDS.between(previousWorkout.workoutStart, LocalDateTime.now())
+        updateTemplate(
+            Workout(
+                id = previousWorkout.id,
+                name = previousWorkout.name,
+                duration = previousWorkout.duration,
+                volume = previousWorkout.volume,
+                date = previousWorkout.date,
+                isTemplate = false,
+                exercises = previousWorkout.exercises,
+                note = previousWorkout.note,
+                personalRecords = previousWorkout.personalRecords
+            )
+        )
     }
 }

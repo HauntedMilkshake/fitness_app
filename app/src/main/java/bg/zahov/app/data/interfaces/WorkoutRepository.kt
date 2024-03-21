@@ -1,5 +1,6 @@
 package bg.zahov.app.data.interfaces
 
+import bg.zahov.app.data.local.WorkoutState
 import bg.zahov.app.data.model.Exercise
 import bg.zahov.app.data.model.Workout
 import kotlinx.coroutines.flow.Flow
@@ -17,4 +18,6 @@ interface WorkoutRepository {
     suspend fun getWorkoutByName(name: String): Flow<Workout>
     suspend fun updateExercises(exercises: List<Exercise>)
     suspend fun getPastWorkoutById(id: String): Workout
+    suspend fun getPastWorkoutState(): WorkoutState
+    suspend fun updateWorkoutState(workoutState: WorkoutState)
 }

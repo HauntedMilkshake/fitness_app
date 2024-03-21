@@ -11,6 +11,9 @@ class AuthViewModel(application: Application) : AndroidViewModel(application) {
     private val auth by lazy {
         application.getUserProvider()
     }
+    private val workoutProvider by lazy {
+
+    }
     private val _state = MutableLiveData<State>()
     val state: LiveData<State>
         get() = _state
@@ -19,6 +22,7 @@ class AuthViewModel(application: Application) : AndroidViewModel(application) {
         viewModelScope.launch {
             if (auth.isAuthenticated()) {
                 auth.initDataSources()
+
             }
         }
         _state.value = State.Authenticated(auth.isAuthenticated())

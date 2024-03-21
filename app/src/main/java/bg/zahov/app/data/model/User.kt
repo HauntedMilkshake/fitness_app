@@ -75,7 +75,7 @@ data class User(
                         MeasurementType.valueOf(key)
                     }
                     ?.mapValues { (_, value) ->
-                        value.map { measurement ->  Measurement.fromFirestoreMap(measurement) }
+                        value.map { measurement -> Measurement.fromFirestoreMap(measurement) }
                     } ?: emptyMap()
             )
         } ?: throw CriticalDataNullException("No user found")

@@ -1,6 +1,5 @@
 package bg.zahov.app.data.local
 
-import android.util.Log
 import bg.zahov.app.data.model.Language
 import bg.zahov.app.data.model.LanguageKeys
 import bg.zahov.app.data.model.Sound
@@ -66,7 +65,6 @@ class RealmManager {
     }
 
     suspend fun createRealm() = withContext(Dispatchers.IO) {
-        //try catch
         openRealm()
         realmInstance?.write {
             try {
@@ -81,6 +79,31 @@ class RealmManager {
         withRealm {
             it.write {
                 deleteAll()
+            }
+        }
+    }
+
+    suspend fun getWorkoutState() = withRealm { realm ->
+        realm.query<WorkoutState>().find().first()
+    }
+
+    suspend fun updateWorkoutState(workout: WorkoutState) = withRealm { realm ->
+        var state: WorkoutState? = null
+        state = getWorkoutState()
+        realm.write {
+            state?.let { coldState ->
+                findLatest(coldState)?.apply {
+                    id = workout.id
+                    name = workout.name
+                    duration = workout.duration
+                    volume = workout.volume
+                    date = workout.date
+                    isTemplate = workout.isTemplate
+                    exercises = workout.exercises
+                    note = workout.note
+                    personalRecords = workout.personalRecords
+                    workoutStart = workout.workoutStart
+                }
             }
         }
     }
@@ -122,7 +145,7 @@ class RealmManager {
     suspend fun updateSetting(title: String, newValue: Any) = withRealm { realm ->
         var settings: Settings? = null
 
-        getSettings()?.collect {
+        getSettings().collect {
             settings = it.obj
         }
 
