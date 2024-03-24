@@ -5,27 +5,23 @@ import android.view.Menu
 import android.view.View
 import androidx.activity.viewModels
 import androidx.appcompat.app.AppCompatActivity
-import androidx.fragment.app.Fragment
 import androidx.fragment.app.FragmentActivity
 import androidx.lifecycle.map
 import androidx.navigation.findNavController
 import androidx.navigation.ui.AppBarConfiguration
 import androidx.navigation.ui.navigateUp
 import androidx.navigation.ui.setupWithNavController
-import bg.zahov.app.data.model.state.AuthUiModelMapper
 import bg.zahov.app.data.model.state.WorkoutManagerUiMapper
 import bg.zahov.fitness.app.R
 import bg.zahov.fitness.app.databinding.ActivityMainBinding
 import com.google.android.material.appbar.AppBarLayout
 import com.google.android.material.appbar.MaterialToolbar
 import com.google.android.material.bottomnavigation.BottomNavigationView
-import io.realm.kotlin.mongodb.App
 
 class MainActivity : AppCompatActivity() {
 
     private lateinit var appBarConfiguration: AppBarConfiguration
     private lateinit var binding: ActivityMainBinding
-    private val authViewModel: AuthViewModel by viewModels()
     private val workoutManagerViewModel: WorkoutManagerViewModel by viewModels()
 
     override fun onCreate(savedInstanceState: Bundle?) {
@@ -39,12 +35,6 @@ class MainActivity : AppCompatActivity() {
 
         binding.bottomNavigation.setupWithNavController(navController)
         setSupportActionBar(binding.toolbar)
-        authViewModel.state.map { AuthUiModelMapper.map(it) }.observe(this) {
-            if (it.isAuthenticated) {
-                workoutManagerViewModel.checkWorkoutState()
-                navController.navigate(R.id.welcome_to_loading)
-            }
-        }
 
         workoutManagerViewModel.state.map { WorkoutManagerUiMapper.map(it) }.observe(this) {
             setWorkoutVisibility(it.trailingWorkoutVisibility)

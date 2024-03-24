@@ -1,9 +1,8 @@
 package bg.zahov.app.data.provider
 
+import bg.zahov.app.data.interfaces.WorkoutActions
 import bg.zahov.app.data.model.Workout
 import bg.zahov.app.data.model.WorkoutState
-import bg.zahov.app.util.toExercise
-import bg.zahov.app.util.toLocalDateTime
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.Job
@@ -14,10 +13,8 @@ import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.SharedFlow
 import kotlinx.coroutines.flow.StateFlow
 import kotlinx.coroutines.launch
-import java.time.LocalDateTime
-import java.time.temporal.ChronoUnit
 
-class WorkoutStateManager {
+class WorkoutStateManager : WorkoutActions {
     companion object {
 
         @Volatile
@@ -43,9 +40,9 @@ class WorkoutStateManager {
         get() = _timer
 
     private var job: Job? = null
+    private var workoutState = WorkoutState.INACTIVE
 
     private suspend fun startTimer() {
-
         job = CoroutineScope(Dispatchers.Default).launch {
             while (true) {
                 _timer.emit(lastTime)
@@ -58,50 +55,49 @@ class WorkoutStateManager {
     private fun stopTimer() = job?.cancel().also { job = null }
 
     private var lastTime: Long = 0L
-    suspend fun updateState(newState: WorkoutState) {
-        when (newState) {
-            WorkoutState.INACTIVE -> {
-                stopTimer()
-                lastTime = 0L
-            }
-
-            else -> {
-                if (job == null) {
-                    startTimer()
-                }
-            }
-        }
-        _state.emit(newState)
-    }
-
-    suspend fun updateTemplate(workout: Workout) {
-        updateState(WorkoutState.ACTIVE)
-        _template.value = workout
-    }
-
-    fun workoutFinish() {
-        _template.value = null
-    }
 
     suspend fun saveWorkout() {
         _shouldSave.emit(true)
     }
 
-    suspend fun resumeWorkout(previousWorkout: bg.zahov.app.data.local.RealmWorkoutState) {
-        val previousWorkoutStartDate = previousWorkout.workoutStart.toLocalDateTime()
-        lastTime = ChronoUnit.SECONDS.between(previousWorkoutStartDate, LocalDateTime.now())
-        updateTemplate(
-            Workout(
-                id = previousWorkout.id,
-                name = previousWorkout.name,
-                duration = previousWorkout.duration,
-                volume = previousWorkout.volume,
-                date = previousWorkoutStartDate,
-                isTemplate = false,
-                exercises = previousWorkout.exercises.mapNotNull { it.toExercise() },
-                note = previousWorkout.note,
-                personalRecords = previousWorkout.personalRecords
-            )
-        )
+    override suspend fun <T> startWorkout(workout: T?, lastTime: Long?) {
+        if (updateState(WorkoutState.ACTIVE)) {
+            if (workout != null && workout is Workout) {
+                _template.value = workout
+            }
+            lastTime?.let { time -> this.lastTime = time }
+            if (job == null) startTimer()
+        }
+    }
+
+    override suspend fun finishWorkout() {
+        clear()
+    }
+
+    override suspend fun minimizeWorkout() {
+        updateState(WorkoutState.MINIMIZED)
+    }
+
+    override suspend fun cancel() {
+        clear()
+    }
+
+    override suspend fun clear() {
+        _template.value = null
+        stopTimer()
+        lastTime = 0L
+        updateState(WorkoutState.INACTIVE)
+
+    }
+
+    private suspend fun updateState(newState: WorkoutState): Boolean {
+        return if (workoutState != newState) {
+            workoutState = newState
+            _state.emit(workoutState)
+            true
+        } else {
+            false
+        }
     }
 }
+

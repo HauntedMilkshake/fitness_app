@@ -7,6 +7,7 @@ import androidx.lifecycle.AndroidViewModel
 import androidx.lifecycle.LiveData
 import androidx.lifecycle.MutableLiveData
 import androidx.lifecycle.viewModelScope
+import bg.zahov.app.data.local.RealmWorkoutState
 import bg.zahov.app.data.model.Category
 import bg.zahov.app.data.model.Exercise
 import bg.zahov.app.data.model.RestState
@@ -28,13 +29,14 @@ import bg.zahov.app.util.hashString
 import bg.zahov.app.util.parseTimeStringToLong
 import bg.zahov.app.util.toExerciseSetAdapterSetWrapper
 import bg.zahov.app.util.toExerciseSetAdapterWrapper
+import bg.zahov.app.util.toRealmExercise
 import bg.zahov.fitness.app.R
+import io.realm.kotlin.ext.toRealmList
 import io.realm.kotlin.types.RealmInstant
 import kotlinx.coroutines.launch
 import java.time.LocalDateTime
 import java.time.LocalTime
 import java.time.ZoneOffset
-import java.util.NoSuchElementException
 import java.util.Random
 
 class WorkoutViewModel(application: Application) : AndroidViewModel(application) {
@@ -304,15 +306,13 @@ class WorkoutViewModel(application: Application) : AndroidViewModel(application)
     }
 
     private fun filterIntegerInput(input: String): Int {
-        var result = 0
         if (input.startsWith('0') && input.length > 1) {
             input.dropWhile { it == '0' }
         }
         if (input.contains(",")) {
             input.dropLast(input.length - input.indexOf(","))
         }
-        result = input.toIntOrNull() ?: 0
-        return result
+        return input.toIntOrNull() ?: 0
     }
 
     fun onSetTypeChanged(itemPosition: Int, setType: SetType) {
@@ -323,13 +323,16 @@ class WorkoutViewModel(application: Application) : AndroidViewModel(application)
 
     fun minimize() {
         viewModelScope.launch {
-            workoutStateManager.updateState(WorkoutState.MINIMIZED)
+            workoutStateManager.minimizeWorkout()
         }
     }
 
     fun cancel() {
         viewModelScope.launch {
-            workoutStateManager.updateState(WorkoutState.INACTIVE)
+            _name.postValue("")
+            _exercises.postValue(listOf())
+            workoutProvider.clearWorkoutState()
+            workoutStateManager.cancel()
         }
     }
 
@@ -355,8 +358,9 @@ class WorkoutViewModel(application: Application) : AndroidViewModel(application)
                 )
             )
             addExerciseToWorkoutProvider.resetSelectedExercises()
-            workoutStateManager.updateState(WorkoutState.INACTIVE)
-            workoutStateManager.workoutFinish()
+            workoutStateManager.finishWorkout()
+            workoutProvider.clearWorkoutState()
+            _name.postValue("")
         }
     }
 
@@ -465,7 +469,7 @@ class WorkoutViewModel(application: Application) : AndroidViewModel(application)
     }
 
     private suspend fun saveWorkoutState() {
-        var (exercises, prs, volume) = getExerciseArrayAndPRs(_exercises.value.orEmpty())
+        val (exercises, prs, volume) = getExerciseArrayAndPRs(_exercises.value.orEmpty())
         val workout = Workout(
             id = workoutId ?: hashString("${Random().nextInt(Int.MAX_VALUE)}"),
             name = "${getTimePeriodAsString()} ${_name.value}",
@@ -477,19 +481,16 @@ class WorkoutViewModel(application: Application) : AndroidViewModel(application)
             personalRecords = prs,
             volume = volume
         )
-        //ERROR when loading because we havent inserted a value inside this workout
-        workoutProvider.updateWorkoutState(bg.zahov.app.data.local.RealmWorkoutState().apply {
+        workoutProvider.addWorkoutState(RealmWorkoutState().apply {
             id = workout.id
             name = workout.name
-            duration = _timer.value?.parseTimeStringToLong() ?: 0L
-            volume = workout.volume ?: 0.0
+            this.duration = workout.duration ?: 0L
+            this.volume = workout.volume ?: 0.0
             date = RealmInstant.now()
             isTemplate = false
-            exercises = workout.exercises
+            this.exercises = workout.exercises.map { it.toRealmExercise() }.toRealmList()
             note = _note.value
             personalRecords = prs
-            workoutStart =
-                RealmInstant.from(workoutDate.toEpochSecond(ZoneOffset.UTC), workoutDate.nano)
         })
     }
 

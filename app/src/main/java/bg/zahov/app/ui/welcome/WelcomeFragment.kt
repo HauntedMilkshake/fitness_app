@@ -7,23 +7,23 @@ import android.view.ViewGroup
 import androidx.fragment.app.Fragment
 import androidx.navigation.fragment.findNavController
 import bg.zahov.app.hideBottomNav
+import bg.zahov.app.hideTopBar
 import bg.zahov.fitness.app.R
 import bg.zahov.fitness.app.databinding.FragmentWelcomeBinding
+import com.google.android.material.expandable.ExpandableWidget
 
 class WelcomeFragment : Fragment() {
     private var _binding: FragmentWelcomeBinding? = null
     private val binding
         get() = requireNotNull(_binding)
+
     override fun onCreateView(
         inflater: LayoutInflater, container: ViewGroup?, savedInstanceState: Bundle?,
     ): View {
         _binding = FragmentWelcomeBinding.inflate(inflater, container, false)
-        return binding.root
-    }
-
-    override fun onStart() {
-        super.onStart()
         requireActivity().hideBottomNav()
+        requireActivity().hideTopBar()
+        return binding.root
     }
 
     override fun onViewCreated(view: View, savedInstanceState: Bundle?) {

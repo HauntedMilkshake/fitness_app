@@ -1,14 +1,12 @@
 package bg.zahov.app.ui.history.info
 
 import android.app.Application
-import android.util.Log
 import androidx.lifecycle.AndroidViewModel
 import androidx.lifecycle.LiveData
 import androidx.lifecycle.MutableLiveData
 import androidx.lifecycle.viewModelScope
 import bg.zahov.app.data.exception.CriticalDataNullException
 import bg.zahov.app.data.model.Workout
-import bg.zahov.app.data.model.WorkoutState
 import bg.zahov.app.getWorkoutProvider
 import bg.zahov.app.getWorkoutStateManager
 import bg.zahov.app.util.getOneRepMaxes
@@ -57,22 +55,11 @@ class HistoryInfoViewModel(application: Application) : AndroidViewModel(applicat
 
     fun performAgain() {
         viewModelScope.launch {
-            workoutStateProvider.state.collect {
-                when (it) {
-                    WorkoutState.INACTIVE -> workoutStateProvider.updateTemplate(workout)
-                    else -> _state.postValue(
-                        State.Notify(
-                            (_state.value as? State.Data)?.data,
-                            "Unable to start workout whenever one is active!"
-                        )
-                    )
-                }
-            }
+            workoutStateProvider.startWorkout(workout)
         }
     }
 
     fun queryWorkout(id: String) {
-        Log.d("GIVEN ID", id)
         viewModelScope.launch {
             if (id.isNotEmpty()) {
                 try {

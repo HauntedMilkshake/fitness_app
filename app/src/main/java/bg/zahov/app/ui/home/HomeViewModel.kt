@@ -1,22 +1,27 @@
 package bg.zahov.app.ui.home
 
 import android.app.Application
-import android.util.Log
 import androidx.lifecycle.AndroidViewModel
 import androidx.lifecycle.LiveData
 import androidx.lifecycle.MutableLiveData
 import androidx.lifecycle.viewModelScope
+import bg.zahov.app.data.local.RealmWorkoutState
 import bg.zahov.app.data.model.Workout
 import bg.zahov.app.getUserProvider
 import bg.zahov.app.getWorkoutProvider
+import bg.zahov.app.getWorkoutStateManager
+import bg.zahov.app.util.toExercise
+import bg.zahov.app.util.toLocalDateTime
 import com.github.mikephil.charting.data.BarEntry
+import kotlinx.coroutines.async
 import kotlinx.coroutines.launch
 import java.time.DayOfWeek
+import java.time.Instant
 import java.time.LocalDate
 import java.time.format.DateTimeFormatter
+import java.time.temporal.ChronoUnit
 import java.time.temporal.TemporalAdjusters
-import java.time.temporal.WeekFields
-import java.util.Locale
+import java.util.NoSuchElementException
 
 class HomeViewModel(application: Application) : AndroidViewModel(application) {
     private val userRepo by lazy {
@@ -26,7 +31,9 @@ class HomeViewModel(application: Application) : AndroidViewModel(application) {
     private val workoutRepo by lazy {
         application.getWorkoutProvider()
     }
-
+    private val workoutStateManager by lazy {
+        application.getWorkoutStateManager()
+    }
     private val _userName = MutableLiveData<String>()
     val userName: LiveData<String>
         get() = _userName
@@ -50,6 +57,7 @@ class HomeViewModel(application: Application) : AndroidViewModel(application) {
 
 
     init {
+        checkWorkoutState()
         viewModelScope.launch {
             launch {
                 userRepo.getUser().collect {
@@ -89,6 +97,7 @@ class HomeViewModel(application: Application) : AndroidViewModel(application) {
             workoutsPerWeek[weekRangeIndex] = currentCount + 1
         }
 
+
         return workoutsPerWeek
     }
 
@@ -116,6 +125,38 @@ class HomeViewModel(application: Application) : AndroidViewModel(application) {
         return weekRanges
     }
 
+    private suspend fun checkPreviousState(previousState: RealmWorkoutState) {
+        if (previousState.id != "default") {
+            val lastTime = ChronoUnit.SECONDS.between(
+                Instant.ofEpochSecond(
+                    previousState.date.epochSeconds,
+                    0
+                ), Instant.now()
+            )
+
+            workoutStateManager.startWorkout(
+                Workout(
+                    id = previousState.id,
+                    name = previousState.name,
+                    duration = previousState.duration,
+                    volume = previousState.volume,
+                    date = previousState.date.toLocalDateTime(),
+                    isTemplate = false,
+                    exercises = previousState.exercises.mapNotNull { it.toExercise() },
+                    note = previousState.note,
+                    personalRecords = previousState.personalRecords
+                ),
+                lastTime
+            )
+        }
+    }
+
+    private fun checkWorkoutState() {
+        viewModelScope.launch {
+            async {workoutRepo.getPreviousWorkoutState()?.let { checkPreviousState(it) }}.await()
+            workoutRepo.clearWorkoutState()
+        }
+    }
 
     sealed interface State {
         object Default : State

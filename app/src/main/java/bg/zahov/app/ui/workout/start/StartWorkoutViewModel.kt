@@ -10,6 +10,7 @@ import bg.zahov.app.data.model.Workout
 import bg.zahov.app.data.model.WorkoutState
 import bg.zahov.app.getWorkoutProvider
 import bg.zahov.app.getWorkoutStateManager
+import bg.zahov.app.util.generateRandomId
 import kotlinx.coroutines.launch
 import java.time.LocalDateTime
 
@@ -57,14 +58,14 @@ class StartWorkoutViewModel(application: Application) : AndroidViewModel(applica
 
     fun startEmptyWorkout() {
         viewModelScope.launch {
-            workoutState.updateState(WorkoutState.ACTIVE)
+            workoutState.startWorkout(null)
         }
     }
 
     fun startWorkoutFromTemplate(position: Int) {
         viewModelScope.launch {
             _templates.value?.get(position)?.let {
-                workoutState.updateTemplate(it)
+                workoutState.startWorkout(it)
             }
         }
     }
@@ -84,7 +85,7 @@ class StartWorkoutViewModel(application: Application) : AndroidViewModel(applica
         val count = _templates.value?.count { template?.id == it.id }
         template?.let { workout ->
             val dupe = Workout(
-                id = workout.id,
+                id = generateRandomId(),
                 name = "${workout.name} duplicate $count",
                 volume = workout.volume,
                 duration = null,

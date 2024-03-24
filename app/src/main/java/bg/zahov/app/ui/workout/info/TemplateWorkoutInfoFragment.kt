@@ -99,19 +99,13 @@ class TemplateWorkoutInfoFragment : Fragment() {
                         }
                     }
                     circularProgressIndicator.visibility = it.loadingIndicatorVisibility
-                    if (it.shutdown) findNavController().navigateUp()
-                    showToast(it.message)
+                    if (it.shutdown) {}//TODO()
+                    if (it.deleted) findNavController().navigateUp()
                 }
 
             startWorkout.setOnClickListener {
                 templateWorkoutInfoViewModel.startWorkout()
             }
-        }
-    }
-
-    private fun showToast(message: String?) {
-        message?.let {
-            Toast.makeText(context, it, Toast.LENGTH_SHORT).show()
         }
     }
 

@@ -1,5 +1,6 @@
 package bg.zahov.app.data.provider
 
+import android.util.Log
 import bg.zahov.app.data.interfaces.WorkoutProvider
 import bg.zahov.app.data.local.RealmWorkoutState
 import bg.zahov.app.data.model.Exercise
@@ -8,6 +9,7 @@ import bg.zahov.app.data.repository.WorkoutRepositoryImpl
 import bg.zahov.app.ui.exercise.info.history.ExerciseHistoryInfo
 import bg.zahov.app.util.getOneRepMaxes
 import bg.zahov.app.util.toFormattedString
+import io.realm.kotlin.notifications.ObjectChange
 import kotlinx.coroutines.flow.Flow
 import kotlinx.coroutines.flow.flow
 
@@ -90,8 +92,14 @@ class WorkoutProviderImpl : WorkoutProvider {
             emit(resultsList)
         }
 
-    override suspend fun getPreviousWorkoutState(): RealmWorkoutState = workoutRepo.getPastWorkoutState()
-    override suspend fun updateWorkoutState(realmWorkoutState: RealmWorkoutState){
-        workoutRepo.updateWorkoutState(realmWorkoutState)
+    override suspend fun getPreviousWorkoutState(): RealmWorkoutState? = workoutRepo.getPastWorkoutState()
+
+    override suspend fun addWorkoutState(realmWorkoutState: RealmWorkoutState) {
+        workoutRepo.addWorkoutState(realmWorkoutState)
+    }
+
+    override suspend fun clearWorkoutState() {
+        Log.d("calling clear", "clear 2")
+        workoutRepo.clearWorkoutState()
     }
 }

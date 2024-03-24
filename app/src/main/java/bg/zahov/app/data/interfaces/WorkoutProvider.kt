@@ -4,6 +4,7 @@ import bg.zahov.app.data.local.RealmWorkoutState
 import bg.zahov.app.data.model.Exercise
 import bg.zahov.app.data.model.Workout
 import bg.zahov.app.ui.exercise.info.history.ExerciseHistoryInfo
+import io.realm.kotlin.notifications.ObjectChange
 import kotlinx.coroutines.flow.Flow
 
 interface WorkoutProvider {
@@ -22,6 +23,7 @@ interface WorkoutProvider {
     fun setClickedTemplateExercise(item: Exercise)
     fun getClickedTemplateExercise(): Exercise
     suspend fun getExerciseHistory(): Flow<List<ExerciseHistoryInfo>>
-    suspend fun getPreviousWorkoutState(): RealmWorkoutState
-    suspend fun updateWorkoutState(realmWorkoutState: RealmWorkoutState)
+    suspend fun getPreviousWorkoutState(): RealmWorkoutState?
+    suspend fun addWorkoutState(realmWorkoutState: RealmWorkoutState)
+    suspend fun clearWorkoutState()
 }

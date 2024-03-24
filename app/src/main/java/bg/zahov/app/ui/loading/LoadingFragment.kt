@@ -1,6 +1,5 @@
 package bg.zahov.app.ui.loading
 
-import android.media.MediaPlayer
 import android.os.Bundle
 import android.view.LayoutInflater
 import android.view.View
@@ -14,8 +13,6 @@ import androidx.lifecycle.map
 import androidx.navigation.fragment.findNavController
 import bg.zahov.app.data.model.state.LoadingUiMapper
 import bg.zahov.app.hideBottomNav
-import bg.zahov.app.showBottomNav
-import bg.zahov.fitness.app.R
 import bg.zahov.fitness.app.databinding.FragmentLoadingBinding
 import com.google.android.material.imageview.ShapeableImageView
 
@@ -23,7 +20,6 @@ class LoadingFragment : Fragment() {
     private var _binding: FragmentLoadingBinding? = null
     private val binding
         get() = requireNotNull(_binding)
-    private var mediaPlayer: MediaPlayer? = null
     private val loadingViewModel: LoadingViewModel by viewModels()
     override fun onCreateView(
         inflater: LayoutInflater,
@@ -31,7 +27,6 @@ class LoadingFragment : Fragment() {
         savedInstanceState: Bundle?,
     ): View {
         _binding = FragmentLoadingBinding.inflate(inflater, container, false)
-        mediaPlayer = MediaPlayer.create(context, R.raw.talic)
         return binding.root
     }
 
@@ -42,20 +37,21 @@ class LoadingFragment : Fragment() {
 
     override fun onViewCreated(view: View, savedInstanceState: Bundle?) {
         super.onViewCreated(view, savedInstanceState)
-        mediaPlayer?.start()
         binding.apply {
             animateView(bottomLeft)
             animateView(bottomRight)
             animateView(topLeft)
             animateView(topRight)
+            loadingViewModel.onAppStart()
 
             loadingViewModel.state.map { LoadingUiMapper.map(it) }.observe(viewLifecycleOwner) {
                 it.message?.let { message ->
                     //TODO(end process)
                     Toast.makeText(context, message, Toast.LENGTH_SHORT).show()
                 }
-                findNavController().navigate(R.id.loading_to_home)
-
+                it.destination?.let { des ->
+                    findNavController().navigate(des)
+                }
             }
         }
     }
@@ -74,11 +70,6 @@ class LoadingFragment : Fragment() {
             }
 
             override fun onAnimationEnd(animation: Animation?) {
-                loadingViewModel.state.map { LoadingUiMapper.map(it) }.observe(viewLifecycleOwner) {
-                    if (!it.isLoading) {
-//                        findNavController().navigate(R.id.loading_to_home)
-                    }
-                }
             }
 
             override fun onAnimationRepeat(animation: Animation?) {
@@ -89,9 +80,6 @@ class LoadingFragment : Fragment() {
 
     override fun onDestroyView() {
         super.onDestroyView()
-        requireActivity().showBottomNav()
         _binding = null
-        mediaPlayer?.release()
-        mediaPlayer = null
     }
 }

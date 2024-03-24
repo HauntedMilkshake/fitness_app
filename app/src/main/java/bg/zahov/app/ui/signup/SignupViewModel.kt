@@ -46,12 +46,12 @@ class SignupViewModel(application: Application) : AndroidViewModel(application) 
 
         viewModelScope.launch {
             try {
-                auth.signup(userName, email, password)
+                auth.signup(email, password)
                     .addOnSuccessListener {
-                        _state.value = State.Authentication(true)
                         CoroutineScope(Dispatchers.IO).launch {
-                            auth.initDataSources(userName)
+                            auth.createDataSources(userName)
                         }
+                        _state.value = State.Authentication(true)
                     }
                     .addOnFailureListener {
                         _state.value = State.Error(it.message, false)

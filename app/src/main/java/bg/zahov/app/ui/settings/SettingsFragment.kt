@@ -4,6 +4,7 @@ import android.content.Intent
 import android.net.Uri
 import android.os.Bundle
 import android.transition.TransitionInflater
+import android.util.Log
 import android.view.LayoutInflater
 import android.view.Menu
 import android.view.MenuInflater
@@ -14,6 +15,7 @@ import androidx.appcompat.app.AppCompatActivity
 import androidx.core.view.MenuProvider
 import androidx.fragment.app.Fragment
 import androidx.fragment.app.viewModels
+import androidx.lifecycle.map
 import androidx.navigation.fragment.findNavController
 import bg.zahov.app.util.SettingsChangeListener
 import bg.zahov.app.ui.custom.RadioGroupSettingsView
@@ -24,6 +26,7 @@ import bg.zahov.app.data.model.Theme
 import bg.zahov.app.data.model.Units
 import bg.zahov.app.hideBottomNav
 import bg.zahov.app.data.local.Settings
+import bg.zahov.app.data.model.state.SettingsUiMapper
 import bg.zahov.app.setToolBarTitle
 import bg.zahov.fitness.app.R
 import bg.zahov.fitness.app.databinding.FragmentSettingsBinding
@@ -44,8 +47,10 @@ class SettingsFragment : Fragment() {
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
-        enterTransition = TransitionInflater.from(requireContext()).inflateTransition(R.transition.slide_up)
-        exitTransition = TransitionInflater.from(requireContext()).inflateTransition(R.transition.fade_out)
+        enterTransition =
+            TransitionInflater.from(requireContext()).inflateTransition(R.transition.slide_up)
+        exitTransition =
+            TransitionInflater.from(requireContext()).inflateTransition(R.transition.fade_out)
     }
 
     override fun onViewCreated(view: View, savedInstanceState: Bundle?) {
@@ -62,7 +67,7 @@ class SettingsFragment : Fragment() {
             override fun onMenuItemSelected(menuItem: MenuItem): Boolean {
                 return when (menuItem.itemId) {
                     R.id.home -> {
-                        findNavController().popBackStack()
+                        findNavController().navigate(R.id.settings_to_home)
                         true
                     }
 
@@ -78,8 +83,8 @@ class SettingsFragment : Fragment() {
 
         binding.apply {
             signOutButton.setOnClickListener {
+                Log.d("button", "button")
                 settingsViewModel.logout()
-                findNavController().navigate(R.id.settings_to_welcome)
             }
 
 //                findNavController().navigate(R.id.settings_to_home)
@@ -94,12 +99,10 @@ class SettingsFragment : Fragment() {
             }
             deleteAccount.setOnClickListener {
                 settingsViewModel.deleteAccount()
-                findNavController().navigate(R.id.settings_to_welcome)
             }
 
         }
         initDefaultSettingsViews()
-
     }
 
     private fun initRadioSettingsView(
@@ -132,66 +135,71 @@ class SettingsFragment : Fragment() {
 
     private fun initDefaultSettingsViews() {
         binding.apply {
-            settingsViewModel.settings.observe(viewLifecycleOwner) {
-                initRadioSettingsView(
-                    languageSettings,
-                    "Language",
-                    listOf(Language.English.name, Language.Bulgarian.name),
-                    it
-                )
-                initRadioSettingsView(
-                    unitSettings,
-                    "Units",
-                    listOf(Units.BANANA.name, Units.METRIC.name),
-                    it
-                )
-                initRadioSettingsView(
-                    themeSettings,
-                    "Theme",
-                    listOf(Theme.Light.name, Theme.Dark.name),
-                    it
-                )
-                initRadioSettingsView(
-                    restTimerSettings,
-                    "Timer increment value",
-                    listOf("30 s", "15 s", "5 s"),
-                    it
-                )
-                initRadioSettingsView(
-                    soundSettings,
-                    "Sound",
-                    listOf(Sound.SOUND_1.name, Sound.SOUND_2.name, Sound.SOUND_3.name),
-                    it
-                )
-                initSwitchSettingsView(
-                    soundEffectsSettings,
-                    "Sound effects",
-                    "Doesn't include rest timer alert",
-                    it
-                )
-                initSwitchSettingsView(vibrateSettings, "Vibrate upon finish", "", it)
-                initSwitchSettingsView(
-                    samsungFitSettings,
-                    "Use samsung watch during workout",
-                    "",
-                    it
-                )
-                initSwitchSettingsView(
-                    showUpdateTemplateSettings,
-                    "Show update template",
-                    "Prompt when a workout is finished",
-                    it
-                )
-                initSwitchSettingsView(
-                    autoSyncSettings,
-                    "Automatic between device sync",
-                    "Turn this on if you want to use your account on another device",
-                    it
-                )
-                editProfile.setViewTitle("Edit")
-                github.setViewTitle("Github")
-                bugReport.setViewTitle("Bug report")
-            }
+            settingsViewModel.state.map { SettingsUiMapper.map(it) }
+                .observe(viewLifecycleOwner) { model ->
+                    model.settings?.let {
+                        initRadioSettingsView(
+                            languageSettings,
+                            "Language",
+                            listOf(Language.English.name, Language.Bulgarian.name), it
+                        )
+                        initRadioSettingsView(
+                            unitSettings,
+                            "Units",
+                            listOf(Units.BANANA.name, Units.METRIC.name),
+                            it
+                        )
+                        initRadioSettingsView(
+                            themeSettings,
+                            "Theme",
+                            listOf(Theme.Light.name, Theme.Dark.name),
+                            it
+                        )
+                        initRadioSettingsView(
+                            restTimerSettings,
+                            "Timer increment value",
+                            listOf("30 s", "15 s", "5 s"),
+                            it
+                        )
+                        initRadioSettingsView(
+                            soundSettings,
+                            "Sound",
+                            listOf(Sound.SOUND_1.name, Sound.SOUND_2.name, Sound.SOUND_3.name),
+                            it
+                        )
+                        initSwitchSettingsView(
+                            soundEffectsSettings,
+                            "Sound effects",
+                            "Doesn't include rest timer alert",
+                            it
+                        )
+                        initSwitchSettingsView(vibrateSettings, "Vibrate upon finish", "", it)
+                        initSwitchSettingsView(
+                            samsungFitSettings,
+                            "Use samsung watch during workout",
+                            "",
+                            it
+                        )
+                        initSwitchSettingsView(
+                            showUpdateTemplateSettings,
+                            "Show update template",
+                            "Prompt when a workout is finished",
+                            it
+                        )
+                        initSwitchSettingsView(
+                            autoSyncSettings,
+                            "Automatic between device sync",
+                            "Turn this on if you want to use your account on another device",
+                            it
+                        )
+                        editProfile.setViewTitle("Edit")
+                        github.setViewTitle("Github")
+                        bugReport.setViewTitle("Bug report")
+                    }
+                    model.action?.let {
+                        findNavController().navigate(it)
+                    }
+                }
         }
     }
 

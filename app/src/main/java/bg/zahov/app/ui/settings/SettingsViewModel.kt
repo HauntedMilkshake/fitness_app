@@ -8,7 +8,8 @@ import androidx.lifecycle.viewModelScope
 import bg.zahov.app.data.local.Settings
 import bg.zahov.app.getSettingsProvider
 import bg.zahov.app.getUserProvider
-import kotlinx.coroutines.Dispatchers
+import bg.zahov.app.getWorkoutStateManager
+import bg.zahov.fitness.app.R
 import kotlinx.coroutines.launch
 
 class SettingsViewModel(application: Application) : AndroidViewModel(application) {
@@ -21,26 +22,30 @@ class SettingsViewModel(application: Application) : AndroidViewModel(application
         application.getUserProvider()
     }
 
-    private val _settings = MutableLiveData<Settings>()
-    val settings: LiveData<Settings>
-        get() = _settings
+    private val workoutState by lazy {
+        application.getWorkoutStateManager()
+    }
+
+    private val _state = MutableLiveData<State>()
+    val state: LiveData<State>
+        get() = _state
 
     init {
         viewModelScope.launch {
             repo.getSettings().collect {
-                _settings.postValue(it.obj)
+                it.obj?.let { settings -> _state.postValue(State.Data(settings)) }
             }
         }
     }
 
     fun writeNewSetting(title: String, newValue: Any) {
-        viewModelScope.launch(Dispatchers.IO) {
+        viewModelScope.launch {
             repo.addSetting(title, newValue)
         }
     }
 
     fun resetSettings() {
-        viewModelScope.launch(Dispatchers.IO) {
+        viewModelScope.launch {
             repo.resetSettings()
         }
     }
@@ -48,12 +53,22 @@ class SettingsViewModel(application: Application) : AndroidViewModel(application
     fun logout() {
         viewModelScope.launch {
             auth.logout()
+            workoutState.cancel()
+            _state.postValue(State.Navigate(R.id.settings_to_welcome))
         }
     }
 
     fun deleteAccount() {
         viewModelScope.launch {
+            workoutState.cancel()
             auth.deleteAccount()
+            _state.postValue(State.Navigate(R.id.settings_to_welcome))
         }
+    }
+
+    sealed interface State {
+        data class Data(val data: Settings) : State
+        data class Navigate(val action: Int?) : State
+
     }
 }

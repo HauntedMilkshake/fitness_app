@@ -6,14 +6,15 @@ import kotlinx.coroutines.flow.Flow
 
 
 interface Authentication {
-    suspend fun signup(username: String, email: String, password: String) : Task<AuthResult>
+    suspend fun signup(email: String, password: String) : Task<AuthResult>
     suspend fun login(email: String, password: String) : Task<AuthResult>
     suspend fun logout()
     suspend fun deleteAccount()
     suspend fun passwordResetByEmail(email: String): Task<Void>
     suspend fun passwordResetForLoggedUser(): Task<Void>
     fun isAuthenticated() : Boolean
-    suspend fun initDataSources(username: String? = null)
+    suspend fun initDataSources()
+    suspend fun createDataSources(username: String)
     suspend fun updatePassword(newPassword: String): Task<Void>
     suspend fun updateEmail(newEmail: String): Task<Void>
     suspend fun reauthenticate(password: String): Task<Void>

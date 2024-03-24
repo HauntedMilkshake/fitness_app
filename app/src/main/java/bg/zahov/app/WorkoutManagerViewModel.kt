@@ -1,7 +1,6 @@
 package bg.zahov.app
 
 import android.app.Application
-import android.util.Log
 import android.view.View
 import androidx.lifecycle.AndroidViewModel
 import androidx.lifecycle.LiveData
@@ -11,14 +10,10 @@ import bg.zahov.app.data.model.Workout
 import bg.zahov.app.data.model.WorkoutState
 import bg.zahov.app.util.timeToString
 import kotlinx.coroutines.launch
-import java.util.NoSuchElementException
 
 class WorkoutManagerViewModel(application: Application) : AndroidViewModel(application) {
     private val workoutStateManager by lazy {
         application.getWorkoutStateManager()
-    }
-    private val workoutProvider by lazy {
-        application.getWorkoutProvider()
     }
 
     private val _state = MutableLiveData<State>(State.Inactive(View.GONE))
@@ -64,33 +59,15 @@ class WorkoutManagerViewModel(application: Application) : AndroidViewModel(appli
         }
     }
 
-
     fun updateStateToActive() {
         viewModelScope.launch {
-            workoutStateManager.updateState(WorkoutState.ACTIVE)
-        }
-    }
-
-    private suspend fun checkPreviousState(previousState: bg.zahov.app.data.local.RealmWorkoutState) {
-        if (previousState.id != "default") {
-            workoutStateManager.resumeWorkout(previousState)
+            workoutStateManager.startWorkout(null)
         }
     }
 
     fun saveWorkoutState() {
         viewModelScope.launch {
             workoutStateManager.saveWorkout()
-        }
-    }
-
-    fun checkWorkoutState() {
-        viewModelScope.launch {
-            try {
-                checkPreviousState(workoutProvider.getPreviousWorkoutState())
-            } catch (e: NoSuchElementException) {
-                Log.d("NO SUCH LIST", "NO SUCH LIST")
-                //TODO()
-            }
         }
     }
 

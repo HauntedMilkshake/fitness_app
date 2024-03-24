@@ -1,6 +1,5 @@
 package bg.zahov.app.data.local
 
-import android.util.Log
 import bg.zahov.app.data.model.Language
 import bg.zahov.app.data.model.LanguageKeys
 import bg.zahov.app.data.model.Sound
@@ -13,8 +12,11 @@ import io.realm.kotlin.Realm
 import io.realm.kotlin.RealmConfiguration
 import io.realm.kotlin.ext.asFlow
 import io.realm.kotlin.ext.query
+import io.realm.kotlin.notifications.ObjectChange
 import kotlinx.coroutines.Dispatchers
+import kotlinx.coroutines.flow.Flow
 import kotlinx.coroutines.withContext
+import java.io.File
 
 class RealmManager {
     companion object {
@@ -41,6 +43,8 @@ class RealmManager {
     private val realmConfig by lazy {
         getConfig().build()
     }
+
+    fun doesRealmExist(): Boolean = File(realmConfig.path).exists()
 
     private fun getConfig(): RealmConfiguration.Builder {
         val config = RealmConfiguration.Builder(
@@ -79,6 +83,7 @@ class RealmManager {
                 copyToRealm(Settings())
             } catch (e: IllegalArgumentException) {
                 throw e
+            } finally {
             }
         }
     }
@@ -92,37 +97,48 @@ class RealmManager {
     }
 
     suspend fun getWorkoutState() = withRealm { realm ->
-        realm.query<RealmWorkoutState>().find().first()
+        realm.query<RealmWorkoutState>().first().find()
     }
 
-    suspend fun updateWorkoutState(workout: RealmWorkoutState) = withRealm { realm ->
-        val state = getWorkoutState()
+    suspend fun addWorkoutState(workout: RealmWorkoutState) = withRealm { realm ->
         realm.write {
-            state.let { coldState ->
-                findLatest(coldState)?.apply {
-                    Log.d("WORKOUT STATE", "UPDATE WORKOUT STATE")
-                    id = workout.id
-                    name = workout.name
-                    duration = workout.duration
-                    volume = workout.volume
-                    date = workout.date
-                    isTemplate = workout.isTemplate
-                    exercises = workout.exercises
-                    note = workout.note
-                    personalRecords = workout.personalRecords
-                    workoutStart = workout.workoutStart
-                }
+            copyToRealm(workout)
+        }
+    }
+    suspend fun addSettings() = withRealm {realm ->
+        if(realm.query<Settings>().first().find() == null){
+            realm.write {
+                copyToRealm(Settings())
             }
         }
     }
 
-    suspend fun getSettings() = withRealm { realm ->
+    suspend fun clearWorkoutState() = withRealm { realm ->
+        realm.write {
+            val sets = query<RealmSets>().find()
+            if (sets.isNotEmpty()) sets.forEach { set -> delete(set) }
+            val exercises = query<RealmExercise>().find()
+            if (exercises.isNotEmpty()) exercises.forEach { exercise -> delete(exercise) }
+            val workoutState = query<RealmWorkoutState>().find()
+            if (workoutState.isNotEmpty()) workoutState.forEach { workoutState ->
+                if (workoutState.id != "default") delete(
+                    workoutState
+                )
+            }
+        }
+    }
+
+    suspend fun getSettings(): Flow<ObjectChange<Settings>> = withRealm { realm ->
         realm.query<Settings>().find().first().asFlow()
     }
 
-    //TODO(Try catch)
     private suspend fun <T> withRealm(block: suspend (Realm) -> T): T {
-        return block(openRealm())
+        val realm = openRealm()
+        return try {
+            block(realm)
+        } finally {
+//            realm.close()
+        }
     }
 
     suspend fun resetSettings() = withRealm { realm ->
@@ -200,7 +216,6 @@ class RealmManager {
                         AUTOMATIC_SYNC_SETTING -> {
                             it.automaticSync = (newValue as Boolean)
                         }
-
                     }
                 }
             }

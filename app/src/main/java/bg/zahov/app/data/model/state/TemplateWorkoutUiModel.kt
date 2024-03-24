@@ -12,7 +12,7 @@ data class TemplateWorkoutUiModel(
     val lastPerformedText: String = "",
     val exercises: List<ExerciseAdapterWrapper> = listOf(),
     val shutdown: Boolean = false,
-    val message: String? = null,
+    val deleted: Boolean = false,
 )
 
 object TemplateWorkoutUiMapper {
@@ -33,7 +33,8 @@ object TemplateWorkoutUiMapper {
         is TemplateWorkoutInfoViewModel.State.WorkoutActive -> TemplateWorkoutUiModel(
             lastPerformedText = state.lastPerformed,
             exercises = state.exercises,
-            message = state.message
         )
+
+        is TemplateWorkoutInfoViewModel.State.Deleted -> TemplateWorkoutUiModel(deleted = true)
     }
 }

@@ -1,11 +1,13 @@
 package bg.zahov.app.data.repository
 
+import android.util.Log
 import bg.zahov.app.data.model.Exercise
 import bg.zahov.app.data.model.Workout
 import bg.zahov.app.data.interfaces.WorkoutRepository
 import bg.zahov.app.data.local.RealmManager
 import bg.zahov.app.data.local.RealmWorkoutState
 import bg.zahov.app.data.remote.FirestoreManager
+import io.realm.kotlin.notifications.ObjectChange
 import kotlinx.coroutines.flow.Flow
 
 class WorkoutRepositoryImpl : WorkoutRepository {
@@ -58,8 +60,15 @@ class WorkoutRepositoryImpl : WorkoutRepository {
     }
 
     override suspend fun getPastWorkoutById(id: String): Workout = firestore.getPastWorkoutById(id)
-    override suspend fun getPastWorkoutState(): RealmWorkoutState = realm.getWorkoutState()
-    override suspend fun updateWorkoutState(realmWorkoutState: RealmWorkoutState) {
-        realm.updateWorkoutState(realmWorkoutState)
+    override suspend fun getPastWorkoutState(): RealmWorkoutState? = realm.getWorkoutState()
+
+    override suspend fun addWorkoutState(realmWorkoutState: RealmWorkoutState) {
+        realm.addWorkoutState(realmWorkoutState)
     }
+
+    override suspend fun clearWorkoutState() {
+        Log.d("calling clear", "clear 3")
+        realm.clearWorkoutState()
+    }
+
 }

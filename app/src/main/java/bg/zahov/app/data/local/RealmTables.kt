@@ -39,7 +39,6 @@ class RealmWorkoutState : RealmObject {
     var exercises: RealmList<RealmExercise> = realmListOf()
     var note: String? = null
     var personalRecords = 0
-    var workoutStart: RealmInstant = RealmInstant.now()
 }
 
 class RealmExercise : RealmObject {

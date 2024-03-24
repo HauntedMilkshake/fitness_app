@@ -12,6 +12,7 @@ import bg.zahov.app.data.model.WorkoutState
 import bg.zahov.app.getWorkoutProvider
 import bg.zahov.app.getWorkoutStateManager
 import bg.zahov.app.ui.exercise.ExerciseAdapterWrapper
+import bg.zahov.app.util.generateRandomId
 import bg.zahov.app.util.toExerciseAdapterWrapper
 import kotlinx.coroutines.launch
 import java.time.LocalDate
@@ -37,6 +38,7 @@ class TemplateWorkoutInfoViewModel(application: Application) : AndroidViewModel(
 
     private var workoutState: WorkoutState? = null
     private var workout: Workout? = null
+    private var allWorkout: List<Workout> = listOf()
 
     fun fetchWorkout() {
         viewModelScope.launch {
@@ -54,7 +56,7 @@ class TemplateWorkoutInfoViewModel(application: Application) : AndroidViewModel(
                                 _workoutName.postValue(it.name)
                                 workout = it
                             }
-
+                            allWorkout = workouts
                         }
                     } catch (e: CriticalDataNullException) {
                         _state.postValue(State.Error(true))
@@ -81,32 +83,45 @@ class TemplateWorkoutInfoViewModel(application: Application) : AndroidViewModel(
 
     fun startWorkout() {
         workout?.let {
-            if (workoutState != null && workoutState == WorkoutState.INACTIVE) {
-                viewModelScope.launch {
-                    workoutStateProvider.updateTemplate(it)
-                }
-            } else {
-                (_state.value as? State.Data)?.let { state ->
-                    _state.value = State.WorkoutActive(
-                        "Cannot start a workout at this time",
-                        state.lastPerformed,
-                        state.exercises
+            viewModelScope.launch {
+                workoutStateProvider.startWorkout(it)
+            }
+        }
+
+    }
+
+    fun duplicateWorkout() {
+        viewModelScope.launch {
+            workout?.let { workout ->
+                val count = allWorkout.count { it.id == workout.id }
+                workoutProvider.addTemplateWorkout(
+                    Workout(
+                        id = generateRandomId(),
+                        name = "${workout.name} duplicate $count",
+                        duration = 0L,
+                        volume = 0.0,
+                        date = LocalDateTime.now(),
+                        isTemplate = true,
+                        exercises = workout.exercises,
+                        note = workout.note,
+                        personalRecords = 0
                     )
-                }
+                )
             }
         }
     }
 
-    fun duplicateWorkout() {
-
-    }
-
     fun deleteWorkout() {
-
+        viewModelScope.launch {
+            workout?.let {
+                workoutProvider.deleteTemplateWorkout(it)
+            }
+        }
     }
 
     sealed interface State {
         object Default : State
+        object Deleted : State
         data class Data(val lastPerformed: String, val exercises: List<ExerciseAdapterWrapper>) :
             State
 
@@ -114,7 +129,6 @@ class TemplateWorkoutInfoViewModel(application: Application) : AndroidViewModel(
         data class Loading(val loadingVisibility: Int) : State
 
         data class WorkoutActive(
-            val message: String,
             val lastPerformed: String,
             val exercises: List<ExerciseAdapterWrapper>,
         ) : State

@@ -29,8 +29,7 @@ class FirebaseAuthentication {
     private val firestore = FirestoreManager.getInstance()
     private val realm = RealmManager.getInstance()
 
-    //username could be removed
-    suspend fun signup(username: String, email: String, password: String) =
+    suspend fun signup(email: String, password: String) =
         withContext(Dispatchers.IO) { auth.createUserWithEmailAndPassword(email, password) }
 
     suspend fun login(email: String, password: String) =
@@ -69,18 +68,23 @@ class FirebaseAuthentication {
         auth.sendPasswordResetEmail(email)
     }
 
-    fun isAuthenticated() = auth.currentUser != null
+    fun isAuthenticated(): Boolean {
+        return auth.currentUser != null
+    }
 
-    suspend fun init(username: String? = null) {
-
+    suspend fun init() {
         auth.currentUser?.uid?.let {
             firestore.initUser(it)
         }
-
-        username?.let {
-            firestore.createFirestore(username)
+        if (realm.doesRealmExist()) {
+            realm.addSettings()
+        } else {
+            realm.createRealm()
         }
+    }
 
+    suspend fun create(username: String) {
+        firestore.createFirestore(username)
         realm.createRealm()
     }
 

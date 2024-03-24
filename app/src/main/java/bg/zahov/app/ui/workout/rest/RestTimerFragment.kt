@@ -35,6 +35,7 @@ class RestTimerFragment : Fragment() {
         savedInstanceState: Bundle?,
     ): View {
         _binding = FragmentRestTimerBinding.inflate(inflater, container, false)
+        requireActivity().showTopBar()
         return binding.root
     }
 
@@ -128,9 +129,6 @@ class RestTimerFragment : Fragment() {
             }
             fourthRestButton.setOnClickListener {
                 restTimerViewModel.onDefaultTimerClick("2:30")
-            }
-            close.setOnClickListener {
-                findNavController().navigateUp()
             }
             skip.setOnClickListener {
                 restTimerViewModel.cancelTimer()
