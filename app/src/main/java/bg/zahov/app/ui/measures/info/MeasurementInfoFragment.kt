@@ -12,10 +12,12 @@ import androidx.core.view.MenuProvider
 import androidx.fragment.app.Fragment
 import androidx.fragment.app.viewModels
 import androidx.lifecycle.map
+import androidx.navigation.fragment.findNavController
 import bg.zahov.app.data.model.state.MeasurementInformationUiMapper
 import bg.zahov.app.setToolBarTitle
 import bg.zahov.app.showTopBar
 import bg.zahov.app.ui.measures.MeasuresFragment.Companion.MEASUREMENT_ARGS
+import bg.zahov.app.ui.measures.info.input.MeasurementInputFragment
 import bg.zahov.fitness.app.R
 import bg.zahov.fitness.app.databinding.FragmentMeasurementInformationBinding
 import com.github.mikephil.charting.data.LineData
@@ -62,6 +64,9 @@ class MeasurementInfoFragment : Fragment() {
                     if (it.shutdown) {
                     }//TODO(BAD)
                 }
+            addEntry.setOnClickListener {
+                MeasurementInputFragment().show(childFragmentManager, "tag")
+            }
         }
     }
 

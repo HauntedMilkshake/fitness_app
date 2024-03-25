@@ -27,6 +27,7 @@ class ExerciseHistoryViewModel(application: Application) : AndroidViewModel(appl
             _state.postValue(State.Loading(View.VISIBLE))
             try {
                 workoutProvider.getExerciseHistory().collect {
+                    Log.d("history size", it.size.toString())
                     _state.postValue(State.Data(it))
                 }
             } catch (e: Exception) {

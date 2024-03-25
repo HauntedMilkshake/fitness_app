@@ -20,8 +20,8 @@ interface WorkoutProvider {
     suspend fun updateExercises(exercises: List<Exercise>)
     suspend fun getTemplateWorkoutByName(name: String): Flow<Workout>
     suspend fun getPastWorkoutById(id: String): Workout
-    fun setClickedTemplateExercise(item: Exercise)
-    fun getClickedTemplateExercise(): Exercise
+    suspend fun setClickedTemplateExercise(item: Exercise)
+    suspend fun getClickedTemplateExercise(): Flow<Exercise>
     suspend fun getExerciseHistory(): Flow<List<ExerciseHistoryInfo>>
     suspend fun getPreviousWorkoutState(): RealmWorkoutState?
     suspend fun addWorkoutState(realmWorkoutState: RealmWorkoutState)

@@ -11,7 +11,10 @@ import bg.zahov.app.util.getOneRepMaxes
 import bg.zahov.app.util.toFormattedString
 import io.realm.kotlin.notifications.ObjectChange
 import kotlinx.coroutines.flow.Flow
+import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.flow
+import kotlinx.coroutines.flow.flowOf
+import kotlinx.coroutines.flow.mapNotNull
 
 class WorkoutProviderImpl : WorkoutProvider {
     companion object {
@@ -24,7 +27,13 @@ class WorkoutProviderImpl : WorkoutProvider {
     }
 
     private var lastWorkoutPerformed: Workout? = null
-    private var clickedExercise: Exercise? = null
+    private val _clickedExercise = MutableStateFlow<Exercise?>(null)
+    private val clickedExercise: Flow<Exercise?>
+        get() = _clickedExercise
+
+    private val _exerciseHistory = MutableStateFlow<List<ExerciseHistoryInfo>>(listOf())
+    private val exerciseHistory: Flow<List<ExerciseHistoryInfo>>
+        get() = _exerciseHistory
     private val workoutRepo = WorkoutRepositoryImpl.getInstance()
     fun getLastWorkout(): Workout? = lastWorkoutPerformed
     override suspend fun getTemplateWorkouts(): Flow<List<Workout>> =
@@ -65,34 +74,36 @@ class WorkoutProviderImpl : WorkoutProvider {
     override suspend fun getPastWorkoutById(id: String): Workout =
         workoutRepo.getPastWorkoutById(id)
 
-    override fun setClickedTemplateExercise(item: Exercise) {
-        clickedExercise = item
+    override suspend fun setClickedTemplateExercise(item: Exercise) {
+        Log.d("setting clicked exericse", "setting clicked exercise")
+        var resultsList = listOf<ExerciseHistoryInfo>()
+        getPastWorkouts().collect { workout ->
+            Log.d("collecting workouts", "collecting workouts")
+            resultsList = workout.mapNotNull {
+                it.exercises.find { workoutExercise -> workoutExercise.name == item.name }
+                    ?.let { previousExercise ->
+                        ExerciseHistoryInfo(
+                            workoutId = it.id,
+                            workoutName = it.name,
+                            lastPerformed = it.date.toFormattedString(),
+                            sets = previousExercise.sets,
+                            oneRepMaxes = previousExercise.getOneRepMaxes(),
+                            date = it.date
+                        )
+                    }
+            }
+        }
+        _exerciseHistory.emit(resultsList)
+        _clickedExercise.emit(item)
     }
 
-    override fun getClickedTemplateExercise(): Exercise = requireNotNull(clickedExercise)
+    override suspend fun getClickedTemplateExercise() = clickedExercise.mapNotNull { it }
 
-    override suspend fun getExerciseHistory(): Flow<List<ExerciseHistoryInfo>> =
-        flow {
-            var resultsList = listOf<ExerciseHistoryInfo>()
-            getPastWorkouts().collect { workout ->
-                resultsList = workout.mapNotNull {
-                    it.exercises.find { workoutExercise -> workoutExercise.name == clickedExercise?.name }
-                        ?.let { previousExercise ->
-                            ExerciseHistoryInfo(
-                                workoutId = it.id,
-                                workoutName = it.name,
-                                lastPerformed = it.date.toFormattedString(),
-                                sets = previousExercise.sets,
-                                oneRepMaxes = previousExercise.getOneRepMaxes(),
-                                date = it.date
-                            )
-                        }
-                }
-            }
-            emit(resultsList)
-        }
+    override suspend fun getExerciseHistory(): Flow<List<ExerciseHistoryInfo>> = exerciseHistory
 
-    override suspend fun getPreviousWorkoutState(): RealmWorkoutState? = workoutRepo.getPastWorkoutState()
+
+    override suspend fun getPreviousWorkoutState(): RealmWorkoutState? =
+        workoutRepo.getPastWorkoutState()
 
     override suspend fun addWorkoutState(realmWorkoutState: RealmWorkoutState) {
         workoutRepo.addWorkoutState(realmWorkoutState)

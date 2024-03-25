@@ -84,8 +84,10 @@ class ExerciseViewModel(application: Application) : AndroidViewModel(application
     }
 
     fun setClickedExercise(name: String) {
-        exerciseTemplates.find { it.name == name }?.let {
-            repo.setClickedTemplateExercise(it)
+        viewModelScope.launch {
+            exerciseTemplates.find { it.name == name }?.let {
+                repo.setClickedTemplateExercise(it)
+            }
         }
     }
 
