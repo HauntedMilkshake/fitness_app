@@ -84,34 +84,8 @@ class ExerciseSetAdapter(val mediaPLayer: MediaPlayer? = null) :
     override fun getItemCount(): Int = items.size
 
     fun updateItems(newItems: List<WorkoutEntry>) {
-//        val oldList = items
         items.clear()
         items.addAll(newItems)
-
-//        DiffUtil.calculateDiff(object : DiffUtil.Callback() {
-//            override fun getOldListSize(): Int = oldList.size
-//
-//            override fun getNewListSize(): Int = items.size
-//
-//            override fun areItemsTheSame(oldItemPosition: Int, newItemPosition: Int): Boolean {
-//                return when {
-//                    oldList[oldItemPosition] is ExerciseEntry && items[newItemPosition] is ExerciseEntry -> {
-//                        (oldList[oldItemPosition] as ExerciseEntry).exercise.name == (items[newItemPosition] as ExerciseEntry).exercise.name
-//                    }
-//
-//                    oldList[oldItemPosition] is SetEntry && items[newItemPosition] is SetEntry -> {
-//                        (oldList[oldItemPosition] as SetEntry).set.set == (items[newItemPosition] as SetEntry).set.set
-//                    }
-//
-//                    else -> {
-//                        false
-//                    }
-//                }
-//            }
-//
-//            override fun areContentsTheSame(oldItemPosition: Int, newItemPosition: Int): Boolean =
-//                oldList[oldItemPosition] == items[newItemPosition]
-//        }).dispatchUpdatesTo(this)
         notifyDataSetChanged()
     }
 

@@ -1,5 +1,6 @@
 package bg.zahov.app.data.provider
 
+import android.util.Log
 import bg.zahov.app.data.interfaces.UserProvider
 import bg.zahov.app.data.model.Measurement
 import bg.zahov.app.data.model.MeasurementType
@@ -25,8 +26,8 @@ class UserProviderImpl : UserProvider {
     private val userRepo = UserRepositoryImpl.getInstance()
     private val auth = AuthenticationImpl.getInstance()
 
-    private val _selectedMeasurement = MutableSharedFlow<List<Measurement>>()
-    val selectedMeasurement: SharedFlow<List<Measurement>> = _selectedMeasurement
+    private val _selectedMeasurement = MutableSharedFlow<SelectedMeasurement>()
+    private val selectedMeasurement: SharedFlow<SelectedMeasurement> = _selectedMeasurement
 
     override suspend fun getUser(): Flow<User> = userRepo.getUser()
 
@@ -61,10 +62,19 @@ class UserProviderImpl : UserProvider {
 
     override suspend fun getEmail(): String = auth.getEmail()
     override suspend fun selectMeasure(type: MeasurementType) {
+        Log.d("select measure", "inside provider")
         getUser().collect {
-            _selectedMeasurement.emit(it.measurements[type] ?: listOf())
+            Log.d("select measure", "inside flow before emit")
+            _selectedMeasurement.emit(SelectedMeasurement(type, it.measurements[type] ?: listOf()))
         }
     }
 
     override suspend fun getSelectedMeasure() = selectedMeasurement
+    override suspend fun updateMeasurement(
+        measurementType: MeasurementType,
+        measurement: Measurement,
+    ) {
+        userRepo.updateMeasurement(measurementType, measurement)
+    }
 }
+data class SelectedMeasurement(val type: MeasurementType, val measurements:List<Measurement>)

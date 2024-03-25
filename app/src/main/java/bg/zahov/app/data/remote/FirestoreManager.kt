@@ -4,9 +4,12 @@ import android.util.Log
 import bg.zahov.app.data.exception.CriticalDataNullException
 import bg.zahov.app.data.model.Exercise
 import bg.zahov.app.data.model.FirestoreFields
+import bg.zahov.app.data.model.Measurement
+import bg.zahov.app.data.model.MeasurementType
 import bg.zahov.app.data.model.User
 import bg.zahov.app.data.model.Workout
 import bg.zahov.app.util.toFirestoreMap
+import bg.zahov.app.util.toTimestamp
 import com.google.firebase.firestore.CollectionReference
 import com.google.firebase.firestore.DocumentReference
 import com.google.firebase.firestore.FirebaseFirestore
@@ -47,7 +50,10 @@ class FirestoreManager {
         firestore.collection(USERS_COLLECTION).document(userId).set(User(username).toFirestoreMap())
     }
 
-    private suspend fun <T> getNonObservableDocData(reference: DocumentReference, mapper: (Map<String, Any>?) -> T): T {
+    private suspend fun <T> getNonObservableDocData(
+        reference: DocumentReference,
+        mapper: (Map<String, Any>?) -> T,
+    ): T {
         try {
             return mapper(reference.get().await().data)
         } catch (e: Exception) {
@@ -139,6 +145,20 @@ class FirestoreManager {
                 .collection(TEMPLATE_EXERCISES).document(newExercise.name)
                 .set(newExercise.toFirestoreMap())
         }
+
+    suspend fun upsertMeasurement(type: MeasurementType, measurement: Measurement) {
+        withContext(Dispatchers.IO) {
+
+
+            firestore.collection(USERS_COLLECTION).document(userId).collection(
+                MEASUREMENTS_COLLECTION).document(type.key).update()
+        }
+    }
+
+//    suspend fun getMeasurement(val type: MeasurementType): List<MeasurementType> = getDocData(firestore.collection(
+//        USERS_COLLECTION).document(userId).collection(MEASUREMENTS_COLLECTION).document(type.key)) {
+//
+//    }
 
     suspend fun addTemplateWorkout(newWorkoutTemplate: Workout) =
         withContext(Dispatchers.IO) {

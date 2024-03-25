@@ -65,7 +65,8 @@ class MeasurementInfoFragment : Fragment() {
                     }//TODO(BAD)
                 }
             addEntry.setOnClickListener {
-                MeasurementInputFragment().show(childFragmentManager, "tag")
+                val measurementInputFragment = MeasurementInputFragment.newInstance(arguments?.getString(MEASUREMENT_ARGS) ?: "Measurement")
+                measurementInputFragment.show(childFragmentManager, measurementInputFragment.tag)
             }
         }
     }

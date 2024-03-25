@@ -25,7 +25,7 @@ class MeasurementInfoViewModel(application: Application) : AndroidViewModel(appl
             val measureEntries = mutableListOf<Entry>()
             try {
                 userProvider.getSelectedMeasure().collect {
-                    it.sortedBy { item -> item.date.monthValue }.forEach { measurement ->
+                    it.measurements.sortedBy { item -> item.date.monthValue }.forEach { measurement ->
                         measureEntries.add(
                             Entry(
                                 measurement.value.toFloat(),

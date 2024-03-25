@@ -9,7 +9,7 @@ data class ExerciseHistoryUiModel(
     val loadingVisibility: Int = View.GONE,
     val recyclerViewVisibility: Int = View.VISIBLE,
     val shutdown: Boolean = false,
-    val message: String = "",
+    val message: String? = null,
 )
 
 object ExerciseHistoryUiMapper {

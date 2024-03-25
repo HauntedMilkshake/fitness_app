@@ -12,6 +12,9 @@ import bg.zahov.app.data.model.Exercise
 import bg.zahov.app.getWorkoutProvider
 import bg.zahov.app.util.getOneRepMaxes
 import bg.zahov.app.util.toFormattedString
+import kotlinx.coroutines.Job
+import kotlinx.coroutines.NonCancellable
+import kotlinx.coroutines.cancel
 import kotlinx.coroutines.launch
 
 class ExerciseHistoryViewModel(application: Application) : AndroidViewModel(application) {
@@ -21,13 +24,12 @@ class ExerciseHistoryViewModel(application: Application) : AndroidViewModel(appl
     private val _state = MutableLiveData<State>(State.Default)
     val state: LiveData<State>
         get() = _state
-
-    init {
-        viewModelScope.launch {
+    private lateinit var job: Job
+    fun initData() {
+        job = viewModelScope.launch(NonCancellable) {
             _state.postValue(State.Loading(View.VISIBLE))
             try {
                 workoutProvider.getExerciseHistory().collect {
-                    Log.d("history size", it.size.toString())
                     _state.postValue(State.Data(it))
                 }
             } catch (e: Exception) {
@@ -38,6 +40,11 @@ class ExerciseHistoryViewModel(application: Application) : AndroidViewModel(appl
                 )
             }
         }
+    }
+
+    override fun onCleared() {
+        super.onCleared()
+        job.cancel()
     }
 
     sealed interface State {

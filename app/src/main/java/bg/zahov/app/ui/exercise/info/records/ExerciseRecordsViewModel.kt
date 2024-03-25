@@ -6,6 +6,8 @@ import androidx.lifecycle.LiveData
 import androidx.lifecycle.MutableLiveData
 import androidx.lifecycle.viewModelScope
 import bg.zahov.app.getWorkoutProvider
+import kotlinx.coroutines.Job
+import kotlinx.coroutines.NonCancellable
 import kotlinx.coroutines.launch
 
 class ExerciseRecordsViewModel(application: Application) : AndroidViewModel(application) {
@@ -15,12 +17,12 @@ class ExerciseRecordsViewModel(application: Application) : AndroidViewModel(appl
     private val _state = MutableLiveData<Data>()
     val state: LiveData<Data>
         get() = _state
-
+    private lateinit var job: Job
     init {
         var maxVolume = 0.0
         var maxWeight = 0.0
         var oneRepMax = 0.0
-        viewModelScope.launch {
+        job = viewModelScope.launch(NonCancellable) {
             workoutProvider.getExerciseHistory().collect { data ->
                 data.forEach {
                     it.sets.forEach { set ->
@@ -49,6 +51,11 @@ class ExerciseRecordsViewModel(application: Application) : AndroidViewModel(appl
                 )
             }
         }
+    }
+
+    override fun onCleared() {
+        super.onCleared()
+        job.cancel()
     }
 
     data class Data(val oneRepMax: String, val maxVolume: String, val maxWeight: String)

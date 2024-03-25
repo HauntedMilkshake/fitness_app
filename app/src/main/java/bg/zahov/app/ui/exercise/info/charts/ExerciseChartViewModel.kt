@@ -8,6 +8,8 @@ import androidx.lifecycle.MutableLiveData
 import androidx.lifecycle.viewModelScope
 import bg.zahov.app.getWorkoutProvider
 import com.github.mikephil.charting.data.Entry
+import kotlinx.coroutines.Job
+import kotlinx.coroutines.NonCancellable
 import kotlinx.coroutines.launch
 
 class ExerciseChartViewModel(application: Application) : AndroidViewModel(application) {
@@ -25,7 +27,7 @@ class ExerciseChartViewModel(application: Application) : AndroidViewModel(applic
     private val _bestSet = MutableLiveData<List<Entry>>()
     val bestSet: LiveData<List<Entry>>
         get() = _bestSet
-
+    private lateinit var job: Job
     init {
         var maxVolume = 0.0
         var maxWeight = 0.0
@@ -34,7 +36,7 @@ class ExerciseChartViewModel(application: Application) : AndroidViewModel(applic
         val oneRepMaxEntries = mutableListOf<Entry>()
         val maxWeightEntries = mutableListOf<Entry>()
 
-        viewModelScope.launch {
+        job = viewModelScope.launch(NonCancellable) {
             workoutProvider.getExerciseHistory().collect { data ->
                 data.forEach {
                     it.sets.forEach { set ->
@@ -85,5 +87,10 @@ class ExerciseChartViewModel(application: Application) : AndroidViewModel(applic
                 _bestSet.postValue(maxWeightEntries)
             }
         }
+    }
+
+    override fun onCleared() {
+        super.onCleared()
+        job.cancel()
     }
 }

@@ -9,11 +9,8 @@ import bg.zahov.app.data.repository.WorkoutRepositoryImpl
 import bg.zahov.app.ui.exercise.info.history.ExerciseHistoryInfo
 import bg.zahov.app.util.getOneRepMaxes
 import bg.zahov.app.util.toFormattedString
-import io.realm.kotlin.notifications.ObjectChange
 import kotlinx.coroutines.flow.Flow
 import kotlinx.coroutines.flow.MutableStateFlow
-import kotlinx.coroutines.flow.flow
-import kotlinx.coroutines.flow.flowOf
 import kotlinx.coroutines.flow.mapNotNull
 
 class WorkoutProviderImpl : WorkoutProvider {
@@ -75,10 +72,10 @@ class WorkoutProviderImpl : WorkoutProvider {
         workoutRepo.getPastWorkoutById(id)
 
     override suspend fun setClickedTemplateExercise(item: Exercise) {
-        Log.d("setting clicked exericse", "setting clicked exercise")
+        Log.d("clicked exercise", "sex clicked exercise")
         var resultsList = listOf<ExerciseHistoryInfo>()
         getPastWorkouts().collect { workout ->
-            Log.d("collecting workouts", "collecting workouts")
+            Log.d("clicked exercise", "collecting workouts")
             resultsList = workout.mapNotNull {
                 it.exercises.find { workoutExercise -> workoutExercise.name == item.name }
                     ?.let { previousExercise ->
@@ -93,7 +90,8 @@ class WorkoutProviderImpl : WorkoutProvider {
                     }
             }
         }
-        _exerciseHistory.emit(resultsList)
+        Log.d("clicked exercise", resultsList.size.toString())
+        _exerciseHistory.value = resultsList
         _clickedExercise.emit(item)
     }
 
@@ -110,7 +108,6 @@ class WorkoutProviderImpl : WorkoutProvider {
     }
 
     override suspend fun clearWorkoutState() {
-        Log.d("calling clear", "clear 2")
         workoutRepo.clearWorkoutState()
     }
 }
