@@ -12,7 +12,6 @@ import bg.zahov.app.data.model.ThemeKeys
 import bg.zahov.app.data.model.Units
 import bg.zahov.app.data.model.UnitsKeys
 import io.realm.kotlin.ext.realmListOf
-import io.realm.kotlin.types.RealmInstant
 import io.realm.kotlin.types.RealmList
 import io.realm.kotlin.types.RealmObject
 

@@ -23,12 +23,9 @@ import bg.zahov.app.ui.workout.add.ExerciseSetAdapterSetWrapper
 import bg.zahov.fitness.app.R
 import com.google.common.hash.Hashing
 import com.google.firebase.Timestamp
-import io.realm.kotlin.types.RealmInstant
 import java.nio.charset.StandardCharsets
 import java.time.Instant
-import java.time.LocalDate
 import java.time.LocalDateTime
-import java.time.ZoneId
 import java.time.ZoneOffset
 import java.time.format.DateTimeFormatter
 import java.util.Date
@@ -318,10 +315,6 @@ fun Exercise.getOneRepMaxes(): List<String> = this.sets.map {
             getOneRepEstimate(it.firstMetric ?: 1.0, it.secondMetric ?: 1)
         }
     }
-}
-
-fun RealmInstant.toLocalDateTime(): LocalDateTime {
-    return LocalDateTime.ofInstant(Instant.ofEpochSecond(this.epochSeconds), ZoneId.systemDefault())
 }
 
 fun LocalDateTime.toRealmString(): String {

@@ -1,6 +1,5 @@
 package bg.zahov.app.data.provider
 
-import android.util.Log
 import bg.zahov.app.data.interfaces.WorkoutActions
 import bg.zahov.app.data.model.Workout
 import bg.zahov.app.data.model.WorkoutState
@@ -46,7 +45,6 @@ class WorkoutStateManager : WorkoutActions {
     private suspend fun startTimer() {
         job = CoroutineScope(Dispatchers.Default).launch {
             while (true) {
-                Log.d("Timer Start", lastTime.toString())
                 _timer.emit(lastTime)
                 delay(1000)
                 lastTime += 1000

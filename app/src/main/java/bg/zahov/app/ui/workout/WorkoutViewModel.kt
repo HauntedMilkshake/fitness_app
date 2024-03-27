@@ -15,7 +15,6 @@ import bg.zahov.app.data.model.SetType
 import bg.zahov.app.data.model.Sets
 import bg.zahov.app.data.model.Units
 import bg.zahov.app.data.model.Workout
-import bg.zahov.app.data.model.WorkoutState
 import bg.zahov.app.getAddExerciseToWorkoutProvider
 import bg.zahov.app.getRestTimerProvider
 import bg.zahov.app.getSettingsProvider
@@ -33,11 +32,9 @@ import bg.zahov.app.util.toRealmExercise
 import bg.zahov.app.util.toRealmString
 import bg.zahov.fitness.app.R
 import io.realm.kotlin.ext.toRealmList
-import io.realm.kotlin.types.RealmInstant
 import kotlinx.coroutines.launch
 import java.time.LocalDateTime
 import java.time.LocalTime
-import java.time.ZoneOffset
 import java.util.Random
 
 class WorkoutViewModel(application: Application) : AndroidViewModel(application) {

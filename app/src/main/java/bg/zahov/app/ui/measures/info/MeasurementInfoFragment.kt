@@ -1,5 +1,6 @@
 package bg.zahov.app.ui.measures.info
 
+import android.graphics.Color
 import android.os.Bundle
 import android.view.LayoutInflater
 import android.view.Menu
@@ -20,8 +21,11 @@ import bg.zahov.app.ui.measures.MeasuresFragment.Companion.MEASUREMENT_ARGS
 import bg.zahov.app.ui.measures.info.input.MeasurementInputFragment
 import bg.zahov.fitness.app.R
 import bg.zahov.fitness.app.databinding.FragmentMeasurementInformationBinding
+import com.github.mikephil.charting.components.XAxis
 import com.github.mikephil.charting.data.LineData
 import com.github.mikephil.charting.data.LineDataSet
+import com.github.mikephil.charting.formatter.ValueFormatter
+import java.time.LocalDate
 
 class MeasurementInfoFragment : Fragment() {
     private var _binding: FragmentMeasurementInformationBinding? = null
@@ -52,21 +56,63 @@ class MeasurementInfoFragment : Fragment() {
             override fun onMenuItemSelected(menuItem: MenuItem) = false
         })
         binding.apply {
+            setupChart()
             measurementInfoViewModel.state.map { MeasurementInformationUiMapper.map(it) }
                 .observe(viewLifecycleOwner) {
                     circularProgressIndicator.visibility = it.loadingVisibility
                     chart.visibility = it.chartVisibility
                     chart.apply {
-                        data = LineData(LineDataSet(it.chartData, "results"))
+                        val dataSet = LineDataSet(it.chartData, "results").apply {
+                            valueTextColor = Color.WHITE
+                            valueTextSize = 13f
+                        }
+
+                        data = LineData(dataSet)
                         notifyDataSetChanged()
                         invalidate()
+
+                        axisRight.axisMinimum = 0f
+                        it.maxData?.let {maxData -> axisRight.axisMaximum = maxData.toFloat() }
+
+
                     }
                     if (it.shutdown) {
                     }//TODO(BAD)
                 }
             addEntry.setOnClickListener {
-                val measurementInputFragment = MeasurementInputFragment.newInstance(arguments?.getString(MEASUREMENT_ARGS) ?: "Measurement")
+                val measurementInputFragment = MeasurementInputFragment.newInstance(
+                    arguments?.getString(MEASUREMENT_ARGS) ?: "Measurement"
+                )
                 measurementInputFragment.show(childFragmentManager, measurementInputFragment.tag)
+            }
+        }
+    }
+
+    private fun setupChart() {
+        binding.chart.apply {
+            setPinchZoom(false)
+            setDrawGridBackground(false)
+            legend.isEnabled = false
+            axisLeft.isEnabled = false
+
+            description.apply {
+                textColor = Color.WHITE
+                text = "Measurements"
+            }
+            xAxis.apply {
+                axisMinimum = 1f
+                axisMaximum = LocalDate.now().lengthOfMonth().toFloat()
+                position = XAxis.XAxisPosition.BOTTOM
+                textColor = Color.WHITE
+            }
+            axisRight.apply {
+                textSize = 14f
+                textColor = Color.WHITE
+                valueFormatter = object : ValueFormatter() {
+                    override fun getFormattedValue(value: Float): String {
+                        return value.toInt().toString()
+                    }
+                }
             }
         }
     }

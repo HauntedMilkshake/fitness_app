@@ -88,9 +88,9 @@ class ExerciseChartViewModel(application: Application) : AndroidViewModel(applic
                 Log.d("volumeEntries", maxVolumeEntries.size.toString())
                 Log.d("onerepmax", oneRepMax.toString())
                 Log.d("ORP", oneRepMaxEntries.toString())
-                _totalVolume.postValue(Pair(maxVolume.toFloat(), maxVolumeEntries))
-                _oneRepMax.postValue(Pair(oneRepMax.toFloat(), oneRepMaxEntries))
-                _maxReps.postValue(Pair(maxReps.toFloat(), maxWeightEntries))
+                _totalVolume.postValue(Pair(maxVolume.toFloat(), maxVolumeEntries.sortedBy { it.x }))
+                _oneRepMax.postValue(Pair(oneRepMax.toFloat(), oneRepMaxEntries.sortedBy { it.x }))
+                _maxReps.postValue(Pair(maxReps.toFloat(), maxWeightEntries.sortedBy { it.x }))
             }
         }
     }

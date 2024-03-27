@@ -12,22 +12,16 @@ import bg.zahov.app.getUserProvider
 import bg.zahov.app.getWorkoutProvider
 import bg.zahov.app.getWorkoutStateManager
 import bg.zahov.app.util.toExercise
-import bg.zahov.app.util.toLocalDateTime
 import bg.zahov.app.util.toLocalDateTimeRlm
 import com.github.mikephil.charting.data.BarEntry
 import kotlinx.coroutines.async
 import kotlinx.coroutines.launch
-import java.lang.Math.abs
 import java.time.DayOfWeek
 import java.time.Duration
-import java.time.Instant
 import java.time.LocalDate
 import java.time.LocalDateTime
-import java.time.ZoneOffset
 import java.time.format.DateTimeFormatter
-import java.time.temporal.ChronoUnit
 import java.time.temporal.TemporalAdjusters
-import java.util.NoSuchElementException
 
 class HomeViewModel(application: Application) : AndroidViewModel(application) {
     private val userRepo by lazy {
@@ -134,7 +128,8 @@ class HomeViewModel(application: Application) : AndroidViewModel(application) {
     private suspend fun checkPreviousState(previousState: RealmWorkoutState) {
         if (previousState.id != "default") {
             Log.d("date when retrieved", previousState.date)
-            val lastTime = Duration.between(LocalDateTime.now(), previousState.date.toLocalDateTimeRlm())
+            val lastTime =
+                Duration.between(LocalDateTime.now(), previousState.date.toLocalDateTimeRlm())
             Log.d("date when duration", lastTime.seconds.toString())
             workoutStateManager.startWorkout(
                 Workout(
@@ -155,7 +150,7 @@ class HomeViewModel(application: Application) : AndroidViewModel(application) {
 
     private fun checkWorkoutState() {
         viewModelScope.launch {
-            async {workoutRepo.getPreviousWorkoutState()?.let { checkPreviousState(it) }}.await()
+            async { workoutRepo.getPreviousWorkoutState()?.let { checkPreviousState(it) } }.await()
             workoutRepo.clearWorkoutState()
         }
     }

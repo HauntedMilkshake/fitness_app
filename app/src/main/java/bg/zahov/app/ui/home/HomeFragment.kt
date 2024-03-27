@@ -43,11 +43,6 @@ class HomeFragment : Fragment() {
     override fun onViewCreated(view: View, savedInstanceState: Bundle?) {
         super.onViewCreated(view, savedInstanceState)
         binding.apply {
-//            requireActivity().setToolbarVisibility(View.VISIBLE)
-//            requireActivity().setToolbarTitle(R.string.top_bar_text)
-//            settings.setOnClickListener {
-//            }
-
             homeViewModel.state.map { HomeUiMapper.map(it) }.observe(viewLifecycleOwner) {
                 loadingIndicator.visibility = if (it.isLoading) View.VISIBLE else View.GONE
                 weeklyWorkoutsChart.visibility = if (it.isLoading) View.GONE else View.VISIBLE
