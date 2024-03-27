@@ -3,6 +3,7 @@ package bg.zahov.app
 import android.app.Application
 import bg.zahov.app.data.provider.AddExerciseToWorkoutProvider
 import bg.zahov.app.data.provider.FilterProvider
+import bg.zahov.app.data.provider.MeasurementProviderImpl
 import bg.zahov.app.data.provider.ReplaceableExerciseProvider
 import bg.zahov.app.data.provider.RestTimerProvider
 import bg.zahov.app.data.provider.SelectableExerciseProvider
@@ -41,6 +42,9 @@ class MyApplication : Application() {
     val filterProvider by lazy {
         FilterProvider.getInstance()
     }
+    val measurementProvider by lazy {
+        MeasurementProviderImpl.getInstance()
+    }
 
     override fun onCreate() {
         super.onCreate()
@@ -55,6 +59,8 @@ fun Application.getWorkoutStateManager() = (this as MyApplication).workoutState
 fun Application.getSelectableExerciseProvider() = (this as MyApplication).selectedExerciseProvider
 fun Application.getReplaceableExerciseProvider() =
     (this as MyApplication).replaceableExerciseProvider
+
+fun Application.getMeasurementsProvider() = (this as MyApplication).measurementProvider
 
 fun Application.getAddExerciseToWorkoutProvider() =
     (this as MyApplication).workoutAddedExerciseProvider

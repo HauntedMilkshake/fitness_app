@@ -1,9 +1,6 @@
 package bg.zahov.app.data.interfaces
 
-import bg.zahov.app.data.model.Measurement
-import bg.zahov.app.data.model.MeasurementType
 import bg.zahov.app.data.model.User
-import bg.zahov.app.data.provider.SelectedMeasurement
 import com.google.android.gms.tasks.Task
 import com.google.firebase.auth.AuthResult
 import kotlinx.coroutines.flow.Flow
@@ -24,8 +21,4 @@ interface UserProvider {
     suspend fun updateEmail(newEmail: String): Task<Void>
     suspend fun reauthenticate(password: String): Task<Void>
     suspend fun getEmail(): String
-    suspend fun selectMeasure(type: MeasurementType)
-    suspend fun getSelectedMeasure(): Flow<SelectedMeasurement>
-    suspend fun updateMeasurement(measurementType: MeasurementType, measurement: Measurement)
-
 }

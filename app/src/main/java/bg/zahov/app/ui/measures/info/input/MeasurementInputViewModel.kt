@@ -9,14 +9,14 @@ import androidx.lifecycle.viewModelScope
 import bg.zahov.app.data.exception.CriticalDataNullException
 import bg.zahov.app.data.model.Measurement
 import bg.zahov.app.data.model.MeasurementType
-import bg.zahov.app.getUserProvider
+import bg.zahov.app.getMeasurementsProvider
 import kotlinx.coroutines.launch
 import java.time.LocalDateTime
 import java.time.format.DateTimeFormatter
 
 class MeasurementInputViewModel(application: Application) : AndroidViewModel(application) {
-    private val userProvider by lazy {
-        application.getUserProvider()
+    private val measurementProvider by lazy {
+        application.getMeasurementsProvider()
     }
     private val _state = MutableLiveData<State>()
     val state: LiveData<State>
@@ -26,11 +26,11 @@ class MeasurementInputViewModel(application: Application) : AndroidViewModel(app
     init {
         viewModelScope.launch {
             try {
-                userProvider.getSelectedMeasure().collect {
+                measurementProvider.getSelectedMeasurement().collect {
                     Log.d("collecting measurement", "collecting ")
                     _state.postValue(
                         State.Measurement(
-                            name = it.type.key,
+                            name = it.measurements.keys.first().key,
                             date = LocalDateTime.now()
                                 .format(DateTimeFormatter.ofPattern("dd/MM/yy"))
                         )
@@ -46,7 +46,7 @@ class MeasurementInputViewModel(application: Application) : AndroidViewModel(app
             filterInput(input)?.let {
                 if (type.isNotEmpty()) {
                     MeasurementType.fromKey(type)?.let { enumValue ->
-                        userProvider.updateMeasurement(
+                        measurementProvider.updateMeasurement(
                             enumValue,
                             Measurement(LocalDateTime.now(), it)
                         )

@@ -6,6 +6,7 @@ import bg.zahov.app.data.model.Exercise
 import bg.zahov.app.data.model.FirestoreFields
 import bg.zahov.app.data.model.Measurement
 import bg.zahov.app.data.model.MeasurementType
+import bg.zahov.app.data.model.Measurements
 import bg.zahov.app.data.model.User
 import bg.zahov.app.data.model.Workout
 import bg.zahov.app.util.toFirestoreMap
@@ -20,6 +21,7 @@ import kotlinx.coroutines.awaitAll
 import kotlinx.coroutines.flow.Flow
 import kotlinx.coroutines.flow.channelFlow
 import kotlinx.coroutines.flow.first
+import kotlinx.coroutines.flow.map
 import kotlinx.coroutines.tasks.await
 import kotlinx.coroutines.withContext
 
@@ -148,17 +150,42 @@ class FirestoreManager {
 
     suspend fun upsertMeasurement(type: MeasurementType, measurement: Measurement) {
         withContext(Dispatchers.IO) {
-
-
+            var newMap = mutableMapOf<MeasurementType, List<Measurement>>()
+            getMeasurement(type).collect() {value ->
+                newMap = value.measurements.toMutableMap()
+            }
+            val newList = newMap[type].orEmpty().toMutableList()
+            newList.add(measurement)
+            newMap[type] = newList.toList()
             firestore.collection(USERS_COLLECTION).document(userId).collection(
-                MEASUREMENTS_COLLECTION).document(type.key).update()
+                MEASUREMENTS_COLLECTION
+            ).document(type.key).set(newMap)
         }
     }
 
-//    suspend fun getMeasurement(val type: MeasurementType): List<MeasurementType> = getDocData(firestore.collection(
-//        USERS_COLLECTION).document(userId).collection(MEASUREMENTS_COLLECTION).document(type.key)) {
-//
-//    }
+    suspend fun getMeasurement(type: MeasurementType): Flow<Measurements> = getDocData(
+        firestore.collection(
+            USERS_COLLECTION
+        ).document(userId).collection(MEASUREMENTS_COLLECTION).document(type.key)
+    ) {
+        Measurements.fromFirestoreMap(it)
+    }
+
+    suspend fun getMeasurements(): Flow<Measurements> = getCollectionData(
+        firestore.collection(
+            USERS_COLLECTION
+        ).document(userId).collection(MEASUREMENTS_COLLECTION)
+    ) {
+        Measurements.fromFirestoreMap(it)
+    }.map {
+        val mergedMap = mutableMapOf<MeasurementType, List<Measurement>>()
+        it.forEach { map ->
+            mergedMap[map.measurements.keys.first()] = map.measurements.values.first()
+        }
+        Measurements(
+            mergedMap
+        )
+    }
 
     suspend fun addTemplateWorkout(newWorkoutTemplate: Workout) =
         withContext(Dispatchers.IO) {

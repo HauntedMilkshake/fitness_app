@@ -61,24 +61,32 @@ object FirestoreFields {
 }
 //TODO(this is wrong, introduce a new measurement object where each measurement has a document and each document has a list of custom types)
 data class User(
-    var name: String,
-    val measurements: Map<MeasurementType, List<Measurement>> = mapOf(),
+    var name: String
 ) {
     companion object {
         fun fromFirestoreMap(data: Map<String, Any>?): User = data?.let { firestoreData ->
             User(
-                name = (firestoreData[FirestoreFields.USER_NAME] as? String)
-                    ?: throw CriticalDataNullException("No user found"),
-                measurements = (firestoreData
-                    [FirestoreFields.USER_MEASUREMENTS] as? Map<String, List<Map<String, Any>>>)
-                    ?.mapKeys { (key, _) ->
-                        MeasurementType.valueOf(key)
-                    }
-                    ?.mapValues { (_, value) ->
-                        value.map { measurement -> Measurement.fromFirestoreMap(measurement) }
-                    } ?: emptyMap()
-            )
+                name = (firestoreData[FirestoreFields.USER_NAME] as? String) ?: throw CriticalDataNullException("No user found"))
         } ?: throw CriticalDataNullException("No user found")
+    }
+}
+data class Measurements(
+    val measurements: Map<MeasurementType, List<Measurement>> = mapOf()
+) {
+    companion object {
+        fun fromFirestoreMap(data: Map<String, Any>?): Measurements {
+            val measurementsMap = mutableMapOf<MeasurementType, List<Measurement>>()
+
+            data?.forEach { (measurementTypeKey, measurementList) ->
+                val measurementType = MeasurementType.fromKey(measurementTypeKey)
+                val measurements = (measurementList as? List<Map<String, Any>>)?.mapNotNull { Measurement.fromFirestoreMap(it) }
+                if (measurementType != null && measurements != null) {
+                    measurementsMap[measurementType] = measurements
+                }
+            }
+
+            return Measurements(measurementsMap)
+        }
     }
 }
 
@@ -175,13 +183,16 @@ data class Measurement(
     val value: Double,
 ) {
     companion object {
-        fun fromFirestoreMap(data: Map<String, Any>?) = data?.let {
-            Measurement(
-                date = (it[FirestoreFields.WORKOUT_DATE] as? Timestamp
-                    ?: Timestamp.now()).toLocalDateTime(),
-                value = (it[FirestoreFields.MEASUREMENT_VALUE] as? Double ?: 0.0)
-            )
-        } ?: throw CriticalDataNullException("No data received")
+        fun fromFirestoreMap(data: Map<String, Any>?): Measurement? {
+            return if (data != null && (data[FirestoreFields.WORKOUT_DATE] as? Timestamp) != null && (data[FirestoreFields.MEASUREMENT_VALUE] as? Double) != null) {
+                Measurement(
+                    date = (data[FirestoreFields.WORKOUT_DATE] as Timestamp).toLocalDateTime(),
+                    value = data[FirestoreFields.MEASUREMENT_VALUE] as Double
+                )
+            } else {
+                null
+            }
+        }
     }
 }
 

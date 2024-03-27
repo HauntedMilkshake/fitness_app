@@ -7,13 +7,14 @@ import androidx.lifecycle.LiveData
 import androidx.lifecycle.MutableLiveData
 import androidx.lifecycle.viewModelScope
 import bg.zahov.app.data.exception.CriticalDataNullException
+import bg.zahov.app.getMeasurementsProvider
 import bg.zahov.app.getUserProvider
 import com.github.mikephil.charting.data.Entry
 import kotlinx.coroutines.launch
 
 class MeasurementInfoViewModel(application: Application) : AndroidViewModel(application) {
-    private val userProvider by lazy {
-        application.getUserProvider()
+    private val measurementProvider by lazy {
+        application.getMeasurementsProvider()
     }
     private val _state = MutableLiveData<State>()
     val state: LiveData<State>
@@ -24,14 +25,18 @@ class MeasurementInfoViewModel(application: Application) : AndroidViewModel(appl
             _state.postValue(State.Loading(View.VISIBLE))
             val measureEntries = mutableListOf<Entry>()
             try {
-                userProvider.getSelectedMeasure().collect {
-                    it.measurements.sortedBy { item -> item.date.monthValue }.forEach { measurement ->
-                        measureEntries.add(
-                            Entry(
-                                measurement.value.toFloat(),
-                                measurement.date.dayOfMonth.toFloat()
-                            )
-                        )
+                measurementProvider.getSelectedMeasurement().collect {
+                    if(it.measurements.values.isNotEmpty()) {
+                        it.measurements.values.first().sortedBy { item -> item.date.monthValue }
+                            .forEach { measurement ->
+                                measureEntries.add(
+                                    Entry(
+                                        measurement.value.toFloat(),
+                                        measurement.date.dayOfMonth.toFloat()
+                                    )
+                                )
+                            }
+
                     }
                     _state.postValue(State.Data(measureEntries))
                 }

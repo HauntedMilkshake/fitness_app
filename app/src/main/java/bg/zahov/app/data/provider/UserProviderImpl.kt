@@ -26,9 +26,6 @@ class UserProviderImpl : UserProvider {
     private val userRepo = UserRepositoryImpl.getInstance()
     private val auth = AuthenticationImpl.getInstance()
 
-    private val _selectedMeasurement = MutableSharedFlow<SelectedMeasurement>()
-    private val selectedMeasurement: SharedFlow<SelectedMeasurement> = _selectedMeasurement
-
     override suspend fun getUser(): Flow<User> = userRepo.getUser()
 
     override suspend fun changeUserName(newUsername: String) = userRepo.changeUserName(newUsername)
@@ -61,20 +58,19 @@ class UserProviderImpl : UserProvider {
         auth.reauthenticate(password)
 
     override suspend fun getEmail(): String = auth.getEmail()
-    override suspend fun selectMeasure(type: MeasurementType) {
-        Log.d("select measure", "inside provider")
-        getUser().collect {
-            Log.d("select measure", "inside flow before emit")
-            _selectedMeasurement.emit(SelectedMeasurement(type, it.measurements[type] ?: listOf()))
-        }
-    }
-
-    override suspend fun getSelectedMeasure() = selectedMeasurement
-    override suspend fun updateMeasurement(
-        measurementType: MeasurementType,
-        measurement: Measurement,
-    ) {
-        userRepo.updateMeasurement(measurementType, measurement)
-    }
+//    override suspend fun selectMeasure(type: MeasurementType) {
+//        Log.d("select measure", "inside provider")
+//        getUser().collect {
+//            Log.d("select measure", "inside flow before emit")
+////            _selectedMeasurement.emit(SelectedMeasurement(type, it.measurements[type] ?: listOf()))
+//        }
+//    }
+//
+//    override suspend fun getSelectedMeasure() = selectedMeasurement
+//    override suspend fun updateMeasurement(
+//        measurementType: MeasurementType,
+//        measurement: Measurement,
+//    ) {
+//        userRepo.updateMeasurement(measurementType, measurement)
+//    }
 }
-data class SelectedMeasurement(val type: MeasurementType, val measurements:List<Measurement>)

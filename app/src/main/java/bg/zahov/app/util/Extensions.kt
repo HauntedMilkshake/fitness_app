@@ -35,10 +35,7 @@ import java.util.UUID
 
 fun User.toFirestoreMap(): Map<String, Any?> {
     return mapOf(
-        FirestoreFields.USER_NAME to name,
-        FirestoreFields.USER_MEASUREMENTS to measurements.mapValues { (_, value) ->
-            value.map { it.toFirestoreMap() }
-        }
+        FirestoreFields.USER_NAME to name
     )
 }
 
