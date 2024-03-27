@@ -6,6 +6,7 @@ import android.transition.TransitionInflater
 import android.view.LayoutInflater
 import android.view.View
 import android.view.ViewGroup
+import android.widget.Toast
 import androidx.activity.OnBackPressedCallback
 import androidx.core.os.bundleOf
 import androidx.fragment.app.Fragment
@@ -62,6 +63,9 @@ class WorkoutFragment : Fragment() {
                     restTimerIndicator.visibility = it.restTimerVisibility
                     restTimerCounter.visibility = it.restTimerVisibility
                     restTimerCounter.text = it.rest
+                    it.message?.let { message ->
+                        Toast.makeText(context, message, Toast.LENGTH_SHORT).show()
+                    }
                 }
 
             val exerciseSetAdapter = ExerciseSetAdapter(mediaPlayer).apply {
@@ -170,9 +174,11 @@ class WorkoutFragment : Fragment() {
                 it.applyScaleAnimation()
                 onGoingWorkoutViewModel.finishWorkout()
                 requireActivity().showBottomNav()
-                findNavController().navigate(R.id.workout_to_finish_workout)
-            }
 
+            }
+            onGoingWorkoutViewModel.navigate.observe(viewLifecycleOwner) {
+                it?.let { findNavController().navigate(it) }
+            }
             activity?.onBackPressedDispatcher?.addCallback(object : OnBackPressedCallback(true) {
                 override fun handleOnBackPressed() {
                     if (findNavController().currentDestination?.id == R.id.workout) {

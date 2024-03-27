@@ -1,6 +1,7 @@
 package bg.zahov.app.ui.home
 
 import android.app.Application
+import android.util.Log
 import androidx.lifecycle.AndroidViewModel
 import androidx.lifecycle.LiveData
 import androidx.lifecycle.MutableLiveData
@@ -12,12 +13,17 @@ import bg.zahov.app.getWorkoutProvider
 import bg.zahov.app.getWorkoutStateManager
 import bg.zahov.app.util.toExercise
 import bg.zahov.app.util.toLocalDateTime
+import bg.zahov.app.util.toLocalDateTimeRlm
 import com.github.mikephil.charting.data.BarEntry
 import kotlinx.coroutines.async
 import kotlinx.coroutines.launch
+import java.lang.Math.abs
 import java.time.DayOfWeek
+import java.time.Duration
 import java.time.Instant
 import java.time.LocalDate
+import java.time.LocalDateTime
+import java.time.ZoneOffset
 import java.time.format.DateTimeFormatter
 import java.time.temporal.ChronoUnit
 import java.time.temporal.TemporalAdjusters
@@ -127,26 +133,22 @@ class HomeViewModel(application: Application) : AndroidViewModel(application) {
 
     private suspend fun checkPreviousState(previousState: RealmWorkoutState) {
         if (previousState.id != "default") {
-            val lastTime = ChronoUnit.SECONDS.between(
-                Instant.ofEpochSecond(
-                    previousState.date.epochSeconds,
-                    0
-                ), Instant.now()
-            )
-
+            Log.d("date when retrieved", previousState.date)
+            val lastTime = Duration.between(LocalDateTime.now(), previousState.date.toLocalDateTimeRlm())
+            Log.d("date when duration", lastTime.seconds.toString())
             workoutStateManager.startWorkout(
                 Workout(
                     id = previousState.id,
                     name = previousState.name,
                     duration = previousState.duration,
                     volume = previousState.volume,
-                    date = previousState.date.toLocalDateTime(),
+                    date = previousState.date.toLocalDateTimeRlm(),
                     isTemplate = false,
                     exercises = previousState.exercises.mapNotNull { it.toExercise() },
                     note = previousState.note,
                     personalRecords = previousState.personalRecords
                 ),
-                lastTime
+                kotlin.math.abs(lastTime.seconds) * 1000
             )
         }
     }

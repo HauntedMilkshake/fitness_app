@@ -30,6 +30,7 @@ import bg.zahov.app.util.parseTimeStringToLong
 import bg.zahov.app.util.toExerciseSetAdapterSetWrapper
 import bg.zahov.app.util.toExerciseSetAdapterWrapper
 import bg.zahov.app.util.toRealmExercise
+import bg.zahov.app.util.toRealmString
 import bg.zahov.fitness.app.R
 import io.realm.kotlin.ext.toRealmList
 import io.realm.kotlin.types.RealmInstant
@@ -63,7 +64,9 @@ class WorkoutViewModel(application: Application) : AndroidViewModel(application)
     private val settingsProvider by lazy {
         application.getSettingsProvider()
     }
-
+    private val _navigate = MutableLiveData<Int?>()
+    val navigate: LiveData<Int?>
+        get() = _navigate
     private val _exercises = MutableLiveData<List<WorkoutEntry>>()
     val exercises: LiveData<List<WorkoutEntry>>
         get() = _exercises
@@ -83,6 +86,9 @@ class WorkoutViewModel(application: Application) : AndroidViewModel(application)
     private val _note = MutableLiveData<String>()
     val note: LiveData<String>
         get() = _note
+    private val _notify = MutableLiveData<String?>()
+    val notify: LiveData<String?>
+        get() = _notify
 
     private var exerciseToReplaceIndex: Int? = null
     private var templateExercises = listOf<Exercise>()
@@ -341,6 +347,11 @@ class WorkoutViewModel(application: Application) : AndroidViewModel(application)
             _restTimerState.postValue(State.Error("Cannot finish a workout without any exercises!"))
             return
         }
+        //Checks if all exercises have 0 sets
+        if (_exercises.value!!.all { entry -> entry is ExerciseEntry }) {
+            _restTimerState.postValue(State.Error("Cannot finish a workout without any sets!"))
+            return
+        }
 
         viewModelScope.launch {
             val (exercises, prs, volume) = getExerciseArrayAndPRs(_exercises.value.orEmpty())
@@ -357,6 +368,7 @@ class WorkoutViewModel(application: Application) : AndroidViewModel(application)
                     volume = volume
                 )
             )
+            _navigate.postValue(R.id.workout_to_finish_workout)
             addExerciseToWorkoutProvider.resetSelectedExercises()
             workoutStateManager.finishWorkout()
             workoutProvider.clearWorkoutState()
@@ -364,7 +376,7 @@ class WorkoutViewModel(application: Application) : AndroidViewModel(application)
         }
     }
 
-    private fun getExerciseArrayAndPRs(entries: List<WorkoutEntry>): Triple<List<Exercise>, Int, Double> {
+    private suspend fun getExerciseArrayAndPRs(entries: List<WorkoutEntry>): Triple<List<Exercise>, Int, Double> {
         val exercises = linkedMapOf<String, Exercise>()
         var prs = 0
         var volume = 0.0
@@ -384,76 +396,83 @@ class WorkoutViewModel(application: Application) : AndroidViewModel(application)
 
                 is SetEntry -> {
                     exercises.entries.last().value.apply {
-                        sets.add(entry.setEntry.set)
-                        if (category != Category.Cardio && category != Category.Timed && category != Category.AssistedWeight) {
-                            volume += (entry.setEntry.set.firstMetric
-                                ?: 1.0) * (entry.setEntry.set.secondMetric ?: 1).toInt()
-                        }
-                        if (entry.setEntry.set.type == SetType.DEFAULT || entry.setEntry.set.type == SetType.FAILURE) {
-                            when (category) {
-                                Category.RepsOnly -> {
-                                    if ((entry.setEntry.set.secondMetric
-                                            ?: 0) > (bestSet.secondMetric ?: 0)
-                                    ) {
-                                        bestSet = entry.setEntry.set
-                                    }
-                                }
+                        val reps = entry.setEntry.set.secondMetric
+                        val weight = entry.setEntry.set.firstMetric
+                        if (weight != null && weight != 0.0 && reps != null && reps != 0) {
+                            sets.add(entry.setEntry.set)
 
-                                Category.AssistedWeight -> {
-                                    if ((bestSet.firstMetric
-                                            ?: 0.0) < (entry.setEntry.set.firstMetric ?: 0.0)
-                                    ) {
-                                        bestSet = entry.setEntry.set
-                                    }
-                                }
-//                                Category.Cardio, Category.Timed -> {
-//                                  potentially if we add the second parameter to be a long os that there is enough space for the time
-//                                }
-                                else -> {
-                                    if ((entry.setEntry.set.firstMetric
-                                            ?: 0.0) > (bestSet.firstMetric ?: 0.0)
-                                    ) {
-                                        bestSet = entry.setEntry.set
-                                    }
+                            volume += weight * reps
 
+                            if (entry.setEntry.set.type == SetType.DEFAULT || entry.setEntry.set.type == SetType.FAILURE) {
+                                when (category) {
+                                    //reps only, cardio, and timed are soonTM
+//                                    Category.RepsOnly -> {
+//                                        if ((entry.setEntry.set.secondMetric
+//                                                ?: 0) > (bestSet.secondMetric ?: 0)
+//                                        ) {
+//                                            bestSet = entry.setEntry.set
+//                                        }
+//                                    }
+//
+//                                    Category.AssistedWeight -> {
+//                                        if ((bestSet.firstMetric
+//                                                ?: 0.0) < (entry.setEntry.set.firstMetric ?: 0.0)
+//                                        ) {
+//                                            bestSet = entry.setEntry.set
+//                                        }
+//                                    }
+
+                                    else -> if (weight > (bestSet.firstMetric ?: 0.0)) bestSet =
+                                        entry.setEntry.set
                                 }
                             }
                         }
                     }
                 }
+
             }
         }
+        Log.d("EXERCISES BEFORE DROP", exercises.entries.size.toString())
+        //We should have atleast 1 exercise with sets because the case of finishWorkout() covers where all exercises have 0 sets :)
+        exercises.entries.removeIf { it.value.sets.isEmpty() }
 
-        viewModelScope.launch {
-            val temp = exercises.values.toMutableList()
-            temp.forEach { currExercise ->
-                templateExercises.find { it.name == currExercise.name }?.let { template ->
-                    when (currExercise.category) {
-                        Category.RepsOnly -> {
-                            if ((currExercise.bestSet.secondMetric
-                                    ?: 0) <= (template.bestSet.secondMetric ?: 0)
-                            ) {
-                                currExercise.bestSet = template.bestSet
-                            } else {
-                                prs++
-                            }
-                        }
+        Log.d("EXERCISES AFTER DROP", exercises.entries.size.toString())
 
-                        else -> {
-                            if ((currExercise.bestSet.firstMetric
-                                    ?: 0.0) <= (template.bestSet.firstMetric ?: 0.0)
-                            ) {
-                                currExercise.bestSet = template.bestSet
-                            } else {
-                                prs++
-                            }
+        //
+        val temp = exercises.values.toMutableList()
+        temp.forEach { currExercise ->
+            templateExercises.find { it.name == currExercise.name }?.let { template ->
+                when (currExercise.category) {
+//                    Category.RepsOnly -> {
+//                        if ((currExercise.bestSet.secondMetric
+//                                ?: 0) <= (template.bestSet.secondMetric ?: 0)
+//                        ) {
+//                            currExercise.bestSet = template.bestSet
+//                        } else {
+//                            prs++
+//                        }
+//                    }
+                    else -> {
+                        val currentBestSetResult = (currExercise.bestSet.firstMetric
+                            ?: 0.0) * (currExercise.bestSet.secondMetric ?: 0)
+                        Log.d("Current best set", currentBestSetResult.toString())
+                        val previousBestSetResult =
+                            (template.bestSet.firstMetric ?: 0.0) * (template.bestSet.secondMetric
+                                ?: 0)
+                        Log.d("previous best set", previousBestSetResult.toString())
+
+                        if (currentBestSetResult <= previousBestSetResult) {
+                            currExercise.bestSet = template.bestSet
+                        } else {
+                            Log.d("PR", "WOHOO")
+                            prs++
                         }
                     }
-                    currExercise.isTemplate = true
                 }
+                currExercise.isTemplate = true
             }
-            workoutProvider.updateExercises(exercises.values.toList())
         }
+        workoutProvider.updateExercises(exercises.values.toList())
         return Triple(exercises.values.toList(), prs, volume)
     }
 
@@ -481,12 +500,14 @@ class WorkoutViewModel(application: Application) : AndroidViewModel(application)
             personalRecords = prs,
             volume = volume
         )
+        Log.d("date when local date", LocalDateTime.now().toString())
+        Log.d("date when to realm", workout.date.toRealmString())
         workoutProvider.addWorkoutState(RealmWorkoutState().apply {
             id = workout.id
             name = workout.name
             this.duration = workout.duration ?: 0L
             this.volume = workout.volume ?: 0.0
-            date = RealmInstant.now()
+            date = workout.date.toRealmString()
             isTemplate = false
             this.exercises = workout.exercises.map { it.toRealmExercise() }.toRealmList()
             note = _note.value

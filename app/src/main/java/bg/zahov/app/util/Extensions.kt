@@ -6,6 +6,7 @@ import android.util.Log
 import android.view.View
 import bg.zahov.app.data.local.RealmExercise
 import bg.zahov.app.data.local.RealmSets
+import bg.zahov.app.data.local.RealmTimePattern
 import bg.zahov.app.data.model.BodyPart
 import bg.zahov.app.data.model.Category
 import bg.zahov.app.data.model.Exercise
@@ -25,6 +26,7 @@ import com.google.firebase.Timestamp
 import io.realm.kotlin.types.RealmInstant
 import java.nio.charset.StandardCharsets
 import java.time.Instant
+import java.time.LocalDate
 import java.time.LocalDateTime
 import java.time.ZoneId
 import java.time.ZoneOffset
@@ -73,10 +75,16 @@ fun Sets.toFirestoreMap(): Map<String, Any?> {
     )
 }
 
+fun List<Measurement>.toFirestoreMap(): Map<String, Any?> {
+    return mapOf(
+        FirestoreFields.MEASUREMENTS_COLLECTION to this.map { it.toFirestoreMap() }
+    )
+}
+
 fun Measurement.toFirestoreMap(): Map<String, Any?> {
     return mapOf(
         FirestoreFields.MEASUREMENT_VALUE to value,
-        FirestoreFields.MEASUREMENT_DATE to date
+        FirestoreFields.MEASUREMENT_DATE to date.toTimestamp()
     )
 }
 
@@ -314,4 +322,12 @@ fun Exercise.getOneRepMaxes(): List<String> = this.sets.map {
 
 fun RealmInstant.toLocalDateTime(): LocalDateTime {
     return LocalDateTime.ofInstant(Instant.ofEpochSecond(this.epochSeconds), ZoneId.systemDefault())
+}
+
+fun LocalDateTime.toRealmString(): String {
+    return this.format(DateTimeFormatter.ofPattern(RealmTimePattern.realmTimePattern))
+}
+
+fun String.toLocalDateTimeRlm(): LocalDateTime {
+    return LocalDateTime.parse(this, DateTimeFormatter.ofPattern(RealmTimePattern.realmTimePattern))
 }

@@ -1,5 +1,6 @@
 package bg.zahov.app.data.model
 
+import android.util.Log
 import bg.zahov.app.data.exception.CriticalDataNullException
 import bg.zahov.app.util.toLocalDateTime
 import com.google.firebase.Timestamp
@@ -74,17 +75,15 @@ data class Measurements(
     val measurements: Map<MeasurementType, List<Measurement>> = mapOf()
 ) {
     companion object {
-        fun fromFirestoreMap(data: Map<String, Any>?): Measurements {
+        fun fromFirestoreMap(data: Map<String, Any>?, measurementType: MeasurementType): Measurements {
             val measurementsMap = mutableMapOf<MeasurementType, List<Measurement>>()
-
-            data?.forEach { (measurementTypeKey, measurementList) ->
-                val measurementType = MeasurementType.fromKey(measurementTypeKey)
-                val measurements = (measurementList as? List<Map<String, Any>>)?.mapNotNull { Measurement.fromFirestoreMap(it) }
-                if (measurementType != null && measurements != null) {
-                    measurementsMap[measurementType] = measurements
-                }
+            data?.let {
+            val measurements = (it[FirestoreFields.MEASUREMENTS_COLLECTION] as? List<Map<String, Any>>)?.mapNotNull { values -> Measurement.fromFirestoreMap(values) }.orEmpty()
+            Log.d("measurements list", measurements.toString())
+            measurementsMap[measurementType] = measurements
             }
-
+            Log.d("converting", if(measurementsMap.keys.size > 0) measurementsMap.keys.first().toString() else "")
+            Log.d("values size", measurementsMap.values.size.toString())
             return Measurements(measurementsMap)
         }
     }
@@ -186,7 +185,7 @@ data class Measurement(
         fun fromFirestoreMap(data: Map<String, Any>?): Measurement? {
             return if (data != null && (data[FirestoreFields.WORKOUT_DATE] as? Timestamp) != null && (data[FirestoreFields.MEASUREMENT_VALUE] as? Double) != null) {
                 Measurement(
-                    date = (data[FirestoreFields.WORKOUT_DATE] as Timestamp).toLocalDateTime(),
+                    date = (data[FirestoreFields.MEASUREMENT_DATE] as Timestamp).toLocalDateTime(),
                     value = data[FirestoreFields.MEASUREMENT_VALUE] as Double
                 )
             } else {

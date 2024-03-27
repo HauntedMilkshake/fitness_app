@@ -22,6 +22,7 @@ import kotlinx.coroutines.flow.Flow
 import kotlinx.coroutines.flow.channelFlow
 import kotlinx.coroutines.flow.first
 import kotlinx.coroutines.flow.map
+import kotlinx.coroutines.flow.mapNotNull
 import kotlinx.coroutines.tasks.await
 import kotlinx.coroutines.withContext
 
@@ -150,16 +151,12 @@ class FirestoreManager {
 
     suspend fun upsertMeasurement(type: MeasurementType, measurement: Measurement) {
         withContext(Dispatchers.IO) {
-            var newMap = mutableMapOf<MeasurementType, List<Measurement>>()
-            getMeasurement(type).collect() {value ->
-                newMap = value.measurements.toMutableMap()
-            }
-            val newList = newMap[type].orEmpty().toMutableList()
+            var newMap = getLatestMeasurementsByType(type)
+            val newList = newMap.measurements[type].orEmpty().toMutableList()
             newList.add(measurement)
-            newMap[type] = newList.toList()
             firestore.collection(USERS_COLLECTION).document(userId).collection(
                 MEASUREMENTS_COLLECTION
-            ).document(type.key).set(newMap)
+            ).document(type.key).set(newList.toFirestoreMap())
         }
     }
 
@@ -168,24 +165,24 @@ class FirestoreManager {
             USERS_COLLECTION
         ).document(userId).collection(MEASUREMENTS_COLLECTION).document(type.key)
     ) {
-        Measurements.fromFirestoreMap(it)
+        Measurements.fromFirestoreMap(it, type)
     }
 
-    suspend fun getMeasurements(): Flow<Measurements> = getCollectionData(
-        firestore.collection(
-            USERS_COLLECTION
-        ).document(userId).collection(MEASUREMENTS_COLLECTION)
-    ) {
-        Measurements.fromFirestoreMap(it)
-    }.map {
-        val mergedMap = mutableMapOf<MeasurementType, List<Measurement>>()
-        it.forEach { map ->
-            mergedMap[map.measurements.keys.first()] = map.measurements.values.first()
-        }
-        Measurements(
-            mergedMap
-        )
-    }
+//    suspend fun getMeasurements(): Flow<Measurements> = getCollectionData(
+//        firestore.collection(
+//            USERS_COLLECTION
+//        ).document(userId).collection(MEASUREMENTS_COLLECTION)
+//    ) {
+//        Measurements.fromFirestoreMap(it)
+//    }.map {
+//        val mergedMap = mutableMapOf<MeasurementType, List<Measurement>>()
+//        it.forEach { map ->
+//            mergedMap[map.measurements.keys.first()] = map.measurements.values.first()
+//        }
+//        Measurements(
+//            mergedMap
+//        )
+//    }
 
     suspend fun addTemplateWorkout(newWorkoutTemplate: Workout) =
         withContext(Dispatchers.IO) {
@@ -199,6 +196,12 @@ class FirestoreManager {
             .document(id)
     ) {
         Workout.fromFirestoreMap(it)
+    }
+
+    suspend fun getLatestMeasurementsByType(type: MeasurementType): Measurements = getNonObservableDocData(firestore.collection(
+        USERS_COLLECTION
+    ).document(userId).collection(MEASUREMENTS_COLLECTION).document(type.key)) {
+        Measurements.fromFirestoreMap(it, type)
     }
 
     private fun deleteFirestore() {

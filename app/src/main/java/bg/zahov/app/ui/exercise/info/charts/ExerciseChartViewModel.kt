@@ -6,6 +6,7 @@ import androidx.lifecycle.AndroidViewModel
 import androidx.lifecycle.LiveData
 import androidx.lifecycle.MutableLiveData
 import androidx.lifecycle.viewModelScope
+import bg.zahov.app.data.model.SetType
 import bg.zahov.app.getWorkoutProvider
 import com.github.mikephil.charting.data.Entry
 import kotlinx.coroutines.Job
@@ -16,21 +17,22 @@ class ExerciseChartViewModel(application: Application) : AndroidViewModel(applic
     private val workoutProvider by lazy {
         application.getWorkoutProvider()
     }
-    private val _oneRepMax = MutableLiveData<List<Entry>>()
-    val oneRepMax: LiveData<List<Entry>>
+    private val _oneRepMax = MutableLiveData<Pair<Float, List<Entry>>>()
+    val oneRepMax: LiveData<Pair<Float, List<Entry>>>
         get() = _oneRepMax
 
-    private val _totalVolume = MutableLiveData<List<Entry>>()
-    val totalVolume: LiveData<List<Entry>>
+    private val _totalVolume = MutableLiveData<Pair<Float, List<Entry>>>()
+    val totalVolume: LiveData<Pair<Float, List<Entry>>>
         get() = _totalVolume
 
-    private val _bestSet = MutableLiveData<List<Entry>>()
-    val bestSet: LiveData<List<Entry>>
-        get() = _bestSet
+    private val _maxReps = MutableLiveData<Pair<Float, List<Entry>>>()
+    val maxReps: LiveData<Pair<Float, List<Entry>>>
+        get() = _maxReps
     private lateinit var job: Job
-    init {
+
+    fun initChartData() {
         var maxVolume = 0.0
-        var maxWeight = 0.0
+        var maxReps = 0
         var oneRepMax = 0.0
         val maxVolumeEntries = mutableListOf<Entry>()
         val oneRepMaxEntries = mutableListOf<Entry>()
@@ -40,7 +42,9 @@ class ExerciseChartViewModel(application: Application) : AndroidViewModel(applic
             workoutProvider.getExerciseHistory().collect { data ->
                 data.forEach {
                     it.sets.forEach { set ->
-                        if (maxVolume < (set.secondMetric ?: 0) * (set.firstMetric ?: 0.0)) {
+                        if (set.type == SetType.FAILURE || set.type == SetType.DEFAULT && maxVolume < (set.secondMetric
+                                ?: 0) * (set.firstMetric ?: 0.0)
+                        ) {
                             maxVolume =
                                 (set.secondMetric ?: 0).toDouble() * (set.firstMetric ?: 0.0)
                             it.date?.let { date ->
@@ -53,12 +57,14 @@ class ExerciseChartViewModel(application: Application) : AndroidViewModel(applic
                             }
                         }
 
-                        if (maxWeight < (set.firstMetric ?: 0.0)) {
-                            maxWeight = (set.firstMetric ?: 0.0)
+                        if (set.type == SetType.FAILURE || set.type == SetType.DEFAULT && maxReps < (set.secondMetric
+                                ?: 0)
+                        ) {
+                            maxReps = (set.secondMetric ?: 0)
                             it.date?.let { date ->
                                 maxWeightEntries.add(
                                     Entry(
-                                        maxWeight.toFloat(),
+                                        maxReps.toFloat(),
                                         date.dayOfMonth.toFloat()
                                     )
                                 )
@@ -71,20 +77,20 @@ class ExerciseChartViewModel(application: Application) : AndroidViewModel(applic
                             it.date?.let { date ->
                                 oneRepMaxEntries.add(
                                     Entry(
-                                        oneRepMax.toFloat(),
-                                        date.dayOfMonth.toFloat()
+                                        date.dayOfMonth.toFloat(),
+                                        oneRepMax.toFloat()
                                     )
                                 )
                             }
                         }
                     }
                 }
-                Log.d("totalVolume", maxVolumeEntries.toString())
-                _totalVolume.postValue(maxVolumeEntries)
+                Log.d("volumeEntries", maxVolumeEntries.size.toString())
+                Log.d("onerepmax", oneRepMax.toString())
                 Log.d("ORP", oneRepMaxEntries.toString())
-                _oneRepMax.postValue(oneRepMaxEntries)
-                Log.d("bestWeight", maxWeightEntries.toString())
-                _bestSet.postValue(maxWeightEntries)
+                _totalVolume.postValue(Pair(maxVolume.toFloat(), maxVolumeEntries))
+                _oneRepMax.postValue(Pair(oneRepMax.toFloat(), oneRepMaxEntries))
+                _maxReps.postValue(Pair(maxReps.toFloat(), maxWeightEntries))
             }
         }
     }

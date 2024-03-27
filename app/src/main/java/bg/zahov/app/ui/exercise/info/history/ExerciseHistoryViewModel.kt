@@ -30,7 +30,9 @@ class ExerciseHistoryViewModel(application: Application) : AndroidViewModel(appl
             _state.postValue(State.Loading(View.VISIBLE))
             try {
                 workoutProvider.getExerciseHistory().collect {
-                    _state.postValue(State.Data(it))
+                    it.sortedByDescending { value -> value.date }.let { result ->
+                        _state.postValue(State.Data(result))
+                    }
                 }
             } catch (e: Exception) {
                 _state.postValue(

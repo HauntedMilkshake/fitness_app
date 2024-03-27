@@ -35,32 +35,13 @@ class HomeFragment : Fragment() {
     ): View {
         _binding = FragmentHomeBinding.inflate(inflater, container, false)
         requireActivity().showBottomNav()
+        setupTopBar()
         requireActivity().showTopBar()
         return binding.root
     }
 
     override fun onViewCreated(view: View, savedInstanceState: Bundle?) {
         super.onViewCreated(view, savedInstanceState)
-        (activity as? AppCompatActivity)?.supportActionBar?.setDisplayHomeAsUpEnabled(false)
-        requireActivity().setToolBarTitle(R.string.profile)
-        requireActivity().addMenuProvider(object : MenuProvider {
-            override fun onCreateMenu(menu: Menu, menuInflater: MenuInflater) {
-                menu.clear()
-                menuInflater.inflate(R.menu.menu_toolbar_home, menu)
-            }
-
-            override fun onMenuItemSelected(menuItem: MenuItem): Boolean {
-                return when (menuItem.itemId) {
-                    R.id.settings -> {
-                        findNavController().navigate(R.id.settings)
-                        true
-                    }
-
-                    else -> false
-                }
-            }
-
-        })
         binding.apply {
 //            requireActivity().setToolbarVisibility(View.VISIBLE)
 //            requireActivity().setToolbarTitle(R.string.top_bar_text)
@@ -89,10 +70,7 @@ class HomeFragment : Fragment() {
             }
 
             weeklyWorkoutsChart.apply {
-                setPinchZoom(false)
-                setDrawGridBackground(false)
-                setDrawBarShadow(false)
-                setDrawValueAboveBar(false)
+
                 isDragEnabled = false
                 isHighlightFullBarEnabled = false
 
@@ -129,9 +107,33 @@ class HomeFragment : Fragment() {
         }
     }
 
+    private fun setupTopBar() {
+        (activity as? AppCompatActivity)?.supportActionBar?.setDisplayHomeAsUpEnabled(false)
+        requireActivity().setToolBarTitle(R.string.profile)
+        requireActivity().addMenuProvider(object : MenuProvider {
+            override fun onCreateMenu(menu: Menu, menuInflater: MenuInflater) {
+                menu.clear()
+                menuInflater.inflate(R.menu.menu_toolbar_home, menu)
+            }
+
+            override fun onMenuItemSelected(menuItem: MenuItem): Boolean {
+                return when (menuItem.itemId) {
+                    R.id.settings -> {
+                        findNavController().navigate(R.id.settings)
+                        true
+                    }
+
+                    else -> false
+                }
+            }
+
+        })
+    }
+
     override fun onResume() {
         super.onResume()
         requireActivity().showBottomNav()
+        setupTopBar()
     }
 
     override fun onDestroyView() {

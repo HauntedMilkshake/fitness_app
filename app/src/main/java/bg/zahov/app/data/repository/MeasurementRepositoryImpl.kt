@@ -22,7 +22,7 @@ class MeasurementRepositoryImpl : MeasurementRepository {
 
     private val firestore = FirestoreManager.getInstance()
 
-    override suspend fun getMeasurements(): Flow<Measurements> = firestore.getMeasurements()
+//    override suspend fun getMeasurements(): Flow<Measurements> = firestore.getMeasurements()
     override suspend fun getMeasurement(type: MeasurementType): Flow<Measurements> =
         firestore.getMeasurement(type)
 

@@ -27,14 +27,15 @@ class MeasurementInputViewModel(application: Application) : AndroidViewModel(app
         viewModelScope.launch {
             try {
                 measurementProvider.getSelectedMeasurement().collect {
-                    Log.d("collecting measurement", "collecting ")
-                    _state.postValue(
-                        State.Measurement(
-                            name = it.measurements.keys.first().key,
-                            date = LocalDateTime.now()
-                                .format(DateTimeFormatter.ofPattern("dd/MM/yy"))
+                    if (it.measurements.keys.isNotEmpty()) {
+                        _state.postValue(
+                            State.Measurement(
+                                name = it.measurements.keys.first().key,
+                                date = LocalDateTime.now()
+                                    .format(DateTimeFormatter.ofPattern("dd/MM/yy"))
+                            )
                         )
-                    )
+                    }
                 }
             } catch (e: CriticalDataNullException) {
             }

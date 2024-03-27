@@ -7,6 +7,7 @@ class CategoryKeys {
         const val MACHINE = "Machine"
         const val ADDITIONAL_WEIGHT = "AdditionalWeight"
         const val ASSISTED_WEIGHT = "AssistedWeight"
+        //reps only, cardio, and timed are soonTM
         const val REPS_ONLY = "RepsOnly"
         const val CARDIO = "Cardio"
         const val TIMED = "Timed"

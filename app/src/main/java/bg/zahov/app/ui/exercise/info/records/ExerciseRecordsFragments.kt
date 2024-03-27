@@ -19,6 +19,7 @@ class ExerciseRecordsFragments : Fragment() {
         savedInstanceState: Bundle?,
     ): View {
         _binding = FragmentExerciseRecordsBinding.inflate(inflater, container, false)
+        exerciseRecordsViewModel.initData()
         return binding.root
     }
 

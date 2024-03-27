@@ -6,10 +6,10 @@ import bg.zahov.app.data.model.MeasurementType
 import bg.zahov.app.data.model.Measurements
 import bg.zahov.app.data.repository.MeasurementRepositoryImpl
 import kotlinx.coroutines.flow.Flow
-import kotlinx.coroutines.flow.MutableSharedFlow
-import kotlinx.coroutines.flow.SharedFlow
+import kotlinx.coroutines.flow.MutableStateFlow
+import kotlinx.coroutines.flow.StateFlow
 
-class MeasurementProviderImpl: MeasurementProvider {
+class MeasurementProviderImpl : MeasurementProvider {
 
     companion object {
         @Volatile
@@ -23,25 +23,43 @@ class MeasurementProviderImpl: MeasurementProvider {
 
 
     private val measurementRepo = MeasurementRepositoryImpl.getInstance()
-    private val _selectedMeasurement = MutableSharedFlow<Measurements>()
-    private val selectedMeasurement: SharedFlow<Measurements> = _selectedMeasurement
+    private val _selectedMeasurement = MutableStateFlow(Measurements())
+    private val selectedMeasurement: StateFlow<Measurements> = _selectedMeasurement
+    private var selectedMeasurementValue = Measurements()
 
-    override suspend fun getMeasurements(): Flow<Measurements> = measurementRepo.getMeasurements()
-
-    override suspend fun getMeasurement(type: MeasurementType): Flow<Measurements> = measurementRepo.getMeasurement(type)
+    override suspend fun getMeasurement(type: MeasurementType): Flow<Measurements> =
+        measurementRepo.getMeasurement(type)
 
     override suspend fun getSelectedMeasurement(): Flow<Measurements> = selectedMeasurement
 
     override suspend fun updateMeasurement(
         measurementType: MeasurementType,
-        measurement: Measurement
+        measurement: Measurement,
     ) {
-        TODO("Not yet implemented")
+        measurementRepo.updateMeasurement(measurementType, measurement)
+        addInputToSelectedMeasurement(measurementType, measurement)
     }
 
     override suspend fun selectMeasure(type: MeasurementType) {
         getMeasurement(type).collect {
-            _selectedMeasurement.emit(it)
+            _selectedMeasurement.value = it
+            selectedMeasurementValue = it
         }
     }
+
+    override suspend fun addInputToSelectedMeasurement(
+        type: MeasurementType,
+        measurement: Measurement,
+    ) {
+        val newList = mutableListOf<Measurement>()
+        val existingMeasurements = selectedMeasurementValue.measurements[type]
+
+        existingMeasurements?.let { newList.addAll(it) }
+        newList.add(measurement)
+
+        _selectedMeasurement.value = Measurements(
+            measurements = selectedMeasurementValue.measurements + (type to newList)
+        )
+    }
+
 }

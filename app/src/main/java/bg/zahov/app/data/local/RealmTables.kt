@@ -34,7 +34,7 @@ class RealmWorkoutState : RealmObject {
     var name: String = "default"
     var duration: Long = 0L
     var volume: Double = 0.0
-    var date: RealmInstant = RealmInstant.now()
+    var date: String = ""
     var isTemplate: Boolean = false
     var exercises: RealmList<RealmExercise> = realmListOf()
     var note: String? = null
@@ -55,4 +55,7 @@ class RealmSets : RealmObject {
     var type: String = SetType.DEFAULT.key
     var firstMetric: Double = 0.0
     var secondMetric: Int = 0
+}
+object RealmTimePattern {
+    const val realmTimePattern = "yyyy-MM-dd HH:mm:ss"
 }

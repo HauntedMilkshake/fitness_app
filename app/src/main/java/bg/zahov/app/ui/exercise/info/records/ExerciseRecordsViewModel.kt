@@ -18,7 +18,8 @@ class ExerciseRecordsViewModel(application: Application) : AndroidViewModel(appl
     val state: LiveData<Data>
         get() = _state
     private lateinit var job: Job
-    init {
+
+    fun initData() {
         var maxVolume = 0.0
         var maxWeight = 0.0
         var oneRepMax = 0.0
@@ -52,7 +53,6 @@ class ExerciseRecordsViewModel(application: Application) : AndroidViewModel(appl
             }
         }
     }
-
     override fun onCleared() {
         super.onCleared()
         job.cancel()
