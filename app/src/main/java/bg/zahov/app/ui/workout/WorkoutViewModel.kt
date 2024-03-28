@@ -24,6 +24,7 @@ import bg.zahov.app.ui.workout.add.ExerciseEntry
 import bg.zahov.app.ui.workout.add.ExerciseSetAdapterSetWrapper
 import bg.zahov.app.ui.workout.add.SetEntry
 import bg.zahov.app.ui.workout.add.WorkoutEntry
+import bg.zahov.app.util.filterIntegerInput
 import bg.zahov.app.util.hashString
 import bg.zahov.app.util.parseTimeStringToLong
 import bg.zahov.app.util.toExerciseSetAdapterSetWrapper
@@ -263,7 +264,7 @@ class WorkoutViewModel(application: Application) : AndroidViewModel(application)
                         Category.RepsOnly, Category.Cardio, Category.Timed -> View.GONE
                         else -> View.VISIBLE
                     },
-                    setNumber = setNumber.toString(),
+                    setNumber = if (setNumber == 0) 1.toString() else setNumber.toString(),
                     previousResults = "-/-",
                     set = Sets(SetType.DEFAULT, 0.0, 0)
                 )
@@ -300,22 +301,10 @@ class WorkoutViewModel(application: Application) : AndroidViewModel(application)
                 }
 
                 R.id.second_input_field_text -> {
-                    (_exercises.value?.get(position) as? SetEntry)?.setEntry?.set?.secondMetric =
-                        filterIntegerInput(metric)
+                    (_exercises.value?.get(position) as? SetEntry)?.setEntry?.set?.secondMetric = metric.filterIntegerInput()
                 }
             }
         }
-        Log.d("Metric inserted in set", metric)
-    }
-
-    private fun filterIntegerInput(input: String): Int {
-        if (input.startsWith('0') && input.length > 1) {
-            input.dropWhile { it == '0' }
-        }
-        if (input.contains(",")) {
-            input.dropLast(input.length - input.indexOf(","))
-        }
-        return input.toIntOrNull() ?: 0
     }
 
     fun onSetTypeChanged(itemPosition: Int, setType: SetType) {
@@ -344,7 +333,6 @@ class WorkoutViewModel(application: Application) : AndroidViewModel(application)
             _restTimerState.postValue(State.Error("Cannot finish a workout without any exercises!"))
             return
         }
-        //Checks if all exercises have 0 sets
         if (_exercises.value!!.all { entry -> entry is ExerciseEntry }) {
             _restTimerState.postValue(State.Error("Cannot finish a workout without any sets!"))
             return

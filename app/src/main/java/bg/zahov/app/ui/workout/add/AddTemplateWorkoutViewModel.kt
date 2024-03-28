@@ -17,6 +17,7 @@ import bg.zahov.app.getReplaceableExerciseProvider
 import bg.zahov.app.getSelectableExerciseProvider
 import bg.zahov.app.getSettingsProvider
 import bg.zahov.app.getWorkoutProvider
+import bg.zahov.app.util.filterIntegerInput
 import bg.zahov.app.util.generateRandomId
 import bg.zahov.app.util.toExercise
 import bg.zahov.app.util.toExerciseSetAdapterSetWrapper
@@ -188,16 +189,8 @@ class AddTemplateWorkoutViewModel(application: Application) : AndroidViewModel(a
             }
 
             viewModelScope.launch {
-                val exercises = getNormalExercises(_currExercises.value!!)
-                var volume = 0.0
-                exercises.forEach {
-                    if (it.category != Category.Cardio && it.category != Category.Timed && it.category != Category.RepsOnly) {
-                        it.sets.forEach { set ->
-                            volume += ((set.firstMetric ?: 1).toDouble() * (set.secondMetric
-                                ?: 1).toDouble())
-                        }
-                    }
-                }
+                val exercises = getNormalExercises(_currExercises.value!!).toMutableList()
+                exercises.removeIf { it.sets.isEmpty() }
                 workoutProvider.addTemplateWorkout(
                     Workout(
                         id = if (edit) workoutIdToEdit else generateRandomId(),
@@ -234,7 +227,11 @@ class AddTemplateWorkoutViewModel(application: Application) : AndroidViewModel(a
                 }
 
                 is SetEntry -> {
-                    exercises[currentExercisesIndex].sets.add(entry.setEntry.set)
+                    val reps = entry.setEntry.set.firstMetric
+                    val weight = entry.setEntry.set.secondMetric
+                    if (reps != null && reps != 0.0 && weight != null && weight != 0) {
+                        exercises[currentExercisesIndex].sets.add(entry.setEntry.set)
+                    }
                 }
             }
         }
@@ -303,7 +300,7 @@ class AddTemplateWorkoutViewModel(application: Application) : AndroidViewModel(a
                         Category.RepsOnly, Category.Cardio, Category.Timed -> View.GONE
                         else -> View.VISIBLE
                     },
-                    setNumber = setNumber.toString(),
+                    setNumber = if (setNumber == 0) 1.toString() else setNumber.toString(),
                     previousResults = "-/-",
                     set = Sets(SetType.DEFAULT, 0.0, 0)
                 )
@@ -335,12 +332,12 @@ class AddTemplateWorkoutViewModel(application: Application) : AndroidViewModel(a
             when (viewId) {
                 R.id.first_input_field_text -> {
                     (_currExercises.value?.get(position) as? SetEntry)?.setEntry?.set?.firstMetric =
-                        metric.toDoubleOrNull()
+                        "%.2f".format(metric.toDoubleOrNull() ?: 0.0).toDouble()
                 }
 
                 R.id.second_input_field_text -> {
                     (_currExercises.value?.get(position) as? SetEntry)?.setEntry?.set?.secondMetric =
-                        metric.toIntOrNull()
+                        metric.filterIntegerInput()
                 }
             }
         }

@@ -324,3 +324,13 @@ fun LocalDateTime.toRealmString(): String {
 fun String.toLocalDateTimeRlm(): LocalDateTime {
     return LocalDateTime.parse(this, DateTimeFormatter.ofPattern(RealmTimePattern.realmTimePattern))
 }
+
+fun String.filterIntegerInput(): Int {
+    if (this.startsWith('0') && this.length > 1) {
+        this.dropWhile { it == '0' }
+    }
+    if (this.contains(",")) {
+        this.dropLast(this.length - this.indexOf(","))
+    }
+    return this.toIntOrNull() ?: 0
+}
