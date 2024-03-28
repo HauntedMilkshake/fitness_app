@@ -28,6 +28,7 @@ class FragmentWorkoutFinish : Fragment() {
         savedInstanceState: Bundle?,
     ): View {
         _binding = FragmentWorkoutFinishBinding.inflate(inflater, container, false)
+        mediaPlayer = MediaPlayer.create(requireContext(), R.raw.workout_finish)
         return binding.root
     }
 
@@ -45,7 +46,6 @@ class FragmentWorkoutFinish : Fragment() {
             }
         }.start()
 
-        mediaPlayer = MediaPlayer.create(requireContext(), R.raw.wow)
         mediaPlayer?.start()
 
         val includedLayout = binding.workout.root

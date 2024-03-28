@@ -49,7 +49,7 @@ class WorkoutFragment : Fragment() {
         val inflater = TransitionInflater.from(requireContext())
         enterTransition = inflater.inflateTransition(R.transition.slide_up)
         exitTransition = inflater.inflateTransition(R.transition.fade_out)
-        mediaPlayer = MediaPlayer.create(context, R.raw.nsfw)
+        mediaPlayer = MediaPlayer.create(context, R.raw.set_complete)
         requireActivity().hideBottomNav()
     }
 
@@ -68,9 +68,10 @@ class WorkoutFragment : Fragment() {
                     }
                 }
 
-            val exerciseSetAdapter = ExerciseSetAdapter(mediaPlayer).apply {
+            val exerciseSetAdapter = ExerciseSetAdapter().apply {
                 itemClickListener = object : ExerciseSetAdapter.ItemClickListener<WorkoutEntry> {
                     override fun onSetCheckClicked(itemPosition: Int) {
+                        mediaPlayer?.start()
                         onGoingWorkoutViewModel.onSetCheckClicked(itemPosition)
                     }
 

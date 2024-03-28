@@ -340,6 +340,9 @@ class WorkoutViewModel(application: Application) : AndroidViewModel(application)
 
         viewModelScope.launch {
             val (exercises, prs, volume) = getExerciseArrayAndPRs(_exercises.value.orEmpty())
+            exercises.forEach {
+                Log.d("exercise best set after conversion", it.bestSet.toString())
+            }
             repo.addWorkoutToHistory(
                 Workout(
                     id = workoutId ?: hashString("${Random().nextInt(Int.MAX_VALUE)}"),
@@ -417,6 +420,9 @@ class WorkoutViewModel(application: Application) : AndroidViewModel(application)
 
             }
         }
+        exercises.values.forEach {
+            Log.d("BEST SET FOR EXERCISE", it.bestSet.toString())
+        }
         Log.d("EXERCISES BEFORE DROP", exercises.entries.size.toString())
         //We should have atleast 1 exercise with sets because the case of finishWorkout() covers where all exercises have 0 sets :)
         exercises.entries.removeIf { it.value.sets.isEmpty() }
@@ -424,7 +430,10 @@ class WorkoutViewModel(application: Application) : AndroidViewModel(application)
         Log.d("EXERCISES AFTER DROP", exercises.entries.size.toString())
 
         //
-        val temp = exercises.values.toMutableList()
+        val temp = exercises.values.map { it.copy() }.toMutableList()
+        temp.forEach {
+            Log.d("exercise", it.toString())
+        }
         temp.forEach { currExercise ->
             templateExercises.find { it.name == currExercise.name }?.let { template ->
                 when (currExercise.category) {
@@ -461,7 +470,7 @@ class WorkoutViewModel(application: Application) : AndroidViewModel(application)
         return Triple(exercises.values.toList(), prs, volume)
     }
 
-    private fun getTimePeriodAsString() = when (LocalTime.now().hour) {
+    private fun getTimePeriodAsString() = when (workoutDate.hour) {
         in 6..11 -> "Morning"
         in 12..16 -> "Noon"
         in 17..20 -> "Afternoon"

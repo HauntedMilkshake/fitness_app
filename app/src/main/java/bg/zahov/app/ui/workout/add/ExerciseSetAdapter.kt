@@ -4,7 +4,6 @@ import android.animation.AnimatorSet
 import android.animation.ArgbEvaluator
 import android.animation.ObjectAnimator
 import android.animation.ValueAnimator
-import android.media.MediaPlayer
 import android.view.LayoutInflater
 import android.view.View
 import android.view.ViewGroup
@@ -25,7 +24,7 @@ import com.google.android.material.textfield.TextInputEditText
 import com.google.android.material.textfield.TextInputLayout
 import com.google.android.material.textview.MaterialTextView
 
-class ExerciseSetAdapter(val mediaPLayer: MediaPlayer? = null) :
+class ExerciseSetAdapter :
     RecyclerView.Adapter<RecyclerView.ViewHolder>() {
 
     companion object {
@@ -175,7 +174,6 @@ class ExerciseSetAdapter(val mediaPLayer: MediaPlayer? = null) :
             }
 
             check.setOnClickListener {
-                mediaPLayer?.start()
                 animateSetBackgroundOnClick(item.backgroundResource)
                 itemClickListener?.onSetCheckClicked(bindingAdapterPosition)
             }
@@ -237,6 +235,7 @@ class ExerciseSetAdapter(val mediaPLayer: MediaPlayer? = null) :
             swipeActionListener?.onDeleteSet(bindingAdapterPosition)
             notifyItemRemoved(bindingAdapterPosition)
         }
+
         //TODO(Bug with the first click)
         private fun animateSetBackgroundOnClick(startColor: Int) {
             val endColor = if (getColor(itemView.context, startColor) == getColor(
