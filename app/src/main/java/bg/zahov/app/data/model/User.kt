@@ -60,7 +60,7 @@ object FirestoreFields {
 //    const val SETTINGS_FIT = "fit"
 //    const val SETTINGS_AUTOMATIC_SYNC = "automaticSync"
 }
-//TODO(this is wrong, introduce a new measurement object where each measurement has a document and each document has a list of custom types)
+
 data class User(
     var name: String
 ) {

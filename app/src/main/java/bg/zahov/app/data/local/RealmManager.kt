@@ -1,5 +1,6 @@
 package bg.zahov.app.data.local
 
+import android.util.Log
 import bg.zahov.app.data.model.Language
 import bg.zahov.app.data.model.LanguageKeys
 import bg.zahov.app.data.model.Sound
@@ -77,6 +78,7 @@ class RealmManager {
     }
 
     suspend fun createRealm() = withContext(Dispatchers.IO) {
+        Log.d("creating realm", "creating...")
         openRealm()
         realmInstance?.write {
             try {

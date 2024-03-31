@@ -1,14 +1,15 @@
 package bg.zahov.app.ui.settings.profile
 
-import android.app.AlertDialog
-import android.app.Dialog
 import android.os.Bundle
+import android.util.Log
 import android.view.LayoutInflater
 import android.view.View
 import android.view.ViewGroup
 import android.widget.Toast
 import androidx.fragment.app.DialogFragment
 import androidx.fragment.app.viewModels
+import androidx.lifecycle.map
+import bg.zahov.app.data.model.state.EditProfileUiMapper
 import bg.zahov.app.util.applyScaleAnimation
 import bg.zahov.fitness.app.databinding.DialogFragmentAuthenticationBinding
 
@@ -41,6 +42,22 @@ class AuthenticationDialog : DialogFragment() {
                 it.applyScaleAnimation()
                 editProfileViewModel.unlockFields(passwordFieldText.text.toString())
             }
+
+            editProfileViewModel.isUnlocked.observe(viewLifecycleOwner) {
+                Log.d("collecting is unlocked", it.toString())
+                if (it) dismiss()
+            }
+
+            editProfileViewModel.state.map { EditProfileUiMapper.map(it) }.observe(viewLifecycleOwner) {
+                showToast(it.errorMessage)
+                showToast(it.notifyMessage)
+            }
+        }
+    }
+
+    private fun showToast(message: String?) {
+        message?.let {
+            Toast.makeText(context, message, Toast.LENGTH_SHORT).show()
         }
     }
 

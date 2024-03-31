@@ -67,14 +67,15 @@ class EditProfileFragment : Fragment() {
 
             editProfileViewModel.isUnlocked.observe(viewLifecycleOwner) {
                 lock.setImageResource(if (it) R.drawable.ic_open_lock else R.drawable.ic_closed_lock)
+                passwordField.isEnabled = it
                 usernameField.isEnabled = it
                 emailField.isEnabled = it
 
                 if (it) {
                     saveChanges.setOnClickListener {
-                        editProfileViewModel.updateEmail(emailFieldText.toString())
-                        editProfileViewModel.updateUsername(usernameFieldText.toString())
-                        editProfileViewModel.updatePassword(passwordFieldText.toString())
+                        editProfileViewModel.updateEmail(emailFieldText.text.toString())
+                        editProfileViewModel.updateUsername(usernameFieldText.text.toString())
+                        editProfileViewModel.updatePassword(passwordFieldText.text.toString())
                     }
                 }
             }
@@ -99,7 +100,7 @@ class EditProfileFragment : Fragment() {
 
     private fun showToast(message: String?) {
         message?.let {
-            Toast.makeText(requireContext(), message, Toast.LENGTH_SHORT).show()
+            Toast.makeText(context, message, Toast.LENGTH_SHORT).show()
         }
     }
 }

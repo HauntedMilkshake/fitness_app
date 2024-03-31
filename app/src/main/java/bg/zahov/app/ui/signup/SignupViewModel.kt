@@ -1,6 +1,7 @@
 package bg.zahov.app.ui.signup
 
 import android.app.Application
+import android.util.Log
 import androidx.lifecycle.AndroidViewModel
 import androidx.lifecycle.LiveData
 import androidx.lifecycle.MutableLiveData
@@ -10,6 +11,7 @@ import bg.zahov.app.util.isEmail
 import kotlinx.coroutines.CancellationException
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.Dispatchers
+import kotlinx.coroutines.async
 import kotlinx.coroutines.launch
 
 class SignupViewModel(application: Application) : AndroidViewModel(application) {
@@ -49,8 +51,9 @@ class SignupViewModel(application: Application) : AndroidViewModel(application) 
                 auth.signup(email, password)
                     .addOnSuccessListener {
                         CoroutineScope(Dispatchers.IO).launch {
-                            auth.createDataSources(userName)
+                           auth.createDataSources(userName)
                         }
+                        Log.d("posting state","posting...")
                         _state.value = State.Authentication(true)
                     }
                     .addOnFailureListener {

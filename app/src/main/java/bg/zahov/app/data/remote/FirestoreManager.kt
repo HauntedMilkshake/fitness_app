@@ -50,6 +50,7 @@ class FirestoreManager {
     }
 
     suspend fun createFirestore(username: String) = withContext(Dispatchers.IO) {
+        Log.d("creating firestore", "creating...")
         firestore.collection(USERS_COLLECTION).document(userId).set(User(username).toFirestoreMap())
     }
 
