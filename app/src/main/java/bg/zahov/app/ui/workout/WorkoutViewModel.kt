@@ -364,7 +364,7 @@ class WorkoutViewModel(application: Application) : AndroidViewModel(application)
         }
     }
 
-    private suspend fun getExerciseArrayAndPRs(entries: List<WorkoutEntry>): Triple<List<Exercise>, Int, Double> {
+    private suspend fun getExerciseArrayAndPRs(entries: List<WorkoutEntry>, removeEmpty: Boolean = true): Triple<List<Exercise>, Int, Double> {
         val exercises = linkedMapOf<String, Exercise>()
         var prs = 0
         var volume = 0.0
@@ -425,7 +425,7 @@ class WorkoutViewModel(application: Application) : AndroidViewModel(application)
         }
         Log.d("EXERCISES BEFORE DROP", exercises.entries.size.toString())
         //We should have atleast 1 exercise with sets because the case of finishWorkout() covers where all exercises have 0 sets :)
-        exercises.entries.removeIf { it.value.sets.isEmpty() }
+        if (removeEmpty) exercises.entries.removeIf { it.value.sets.isEmpty() }
 
         Log.d("EXERCISES AFTER DROP", exercises.entries.size.toString())
 
@@ -482,7 +482,7 @@ class WorkoutViewModel(application: Application) : AndroidViewModel(application)
     }
 
     private suspend fun saveWorkoutState() {
-        val (exercises, prs, volume) = getExerciseArrayAndPRs(_exercises.value.orEmpty())
+        val (exercises, prs, volume) = getExerciseArrayAndPRs(_exercises.value.orEmpty(), false)
         val workout = Workout(
             id = workoutId ?: hashString("${Random().nextInt(Int.MAX_VALUE)}"),
             name = "${getTimePeriodAsString()} ${_name.value}",
@@ -494,8 +494,7 @@ class WorkoutViewModel(application: Application) : AndroidViewModel(application)
             personalRecords = prs,
             volume = volume
         )
-        Log.d("date when local date", LocalDateTime.now().toString())
-        Log.d("date when to realm", workout.date.toRealmString())
+        restTimerProvider.stopTimer()
         workoutProvider.addWorkoutState(RealmWorkoutState().apply {
             id = workout.id
             name = workout.name
@@ -506,6 +505,7 @@ class WorkoutViewModel(application: Application) : AndroidViewModel(application)
             this.exercises = workout.exercises.map { it.toRealmExercise() }.toRealmList()
             note = _note.value
             personalRecords = prs
+            restTimerStart = if(restTimerProvider.isRestActive()) restTimerProvider.getRestStart().toRealmString() else ""
         })
     }
 

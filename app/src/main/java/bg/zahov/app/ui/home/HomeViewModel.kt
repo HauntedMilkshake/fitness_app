@@ -34,6 +34,7 @@ class HomeViewModel(application: Application) : AndroidViewModel(application) {
     private val workoutStateManager by lazy {
         application.getWorkoutStateManager()
     }
+
     private val _userName = MutableLiveData<String>()
     val userName: LiveData<String>
         get() = _userName

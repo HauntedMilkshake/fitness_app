@@ -78,7 +78,6 @@ class RealmManager {
     }
 
     suspend fun createRealm() = withContext(Dispatchers.IO) {
-        Log.d("creating realm", "creating...")
         openRealm()
         realmInstance?.write {
             try {

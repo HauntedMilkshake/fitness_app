@@ -1,7 +1,7 @@
 package bg.zahov.app.data.provider
 
 import android.os.CountDownTimer
-import android.util.Log
+import bg.zahov.app.data.interfaces.RestProvider
 import bg.zahov.app.data.model.RestState
 import bg.zahov.app.util.parseTimeStringToLong
 import bg.zahov.app.util.timeToString
@@ -10,9 +10,9 @@ import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.StateFlow
 import kotlinx.coroutines.launch
-import kotlinx.coroutines.withContext
+import java.time.LocalDateTime
 
-class RestTimerProvider {
+class RestTimerProvider: RestProvider {
     companion object {
         @Volatile
         private var instance: RestTimerProvider? = null
@@ -33,14 +33,16 @@ class RestTimerProvider {
 
     private lateinit var timer: CountDownTimer
     private var remainingTime: Long = 0
+    private lateinit var restTimerStart: LocalDateTime
 
-    suspend fun startRest(time: Long) {
+    override suspend fun startRest(startTime: Long) {
         _restState.emit(RestState.Active)
+        restTimerStart = LocalDateTime.now()
         if (remainingTime == 0L) {
-            _restTimer.value.fullRest = time.timeToString()
+            _restTimer.value.fullRest = startTime.timeToString()
         }
-        remainingTime = time
-        timer = object : CountDownTimer(time, 1000) {
+        remainingTime = startTime
+        timer = object : CountDownTimer(startTime, 1000) {
             override fun onTick(p0: Long) {
                 CoroutineScope(Dispatchers.Main).launch {
                     remainingTime = p0
@@ -63,27 +65,29 @@ class RestTimerProvider {
         }.start()
     }
 
-    suspend fun addTime(time: Long) {
-        timer.cancel()
-        _restTimer.value.fullRest =
-            (_restTimer.value.fullRest!!.parseTimeStringToLong() + time).timeToString()
-        startRest(remainingTime + time)
-    }
-
-    suspend fun removeTime(time: Long) {
-        if (remainingTime >= time) {
-            remainingTime -= time
-            timer.cancel()
-            startRest(remainingTime)
-        }
-    }
-
-    suspend fun stopTimer() {
+    override suspend fun stopRest() {
         timer.cancel()
         remainingTime = 0
         _restState.emit(RestState.Finished)
         _restState.value = RestState.Default
     }
 
+    override suspend fun addTime(timeToAdd: Long) {
+        timer.cancel()
+        _restTimer.value.fullRest =
+            (_restTimer.value.fullRest!!.parseTimeStringToLong() + timeToAdd).timeToString()
+        startRest(remainingTime + timeToAdd)
+    }
+
+    override suspend fun removeTime(timeToRemove: Long) {
+        if (remainingTime >= timeToRemove) {
+            remainingTime -= timeToRemove
+            timer.cancel()
+            startRest(remainingTime)
+        }
+    }
+
+    override fun isRestActive(): Boolean = restState.value == RestState.Active
+    override fun getRestStartDate(): LocalDateTime =  restTimerStart
     data class Rest(var elapsedTime: String? = null, var fullRest: String? = null)
 }

@@ -38,6 +38,8 @@ class RealmWorkoutState : RealmObject {
     var exercises: RealmList<RealmExercise> = realmListOf()
     var note: String? = null
     var personalRecords = 0
+    var restTimerStart: String = ""
+    var fullRest: Long = 0
 }
 
 class RealmExercise : RealmObject {
