@@ -11,7 +11,6 @@ import bg.zahov.app.util.isEmail
 import kotlinx.coroutines.CancellationException
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.Dispatchers
-import kotlinx.coroutines.async
 import kotlinx.coroutines.launch
 
 class SignupViewModel(application: Application) : AndroidViewModel(application) {
@@ -51,10 +50,17 @@ class SignupViewModel(application: Application) : AndroidViewModel(application) 
                 auth.signup(email, password)
                     .addOnSuccessListener {
                         CoroutineScope(Dispatchers.IO).launch {
-                           auth.createDataSources(userName)
+                            it.user?.uid?.let {
+                                auth.createDataSources(userName, it)
+                                _state.postValue(State.Authentication(true))
+                            } ?: _state.postValue(
+                                State.Error(
+                                    "There was an error while attempting to log in",
+                                    false
+                                )
+                            )
                         }
-                        Log.d("posting state","posting...")
-                        _state.value = State.Authentication(true)
+                        Log.d("posting state", "posting...")
                     }
                     .addOnFailureListener {
                         _state.value = State.Error(it.message, false)

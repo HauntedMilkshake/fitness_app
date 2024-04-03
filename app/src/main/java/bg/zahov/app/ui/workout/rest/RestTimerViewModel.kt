@@ -125,7 +125,7 @@ class RestTimerViewModel(application: Application) : AndroidViewModel(applicatio
 
     fun cancelTimer() {
         viewModelScope.launch {
-            restManager.stopTimer()
+            restManager.stopRest()
         }
     }
 

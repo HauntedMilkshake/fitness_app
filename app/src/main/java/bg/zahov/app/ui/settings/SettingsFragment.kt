@@ -83,10 +83,8 @@ class SettingsFragment : Fragment() {
 
         binding.apply {
             signOutButton.setOnClickListener {
-                Log.d("button", "button")
                 settingsViewModel.logout()
             }
-
 //                findNavController().navigate(R.id.settings_to_home)
             editProfile.setOnClickListener {
                 findNavController().navigate(R.id.settings_to_edit_profile)

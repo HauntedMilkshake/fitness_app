@@ -1,17 +1,12 @@
 package bg.zahov.app.data.provider
 
-import android.util.Log
 import bg.zahov.app.data.interfaces.UserProvider
-import bg.zahov.app.data.model.Measurement
-import bg.zahov.app.data.model.MeasurementType
 import bg.zahov.app.data.model.User
 import bg.zahov.app.data.repository.AuthenticationImpl
 import bg.zahov.app.data.repository.UserRepositoryImpl
 import com.google.android.gms.tasks.Task
 import com.google.firebase.auth.AuthResult
 import kotlinx.coroutines.flow.Flow
-import kotlinx.coroutines.flow.MutableSharedFlow
-import kotlinx.coroutines.flow.SharedFlow
 
 class UserProviderImpl : UserProvider {
     companion object {
@@ -47,12 +42,11 @@ class UserProviderImpl : UserProvider {
     override fun isAuthenticated(): Boolean = auth.isAuthenticated()
 
     override suspend fun initDataSources() = auth.initDataSources()
-    override suspend fun createDataSources(username: String) = auth.createDataSources(username)
+    override suspend fun createDataSources(username: String, userId: String) = auth.createDataSources(username, userId)
 
     override suspend fun updatePassword(newPassword: String): Task<Void> =
         auth.updatePassword(newPassword)
 
-    override suspend fun updateEmail(newEmail: String): Task<Void> = auth.updateEmail(newEmail)
 
     override suspend fun reauthenticate(password: String): Task<Void> =
         auth.reauthenticate(password)

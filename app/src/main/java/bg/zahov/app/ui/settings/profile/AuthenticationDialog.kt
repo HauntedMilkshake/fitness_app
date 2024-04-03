@@ -1,7 +1,6 @@
 package bg.zahov.app.ui.settings.profile
 
 import android.os.Bundle
-import android.util.Log
 import android.view.LayoutInflater
 import android.view.View
 import android.view.ViewGroup
@@ -44,12 +43,10 @@ class AuthenticationDialog : DialogFragment() {
             }
 
             editProfileViewModel.isUnlocked.observe(viewLifecycleOwner) {
-                Log.d("collecting is unlocked", it.toString())
                 if (it) dismiss()
             }
 
             editProfileViewModel.state.map { EditProfileUiMapper.map(it) }.observe(viewLifecycleOwner) {
-                showToast(it.errorMessage)
                 showToast(it.notifyMessage)
             }
         }

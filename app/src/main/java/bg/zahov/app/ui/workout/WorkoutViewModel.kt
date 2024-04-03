@@ -35,7 +35,6 @@ import bg.zahov.fitness.app.R
 import io.realm.kotlin.ext.toRealmList
 import kotlinx.coroutines.launch
 import java.time.LocalDateTime
-import java.time.LocalTime
 import java.util.Random
 
 class WorkoutViewModel(application: Application) : AndroidViewModel(application) {
@@ -417,7 +416,6 @@ class WorkoutViewModel(application: Application) : AndroidViewModel(application)
                         }
                     }
                 }
-
             }
         }
         exercises.values.forEach {
@@ -494,7 +492,6 @@ class WorkoutViewModel(application: Application) : AndroidViewModel(application)
             personalRecords = prs,
             volume = volume
         )
-        restTimerProvider.stopTimer()
         workoutProvider.addWorkoutState(RealmWorkoutState().apply {
             id = workout.id
             name = workout.name
@@ -505,8 +502,11 @@ class WorkoutViewModel(application: Application) : AndroidViewModel(application)
             this.exercises = workout.exercises.map { it.toRealmExercise() }.toRealmList()
             note = _note.value
             personalRecords = prs
-            restTimerStart = if(restTimerProvider.isRestActive()) restTimerProvider.getRestStart().toRealmString() else ""
+            restTimerStart = if(restTimerProvider.isRestActive()) restTimerProvider.getRestStartDate().toRealmString() else ""
+            fullRest = restTimerProvider.fullRest
         })
+        restTimerProvider.stopRest()
+
     }
 
     sealed interface State {

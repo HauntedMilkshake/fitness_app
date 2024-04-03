@@ -1,6 +1,5 @@
 package bg.zahov.app.data.repository
 
-import android.util.Log
 import bg.zahov.app.data.interfaces.Authentication
 import bg.zahov.app.data.remote.FirebaseAuthentication
 
@@ -33,11 +32,9 @@ class AuthenticationImpl : Authentication {
     override fun isAuthenticated(): Boolean = auth.isAuthenticated()
 
     override suspend fun initDataSources() = auth.init()
-    override suspend fun createDataSources(username: String) = auth.create(username)
+    override suspend fun createDataSources(username: String, userId: String) = auth.create(username, userId)
 
     override suspend fun updatePassword(newPassword: String) = auth.updatePassword(newPassword)
-
-    override suspend fun updateEmail(newEmail: String) = auth.updateEmail(newEmail)
 
     override suspend fun reauthenticate(password: String) = auth.reauthenticate(password)
 

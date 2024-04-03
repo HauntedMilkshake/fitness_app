@@ -9,6 +9,15 @@
         android:id="@+id/to_workout_fragment"
         app:destination="@id/workout" />
 
+    <action
+        android:id="@+id/to_shutting_down_fragment"
+        app:destination="@id/shutting_down" />
+
+    <fragment
+        android:id="@+id/shutting_down"
+        android:name="bg.zahov.app.ui.error.FragmentShuttingDown"
+        tools:layout="@layout/fragment_shutting_down" />
+
     <fragment
         android:id="@+id/welcome"
         android:name="bg.zahov.app.ui.welcome.WelcomeFragment"
@@ -132,7 +141,7 @@
         <action
             android:id="@+id/settings_to_welcome"
             app:destination="@id/welcome"
-            app:popUpTo="@id/home"
+            app:popUpTo="@id/settings"
             app:popUpToInclusive="true" />
         <action
             android:id="@+id/settings_to_edit_profile"
@@ -255,7 +264,7 @@
     <fragment
         android:id="@+id/measurement_information"
         android:name="bg.zahov.app.ui.measures.info.MeasurementInfoFragment"
-        tools:layout="@layout/fragment_measurement_information" >
+        tools:layout="@layout/fragment_measurement_information">
         <action
             android:id="@+id/measurement_information_to_measurement_input"
             app:destination="@id/measurement_input" />

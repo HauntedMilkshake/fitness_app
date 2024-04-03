@@ -114,7 +114,7 @@ class HomeFragment : Fragment() {
             override fun onMenuItemSelected(menuItem: MenuItem): Boolean {
                 return when (menuItem.itemId) {
                     R.id.settings -> {
-                        findNavController().navigate(R.id.settings)
+                        findNavController().navigate(R.id.home_to_settings)
                         true
                     }
 

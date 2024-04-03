@@ -10,7 +10,6 @@ import bg.zahov.app.data.model.Measurements
 import bg.zahov.app.data.model.User
 import bg.zahov.app.data.model.Workout
 import bg.zahov.app.util.toFirestoreMap
-import bg.zahov.app.util.toTimestamp
 import com.google.firebase.firestore.CollectionReference
 import com.google.firebase.firestore.DocumentReference
 import com.google.firebase.firestore.FirebaseFirestore
@@ -21,8 +20,6 @@ import kotlinx.coroutines.awaitAll
 import kotlinx.coroutines.flow.Flow
 import kotlinx.coroutines.flow.channelFlow
 import kotlinx.coroutines.flow.first
-import kotlinx.coroutines.flow.map
-import kotlinx.coroutines.flow.mapNotNull
 import kotlinx.coroutines.tasks.await
 import kotlinx.coroutines.withContext
 
@@ -49,9 +46,10 @@ class FirestoreManager {
         userId = id
     }
 
-    suspend fun createFirestore(username: String) = withContext(Dispatchers.IO) {
+    suspend fun createFirestore(username: String, userId: String) = withContext(Dispatchers.IO) {
         Log.d("creating firestore", "creating...")
         firestore.collection(USERS_COLLECTION).document(userId).set(User(username).toFirestoreMap())
+        initUser(userId)
     }
 
     private suspend fun <T> getNonObservableDocData(
@@ -102,13 +100,13 @@ class FirestoreManager {
 
     suspend fun getUser(): Flow<User> =
         getDocData(firestore.collection(USERS_COLLECTION).document(userId)) { info ->
-            User.fromFirestoreMap(info) ?: throw CriticalDataNullException("Critical data missing!")
+            User.fromFirestoreMap(info)
         }
 
     suspend fun getWorkouts(): Flow<List<Workout>> = getCollectionData(
         firestore.collection(USERS_COLLECTION).document(userId).collection(WORKOUTS_SUB_COLLECTION)
     ) { info ->
-        Workout.fromFirestoreMap(info) ?: throw CriticalDataNullException("Critical data missing!")
+        Workout.fromFirestoreMap(info)
     }
 
     suspend fun getTemplateWorkouts(): Flow<List<Workout>> = getCollectionData(
@@ -116,7 +114,6 @@ class FirestoreManager {
             .collection(TEMPLATE_WORKOUTS_SUB_COLLECTION)
     ) { info ->
         Workout.fromFirestoreMap(info)
-            ?: throw CriticalDataNullException("Critical data missing!")
     }
 
     //TODO(we could make the request work if the initial result is null to search for the template it belongs to so it isn't null
@@ -152,7 +149,7 @@ class FirestoreManager {
 
     suspend fun upsertMeasurement(type: MeasurementType, measurement: Measurement) {
         withContext(Dispatchers.IO) {
-            var newMap = getLatestMeasurementsByType(type)
+            val newMap = getLatestMeasurementsByType(type)
             val newList = newMap.measurements[type].orEmpty().toMutableList()
             newList.add(measurement)
             firestore.collection(USERS_COLLECTION).document(userId).collection(
@@ -254,7 +251,6 @@ class FirestoreManager {
             firestore.collection(USERS_COLLECTION).document(userId)
                 .collection(TEMPLATE_WORKOUTS_SUB_COLLECTION).document(workout.id).delete()
                 .addOnSuccessListener {
-                    Log.d("LISTEN", "deleted")
                 }
         }
     }

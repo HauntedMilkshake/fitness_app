@@ -16,9 +16,8 @@ interface UserProvider {
     suspend fun passwordResetForLoggedUser(): Task<Void>
     fun isAuthenticated(): Boolean
     suspend fun initDataSources()
-    suspend fun createDataSources(username: String)
+    suspend fun createDataSources(username: String, userId: String)
     suspend fun updatePassword(newPassword: String): Task<Void>
-    suspend fun updateEmail(newEmail: String): Task<Void>
     suspend fun reauthenticate(password: String): Task<Void>
     suspend fun getEmail(): String
 }

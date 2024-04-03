@@ -9,7 +9,6 @@ import com.google.android.gms.tasks.Task
 import com.google.android.gms.tasks.Tasks
 import com.google.firebase.auth.EmailAuthProvider
 import com.google.firebase.auth.FirebaseAuth
-import com.google.firebase.auth.FirebaseAuthException
 import com.google.firebase.auth.FirebaseAuthInvalidUserException
 import com.google.firebase.auth.FirebaseAuthRecentLoginRequiredException
 import kotlinx.coroutines.Dispatchers
@@ -85,21 +84,13 @@ class FirebaseAuthentication {
         }
     }
 
-    suspend fun create(username: String) {
-        firestore.createFirestore(username)
+    suspend fun create(username: String, userId: String) {
+        firestore.createFirestore(username, userId)
         realm.createRealm()
     }
 
     suspend fun updatePassword(newPassword: String): Task<Void> = withContext(Dispatchers.IO) {
         auth.currentUser?.updatePassword(newPassword) ?: Tasks.forResult(null)
-    }
-
-    suspend fun updateEmail(newEmail: String): Task<Void> = withContext(Dispatchers.IO) {
-        try {
-            auth.currentUser?.let { updateEmail(newEmail) } ?: Tasks.forResult(null)
-        } catch (e: FirebaseAuthException) {
-            throw AuthenticationException(e.message ?: "tough luck")
-        }
     }
 
     suspend fun reauthenticate(password: String): Task<Void> = withContext(Dispatchers.IO) {

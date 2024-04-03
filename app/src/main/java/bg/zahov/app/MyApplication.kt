@@ -7,6 +7,7 @@ import bg.zahov.app.data.provider.MeasurementProviderImpl
 import bg.zahov.app.data.provider.ReplaceableExerciseProvider
 import bg.zahov.app.data.provider.RestTimerProvider
 import bg.zahov.app.data.provider.SelectableExerciseProvider
+import bg.zahov.app.data.provider.ServiceErrorHandlerImpl
 import bg.zahov.app.data.provider.SettingsProviderImpl
 import bg.zahov.app.data.provider.UserProviderImpl
 import bg.zahov.app.data.provider.WorkoutProviderImpl
@@ -45,7 +46,9 @@ class MyApplication : Application() {
     val measurementProvider by lazy {
         MeasurementProviderImpl.getInstance()
     }
-
+    val serviceErrorHandler by lazy {
+        ServiceErrorHandlerImpl.getInstance()
+    }
     override fun onCreate() {
         super.onCreate()
         Firebase.initialize(this)
@@ -68,3 +71,4 @@ fun Application.getAddExerciseToWorkoutProvider() =
 fun Application.getRestTimerProvider() = (this as MyApplication).restTimerProvider
 fun Application.getFilterProvider() = (this as MyApplication).filterProvider
 
+fun Application.getServiceErrorProvider() = (this as MyApplication).serviceErrorHandler

@@ -11,6 +11,7 @@ import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.StateFlow
 import kotlinx.coroutines.launch
 import java.time.LocalDateTime
+import kotlin.math.abs
 
 class RestTimerProvider: RestProvider {
     companion object {
@@ -34,14 +35,16 @@ class RestTimerProvider: RestProvider {
     private lateinit var timer: CountDownTimer
     private var remainingTime: Long = 0
     private lateinit var restTimerStart: LocalDateTime
+    var fullRest: Long = 0
 
-    override suspend fun startRest(startTime: Long) {
+    override suspend fun startRest(startTime: Long, elapsedTime: Long) {
         _restState.emit(RestState.Active)
         restTimerStart = LocalDateTime.now()
+        fullRest = startTime
         if (remainingTime == 0L) {
             _restTimer.value.fullRest = startTime.timeToString()
         }
-        remainingTime = startTime
+        remainingTime = startTime - abs(elapsedTime)
         timer = object : CountDownTimer(startTime, 1000) {
             override fun onTick(p0: Long) {
                 CoroutineScope(Dispatchers.Main).launch {

@@ -11,6 +11,7 @@ import androidx.navigation.findNavController
 import androidx.navigation.ui.AppBarConfiguration
 import androidx.navigation.ui.navigateUp
 import androidx.navigation.ui.setupWithNavController
+import bg.zahov.app.data.model.state.ServiceStateUiMapper
 import bg.zahov.app.data.model.state.WorkoutManagerUiMapper
 import bg.zahov.fitness.app.R
 import bg.zahov.fitness.app.databinding.ActivityMainBinding
@@ -23,6 +24,7 @@ class MainActivity : AppCompatActivity() {
     private lateinit var appBarConfiguration: AppBarConfiguration
     private lateinit var binding: ActivityMainBinding
     private val workoutManagerViewModel: WorkoutManagerViewModel by viewModels()
+    private val serviceErrorViewModel: ServiceErrorStateViewModel by viewModels()
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
@@ -39,6 +41,11 @@ class MainActivity : AppCompatActivity() {
         workoutManagerViewModel.state.map { WorkoutManagerUiMapper.map(it) }.observe(this) {
             setWorkoutVisibility(it.trailingWorkoutVisibility)
             if (it.openWorkout) navController.navigate(R.id.to_workout_fragment)
+        }
+
+        serviceErrorViewModel.serviceState.map { ServiceStateUiMapper.map(it) }.observe(this) {
+            it.action?.let { action -> navController.navigate(action) }
+            if(it.shutdown) finish()
         }
 
         workoutManagerViewModel.template.observe(this) {
@@ -74,6 +81,7 @@ class MainActivity : AppCompatActivity() {
         super.onPause()
         workoutManagerViewModel.saveWorkoutState()
     }
+
     override fun onStop() {
         super.onStop()
         workoutManagerViewModel.saveWorkoutState()
@@ -97,12 +105,6 @@ fun FragmentActivity.showTopBar() {
 fun FragmentActivity.hideTopBar() {
     findViewById<AppBarLayout>(R.id.top_bar)?.visibility = View.GONE
     findViewById<MaterialToolbar>(R.id.toolbar)?.visibility = View.GONE
-
-}
-
-fun FragmentActivity.invisibleTopBar() {
-    findViewById<AppBarLayout>(R.id.top_bar)?.visibility = View.INVISIBLE
-    findViewById<MaterialToolbar>(R.id.toolbar)?.visibility = View.INVISIBLE
 
 }
 

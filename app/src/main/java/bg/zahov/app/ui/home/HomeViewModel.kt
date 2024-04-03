@@ -6,8 +6,11 @@ import androidx.lifecycle.AndroidViewModel
 import androidx.lifecycle.LiveData
 import androidx.lifecycle.MutableLiveData
 import androidx.lifecycle.viewModelScope
+import bg.zahov.app.data.exception.CriticalDataNullException
 import bg.zahov.app.data.local.RealmWorkoutState
 import bg.zahov.app.data.model.Workout
+import bg.zahov.app.getRestTimerProvider
+import bg.zahov.app.getServiceErrorProvider
 import bg.zahov.app.getUserProvider
 import bg.zahov.app.getWorkoutProvider
 import bg.zahov.app.getWorkoutStateManager
@@ -34,7 +37,12 @@ class HomeViewModel(application: Application) : AndroidViewModel(application) {
     private val workoutStateManager by lazy {
         application.getWorkoutStateManager()
     }
-
+    private val workoutRestManager by lazy {
+        application.getRestTimerProvider()
+    }
+    private val serviceErrorHandler by lazy {
+        application.getServiceErrorProvider()
+    }
     private val _userName = MutableLiveData<String>()
     val userName: LiveData<String>
         get() = _userName
@@ -61,23 +69,30 @@ class HomeViewModel(application: Application) : AndroidViewModel(application) {
         checkWorkoutState()
         viewModelScope.launch {
             launch {
-                userRepo.getUser().collect {
-                    _userName.postValue(it.name)
+                try {
+                    userRepo.getUser().collect {
+                        _userName.postValue(it.name)
+                    }
+                } catch (e: CriticalDataNullException) {
+                    serviceErrorHandler.stopApplication()
                 }
             }
             launch {
                 _state.postValue(State.Loading(true))
-                workoutRepo.getPastWorkouts().collect { pastWorkouts ->
-                    _numberOfWorkouts.postValue(pastWorkouts.size)
-                    _workoutEntries.postValue(getWorkoutsPerWeek(pastWorkouts).map {
-                        BarEntry(
-                            it.key.toFloat(),
-                            it.value.toFloat()
-                        )
-                    })
-                    _state.postValue(State.Default)
+                try {
+                    workoutRepo.getPastWorkouts().collect { pastWorkouts ->
+                        _numberOfWorkouts.postValue(pastWorkouts.size)
+                        _workoutEntries.postValue(getWorkoutsPerWeek(pastWorkouts).map {
+                            BarEntry(
+                                it.key.toFloat(),
+                                it.value.toFloat()
+                            )
+                        })
+                        _state.postValue(State.Default)
+                    }
+                } catch (e: CriticalDataNullException) {
+                    serviceErrorHandler.stopApplication()
                 }
-
             }
         }
     }
@@ -128,10 +143,23 @@ class HomeViewModel(application: Application) : AndroidViewModel(application) {
 
     private suspend fun checkPreviousState(previousState: RealmWorkoutState) {
         if (previousState.id != "default") {
-            Log.d("date when retrieved", previousState.date)
             val lastTime =
                 Duration.between(LocalDateTime.now(), previousState.date.toLocalDateTimeRlm())
-            Log.d("date when duration", lastTime.seconds.toString())
+            Log.d("Rest Timer information", previousState.restTimerStart)
+            Log.d("Rest full time", previousState.fullRest.toString())
+            if (previousState.restTimerStart.isNotEmpty() && Duration.between(
+                    LocalDateTime.now(),
+                    previousState.restTimerStart.toLocalDateTimeRlm()
+                ).seconds * 1000 > 0
+            ) {
+                Log.d("Rest Timer", "about to start")
+                workoutRestManager.startRest(
+                    previousState.fullRest, Duration.between(
+                        LocalDateTime.now(),
+                        previousState.restTimerStart.toLocalDateTimeRlm()
+                    ).seconds * 1000
+                )
+            }
             workoutStateManager.startWorkout(
                 Workout(
                     id = previousState.id,
