@@ -145,20 +145,21 @@ class HomeViewModel(application: Application) : AndroidViewModel(application) {
         if (previousState.id != "default") {
             val lastTime =
                 Duration.between(LocalDateTime.now(), previousState.date.toLocalDateTimeRlm())
-            Log.d("Rest Timer information", previousState.restTimerStart)
-            Log.d("Rest full time", previousState.fullRest.toString())
-            if (previousState.restTimerStart.isNotEmpty() && Duration.between(
-                    LocalDateTime.now(),
-                    previousState.restTimerStart.toLocalDateTimeRlm()
-                ).seconds * 1000 > 0
+//            Log.d("Rest Timer information", previousState.restTimerStart)
+//            Log.d("Rest full time", previousState.fullRest.toString())
+            if (previousState.restTimerStart.isNotEmpty() && previousState.restTimerEnd.isNotEmpty() && !LocalDateTime.now()
+                    .isAfter(previousState.timeOfStop.toLocalDateTimeRlm())
             ) {
-                Log.d("Rest Timer", "about to start")
-                workoutRestManager.startRest(
-                    previousState.fullRest, Duration.between(
-                        LocalDateTime.now(),
-                        previousState.restTimerStart.toLocalDateTimeRlm()
-                    ).seconds * 1000
-                )
+                Log.d("Detected rest", "rest detected")
+                val restDuration = Duration.between(
+                    previousState.restTimerStart.toLocalDateTimeRlm(),
+                    previousState.restTimerEnd.toLocalDateTimeRlm()
+                ).seconds * 1000
+                val elapsedTime = Duration.between(
+                    previousState.restTimerStart.toLocalDateTimeRlm(),
+                    LocalDateTime.now()
+                ).seconds * 1000
+                workoutRestManager.startRest(restDuration, elapsedTime)
             }
             workoutStateManager.startWorkout(
                 Workout(

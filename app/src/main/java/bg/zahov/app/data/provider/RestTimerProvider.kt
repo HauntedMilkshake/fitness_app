@@ -1,6 +1,7 @@
 package bg.zahov.app.data.provider
 
 import android.os.CountDownTimer
+import android.util.Log
 import bg.zahov.app.data.interfaces.RestProvider
 import bg.zahov.app.data.model.RestState
 import bg.zahov.app.util.parseTimeStringToLong
@@ -13,7 +14,7 @@ import kotlinx.coroutines.launch
 import java.time.LocalDateTime
 import kotlin.math.abs
 
-class RestTimerProvider: RestProvider {
+class RestTimerProvider : RestProvider {
     companion object {
         @Volatile
         private var instance: RestTimerProvider? = null
@@ -35,17 +36,19 @@ class RestTimerProvider: RestProvider {
     private lateinit var timer: CountDownTimer
     private var remainingTime: Long = 0
     private lateinit var restTimerStart: LocalDateTime
-    var fullRest: Long = 0
+    private lateinit var restTimerEnd: LocalDateTime
 
-    override suspend fun startRest(startTime: Long, elapsedTime: Long) {
+    override suspend fun startRest(duration: Long, elapsedTime: Long) {
         _restState.emit(RestState.Active)
         restTimerStart = LocalDateTime.now()
-        fullRest = startTime
+//        Log.d("Adding seconds", LocalDateTime.now().plusSeconds(duration))
+        restTimerEnd = LocalDateTime.now().plusSeconds(duration)
+
         if (remainingTime == 0L) {
-            _restTimer.value.fullRest = startTime.timeToString()
+            _restTimer.value.fullRest = duration.timeToString()
         }
-        remainingTime = startTime - abs(elapsedTime)
-        timer = object : CountDownTimer(startTime, 1000) {
+        remainingTime = duration - abs(elapsedTime)
+        timer = object : CountDownTimer(duration, 1000) {
             override fun onTick(p0: Long) {
                 CoroutineScope(Dispatchers.Main).launch {
                     remainingTime = p0
@@ -80,6 +83,7 @@ class RestTimerProvider: RestProvider {
         _restTimer.value.fullRest =
             (_restTimer.value.fullRest!!.parseTimeStringToLong() + timeToAdd).timeToString()
         startRest(remainingTime + timeToAdd)
+        restTimerEnd.plusSeconds(timeToAdd)
     }
 
     override suspend fun removeTime(timeToRemove: Long) {
@@ -91,6 +95,7 @@ class RestTimerProvider: RestProvider {
     }
 
     override fun isRestActive(): Boolean = restState.value == RestState.Active
-    override fun getRestStartDate(): LocalDateTime =  restTimerStart
+    override fun getRestStartDate(): LocalDateTime = restTimerStart
+    fun getEndOfRest() = restTimerEnd
     data class Rest(var elapsedTime: String? = null, var fullRest: String? = null)
 }

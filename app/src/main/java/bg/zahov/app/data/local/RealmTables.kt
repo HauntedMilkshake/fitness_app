@@ -39,7 +39,8 @@ class RealmWorkoutState : RealmObject {
     var note: String? = null
     var personalRecords = 0
     var restTimerStart: String = ""
-    var fullRest: Long = 0
+    var restTimerEnd: String = ""
+    var timeOfStop: String = ""
 }
 
 class RealmExercise : RealmObject {
@@ -57,6 +58,7 @@ class RealmSets : RealmObject {
     var firstMetric: Double = 0.0
     var secondMetric: Int = 0
 }
+
 object RealmTimePattern {
     const val realmTimePattern = "yyyy-MM-dd HH:mm:ss"
 }

@@ -492,6 +492,9 @@ class WorkoutViewModel(application: Application) : AndroidViewModel(application)
             personalRecords = prs,
             volume = volume
         )
+        Log.d("Rest Timer Start", if(restTimerProvider.isRestActive()) restTimerProvider.getRestStartDate().toRealmString() else "")
+        Log.d("Rest Timer end", if(restTimerProvider.isRestActive()) restTimerProvider.getEndOfRest().toRealmString() else "")
+        Log.d("time of stop", LocalDateTime.now().toRealmString())
         workoutProvider.addWorkoutState(RealmWorkoutState().apply {
             id = workout.id
             name = workout.name
@@ -503,7 +506,8 @@ class WorkoutViewModel(application: Application) : AndroidViewModel(application)
             note = _note.value
             personalRecords = prs
             restTimerStart = if(restTimerProvider.isRestActive()) restTimerProvider.getRestStartDate().toRealmString() else ""
-            fullRest = restTimerProvider.fullRest
+            restTimerEnd = if(restTimerProvider.isRestActive()) restTimerProvider.getEndOfRest().toRealmString() else ""
+            timeOfStop = LocalDateTime.now().toRealmString()
         })
         restTimerProvider.stopRest()
 
