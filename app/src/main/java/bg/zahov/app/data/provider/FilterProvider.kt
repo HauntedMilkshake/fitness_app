@@ -1,5 +1,6 @@
 package bg.zahov.app.data.provider
 
+import android.util.Log
 import bg.zahov.app.data.model.SelectableFilter
 import kotlinx.coroutines.flow.Flow
 import kotlinx.coroutines.flow.MutableSharedFlow
@@ -21,7 +22,9 @@ class FilterProvider {
     private val selectedFilters = mutableListOf<SelectableFilter>()
 
     suspend fun addFilter(item: SelectableFilter) {
+        Log.d("selected filters before adding", selectedFilters.toString())
         selectedFilters.add(item)
+        Log.d("selected filters afte  adding", selectedFilters.toString())
         emitSelectedFilters()
     }
 

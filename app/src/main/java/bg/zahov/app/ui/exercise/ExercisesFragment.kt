@@ -105,7 +105,7 @@ class ExercisesFragment : Fragment() {
                         }
 
                         R.id.filter -> {
-                            FilterDialog().show(childFragmentManager, FilterDialog.TAG)
+                            FilterDialog().show(requireActivity().supportFragmentManager, FilterDialog.TAG)
                             true
                         }
 
@@ -207,6 +207,7 @@ class ExercisesFragment : Fragment() {
         }
     }
 
+    override fun onSaveInstanceState(outState: Bundle) {}
     override fun onPause() {
         super.onPause()
         exerciseViewModel.onConfirm()

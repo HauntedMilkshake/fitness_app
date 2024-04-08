@@ -81,7 +81,7 @@
     <string name="new_workout_template">New workout template</string>
     <string name="add_exercise">Add exercise</string>
     <string name="template_name_placeholder">Example</string>
-    <string name="new_workout_template_hint">Workout template name:</string>
+    <string name="new_workout_template_hint">Workout template name</string>
     <!-- Strings used for exercise template creation   -->
     <string name="set_column_text">Set</string>
     <string name="previous_column_text">Previous</string>
@@ -109,7 +109,7 @@
     <string name="drop_set"><font color="#673ab7"><b>D</b></font>  Drop set</string>
     <string name="failure_set"><font color="#ff0000"><b>F</b></font>   Failure</string>
     <string name="workout_template_note">note</string>
-    <string name="rest_fragment_info">Choose a duration below or set your own. Custom durations are saved for next time.</string>
+    <string name="rest_fragment_info">Choose a duration below or set your own</string>
     <string name="create_custom_timer">create custom timer</string>
     <string name="minute">1:00</string>
     <string name="minute_and_half">1:30</string>
@@ -136,7 +136,7 @@
     <string name="Charts">Charts</string>
     <string name="sets_performed">Sets performed</string>
     <string name="personal_records">PERSONAL RECORDS</string>
-    <string name="estimated_1rm">Estimatd 1RM</string>
+    <string name="estimated_1rm">Estimated 1RM</string>
     <string name="max_volume">Max volume</string>
     <string name="max_weight">Max weight</string>
     <string name="history_measurement">HISTORY</string>

@@ -20,6 +20,7 @@ import bg.zahov.app.data.model.SetType
 import bg.zahov.app.hideBottomNav
 import bg.zahov.app.hideTopBar
 import bg.zahov.app.showBottomNav
+import bg.zahov.app.showTopBar
 import bg.zahov.app.ui.workout.add.ExerciseSetAdapter
 import bg.zahov.app.ui.workout.add.WorkoutEntry
 import bg.zahov.app.util.SetSwipeGesture
@@ -192,6 +193,10 @@ class WorkoutFragment : Fragment() {
         }
     }
 
+    override fun onStop() {
+        super.onStop()
+        requireActivity().showTopBar()
+    }
     override fun onDestroy() {
         super.onDestroy()
         _binding = null

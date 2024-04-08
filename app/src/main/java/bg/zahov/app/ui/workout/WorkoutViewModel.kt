@@ -300,7 +300,8 @@ class WorkoutViewModel(application: Application) : AndroidViewModel(application)
                 }
 
                 R.id.second_input_field_text -> {
-                    (_exercises.value?.get(position) as? SetEntry)?.setEntry?.set?.secondMetric = metric.filterIntegerInput()
+                    (_exercises.value?.get(position) as? SetEntry)?.setEntry?.set?.secondMetric =
+                        metric.filterIntegerInput()
                 }
             }
         }
@@ -329,19 +330,22 @@ class WorkoutViewModel(application: Application) : AndroidViewModel(application)
 
     fun finishWorkout() {
         if (_exercises.value.isNullOrEmpty()) {
-            _restTimerState.postValue(State.Error("Cannot finish a workout without any exercises!"))
+            _restTimerState.value = State.Error("Cannot finish a workout without any exercises!")
             return
         }
-        if (_exercises.value!!.all { entry -> entry is ExerciseEntry }) {
-            _restTimerState.postValue(State.Error("Cannot finish a workout without any sets!"))
+        if (_exercises.value.orEmpty().all { entry -> entry is ExerciseEntry }) {
+            _restTimerState.value = State.Error("Cannot finish a workout without any sets!")
             return
         }
-
+        if (_exercises.value.orEmpty().filterIsInstance<SetEntry>().all {
+                (it.setEntry.set.secondMetric ?: 0) == 0 && (it.setEntry.set.firstMetric
+                    ?: 0.0) == 0.0
+            }) {
+            _restTimerState.value = State.Error("Cannot finish a workout with empty sets!")
+            return
+        }
         viewModelScope.launch {
             val (exercises, prs, volume) = getExerciseArrayAndPRs(_exercises.value.orEmpty())
-            exercises.forEach {
-                Log.d("exercise best set after conversion", it.bestSet.toString())
-            }
             repo.addWorkoutToHistory(
                 Workout(
                     id = workoutId ?: hashString("${Random().nextInt(Int.MAX_VALUE)}"),
@@ -363,7 +367,10 @@ class WorkoutViewModel(application: Application) : AndroidViewModel(application)
         }
     }
 
-    private suspend fun getExerciseArrayAndPRs(entries: List<WorkoutEntry>, removeEmpty: Boolean = true): Triple<List<Exercise>, Int, Double> {
+    private suspend fun getExerciseArrayAndPRs(
+        entries: List<WorkoutEntry>,
+        removeEmpty: Boolean = true,
+    ): Triple<List<Exercise>, Int, Double> {
         val exercises = linkedMapOf<String, Exercise>()
         var prs = 0
         var volume = 0.0
@@ -408,7 +415,6 @@ class WorkoutViewModel(application: Application) : AndroidViewModel(application)
 //                                            bestSet = entry.setEntry.set
 //                                        }
 //                                    }
-
                                     else -> if (weight > (bestSet.firstMetric ?: 0.0)) bestSet =
                                         entry.setEntry.set
                                 }
@@ -418,20 +424,11 @@ class WorkoutViewModel(application: Application) : AndroidViewModel(application)
                 }
             }
         }
-        exercises.values.forEach {
-            Log.d("BEST SET FOR EXERCISE", it.bestSet.toString())
-        }
-        Log.d("EXERCISES BEFORE DROP", exercises.entries.size.toString())
-        //We should have atleast 1 exercise with sets because the case of finishWorkout() covers where all exercises have 0 sets :)
+
         if (removeEmpty) exercises.entries.removeIf { it.value.sets.isEmpty() }
 
-        Log.d("EXERCISES AFTER DROP", exercises.entries.size.toString())
-
-        //
         val temp = exercises.values.map { it.copy() }.toMutableList()
-        temp.forEach {
-            Log.d("exercise", it.toString())
-        }
+
         temp.forEach { currExercise ->
             templateExercises.find { it.name == currExercise.name }?.let { template ->
                 when (currExercise.category) {
@@ -492,9 +489,6 @@ class WorkoutViewModel(application: Application) : AndroidViewModel(application)
             personalRecords = prs,
             volume = volume
         )
-        Log.d("Rest Timer Start", if(restTimerProvider.isRestActive()) restTimerProvider.getRestStartDate().toRealmString() else "")
-        Log.d("Rest Timer end", if(restTimerProvider.isRestActive()) restTimerProvider.getEndOfRest().toRealmString() else "")
-        Log.d("time of stop", LocalDateTime.now().toRealmString())
         workoutProvider.addWorkoutState(RealmWorkoutState().apply {
             id = workout.id
             name = workout.name
@@ -505,8 +499,11 @@ class WorkoutViewModel(application: Application) : AndroidViewModel(application)
             this.exercises = workout.exercises.map { it.toRealmExercise() }.toRealmList()
             note = _note.value
             personalRecords = prs
-            restTimerStart = if(restTimerProvider.isRestActive()) restTimerProvider.getRestStartDate().toRealmString() else ""
-            restTimerEnd = if(restTimerProvider.isRestActive()) restTimerProvider.getEndOfRest().toRealmString() else ""
+            restTimerStart =
+                if (restTimerProvider.isRestActive()) restTimerProvider.getRestStartDate()
+                    .toRealmString() else ""
+            restTimerEnd = if (restTimerProvider.isRestActive()) restTimerProvider.getEndOfRest()
+                .toRealmString() else ""
             timeOfStop = LocalDateTime.now().toRealmString()
         })
         restTimerProvider.stopRest()

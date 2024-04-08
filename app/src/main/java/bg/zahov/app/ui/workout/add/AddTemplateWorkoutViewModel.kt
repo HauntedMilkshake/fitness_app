@@ -75,9 +75,9 @@ class AddTemplateWorkoutViewModel(application: Application) : AndroidViewModel(a
             }
             launch {
                 try {
-                    settingsProvider.getSettings().collect {
-                        it.obj?.let { settingz ->
-                            settings = settingz
+                    settingsProvider.getSettings().collect {settingsObject ->
+                        settingsObject.obj?.let { collectedSettings ->
+                            settings = collectedSettings
                         }
                     }
                 } catch (e: Exception) {
@@ -189,8 +189,7 @@ class AddTemplateWorkoutViewModel(application: Application) : AndroidViewModel(a
             }
 
             viewModelScope.launch {
-                val exercises = getNormalExercises(_currExercises.value!!).toMutableList()
-                exercises.removeIf { it.sets.isEmpty() }
+                val exercises = getNormalExercises(_currExercises.value.orEmpty()).toMutableList()
                 workoutProvider.addTemplateWorkout(
                     Workout(
                         id = if (edit) workoutIdToEdit else generateRandomId(),

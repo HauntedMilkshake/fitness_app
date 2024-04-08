@@ -91,8 +91,6 @@ class StartWorkoutFragment : Fragment() {
             startWorkoutViewModel.state.map { StartWorkoutUiMapper.map(it) }
                 .observe(viewLifecycleOwner) {
                     showToast(it.errorMessage)
-
-//                    if (it.shutdown) TODO()
                 }
 
             startEmptyWorkout.setOnClickListener {

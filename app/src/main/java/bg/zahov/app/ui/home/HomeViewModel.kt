@@ -143,12 +143,11 @@ class HomeViewModel(application: Application) : AndroidViewModel(application) {
 
     private suspend fun checkPreviousState(previousState: RealmWorkoutState) {
         if (previousState.id != "default") {
-            val lastTime =
-                Duration.between(LocalDateTime.now(), previousState.date.toLocalDateTimeRlm())
-//            Log.d("Rest Timer information", previousState.restTimerStart)
-//            Log.d("Rest full time", previousState.fullRest.toString())
+            val lastTime = Duration.between(LocalDateTime.now(), previousState.date.toLocalDateTimeRlm())
+                LocalDateTime.now().isAfter(previousState.restTimerEnd.toLocalDateTimeRlm())
+                    .toString()
             if (previousState.restTimerStart.isNotEmpty() && previousState.restTimerEnd.isNotEmpty() && !LocalDateTime.now()
-                    .isAfter(previousState.timeOfStop.toLocalDateTimeRlm())
+                    .isAfter(previousState.restTimerEnd.toLocalDateTimeRlm())
             ) {
                 Log.d("Detected rest", "rest detected")
                 val restDuration = Duration.between(

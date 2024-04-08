@@ -193,9 +193,7 @@
         tools:layout="@layout/fragment_start_workout">
         <action
             android:id="@+id/workout_to_create_workout_template"
-            app:destination="@+id/create_workout_template"
-            app:popUpTo="@id/create_workout_template"
-            app:popUpToInclusive="true" />
+            app:destination="@+id/create_workout_template" />
         <action
             android:id="@+id/start_workout_to_template_workout_info"
             app:destination="@id/template_workout_info" />
