@@ -424,7 +424,7 @@ class WorkoutViewModel(application: Application) : AndroidViewModel(application)
                 }
             }
         }
-
+        //Todo(no best set is currently saved for the exercises therefore there are never prs)
         if (removeEmpty) exercises.entries.removeIf { it.value.sets.isEmpty() }
 
         val temp = exercises.values.map { it.copy() }.toMutableList()
@@ -453,7 +453,6 @@ class WorkoutViewModel(application: Application) : AndroidViewModel(application)
                         if (currentBestSetResult <= previousBestSetResult) {
                             currExercise.bestSet = template.bestSet
                         } else {
-                            Log.d("PR", "WOHOO")
                             prs++
                         }
                     }

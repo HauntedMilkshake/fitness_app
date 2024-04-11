@@ -25,7 +25,8 @@ import com.github.mikephil.charting.data.BarData
 import com.github.mikephil.charting.data.BarDataSet
 import com.github.mikephil.charting.formatter.IndexAxisValueFormatter
 
-class HomeFragment : Fragment() {
+class
+HomeFragment : Fragment() {
     private var _binding: FragmentHomeBinding? = null
     private val binding
         get() = requireNotNull(_binding)

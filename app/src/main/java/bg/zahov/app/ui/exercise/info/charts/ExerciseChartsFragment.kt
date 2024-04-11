@@ -2,6 +2,7 @@ package bg.zahov.app.ui.exercise.info.charts
 
 import android.graphics.Color
 import android.os.Bundle
+import android.util.Log
 import android.view.LayoutInflater
 import android.view.View
 import android.view.ViewGroup
@@ -36,7 +37,7 @@ class ExerciseChartsFragment : Fragment() {
         super.onViewCreated(view, savedInstanceState)
         binding.apply {
             exerciseChartViewModel.oneRepMax.observe(viewLifecycleOwner) {
-                val dataSet = LineDataSet(it.second, "results")
+                val dataSet = LineDataSet(it.third, "results")
 
                 bestOneRepMaxSet.apply {
                     data = LineData(dataSet)
@@ -44,27 +45,29 @@ class ExerciseChartsFragment : Fragment() {
                     invalidate()
                 }
 
-                bestOneRepMaxSet.axisRight.axisMinimum = 0f
+                bestOneRepMaxSet.axisRight.axisMinimum = it.second
                 bestOneRepMaxSet.axisRight.axisMaximum = it.first
                 dataSet.valueTextColor = Color.WHITE
                 dataSet.valueTextSize = 13f
             }
 
             exerciseChartViewModel.totalVolume.observe(viewLifecycleOwner) {
-                val dataSet = LineDataSet(it.second, "results")
-                totalVolume.axisRight.axisMinimum = 0f
-                totalVolume.axisRight.axisMaximum = it.first
-                dataSet.valueTextColor = Color.WHITE
-                dataSet.valueTextSize = 13f
+                Log.d("data size", it.second.toString())
+                val dataSet = LineDataSet(it.third, "results")
                 totalVolume.apply {
                     data = LineData(dataSet)
                     notifyDataSetChanged()
                     invalidate()
                 }
+                totalVolume.axisRight.axisMinimum = it.second
+                totalVolume.axisRight.axisMaximum = it.first
+                dataSet.valueTextColor = Color.WHITE
+                dataSet.valueTextSize = 13f
+
             }
             exerciseChartViewModel.maxReps.observe(viewLifecycleOwner) {
-                val dataSet = LineDataSet(it.second, "results")
-                bestSetReps.axisRight.axisMinimum = 0f
+                val dataSet = LineDataSet(it.third, "results")
+                bestSetReps.axisRight.axisMinimum = it.second
                 bestSetReps.axisRight.axisMaximum = it.first
                 dataSet.valueTextColor = Color.WHITE
                 dataSet.valueTextSize = 13f
@@ -74,16 +77,18 @@ class ExerciseChartsFragment : Fragment() {
                     invalidate()
                 }
             }
-            setupChart(bestOneRepMaxSet, "One rep max")
+            setupChart(bestOneRepMaxSet, "One rep max estimates-")
             setupChart(totalVolume, "Max volume")
             setupChart(bestSetReps, "Max reps")
         }
     }
 
     private fun setupChart(chart: LineChart, chartDescription: String) {
+        Log.d("chart setup", "")
         chart.apply {
             setPinchZoom(false)
             setDrawGridBackground(false)
+            isDoubleTapToZoomEnabled = false
             legend.isEnabled = false
             axisLeft.isEnabled = false
 
@@ -96,15 +101,6 @@ class ExerciseChartsFragment : Fragment() {
                 axisMaximum = LocalDate.now().lengthOfMonth().toFloat()
                 position = XAxis.XAxisPosition.BOTTOM
                 textColor = Color.WHITE
-//                valueFormatter = object : ValueFormatter() {
-//                    override fun getFormattedValue(value: Float): String {
-//                        return if (value.toInt() + 1 in 1..LocalDate.now().lengthOfMonth()) {
-//                            (value.toInt() + 1).toString()
-//                        } else {
-//                            ""
-//                        }
-//                    }
-//                }
             }
             axisRight.apply {
                 textSize = 14f

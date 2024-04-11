@@ -166,22 +166,6 @@ class FirestoreManager {
         Measurements.fromFirestoreMap(it, type)
     }
 
-//    suspend fun getMeasurements(): Flow<Measurements> = getCollectionData(
-//        firestore.collection(
-//            USERS_COLLECTION
-//        ).document(userId).collection(MEASUREMENTS_COLLECTION)
-//    ) {
-//        Measurements.fromFirestoreMap(it)
-//    }.map {
-//        val mergedMap = mutableMapOf<MeasurementType, List<Measurement>>()
-//        it.forEach { map ->
-//            mergedMap[map.measurements.keys.first()] = map.measurements.values.first()
-//        }
-//        Measurements(
-//            mergedMap
-//        )
-//    }
-
     suspend fun addTemplateWorkout(newWorkoutTemplate: Workout) =
         withContext(Dispatchers.IO) {
             firestore.collection(USERS_COLLECTION).document(userId)
@@ -196,28 +180,14 @@ class FirestoreManager {
         Workout.fromFirestoreMap(it)
     }
 
-    suspend fun getLatestMeasurementsByType(type: MeasurementType): Measurements = getNonObservableDocData(firestore.collection(
-        USERS_COLLECTION
-    ).document(userId).collection(MEASUREMENTS_COLLECTION).document(type.key)) {
-        Measurements.fromFirestoreMap(it, type)
-    }
-
-    private fun deleteFirestore() {
-//        return userDocRef.listCollections().fold(Tasks.forResult(null as Void?)) { task, collectionRef ->
-//            task.continueWithTask { _ ->
-//                // Delete all documents within the subcollection
-//                val deleteSubcollectionTask = deleteCollection(collectionRef)
-//
-//                // Delete the subcollection itself
-//                deleteSubcollectionTask.continueWithTask {
-//                    collectionRef.delete()
-//                }
-//            }
-//        }.continueWithTask { _ ->
-//            // Delete the main document
-//            documentRef.delete()
-//        }
-    }
+    suspend fun getLatestMeasurementsByType(type: MeasurementType): Measurements =
+        getNonObservableDocData(
+            firestore.collection(
+                USERS_COLLECTION
+            ).document(userId).collection(MEASUREMENTS_COLLECTION).document(type.key)
+        ) {
+            Measurements.fromFirestoreMap(it, type)
+        }
 
     suspend fun updateUsername(newUsername: String) =
         withContext(Dispatchers.IO) {

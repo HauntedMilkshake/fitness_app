@@ -1,6 +1,5 @@
 package bg.zahov.app.data.provider
 
-import android.util.Log
 import bg.zahov.app.data.interfaces.WorkoutProvider
 import bg.zahov.app.data.local.RealmWorkoutState
 import bg.zahov.app.data.model.Exercise
@@ -72,10 +71,8 @@ class WorkoutProviderImpl : WorkoutProvider {
         workoutRepo.getPastWorkoutById(id)
 
     override suspend fun setClickedTemplateExercise(item: Exercise) {
-        Log.d("clicked exercise", "sex clicked exercise")
         var resultsList = listOf<ExerciseHistoryInfo>()
         getPastWorkouts().collect { workout ->
-            Log.d("clicked exercise", "collecting workouts")
             resultsList = workout.mapNotNull {
                 it.exercises.find { workoutExercise -> workoutExercise.name == item.name }
                     ?.let { previousExercise ->
@@ -88,9 +85,8 @@ class WorkoutProviderImpl : WorkoutProvider {
                             date = it.date
                         )
                     }
-            }
+            }.sortedBy { it.date }
         }
-        Log.d("clicked exercise", resultsList.size.toString())
         _exerciseHistory.value = resultsList
         _clickedExercise.emit(item)
     }

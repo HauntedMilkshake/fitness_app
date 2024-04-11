@@ -27,15 +27,18 @@ class ExerciseRecordsViewModel(application: Application) : AndroidViewModel(appl
             workoutProvider.getExerciseHistory().collect { data ->
                 data.forEach {
                     it.sets.forEach { set ->
-                        if (maxVolume < (set.secondMetric ?: 0) * (set.firstMetric ?: 0.0)) {
-                            maxVolume =
-                                (set.secondMetric ?: 0).toDouble() * (set.firstMetric ?: 0.0)
+                        val reps = set.secondMetric ?: 0
+                        val weight = set.firstMetric ?: 0.0
+                        //the most ammount of weight with the sets
+                        if (maxVolume < reps * weight) {
+                            maxVolume = reps * weight
                         }
-
-                        if (maxWeight < (set.firstMetric ?: 0.0)) {
-                            maxWeight = (set.firstMetric ?: 0.0)
+                        //simply the most amount of weight lifted ever a set without considering the sets
+                        if (maxWeight < weight) {
+                            maxWeight = weight
                         }
                     }
+                    //estimates
                     it.oneRepMaxes.forEach { pr ->
                         if (oneRepMax < pr.toDouble()) {
                             oneRepMax = pr.toDouble()
@@ -53,6 +56,7 @@ class ExerciseRecordsViewModel(application: Application) : AndroidViewModel(appl
             }
         }
     }
+
     override fun onCleared() {
         super.onCleared()
         job.cancel()
