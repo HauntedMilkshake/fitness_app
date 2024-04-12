@@ -6,6 +6,7 @@ import androidx.lifecycle.AndroidViewModel
 import androidx.lifecycle.LiveData
 import androidx.lifecycle.MutableLiveData
 import androidx.lifecycle.viewModelScope
+import bg.zahov.app.getServiceErrorProvider
 import bg.zahov.app.getWorkoutProvider
 import kotlinx.coroutines.launch
 import java.time.Month
@@ -14,6 +15,9 @@ import java.time.YearMonth
 class CalendarViewModel(application: Application) : AndroidViewModel(application) {
     private val workoutProvider by lazy {
         application.getWorkoutProvider()
+    }
+    private val serviceError by lazy {
+        application.getServiceErrorProvider()
     }
 
     private val _workoutsPerMonthCheck = MutableLiveData<Map<WorkoutDate, Int>>()
@@ -54,7 +58,7 @@ class CalendarViewModel(application: Application) : AndroidViewModel(application
                     _numberOfWorkouts.value = workoutsPerMonth.toMap()
                 }
             } catch (e: Exception) {
-                // Handle exceptions
+                serviceError.stopApplication()
             }
         }
     }

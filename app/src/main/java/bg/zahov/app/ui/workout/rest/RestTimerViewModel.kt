@@ -1,7 +1,6 @@
 package bg.zahov.app.ui.workout.rest
 
 import android.app.Application
-import android.util.Log
 import androidx.lifecycle.AndroidViewModel
 import androidx.lifecycle.LiveData
 import androidx.lifecycle.MutableLiveData
@@ -10,7 +9,6 @@ import bg.zahov.app.data.model.RestState
 import bg.zahov.app.getRestTimerProvider
 import bg.zahov.app.getSettingsProvider
 import bg.zahov.app.util.parseTimeStringToLong
-import bg.zahov.app.util.timeToString
 import kotlinx.coroutines.launch
 import java.lang.IllegalArgumentException
 
@@ -98,10 +96,8 @@ class RestTimerViewModel(application: Application) : AndroidViewModel(applicatio
 
     fun onCustomTimerStart(customTime: String) {
         try {
-            Log.d("CUSTOM TIME START", customTime)
             startTimer("00:$customTime".parseTimeStringToLong())
         } catch (e: IllegalArgumentException) {
-            //TODO()
         }
     }
 

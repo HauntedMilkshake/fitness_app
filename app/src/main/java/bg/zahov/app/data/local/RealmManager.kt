@@ -1,6 +1,5 @@
 package bg.zahov.app.data.local
 
-import android.util.Log
 import bg.zahov.app.data.model.Language
 import bg.zahov.app.data.model.LanguageKeys
 import bg.zahov.app.data.model.Sound
@@ -84,7 +83,6 @@ class RealmManager {
                 copyToRealm(Settings())
             } catch (e: IllegalArgumentException) {
                 throw e
-            } finally {
             }
         }
     }
@@ -135,11 +133,7 @@ class RealmManager {
 
     private suspend fun <T> withRealm(block: suspend (Realm) -> T): T {
         val realm = openRealm()
-        return try {
-            block(realm)
-        } finally {
-//            realm.close()
-        }
+        return block(realm)
     }
 
     suspend fun resetSettings() = withRealm { realm ->

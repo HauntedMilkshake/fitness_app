@@ -10,7 +10,6 @@ import bg.zahov.app.hideBottomNav
 import bg.zahov.app.hideTopBar
 import bg.zahov.fitness.app.R
 import bg.zahov.fitness.app.databinding.FragmentWelcomeBinding
-import com.google.android.material.expandable.ExpandableWidget
 
 class WelcomeFragment : Fragment() {
     private var _binding: FragmentWelcomeBinding? = null

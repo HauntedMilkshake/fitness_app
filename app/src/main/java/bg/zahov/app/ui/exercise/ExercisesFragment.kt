@@ -7,7 +7,6 @@ import android.view.MenuInflater
 import android.view.MenuItem
 import android.view.View
 import android.view.ViewGroup
-import android.widget.SearchView
 import android.widget.Toast
 import androidx.appcompat.app.AppCompatActivity
 import androidx.core.view.MenuProvider
@@ -47,7 +46,6 @@ class ExercisesFragment : Fragment() {
     private val addable by lazy {
         arguments?.getBoolean("ADDABLE") ?: false
     }
-    private var searchView: SearchView? = null
 
     override fun onCreateView(
         inflater: LayoutInflater,

@@ -15,6 +15,7 @@ import bg.zahov.app.data.model.Units
 import bg.zahov.app.data.model.Workout
 import bg.zahov.app.getReplaceableExerciseProvider
 import bg.zahov.app.getSelectableExerciseProvider
+import bg.zahov.app.getServiceErrorProvider
 import bg.zahov.app.getSettingsProvider
 import bg.zahov.app.getWorkoutProvider
 import bg.zahov.app.util.filterIntegerInput
@@ -45,6 +46,10 @@ class AddTemplateWorkoutViewModel(application: Application) : AndroidViewModel(a
         application.getSettingsProvider()
     }
 
+    private val serviceError by lazy {
+        application.getServiceErrorProvider()
+    }
+
     private val _state = MutableLiveData<State>()
     val state: LiveData<State>
         get() = _state
@@ -70,18 +75,18 @@ class AddTemplateWorkoutViewModel(application: Application) : AndroidViewModel(a
                         templateExercises = it
                     }
                 } catch (e: CriticalDataNullException) {
-                    //TODO()
+                    serviceError.stopApplication()
                 }
             }
             launch {
                 try {
-                    settingsProvider.getSettings().collect {settingsObject ->
+                    settingsProvider.getSettings().collect { settingsObject ->
                         settingsObject.obj?.let { collectedSettings ->
                             settings = collectedSettings
                         }
                     }
                 } catch (e: Exception) {
-                    //TODO(Handle + get the appropriate exception)
+                    serviceError.stopApplication()
                 }
             }
             launch {
@@ -90,7 +95,7 @@ class AddTemplateWorkoutViewModel(application: Application) : AndroidViewModel(a
                         templates = it
                     }
                 } catch (e: CriticalDataNullException) {
-                    //todo()
+                    serviceError.stopApplication()
                 }
             }
 

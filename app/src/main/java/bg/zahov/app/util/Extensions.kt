@@ -2,7 +2,6 @@ package bg.zahov.app.util
 
 import android.animation.ObjectAnimator
 import android.animation.PropertyValuesHolder
-import android.util.Log
 import android.view.View
 import bg.zahov.app.data.local.RealmExercise
 import bg.zahov.app.data.local.RealmSets
@@ -96,22 +95,6 @@ fun LocalDateTime.toTimestamp(): Timestamp {
     return Timestamp(Date.from(this.toInstant(ZoneOffset.UTC)))
 }
 
-//fun Settings.toFirestoreMap(): Map<String, Any?> {
-//    return mapOf(
-//
-//        FirestoreFields.SETTINGS_LANGUAGE to language,
-//        FirestoreFields.SETTINGS_UNITS to units,
-//        FirestoreFields.SETTINGS_SOUND_EFFECTS to soundEffects,
-//        FirestoreFields.SETTINGS_THEME to theme,
-//        FirestoreFields.SETTINGS_REST_TIMER to restTimer,
-//        FirestoreFields.SETTINGS_VIBRATION to vibration,
-//        FirestoreFields.SETTINGS_SOUND_SETTINGS to soundSettings,
-//        FirestoreFields.SETTINGS_UPDATE_TEMPLATE to updateTemplate,
-//        FirestoreFields.SETTINGS_FIT to fit,
-//        FirestoreFields.SETTINGS_AUTOMATIC_SYNC to automaticSync
-//    )
-//}
-
 fun String.isEmail() = Regex("^\\S+@\\S+\\.\\S+$").matches(this)
 
 fun View.applyScaleAnimation() {
@@ -132,14 +115,6 @@ fun hashString(input: String) =
 
 fun generateRandomId(): String = UUID.randomUUID().toString().take(16)
 
-
-//fun currDateToString(): String = LocalDate.now().format(
-//    DateTimeFormatter.ofPattern(
-//        "dd-MM-yyyy",
-//        Locale.getDefault()
-//    )
-//)
-
 fun Long.timeToString(): String = String.format(
     "%02d:%02d:%02d",
     (this / (1000 * 60 * 60)) % 24,
@@ -150,7 +125,6 @@ fun Long.timeToString(): String = String.format(
 fun String.parseTimeStringToLong(): Long {
     val parts = this.split(":")
     if (parts.size !in 1..3) {
-        Log.d("SIZE OF PARSE", parts.size.toString())
         throw IllegalArgumentException("Invalid time string format")
     }
 

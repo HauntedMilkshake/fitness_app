@@ -13,9 +13,6 @@ import android.widget.RadioGroup
 import android.widget.RelativeLayout
 import androidx.core.content.ContextCompat
 import androidx.core.view.setPadding
-import bg.zahov.app.data.model.BodyPart
-import bg.zahov.app.data.model.Category
-import bg.zahov.app.ui.exercise.add.AddExerciseViewModel
 import bg.zahov.fitness.app.R
 import com.google.android.material.textview.MaterialTextView
 

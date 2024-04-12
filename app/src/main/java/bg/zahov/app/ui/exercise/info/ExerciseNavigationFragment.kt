@@ -62,7 +62,6 @@ class ExerciseNavigationFragment : Fragment() {
                     }
 
                     R.id.edit -> {
-                        //TODO()
                         true
                     }
 

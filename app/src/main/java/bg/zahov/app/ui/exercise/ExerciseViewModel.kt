@@ -1,7 +1,6 @@
 package bg.zahov.app.ui.exercise
 
 import android.app.Application
-import android.util.Log
 import androidx.lifecycle.AndroidViewModel
 import androidx.lifecycle.LiveData
 import androidx.lifecycle.MutableLiveData
@@ -13,10 +12,10 @@ import bg.zahov.app.getAddExerciseToWorkoutProvider
 import bg.zahov.app.getFilterProvider
 import bg.zahov.app.getReplaceableExerciseProvider
 import bg.zahov.app.getSelectableExerciseProvider
+import bg.zahov.app.getServiceErrorProvider
 import bg.zahov.app.getWorkoutProvider
 import bg.zahov.app.util.toExerciseAdapterWrapper
 import bg.zahov.fitness.app.R
-import kotlinx.coroutines.async
 import kotlinx.coroutines.launch
 
 class ExerciseViewModel(application: Application) : AndroidViewModel(application) {
@@ -38,6 +37,10 @@ class ExerciseViewModel(application: Application) : AndroidViewModel(application
 
     private val filterProvider by lazy {
         application.getFilterProvider()
+    }
+
+    private val serviceError by lazy {
+        application.getServiceErrorProvider()
     }
     private val _state = MutableLiveData<State>()
     val state: LiveData<State>
@@ -161,7 +164,7 @@ class ExerciseViewModel(application: Application) : AndroidViewModel(application
                     _state.postValue(State.Default)
                 }
             } catch (e: CriticalDataNullException) {
-                _state.postValue(State.ErrorFetching(e.message, true))
+                serviceError.stopApplication()
             }
         }
     }
@@ -169,7 +172,6 @@ class ExerciseViewModel(application: Application) : AndroidViewModel(application
     private fun getFilters() {
         viewModelScope.launch {
             filterProvider.filters.collect {
-                Log.d("collecting filters", it.toString())
                 currentSearchFilters = it
                 _searchFilters.postValue(it)
                 searchExercises(search)
@@ -179,13 +181,10 @@ class ExerciseViewModel(application: Application) : AndroidViewModel(application
 
     fun searchExercises(name: String?) {
         val selectedFilters = currentSearchFilters
-        Log.d("filters", selectedFilters.toString())
         val newExercises = _userExercises.value?.let {
-            //TODO(Test it vs allExercises)
             when {
                 name.isNullOrEmpty() && selectedFilters.isEmpty() -> allExercises
                 name.isNullOrEmpty() && selectedFilters.isNotEmpty() -> {
-                    Log.d("in case with no filters", "yay")
                     allExercises.filter { exercise ->
                         selectedFilters.any { filter ->
                             filter.name == exercise.bodyPart || filter.name == exercise.category
@@ -210,7 +209,6 @@ class ExerciseViewModel(application: Application) : AndroidViewModel(application
         } ?: emptyList()
 
         search = name
-        Log.d("new exercises", newExercises.toString())
         _userExercises.value = newExercises
 
         if (newExercises.isEmpty()) _state.value = State.NoResults(true)

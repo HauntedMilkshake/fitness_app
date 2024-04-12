@@ -1,6 +1,5 @@
 package bg.zahov.app.data.model
 
-import android.util.Log
 import bg.zahov.app.data.exception.CriticalDataNullException
 import bg.zahov.app.util.toLocalDateTime
 import com.google.firebase.Timestamp
@@ -79,11 +78,8 @@ data class Measurements(
             val measurementsMap = mutableMapOf<MeasurementType, List<Measurement>>()
             data?.let {
             val measurements = (it[FirestoreFields.MEASUREMENTS_COLLECTION] as? List<Map<String, Any>>)?.mapNotNull { values -> Measurement.fromFirestoreMap(values) }.orEmpty()
-            Log.d("measurements list", measurements.toString())
             measurementsMap[measurementType] = measurements
             }
-            Log.d("converting", if(measurementsMap.keys.size > 0) measurementsMap.keys.first().toString() else "")
-            Log.d("values size", measurementsMap.values.size.toString())
             return Measurements(measurementsMap)
         }
     }
@@ -120,8 +116,6 @@ data class Workout(
                 personalRecords = it[FirestoreFields.WORKOUT_PERSONAL_RECORD] as? Int ?: 0
             )
         } ?: throw CriticalDataNullException("No firestore data found")
-        //TODO(RETURN THIS INSTEAD OF THROWING)
-        //?: Workout("", null, "", false, emptyList(), emptyList())
     }
 }
 
@@ -137,7 +131,7 @@ data class Exercise(
     companion object {
         fun fromFirestoreMap(data: Map<String, Any>?) = data?.let {
             Exercise(
-                name = it[FirestoreFields.EXERCISE_NAME] as String,
+                name = it[FirestoreFields.EXERCISE_NAME] as? String ?: throw CriticalDataNullException("No name for exercise"),
                 bodyPart = it[FirestoreFields.EXERCISE_BODY_PART].toString()
                     .let { string -> BodyPart.valueOf(string) },
                 category = it[FirestoreFields.EXERCISE_CATEGORY].toString()
@@ -153,7 +147,7 @@ data class Exercise(
                     Sets.fromFirestoreMap(map)
                 } ?: Sets(SetType.DEFAULT, null, null)
             )
-        }
+        } ?: throw CriticalDataNullException("No exercise found")
     }
 }
 
@@ -194,33 +188,3 @@ data class Measurement(
         }
     }
 }
-
-//data class Settings(
-//    var language: String = Language.fromKey(LanguageKeys.ENGLISH),
-//    var units: String = Units.fromKey(UnitsKeys.METRIC),
-//    var soundEffects: Boolean = true,
-//    var theme: String = Theme.fromKey(ThemeKeys.DARK),
-//    var restTimer: Int = 30,
-//    var vibration: Boolean = true,
-//    var soundSettings: String = Sound.fromKey(SoundKeys.SOUND_1),
-//    var updateTemplate: Boolean = true,
-//    var fit: Boolean = false,
-//    var automaticSync: Boolean = true
-//) {
-//    companion object {
-//        fun fromFirestoreMap(data: Map<String, Any>): Settings {
-//            return Settings(
-//                language = data[FirestoreFields.SETTINGS_LANGUAGE] as String,
-//                units = data[FirestoreFields.SETTINGS_UNITS] as String,
-//                soundEffects = data[FirestoreFields.SETTINGS_SOUND_EFFECTS] as Boolean,
-//                theme = data[FirestoreFields.SETTINGS_THEME] as String,
-//                restTimer = (data[FirestoreFields.SETTINGS_REST_TIMER] as Long).toInt(),
-//                vibration = data[FirestoreFields.SETTINGS_VIBRATION] as Boolean,
-//                soundSettings = data[FirestoreFields.SETTINGS_SOUND_SETTINGS] as String,
-//                updateTemplate = data[FirestoreFields.SETTINGS_UPDATE_TEMPLATE] as Boolean,
-//                fit = data[FirestoreFields.SETTINGS_FIT] as Boolean,
-//                automaticSync = data[FirestoreFields.SETTINGS_AUTOMATIC_SYNC] as Boolean
-//            )
-//        }
-//    }
-//}

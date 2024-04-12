@@ -28,7 +28,6 @@ class TemplateWorkoutAdapter : BaseAdapter<Workout>(
 
         override fun bind(item: Workout) {
             title.text = item.name
-            //TODO(Fix)
             lastPerformed.text = "Last performed: ${item.date.toFormattedString()}"
             settings.setOnClickListener {
                 showCustomLayout(item, bindingAdapterPosition, it)

@@ -46,7 +46,6 @@ class LoadingFragment : Fragment() {
 
             loadingViewModel.state.map { LoadingUiMapper.map(it) }.observe(viewLifecycleOwner) {
                 it.message?.let { message ->
-                    //TODO(end process)
                     Toast.makeText(context, message, Toast.LENGTH_SHORT).show()
                 }
                 it.destination?.let { des ->

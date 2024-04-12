@@ -53,10 +53,6 @@ class HomeViewModel(application: Application) : AndroidViewModel(application) {
 
     private val _workoutEntries = MutableLiveData<List<BarEntry>>()
 
-    private val _xAxisLabels = MutableLiveData<List<String>>()
-    val xAxisLabels: LiveData<List<String>>
-        get() = _xAxisLabels
-
     val workoutEntries: LiveData<List<BarEntry>>
         get() = _workoutEntries
 

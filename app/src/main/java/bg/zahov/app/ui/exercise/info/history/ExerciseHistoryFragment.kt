@@ -1,7 +1,6 @@
 package bg.zahov.app.ui.exercise.info.history
 
 import android.os.Bundle
-import android.util.Log
 import android.view.LayoutInflater
 import android.view.View
 import android.view.ViewGroup
@@ -27,7 +26,6 @@ class ExerciseHistoryFragment : Fragment() {
         _binding = FragmentExerciseHistoryBinding.inflate(inflater, container, false)
         requireActivity().hideBottomNav()
         historyInfoViewModel.initData()
-        Log.d("on create", "on create")
         return binding.root
     }
 
@@ -41,8 +39,6 @@ class ExerciseHistoryFragment : Fragment() {
                     circularProgressIndicator.visibility = it.loadingVisibility
                     setsRecyclerView.visibility = it.recyclerViewVisibility
                     it.message?.let { message ->Toast.makeText(context, message, Toast.LENGTH_SHORT).show() }
-                    if (it.shutdown) {
-                    } //TODO()
                     setAdapter.updateItems(it.data)
                     it.data
                 }
@@ -55,7 +51,6 @@ class ExerciseHistoryFragment : Fragment() {
 
     override fun onDestroyView() {
         super.onDestroyView()
-        Log.d("on destroy", "on destroy")
         _binding = null
     }
 }

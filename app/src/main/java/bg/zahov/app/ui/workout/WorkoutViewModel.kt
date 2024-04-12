@@ -1,7 +1,6 @@
 package bg.zahov.app.ui.workout
 
 import android.app.Application
-import android.util.Log
 import android.view.View
 import androidx.lifecycle.AndroidViewModel
 import androidx.lifecycle.LiveData
@@ -444,11 +443,9 @@ class WorkoutViewModel(application: Application) : AndroidViewModel(application)
                     else -> {
                         val currentBestSetResult = (currExercise.bestSet.firstMetric
                             ?: 0.0) * (currExercise.bestSet.secondMetric ?: 0)
-                        Log.d("Current best set", currentBestSetResult.toString())
                         val previousBestSetResult =
                             (template.bestSet.firstMetric ?: 0.0) * (template.bestSet.secondMetric
                                 ?: 0)
-                        Log.d("previous best set", previousBestSetResult.toString())
 
                         if (currentBestSetResult <= previousBestSetResult) {
                             currExercise.bestSet = template.bestSet

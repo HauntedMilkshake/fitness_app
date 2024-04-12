@@ -10,7 +10,6 @@ data class LoadingUiModel(
 
 object LoadingUiMapper {
     fun map(state: LoadingViewModel.State) = when (state) {
-        is LoadingViewModel.State.Error -> LoadingUiModel(message = state.message)
         is LoadingViewModel.State.Loading -> LoadingUiModel(isLoading = state.isDataLoading)
         is LoadingViewModel.State.Navigate -> LoadingUiModel(destination = state.destination)
     }

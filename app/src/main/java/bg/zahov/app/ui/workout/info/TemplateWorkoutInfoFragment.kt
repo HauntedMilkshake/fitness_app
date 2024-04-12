@@ -7,7 +7,6 @@ import android.view.MenuInflater
 import android.view.MenuItem
 import android.view.View
 import android.view.ViewGroup
-import android.widget.Toast
 import androidx.appcompat.app.AppCompatActivity
 import androidx.core.os.bundleOf
 import androidx.core.view.MenuProvider
@@ -99,7 +98,6 @@ class TemplateWorkoutInfoFragment : Fragment() {
                         }
                     }
                     circularProgressIndicator.visibility = it.loadingIndicatorVisibility
-                    if (it.shutdown) {}//TODO()
                     if (it.deleted) findNavController().navigateUp()
                 }
 

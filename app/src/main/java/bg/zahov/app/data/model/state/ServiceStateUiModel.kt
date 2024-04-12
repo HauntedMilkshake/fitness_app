@@ -8,7 +8,7 @@ data class ServiceStateUiModel(
 )
 object ServiceStateUiMapper {
     fun map(state: ServiceErrorStateViewModel.State) = when(state) {
-        is ServiceErrorStateViewModel.State.Shutdown -> ServiceStateUiModel(shutdown = state.shouldShutdown)
         is ServiceErrorStateViewModel.State.NavigateToTimer -> ServiceStateUiModel(action = state.action)
+        is ServiceErrorStateViewModel.State.Shutdown -> ServiceStateUiModel(shutdown = state.shouldShutdown)
     }
 }

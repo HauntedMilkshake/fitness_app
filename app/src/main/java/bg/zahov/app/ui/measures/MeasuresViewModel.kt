@@ -5,7 +5,6 @@ import androidx.lifecycle.AndroidViewModel
 import androidx.lifecycle.viewModelScope
 import bg.zahov.app.data.model.MeasurementType
 import bg.zahov.app.getMeasurementsProvider
-import bg.zahov.app.getUserProvider
 import kotlinx.coroutines.launch
 
 class MeasuresViewModel(application: Application) : AndroidViewModel(application) {

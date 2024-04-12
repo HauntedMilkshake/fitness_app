@@ -63,10 +63,6 @@ class LoginFragment : Fragment() {
                 if (it.isAuthenticated) {
                     findNavController().navigate(R.id.login_to_loading)
                 }
-                if (it.shutdown) {
-                    //TODO(BAD)
-                }
-
                 showToast(it.notifyMessage)
                 showToast(it.errorMessage)
             }

@@ -1,7 +1,6 @@
 package bg.zahov.app
 
 import android.os.Bundle
-import android.util.Log
 import android.view.Menu
 import android.view.View
 import androidx.activity.viewModels
@@ -45,7 +44,6 @@ class MainActivity : AppCompatActivity() {
         }
 
         serviceErrorViewModel.serviceState.map { ServiceStateUiMapper.map(it) }.observe(this) {
-            Log.d("service state ui", it.toString())
             it.action?.let { action -> navController.navigate(action) }
             if(it.shutdown) finish()
         }

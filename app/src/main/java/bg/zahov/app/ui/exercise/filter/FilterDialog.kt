@@ -10,8 +10,6 @@ import androidx.recyclerview.widget.RecyclerView
 import bg.zahov.app.data.model.BodyPart
 import bg.zahov.app.data.model.Category
 import bg.zahov.app.data.model.SelectableFilter
-import bg.zahov.app.hideBottomNav
-import bg.zahov.app.ui.exercise.ExerciseViewModel
 import bg.zahov.app.util.SpacingItemDecoration
 import bg.zahov.app.util.applyScaleAnimation
 import bg.zahov.fitness.app.R

@@ -2,7 +2,6 @@ package bg.zahov.app.data.model.state
 
 import android.view.View
 import bg.zahov.app.WorkoutManagerViewModel
-import bg.zahov.app.data.model.WorkoutState
 
 data class WorkoutManagerUiModel(
     val trailingWorkoutVisibility: Int = View.GONE,

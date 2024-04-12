@@ -11,7 +11,6 @@ import androidx.lifecycle.map
 import bg.zahov.app.data.model.state.ShutdownFragmentUiMapper
 import bg.zahov.app.hideBottomNav
 import bg.zahov.app.hideTopBar
-import bg.zahov.app.showTopBar
 import bg.zahov.fitness.app.databinding.FragmentShuttingDownBinding
 
 class FragmentShuttingDown : Fragment() {

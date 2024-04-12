@@ -1,14 +1,13 @@
 package bg.zahov.app.ui.history.info
 
 import android.view.View
-import bg.zahov.app.data.model.Exercise
 import bg.zahov.app.data.model.Sets
 import bg.zahov.app.util.BaseAdapter
 import bg.zahov.fitness.app.R
 import com.google.android.material.textview.MaterialTextView
 
 class HistoryInfoAdapter : BaseAdapter<HistoryInfo>(
-    areItemsTheSame = { oldItem, newItem -> oldItem.exerciseName == oldItem.exerciseName },
+    areItemsTheSame = { oldItem, newItem -> oldItem.exerciseName == newItem.exerciseName },
     areContentsTheSame = { oldItem, newItem -> oldItem == newItem },
     layoutResId = R.layout.item_past_workout_info
 ) {

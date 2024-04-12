@@ -7,9 +7,7 @@ import android.view.ViewGroup
 import androidx.fragment.app.DialogFragment
 import androidx.fragment.app.viewModels
 import androidx.lifecycle.map
-import androidx.navigation.fragment.findNavController
 import bg.zahov.app.data.model.state.MeasurementInputUiMapper
-import bg.zahov.fitness.app.R
 import bg.zahov.fitness.app.databinding.DialogFragmentMeasurementInputBinding
 
 class MeasurementInputFragment : DialogFragment() {

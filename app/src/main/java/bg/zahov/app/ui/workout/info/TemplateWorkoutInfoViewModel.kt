@@ -9,6 +9,7 @@ import androidx.lifecycle.viewModelScope
 import bg.zahov.app.data.exception.CriticalDataNullException
 import bg.zahov.app.data.model.Workout
 import bg.zahov.app.data.model.WorkoutState
+import bg.zahov.app.getServiceErrorProvider
 import bg.zahov.app.getWorkoutProvider
 import bg.zahov.app.getWorkoutStateManager
 import bg.zahov.app.ui.exercise.ExerciseAdapterWrapper
@@ -26,6 +27,10 @@ class TemplateWorkoutInfoViewModel(application: Application) : AndroidViewModel(
 
     private val workoutStateProvider by lazy {
         application.getWorkoutStateManager()
+    }
+
+    private val serviceError by lazy {
+        application.getServiceErrorProvider()
     }
     private val _state = MutableLiveData<State>(State.Default)
     var workoutId: String? = ""
@@ -59,10 +64,10 @@ class TemplateWorkoutInfoViewModel(application: Application) : AndroidViewModel(
                             allWorkout = workouts
                         }
                     } catch (e: CriticalDataNullException) {
-                        _state.postValue(State.Error(true))
+                        serviceError.stopApplication()
                     }
                 } else {
-                    _state.postValue(State.Error(true))
+                    serviceError.stopApplication()
                 }
             }
             launch {
@@ -125,7 +130,6 @@ class TemplateWorkoutInfoViewModel(application: Application) : AndroidViewModel(
         data class Data(val lastPerformed: String, val exercises: List<ExerciseAdapterWrapper>) :
             State
 
-        data class Error(val shutdown: Boolean) : State
         data class Loading(val loadingVisibility: Int) : State
 
         data class WorkoutActive(

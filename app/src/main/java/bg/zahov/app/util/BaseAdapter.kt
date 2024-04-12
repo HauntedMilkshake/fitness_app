@@ -43,13 +43,6 @@ abstract class BaseAdapter<T>(
     }
     fun getRecyclerViewItems() = items
 
-    //SUSSY
-//    internal fun deleteItem(position: Int) {
-//        val new = items
-//        new.removeAt(position)
-//        updateItems(new)
-//    }
-
     abstract class BaseViewHolder<T>(view: View) : RecyclerView.ViewHolder(view) {
         abstract fun bind(item: T)
     }

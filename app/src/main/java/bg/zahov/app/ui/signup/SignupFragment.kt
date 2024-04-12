@@ -16,7 +16,6 @@ import bg.zahov.app.hideTopBar
 import bg.zahov.fitness.app.R
 import bg.zahov.fitness.app.databinding.FragmentSignUpBinding
 
-//FIXME clear _binding...
 class SignupFragment : Fragment() {
     private var _binding: FragmentSignUpBinding? = null
     private val binding get() = _binding!!

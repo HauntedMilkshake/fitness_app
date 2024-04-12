@@ -9,12 +9,15 @@ import bg.zahov.app.data.exception.CriticalDataNullException
 import bg.zahov.app.data.model.BodyPart
 import bg.zahov.app.data.model.Category
 import bg.zahov.app.data.model.Exercise
+import bg.zahov.app.getServiceErrorProvider
 import bg.zahov.app.getWorkoutProvider
 import kotlinx.coroutines.launch
-//TODO(Some combinations of category and bodyParts are not possible + bug where some enums do not work)
 class AddExerciseViewModel(application: Application) : AndroidViewModel(application) {
     private val repo by lazy {
         application.getWorkoutProvider()
+    }
+    private val serviceError by lazy {
+        application.getServiceErrorProvider()
     }
     private var exercises: List<Exercise> = emptyList()
 
@@ -37,7 +40,7 @@ class AddExerciseViewModel(application: Application) : AndroidViewModel(applicat
                     if (it.isNotEmpty()) exercises = it
                 }
             } catch (e: CriticalDataNullException) {
-                //TODO(Ask user to leave the fragment somehow)
+                serviceError.stopApplication()
             }
         }
     }

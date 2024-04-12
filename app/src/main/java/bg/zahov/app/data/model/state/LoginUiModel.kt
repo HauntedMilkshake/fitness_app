@@ -6,7 +6,6 @@ data class LoginUiModel(
     val isAuthenticated: Boolean = false,
     val notifyMessage: String? = null,
     val errorMessage: String? = null,
-    val shutdown: Boolean = false,
 
     )
 
@@ -15,8 +14,7 @@ object LoginUiMapper {
         is LoginViewModel.State.Authenticated -> LoginUiModel(true)
         is LoginViewModel.State.Notify -> LoginUiModel(notifyMessage = state.nMessage)
         is LoginViewModel.State.Error -> LoginUiModel(
-            errorMessage = state.eMessage,
-            shutdown = state.shutdown
+            errorMessage = state.eMessage
         )
     }
 }

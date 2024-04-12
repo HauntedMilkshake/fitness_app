@@ -6,6 +6,7 @@ import androidx.lifecycle.AndroidViewModel
 import androidx.lifecycle.LiveData
 import androidx.lifecycle.MutableLiveData
 import androidx.lifecycle.viewModelScope
+import bg.zahov.app.getServiceErrorProvider
 import bg.zahov.app.getUserProvider
 import bg.zahov.app.util.isEmail
 import kotlinx.coroutines.CancellationException
@@ -16,6 +17,9 @@ import kotlinx.coroutines.launch
 class SignupViewModel(application: Application) : AndroidViewModel(application) {
     private val auth by lazy {
         application.getUserProvider()
+    }
+    private val serviceError by lazy {
+        application.getServiceErrorProvider()
     }
 
     private val _state = MutableLiveData<State>()
@@ -66,7 +70,7 @@ class SignupViewModel(application: Application) : AndroidViewModel(application) 
                         _state.value = State.Error(it.message, false)
                     }
             } catch (e: CancellationException) {
-                _state.postValue(State.Error(e.message, true))
+                serviceError.stopApplication()
             }
 
         }

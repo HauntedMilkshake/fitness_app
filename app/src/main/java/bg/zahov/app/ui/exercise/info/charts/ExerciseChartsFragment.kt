@@ -2,7 +2,6 @@ package bg.zahov.app.ui.exercise.info.charts
 
 import android.graphics.Color
 import android.os.Bundle
-import android.util.Log
 import android.view.LayoutInflater
 import android.view.View
 import android.view.ViewGroup
@@ -52,7 +51,6 @@ class ExerciseChartsFragment : Fragment() {
             }
 
             exerciseChartViewModel.totalVolume.observe(viewLifecycleOwner) {
-                Log.d("data size", it.second.toString())
                 val dataSet = LineDataSet(it.third, "results")
                 totalVolume.apply {
                     data = LineData(dataSet)
@@ -77,14 +75,13 @@ class ExerciseChartsFragment : Fragment() {
                     invalidate()
                 }
             }
-            setupChart(bestOneRepMaxSet, "One rep max estimates-")
-            setupChart(totalVolume, "Max volume")
-            setupChart(bestSetReps, "Max reps")
+            setupChart(totalVolume, "Max volume", "kg")
+            setupChart(bestOneRepMaxSet, "One rep max estimates", "kg")
+            setupChart(bestSetReps, "Max reps", "reps")
         }
     }
 
-    private fun setupChart(chart: LineChart, chartDescription: String) {
-        Log.d("chart setup", "")
+    private fun setupChart(chart: LineChart, chartDescription: String, suffix: String) {
         chart.apply {
             setPinchZoom(false)
             setDrawGridBackground(false)
@@ -105,9 +102,10 @@ class ExerciseChartsFragment : Fragment() {
             axisRight.apply {
                 textSize = 14f
                 textColor = Color.WHITE
+                granularity = 1f
                 valueFormatter = object : ValueFormatter() {
                     override fun getFormattedValue(value: Float): String {
-                        return "${value.toInt()} kg"
+                        return "${value.toInt()} $suffix"
                     }
                 }
             }

@@ -19,7 +19,6 @@ class FilterAdapter(private val isRemovable: Boolean) : BaseAdapter<SelectableFi
         private val filterView = view.findViewById<MaterialTextView>(R.id.text)
         private val remove = view.findViewById<ShapeableImageView>(R.id.remove)
 
-        //FIXME pay attention to the warnings
         override fun bind(filter: SelectableFilter) {
             filterView.text = filter.name
             remove.visibility = if (isRemovable) View.VISIBLE else View.GONE

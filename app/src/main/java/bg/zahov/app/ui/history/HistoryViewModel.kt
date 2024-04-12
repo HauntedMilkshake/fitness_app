@@ -8,12 +8,16 @@ import androidx.lifecycle.MutableLiveData
 import androidx.lifecycle.viewModelScope
 import bg.zahov.app.data.exception.CriticalDataNullException
 import bg.zahov.app.data.model.Workout
+import bg.zahov.app.getServiceErrorProvider
 import bg.zahov.app.getWorkoutProvider
 import kotlinx.coroutines.launch
 
 class HistoryViewModel(application: Application) : AndroidViewModel(application) {
     private val workoutProvider by lazy {
         application.getWorkoutProvider()
+    }
+    private val serviceError by lazy {
+        application.getServiceErrorProvider()
     }
     private val _state = MutableLiveData<State>(State.Default)
     val state: LiveData<State>
@@ -26,7 +30,7 @@ class HistoryViewModel(application: Application) : AndroidViewModel(application)
                 try {
                     _state.postValue(State.Data(it.sortedByDescending { item -> item.date }))
                 } catch (e: CriticalDataNullException) {
-                    _state.postValue(State.Error(true))
+                    serviceError.stopApplication()
                 }
             }
         }
@@ -36,6 +40,5 @@ class HistoryViewModel(application: Application) : AndroidViewModel(application)
         object Default : State
         data class Loading(val loadingVisibility: Int, val workoutsVisibility: Int) : State
         data class Data(val workouts: List<Workout>) : State
-        data class Error(val shutdown: Boolean) : State
     }
 }

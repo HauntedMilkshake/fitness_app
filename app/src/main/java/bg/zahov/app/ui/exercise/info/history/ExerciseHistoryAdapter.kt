@@ -1,6 +1,5 @@
 package bg.zahov.app.ui.exercise.info.history
 
-import android.util.Log
 import android.view.View
 import bg.zahov.app.data.model.Sets
 import bg.zahov.app.util.BaseAdapter

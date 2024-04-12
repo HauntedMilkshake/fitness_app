@@ -13,7 +13,6 @@ import androidx.core.view.MenuProvider
 import androidx.fragment.app.Fragment
 import androidx.fragment.app.viewModels
 import androidx.lifecycle.map
-import androidx.navigation.fragment.findNavController
 import bg.zahov.app.data.model.state.MeasurementInformationUiMapper
 import bg.zahov.app.setToolBarTitle
 import bg.zahov.app.showTopBar
@@ -76,8 +75,6 @@ class MeasurementInfoFragment : Fragment() {
 
 
                     }
-                    if (it.shutdown) {
-                    }//TODO(BAD)
                 }
             addEntry.setOnClickListener {
                 val measurementInputFragment = MeasurementInputFragment.newInstance(

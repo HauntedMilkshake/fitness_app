@@ -52,15 +52,15 @@ class ExerciseChartViewModel(application: Application) : AndroidViewModel(applic
                                 it.date?.let { date ->
                                     maxVolumeEntries.add(
                                         Entry(
-                                            reps.toFloat(),
-                                            date.dayOfMonth.toFloat()
+                                            date.dayOfMonth.toFloat(),
+                                            reps.toFloat()
                                         )
                                     )
 
                                     maxWeightEntries.add(
                                         Entry(
-                                            (reps.toDouble() * weight).toFloat(),
-                                            date.dayOfMonth.toFloat()
+                                            date.dayOfMonth.toFloat(),
+                                            (reps.toDouble() * weight).toFloat()
                                         )
                                     )
                                 }
@@ -83,8 +83,8 @@ class ExerciseChartViewModel(application: Application) : AndroidViewModel(applic
                 val totalVolumeEntries = filterEntries(maxWeightEntries).sortedBy { it.x }
                 _totalVolume.postValue(
                     Triple(
-                        totalVolumeEntries.maxOf { it.y },
-                        totalVolumeEntries.minOf { it.y },
+                        if (totalVolumeEntries.isNotEmpty()) totalVolumeEntries.maxOf { it.y } else 0f,
+                        if (totalVolumeEntries.isNotEmpty()) totalVolumeEntries.minOf { it.y } else 0f,
                         totalVolumeEntries
                     )
                 )
@@ -92,8 +92,8 @@ class ExerciseChartViewModel(application: Application) : AndroidViewModel(applic
                 val oneRepMaxes = filterEntries(oneRepMaxEntries).sortedBy { it.x }
                 _oneRepMax.postValue(
                     Triple(
-                        oneRepMaxes.maxOf { it.y },
-                        oneRepMaxes.minOf { it.y },
+                        if (oneRepMaxes.isNotEmpty()) oneRepMaxes.maxOf { it.y } else 0f,
+                        if (oneRepMaxes.isNotEmpty()) oneRepMaxes.minOf { it.y } else 0f,
                         oneRepMaxes
                     )
                 )
@@ -101,8 +101,8 @@ class ExerciseChartViewModel(application: Application) : AndroidViewModel(applic
                 val maxRepsEntries = filterEntries(maxVolumeEntries).sortedBy { it.x }
                 _maxReps.postValue(
                     Triple(
-                        maxRepsEntries.maxOf { it.y },
-                        maxRepsEntries.minOf { it.y },
+                        if (maxRepsEntries.isNotEmpty()) maxRepsEntries.maxOf { it.y } else 0f,
+                        if (maxRepsEntries.isNotEmpty()) maxRepsEntries.minOf { it.y } else 0f,
                         maxRepsEntries
                     )
                 )

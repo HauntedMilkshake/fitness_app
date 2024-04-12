@@ -20,7 +20,7 @@ class ServiceErrorHandlerImpl : ServiceErrorHandler {
         get() = _state
 
     override suspend fun stopApplication() {
-        _state.value = ServiceState.Unavailable
+        _state.value = ServiceState.Shutdown
     }
 
     override suspend fun observeServiceState(): Flow<ServiceState> = state

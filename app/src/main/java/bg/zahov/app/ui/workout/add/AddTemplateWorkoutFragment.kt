@@ -161,8 +161,6 @@ class AddTemplateWorkoutFragment : Fragment() {
                     showToast(it.eMessage)
                     showToast(it.nMessage)
                     if (it.success) findNavController().navigate(R.id.create_workout_template_to_workout)
-
-
                 }
 
             cancel.setOnClickListener {

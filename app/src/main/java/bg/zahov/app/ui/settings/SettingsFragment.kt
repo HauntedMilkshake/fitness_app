@@ -4,7 +4,6 @@ import android.content.Intent
 import android.net.Uri
 import android.os.Bundle
 import android.transition.TransitionInflater
-import android.util.Log
 import android.view.LayoutInflater
 import android.view.Menu
 import android.view.MenuInflater
@@ -85,7 +84,6 @@ class SettingsFragment : Fragment() {
             signOutButton.setOnClickListener {
                 settingsViewModel.logout()
             }
-//                findNavController().navigate(R.id.settings_to_home)
             editProfile.setOnClickListener {
                 findNavController().navigate(R.id.settings_to_edit_profile)
             }

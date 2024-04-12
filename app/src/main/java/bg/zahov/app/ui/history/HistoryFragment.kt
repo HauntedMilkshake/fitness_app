@@ -1,7 +1,6 @@
 package bg.zahov.app.ui.history
 
 import android.os.Bundle
-import android.transition.TransitionInflater
 import android.view.LayoutInflater
 import android.view.Menu
 import android.view.MenuInflater
@@ -77,7 +76,6 @@ class HistoryFragment : Fragment() {
                 circularProgressIndicator.visibility = it.loadingVisibility
                 workouts.visibility = it.workoutVisibility
                 historyAdapter.updateItems(it.workouts)
-                if (it.shutdown) findNavController().navigateUp()
             }
         }
     }

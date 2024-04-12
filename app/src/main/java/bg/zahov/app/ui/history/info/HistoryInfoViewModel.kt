@@ -7,6 +7,7 @@ import androidx.lifecycle.MutableLiveData
 import androidx.lifecycle.viewModelScope
 import bg.zahov.app.data.exception.CriticalDataNullException
 import bg.zahov.app.data.model.Workout
+import bg.zahov.app.getServiceErrorProvider
 import bg.zahov.app.getWorkoutProvider
 import bg.zahov.app.getWorkoutStateManager
 import bg.zahov.app.util.getOneRepMaxes
@@ -20,6 +21,9 @@ class HistoryInfoViewModel(application: Application) : AndroidViewModel(applicat
     }
     private val workoutProvider by lazy {
         application.getWorkoutProvider()
+    }
+    private val serviceError by lazy {
+        application.getServiceErrorProvider()
     }
     private lateinit var workout: Workout
     private val _state = MutableLiveData<State>()
@@ -48,7 +52,7 @@ class HistoryInfoViewModel(application: Application) : AndroidViewModel(applicat
                     }
                 }
             } catch (e: CriticalDataNullException) {
-                _state.postValue(State.CriticalError(shutdown = true))
+                serviceError.stopApplication()
             }
         }
     }
@@ -66,10 +70,10 @@ class HistoryInfoViewModel(application: Application) : AndroidViewModel(applicat
                     workout = workoutProvider.getPastWorkoutById(id)
                     _state.postValue(State.Data(createAdapterData(workout)))
                 } catch (e: Exception) {
-                    _state.postValue(State.CriticalError(shutdown = true))
+                    serviceError.stopApplication()
                 }
             } else {
-                _state.postValue(State.CriticalError(shutdown = true))
+                serviceError.stopApplication()
             }
         }
     }
@@ -91,7 +95,6 @@ class HistoryInfoViewModel(application: Application) : AndroidViewModel(applicat
 
     sealed interface State {
         data class Data(val data: HistoryInfoData) : State
-        data class CriticalError(val shutdown: Boolean) : State
         data class Notify(val data: HistoryInfoData? = null, val message: String) : State
     }
 }

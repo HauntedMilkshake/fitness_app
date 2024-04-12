@@ -8,14 +8,16 @@ import androidx.lifecycle.MutableLiveData
 import androidx.lifecycle.viewModelScope
 import bg.zahov.app.data.exception.CriticalDataNullException
 import bg.zahov.app.getMeasurementsProvider
-import bg.zahov.app.getUserProvider
+import bg.zahov.app.getServiceErrorProvider
 import com.github.mikephil.charting.data.Entry
 import kotlinx.coroutines.launch
-import kotlin.math.max
 
 class MeasurementInfoViewModel(application: Application) : AndroidViewModel(application) {
     private val measurementProvider by lazy {
         application.getMeasurementsProvider()
+    }
+    private val serviceError by lazy {
+        application.getServiceErrorProvider()
     }
     private val _state = MutableLiveData<State>()
     val state: LiveData<State>
@@ -44,7 +46,7 @@ class MeasurementInfoViewModel(application: Application) : AndroidViewModel(appl
                     _state.postValue(State.Data(maxValue, measureEntries))
                 }
             } catch (e: CriticalDataNullException) {
-                _state.postValue(State.Error(true))
+               serviceError.stopApplication()
             }
         }
     }
@@ -52,6 +54,5 @@ class MeasurementInfoViewModel(application: Application) : AndroidViewModel(appl
     sealed interface State {
         data class Loading(val loadingVisibility: Int) : State
         data class Data(val maxValue: Int, val entries: List<Entry>) : State
-        data class Error(val shutdown: Boolean) : State
     }
 }

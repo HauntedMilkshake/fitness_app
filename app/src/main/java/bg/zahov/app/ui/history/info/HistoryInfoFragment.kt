@@ -87,8 +87,6 @@ class HistoryInfoFragment : Fragment() {
                         historyInfoAdapter.updateItems(data.adapterData)
                     }
                     showToast(it.message)
-                    if (it.shutdown) {
-                    }//TODO()
                 }
             exercisesRecyclerView.apply {
                 layoutManager = LinearLayoutManager(context)

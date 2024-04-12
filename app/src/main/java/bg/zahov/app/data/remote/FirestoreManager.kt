@@ -1,7 +1,5 @@
 package bg.zahov.app.data.remote
 
-import android.util.Log
-import bg.zahov.app.data.exception.CriticalDataNullException
 import bg.zahov.app.data.model.Exercise
 import bg.zahov.app.data.model.FirestoreFields
 import bg.zahov.app.data.model.Measurement
@@ -47,7 +45,6 @@ class FirestoreManager {
     }
 
     suspend fun createFirestore(username: String, userId: String) = withContext(Dispatchers.IO) {
-        Log.d("creating firestore", "creating...")
         firestore.collection(USERS_COLLECTION).document(userId).set(User(username).toFirestoreMap())
         initUser(userId)
     }
@@ -137,7 +134,6 @@ class FirestoreManager {
         firestore.collection(USERS_COLLECTION).document(userId).collection(TEMPLATE_EXERCISES)
     ) {
         Exercise.fromFirestoreMap(it)
-            ?: throw CriticalDataNullException("Critical data missing!")
     }
 
     suspend fun addTemplateExercise(newExercise: Exercise) =
@@ -180,7 +176,7 @@ class FirestoreManager {
         Workout.fromFirestoreMap(it)
     }
 
-    suspend fun getLatestMeasurementsByType(type: MeasurementType): Measurements =
+    private suspend fun getLatestMeasurementsByType(type: MeasurementType): Measurements =
         getNonObservableDocData(
             firestore.collection(
                 USERS_COLLECTION
@@ -220,8 +216,6 @@ class FirestoreManager {
         withContext(Dispatchers.IO) {
             firestore.collection(USERS_COLLECTION).document(userId)
                 .collection(TEMPLATE_WORKOUTS_SUB_COLLECTION).document(workout.id).delete()
-                .addOnSuccessListener {
-                }
         }
     }
 

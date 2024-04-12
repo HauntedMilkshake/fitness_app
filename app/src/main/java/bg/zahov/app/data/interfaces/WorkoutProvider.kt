@@ -4,7 +4,6 @@ import bg.zahov.app.data.local.RealmWorkoutState
 import bg.zahov.app.data.model.Exercise
 import bg.zahov.app.data.model.Workout
 import bg.zahov.app.ui.exercise.info.history.ExerciseHistoryInfo
-import io.realm.kotlin.notifications.ObjectChange
 import kotlinx.coroutines.flow.Flow
 
 interface WorkoutProvider {

@@ -5,6 +5,7 @@ import androidx.lifecycle.AndroidViewModel
 import androidx.lifecycle.LiveData
 import androidx.lifecycle.MutableLiveData
 import androidx.lifecycle.viewModelScope
+import bg.zahov.app.getServiceErrorProvider
 import bg.zahov.app.getUserProvider
 import bg.zahov.app.util.isEmail
 import kotlinx.coroutines.launch
@@ -13,6 +14,9 @@ import java.lang.IllegalArgumentException
 class LoginViewModel(application: Application) : AndroidViewModel(application) {
     private val auth by lazy {
         application.getUserProvider()
+    }
+    private val serviceError by lazy {
+        application.getServiceErrorProvider()
     }
     private val _state = MutableLiveData<State>()
     val state: LiveData<State>
@@ -40,8 +44,7 @@ class LoginViewModel(application: Application) : AndroidViewModel(application) {
                         _state.value = State.Error(it.message, false)
                     }
             } catch (e: IllegalArgumentException) {
-                _state.postValue(State.Error("There was a failure with initialization", true))
-
+                serviceError.stopApplication()
             }
         }
     }

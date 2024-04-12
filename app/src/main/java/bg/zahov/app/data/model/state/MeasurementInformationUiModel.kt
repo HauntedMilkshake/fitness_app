@@ -10,13 +10,11 @@ data class MeasurementInformationUiModel(
     val chartVisibility: Int = View.VISIBLE,
     val maxData: Int? = null,
     val chartData: List<Entry> = listOf(),
-    val shutdown: Boolean = false
 )
 
 object MeasurementInformationUiMapper {
     fun map(state: MeasurementInfoViewModel.State) = when(state) {
         is MeasurementInfoViewModel.State.Data -> MeasurementInformationUiModel(maxData = state.maxValue, chartData = state.entries)
         is MeasurementInfoViewModel.State.Loading -> MeasurementInformationUiModel(loadingVisibility = state.loadingVisibility, chartVisibility = View.GONE)
-        else -> MeasurementInformationUiModel(shutdown = true)
     }
 }

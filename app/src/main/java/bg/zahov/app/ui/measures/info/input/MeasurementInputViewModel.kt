@@ -10,6 +10,7 @@ import bg.zahov.app.data.exception.CriticalDataNullException
 import bg.zahov.app.data.model.Measurement
 import bg.zahov.app.data.model.MeasurementType
 import bg.zahov.app.getMeasurementsProvider
+import bg.zahov.app.getServiceErrorProvider
 import kotlinx.coroutines.launch
 import java.time.LocalDateTime
 import java.time.format.DateTimeFormatter
@@ -17,6 +18,9 @@ import java.time.format.DateTimeFormatter
 class MeasurementInputViewModel(application: Application) : AndroidViewModel(application) {
     private val measurementProvider by lazy {
         application.getMeasurementsProvider()
+    }
+    private val serviceError by lazy {
+        application.getServiceErrorProvider()
     }
     private val _state = MutableLiveData<State>()
     val state: LiveData<State>
@@ -38,6 +42,7 @@ class MeasurementInputViewModel(application: Application) : AndroidViewModel(app
                     }
                 }
             } catch (e: CriticalDataNullException) {
+                serviceError.stopApplication()
             }
         }
     }

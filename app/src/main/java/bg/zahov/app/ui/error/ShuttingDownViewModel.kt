@@ -25,9 +25,7 @@ class ShuttingDownViewModel(application: Application) : AndroidViewModel(applica
     private fun startCountdown() {
         countDownTimer = object : CountDownTimer(5000, 1000) {
             override fun onTick(millisUntilFinished: Long) {
-                val secondsLeft = millisUntilFinished / 1000
-                val formattedTime = String.format("%02d", secondsLeft)
-                _state.value = State.CountDown(formattedTime)
+                _state.value = State.CountDown((millisUntilFinished / 1000).toString())
             }
 
             override fun onFinish() {
