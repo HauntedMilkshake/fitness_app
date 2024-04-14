@@ -35,6 +35,7 @@ class WorkoutFragment : Fragment() {
 
     private val onGoingWorkoutViewModel: WorkoutViewModel by viewModels()
     private var mediaPlayer: MediaPlayer? = null
+    private var onBackPressedCallback: OnBackPressedCallback? = null
 
     override fun onCreateView(
         inflater: LayoutInflater,
@@ -57,7 +58,6 @@ class WorkoutFragment : Fragment() {
     override fun onViewCreated(view: View, savedInstanceState: Bundle?) {
         super.onViewCreated(view, savedInstanceState)
         requireActivity().hideTopBar()
-
         binding.apply {
             onGoingWorkoutViewModel.restTimer.map { OnGoingWorkoutUiMapper.map(it) }
                 .observe(viewLifecycleOwner) {
@@ -181,7 +181,7 @@ class WorkoutFragment : Fragment() {
             onGoingWorkoutViewModel.navigate.observe(viewLifecycleOwner) {
                 it?.let { findNavController().navigate(it) }
             }
-            activity?.onBackPressedDispatcher?.addCallback(object : OnBackPressedCallback(true) {
+            onBackPressedCallback = object : OnBackPressedCallback(true) {
                 override fun handleOnBackPressed() {
                     if (findNavController().currentDestination?.id == R.id.workout) {
                         onGoingWorkoutViewModel.minimize()
@@ -189,10 +189,16 @@ class WorkoutFragment : Fragment() {
                     }
                     findNavController().navigateUp()
                 }
-            })
+            }
+
+            activity?.onBackPressedDispatcher?.addCallback(viewLifecycleOwner, onBackPressedCallback!!)
         }
     }
 
+    override fun onResume() {
+        super.onResume()
+        requireActivity().hideTopBar()
+    }
     override fun onStop() {
         super.onStop()
         requireActivity().showTopBar()
@@ -202,5 +208,8 @@ class WorkoutFragment : Fragment() {
         _binding = null
         mediaPlayer?.release()
         mediaPlayer = null
+        onBackPressedCallback?.remove()
+        onBackPressedCallback = null
+
     }
 }

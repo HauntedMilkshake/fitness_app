@@ -55,7 +55,7 @@ class StartWorkoutViewModel(application: Application) : AndroidViewModel(applica
                     _templates.postValue(it)
                 }
             } catch (e: CriticalDataNullException) {
-               serviceError.initiateCountdown()
+                serviceError.initiateCountdown()
             }
         }
     }

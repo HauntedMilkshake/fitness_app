@@ -202,7 +202,7 @@ fun Sets.toExerciseSetAdapterSetWrapper(
             else -> View.VISIBLE
         },
         setNumber = number,
-        set = this,
+        set = Sets(SetType.DEFAULT, 0.0, 0),
         backgroundResource = R.color.completed_set,
         previousResults = previousResults,
     )

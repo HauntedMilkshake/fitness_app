@@ -5,6 +5,7 @@ import bg.zahov.app.data.model.Exercise
 import bg.zahov.app.data.model.Workout
 import bg.zahov.app.ui.exercise.info.history.ExerciseHistoryInfo
 import kotlinx.coroutines.flow.Flow
+import java.time.LocalDateTime
 
 interface WorkoutProvider {
     suspend fun getTemplateWorkouts(): Flow<List<Workout>>
@@ -24,5 +25,6 @@ interface WorkoutProvider {
     suspend fun getExerciseHistory(): Flow<List<ExerciseHistoryInfo>>
     suspend fun getPreviousWorkoutState(): RealmWorkoutState?
     suspend fun addWorkoutState(realmWorkoutState: RealmWorkoutState)
+    suspend fun updateWorkoutDate(workoutId: String, date: LocalDateTime)
     suspend fun clearWorkoutState()
 }

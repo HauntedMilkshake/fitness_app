@@ -1,6 +1,7 @@
 package bg.zahov.app.ui.workout
 
 import android.app.Application
+import android.util.Log
 import android.view.View
 import androidx.lifecycle.AndroidViewModel
 import androidx.lifecycle.LiveData
@@ -345,11 +346,15 @@ class WorkoutViewModel(application: Application) : AndroidViewModel(application)
         }
         viewModelScope.launch {
             val (exercises, prs, volume) = getExerciseArrayAndPRs(_exercises.value.orEmpty())
+            Log.d("prs", prs.toString())
+            workoutId?.let {
+                repo.updateWorkoutDate(it, workoutDate)
+            }
             repo.addWorkoutToHistory(
                 Workout(
                     id = workoutId ?: hashString("${Random().nextInt(Int.MAX_VALUE)}"),
                     name = "${getTimePeriodAsString()} ${_name.value}",
-                    date = LocalDateTime.now(),
+                    date = workoutDate,
                     exercises = exercises,
                     note = _note.value,
                     duration = _timer.value?.parseTimeStringToLong() ?: 0L,
@@ -474,10 +479,16 @@ class WorkoutViewModel(application: Application) : AndroidViewModel(application)
     }
 
     private suspend fun saveWorkoutState() {
+        val prefixes = setOf("Morning", "Noon", "Afternoon", "Night")
         val (exercises, prs, volume) = getExerciseArrayAndPRs(_exercises.value.orEmpty(), false)
+
         val workout = Workout(
             id = workoutId ?: hashString("${Random().nextInt(Int.MAX_VALUE)}"),
-            name = "${getTimePeriodAsString()} ${_name.value}",
+            name = if (_name.value.isNullOrEmpty() || !(prefixes.any {
+                    (_name.value ?: "").contains(
+                        it
+                    )
+                })) "${getTimePeriodAsString()} ${_name.value}" else _name.value ?: "",
             date = workoutDate,
             exercises = exercises,
             note = _note.value,
@@ -503,7 +514,7 @@ class WorkoutViewModel(application: Application) : AndroidViewModel(application)
                 .toRealmString() else ""
             timeOfStop = LocalDateTime.now().toRealmString()
         })
-        restTimerProvider.stopRest()
+        if (restTimerProvider.isRestActive()) restTimerProvider.stopRest()
 
     }
 

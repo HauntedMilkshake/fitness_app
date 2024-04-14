@@ -12,6 +12,7 @@ import bg.zahov.app.util.toFormattedString
 import kotlinx.coroutines.flow.Flow
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.mapNotNull
+import java.time.LocalDateTime
 
 class WorkoutProviderImpl : WorkoutProvider {
     companion object {
@@ -103,6 +104,10 @@ class WorkoutProviderImpl : WorkoutProvider {
 
     override suspend fun addWorkoutState(realmWorkoutState: RealmWorkoutState) {
         workoutRepo.addWorkoutState(realmWorkoutState)
+    }
+
+    override suspend fun updateWorkoutDate(workoutId: String, date: LocalDateTime) {
+        workoutRepo.updateTemplateWorkoutDate(workoutId, date)
     }
 
     override suspend fun clearWorkoutState() {

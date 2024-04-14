@@ -1,6 +1,7 @@
 package bg.zahov.app.ui.history.info
 
 import android.os.Bundle
+import android.util.Log
 import android.view.LayoutInflater
 import android.view.Menu
 import android.view.MenuInflater
@@ -16,6 +17,7 @@ import androidx.lifecycle.map
 import androidx.navigation.fragment.findNavController
 import androidx.recyclerview.widget.LinearLayoutManager
 import bg.zahov.app.data.model.state.HistoryInfoUiMapper
+import bg.zahov.app.hideBottomNav
 import bg.zahov.app.setToolBarTitle
 import bg.zahov.app.ui.history.HistoryFragment.Companion.workoutId
 import bg.zahov.fitness.app.R
@@ -36,6 +38,7 @@ class HistoryInfoFragment : Fragment() {
     ): View {
         _binding = FragmentHistoryInfoBinding.inflate(inflater, container, false)
         historyInfoViewModel.queryWorkout(id)
+        requireActivity().hideBottomNav()
         return binding.root
     }
 
@@ -55,13 +58,13 @@ class HistoryInfoFragment : Fragment() {
             override fun onMenuItemSelected(menuItem: MenuItem): Boolean {
                 return when (menuItem.itemId) {
                     R.id.home -> {
-                        findNavController().navigate(R.id.history_info_to_history)
+                        findNavController().navigateUp()
                         true
                     }
 
                     R.id.delete -> {
                         historyInfoViewModel.delete()
-                        findNavController().navigate(R.id.history_info_to_history)
+                        findNavController().navigateUp()
                         true
                     }
 
@@ -99,13 +102,14 @@ class HistoryInfoFragment : Fragment() {
     }
 
     private fun showToast(message: String?) {
+        Log.d("workout", "showing toast")
         message?.let {
             Toast.makeText(context, it, Toast.LENGTH_SHORT).show()
         }
     }
-
     override fun onDestroyView() {
         super.onDestroyView()
         _binding = null
+        historyInfoViewModel.state.removeObservers(viewLifecycleOwner)
     }
 }

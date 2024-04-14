@@ -86,7 +86,7 @@ class AddTemplateWorkoutViewModel(application: Application) : AndroidViewModel(a
                         }
                     }
                 } catch (e: Exception) {
-                    serviceError.initiateCountdown()
+//                    serviceError.initiateCountdown()
                 }
             }
             launch {

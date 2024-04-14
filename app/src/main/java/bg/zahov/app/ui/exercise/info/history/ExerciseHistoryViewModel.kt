@@ -6,7 +6,6 @@ import androidx.lifecycle.AndroidViewModel
 import androidx.lifecycle.LiveData
 import androidx.lifecycle.MutableLiveData
 import androidx.lifecycle.viewModelScope
-import bg.zahov.app.getServiceErrorProvider
 import bg.zahov.app.getWorkoutProvider
 import kotlinx.coroutines.Job
 import kotlinx.coroutines.NonCancellable
@@ -15,9 +14,6 @@ import kotlinx.coroutines.launch
 class ExerciseHistoryViewModel(application: Application) : AndroidViewModel(application) {
     private val workoutProvider by lazy {
         application.getWorkoutProvider()
-    }
-    private val serviceError by lazy {
-        application.getServiceErrorProvider()
     }
     private val _state = MutableLiveData<State>(State.Default)
     val state: LiveData<State>
@@ -33,7 +29,7 @@ class ExerciseHistoryViewModel(application: Application) : AndroidViewModel(appl
                     }
                 }
             } catch (e: Exception) {
-                serviceError.initiateCountdown()
+//                serviceError.initiateCountdown()
             }
         }
     }

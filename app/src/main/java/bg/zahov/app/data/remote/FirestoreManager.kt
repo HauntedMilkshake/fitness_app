@@ -1,5 +1,6 @@
 package bg.zahov.app.data.remote
 
+import android.util.Log
 import bg.zahov.app.data.model.Exercise
 import bg.zahov.app.data.model.FirestoreFields
 import bg.zahov.app.data.model.Measurement
@@ -8,6 +9,8 @@ import bg.zahov.app.data.model.Measurements
 import bg.zahov.app.data.model.User
 import bg.zahov.app.data.model.Workout
 import bg.zahov.app.util.toFirestoreMap
+import bg.zahov.app.util.toLocalDateTime
+import com.google.firebase.Timestamp
 import com.google.firebase.firestore.CollectionReference
 import com.google.firebase.firestore.DocumentReference
 import com.google.firebase.firestore.FirebaseFirestore
@@ -20,6 +23,7 @@ import kotlinx.coroutines.flow.channelFlow
 import kotlinx.coroutines.flow.first
 import kotlinx.coroutines.tasks.await
 import kotlinx.coroutines.withContext
+import java.time.LocalDateTime
 
 class FirestoreManager {
     companion object {
@@ -103,7 +107,7 @@ class FirestoreManager {
     suspend fun getWorkouts(): Flow<List<Workout>> = getCollectionData(
         firestore.collection(USERS_COLLECTION).document(userId).collection(WORKOUTS_SUB_COLLECTION)
     ) { info ->
-        Workout.fromFirestoreMap(info)
+        Workout.fromFirestoreMap(info).also { Log.d("workout from adapter", it.toString()) }
     }
 
     suspend fun getTemplateWorkouts(): Flow<List<Workout>> = getCollectionData(
@@ -148,7 +152,8 @@ class FirestoreManager {
             val newMap = getLatestMeasurementsByType(type)
             val newList = newMap.measurements[type].orEmpty().toMutableList()
 
-            val existingIndex = newList.indexOfFirst { it.date.year == measurement.date.year && it.date.month == measurement.date.month && it.date.dayOfMonth == measurement.date.dayOfMonth }
+            val existingIndex =
+                newList.indexOfFirst { it.date.year == measurement.date.year && it.date.month == measurement.date.month && it.date.dayOfMonth == measurement.date.dayOfMonth }
 
             if (existingIndex != -1) {
                 newList[existingIndex] = measurement
@@ -196,6 +201,14 @@ class FirestoreManager {
             Measurements.fromFirestoreMap(it, type)
         }
 
+    private suspend fun getLatestWorkoutById(id: String): Workout = getNonObservableDocData(
+        firestore.collection(
+            USERS_COLLECTION
+        ).document(userId).collection(TEMPLATE_WORKOUTS_SUB_COLLECTION).document(id)
+    ) {
+        Workout.fromFirestoreMap(it)
+    }
+
     suspend fun updateUsername(newUsername: String) =
         withContext(Dispatchers.IO) {
             firestore.collection(USERS_COLLECTION).document(userId)
@@ -227,6 +240,16 @@ class FirestoreManager {
         withContext(Dispatchers.IO) {
             firestore.collection(USERS_COLLECTION).document(userId)
                 .collection(TEMPLATE_WORKOUTS_SUB_COLLECTION).document(workout.id).delete()
+        }
+    }
+
+    suspend fun updateWorkoutDate(workoutId: String, newDate: LocalDateTime) {
+        withContext(Dispatchers.IO) {
+            val workoutToUpdate = getLatestWorkoutById(workoutId)
+            workoutToUpdate.date = newDate
+            firestore.collection(USERS_COLLECTION).document(userId).collection(
+                WORKOUTS_SUB_COLLECTION
+            ).document(workoutId).set(workoutToUpdate.toFirestoreMap())
         }
     }
 

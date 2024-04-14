@@ -1,6 +1,7 @@
 package bg.zahov.app.ui.history
 
 import android.os.Bundle
+import android.util.Log
 import android.view.LayoutInflater
 import android.view.Menu
 import android.view.MenuInflater
@@ -18,6 +19,7 @@ import androidx.recyclerview.widget.LinearLayoutManager
 import bg.zahov.app.data.model.Workout
 import bg.zahov.app.data.model.state.HistoryUiMapper
 import bg.zahov.app.setToolBarTitle
+import bg.zahov.app.showBottomNav
 import bg.zahov.app.showTopBar
 import bg.zahov.fitness.app.R
 import bg.zahov.fitness.app.databinding.FragmentHistoryBinding
@@ -34,6 +36,7 @@ class HistoryFragment : Fragment() {
     ): View {
         _binding = FragmentHistoryBinding.inflate(inflater, container, false)
         requireActivity().showTopBar()
+        requireActivity().showBottomNav()
         return binding.root
     }
 
@@ -81,6 +84,12 @@ class HistoryFragment : Fragment() {
                 historyAdapter.updateItems(it.workouts)
             }
         }
+    }
+
+    override fun onResume() {
+        super.onResume()
+        Log.d("on resume", "on resume")
+        historyViewModel.fetchPastWorkouts()
     }
 
     override fun onDestroyView() {

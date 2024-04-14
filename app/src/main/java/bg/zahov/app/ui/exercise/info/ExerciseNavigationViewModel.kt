@@ -14,9 +14,6 @@ class ExerciseNavigationViewModel(application: Application) : AndroidViewModel(a
     private val exerciseProvider by lazy {
         application.getWorkoutProvider()
     }
-    private val serviceError by lazy {
-        application.getServiceErrorProvider()
-    }
     private val _state = MutableLiveData<State>()
     val state: LiveData<State>
         get() = _state

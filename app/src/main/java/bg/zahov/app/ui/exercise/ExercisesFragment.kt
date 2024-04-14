@@ -115,7 +115,6 @@ class ExercisesFragment : Fragment() {
                         else -> false
                     }
                 }
-
             })
 
             requireActivity().setToolBarTitle(

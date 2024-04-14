@@ -1,6 +1,7 @@
 package bg.zahov.app.ui.history
 
 import android.app.Application
+import android.util.Log
 import android.view.View
 import androidx.lifecycle.AndroidViewModel
 import androidx.lifecycle.LiveData
@@ -24,10 +25,15 @@ class HistoryViewModel(application: Application) : AndroidViewModel(application)
         get() = _state
 
     init {
+        fetchPastWorkouts()
+    }
+
+    fun fetchPastWorkouts() {
         viewModelScope.launch {
             _state.postValue(State.Loading(View.VISIBLE, View.GONE))
             workoutProvider.getPastWorkouts().collect {
                 try {
+                    Log.d("history ", it.toString())
                     _state.postValue(State.Data(it.sortedByDescending { item -> item.date }))
                 } catch (e: CriticalDataNullException) {
                     serviceError.initiateCountdown()

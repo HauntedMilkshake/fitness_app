@@ -9,6 +9,7 @@ import bg.zahov.app.data.local.RealmWorkoutState
 import bg.zahov.app.data.remote.FirestoreManager
 import io.realm.kotlin.notifications.ObjectChange
 import kotlinx.coroutines.flow.Flow
+import java.time.LocalDateTime
 
 class WorkoutRepositoryImpl : WorkoutRepository {
     companion object {
@@ -64,6 +65,10 @@ class WorkoutRepositoryImpl : WorkoutRepository {
 
     override suspend fun addWorkoutState(realmWorkoutState: RealmWorkoutState) {
         realm.addWorkoutState(realmWorkoutState)
+    }
+
+    override suspend fun updateTemplateWorkoutDate(workoutId: String, date: LocalDateTime) {
+        firestore.updateWorkoutDate(workoutId, date)
     }
 
     override suspend fun clearWorkoutState() {

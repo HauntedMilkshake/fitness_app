@@ -5,6 +5,8 @@ import bg.zahov.app.data.model.Exercise
 import bg.zahov.app.data.model.Workout
 import io.realm.kotlin.notifications.ObjectChange
 import kotlinx.coroutines.flow.Flow
+import java.time.LocalDateTime
+
 //TODO(would be good for addWorkout and addTemplateExercise to return a task or something)
 interface WorkoutRepository {
     suspend fun getTemplateWorkouts(): Flow<List<Workout>>
@@ -21,5 +23,6 @@ interface WorkoutRepository {
     suspend fun getPastWorkoutById(id: String): Workout
     suspend fun getPastWorkoutState(): RealmWorkoutState?
     suspend fun addWorkoutState(realmWorkoutState: RealmWorkoutState)
+    suspend fun updateTemplateWorkoutDate(workoutId: String, date: LocalDateTime)
     suspend fun clearWorkoutState()
 }

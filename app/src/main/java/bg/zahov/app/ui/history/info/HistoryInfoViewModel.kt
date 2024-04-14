@@ -1,6 +1,7 @@
 package bg.zahov.app.ui.history.info
 
 import android.app.Application
+import android.util.Log
 import androidx.lifecycle.AndroidViewModel
 import androidx.lifecycle.LiveData
 import androidx.lifecycle.MutableLiveData
@@ -25,35 +26,53 @@ class HistoryInfoViewModel(application: Application) : AndroidViewModel(applicat
     private val serviceError by lazy {
         application.getServiceErrorProvider()
     }
-    private lateinit var workout: Workout
+    private var workout: Workout? = null
     private val _state = MutableLiveData<State>()
+    private var templates: MutableList<Workout> = mutableListOf()
     val state: LiveData<State>
         get() = _state
 
-    fun delete() {
-        viewModelScope.launch {
-            workoutProvider.deleteWorkout(workout)
-        }
-    }
-
-    fun saveAsTemplate() {
+    init {
         viewModelScope.launch {
             try {
                 workoutProvider.getTemplateWorkouts().collect {
-                    if (!it.contains(workout)) {
-                        workoutProvider.addTemplateWorkout(workout)
-                    } else {
-                        _state.postValue(
-                            State.Notify(
-                                (_state.value as? State.Data)?.data,
-                                "Such a workout already exists!"
-                            )
-                        )
-                    }
+                    templates = it.toMutableList()
                 }
             } catch (e: CriticalDataNullException) {
                 serviceError.initiateCountdown()
             }
+        }
+    }
+
+    fun delete() {
+        viewModelScope.launch {
+            workout?.let {
+                workoutProvider.deleteWorkout(it)
+            }
+        }
+    }
+
+    fun saveAsTemplate() {
+        Log.d("workout id", workout?.id ?: "")
+        Log.d("workout workouts", templates.map{it.id}.toString())
+        if (templates.any { it.id == workout?.id}) {
+            Log.d("workout already have this workout", "already have this workout")
+            _state.value = State.Notify((_state.value as? State.Data)?.data, "Such a workout already exists!")
+            return
+        }
+
+        viewModelScope.launch {
+            Log.d("workout adding workout", workout.toString())
+            workout?.let {
+                it.isTemplate = true
+                it.duration = 0L
+                it.volume = 0.0
+                it.personalRecords = 0
+
+                workoutProvider.addTemplateWorkout(it)
+                templates.add(it)
+            }
+
         }
     }
 
@@ -64,13 +83,16 @@ class HistoryInfoViewModel(application: Application) : AndroidViewModel(applicat
     }
 
     fun queryWorkout(id: String) {
+        Log.d("workout querying workout", id)
         viewModelScope.launch {
             if (id.isNotEmpty()) {
                 try {
                     workout = workoutProvider.getPastWorkoutById(id)
-                    _state.postValue(State.Data(createAdapterData(workout)))
+                    Log.d("workout new workout", workout.toString())
+                    workout?.let { _state.postValue(State.Data(createAdapterData(it))) }
                 } catch (e: Exception) {
-                    serviceError.initiateCountdown()
+                    Log.d("exceptiong", e.message ?: " ")
+//                    serviceError.initiateCountdown()
                 }
             } else {
                 serviceError.initiateCountdown()

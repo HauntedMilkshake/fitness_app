@@ -15,6 +15,7 @@ import androidx.fragment.app.viewModels
 import androidx.navigation.fragment.findNavController
 import androidx.recyclerview.widget.LinearLayoutManager
 import bg.zahov.app.data.model.MeasurementType
+import bg.zahov.app.hideBottomNav
 import bg.zahov.app.setToolBarTitle
 import bg.zahov.app.showTopBar
 import bg.zahov.fitness.app.R
@@ -33,6 +34,7 @@ class MeasuresFragment : Fragment() {
     ): View {
         _binding = FragmentMeasuresBinding.inflate(inflater, container, false)
         requireActivity().showTopBar()
+        requireActivity().hideBottomNav()
         return binding.root
     }
 
