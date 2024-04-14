@@ -40,7 +40,7 @@ class AddExerciseViewModel(application: Application) : AndroidViewModel(applicat
                     if (it.isNotEmpty()) exercises = it
                 }
             } catch (e: CriticalDataNullException) {
-                serviceError.stopApplication()
+                serviceError.initiateCountdown()
             }
         }
     }

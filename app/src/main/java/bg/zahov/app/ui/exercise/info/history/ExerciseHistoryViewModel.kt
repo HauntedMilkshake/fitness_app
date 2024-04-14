@@ -33,7 +33,7 @@ class ExerciseHistoryViewModel(application: Application) : AndroidViewModel(appl
                     }
                 }
             } catch (e: Exception) {
-                serviceError.stopApplication()
+                serviceError.initiateCountdown()
             }
         }
     }

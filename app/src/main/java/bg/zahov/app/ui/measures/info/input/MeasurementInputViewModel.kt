@@ -1,7 +1,6 @@
 package bg.zahov.app.ui.measures.info.input
 
 import android.app.Application
-import android.util.Log
 import androidx.lifecycle.AndroidViewModel
 import androidx.lifecycle.LiveData
 import androidx.lifecycle.MutableLiveData
@@ -42,7 +41,7 @@ class MeasurementInputViewModel(application: Application) : AndroidViewModel(app
                     }
                 }
             } catch (e: CriticalDataNullException) {
-                serviceError.stopApplication()
+                serviceError.initiateCountdown()
             }
         }
     }

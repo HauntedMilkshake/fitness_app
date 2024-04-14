@@ -58,7 +58,7 @@ class CalendarViewModel(application: Application) : AndroidViewModel(application
                     _numberOfWorkouts.value = workoutsPerMonth.toMap()
                 }
             } catch (e: Exception) {
-                serviceError.stopApplication()
+                serviceError.initiateCountdown()
             }
         }
     }

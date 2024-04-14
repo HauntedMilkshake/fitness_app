@@ -38,7 +38,7 @@ class EditProfileViewModel(application: Application) : AndroidViewModel(applicat
                     _name.postValue(it.name)
                 }
             } catch (e: CriticalDataNullException) {
-                serviceErrorHandler.stopApplication()
+                serviceErrorHandler.initiateCountdown()
             }
         }
     }

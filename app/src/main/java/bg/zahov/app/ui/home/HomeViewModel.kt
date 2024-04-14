@@ -1,7 +1,6 @@
 package bg.zahov.app.ui.home
 
 import android.app.Application
-import android.util.Log
 import androidx.lifecycle.AndroidViewModel
 import androidx.lifecycle.LiveData
 import androidx.lifecycle.MutableLiveData
@@ -70,7 +69,7 @@ class HomeViewModel(application: Application) : AndroidViewModel(application) {
                         _userName.postValue(it.name)
                     }
                 } catch (e: CriticalDataNullException) {
-                    serviceErrorHandler.stopApplication()
+                    serviceErrorHandler.initiateCountdown()
                 }
             }
             launch {
@@ -87,7 +86,7 @@ class HomeViewModel(application: Application) : AndroidViewModel(application) {
                         _state.postValue(State.Default)
                     }
                 } catch (e: CriticalDataNullException) {
-                    serviceErrorHandler.stopApplication()
+                    serviceErrorHandler.initiateCountdown()
                 }
             }
         }
@@ -140,12 +139,9 @@ class HomeViewModel(application: Application) : AndroidViewModel(application) {
     private suspend fun checkPreviousState(previousState: RealmWorkoutState) {
         if (previousState.id != "default") {
             val lastTime = Duration.between(LocalDateTime.now(), previousState.date.toLocalDateTimeRlm())
-                LocalDateTime.now().isAfter(previousState.restTimerEnd.toLocalDateTimeRlm())
-                    .toString()
             if (previousState.restTimerStart.isNotEmpty() && previousState.restTimerEnd.isNotEmpty() && !LocalDateTime.now()
                     .isAfter(previousState.restTimerEnd.toLocalDateTimeRlm())
             ) {
-                Log.d("Detected rest", "rest detected")
                 val restDuration = Duration.between(
                     previousState.restTimerStart.toLocalDateTimeRlm(),
                     previousState.restTimerEnd.toLocalDateTimeRlm()

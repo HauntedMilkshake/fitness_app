@@ -2,6 +2,7 @@ package bg.zahov.app.ui.measures.info
 
 import android.graphics.Color
 import android.os.Bundle
+import android.util.Log
 import android.view.LayoutInflater
 import android.view.Menu
 import android.view.MenuInflater
@@ -18,12 +19,13 @@ import bg.zahov.app.setToolBarTitle
 import bg.zahov.app.showTopBar
 import bg.zahov.app.ui.measures.MeasuresFragment.Companion.MEASUREMENT_ARGS
 import bg.zahov.app.ui.measures.info.input.MeasurementInputFragment
+import bg.zahov.app.util.MonthValueFormatter
+import bg.zahov.app.util.RightAxisValueFormatter
 import bg.zahov.fitness.app.R
 import bg.zahov.fitness.app.databinding.FragmentMeasurementInformationBinding
 import com.github.mikephil.charting.components.XAxis
 import com.github.mikephil.charting.data.LineData
 import com.github.mikephil.charting.data.LineDataSet
-import com.github.mikephil.charting.formatter.ValueFormatter
 import java.time.LocalDate
 
 class MeasurementInfoFragment : Fragment() {
@@ -55,12 +57,11 @@ class MeasurementInfoFragment : Fragment() {
             override fun onMenuItemSelected(menuItem: MenuItem) = false
         })
         binding.apply {
-            setupChart()
             measurementInfoViewModel.state.map { MeasurementInformationUiMapper.map(it) }
                 .observe(viewLifecycleOwner) {
                     circularProgressIndicator.visibility = it.loadingVisibility
-                    chart.visibility = it.chartVisibility
                     chart.apply {
+                        visibility = it.chartVisibility
                         val dataSet = LineDataSet(it.chartData, "results").apply {
                             valueTextColor = Color.WHITE
                             valueTextSize = 13f
@@ -70,11 +71,13 @@ class MeasurementInfoFragment : Fragment() {
                         notifyDataSetChanged()
                         invalidate()
 
-                        axisRight.axisMinimum = 0f
-                        it.maxData?.let {maxData -> axisRight.axisMaximum = maxData.toFloat() }
-
-
+                        axisRight.apply {
+                            axisMaximum = it.max
+                            axisMinimum = it.min
+                        }
                     }
+                    setupChart(it.suffix)
+
                 }
             addEntry.setOnClickListener {
                 val measurementInputFragment = MeasurementInputFragment.newInstance(
@@ -85,10 +88,12 @@ class MeasurementInfoFragment : Fragment() {
         }
     }
 
-    private fun setupChart() {
+    private fun setupChart(suffix: String) {
         binding.chart.apply {
+            extraRightOffset = 34f
             setPinchZoom(false)
             setDrawGridBackground(false)
+            isDoubleTapToZoomEnabled = false
             legend.isEnabled = false
             axisLeft.isEnabled = false
 
@@ -96,20 +101,19 @@ class MeasurementInfoFragment : Fragment() {
                 textColor = Color.WHITE
                 text = "Measurements"
             }
+
             xAxis.apply {
                 axisMinimum = 1f
                 axisMaximum = LocalDate.now().lengthOfMonth().toFloat()
                 position = XAxis.XAxisPosition.BOTTOM
                 textColor = Color.WHITE
+                valueFormatter = MonthValueFormatter()
             }
+
             axisRight.apply {
-                textSize = 14f
                 textColor = Color.WHITE
-                valueFormatter = object : ValueFormatter() {
-                    override fun getFormattedValue(value: Float): String {
-                        return value.toInt().toString()
-                    }
-                }
+                granularity = 1f
+                valueFormatter = RightAxisValueFormatter(suffix)
             }
         }
     }

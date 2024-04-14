@@ -1,7 +1,6 @@
 package bg.zahov.app.ui.loading
 
 import android.app.Application
-import android.util.Log
 import androidx.lifecycle.AndroidViewModel
 import androidx.lifecycle.LiveData
 import androidx.lifecycle.MutableLiveData
@@ -9,7 +8,6 @@ import androidx.lifecycle.viewModelScope
 import bg.zahov.app.getServiceErrorProvider
 import bg.zahov.app.getUserProvider
 import bg.zahov.fitness.app.R
-import kotlinx.coroutines.async
 import kotlinx.coroutines.launch
 
 class LoadingViewModel(application: Application) : AndroidViewModel(application) {
@@ -33,7 +31,7 @@ class LoadingViewModel(application: Application) : AndroidViewModel(application)
                     _state.postValue(State.Navigate(R.id.loading_to_welcome))
                 }
             } catch (e: Exception) {
-               serviceError.stopApplication()
+               serviceError.initiateCountdown()
             }
         }
     }

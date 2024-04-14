@@ -147,12 +147,23 @@ class FirestoreManager {
         withContext(Dispatchers.IO) {
             val newMap = getLatestMeasurementsByType(type)
             val newList = newMap.measurements[type].orEmpty().toMutableList()
-            newList.add(measurement)
-            firestore.collection(USERS_COLLECTION).document(userId).collection(
-                MEASUREMENTS_COLLECTION
-            ).document(type.key).set(newList.toFirestoreMap())
+
+            val existingIndex = newList.indexOfFirst { it.date.year == measurement.date.year && it.date.month == measurement.date.month && it.date.dayOfMonth == measurement.date.dayOfMonth }
+
+            if (existingIndex != -1) {
+                newList[existingIndex] = measurement
+            } else {
+                newList.add(measurement)
+            }
+
+            firestore.collection(USERS_COLLECTION)
+                .document(userId)
+                .collection(MEASUREMENTS_COLLECTION)
+                .document(type.key)
+                .set(newList.toFirestoreMap())
         }
     }
+
 
     suspend fun getMeasurement(type: MeasurementType): Flow<Measurements> = getDocData(
         firestore.collection(

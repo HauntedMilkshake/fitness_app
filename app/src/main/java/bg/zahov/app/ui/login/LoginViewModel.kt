@@ -44,7 +44,7 @@ class LoginViewModel(application: Application) : AndroidViewModel(application) {
                         _state.value = State.Error(it.message, false)
                     }
             } catch (e: IllegalArgumentException) {
-                serviceError.stopApplication()
+                serviceError.initiateCountdown()
             }
         }
     }

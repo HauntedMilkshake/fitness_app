@@ -75,7 +75,7 @@ class AddTemplateWorkoutViewModel(application: Application) : AndroidViewModel(a
                         templateExercises = it
                     }
                 } catch (e: CriticalDataNullException) {
-                    serviceError.stopApplication()
+                    serviceError.initiateCountdown()
                 }
             }
             launch {
@@ -86,7 +86,7 @@ class AddTemplateWorkoutViewModel(application: Application) : AndroidViewModel(a
                         }
                     }
                 } catch (e: Exception) {
-                    serviceError.stopApplication()
+                    serviceError.initiateCountdown()
                 }
             }
             launch {
@@ -95,7 +95,7 @@ class AddTemplateWorkoutViewModel(application: Application) : AndroidViewModel(a
                         templates = it
                     }
                 } catch (e: CriticalDataNullException) {
-                    serviceError.stopApplication()
+                    serviceError.initiateCountdown()
                 }
             }
 

@@ -52,7 +52,7 @@ class HistoryInfoViewModel(application: Application) : AndroidViewModel(applicat
                     }
                 }
             } catch (e: CriticalDataNullException) {
-                serviceError.stopApplication()
+                serviceError.initiateCountdown()
             }
         }
     }
@@ -70,10 +70,10 @@ class HistoryInfoViewModel(application: Application) : AndroidViewModel(applicat
                     workout = workoutProvider.getPastWorkoutById(id)
                     _state.postValue(State.Data(createAdapterData(workout)))
                 } catch (e: Exception) {
-                    serviceError.stopApplication()
+                    serviceError.initiateCountdown()
                 }
             } else {
-                serviceError.stopApplication()
+                serviceError.initiateCountdown()
             }
         }
     }

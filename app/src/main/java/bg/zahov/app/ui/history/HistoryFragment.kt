@@ -62,7 +62,10 @@ class HistoryFragment : Fragment() {
             val historyAdapter = HistoryAdapter().apply {
                 itemClickListener = object : HistoryAdapter.ItemClickListener<Workout> {
                     override fun onWorkoutClick(item: Workout, position: Int) {
-                        findNavController().navigate(R.id.history_to_history_info, bundleOf(workoutId to item.id))
+                        findNavController().navigate(
+                            R.id.history_to_history_info,
+                            bundleOf(workoutId to item.id)
+                        )
                     }
                 }
             }
@@ -84,6 +87,7 @@ class HistoryFragment : Fragment() {
         super.onDestroyView()
         _binding = null
     }
+
     companion object {
         const val workoutId = "WORKOUT_ID"
     }

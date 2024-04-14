@@ -8,12 +8,13 @@ import android.view.ViewGroup
 import androidx.fragment.app.Fragment
 import androidx.fragment.app.viewModels
 import bg.zahov.app.hideBottomNav
+import bg.zahov.app.util.MonthValueFormatter
+import bg.zahov.app.util.RightAxisValueFormatter
 import bg.zahov.fitness.app.databinding.FragmentExerciseChartsBinding
 import com.github.mikephil.charting.charts.LineChart
 import com.github.mikephil.charting.components.XAxis
 import com.github.mikephil.charting.data.LineData
 import com.github.mikephil.charting.data.LineDataSet
-import com.github.mikephil.charting.formatter.ValueFormatter
 import java.time.LocalDate
 
 class ExerciseChartsFragment : Fragment() {
@@ -98,16 +99,13 @@ class ExerciseChartsFragment : Fragment() {
                 axisMaximum = LocalDate.now().lengthOfMonth().toFloat()
                 position = XAxis.XAxisPosition.BOTTOM
                 textColor = Color.WHITE
+                valueFormatter = MonthValueFormatter()
             }
             axisRight.apply {
                 textSize = 14f
                 textColor = Color.WHITE
                 granularity = 1f
-                valueFormatter = object : ValueFormatter() {
-                    override fun getFormattedValue(value: Float): String {
-                        return "${value.toInt()} $suffix"
-                    }
-                }
+                valueFormatter = RightAxisValueFormatter(suffix)
             }
         }
     }

@@ -70,7 +70,7 @@ class SignupViewModel(application: Application) : AndroidViewModel(application) 
                         _state.value = State.Error(it.message, false)
                     }
             } catch (e: CancellationException) {
-                serviceError.stopApplication()
+                serviceError.initiateCountdown()
             }
 
         }

@@ -9,6 +9,8 @@ import android.view.ViewGroup
 import androidx.fragment.app.Fragment
 import androidx.fragment.app.viewModels
 import androidx.navigation.fragment.findNavController
+import bg.zahov.app.hideBottomNav
+import bg.zahov.app.hideTopBar
 import bg.zahov.app.util.timeToString
 import bg.zahov.app.util.toFormattedString
 import bg.zahov.fitness.app.R
@@ -29,6 +31,8 @@ class FragmentWorkoutFinish : Fragment() {
     ): View {
         _binding = FragmentWorkoutFinishBinding.inflate(inflater, container, false)
         mediaPlayer = MediaPlayer.create(requireContext(), R.raw.workout_finish)
+        requireActivity().hideTopBar()
+        requireActivity().hideBottomNav()
         return binding.root
     }
 

@@ -64,10 +64,10 @@ class TemplateWorkoutInfoViewModel(application: Application) : AndroidViewModel(
                             allWorkout = workouts
                         }
                     } catch (e: CriticalDataNullException) {
-                        serviceError.stopApplication()
+                        serviceError.initiateCountdown()
                     }
                 } else {
-                    serviceError.stopApplication()
+                    serviceError.initiateCountdown()
                 }
             }
             launch {

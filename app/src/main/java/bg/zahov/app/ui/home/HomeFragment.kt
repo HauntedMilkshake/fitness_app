@@ -53,7 +53,7 @@ HomeFragment : Fragment() {
             }
 
             homeViewModel.numberOfWorkouts.observe(viewLifecycleOwner) {
-                numberOfWorkouts.text = it.toString()
+                numberOfWorkouts.text = "$it workouts"
             }
 
             homeViewModel.workoutEntries.observe(viewLifecycleOwner) {

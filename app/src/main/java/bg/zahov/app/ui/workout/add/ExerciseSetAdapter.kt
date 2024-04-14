@@ -179,7 +179,7 @@ class ExerciseSetAdapter :
             }
 
             firstInputEditText.apply {
-                setText(item.set.firstMetric.toString())
+                if((item.set.firstMetric ?: 0.0) > 0.0) setText(item.set.firstMetric.toString())
                 addTextChangedListener {
                     textChangeListener?.onInputFieldChanged(
                         bindingAdapterPosition,
@@ -190,7 +190,7 @@ class ExerciseSetAdapter :
             }
 
             secondInputEditText.apply {
-                setText(item.set.secondMetric.toString())
+                if((item.set.secondMetric ?: 0) > 0) setText(item.set.secondMetric.toString())
                 addTextChangedListener {
                     textChangeListener?.onInputFieldChanged(
                         bindingAdapterPosition,
@@ -263,7 +263,7 @@ class ExerciseSetAdapter :
             AnimatorSet().apply {
                 play(scaleDownX).with(scaleDownY)
                 play(scaleUpX).with(scaleUpY).after(scaleDownX)
-                duration = 200L
+                duration = 500L
                 start()
             }
         }

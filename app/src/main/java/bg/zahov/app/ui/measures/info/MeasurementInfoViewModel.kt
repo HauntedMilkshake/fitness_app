@@ -7,6 +7,7 @@ import androidx.lifecycle.LiveData
 import androidx.lifecycle.MutableLiveData
 import androidx.lifecycle.viewModelScope
 import bg.zahov.app.data.exception.CriticalDataNullException
+import bg.zahov.app.data.model.MeasurementType
 import bg.zahov.app.getMeasurementsProvider
 import bg.zahov.app.getServiceErrorProvider
 import com.github.mikephil.charting.data.Entry
@@ -27,13 +28,14 @@ class MeasurementInfoViewModel(application: Application) : AndroidViewModel(appl
         viewModelScope.launch {
             _state.postValue(State.Loading(View.VISIBLE))
             val measureEntries = mutableListOf<Entry>()
+            var measurementType: MeasurementType?
             try {
-                var maxValue = 0
                 measurementProvider.getSelectedMeasurement().collect {
-                    if(it.measurements.values.isNotEmpty()) {
+                    measurementType =
+                        if (it.measurements.keys.isNotEmpty()) it.measurements.keys.first() else null
+                    if (it.measurements.values.isNotEmpty()) {
                         it.measurements.values.first().sortedBy { item -> item.date.monthValue }
                             .forEach { measurement ->
-                                if(maxValue < measurement.value) maxValue = measurement.value.toInt()
                                 measureEntries.add(
                                     Entry(
                                         measurement.date.dayOfMonth.toFloat(),
@@ -43,16 +45,57 @@ class MeasurementInfoViewModel(application: Application) : AndroidViewModel(appl
                             }
 
                     }
-                    _state.postValue(State.Data(maxValue, measureEntries))
+                    var measurementMax = 0f
+                    var measurementMin = 0f
+                    if (measureEntries.isNotEmpty()) {
+                        measurementMax = measureEntries.maxOf { value -> value.y }
+                        measurementMin = measureEntries.minOf { value -> value.y }
+                    }
+                    val measurementSuffix = when (measurementType) {
+                        MeasurementType.Weight -> "kg"
+                        MeasurementType.BodyFatPercentage -> "%"
+                        MeasurementType.CaloricIntake -> "kcal"
+                        else -> "sm"
+                    }
+
+                    _state.postValue(
+                        State.Data(
+                            maxValue = measurementMax,
+                            minValue = measurementMin,
+                            suffix = measurementSuffix,
+                            entries = filterEntries(measureEntries)
+                        )
+                    )
                 }
             } catch (e: CriticalDataNullException) {
-               serviceError.stopApplication()
+                serviceError.initiateCountdown()
             }
         }
     }
 
+    private fun filterEntries(entries: List<Entry>): List<Entry> {
+        val groupedEntries = HashMap<Float, Entry>()
+
+        for (entry in entries) {
+            if (!groupedEntries.containsKey(entry.x)) {
+                groupedEntries[entry.x] = entry
+            } else {
+                val existingEntry = groupedEntries[entry.x]!!
+                if (entry.y > existingEntry.y) {
+                    groupedEntries[entry.x] = entry
+                }
+            }
+        }
+        return groupedEntries.values.toList()
+    }
+
     sealed interface State {
         data class Loading(val loadingVisibility: Int) : State
-        data class Data(val maxValue: Int, val entries: List<Entry>) : State
+        data class Data(
+            val maxValue: Float,
+            val minValue: Float,
+            val suffix: String,
+            val entries: List<Entry>,
+        ) : State
     }
 }

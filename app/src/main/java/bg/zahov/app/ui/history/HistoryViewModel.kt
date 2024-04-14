@@ -30,7 +30,7 @@ class HistoryViewModel(application: Application) : AndroidViewModel(application)
                 try {
                     _state.postValue(State.Data(it.sortedByDescending { item -> item.date }))
                 } catch (e: CriticalDataNullException) {
-                    serviceError.stopApplication()
+                    serviceError.initiateCountdown()
                 }
             }
         }

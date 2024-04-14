@@ -19,12 +19,12 @@ class ServiceErrorHandlerImpl : ServiceErrorHandler {
     private val state: Flow<ServiceState>
         get() = _state
 
-    override suspend fun stopApplication() {
-        _state.value = ServiceState.Shutdown
+    override suspend fun initiateCountdown() {
+        _state.value = ServiceState.Unavailable
     }
 
     override suspend fun observeServiceState(): Flow<ServiceState> = state
-    override suspend fun startCountdownTimer() {
-        TODO("Not yet implemented")
+    override suspend fun stopApplication() {
+        _state.value = ServiceState.Shutdown
     }
 }
