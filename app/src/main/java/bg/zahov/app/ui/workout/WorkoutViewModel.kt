@@ -194,13 +194,6 @@ class WorkoutViewModel(application: Application) : AndroidViewModel(application)
         exerciseToReplaceIndex = itemPosition
     }
 
-    fun onSetCheckClicked(itemPosition: Int) {
-        val captured = _exercises.value.orEmpty()
-        (captured[itemPosition] as? SetEntry)?.setEntry?.backgroundResource =
-            if ((captured[itemPosition] as? SetEntry)?.setEntry?.backgroundResource == R.color.background) R.color.cool_green else R.color.background
-        _exercises.value = captured
-    }
-
     fun toggleExerciseNoteField(position: Int) {
         val captured = _exercises.value.orEmpty()
         (captured[position] as? ExerciseEntry)?.exerciseEntry?.noteVisibility =

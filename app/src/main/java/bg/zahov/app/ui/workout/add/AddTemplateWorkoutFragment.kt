@@ -20,6 +20,7 @@ import androidx.recyclerview.widget.ItemTouchHelper
 import androidx.recyclerview.widget.LinearLayoutManager
 import bg.zahov.app.data.model.state.AddTemplateWorkoutUiMapper
 import bg.zahov.app.data.model.SetType
+import bg.zahov.app.hideBottomNav
 import bg.zahov.app.hideTopBar
 import bg.zahov.app.setToolBarTitle
 import bg.zahov.app.util.SetSwipeGesture
@@ -61,6 +62,7 @@ class AddTemplateWorkoutFragment : Fragment() {
             edit,
             id ?: ""
         )
+        requireActivity().hideBottomNav()
     }
     override fun onViewCreated(view: View, savedInstanceState: Bundle?) {
         super.onViewCreated(view, savedInstanceState)
@@ -94,10 +96,6 @@ class AddTemplateWorkoutFragment : Fragment() {
         binding.apply {
             val exerciseSetAdapter = ExerciseSetAdapter().apply {
                 itemClickListener = object : ExerciseSetAdapter.ItemClickListener<WorkoutEntry> {
-                    override fun onSetCheckClicked(itemPosition: Int) {
-                        addWorkoutViewModel.onSetCheckClicked(itemPosition)
-                    }
-
                     override fun onAddSet(itemPosition: Int) {
                         addWorkoutViewModel.addSet(itemPosition)
                     }
@@ -181,6 +179,7 @@ class AddTemplateWorkoutFragment : Fragment() {
         super.onResume()
         binding.workoutNameFieldText.setText(addWorkoutViewModel.workoutName)
         binding.workoutNoteFieldText.setText(addWorkoutViewModel.workoutNote)
+        requireActivity().hideBottomNav()
     }
 
     override fun onPause() {

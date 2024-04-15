@@ -99,7 +99,7 @@ data class Workout(
 ) {
     companion object {
         fun fromFirestoreMap(data: Map<String, Any>?) = data?.let {
-            Log.d("personal records", (it[FirestoreFields.WORKOUT_PERSONAL_RECORD] as? Int).toString())
+            Log.d("personal records", (it[FirestoreFields.WORKOUT_PERSONAL_RECORD] as? Long)?.toInt().toString())
             Workout(
                 id = it[FirestoreFields.WORKOUT_ID] as? String
                     ?: throw CriticalDataNullException(""),

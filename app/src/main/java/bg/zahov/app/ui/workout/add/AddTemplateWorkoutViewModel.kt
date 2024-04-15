@@ -140,7 +140,7 @@ class AddTemplateWorkoutViewModel(application: Application) : AndroidViewModel(a
                 workoutEntries.add(
                     SetEntry(
                         set.toExerciseSetAdapterSetWrapper(
-                            index.toString(),
+                            (index + 1).toString(),
                             it.category,
                             "${(set.secondMetric)} x ${set.firstMetric}"
                         )
@@ -164,13 +164,6 @@ class AddTemplateWorkoutViewModel(application: Application) : AndroidViewModel(a
                     }
             }
         }
-    }
-
-    fun onSetCheckClicked(itemPosition: Int) {
-        val captured = _currExercises.value.orEmpty()
-        (captured[itemPosition] as? SetEntry)?.setEntry?.backgroundResource =
-            if ((captured[itemPosition] as? SetEntry)?.setEntry?.backgroundResource == R.color.background) R.color.completed_set else R.color.background
-        _currExercises.value = captured
     }
 
     fun resetSelectedExercises() {

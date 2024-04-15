@@ -71,11 +71,6 @@ class WorkoutFragment : Fragment() {
 
             val exerciseSetAdapter = ExerciseSetAdapter().apply {
                 itemClickListener = object : ExerciseSetAdapter.ItemClickListener<WorkoutEntry> {
-                    override fun onSetCheckClicked(itemPosition: Int) {
-                        mediaPlayer?.start()
-                        onGoingWorkoutViewModel.onSetCheckClicked(itemPosition)
-                    }
-
                     override fun onAddSet(itemPosition: Int) {
                         onGoingWorkoutViewModel.addSet(itemPosition)
                     }

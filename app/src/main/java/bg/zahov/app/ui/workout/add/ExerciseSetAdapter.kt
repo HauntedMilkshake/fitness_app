@@ -1,15 +1,10 @@
 package bg.zahov.app.ui.workout.add
 
-import android.animation.AnimatorSet
-import android.animation.ArgbEvaluator
-import android.animation.ObjectAnimator
-import android.animation.ValueAnimator
 import android.view.LayoutInflater
 import android.view.View
 import android.view.ViewGroup
 import android.widget.PopupMenu
 import androidx.appcompat.view.ContextThemeWrapper
-import androidx.core.content.ContextCompat.getColor
 import androidx.core.widget.addTextChangedListener
 import androidx.core.widget.doAfterTextChanged
 import androidx.recyclerview.widget.RecyclerView
@@ -173,13 +168,8 @@ class ExerciseSetAdapter :
                 }
             }
 
-            check.setOnClickListener {
-                animateSetBackgroundOnClick(item.backgroundResource)
-                itemClickListener?.onSetCheckClicked(bindingAdapterPosition)
-            }
-
             firstInputEditText.apply {
-                if((item.set.firstMetric ?: 0.0) > 0.0) setText(item.set.firstMetric.toString())
+                if ((item.set.firstMetric ?: 0.0) > 0.0) setText(item.set.firstMetric.toString())
                 addTextChangedListener {
                     textChangeListener?.onInputFieldChanged(
                         bindingAdapterPosition,
@@ -190,7 +180,7 @@ class ExerciseSetAdapter :
             }
 
             secondInputEditText.apply {
-                if((item.set.secondMetric ?: 0) > 0) setText(item.set.secondMetric.toString())
+                if ((item.set.secondMetric ?: 0) > 0) setText(item.set.secondMetric.toString())
                 addTextChangedListener {
                     textChangeListener?.onInputFieldChanged(
                         bindingAdapterPosition,
@@ -235,42 +225,9 @@ class ExerciseSetAdapter :
             swipeActionListener?.onDeleteSet(bindingAdapterPosition)
             notifyItemRemoved(bindingAdapterPosition)
         }
-
-        //TODO(Bug with the first click)
-        private fun animateSetBackgroundOnClick(startColor: Int) {
-            val endColor = if (getColor(itemView.context, startColor) == getColor(
-                    itemView.context,
-                    R.color.background
-                )
-            ) {
-                getColor(itemView.context, R.color.cool_green)
-            } else {
-                getColor(itemView.context, R.color.background)
-            }
-
-            ValueAnimator.ofObject(ArgbEvaluator(), startColor, endColor).apply {
-                duration = 1000L
-                addUpdateListener {
-                    itemView.setBackgroundColor(it.animatedValue as Int)
-                }
-            }.start()
-
-            val scaleDownX = ObjectAnimator.ofFloat(itemView, "scaleX", 1.1f)
-            val scaleDownY = ObjectAnimator.ofFloat(itemView, "scaleY", 1.1f)
-            val scaleUpX = ObjectAnimator.ofFloat(itemView, "scaleX", 1f)
-            val scaleUpY = ObjectAnimator.ofFloat(itemView, "scaleY", 1f)
-
-            AnimatorSet().apply {
-                play(scaleDownX).with(scaleDownY)
-                play(scaleUpX).with(scaleUpY).after(scaleDownX)
-                duration = 500L
-                start()
-            }
-        }
     }
 
     interface ItemClickListener<T> {
-        fun onSetCheckClicked(itemPosition: Int)
         fun onAddSet(itemPosition: Int)
         fun onNoteToggle(itemPosition: Int)
         fun onReplaceExercise(itemPosition: Int)

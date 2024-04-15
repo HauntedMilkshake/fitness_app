@@ -34,7 +34,6 @@ class MeasuresFragment : Fragment() {
     ): View {
         _binding = FragmentMeasuresBinding.inflate(inflater, container, false)
         requireActivity().showTopBar()
-        requireActivity().hideBottomNav()
         return binding.root
     }
 
