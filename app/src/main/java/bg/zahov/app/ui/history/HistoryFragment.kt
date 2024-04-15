@@ -89,7 +89,7 @@ class HistoryFragment : Fragment() {
     override fun onResume() {
         super.onResume()
         Log.d("on resume", "on resume")
-        historyViewModel.fetchPastWorkouts()
+//        historyViewModel.fetchPastWorkouts()
     }
 
     override fun onDestroyView() {

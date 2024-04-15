@@ -9,18 +9,22 @@ import bg.zahov.app.data.model.Measurements
 import bg.zahov.app.data.model.User
 import bg.zahov.app.data.model.Workout
 import bg.zahov.app.util.toFirestoreMap
-import bg.zahov.app.util.toLocalDateTime
-import com.google.firebase.Timestamp
 import com.google.firebase.firestore.CollectionReference
 import com.google.firebase.firestore.DocumentReference
 import com.google.firebase.firestore.FirebaseFirestore
+import com.google.firebase.firestore.ListenSource
+import com.google.firebase.firestore.ListenerRegistration
+import com.google.firebase.firestore.MetadataChanges
+import com.google.firebase.firestore.SnapshotListenOptions
 import kotlinx.coroutines.CancellationException
+import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.async
 import kotlinx.coroutines.awaitAll
 import kotlinx.coroutines.flow.Flow
 import kotlinx.coroutines.flow.channelFlow
 import kotlinx.coroutines.flow.first
+import kotlinx.coroutines.launch
 import kotlinx.coroutines.tasks.await
 import kotlinx.coroutines.withContext
 import java.time.LocalDateTime
@@ -43,6 +47,10 @@ class FirestoreManager {
     private lateinit var userId: String
 
     private val firestore = FirebaseFirestore.getInstance()
+    private val listenerOptions =
+        SnapshotListenOptions.Builder().setMetadataChanges(MetadataChanges.INCLUDE)
+            .setSource(ListenSource.CACHE).build()
+    private val listeners: MutableSet<ListenerRegistration> = mutableSetOf()
 
     fun initUser(id: String) {
         userId = id
@@ -99,15 +107,47 @@ class FirestoreManager {
         }
     }
 
+    private suspend fun <T> getCollectionDataLISTENERS(
+        reference: CollectionReference,
+        mapper: (Map<String, Any>?) -> T,
+    ): Flow<List<T>> = channelFlow {
+        try {
+            reference.addSnapshotListener { value, e ->
+                e?.let {
+                    //potential throw?
+                    return@addSnapshotListener
+                }
+                CoroutineScope(Dispatchers.IO).launch {
+                    trySend(value?.map {
+                        getNonObservableDocData(it.reference, mapper)
+                    } ?: listOf())
+                }
+            }
+        } catch (e: CancellationException) {
+            close()
+            throw e
+        }
+    }
+
+    //    private suspend fun <T> getNonObservableDocData(
+//        reference: DocumentReference,
+//        mapper: (Map<String, Any>?) -> T,
+//    ): T {
+//        try {
+//            return mapper(reference.get().await().data)
+//        } catch (e: Exception) {
+//            throw e
+//        }
+//    }
     suspend fun getUser(): Flow<User> =
         getDocData(firestore.collection(USERS_COLLECTION).document(userId)) { info ->
             User.fromFirestoreMap(info)
         }
 
-    suspend fun getWorkouts(): Flow<List<Workout>> = getCollectionData(
+    suspend fun getWorkouts(): Flow<List<Workout>> = getCollectionDataLISTENERS(
         firestore.collection(USERS_COLLECTION).document(userId).collection(WORKOUTS_SUB_COLLECTION)
     ) { info ->
-        Workout.fromFirestoreMap(info).also { Log.d("workout from adapter", it.toString()) }
+        Workout.fromFirestoreMap(info)
     }
 
     suspend fun getTemplateWorkouts(): Flow<List<Workout>> = getCollectionData(
