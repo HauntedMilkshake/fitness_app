@@ -2,6 +2,7 @@ package bg.zahov.app.ui.home
 
 import android.app.Application
 import android.util.Log
+import android.view.View
 import androidx.lifecycle.AndroidViewModel
 import androidx.lifecycle.LiveData
 import androidx.lifecycle.MutableLiveData
@@ -47,15 +48,6 @@ class HomeViewModel(application: Application) : AndroidViewModel(application) {
     val userName: LiveData<String>
         get() = _userName
 
-    private val _numberOfWorkouts = MutableLiveData<Int>()
-    val numberOfWorkouts: LiveData<Int>
-        get() = _numberOfWorkouts
-
-    private val _workoutEntries = MutableLiveData<List<BarEntry>>()
-
-    val workoutEntries: LiveData<List<BarEntry>>
-        get() = _workoutEntries
-
     private val _state = MutableLiveData<State>(State.Default)
     val state: LiveData<State>
         get() = _state
@@ -74,19 +66,24 @@ class HomeViewModel(application: Application) : AndroidViewModel(application) {
                 }
             }
             launch {
-                _state.postValue(State.Loading(true))
                 try {
-                    Log.d("past workouts", "before flow")
                     workoutRepo.getPastWorkouts().collect { pastWorkouts ->
-                        Log.d("past workouts", pastWorkouts.toString())
-                        _numberOfWorkouts.postValue(pastWorkouts.size)
-                        _workoutEntries.postValue(getWorkoutsPerWeek(pastWorkouts).map {
+                        val workoutPerWeekMap = getWorkoutsPerWeek(pastWorkouts)
+                        val barData = workoutPerWeekMap.map {
                             BarEntry(
                                 it.key.toFloat(),
                                 it.value.toFloat()
                             )
-                        })
-                        _state.postValue(State.Default)
+                        }
+                        _state.postValue(State.BarData(
+                            chartData = barData,
+                            numberOfWorkouts = pastWorkouts.size,
+                            xMin = workoutPerWeekMap.keys.min().toFloat(),
+                            xMax = workoutPerWeekMap.keys.max().toFloat(),
+                            yMin = workoutPerWeekMap.values.min().toFloat(),
+                            yMax = workoutPerWeekMap.values.max().toFloat(),
+                            getWeekRangesForCurrentMonth()
+                        ))
                     }
                 } catch (e: CriticalDataNullException) {
                     serviceErrorHandler.initiateCountdown()
@@ -111,12 +108,11 @@ class HomeViewModel(application: Application) : AndroidViewModel(application) {
             workoutsPerWeek[weekRangeIndex] = currentCount + 1
         }
 
-
         return workoutsPerWeek
     }
 
 
-    fun getWeekRangesForCurrentMonth(): List<String> {
+    private fun getWeekRangesForCurrentMonth(): List<String> {
         val today = LocalDate.now()
         val firstDayOfMonth = today.withDayOfMonth(1)
         val lastDayOfMonth = today.with(TemporalAdjusters.lastDayOfMonth())
@@ -141,7 +137,8 @@ class HomeViewModel(application: Application) : AndroidViewModel(application) {
 
     private suspend fun checkPreviousState(previousState: RealmWorkoutState) {
         if (previousState.id != "default") {
-            val lastTime = Duration.between(LocalDateTime.now(), previousState.date.toLocalDateTimeRlm())
+            val lastTime =
+                Duration.between(LocalDateTime.now(), previousState.date.toLocalDateTimeRlm())
             if (previousState.restTimerStart.isNotEmpty() && previousState.restTimerEnd.isNotEmpty() && !LocalDateTime.now()
                     .isAfter(previousState.restTimerEnd.toLocalDateTimeRlm())
             ) {
@@ -181,6 +178,14 @@ class HomeViewModel(application: Application) : AndroidViewModel(application) {
 
     sealed interface State {
         object Default : State
-        data class Loading(val isLoading: Boolean) : State
+        data class BarData(
+            val chartData: List<BarEntry>,
+            val numberOfWorkouts: Int,
+            val xMin: Float,
+            val xMax: Float,
+            val yMin: Float,
+            val yMax: Float,
+            val weekRanges: List<String>,
+        ) : State
     }
 }

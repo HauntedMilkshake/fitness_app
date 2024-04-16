@@ -45,61 +45,62 @@ HomeFragment : Fragment() {
         super.onViewCreated(view, savedInstanceState)
         binding.apply {
             homeViewModel.state.map { HomeUiMapper.map(it) }.observe(viewLifecycleOwner) {
-                loadingIndicator.visibility = if (it.isLoading) View.VISIBLE else View.GONE
-                weeklyWorkoutsChart.visibility = if (it.isLoading) View.GONE else View.VISIBLE
+                loadingIndicator.visibility = it.loadingVisibility
+                weeklyWorkoutsChart.apply {
+                    visibility = it.chartVisibility
+                    xAxis.apply {
+                        valueFormatter = IndexAxisValueFormatter(it.weekRanges.toTypedArray())
+                        axisMaximum = it.xMax
+                        axisMinimum = it.xMin
+                    }
+                    axisRight.apply {
+                        axisMaximum = it.yMax
+                        axisMinimum = it.yMin
+                    }
+
+                    val dataSet = BarDataSet(it.lineData, "workouts")
+                    dataSet.setDrawValues(false)
+                    val barData = BarData(dataSet)
+                    barData.barWidth = 0.5f
+                    data = barData
+                    weeklyWorkoutsChart.notifyDataSetChanged()
+                    weeklyWorkoutsChart.invalidate()
+                }
+                numberOfWorkouts.apply {
+                    visibility = it.textFieldVisibility
+                    text = getString(R.string.workout_text, it.numberOfWorkouts)
+                }
             }
             homeViewModel.userName.observe(viewLifecycleOwner) {
                 profileName.text = it
             }
 
-            homeViewModel.numberOfWorkouts.observe(viewLifecycleOwner) {
-                numberOfWorkouts.text = "$it workouts"
-            }
-
-            homeViewModel.workoutEntries.observe(viewLifecycleOwner) {
-                val dataSet = BarDataSet(it, "workouts")
-                dataSet.setDrawValues(false)
-                val data = BarData(dataSet)
-                weeklyWorkoutsChart.data = data
-                weeklyWorkoutsChart.notifyDataSetChanged()
-                weeklyWorkoutsChart.invalidate()
-            }
-
             weeklyWorkoutsChart.apply {
-
+                setFitBars(true)
+                legend.isEnabled = false
+                isDoubleTapToZoomEnabled = false
+                axisLeft.isEnabled = false
                 isDragEnabled = false
                 isHighlightFullBarEnabled = false
-
-                description.setPosition(250f, 60f)
-                description.text = "Weekly workouts"
-                description.textColor = Color.WHITE
-
+                description.apply {
+                    setPosition(250f, 60f)
+                    text = "Weekly workouts"
+                    textColor = Color.WHITE
+                }
                 xAxis.apply {
-                    valueFormatter = IndexAxisValueFormatter(
-                        homeViewModel.getWeekRangesForCurrentMonth().toTypedArray()
-                    )
                     position = XAxis.XAxisPosition.BOTTOM
                     granularity = 1f
                     axisMinimum = 0f
                     textColor = Color.WHITE
-                    axisMaximum =
-                        (homeViewModel.getWeekRangesForCurrentMonth().size).toFloat()
                     setCenterAxisLabels(true)
                     isGranularityEnabled = true
                 }
-
                 axisRight.apply {
                     textColor = Color.WHITE
                     granularity = 1f
-                    axisMinimum = 0f
+                    setDrawGridLines(false)
                 }
-
-                axisLeft.isEnabled = false
-                isDoubleTapToZoomEnabled = false
-                setFitBars(true)
-                legend.isEnabled = false
             }
-
         }
     }
 
@@ -122,7 +123,6 @@ HomeFragment : Fragment() {
                     else -> false
                 }
             }
-
         })
     }
 

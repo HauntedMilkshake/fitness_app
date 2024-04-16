@@ -99,7 +99,6 @@ data class Workout(
 ) {
     companion object {
         fun fromFirestoreMap(data: Map<String, Any>?) = data?.let {
-            Log.d("personal records", (it[FirestoreFields.WORKOUT_PERSONAL_RECORD] as? Long)?.toInt().toString())
             Workout(
                 id = it[FirestoreFields.WORKOUT_ID] as? String
                     ?: throw CriticalDataNullException(""),
@@ -109,7 +108,7 @@ data class Workout(
                 volume = it[FirestoreFields.WORKOUT_VOLUME] as? Double,
                 date = (it[FirestoreFields.WORKOUT_DATE] as? Timestamp)?.toLocalDateTime()
                     ?: throw CriticalDataNullException(""),
-                personalRecords = it[FirestoreFields.WORKOUT_PERSONAL_RECORD] as? Int ?: 0,
+                personalRecords = (it[FirestoreFields.WORKOUT_PERSONAL_RECORD] as? Long)?.toInt() ?: 0,
                 isTemplate = it[FirestoreFields.WORKOUT_IS_TEMPLATE] as? Boolean ?: false,
                 exercises = (it[FirestoreFields.WORKOUT_EXERCISES] as List<Map<String, Any>?>)
                     .mapNotNull { map ->

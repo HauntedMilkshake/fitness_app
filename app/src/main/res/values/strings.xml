@@ -25,6 +25,7 @@
     <string name="already_have_account_text">Already have an account? Log in here!</string>
     <string name="confirm_password_text">Confirm <Password></Password></string>
     <!-- Strings used for profile fragment   -->
+    <string name="workout_text">%d workouts</string>
     <string name="top_bar_text">Profile</string>
     <string name="dashboard">Dashboard</string>
     <!-- Strings used for history fragment   -->

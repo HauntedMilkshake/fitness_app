@@ -33,7 +33,6 @@ class HistoryViewModel(application: Application) : AndroidViewModel(application)
             _state.postValue(State.Loading(View.VISIBLE, View.GONE))
             workoutProvider.getPastWorkouts().collect {
                 try {
-                    Log.d("history ", it.toString())
                     _state.postValue(State.Data(it.sortedByDescending { item -> item.date }))
                 } catch (e: CriticalDataNullException) {
                     serviceError.initiateCountdown()
