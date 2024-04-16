@@ -1,6 +1,7 @@
 package bg.zahov.app.ui.home
 
 import android.app.Application
+import android.util.Log
 import androidx.lifecycle.AndroidViewModel
 import androidx.lifecycle.LiveData
 import androidx.lifecycle.MutableLiveData
@@ -75,7 +76,9 @@ class HomeViewModel(application: Application) : AndroidViewModel(application) {
             launch {
                 _state.postValue(State.Loading(true))
                 try {
+                    Log.d("past workouts", "before flow")
                     workoutRepo.getPastWorkouts().collect { pastWorkouts ->
+                        Log.d("past workouts", pastWorkouts.toString())
                         _numberOfWorkouts.postValue(pastWorkouts.size)
                         _workoutEntries.postValue(getWorkoutsPerWeek(pastWorkouts).map {
                             BarEntry(

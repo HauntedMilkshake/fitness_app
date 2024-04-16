@@ -28,7 +28,7 @@ class HistoryViewModel(application: Application) : AndroidViewModel(application)
         fetchPastWorkouts()
     }
 
-    fun fetchPastWorkouts() {
+    private fun fetchPastWorkouts() {
         viewModelScope.launch {
             _state.postValue(State.Loading(View.VISIBLE, View.GONE))
             workoutProvider.getPastWorkouts().collect {

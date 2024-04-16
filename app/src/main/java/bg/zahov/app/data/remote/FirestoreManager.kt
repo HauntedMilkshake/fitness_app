@@ -12,16 +12,15 @@ import bg.zahov.app.util.toFirestoreMap
 import com.google.firebase.firestore.CollectionReference
 import com.google.firebase.firestore.DocumentReference
 import com.google.firebase.firestore.FirebaseFirestore
-import com.google.firebase.firestore.ListenSource
 import com.google.firebase.firestore.ListenerRegistration
-import com.google.firebase.firestore.MetadataChanges
-import com.google.firebase.firestore.SnapshotListenOptions
 import kotlinx.coroutines.CancellationException
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.async
 import kotlinx.coroutines.awaitAll
 import kotlinx.coroutines.flow.Flow
+import kotlinx.coroutines.flow.MutableSharedFlow
+import kotlinx.coroutines.flow.SharedFlow
 import kotlinx.coroutines.flow.channelFlow
 import kotlinx.coroutines.flow.first
 import kotlinx.coroutines.launch
@@ -47,10 +46,20 @@ class FirestoreManager {
     private lateinit var userId: String
 
     private val firestore = FirebaseFirestore.getInstance()
-    private val listenerOptions =
-        SnapshotListenOptions.Builder().setMetadataChanges(MetadataChanges.INCLUDE)
-            .setSource(ListenSource.CACHE).build()
+
+    //    private val listenerOptions =
+//        SnapshotListenOptions.Builder().setMetadataChanges(MetadataChanges.INCLUDE)
+//            .setSource(ListenSource.CACHE).build()
     private val listeners: MutableSet<ListenerRegistration> = mutableSetOf()
+    private val _history = MutableSharedFlow<List<Workout>>()
+    private val history: SharedFlow<List<Workout>>
+        get() = _history
+    private val _templateWorkout = MutableSharedFlow<List<Workout>>()
+    private val templateWorkout: SharedFlow<List<Workout>>
+        get() = _templateWorkout
+    private val _templateExercises = MutableSharedFlow<List<Exercise>>()
+    private val templateExercises: SharedFlow<List<Exercise>>
+        get() = _templateExercises
 
     fun initUser(id: String) {
         userId = id
@@ -65,11 +74,9 @@ class FirestoreManager {
         reference: DocumentReference,
         mapper: (Map<String, Any>?) -> T,
     ): T {
-        try {
-            return mapper(reference.get().await().data)
-        } catch (e: Exception) {
-            throw e
-        }
+        val snapshot = reference.get().await()
+        Log.d("workouts", mapper(snapshot.data).toString())
+        return mapper(snapshot.data)
     }
 
     private suspend fun <T> getDocData(
@@ -109,27 +116,30 @@ class FirestoreManager {
 
     private suspend fun <T> getCollectionDataLISTENERS(
         reference: CollectionReference,
-        mapper: (Map<String, Any>?) -> T,
-    ): Flow<List<T>> = channelFlow {
+        emitterFlow: MutableSharedFlow<List<T>>,
+        collectorFlow: SharedFlow<List<T>>,
+        mapper: (Map<String, Any>?) -> T
+    ): Flow<List<T>> {
         try {
-            reference.addSnapshotListener { value, e ->
+            val listener = reference.addSnapshotListener { value, e ->
                 e?.let {
-                    //potential throw?
+                    //throw?
                     return@addSnapshotListener
                 }
                 CoroutineScope(Dispatchers.IO).launch {
-                    trySend(value?.map {
+                    emitterFlow.emit(value?.map {
                         getNonObservableDocData(it.reference, mapper)
-                    } ?: listOf())
+                    }.orEmpty())
                 }
             }
+            listeners.add(listener)
+            return collectorFlow
         } catch (e: CancellationException) {
-            close()
             throw e
         }
     }
 
-    //    private suspend fun <T> getNonObservableDocData(
+//    private suspend fun <T> getNonObservableDocData(
 //        reference: DocumentReference,
 //        mapper: (Map<String, Any>?) -> T,
 //    ): T {
@@ -144,8 +154,15 @@ class FirestoreManager {
             User.fromFirestoreMap(info)
         }
 
+    //    suspend fun getWorkouts(): Flow<List<Workout>> = getCollectionDataLISTENERS(
+//        firestore.collection(USERS_COLLECTION).document(userId).collection(WORKOUTS_SUB_COLLECTION)
+//    ) { info ->
+//        Workout.fromFirestoreMap(info)
+//    }
     suspend fun getWorkouts(): Flow<List<Workout>> = getCollectionDataLISTENERS(
-        firestore.collection(USERS_COLLECTION).document(userId).collection(WORKOUTS_SUB_COLLECTION)
+        firestore.collection(USERS_COLLECTION).document(userId).collection(WORKOUTS_SUB_COLLECTION),
+        _history,
+        history
     ) { info ->
         Workout.fromFirestoreMap(info)
     }
@@ -296,5 +313,12 @@ class FirestoreManager {
     suspend fun deleteWorkout(workout: Workout) = withContext(Dispatchers.IO) {
         firestore.collection(USERS_COLLECTION).document(userId).collection(WORKOUTS_SUB_COLLECTION)
             .document(workout.id).delete()
+    }
+
+    private fun unsubscribeListeners() {
+        listeners.forEach {
+            it.remove()
+        }
+        listeners.clear()
     }
 }
