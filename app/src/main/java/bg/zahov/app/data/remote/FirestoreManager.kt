@@ -139,7 +139,7 @@ class FirestoreManager {
         }
     }
 
-//    private suspend fun <T> getNonObservableDocData(
+    //    private suspend fun <T> getNonObservableDocData(
 //        reference: DocumentReference,
 //        mapper: (Map<String, Any>?) -> T,
 //    ): T {
@@ -167,9 +167,11 @@ class FirestoreManager {
         Workout.fromFirestoreMap(info)
     }
 
-    suspend fun getTemplateWorkouts(): Flow<List<Workout>> = getCollectionData(
+    suspend fun getTemplateWorkouts(): Flow<List<Workout>> = getCollectionDataLISTENERS(
         firestore.collection(USERS_COLLECTION).document(userId)
-            .collection(TEMPLATE_WORKOUTS_SUB_COLLECTION)
+            .collection(TEMPLATE_WORKOUTS_SUB_COLLECTION),
+        _templateWorkout,
+        templateWorkout
     ) { info ->
         Workout.fromFirestoreMap(info)
     }
@@ -191,8 +193,10 @@ class FirestoreManager {
         Workout.fromFirestoreMap(it)
     }
 
-    suspend fun getTemplateExercises(): Flow<List<Exercise>> = getCollectionData(
-        firestore.collection(USERS_COLLECTION).document(userId).collection(TEMPLATE_EXERCISES)
+    suspend fun getTemplateExercises(): Flow<List<Exercise>> = getCollectionDataLISTENERS(
+        firestore.collection(USERS_COLLECTION).document(userId).collection(TEMPLATE_EXERCISES),
+        _templateExercises,
+        templateExercises
     ) {
         Exercise.fromFirestoreMap(it)
     }

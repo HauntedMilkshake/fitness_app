@@ -302,7 +302,12 @@ class WorkoutViewModel(application: Application) : AndroidViewModel(application)
 
     fun onSetTypeChanged(itemPosition: Int, setType: SetType) {
         val captured = _exercises.value.orEmpty()
-        (captured[itemPosition] as? SetEntry)?.setEntry?.set?.type = setType
+        (captured[itemPosition] as? SetEntry)?.setEntry?.setIndicator = when(setType) {
+            SetType.WARMUP -> R.string.warmup_set_indicator
+            SetType.DROP_SET -> R.string.drop_set_indicator
+            SetType.DEFAULT -> R.string.default_set_indicator
+            SetType.FAILURE -> R.string.failure_set_indicator
+        }
         _exercises.value = captured
     }
 

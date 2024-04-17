@@ -7,8 +7,8 @@ import androidx.lifecycle.MutableLiveData
 import androidx.lifecycle.viewModelScope
 import bg.zahov.app.data.model.BodyPart
 import bg.zahov.app.data.model.Category
-import bg.zahov.app.data.model.SelectableFilter
 import bg.zahov.app.getFilterProvider
+import bg.zahov.fitness.app.R
 import kotlinx.coroutines.launch
 
 class FilterViewModel(application: Application) : AndroidViewModel(application) {
@@ -16,39 +16,43 @@ class FilterViewModel(application: Application) : AndroidViewModel(application) 
         application.getFilterProvider()
     }
     private val _bodyPartFilters =
-        MutableLiveData(enumValues<BodyPart>().map { SelectableFilter(it.name) })
-    val bodyPartFilters: LiveData<List<SelectableFilter>>
+        MutableLiveData(enumValues<BodyPart>().map { FilterWrapper(it.name) })
+    val bodyPartFilters: LiveData<List<FilterWrapper>>
         get() = _bodyPartFilters
 
     private val _categoryFilters =
-        MutableLiveData(enumValues<Category>().map { SelectableFilter(it.name) })
-    val categoryFilters: LiveData<List<SelectableFilter>>
+        MutableLiveData(enumValues<Category>().map { FilterWrapper(it.name) })
+    val categoryFilters: LiveData<List<FilterWrapper>>
         get() = _categoryFilters
 
     init {
         filterManager.getCachedFilters().forEach { item ->
             when {
                 BodyPart.fromKey(item.name) != null -> {
-                    val new = _bodyPartFilters.value?.toMutableList()
-                    new?.find { itemToFind -> itemToFind.name == item.name }?.selected =
-                        item.selected
-                    _bodyPartFilters.postValue(new)
+                    toggleFilter(item, _bodyPartFilters)
                 }
 
                 Category.fromKey(item.name) != null -> {
-                    val new = _categoryFilters.value?.toMutableList()
-                    new?.find { itemToFind -> itemToFind.name == item.name }?.selected =
-                        item.selected
-                    _categoryFilters.postValue(new)
+                    toggleFilter(item, _categoryFilters)
                 }
             }
-
         }
     }
 
-    fun onFilterClicked(item: SelectableFilter) {
+    private fun toggleFilter(filter: FilterWrapper, filters: MutableLiveData<List<FilterWrapper>>) {
+        val new = filters.value.orEmpty()
+        new.find { itemToFind -> itemToFind.name == filter.name }?.let {
+            it.backgroundResource =
+                if (it.backgroundResource == R.drawable.filter_item_clicked) R.drawable.filter_item_unclicked else R.drawable.filter_item_unclicked
+        }
+        filters.postValue(new)
+    }
+
+    fun onFilterClicked(item: FilterWrapper) {
         viewModelScope.launch {
-            if (item.selected) filterManager.addFilter(item) else filterManager.removeFilter(item)
+            if (item.backgroundResource == R.drawable.filter_item_clicked) filterManager.addFilter(
+                item
+            ) else filterManager.removeFilter(item)
         }
     }
 }

@@ -98,6 +98,7 @@ class RestTimerViewModel(application: Application) : AndroidViewModel(applicatio
         try {
             startTimer("00:$customTime".parseTimeStringToLong())
         } catch (e: IllegalArgumentException) {
+            //:)
         }
     }
 

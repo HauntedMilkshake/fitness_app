@@ -9,7 +9,6 @@ import androidx.fragment.app.viewModels
 import androidx.recyclerview.widget.RecyclerView
 import bg.zahov.app.data.model.BodyPart
 import bg.zahov.app.data.model.Category
-import bg.zahov.app.data.model.SelectableFilter
 import bg.zahov.app.util.SpacingItemDecoration
 import bg.zahov.app.util.applyScaleAnimation
 import bg.zahov.fitness.app.R
@@ -51,14 +50,14 @@ class FilterDialog : DialogFragment() {
             }
             val bodyPartAdapter = configureFilterRecyclerView(
                 bodyPartRecyclerView,
-                enumValues<BodyPart>().map { SelectableFilter(it.name) })
+                enumValues<BodyPart>().map { FilterWrapper(it.name) })
             filterViewModel.bodyPartFilters.observe(viewLifecycleOwner) {
                 bodyPartAdapter.updateItems(it)
             }
 
             val categoryAdapter = configureFilterRecyclerView(
                 categoryRecyclerView,
-                enumValues<Category>().map { SelectableFilter(it.name) })
+                enumValues<Category>().map { FilterWrapper(it.name) })
             filterViewModel.categoryFilters.observe(viewLifecycleOwner) {
                 categoryAdapter.updateItems(it)
             }
@@ -67,11 +66,11 @@ class FilterDialog : DialogFragment() {
 
     private fun configureFilterRecyclerView(
         recyclerView: RecyclerView,
-        items: List<SelectableFilter>,
+        items: List<FilterWrapper>,
     ): FilterAdapter {
-        val filterAdapter = FilterAdapter(false).apply {
-            itemClickListener = object : FilterAdapter.ItemClickListener<SelectableFilter> {
-                override fun onItemClicked(item: SelectableFilter, clickedView: View) {
+        val filterAdapter = FilterAdapter(View.GONE).apply {
+            itemClickListener = object : FilterAdapter.ItemClickListener<FilterWrapper> {
+                override fun onItemClicked(item: FilterWrapper, clickedView: View) {
                     filterViewModel.onFilterClicked(item)
                 }
             }

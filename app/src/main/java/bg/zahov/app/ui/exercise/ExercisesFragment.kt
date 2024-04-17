@@ -16,12 +16,12 @@ import androidx.lifecycle.map
 import androidx.navigation.fragment.findNavController
 import androidx.recyclerview.widget.LinearLayoutManager
 import bg.zahov.app.data.model.state.ExerciseUiMapper
-import bg.zahov.app.data.model.SelectableFilter
 import bg.zahov.app.setToolBarTitle
 import bg.zahov.app.showBottomNav
 import bg.zahov.app.showTopBar
 import bg.zahov.app.ui.exercise.filter.FilterAdapter
 import bg.zahov.app.ui.exercise.filter.FilterDialog
+import bg.zahov.app.ui.exercise.filter.FilterWrapper
 import bg.zahov.app.util.applyScaleAnimation
 import bg.zahov.fitness.app.R
 import bg.zahov.fitness.app.databinding.FragmentExercisesBinding
@@ -133,9 +133,9 @@ class ExercisesFragment : Fragment() {
                 }
             )
 
-            val filterAdapter = FilterAdapter(true).apply {
-                itemClickListener = object : FilterAdapter.ItemClickListener<SelectableFilter> {
-                    override fun onItemClicked(item: SelectableFilter, clickedView: View) {
+            val filterAdapter = FilterAdapter(View.VISIBLE).apply {
+                itemClickListener = object : FilterAdapter.ItemClickListener<FilterWrapper> {
+                    override fun onItemClicked(item: FilterWrapper, clickedView: View) {
                         exerciseViewModel.removeFilter(item)
                     }
                 }
@@ -185,9 +185,8 @@ class ExercisesFragment : Fragment() {
             }
 
             exerciseViewModel.state.map { ExerciseUiMapper.map(it) }.observe(viewLifecycleOwner) {
-                circularProgressIndicator.visibility = if (it.isLoading) View.VISIBLE else View.GONE
-                noResultsLabel.visibility = if (it.areThereResults) View.GONE else View.VISIBLE
-
+                circularProgressIndicator.visibility = it.loadingVisibility
+                noResultsLabel.visibility = it.noResultsVisibility
                 it.error?.let { message ->
                     Toast.makeText(context, message, Toast.LENGTH_SHORT).show()
                 }
@@ -209,12 +208,6 @@ class ExercisesFragment : Fragment() {
         super.onPause()
         exerciseViewModel.onConfirm()
     }
-
-    override fun onResume() {
-        super.onResume()
-        exerciseViewModel.getExercises()
-    }
-
     override fun onDestroyView() {
         super.onDestroyView()
         _binding = null

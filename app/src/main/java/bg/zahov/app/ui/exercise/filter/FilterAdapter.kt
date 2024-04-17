@@ -2,32 +2,29 @@ package bg.zahov.app.ui.exercise.filter
 
 import android.view.View
 import bg.zahov.app.util.BaseAdapter
-import bg.zahov.app.data.model.SelectableFilter
 import bg.zahov.fitness.app.R
 import com.google.android.material.imageview.ShapeableImageView
 import com.google.android.material.textview.MaterialTextView
 
-class FilterAdapter(private val isRemovable: Boolean) : BaseAdapter<SelectableFilter>(
+class FilterAdapter(private val removableVisibility: Int) : BaseAdapter<FilterWrapper>(
     areItemsTheSame = { oldItem, newItem -> oldItem == newItem },
     areContentsTheSame = { oldItem, newItem -> oldItem == newItem },
     layoutResId = R.layout.item_filter
 ) {
 
-    internal var itemClickListener: ItemClickListener<SelectableFilter>? = null
+    internal var itemClickListener: ItemClickListener<FilterWrapper>? = null
 
-    inner class FilterAdapterViewHolder(view: View) : BaseViewHolder<SelectableFilter>(view) {
+    inner class FilterAdapterViewHolder(view: View) : BaseViewHolder<FilterWrapper>(view) {
         private val filterView = view.findViewById<MaterialTextView>(R.id.text)
         private val remove = view.findViewById<ShapeableImageView>(R.id.remove)
 
-        override fun bind(filter: SelectableFilter) {
-            filterView.text = filter.name
-            remove.visibility = if (isRemovable) View.VISIBLE else View.GONE
-            itemView.setBackgroundResource(if (filter.selected) R.drawable.filter_item_clicked else R.drawable.filter_item_unclicked)
+        override fun bind(item: FilterWrapper) {
+            filterView.text = item.name
+            remove.visibility = removableVisibility
+            itemView.setBackgroundResource(item.backgroundResource)
 
             itemView.setOnClickListener {
-                filter.apply {
-                    it.setBackgroundResource(if (selected) R.drawable.filter_item_unclicked else R.drawable.filter_item_clicked)
-                    selected = !selected
+                item.apply {
                     itemClickListener?.onItemClicked(this, itemView)
                 }
             }
@@ -38,6 +35,8 @@ class FilterAdapter(private val isRemovable: Boolean) : BaseAdapter<SelectableFi
         fun onItemClicked(item: T, clickedView: View)
     }
 
-    override fun createViewHolder(view: View): BaseViewHolder<SelectableFilter> =
+    override fun createViewHolder(view: View): BaseViewHolder<FilterWrapper> =
         FilterAdapterViewHolder(view)
 }
+
+data class FilterWrapper(val name: String, var backgroundResource: Int = R.drawable.filter_item_unclicked)

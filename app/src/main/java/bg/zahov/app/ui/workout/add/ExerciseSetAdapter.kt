@@ -154,7 +154,6 @@ class ExerciseSetAdapter :
         private val secondInputLayout = view.findViewById<TextInputLayout>(R.id.second_input_field)
         private val secondInputEditText =
             view.findViewById<TextInputEditText>(R.id.second_input_field_text)
-        private val check = view.findViewById<ShapeableImageView>(R.id.check)
 
         fun bind(item: ExerciseSetAdapterSetWrapper) {
             previous.text = item.previousResults
@@ -162,7 +161,7 @@ class ExerciseSetAdapter :
             secondInputLayout.visibility = item.secondInputFieldVisibility
             setIndicator.apply {
                 setText(item.setIndicator)
-                if (item.setIndicator == R.string.default_set_indicator) text = item.setNumber
+                if (item.setIndicator == R.string.default_set_indicator) text = item.setNumber else setText(item.setIndicator)
                 setOnClickListener {
                     showSetMenu(bindingAdapterPosition, it)
                 }

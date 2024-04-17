@@ -1,6 +1,7 @@
 package bg.zahov.app.ui.exercise.info.charts
 
 import android.app.Application
+import android.util.Log
 import androidx.lifecycle.AndroidViewModel
 import androidx.lifecycle.LiveData
 import androidx.lifecycle.MutableLiveData
@@ -41,6 +42,7 @@ class ExerciseChartViewModel(application: Application) : AndroidViewModel(applic
 
         job = viewModelScope.launch(NonCancellable) {
             workoutProvider.getExerciseHistory().collect { data ->
+                Log.d("exercise history", data.toString())
                 data.forEach {
                     it.sets.forEach { set ->
                         when (set.type) {

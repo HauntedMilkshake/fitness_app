@@ -1,22 +1,23 @@
 package bg.zahov.app.data.model.state
 
+import android.view.View
 import bg.zahov.app.ui.exercise.ExerciseViewModel
 
 data class ExerciseUiModel(
-    val isLoading: Boolean = false,
+    val loadingVisibility: Int = View.GONE,
     val error: String? = null,
-    val areThereResults: Boolean = true,
+    val noResultsVisibility: Int = View.GONE,
 )
 
 object ExerciseUiMapper {
     fun map(state: ExerciseViewModel.State) = when (state) {
         ExerciseViewModel.State.Default -> ExerciseUiModel()
-        is ExerciseViewModel.State.Loading -> ExerciseUiModel(isLoading = true)
+        is ExerciseViewModel.State.Loading -> ExerciseUiModel(loadingVisibility = state.loadingVisibility)
         is ExerciseViewModel.State.ErrorFetching -> ExerciseUiModel(
             error = state.error,
-            areThereResults = false
+            noResultsVisibility = View.VISIBLE
         )
 
-        is ExerciseViewModel.State.NoResults -> ExerciseUiModel(areThereResults = false)
+        is ExerciseViewModel.State.NoResults -> ExerciseUiModel(noResultsVisibility = View.VISIBLE)
     }
 }

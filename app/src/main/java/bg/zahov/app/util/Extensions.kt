@@ -65,7 +65,7 @@ fun Exercise.toFirestoreMap(): Map<String, Any?> {
 
 fun Sets.toFirestoreMap(): Map<String, Any?> {
     return mapOf(
-        FirestoreFields.SETS_TYPE to type,
+        FirestoreFields.SETS_TYPE to type.key,
         FirestoreFields.SETS_FIRST_METRIC to firstMetric,
         FirestoreFields.SETS_SECOND_METRIC to secondMetric
     )

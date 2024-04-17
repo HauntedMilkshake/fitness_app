@@ -1,7 +1,6 @@
 package bg.zahov.app.data.provider
 
-import android.util.Log
-import bg.zahov.app.data.model.SelectableFilter
+import bg.zahov.app.ui.exercise.filter.FilterWrapper
 import kotlinx.coroutines.flow.Flow
 import kotlinx.coroutines.flow.MutableSharedFlow
 
@@ -15,20 +14,18 @@ class FilterProvider {
         }
     }
 
-    private val _filters = MutableSharedFlow<List<SelectableFilter>>()
-    val filters: Flow<List<SelectableFilter>>
+    private val _filters = MutableSharedFlow<List<FilterWrapper>>()
+    val filters: Flow<List<FilterWrapper>>
         get() = _filters
 
-    private val selectedFilters = mutableListOf<SelectableFilter>()
+    private val selectedFilters = mutableListOf<FilterWrapper>()
 
-    suspend fun addFilter(item: SelectableFilter) {
-        Log.d("selected filters before adding", selectedFilters.toString())
+    suspend fun addFilter(item: FilterWrapper) {
         selectedFilters.add(item)
-        Log.d("selected filters afte  adding", selectedFilters.toString())
         emitSelectedFilters()
     }
 
-    suspend fun removeFilter(item: SelectableFilter) {
+    suspend fun removeFilter(item: FilterWrapper) {
         selectedFilters.remove(item)
         emitSelectedFilters()
     }

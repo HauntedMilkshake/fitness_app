@@ -1,7 +1,6 @@
 package bg.zahov.app.ui.history
 
 import android.os.Bundle
-import android.util.Log
 import android.view.LayoutInflater
 import android.view.Menu
 import android.view.MenuInflater
@@ -84,12 +83,6 @@ class HistoryFragment : Fragment() {
                 historyAdapter.updateItems(it.workouts)
             }
         }
-    }
-
-    override fun onResume() {
-        super.onResume()
-        Log.d("on resume", "on resume")
-//        historyViewModel.fetchPastWorkouts()
     }
 
     override fun onDestroyView() {

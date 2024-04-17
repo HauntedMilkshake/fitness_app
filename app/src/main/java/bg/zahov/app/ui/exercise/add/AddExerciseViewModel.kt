@@ -11,6 +11,7 @@ import bg.zahov.app.data.model.Category
 import bg.zahov.app.data.model.Exercise
 import bg.zahov.app.getServiceErrorProvider
 import bg.zahov.app.getWorkoutProvider
+import bg.zahov.fitness.app.R
 import kotlinx.coroutines.launch
 class AddExerciseViewModel(application: Application) : AndroidViewModel(application) {
     private val repo by lazy {
@@ -47,12 +48,13 @@ class AddExerciseViewModel(application: Application) : AndroidViewModel(applicat
 
     fun addExercise(exerciseTitle: String?) {
         if (exerciseTitle.isNullOrEmpty() || _category.value.isNullOrEmpty() || _bodyPart.value.isNullOrEmpty()) {
-            _state.postValue(State.Added(false, "Please do not leave empty fields!"))
+            _state.postValue(State.Added( message = "Please do not leave empty fields!"))
             return
         }
 
         if (exercises.any { it.name.equals(exerciseTitle, false) }) {
-            _state.postValue(State.Added(false, "Names of template exercises must be unique!"))
+            _state.postValue(State.Added( message = "Names of template exercises must be unique!"))
+            return
         }
 
         viewModelScope.launch {
@@ -64,7 +66,7 @@ class AddExerciseViewModel(application: Application) : AndroidViewModel(applicat
                     true,
                 )
             )
-            _state.postValue(State.Added(true, "Successfully added an exercise"))
+            _state.postValue(State.Added(R.id.add_exercise_to_exercises, "Successfully added an exercise"))
         }
     }
 
@@ -78,6 +80,6 @@ class AddExerciseViewModel(application: Application) : AndroidViewModel(applicat
 
     sealed interface State {
         object Default : State
-        data class Added(val isAdded: Boolean, val message: String) : State
+        data class Added(val action: Int? = null, val message: String) : State
     }
 }

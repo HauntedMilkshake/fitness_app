@@ -1,19 +1,20 @@
 package bg.zahov.app.ui.exercise
 
 import android.app.Application
+import android.view.View
 import androidx.lifecycle.AndroidViewModel
 import androidx.lifecycle.LiveData
 import androidx.lifecycle.MutableLiveData
 import androidx.lifecycle.viewModelScope
 import bg.zahov.app.data.exception.CriticalDataNullException
 import bg.zahov.app.data.model.Exercise
-import bg.zahov.app.data.model.SelectableFilter
 import bg.zahov.app.getAddExerciseToWorkoutProvider
 import bg.zahov.app.getFilterProvider
 import bg.zahov.app.getReplaceableExerciseProvider
 import bg.zahov.app.getSelectableExerciseProvider
 import bg.zahov.app.getServiceErrorProvider
 import bg.zahov.app.getWorkoutProvider
+import bg.zahov.app.ui.exercise.filter.FilterWrapper
 import bg.zahov.app.util.toExerciseAdapterWrapper
 import bg.zahov.fitness.app.R
 import kotlinx.coroutines.launch
@@ -50,8 +51,8 @@ class ExerciseViewModel(application: Application) : AndroidViewModel(application
     val userExercises: LiveData<List<ExerciseAdapterWrapper>>
         get() = _userExercises
 
-    private val _searchFilters = MutableLiveData<List<SelectableFilter>>(listOf())
-    val searchFilters: LiveData<List<SelectableFilter>>
+    private val _searchFilters = MutableLiveData<List<FilterWrapper>>(listOf())
+    val searchFilters: LiveData<List<FilterWrapper>>
         get() = _searchFilters
 
     var replaceable = false
@@ -61,11 +62,39 @@ class ExerciseViewModel(application: Application) : AndroidViewModel(application
     private var exerciseTemplates = listOf<Exercise>()
     private val allExercises: MutableList<ExerciseAdapterWrapper> = mutableListOf()
     private var currentlySelectedExerciseToReplace: Int? = null
-    private var currentSearchFilters = listOf<SelectableFilter>()
+    private var currentSearchFilters = listOf<FilterWrapper>()
 
     init {
-        getExercises()
-        getFilters()
+        viewModelScope.launch {
+            launch {
+                _state.postValue(State.Loading(View.VISIBLE))
+                try {
+                    repo.getTemplateExercises().collect {
+                        exerciseTemplates = it
+                        val templateExercises =
+                            it.map { exercise -> exercise.toExerciseAdapterWrapper() }
+
+                        _userExercises.postValue(templateExercises)
+
+                        allExercises.apply {
+                            clear()
+                            addAll(templateExercises)
+                        }
+
+                        _state.postValue(State.Default)
+                    }
+                } catch (e: CriticalDataNullException) {
+                    serviceError.stopApplication()
+                }
+            }
+            launch {
+                filterProvider.filters.collect {
+                    currentSearchFilters = it
+                    _searchFilters.postValue(it)
+                    searchExercises(search)
+                }
+            }
+        }
     }
 
     fun onExerciseClicked(position: Int) {
@@ -141,43 +170,9 @@ class ExerciseViewModel(application: Application) : AndroidViewModel(application
                 }
             }
         }
-
         onConfirm()
     }
 
-    fun getExercises() {
-        viewModelScope.launch {
-            _state.postValue(State.Loading(true))
-            try {
-                repo.getTemplateExercises().collect {
-                    exerciseTemplates = it
-                    val templateExercises =
-                        it.map { exercise -> exercise.toExerciseAdapterWrapper() }
-
-                    _userExercises.postValue(templateExercises)
-
-                    allExercises.apply {
-                        clear()
-                        addAll(templateExercises)
-                    }
-
-                    _state.postValue(State.Default)
-                }
-            } catch (e: CriticalDataNullException) {
-                serviceError.stopApplication()
-            }
-        }
-    }
-
-    private fun getFilters() {
-        viewModelScope.launch {
-            filterProvider.filters.collect {
-                currentSearchFilters = it
-                _searchFilters.postValue(it)
-                searchExercises(search)
-            }
-        }
-    }
 
     fun searchExercises(name: String?) {
         val selectedFilters = currentSearchFilters
@@ -211,10 +206,10 @@ class ExerciseViewModel(application: Application) : AndroidViewModel(application
         search = name
         _userExercises.value = newExercises
 
-        if (newExercises.isEmpty()) _state.value = State.NoResults(true)
+        if (newExercises.isEmpty()) _state.value = State.NoResults(View.VISIBLE)
     }
 
-    fun removeFilter(filter: SelectableFilter) {
+    fun removeFilter(filter: FilterWrapper) {
         viewModelScope.launch {
             filterProvider.removeFilter(filter)
         }
@@ -228,10 +223,10 @@ class ExerciseViewModel(application: Application) : AndroidViewModel(application
     sealed interface State {
         object Default : State
 
-        data class Loading(val isLoading: Boolean) : State
+        data class Loading(val loadingVisibility: Int) : State
 
         data class ErrorFetching(val error: String?, val shutdown: Boolean) : State
 
-        data class NoResults(val areThereResults: Boolean) : State
+        data class NoResults(val resultsVisibility: Int) : State
     }
 }

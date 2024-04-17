@@ -68,7 +68,7 @@ class AddExerciseFragment : Fragment() {
                     it.notify?.let { message ->
                         Toast.makeText(context, message, Toast.LENGTH_SHORT).show()
                     }
-                    if (it.isAdded) findNavController().navigate(R.id.add_exercise_to_exercises)
+                    it.action?.let { action -> findNavController().navigate(action) }
                 }
 
             confirm.setOnClickListener {
