@@ -1,6 +1,7 @@
 package bg.zahov.app.ui.loading
 
 import android.app.Application
+import android.util.Log
 import androidx.lifecycle.AndroidViewModel
 import androidx.lifecycle.LiveData
 import androidx.lifecycle.MutableLiveData
@@ -8,6 +9,7 @@ import androidx.lifecycle.viewModelScope
 import bg.zahov.app.getServiceErrorProvider
 import bg.zahov.app.getUserProvider
 import bg.zahov.fitness.app.R
+import kotlinx.coroutines.flow.first
 import kotlinx.coroutines.launch
 
 class LoadingViewModel(application: Application) : AndroidViewModel(application) {
@@ -24,14 +26,18 @@ class LoadingViewModel(application: Application) : AndroidViewModel(application)
     fun onAppStart() {
         viewModelScope.launch {
             try {
-                if(userProvider.isAuthenticated()) {
+                if (userProvider.isAuthenticated()) {
                     userProvider.initDataSources()
+                    userProvider.getUser().first()
                     _state.postValue(State.Navigate(R.id.loading_to_home))
                 } else {
                     _state.postValue(State.Navigate(R.id.loading_to_welcome))
                 }
             } catch (e: Exception) {
-               serviceError.initiateCountdown()
+                when (e) {
+                    is NoSuchElementException -> _state.postValue(State.Navigate(R.id.loading_to_welcome))
+                    else -> serviceError.initiateCountdown()
+                }
             }
         }
     }

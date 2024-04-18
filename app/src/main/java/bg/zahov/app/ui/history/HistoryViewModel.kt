@@ -1,6 +1,7 @@
 package bg.zahov.app.ui.history
 
 import android.app.Application
+import android.util.Log
 import android.view.View
 import androidx.lifecycle.AndroidViewModel
 import androidx.lifecycle.LiveData
@@ -24,9 +25,11 @@ class HistoryViewModel(application: Application) : AndroidViewModel(application)
         get() = _state
 
     init {
+        Log.d("history init", "init")
         viewModelScope.launch {
             _state.postValue(State.Loading(View.VISIBLE, View.GONE))
             workoutProvider.getPastWorkouts().collect {
+                Log.d("collecting", "collecting")
                 try {
                     _state.postValue(State.Data(it.sortedByDescending { item -> item.date }))
                 } catch (e: CriticalDataNullException) {

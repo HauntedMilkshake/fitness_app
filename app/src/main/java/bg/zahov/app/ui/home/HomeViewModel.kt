@@ -1,8 +1,6 @@
 package bg.zahov.app.ui.home
 
 import android.app.Application
-import android.util.Log
-import android.view.View
 import androidx.lifecycle.AndroidViewModel
 import androidx.lifecycle.LiveData
 import androidx.lifecycle.MutableLiveData
@@ -75,15 +73,17 @@ class HomeViewModel(application: Application) : AndroidViewModel(application) {
                                 it.value.toFloat()
                             )
                         }
-                        _state.postValue(State.BarData(
-                            chartData = barData,
-                            numberOfWorkouts = pastWorkouts.size,
-                            xMin = workoutPerWeekMap.keys.min().toFloat(),
-                            xMax = workoutPerWeekMap.keys.max().toFloat(),
-                            yMin = workoutPerWeekMap.values.min().toFloat(),
-                            yMax = workoutPerWeekMap.values.max().toFloat(),
-                            getWeekRangesForCurrentMonth()
-                        ))
+                        _state.postValue(
+                            State.BarData(
+                                chartData = barData,
+                                numberOfWorkouts = pastWorkouts.size,
+                                xMin = workoutPerWeekMap.keys.min().toFloat(),
+                                xMax = workoutPerWeekMap.keys.max().toFloat(),
+                                yMin = workoutPerWeekMap.values.min().toFloat(),
+                                yMax = workoutPerWeekMap.values.max().toFloat(),
+                                getWeekRangesForCurrentMonth()
+                            )
+                        )
                     }
                 } catch (e: CriticalDataNullException) {
                     serviceErrorHandler.initiateCountdown()

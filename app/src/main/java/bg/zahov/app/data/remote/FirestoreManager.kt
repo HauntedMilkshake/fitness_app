@@ -22,7 +22,6 @@ import kotlinx.coroutines.flow.Flow
 import kotlinx.coroutines.flow.MutableSharedFlow
 import kotlinx.coroutines.flow.SharedFlow
 import kotlinx.coroutines.flow.channelFlow
-import kotlinx.coroutines.flow.first
 import kotlinx.coroutines.launch
 import kotlinx.coroutines.tasks.await
 import kotlinx.coroutines.withContext
@@ -47,10 +46,10 @@ class FirestoreManager {
 
     private val firestore = FirebaseFirestore.getInstance()
 
+
     //    private val listenerOptions =
 //        SnapshotListenOptions.Builder().setMetadataChanges(MetadataChanges.INCLUDE)
 //            .setSource(ListenSource.CACHE).build()
-    private val listeners: MutableSet<ListenerRegistration> = mutableSetOf()
     private val _history = MutableSharedFlow<List<Workout>>()
     private val history: SharedFlow<List<Workout>>
         get() = _history
@@ -60,7 +59,10 @@ class FirestoreManager {
     private val _templateExercises = MutableSharedFlow<List<Exercise>>()
     private val templateExercises: SharedFlow<List<Exercise>>
         get() = _templateExercises
-
+    private var historyListener: ListenerRegistration? = null
+    private var templateWorkoutListener: ListenerRegistration? = null
+    private var measurementsListener: ListenerRegistration? = null
+    private var templateExercisesListener: ListenerRegistration? = null
     fun initUser(id: String) {
         userId = id
     }
@@ -70,85 +72,86 @@ class FirestoreManager {
         initUser(userId)
     }
 
+    //legit
     private suspend fun <T> getNonObservableDocData(
         reference: DocumentReference,
         mapper: (Map<String, Any>?) -> T,
     ): T {
         val snapshot = reference.get().await()
-        Log.d("workouts", mapper(snapshot.data).toString())
         return mapper(snapshot.data)
     }
 
+    //fucking garbage
     private suspend fun <T> getDocData(
         reference: DocumentReference,
         mapper: (Map<String, Any>?) -> T,
     ): Flow<T> = channelFlow {
         try {
             val result = reference.get().await()
-
-            trySend(mapper(result.data))
+            result.data?.let {
+                trySend(mapper(it))
+            }
         } catch (e: CancellationException) {
             close()
             throw e
         }
     }
 
-    private suspend fun <T> getCollectionData(
+    //legit
+    private suspend fun <T> getNonObservableCollectionData(
         reference: CollectionReference,
         mapper: (Map<String, Any>?) -> T,
-    ): Flow<List<T>> = channelFlow {
+    ): List<T> = withContext(Dispatchers.IO) {
         try {
             val snapshots = reference.get().await()
 
             val results = snapshots.documents.map {
                 async {
-                    getDocData(it.reference, mapper).first()
+                    getNonObservableDocData(it.reference, mapper)
                 }
             }.awaitAll()
 
-            trySend(results)
-
+            results
         } catch (e: CancellationException) {
-            close()
             throw e
         }
     }
 
+    //less and more garbage at the same time
     private suspend fun <T> getCollectionDataLISTENERS(
         reference: CollectionReference,
         emitterFlow: MutableSharedFlow<List<T>>,
         collectorFlow: SharedFlow<List<T>>,
+        listenerIdentifier: Listeners,
         mapper: (Map<String, Any>?) -> T
     ): Flow<List<T>> {
         try {
-            val listener = reference.addSnapshotListener { value, e ->
-                e?.let {
-                    //throw?
-                    return@addSnapshotListener
-                }
-                CoroutineScope(Dispatchers.IO).launch {
-                    emitterFlow.emit(value?.map {
-                        getNonObservableDocData(it.reference, mapper)
-                    }.orEmpty())
+            var ref = getListenerReference(listenerIdentifier)
+            if (ref == null) {
+                ref = reference.addSnapshotListener { value, error ->
+                    error?.let {
+                        //throw or something to handle this
+                        return@addSnapshotListener
+                    }
+                    CoroutineScope(Dispatchers.IO).launch {
+                        emitterFlow.emit(value?.mapNotNull { mapper(it.data) }.orEmpty())
+                    }
                 }
             }
-            listeners.add(listener)
+            Log.d("history listener", historyListener.toString())
+
             return collectorFlow
         } catch (e: CancellationException) {
             throw e
         }
     }
+    private fun getListenerReference(identifier: Listeners) = when(identifier) {
+        Listeners.History -> historyListener
+        Listeners.TemplateWorkouts -> templateWorkoutListener
+        Listeners.TemplateExercises -> templateExercisesListener
+        Listeners.Measurements -> measurementsListener
+    }
 
-    //    private suspend fun <T> getNonObservableDocData(
-//        reference: DocumentReference,
-//        mapper: (Map<String, Any>?) -> T,
-//    ): T {
-//        try {
-//            return mapper(reference.get().await().data)
-//        } catch (e: Exception) {
-//            throw e
-//        }
-//    }
     suspend fun getUser(): Flow<User> =
         getDocData(firestore.collection(USERS_COLLECTION).document(userId)) { info ->
             User.fromFirestoreMap(info)
@@ -162,7 +165,8 @@ class FirestoreManager {
     suspend fun getWorkouts(): Flow<List<Workout>> = getCollectionDataLISTENERS(
         firestore.collection(USERS_COLLECTION).document(userId).collection(WORKOUTS_SUB_COLLECTION),
         _history,
-        history
+        history,
+        Listeners.History
     ) { info ->
         Workout.fromFirestoreMap(info)
     }
@@ -171,7 +175,8 @@ class FirestoreManager {
         firestore.collection(USERS_COLLECTION).document(userId)
             .collection(TEMPLATE_WORKOUTS_SUB_COLLECTION),
         _templateWorkout,
-        templateWorkout
+        templateWorkout,
+        Listeners.TemplateWorkouts
     ) { info ->
         Workout.fromFirestoreMap(info)
     }
@@ -196,7 +201,8 @@ class FirestoreManager {
     suspend fun getTemplateExercises(): Flow<List<Exercise>> = getCollectionDataLISTENERS(
         firestore.collection(USERS_COLLECTION).document(userId).collection(TEMPLATE_EXERCISES),
         _templateExercises,
-        templateExercises
+        templateExercises,
+        Listeners.TemplateExercises
     ) {
         Exercise.fromFirestoreMap(it)
     }
@@ -320,9 +326,16 @@ class FirestoreManager {
     }
 
     private fun unsubscribeListeners() {
-        listeners.forEach {
-            it.remove()
-        }
-        listeners.clear()
+        historyListener?.remove()
+        historyListener = null
+        templateWorkoutListener?.remove()
+        templateWorkoutListener = null
+        templateExercisesListener?.remove()
+        templateExercisesListener = null
+        measurementsListener?.remove()
+        measurementsListener = null
     }
+}
+enum class Listeners {
+    History, TemplateWorkouts, TemplateExercises, Measurements
 }
