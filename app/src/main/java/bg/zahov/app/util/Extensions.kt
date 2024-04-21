@@ -2,6 +2,7 @@ package bg.zahov.app.util
 
 import android.animation.ObjectAnimator
 import android.animation.PropertyValuesHolder
+import android.util.Log
 import android.view.View
 import bg.zahov.app.data.local.RealmExercise
 import bg.zahov.app.data.local.RealmSets
@@ -64,6 +65,7 @@ fun Exercise.toFirestoreMap(): Map<String, Any?> {
 }
 
 fun Sets.toFirestoreMap(): Map<String, Any?> {
+    Log.d("set key when saving", type.key)
     return mapOf(
         FirestoreFields.SETS_TYPE to type.key,
         FirestoreFields.SETS_FIRST_METRIC to firstMetric,
@@ -137,6 +139,8 @@ fun String.parseTimeStringToLong(): Long {
 
 fun Exercise.toExerciseSetAdapterWrapper(units: Units): ExerciseSetAdapterExerciseWrapper {
     return ExerciseSetAdapterExerciseWrapper(
+        noteVisibility = if(note.isNullOrEmpty()) View.GONE else View.VISIBLE,
+        note =  note,
         name = this.name,
         backgroundResource = R.color.background,
         firstInputColumnVisibility = when (this.category) {
@@ -188,7 +192,8 @@ fun ExerciseSetAdapterExerciseWrapper.toExercise(): Exercise {
 fun Sets.toExerciseSetAdapterSetWrapper(
     number: String,
     category: Category,
-    previousResults: String,
+    previousResults: String = "-//-",
+    resumeSet: Sets? = null
 ): ExerciseSetAdapterSetWrapper {
     return ExerciseSetAdapterSetWrapper(
         setIndicator = when (this.type) {
@@ -202,7 +207,7 @@ fun Sets.toExerciseSetAdapterSetWrapper(
             else -> View.VISIBLE
         },
         setNumber = number,
-        set = Sets(SetType.DEFAULT, 0.0, 0),
+        set = resumeSet ?: Sets(SetType.DEFAULT, 0.0, 0),
         backgroundResource = R.color.completed_set,
         previousResults = previousResults,
     )

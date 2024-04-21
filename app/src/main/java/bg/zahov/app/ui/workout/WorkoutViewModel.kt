@@ -1,7 +1,6 @@
 package bg.zahov.app.ui.workout
 
 import android.app.Application
-import android.util.Log
 import android.view.View
 import androidx.lifecycle.AndroidViewModel
 import androidx.lifecycle.LiveData
@@ -112,7 +111,8 @@ class WorkoutViewModel(application: Application) : AndroidViewModel(application)
             launch {
                 workoutStateManager.template.collect {
                     it?.let { workout ->
-                        val exercisesToAdd = createWorkoutEntryArray(workout.exercises)
+                        val exercisesToAdd =
+                            createWorkoutEntryArray(workout.exercises, workoutStateManager.resuming)
                         val exercises = _exercises.value.orEmpty().toMutableList()
                         if (exercisesToAdd.isNotEmpty()) {
                             exercises.addAll(exercisesToAdd)
@@ -140,7 +140,7 @@ class WorkoutViewModel(application: Application) : AndroidViewModel(application)
                 addExerciseToWorkoutProvider.selectedExercises.collect {
                     if (it.isNotEmpty()) {
                         val exercisesToUpdate = _exercises.value.orEmpty().toMutableList()
-                        exercisesToUpdate.addAll(createWorkoutEntryArray(it))
+                        exercisesToUpdate.addAll(createWorkoutEntryArray(it, false))
                         _exercises.postValue(exercisesToUpdate)
                         addExerciseToWorkoutProvider.resetSelectedExercises()
                     }
@@ -171,7 +171,10 @@ class WorkoutViewModel(application: Application) : AndroidViewModel(application)
         }
     }
 
-    private fun createWorkoutEntryArray(exercises: List<Exercise>): List<WorkoutEntry> {
+    private fun createWorkoutEntryArray(
+        exercises: List<Exercise>,
+        resuming: Boolean,
+    ): List<WorkoutEntry> {
         val workoutEntries = mutableListOf<WorkoutEntry>()
         exercises.forEach {
             workoutEntries.add(ExerciseEntry(it.toExerciseSetAdapterWrapper(if (::units.isInitialized) units else Units.METRIC)))
@@ -181,7 +184,8 @@ class WorkoutViewModel(application: Application) : AndroidViewModel(application)
                         set.toExerciseSetAdapterSetWrapper(
                             (index + 1).toString(),
                             it.category,
-                            "${(set.secondMetric)} x ${set.firstMetric}"
+                            previousResults = if (resuming) "-//-" else "${(set.secondMetric)} x ${set.firstMetric}",
+                            resumeSet = if (resuming) set else null
                         )
                     )
                 )
@@ -233,7 +237,7 @@ class WorkoutViewModel(application: Application) : AndroidViewModel(application)
 
         _exercises.value = exercises
     }
-
+    //likely a bug somewhere here
     private fun insertSetAtIndex(
         exercises: MutableList<WorkoutEntry>,
         insertIndex: Int,
@@ -302,11 +306,14 @@ class WorkoutViewModel(application: Application) : AndroidViewModel(application)
 
     fun onSetTypeChanged(itemPosition: Int, setType: SetType) {
         val captured = _exercises.value.orEmpty()
-        (captured[itemPosition] as? SetEntry)?.setEntry?.setIndicator = when(setType) {
-            SetType.WARMUP -> R.string.warmup_set_indicator
-            SetType.DROP_SET -> R.string.drop_set_indicator
-            SetType.DEFAULT -> R.string.default_set_indicator
-            SetType.FAILURE -> R.string.failure_set_indicator
+        (captured[itemPosition] as? SetEntry)?.setEntry?.apply {
+            setIndicator = when (setType) {
+                SetType.WARMUP -> R.string.warmup_set_indicator
+                SetType.DROP_SET -> R.string.drop_set_indicator
+                SetType.DEFAULT -> R.string.default_set_indicator
+                SetType.FAILURE -> R.string.failure_set_indicator
+            }
+            set.type = setType
         }
         _exercises.value = captured
     }
@@ -344,7 +351,6 @@ class WorkoutViewModel(application: Application) : AndroidViewModel(application)
         }
         viewModelScope.launch {
             val (exercises, prs, volume) = getExerciseArrayAndPRs(_exercises.value.orEmpty())
-            Log.d("prs", prs.toString())
             workoutId?.let {
                 repo.updateWorkoutDate(it, workoutDate)
             }
@@ -398,7 +404,6 @@ class WorkoutViewModel(application: Application) : AndroidViewModel(application)
                             sets.add(entry.setEntry.set)
 
                             volume += weight * reps
-
                             if (entry.setEntry.set.type == SetType.DEFAULT || entry.setEntry.set.type == SetType.FAILURE) {
                                 when (category) {
                                     //reps only, cardio, and timed are soonTM
@@ -431,10 +436,11 @@ class WorkoutViewModel(application: Application) : AndroidViewModel(application)
         if (removeEmpty) exercises.entries.removeIf { it.value.sets.isEmpty() }
 
         val temp = exercises.values.map { it.copy() }.toMutableList()
-
-        temp.forEach { currExercise ->
-            templateExercises.find { it.name == currExercise.name }?.let { template ->
-                when (currExercise.category) {
+        if (removeEmpty) {
+            //no need to update exercises when saving state
+            temp.forEach { currExercise ->
+                templateExercises.find { it.name == currExercise.name }?.let { template ->
+                    when (currExercise.category) {
 //                    Category.RepsOnly -> {
 //                        if ((currExercise.bestSet.secondMetric
 //                                ?: 0) <= (template.bestSet.secondMetric ?: 0)
@@ -444,24 +450,26 @@ class WorkoutViewModel(application: Application) : AndroidViewModel(application)
 //                            prs++
 //                        }
 //                    }
-                    else -> {
-                        val currentBestSetResult = (currExercise.bestSet.firstMetric
-                            ?: 0.0) * (currExercise.bestSet.secondMetric ?: 0)
-                        val previousBestSetResult =
-                            (template.bestSet.firstMetric ?: 0.0) * (template.bestSet.secondMetric
-                                ?: 0)
+                        else -> {
+                            val currentBestSetResult = (currExercise.bestSet.firstMetric
+                                ?: 0.0) * (currExercise.bestSet.secondMetric ?: 0)
+                            val previousBestSetResult =
+                                (template.bestSet.firstMetric
+                                    ?: 0.0) * (template.bestSet.secondMetric
+                                    ?: 0)
 
-                        if (currentBestSetResult <= previousBestSetResult) {
-                            currExercise.bestSet = template.bestSet
-                        } else {
-                            prs++
+                            if (currentBestSetResult <= previousBestSetResult) {
+                                currExercise.bestSet = template.bestSet
+                            } else {
+                                prs++
+                            }
                         }
                     }
+                    currExercise.isTemplate = true
                 }
-                currExercise.isTemplate = true
             }
+            workoutProvider.updateExercises(exercises.values.toList())
         }
-        workoutProvider.updateExercises(exercises.values.toList())
         return Triple(exercises.values.toList(), prs, volume)
     }
 
@@ -516,6 +524,7 @@ class WorkoutViewModel(application: Application) : AndroidViewModel(application)
 
     }
 
+//
     sealed interface State {
         data class Default(val restState: Boolean) : State
         data class Rest(val time: String) : State

@@ -6,8 +6,10 @@ import androidx.lifecycle.AndroidViewModel
 import androidx.lifecycle.LiveData
 import androidx.lifecycle.MutableLiveData
 import androidx.lifecycle.viewModelScope
+import bg.zahov.app.data.exception.CriticalDataNullException
 import bg.zahov.app.getServiceErrorProvider
 import bg.zahov.app.getWorkoutProvider
+import kotlinx.coroutines.CancellationException
 import kotlinx.coroutines.launch
 import java.time.Month
 import java.time.YearMonth
@@ -58,7 +60,14 @@ class CalendarViewModel(application: Application) : AndroidViewModel(application
                     _numberOfWorkouts.value = workoutsPerMonth.toMap()
                 }
             } catch (e: Exception) {
-                serviceError.initiateCountdown()
+                when(e) {
+                    is CancellationException -> {
+                        //:)
+                    }
+                    is CriticalDataNullException -> {
+                        serviceError.initiateCountdown()
+                    }
+                }
             }
         }
     }

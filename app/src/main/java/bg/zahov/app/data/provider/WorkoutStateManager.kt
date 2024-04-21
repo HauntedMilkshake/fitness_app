@@ -41,6 +41,7 @@ class WorkoutStateManager : WorkoutActions {
 
     private var job: Job? = null
     private var workoutState = WorkoutState.INACTIVE
+    var resuming: Boolean = false
 
     private suspend fun startTimer() {
         job = CoroutineScope(Dispatchers.Default).launch {
@@ -60,7 +61,8 @@ class WorkoutStateManager : WorkoutActions {
         _shouldSave.emit(true)
     }
 
-    override suspend fun <T> startWorkout(workout: T?, lastTime: Long?) {
+    override suspend fun <T> startWorkout(workout: T?, lastTime: Long?, isResuming: Boolean) {
+        if(isResuming) resuming = true
         if (updateState(WorkoutState.ACTIVE)) {
             if (workout != null && workout is Workout) {
                 _template.value = workout

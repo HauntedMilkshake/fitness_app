@@ -1,6 +1,5 @@
 package bg.zahov.app.data.model
 
-import android.util.Log
 import bg.zahov.app.data.exception.CriticalDataNullException
 import bg.zahov.app.util.toLocalDateTime
 import com.google.firebase.Timestamp

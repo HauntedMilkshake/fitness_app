@@ -1,7 +1,6 @@
 package bg.zahov.app.ui.history.info
 
 import android.os.Bundle
-import android.util.Log
 import android.view.LayoutInflater
 import android.view.Menu
 import android.view.MenuInflater
@@ -19,6 +18,7 @@ import androidx.recyclerview.widget.LinearLayoutManager
 import bg.zahov.app.data.model.state.HistoryInfoUiMapper
 import bg.zahov.app.hideBottomNav
 import bg.zahov.app.setToolBarTitle
+import bg.zahov.app.showBottomNav
 import bg.zahov.app.ui.history.HistoryFragment.Companion.workoutId
 import bg.zahov.fitness.app.R
 import bg.zahov.fitness.app.databinding.FragmentHistoryInfoBinding
@@ -101,8 +101,11 @@ class HistoryInfoFragment : Fragment() {
         }
     }
 
+    override fun onResume() {
+        super.onResume()
+        requireActivity().showBottomNav()
+    }
     private fun showToast(message: String?) {
-        Log.d("workout", "showing toast")
         message?.let {
             Toast.makeText(context, it, Toast.LENGTH_SHORT).show()
         }

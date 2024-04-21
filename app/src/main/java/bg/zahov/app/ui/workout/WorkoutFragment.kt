@@ -9,6 +9,7 @@ import android.view.ViewGroup
 import android.widget.Toast
 import androidx.activity.OnBackPressedCallback
 import androidx.core.os.bundleOf
+import androidx.core.widget.addTextChangedListener
 import androidx.fragment.app.Fragment
 import androidx.fragment.app.viewModels
 import androidx.lifecycle.map
@@ -133,9 +134,19 @@ class WorkoutFragment : Fragment() {
             }
 
             onGoingWorkoutViewModel.note.observe(viewLifecycleOwner) {
+                workoutNoteField.hint = ""
                 workoutNoteFieldText.setText(it)
             }
 
+            workoutNoteFieldText.setOnFocusChangeListener { _, hasFocus ->
+                if(hasFocus) {
+                    workoutNoteField.hint = ""
+                    workoutNoteFieldText.hint = ""
+                }
+            }
+            workoutNoteFieldText.addTextChangedListener {
+//                onGoingWorkoutViewModel.setWorkoutNote(it.toString())
+            }
             addExercise.setOnClickListener {
                 findNavController().navigate(
                     R.id.workout_to_add_exercise,

@@ -152,6 +152,7 @@ class HomeViewModel(application: Application) : AndroidViewModel(application) {
                 ).seconds * 1000
                 workoutRestManager.startRest(restDuration, elapsedTime)
             }
+
             workoutStateManager.startWorkout(
                 Workout(
                     id = previousState.id,
@@ -164,7 +165,8 @@ class HomeViewModel(application: Application) : AndroidViewModel(application) {
                     note = previousState.note,
                     personalRecords = previousState.personalRecords
                 ),
-                kotlin.math.abs(lastTime.seconds) * 1000
+                kotlin.math.abs(lastTime.seconds) * 1000,
+                true
             )
         }
     }

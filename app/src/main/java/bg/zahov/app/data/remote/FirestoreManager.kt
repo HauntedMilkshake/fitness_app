@@ -123,7 +123,7 @@ class FirestoreManager {
         emitterFlow: MutableSharedFlow<List<T>>,
         collectorFlow: SharedFlow<List<T>>,
         listenerIdentifier: Listeners,
-        mapper: (Map<String, Any>?) -> T
+        mapper: (Map<String, Any>?) -> T,
     ): Flow<List<T>> {
         try {
             var ref = getListenerReference(listenerIdentifier)
@@ -137,6 +137,7 @@ class FirestoreManager {
                         emitterFlow.emit(value?.mapNotNull { mapper(it.data) }.orEmpty())
                     }
                 }
+//                assignListenerReference(listenerIdentifier, ref)
             }
             Log.d("history listener", historyListener.toString())
 
@@ -145,12 +146,21 @@ class FirestoreManager {
             throw e
         }
     }
-    private fun getListenerReference(identifier: Listeners) = when(identifier) {
+
+    private fun getListenerReference(identifier: Listeners) = when (identifier) {
         Listeners.History -> historyListener
         Listeners.TemplateWorkouts -> templateWorkoutListener
         Listeners.TemplateExercises -> templateExercisesListener
         Listeners.Measurements -> measurementsListener
     }
+
+    private fun assignListenerReference(identifier: Listeners, ref: ListenerRegistration) =
+        when (identifier) {
+            Listeners.History -> historyListener = ref
+            Listeners.TemplateWorkouts -> templateWorkoutListener = ref
+            Listeners.TemplateExercises -> templateExercisesListener = ref
+            Listeners.Measurements -> measurementsListener = ref
+        }
 
     suspend fun getUser(): Flow<User> =
         getDocData(firestore.collection(USERS_COLLECTION).document(userId)) { info ->
@@ -336,6 +346,7 @@ class FirestoreManager {
         measurementsListener = null
     }
 }
+
 enum class Listeners {
     History, TemplateWorkouts, TemplateExercises, Measurements
 }
