@@ -1,5 +1,7 @@
 package bg.zahov.app.ui.workout.add
 
+import android.annotation.SuppressLint
+import android.util.Log
 import android.view.LayoutInflater
 import android.view.View
 import android.view.ViewGroup
@@ -78,6 +80,7 @@ class ExerciseSetAdapter :
     override fun getItemCount(): Int = items.size
 
     fun updateItems(newItems: List<WorkoutEntry>) {
+        Log.d("recycler view notify", newItems.toString())
         items.clear()
         items.addAll(newItems)
         notifyDataSetChanged()
@@ -156,6 +159,7 @@ class ExerciseSetAdapter :
             view.findViewById<TextInputEditText>(R.id.second_input_field_text)
 
         fun bind(item: ExerciseSetAdapterSetWrapper) {
+            Log.d("item set notify", item.toString())
             previous.text = item.previousResults
             firstInputLayout.visibility = item.firstInputFieldVisibility
             secondInputLayout.visibility = item.secondInputFieldVisibility
@@ -222,7 +226,6 @@ class ExerciseSetAdapter :
 
         fun deleteSet() {
             swipeActionListener?.onDeleteSet(bindingAdapterPosition)
-            notifyItemRemoved(bindingAdapterPosition)
         }
     }
 

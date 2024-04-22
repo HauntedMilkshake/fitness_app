@@ -1,7 +1,6 @@
 package bg.zahov.app.ui.history
 
 import android.app.Application
-import android.util.Log
 import android.view.View
 import androidx.lifecycle.AndroidViewModel
 import androidx.lifecycle.LiveData
@@ -31,7 +30,6 @@ class HistoryViewModel(application: Application) : AndroidViewModel(application)
                 try {
                     _state.postValue(State.Data(it.sortedByDescending { item -> item.date }))
                 } catch (e: CriticalDataNullException) {
-                    Log.d("e", e.message ?: "")
                     serviceError.initiateCountdown()
                 }
             }

@@ -14,6 +14,7 @@ import androidx.fragment.app.viewModels
 import androidx.lifecycle.map
 import androidx.navigation.fragment.findNavController
 import bg.zahov.app.data.model.state.RestTimerUiModelMapper
+import bg.zahov.app.hideBottomNav
 import bg.zahov.app.setToolBarTitle
 import bg.zahov.app.showTopBar
 import bg.zahov.app.util.parseTimeStringToLong
@@ -35,6 +36,7 @@ class RestTimerFragment : Fragment() {
     ): View {
         _binding = FragmentRestTimerBinding.inflate(inflater, container, false)
         requireActivity().showTopBar()
+        requireActivity().hideBottomNav()
         return binding.root
     }
 
@@ -145,6 +147,12 @@ class RestTimerFragment : Fragment() {
             currentTimer.visibility = visibility
             setTimer.visibility = visibility
         }
+    }
+
+    override fun onResume() {
+        super.onResume()
+        //damn we do be needing some other way to handle this :/
+        requireActivity().hideBottomNav()
     }
 
     override fun onDestroyView() {

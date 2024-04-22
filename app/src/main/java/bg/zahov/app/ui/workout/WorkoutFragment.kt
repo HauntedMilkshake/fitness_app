@@ -3,6 +3,7 @@ package bg.zahov.app.ui.workout
 import android.media.MediaPlayer
 import android.os.Bundle
 import android.transition.TransitionInflater
+import android.util.Log
 import android.view.LayoutInflater
 import android.view.View
 import android.view.ViewGroup
@@ -126,6 +127,7 @@ class WorkoutFragment : Fragment() {
             ItemTouchHelper(SetSwipeGesture()).attachToRecyclerView(exercisesRecyclerView)
 
             onGoingWorkoutViewModel.exercises.observe(viewLifecycleOwner) {
+                Log.d("live data notify", it.toString())
                 exerciseSetAdapter.updateItems(it)
             }
 
@@ -204,10 +206,12 @@ class WorkoutFragment : Fragment() {
     override fun onResume() {
         super.onResume()
         requireActivity().hideTopBar()
+        requireActivity().hideBottomNav()
     }
     override fun onStop() {
         super.onStop()
         requireActivity().showTopBar()
+        requireActivity().showBottomNav()
     }
     override fun onDestroy() {
         super.onDestroy()

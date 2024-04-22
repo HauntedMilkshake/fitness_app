@@ -16,6 +16,7 @@ import androidx.lifecycle.map
 import androidx.navigation.fragment.findNavController
 import androidx.recyclerview.widget.LinearLayoutManager
 import bg.zahov.app.data.model.state.ExerciseUiMapper
+import bg.zahov.app.hideBottomNav
 import bg.zahov.app.setToolBarTitle
 import bg.zahov.app.showBottomNav
 import bg.zahov.app.showTopBar
@@ -57,7 +58,7 @@ class ExercisesFragment : Fragment() {
         exerciseViewModel.selectable = selectable && !replaceable
         exerciseViewModel.addable = addable
         requireActivity().showTopBar()
-        requireActivity().showBottomNav()
+        if (addable || selectable || replaceable) requireActivity().hideBottomNav() else requireActivity().showBottomNav()
         return binding.root
     }
 
@@ -103,7 +104,10 @@ class ExercisesFragment : Fragment() {
                         }
 
                         R.id.filter -> {
-                            FilterDialog().show(requireActivity().supportFragmentManager, FilterDialog.TAG)
+                            FilterDialog().show(
+                                requireActivity().supportFragmentManager,
+                                FilterDialog.TAG
+                            )
                             true
                         }
 
@@ -208,6 +212,12 @@ class ExercisesFragment : Fragment() {
         super.onPause()
         exerciseViewModel.onConfirm()
     }
+
+    override fun onResume() {
+        super.onResume()
+        if (addable || selectable || replaceable) requireActivity().hideBottomNav() else requireActivity().showBottomNav()
+    }
+
     override fun onDestroyView() {
         super.onDestroyView()
         _binding = null

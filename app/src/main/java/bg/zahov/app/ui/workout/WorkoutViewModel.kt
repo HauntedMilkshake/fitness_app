@@ -185,7 +185,7 @@ class WorkoutViewModel(application: Application) : AndroidViewModel(application)
                         set.toExerciseSetAdapterSetWrapper(
                             (index + 1).toString(),
                             it.category,
-                            previousResults = if (resuming) "-//-" else "${(set.secondMetric)} x ${set.firstMetric}",
+                            previousResults = "${(set.secondMetric)} x ${set.firstMetric}",
                             resumeSet = if (resuming) set else null
                         )
                     )
@@ -221,7 +221,7 @@ class WorkoutViewModel(application: Application) : AndroidViewModel(application)
         Log.d("add set", "inital list $exercises")
         val templateExercise =
             templateExercises.find { it.name == (exercises[position] as? ExerciseEntry)?.exerciseEntry?.name }
-        Log.d("add set", "template exercise $templateExercise")
+        Log.d("add set", "template exercise ${if(templateExercise == null) "bad" else "good"}")
         if (exercises.size == 1 || position == exercises.size - 1) {
             Log.d("add set", "adding first set")
             insertSetAtIndex(exercises, position + 1, position, templateExercise)
@@ -271,30 +271,19 @@ class WorkoutViewModel(application: Application) : AndroidViewModel(application)
                 )
             )
         }
-        Log.d("setEntry after insertion", setEntry.toString())
+        Log.d("add set", "added set: ${setEntry.setEntry.set}  additional info ${setEntry.setEntry.previousResults}")
         exercises.add(insertIndex, setEntry)
     }
-
     //bug when removing set gets moved downward
     fun removeSet(position: Int) {
         val exercises = _exercises.value.orEmpty().toMutableList()
-        Log.d("before deletion", exercises.size.toString())
         exercises.removeAt(position)
-        Log.d("after deletion", exercises.size.toString())
         var index = position
         while (index < exercises.size && exercises[index] is SetEntry) {
             (exercises[index] as SetEntry).setEntry.setNumber =
                 ((exercises[index] as SetEntry).setEntry.setNumber.toInt() - 1).toString()
             index++
         }
-//        for (index in position until exercises.size) {
-//            if (exercises[index] is SetEntry) {
-//                (exercises[index] as SetEntry).setEntry.setNumber =
-//                    ((exercises[index] as SetEntry).setEntry.setNumber.toInt() - 1).toString()
-//            } else {
-//                break
-//            }
-//        }
         _exercises.value = exercises
     }
 
@@ -446,9 +435,7 @@ class WorkoutViewModel(application: Application) : AndroidViewModel(application)
                 }
             }
         }
-        //Todo(no best set is currently saved for the exercises therefore there are never prs)
-        //questionable
-        if (removeEmpty) exercises.entries.removeIf { it.value.sets.isEmpty() }
+        if (removeEmpty) exercises.entries.removeIf { it.value.sets.isEmpty()  || it.value.sets.any { set -> set.firstMetric == null || set.firstMetric == 0.0 || set.secondMetric == null || set.secondMetric == 0 } }
 
         val temp = exercises.values.map { it.copy() }.toMutableList()
         if (removeEmpty) {
@@ -456,6 +443,7 @@ class WorkoutViewModel(application: Application) : AndroidViewModel(application)
             temp.forEach { currExercise ->
                 templateExercises.find { it.name == currExercise.name }?.let { template ->
                     when (currExercise.category) {
+                        //unfortunately due to time constraints special sets were dropped as an idea
 //                    Category.RepsOnly -> {
 //                        if ((currExercise.bestSet.secondMetric
 //                                ?: 0) <= (template.bestSet.secondMetric ?: 0)
