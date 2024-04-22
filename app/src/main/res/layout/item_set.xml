@@ -51,6 +51,7 @@
             android:layout_width="match_parent"
             android:layout_height="35dp"
             android:backgroundTint="@color/input_field_background"
+            android:imeOptions="actionDone"
             android:inputType="numberDecimal"
             android:padding="10dp"
             android:textColor="@color/white" />
@@ -79,8 +80,10 @@
             android:layout_width="match_parent"
             android:layout_height="35dp"
             android:backgroundTint="@color/input_field_background"
+            android:imeOptions="actionDone"
             android:inputType="numberDecimal"
             android:padding="10dp"
+
             android:textColor="@color/blue_text" />
     </com.google.android.material.textfield.TextInputLayout>
 

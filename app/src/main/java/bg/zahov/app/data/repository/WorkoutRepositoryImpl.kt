@@ -67,12 +67,15 @@ class WorkoutRepositoryImpl : WorkoutRepository {
         realm.addWorkoutState(realmWorkoutState)
     }
 
-    override suspend fun updateTemplateWorkoutDate(workoutId: String, date: LocalDateTime) {
-        firestore.updateWorkoutDate(workoutId, date)
+    override suspend fun updateTemplateWorkout(
+        workoutId: String,
+        date: LocalDateTime,
+        newExercise: List<Exercise>,
+    ) {
+        firestore.updateTemplateWorkout(workoutId, date, newExercise)
     }
 
     override suspend fun clearWorkoutState() {
-        Log.d("calling clear", "clear 3")
         realm.clearWorkoutState()
     }
 

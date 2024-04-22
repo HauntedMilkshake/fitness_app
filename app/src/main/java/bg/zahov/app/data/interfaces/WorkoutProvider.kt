@@ -25,6 +25,11 @@ interface WorkoutProvider {
     suspend fun getExerciseHistory(): Flow<List<ExerciseHistoryInfo>>
     suspend fun getPreviousWorkoutState(): RealmWorkoutState?
     suspend fun addWorkoutState(realmWorkoutState: RealmWorkoutState)
-    suspend fun updateWorkoutDate(workoutId: String, date: LocalDateTime)
+    suspend fun updateTemplateWorkout(
+        workoutId: String,
+        date: LocalDateTime,
+        newExercises: List<Exercise>,
+    )
+
     suspend fun clearWorkoutState()
 }

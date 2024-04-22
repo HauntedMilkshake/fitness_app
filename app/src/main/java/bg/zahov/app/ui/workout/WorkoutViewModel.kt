@@ -177,23 +177,23 @@ class WorkoutViewModel(application: Application) : AndroidViewModel(application)
         resuming: Boolean,
     ): List<WorkoutEntry> {
         val workoutEntries = mutableListOf<WorkoutEntry>()
-        exercises.forEach {
-            workoutEntries.add(ExerciseEntry(it.toExerciseSetAdapterWrapper(if (::units.isInitialized) units else Units.METRIC)))
-            it.sets.forEachIndexed { index, set ->
-                workoutEntries.add(
-                    SetEntry(
-                        set.toExerciseSetAdapterSetWrapper(
-                            (index + 1).toString(),
-                            it.category,
-                            previousResults = "${(set.secondMetric)} x ${set.firstMetric}",
-                            resumeSet = if (resuming) set else null
-                        )
-                    )
+        exercises.forEach { exercise ->
+            workoutEntries.add(ExerciseEntry(exercise.toExerciseSetAdapterWrapper(if (::units.isInitialized) units else Units.METRIC)))
+            val previousExercise = templateExercises.find { it.name == exercise.name }
+            exercise.sets.forEachIndexed { index, set ->
+                val setCopy = Sets(set.type, set.firstMetric, set.secondMetric)
+                val setEntry = set.toExerciseSetAdapterSetWrapper(
+                    (index + 1).toString(),
+                    exercise.category,
+                    previousResults = if (previousExercise != null && index < previousExercise.sets.size) "${previousExercise.sets[index].secondMetric} x ${previousExercise.sets[index].firstMetric}" else "-/-",
+                    resumeSet = if (resuming) setCopy else Sets(SetType.DEFAULT, 0.0, 0)
                 )
+                workoutEntries.add(SetEntry(setEntry))
             }
         }
         return workoutEntries
     }
+
 
     fun onExerciseReplace(itemPosition: Int) {
         exerciseToReplaceIndex = itemPosition
@@ -221,7 +221,7 @@ class WorkoutViewModel(application: Application) : AndroidViewModel(application)
         Log.d("add set", "inital list $exercises")
         val templateExercise =
             templateExercises.find { it.name == (exercises[position] as? ExerciseEntry)?.exerciseEntry?.name }
-        Log.d("add set", "template exercise ${if(templateExercise == null) "bad" else "good"}")
+        Log.d("add set", "template exercise ${if (templateExercise == null) "bad" else "good"}")
         if (exercises.size == 1 || position == exercises.size - 1) {
             Log.d("add set", "adding first set")
             insertSetAtIndex(exercises, position + 1, position, templateExercise)
@@ -242,7 +242,6 @@ class WorkoutViewModel(application: Application) : AndroidViewModel(application)
         _exercises.value = exercises
     }
 
-    //likely a bug somewhere here
     private fun insertSetAtIndex(
         exercises: MutableList<WorkoutEntry>,
         insertIndex: Int,
@@ -271,10 +270,9 @@ class WorkoutViewModel(application: Application) : AndroidViewModel(application)
                 )
             )
         }
-        Log.d("add set", "added set: ${setEntry.setEntry.set}  additional info ${setEntry.setEntry.previousResults}")
         exercises.add(insertIndex, setEntry)
     }
-    //bug when removing set gets moved downward
+
     fun removeSet(position: Int) {
         val exercises = _exercises.value.orEmpty().toMutableList()
         exercises.removeAt(position)
@@ -292,21 +290,31 @@ class WorkoutViewModel(application: Application) : AndroidViewModel(application)
         metric: String,
         viewId: Int,
     ) {
-        if (position != -1 && position < (_exercises.value?.size ?: -1)) {
+
+        if (position >= 0 && position < (_exercises.value?.size ?: 0)) {
             when (viewId) {
                 R.id.first_input_field_text -> {
-                    (_exercises.value?.get(position) as? SetEntry)?.setEntry?.set?.firstMetric =
-                        "%.2f".format(metric.toDoubleOrNull() ?: 0.0).toDouble()
-
+                    (_exercises.value?.get(position) as? SetEntry)?.setEntry?.set?.let { currentSet ->
+                        val newMetric = "%.2f".format(metric.toDoubleOrNull() ?: 0.0).toDouble()
+                        if (currentSet.firstMetric != newMetric) {
+                            currentSet.firstMetric = newMetric
+                        }
+                    }
                 }
 
                 R.id.second_input_field_text -> {
-                    (_exercises.value?.get(position) as? SetEntry)?.setEntry?.set?.secondMetric =
-                        metric.filterIntegerInput()
+                    (_exercises.value?.get(position) as? SetEntry)?.setEntry?.set?.let { currentSet ->
+                        val newMetric = metric.filterIntegerInput()
+                        if (currentSet.secondMetric != newMetric) {
+                            currentSet.secondMetric = newMetric
+                        }
+                    }
                 }
             }
         }
+
     }
+
 
     fun onSetTypeChanged(itemPosition: Int, setType: SetType) {
         val captured = _exercises.value.orEmpty()
@@ -356,7 +364,7 @@ class WorkoutViewModel(application: Application) : AndroidViewModel(application)
         viewModelScope.launch {
             val (exercises, prs, volume) = getExerciseArrayAndPRs(_exercises.value.orEmpty())
             workoutId?.let {
-                repo.updateWorkoutDate(it, workoutDate)
+                repo.updateTemplateWorkout(it, workoutDate, exercises)
             }
             repo.addWorkoutToHistory(
                 Workout(
@@ -435,7 +443,7 @@ class WorkoutViewModel(application: Application) : AndroidViewModel(application)
                 }
             }
         }
-        if (removeEmpty) exercises.entries.removeIf { it.value.sets.isEmpty()  || it.value.sets.any { set -> set.firstMetric == null || set.firstMetric == 0.0 || set.secondMetric == null || set.secondMetric == 0 } }
+        if (removeEmpty) exercises.entries.removeIf { it.value.sets.isEmpty() || it.value.sets.any { set -> set.firstMetric == null || set.firstMetric == 0.0 || set.secondMetric == null || set.secondMetric == 0 } }
 
         val temp = exercises.values.map { it.copy() }.toMutableList()
         if (removeEmpty) {

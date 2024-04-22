@@ -1,14 +1,16 @@
 package bg.zahov.app.ui.workout.add
 
 import android.annotation.SuppressLint
-import android.util.Log
+import android.view.KeyEvent
 import android.view.LayoutInflater
 import android.view.View
 import android.view.ViewGroup
+import android.view.inputmethod.EditorInfo
 import android.widget.PopupMenu
 import androidx.appcompat.view.ContextThemeWrapper
 import androidx.core.widget.addTextChangedListener
 import androidx.core.widget.doAfterTextChanged
+import androidx.recyclerview.widget.DiffUtil
 import androidx.recyclerview.widget.RecyclerView
 import bg.zahov.app.data.model.BodyPart
 import bg.zahov.app.data.model.Category
@@ -73,17 +75,43 @@ class ExerciseSetAdapter :
 
             is SetViewHolder -> {
                 holder.bind((items[position] as SetEntry).setEntry)
+
             }
         }
     }
 
     override fun getItemCount(): Int = items.size
 
+    @SuppressLint("NotifyDataSetChanged")
     fun updateItems(newItems: List<WorkoutEntry>) {
-        Log.d("recycler view notify", newItems.toString())
+        val oldList: List<WorkoutEntry> = ArrayList(items)
         items.clear()
         items.addAll(newItems)
-        notifyDataSetChanged()
+        DiffUtil.calculateDiff(object : DiffUtil.Callback() {
+            override fun getOldListSize(): Int = oldList.size
+
+            override fun getNewListSize(): Int = items.size
+
+            override fun areItemsTheSame(oldItemPosition: Int, newItemPosition: Int): Boolean {
+                return when {
+                    oldList[oldItemPosition] is ExerciseEntry && items[newItemPosition] is ExerciseEntry ->
+                        (oldList[oldItemPosition] as ExerciseEntry).exerciseEntry.name == (items[newItemPosition] as ExerciseEntry).exerciseEntry.name
+
+                    oldList[oldItemPosition] is SetEntry && items[newItemPosition] is SetEntry ->
+                        (oldList[oldItemPosition] as SetEntry).setEntry.setNumber == (items[newItemPosition] as SetEntry).setEntry.setNumber
+
+                    else -> false
+                }
+            }
+
+            override fun areContentsTheSame(oldItemPosition: Int, newItemPosition: Int): Boolean {
+                return oldList[oldItemPosition] == items[newItemPosition]
+            }
+        }).dispatchUpdatesTo(this)
+//        items.clear()
+//        items.addAll(newItems)
+//        //Implementing a diffUtil resulted in 'weird' behaviour (possibly because I suck) so notifyDataSetChanged it is :)
+//        notifyDataSetChanged()
     }
 
     inner class ExerciseViewHolder(view: View) : RecyclerView.ViewHolder(view) {
@@ -148,6 +176,15 @@ class ExerciseSetAdapter :
         }
     }
 
+    override fun onViewRecycled(holder: RecyclerView.ViewHolder) {
+        super.onViewRecycled(holder)
+        when (holder) {
+            is SetViewHolder -> {
+                holder.clearTextFields()
+            }
+        }
+    }
+
     inner class SetViewHolder(view: View) : RecyclerView.ViewHolder(view) {
         private val setIndicator = view.findViewById<MaterialTextView>(R.id.set_number)
         private val previous = view.findViewById<MaterialTextView>(R.id.previous)
@@ -158,14 +195,19 @@ class ExerciseSetAdapter :
         private val secondInputEditText =
             view.findViewById<TextInputEditText>(R.id.second_input_field_text)
 
+        fun clearTextFields() {
+            firstInputEditText.setText("")
+            secondInputEditText.setText("")
+        }
+
         fun bind(item: ExerciseSetAdapterSetWrapper) {
-            Log.d("item set notify", item.toString())
             previous.text = item.previousResults
             firstInputLayout.visibility = item.firstInputFieldVisibility
             secondInputLayout.visibility = item.secondInputFieldVisibility
             setIndicator.apply {
                 setText(item.setIndicator)
-                if (item.setIndicator == R.string.default_set_indicator) text = item.setNumber else setText(item.setIndicator)
+                if (item.setIndicator == R.string.default_set_indicator) text =
+                    item.setNumber else setText(item.setIndicator)
                 setOnClickListener {
                     showSetMenu(bindingAdapterPosition, it)
                 }
@@ -180,6 +222,16 @@ class ExerciseSetAdapter :
                         firstInputEditText.id
                     )
                 }
+                setOnEditorActionListener { v, actionId, event ->
+                    if (actionId == EditorInfo.IME_ACTION_DONE ||
+                        (event != null && event.keyCode == KeyEvent.KEYCODE_ENTER && event.action == KeyEvent.ACTION_DOWN)
+                    ) {
+                        v.clearFocus()
+                        true
+                    } else {
+                        false
+                    }
+                }
             }
 
             secondInputEditText.apply {
@@ -190,6 +242,16 @@ class ExerciseSetAdapter :
                         it.toString(),
                         secondInputEditText.id
                     )
+                }
+                setOnEditorActionListener { v, actionId, event ->
+                    if (actionId == EditorInfo.IME_ACTION_DONE ||
+                        (event != null && event.keyCode == KeyEvent.KEYCODE_ENTER && event.action == KeyEvent.ACTION_DOWN)
+                    ) {
+                        v.clearFocus()
+                        true
+                    } else {
+                        false
+                    }
                 }
             }
         }
@@ -225,7 +287,19 @@ class ExerciseSetAdapter :
         }
 
         fun deleteSet() {
+            notifyItemRangeChanged(bindingAdapterPosition, getItemCount())
             swipeActionListener?.onDeleteSet(bindingAdapterPosition)
+        }
+
+        private fun getItemCount(): Int {
+            var count = 1;
+            var index = bindingAdapterPosition
+            while (index < items.size && items[index] is SetEntry) {
+                count++
+                index++
+            }
+
+            return count;
         }
     }
 
@@ -277,6 +351,6 @@ data class ExerciseSetAdapterSetWrapper(
     var secondInputFieldVisibility: Int = View.VISIBLE,
     var setNumber: String,
     val previousResults: String,
-    val set: Sets,
+    var set: Sets,
     var backgroundResource: Int = R.color.background,
 )

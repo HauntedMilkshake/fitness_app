@@ -4,8 +4,9 @@
     android:id="@+id/id_fragment_workout"
     android:layout_width="match_parent"
     android:layout_height="match_parent"
-    android:focusableInTouchMode="true"
-    android:background="@color/background">
+    android:background="@color/background"
+    android:focusable="true"
+    android:focusableInTouchMode="true">
 
     <com.google.android.material.appbar.AppBarLayout
         android:id="@+id/top_bar"
@@ -99,8 +100,8 @@
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
         android:layout_marginStart="25dp"
-        android:focusable="true"
         android:layout_marginTop="20dp"
+        android:focusable="true"
         android:textColor="@color/white"
         android:textSize="25sp"
         android:textStyle="bold"

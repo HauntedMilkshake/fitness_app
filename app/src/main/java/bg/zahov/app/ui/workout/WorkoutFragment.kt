@@ -36,7 +36,6 @@ class WorkoutFragment : Fragment() {
         get() = requireNotNull(_binding)
 
     private val onGoingWorkoutViewModel: WorkoutViewModel by viewModels()
-    private var mediaPlayer: MediaPlayer? = null
     private var onBackPressedCallback: OnBackPressedCallback? = null
 
     override fun onCreateView(
@@ -53,7 +52,6 @@ class WorkoutFragment : Fragment() {
         val inflater = TransitionInflater.from(requireContext())
         enterTransition = inflater.inflateTransition(R.transition.slide_up)
         exitTransition = inflater.inflateTransition(R.transition.fade_out)
-        mediaPlayer = MediaPlayer.create(context, R.raw.set_complete)
         requireActivity().hideBottomNav()
     }
 
@@ -127,7 +125,6 @@ class WorkoutFragment : Fragment() {
             ItemTouchHelper(SetSwipeGesture()).attachToRecyclerView(exercisesRecyclerView)
 
             onGoingWorkoutViewModel.exercises.observe(viewLifecycleOwner) {
-                Log.d("live data notify", it.toString())
                 exerciseSetAdapter.updateItems(it)
             }
 
@@ -141,7 +138,7 @@ class WorkoutFragment : Fragment() {
             }
 
             workoutNoteFieldText.setOnFocusChangeListener { _, hasFocus ->
-                if(hasFocus) {
+                if (hasFocus) {
                     workoutNoteField.hint = ""
                     workoutNoteFieldText.hint = ""
                 }
@@ -199,7 +196,10 @@ class WorkoutFragment : Fragment() {
                 }
             }
 
-            activity?.onBackPressedDispatcher?.addCallback(viewLifecycleOwner, onBackPressedCallback!!)
+            activity?.onBackPressedDispatcher?.addCallback(
+                viewLifecycleOwner,
+                onBackPressedCallback!!
+            )
         }
     }
 
@@ -208,16 +208,16 @@ class WorkoutFragment : Fragment() {
         requireActivity().hideTopBar()
         requireActivity().hideBottomNav()
     }
+
     override fun onStop() {
         super.onStop()
         requireActivity().showTopBar()
         requireActivity().showBottomNav()
     }
+
     override fun onDestroy() {
         super.onDestroy()
         _binding = null
-        mediaPlayer?.release()
-        mediaPlayer = null
         onBackPressedCallback?.remove()
         onBackPressedCallback = null
 

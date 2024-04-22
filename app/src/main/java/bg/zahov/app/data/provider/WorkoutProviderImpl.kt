@@ -103,8 +103,12 @@ class WorkoutProviderImpl : WorkoutProvider {
         workoutRepo.addWorkoutState(realmWorkoutState)
     }
 
-    override suspend fun updateWorkoutDate(workoutId: String, date: LocalDateTime) {
-        workoutRepo.updateTemplateWorkoutDate(workoutId, date)
+    override suspend fun updateTemplateWorkout(
+        workoutId: String,
+        date: LocalDateTime,
+        newExercises: List<Exercise>,
+    ) {
+        workoutRepo.updateTemplateWorkout(workoutId, date, newExercises)
     }
 
     override suspend fun clearWorkoutState() {

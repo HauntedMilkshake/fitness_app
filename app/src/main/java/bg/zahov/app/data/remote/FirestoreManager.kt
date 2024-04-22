@@ -320,12 +320,18 @@ class FirestoreManager {
         }
     }
 
-    suspend fun updateWorkoutDate(workoutId: String, newDate: LocalDateTime) {
+    suspend fun updateTemplateWorkout(workoutId: String, newDate: LocalDateTime, newExercises: List<Exercise>) {
         withContext(Dispatchers.IO) {
             val workoutToUpdate = getLatestWorkoutById(workoutId)
             workoutToUpdate.date = newDate
+            workoutToUpdate.exercises.forEach {
+                val foundExercise = newExercises.find { find -> find.name == it.name}
+                if(foundExercise != null) {
+                   it.sets = foundExercise.sets
+                }
+            }
             firestore.collection(USERS_COLLECTION).document(userId).collection(
-                WORKOUTS_SUB_COLLECTION
+                TEMPLATE_WORKOUTS_SUB_COLLECTION
             ).document(workoutId).set(workoutToUpdate.toFirestoreMap())
         }
     }

@@ -23,10 +23,12 @@ class ExerciseView @JvmOverloads constructor(
 ) : RelativeLayout(context, attrs, defStyle) {
 
     var exerciseChangeListener: ExerciseChangeListener<String>? = null
+
     init {
         inflate(context, R.layout.view_create_exercise, this)
     }
 
+    //I just didn't get around to fixing these components :/
     //FIXME don't pass the VM directly to a view, if you need some data to initialize the view/popup
     // pass it as a parameter. Then instead of invoking a concrete VM function on given UI event,
     // create a listener interface, set it to the view and notify it on change
@@ -34,7 +36,7 @@ class ExerciseView @JvmOverloads constructor(
         title: String,
         radioOptions: List<String>,
         currCategory: String?,
-        currBodyPart: String?
+        currBodyPart: String?,
     ) {
         val titleTextView: MaterialTextView = findViewById(R.id.titleTextView)
 
@@ -57,11 +59,12 @@ class ExerciseView @JvmOverloads constructor(
         title: String,
         radioOptions: List<String>,
         currCategory: String? = null,
-        currBodyPart: String? = null
+        currBodyPart: String? = null,
     ) {
         val popupView: View = LayoutInflater.from(context).inflate(R.layout.popup_settings, null)
         popupView.setBackgroundResource(R.drawable.custom_popup_background)
-        val popupTitleTextView: MaterialTextView = popupView.findViewById(R.id.popup_title_text_view)
+        val popupTitleTextView: MaterialTextView =
+            popupView.findViewById(R.id.popup_title_text_view)
         val radioGroup: RadioGroup = popupView.findViewById(R.id.radio_group)
 
         popupTitleTextView.text = title

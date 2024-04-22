@@ -23,6 +23,6 @@ interface WorkoutRepository {
     suspend fun getPastWorkoutById(id: String): Workout
     suspend fun getPastWorkoutState(): RealmWorkoutState?
     suspend fun addWorkoutState(realmWorkoutState: RealmWorkoutState)
-    suspend fun updateTemplateWorkoutDate(workoutId: String, date: LocalDateTime)
+    suspend fun updateTemplateWorkout(workoutId: String, date: LocalDateTime, newExercise: List<Exercise>)
     suspend fun clearWorkoutState()
 }

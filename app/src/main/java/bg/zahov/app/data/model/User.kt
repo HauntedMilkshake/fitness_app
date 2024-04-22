@@ -124,7 +124,7 @@ data class Exercise(
     var bodyPart: BodyPart,
     var category: Category,
     var isTemplate: Boolean,
-    val sets: MutableList<Sets> = mutableListOf(),
+    var sets: MutableList<Sets> = mutableListOf(),
     var bestSet: Sets = Sets(SetType.DEFAULT, null, null),
     var note: String? = null,
 ) {
