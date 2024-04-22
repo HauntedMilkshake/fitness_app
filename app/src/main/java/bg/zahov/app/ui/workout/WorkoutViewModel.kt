@@ -1,6 +1,7 @@
 package bg.zahov.app.ui.workout
 
 import android.app.Application
+import android.util.Log
 import android.view.View
 import androidx.lifecycle.AndroidViewModel
 import androidx.lifecycle.LiveData
@@ -217,26 +218,30 @@ class WorkoutViewModel(application: Application) : AndroidViewModel(application)
     fun addSet(position: Int) {
         var edgeCaseFlag = false
         val exercises = _exercises.value.orEmpty().toMutableList()
+        Log.d("add set", "inital list $exercises")
         val templateExercise =
             templateExercises.find { it.name == (exercises[position] as? ExerciseEntry)?.exerciseEntry?.name }
-
+        Log.d("add set", "template exercise $templateExercise")
         if (exercises.size == 1 || position == exercises.size - 1) {
+            Log.d("add set", "adding first set")
             insertSetAtIndex(exercises, position + 1, position, templateExercise)
             edgeCaseFlag = true
         }
 
         if (!edgeCaseFlag) {
+            Log.d("add set", "adding not first set")
             var index = position + 1
-
             while (index < exercises.size && exercises[index] !is ExerciseEntry) {
                 index++
             }
 
+            Log.d("add set", "insert index:$index exercise position:$position")
             insertSetAtIndex(exercises, index, position, templateExercise)
         }
 
         _exercises.value = exercises
     }
+
     //likely a bug somewhere here
     private fun insertSetAtIndex(
         exercises: MutableList<WorkoutEntry>,
@@ -250,7 +255,7 @@ class WorkoutViewModel(application: Application) : AndroidViewModel(application)
                 templateExercise.sets[setNumber].toExerciseSetAdapterSetWrapper(
                     setNumber.toString(),
                     templateExercise.category,
-                    "${templateExercise.sets[setNumber].secondMetric} x  ${templateExercise.sets[setNumber].secondMetric}"
+                    "${templateExercise.sets[setNumber].secondMetric} x ${templateExercise.sets[setNumber].secondMetric}"
                 )
             )
         } else {
@@ -266,20 +271,30 @@ class WorkoutViewModel(application: Application) : AndroidViewModel(application)
                 )
             )
         }
+        Log.d("setEntry after insertion", setEntry.toString())
         exercises.add(insertIndex, setEntry)
     }
 
+    //bug when removing set gets moved downward
     fun removeSet(position: Int) {
         val exercises = _exercises.value.orEmpty().toMutableList()
+        Log.d("before deletion", exercises.size.toString())
         exercises.removeAt(position)
-        for (index in position until exercises.size) {
-            if (exercises[index] is SetEntry) {
-                (exercises[index] as SetEntry).setEntry.setNumber =
-                    ((exercises[index] as SetEntry).setEntry.setNumber.toInt() - 1).toString()
-            } else {
-                break
-            }
+        Log.d("after deletion", exercises.size.toString())
+        var index = position
+        while (index < exercises.size && exercises[index] is SetEntry) {
+            (exercises[index] as SetEntry).setEntry.setNumber =
+                ((exercises[index] as SetEntry).setEntry.setNumber.toInt() - 1).toString()
+            index++
         }
+//        for (index in position until exercises.size) {
+//            if (exercises[index] is SetEntry) {
+//                (exercises[index] as SetEntry).setEntry.setNumber =
+//                    ((exercises[index] as SetEntry).setEntry.setNumber.toInt() - 1).toString()
+//            } else {
+//                break
+//            }
+//        }
         _exercises.value = exercises
     }
 
@@ -524,7 +539,7 @@ class WorkoutViewModel(application: Application) : AndroidViewModel(application)
 
     }
 
-//
+    //
     sealed interface State {
         data class Default(val restState: Boolean) : State
         data class Rest(val time: String) : State

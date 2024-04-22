@@ -192,7 +192,7 @@ fun ExerciseSetAdapterExerciseWrapper.toExercise(): Exercise {
 fun Sets.toExerciseSetAdapterSetWrapper(
     number: String,
     category: Category,
-    previousResults: String = "-//-",
+    previousResults: String = "-/-",
     resumeSet: Sets? = null
 ): ExerciseSetAdapterSetWrapper {
     return ExerciseSetAdapterSetWrapper(
