@@ -1,307 +1,233 @@
 <?xml version="1.0" encoding="utf-8"?>
-<androidx.constraintlayout.widget.ConstraintLayout
-    xmlns:android="http://schemas.android.com/apk/res/android"
+<androidx.constraintlayout.widget.ConstraintLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:app="http://schemas.android.com/apk/res-auto"
     android:layout_width="match_parent"
     android:layout_height="match_parent"
-    xmlns:app="http://schemas.android.com/apk/res-auto"
     android:background="@color/background">
-    <com.google.android.material.appbar.AppBarLayout
-        android:id="@+id/top_bar"
+
+    <ScrollView
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
         app:layout_constraintEnd_toEndOf="parent"
         app:layout_constraintStart_toStartOf="parent"
         app:layout_constraintTop_toTopOf="parent">
 
-        <com.google.android.material.appbar.CollapsingToolbarLayout
-            android:id="@+id/top_bar_collapsing"
+        <LinearLayout
+            android:id="@+id/container"
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
-            app:layout_scrollFlags="scroll|exitUntilCollapsed">
+            android:orientation="vertical"
+            app:layout_constraintEnd_toEndOf="parent"
+            app:layout_constraintStart_toStartOf="parent"
+            app:layout_constraintTop_toTopOf="parent">
 
-            <androidx.constraintlayout.widget.ConstraintLayout
-                android:id="@+id/layout"
+            <com.google.android.material.textview.MaterialTextView
+                android:id="@+id/profile_segment_text"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:layout_marginStart="20dp"
+                android:layout_marginTop="20dp"
+                android:text="@string/profile"
+                android:textColor="@color/white"
+                android:textSize="20sp"
+                android:textStyle="bold" />
+
+            <bg.zahov.app.ui.custom.DefaultSettingsView
+                android:id="@+id/edit_profile"
                 android:layout_width="match_parent"
                 android:layout_height="wrap_content"
-                android:background="@color/background"
-                android:gravity="clip_horizontal"
-                android:orientation="horizontal">
+                android:layout_marginTop="15dp" />
 
-                <com.google.android.material.imageview.ShapeableImageView
-                    android:id="@+id/back"
-                    android:layout_width="wrap_content"
-                    android:layout_height="wrap_content"
-                    android:src="@drawable/ic_back_arrow"
-                    android:layout_marginStart="15dp"
-                    app:layout_constraintBottom_toBottomOf="@+id/settings_text"
-                    app:layout_constraintStart_toStartOf="parent"
-                    app:layout_constraintTop_toTopOf="@+id/settings_text" />
+            <View
+                android:id="@+id/first_segment_seperator"
+                android:layout_width="match_parent"
+                android:layout_height="1dp"
+                android:layout_marginTop="15dp"
+                android:background="@color/teal_700"
+                android:elevation="4dp" />
 
-                <com.google.android.material.textview.MaterialTextView
-                    android:id="@+id/settings_text"
-                    android:layout_width="wrap_content"
-                    android:layout_height="wrap_content"
-                    android:layout_marginTop="15dp"
-                    android:layout_marginBottom="10dp"
-                    android:layout_marginStart="15dp"
-                    android:text="@string/settings_text"
-                    android:textColor="@color/white"
-                    android:textSize="16sp"
-                    app:layout_collapseMode="parallax"
-                    app:layout_constraintBottom_toBottomOf="parent"
-                    app:layout_constraintStart_toEndOf="@+id/back"
-                    app:layout_constraintTop_toTopOf="parent" />
+            <com.google.android.material.textview.MaterialTextView
+                android:id="@+id/units_and_localization_text"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:layout_marginStart="20dp"
+                android:layout_marginTop="20dp"
+                android:text="@string/units_and_locale_text"
+                android:textColor="@color/white"
+                android:textSize="20sp"
+                android:textStyle="bold" />
 
-                <com.google.android.material.imageview.ShapeableImageView
-                    android:id="@+id/reset_settings"
-                    android:layout_width="24dp"
-                    android:layout_height="24dp"
-                    android:layout_gravity="end"
-                    android:src="@drawable/ic_reset_settings"
-                    android:layout_marginStart="15dp"
-                    android:layout_marginEnd="15dp"
-                    android:layout_marginTop="15dp"
-                    android:layout_marginBottom="10dp"
-                    app:layout_collapseMode="parallax"
-                    app:layout_constraintBottom_toBottomOf="parent"
-                    app:layout_constraintEnd_toEndOf="parent"
-                    app:layout_constraintTop_toTopOf="parent" />
-            </androidx.constraintlayout.widget.ConstraintLayout>
-        </com.google.android.material.appbar.CollapsingToolbarLayout>
-    </com.google.android.material.appbar.AppBarLayout>
+            <bg.zahov.app.ui.custom.RadioGroupSettingsView
+                android:id="@+id/language_settings"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:layout_marginTop="15dp" />
 
-    <View
-        android:id="@+id/view"
-        android:layout_width="match_parent"
-        android:layout_height="1dp"
-        android:background="@drawable/shadow"
-        android:elevation="4dp"
-        app:layout_constraintEnd_toEndOf="parent"
-        app:layout_constraintStart_toStartOf="parent"
-        app:layout_constraintTop_toBottomOf="@id/top_bar" />
+            <bg.zahov.app.ui.custom.RadioGroupSettingsView
+                android:id="@+id/unit_settings"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:layout_marginTop="15dp" />
 
-    <ScrollView
-        android:layout_width="match_parent"
-        android:layout_height="wrap_content"
-        app:layout_constraintTop_toBottomOf="@id/view"
-        app:layout_constraintStart_toStartOf="parent"
-        app:layout_constraintEnd_toEndOf="parent">
+            <View
+                android:id="@+id/second_segment_seperator"
+                android:layout_width="match_parent"
+                android:layout_height="1dp"
+                android:layout_marginTop="15dp"
+                android:background="@color/teal_700"
+                android:elevation="4dp" />
 
-    <LinearLayout
-        android:id="@+id/container"
-        android:layout_width="match_parent"
-        android:layout_height="wrap_content"
-        app:layout_constraintTop_toTopOf="@id/view"
-        app:layout_constraintStart_toStartOf="parent"
-        app:layout_constraintEnd_toEndOf="parent"
-        android:orientation="vertical">
+            <com.google.android.material.textview.MaterialTextView
+                android:id="@+id/general_text"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:layout_marginStart="15dp"
+                android:layout_marginTop="20dp"
+                android:text="@string/general_text"
+                android:textColor="@color/white"
+                android:textSize="20sp"
+                android:textStyle="bold" />
 
-    <com.google.android.material.textview.MaterialTextView
-        android:id="@+id/profile_segment_text"
-        android:layout_width="wrap_content"
-        android:layout_height="wrap_content"
-        android:text="@string/profile"
-        android:layout_marginTop="20dp"
-        android:layout_marginStart="20dp"
-        android:textColor="@color/white"
-        android:textSize="20sp"
-        android:textStyle="bold" />
+            <bg.zahov.app.ui.custom.SwitchSettingsView
+                android:id="@+id/sound_effects_settings"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:layout_marginTop="15dp" />
 
-   <bg.zahov.app.custom_views.DefaultSettingsView
-       android:id="@+id/edit_profile"
-       android:layout_width="wrap_content"
-       android:layout_height="wrap_content"
-       android:layout_marginTop="15dp" />
+            <bg.zahov.app.ui.custom.RadioGroupSettingsView
+                android:id="@+id/theme_settings"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:layout_marginTop="10dp" />
 
-    <View
-        android:id="@+id/first_segment_seperator"
-        android:layout_width="match_parent"
-        android:layout_height="1dp"
-        android:background="@color/teal_700"
-        android:elevation="4dp"
-        android:layout_marginTop="15dp" />
+            <View
+                android:id="@+id/third_segment_seperator"
+                android:layout_width="match_parent"
+                android:layout_height="1dp"
+                android:layout_marginTop="15dp"
+                android:background="@color/teal_700"
+                android:elevation="4dp" />
 
-    <com.google.android.material.textview.MaterialTextView
-        android:id="@+id/units_and_localization_text"
-        android:layout_width="wrap_content"
-        android:layout_height="wrap_content"
-        android:text="@string/units_and_locale_text"
-        android:textColor="@color/white"
-        android:textSize="20sp"
-        android:textStyle="bold"
-        android:layout_marginTop="20dp"
-        android:layout_marginStart="20dp" />
+            <com.google.android.material.textview.MaterialTextView
+                android:id="@+id/rest_timer_label"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:layout_marginStart="15dp"
+                android:layout_marginTop="20dp"
+                android:text="@string/rest_timer_text"
+                android:textColor="@color/white"
+                android:textSize="20sp"
+                android:textStyle="bold" />
 
-    <bg.zahov.app.custom_views.RadioGroupSettingsView
-        android:id="@+id/language_settings"
-        android:layout_width="wrap_content"
-        android:layout_height="wrap_content"
-        android:layout_marginTop="15dp" />
+            <bg.zahov.app.ui.custom.RadioGroupSettingsView
+                android:id="@+id/rest_timer_settings"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:layout_marginTop="15dp" />
 
-    <bg.zahov.app.custom_views.RadioGroupSettingsView
-        android:id="@+id/unit_settings"
-        android:layout_width="wrap_content"
-        android:layout_height="wrap_content"
-        android:layout_marginTop="15dp" />
+            <bg.zahov.app.ui.custom.SwitchSettingsView
+                android:id="@+id/vibrate_settings"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:layout_marginTop="15dp" />
 
-    <View
-        android:id="@+id/second_segment_seperator"
-        android:layout_width="match_parent"
-        android:layout_height="1dp"
-        android:background="@color/teal_700"
-        android:elevation="4dp"
-        android:layout_marginTop="15dp" />
+            <bg.zahov.app.ui.custom.RadioGroupSettingsView
+                android:id="@+id/sound_settings"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:layout_marginTop="10dp" />
 
-    <com.google.android.material.textview.MaterialTextView
-        android:id="@+id/general_text"
-        android:layout_width="wrap_content"
-        android:layout_height="wrap_content"
-        android:text="@string/general_text"
-        android:textColor="@color/white"
-        android:textSize="20sp"
-        android:textStyle="bold"
-        android:layout_marginTop="20dp"
-        android:layout_marginStart="15dp" />
+            <View
+                android:id="@+id/fourth_segment_seperator"
+                android:layout_width="match_parent"
+                android:layout_height="1dp"
+                android:layout_marginTop="15dp"
+                android:background="@color/teal_700"
+                android:elevation="4dp" />
 
-    <bg.zahov.app.custom_views.SwitchSettingsView
-        android:id="@+id/sound_effects_settings"
-        android:layout_width="wrap_content"
-        android:layout_height="wrap_content"
-        android:layout_marginTop="15dp" />
+            <com.google.android.material.textview.MaterialTextView
+                android:id="@+id/advanced_settings_text"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:layout_marginStart="15dp"
+                android:layout_marginTop="20dp"
+                android:text="@string/advanced_settings_text"
+                android:textColor="@color/white"
+                android:textSize="20sp"
+                android:textStyle="bold" />
 
-    <bg.zahov.app.custom_views.RadioGroupSettingsView
-        android:id="@+id/theme_settings"
-        android:layout_width="wrap_content"
-        android:layout_height="wrap_content"
-        android:layout_marginTop="10dp" />
+            <bg.zahov.app.ui.custom.SwitchSettingsView
+                android:id="@+id/auto_sync_settings"
+                android:layout_width="match_parent"
+                android:layout_height="match_parent"
+                android:layout_marginTop="15dp" />
 
-    <View
-        android:id="@+id/third_segment_seperator"
-        android:layout_width="match_parent"
-        android:layout_height="1dp"
-        android:layout_marginTop="15dp"
-        android:background="@color/teal_700"
-        android:elevation="4dp" />
+            <bg.zahov.app.ui.custom.SwitchSettingsView
+                android:id="@+id/show_update_template_settings"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:layout_marginTop="15dp" />
 
-    <com.google.android.material.textview.MaterialTextView
-        android:id="@+id/rest_timer_label"
-        android:layout_width="wrap_content"
-        android:layout_height="wrap_content"
-        android:text="@string/rest_timer_text"
-        android:textColor="@color/white"
-        android:textSize="20sp"
-        android:textStyle="bold"
-        android:layout_marginTop="20dp"
-        android:layout_marginStart="15dp" />
+            <bg.zahov.app.ui.custom.SwitchSettingsView
+                android:id="@+id/samsung_fit_settings"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:layout_marginTop="15dp" />
 
-    <bg.zahov.app.custom_views.RadioGroupSettingsView
-        android:id="@+id/rest_timer_settings"
-        android:layout_width="wrap_content"
-        android:layout_height="wrap_content"
-        android:layout_marginTop="15dp" />
+            <View
+                android:id="@+id/fifth_segment_seperator"
+                android:layout_width="match_parent"
+                android:layout_height="1dp"
+                android:background="@color/teal_700"
+                android:elevation="4dp" />
 
-    <bg.zahov.app.custom_views.SwitchSettingsView
-        android:id="@+id/vibrate_settings"
-        android:layout_width="wrap_content"
-        android:layout_height="wrap_content"
-        android:layout_marginTop="15dp" />
+            <bg.zahov.app.ui.custom.DefaultSettingsView
+                android:id="@+id/github"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:layout_marginTop="15dp" />
 
-    <bg.zahov.app.custom_views.RadioGroupSettingsView
-        android:id="@+id/sound_settings"
-        android:layout_width="wrap_content"
-        android:layout_height="wrap_content"
-        android:layout_marginTop="10dp" />
+            <bg.zahov.app.ui.custom.DefaultSettingsView
+                android:id="@+id/bug_report"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:layout_marginTop="15dp" />
 
-    <View
-        android:id="@+id/fourth_segment_seperator"
-        android:layout_width="match_parent"
-        android:layout_height="1dp"
-        android:layout_marginTop="15dp"
-        android:background="@color/teal_700"
-        android:elevation="4dp" />
+            <View
+                android:id="@+id/sixth_segment_seperator"
+                android:layout_width="match_parent"
+                android:layout_height="1dp"
+                android:layout_marginTop="15dp"
+                android:background="@color/teal_700"
+                android:elevation="4dp" />
 
-    <com.google.android.material.textview.MaterialTextView
-        android:id="@+id/advanced_settings_text"
-        android:layout_width="wrap_content"
-        android:layout_height="wrap_content"
-        android:layout_marginTop="20dp"
-        android:text="@string/advanced_settings_text"
-        android:textColor="@color/white"
-        android:textSize="20sp"
-        android:textStyle="bold"
-        android:layout_marginStart="15dp" />
+            <com.google.android.material.button.MaterialButton
+                android:id="@+id/sign_out_button"
+                android:layout_width="250dp"
+                android:layout_height="wrap_content"
+                android:layout_gravity="center"
+                android:layout_marginTop="10dp"
+                android:backgroundTint="@color/red"
+                android:text="@string/sign_out_button_text"
+                android:textAllCaps="false"
+                android:visibility="visible"
+                app:cornerRadius="12dp" />
 
-    <bg.zahov.app.custom_views.SwitchSettingsView
-        android:id="@+id/show_update_template_settings"
-        android:layout_width="wrap_content"
-        android:layout_height="wrap_content"
-        android:layout_marginTop="15dp" />
+            <com.google.android.material.button.MaterialButton
+                android:id="@+id/delete_account"
+                android:layout_width="250dp"
+                android:layout_height="wrap_content"
+                android:layout_gravity="center"
+                android:layout_marginTop="10dp"
+                android:backgroundTint="@color/red"
+                android:text="@string/delete_account_text"
+                android:textAllCaps="false"
+                android:visibility="visible"
+                app:cornerRadius="12dp" />
 
-<!--    <bg.zahov.app.custom_views.SwitchSettingsView-->
-<!--        android:id="@+id/turn_sync_on_settings"-->
-<!--        android:layout_width="wrap_content"-->
-<!--        android:layout_height="wrap_content"-->
-<!--        android:layout_marginTop="15dp" />-->
-
-    <bg.zahov.app.custom_views.SwitchSettingsView
-        android:id="@+id/samsung_fit_settings"
-        android:layout_width="wrap_content"
-        android:layout_height="wrap_content"
-        android:layout_marginTop="15dp" />
-
-    <View
-        android:id="@+id/fifth_segment_seperator"
-        android:layout_width="match_parent"
-        android:layout_height="1dp"
-        android:background="@color/teal_700"
-        android:elevation="4dp" />
-
-    <bg.zahov.app.custom_views.DefaultSettingsView
-        android:id="@+id/github"
-        android:layout_width="wrap_content"
-        android:layout_height="wrap_content"
-        android:layout_marginTop="15dp" />
-
-    <bg.zahov.app.custom_views.DefaultSettingsView
-        android:id="@+id/bug_report"
-        android:layout_width="wrap_content"
-        android:layout_height="wrap_content"
-        android:layout_marginTop="15dp" />
-
-    <View
-        android:id="@+id/sixth_segment_seperator"
-        android:layout_width="match_parent"
-        android:layout_height="1dp"
-        android:layout_marginTop="15dp"
-        android:background="@color/teal_700"
-        android:elevation="4dp" />
-
-    <com.google.android.material.button.MaterialButton
-        android:id="@+id/sign_out_button"
-        android:layout_width="250dp"
-        android:layout_marginTop="10dp"
-        android:layout_height="wrap_content"
-        android:backgroundTint="@color/red"
-        android:text="@string/sign_out_button_text"
-        android:textAllCaps="false"
-        android:layout_gravity="center"
-        android:visibility="visible"
-        app:cornerRadius="12dp" />
-        <com.google.android.material.button.MaterialButton
-            android:id="@+id/delete_account"
-            android:layout_width="250dp"
-            android:layout_height="wrap_content"
-            android:backgroundTint="@color/red"
-            android:layout_marginTop="10dp"
-            android:text="@string/delete_account_text"
-            android:textAllCaps="false"
-            android:layout_gravity="center"
-            android:visibility="visible"
-            app:cornerRadius="12dp" />
-        <View
-            android:layout_width="match_parent"
-            android:layout_height="80dp"
-            />
-    </LinearLayout>
+            <View
+                android:layout_width="match_parent"
+                android:layout_height="80dp" />
+        </LinearLayout>
     </ScrollView>
 </androidx.constraintlayout.widget.ConstraintLayout>

@@ -1,5 +1,33 @@
 <?xml version="1.0" encoding="utf-8"?>
 <resources>
-    <style name="Welcome.Theme.Fitness_app" parent="Theme.MaterialComponents.Light.NoActionBar">
+
+    <style name="Welcome.Theme.Fitness_app" parent="Theme.MaterialComponents.NoActionBar" />
+    <style name="CustomMaterialStyle" parent="Widget.Material3.TextInputLayout.OutlinedBox.Dense">
+        <item name="colorAccent">@color/background</item>
+        <item name="textAppearanceBody1">@null</item>
+    </style>
+
+    <style name="ExpandDialogAnimation">
+        <item name="android:windowEnterAnimation">@anim/expand_filter_dialog</item>
+    </style>
+
+    <style name="MyAlertDialog" parent="Theme.AppCompat.Dialog">
+        <item name="android:windowBackground">@android:color/transparent</item>
+        <item name="android:layout_gravity">center</item>
+    </style>
+
+    <style name="MyPopUp" parent ="Widget.AppCompat.PopupMenu">
+        <item name="android:textColor">@android:color/white</item>
+        <item name="android:background">@color/background</item>a
+        <item name="cornerRadius">12dp</item>
+    </style>
+
+    <style name="AppTheme.Toolbar" parent="Welcome.Theme.Fitness_app">
+        <item name="itemBackground">@color/background</item>
+        <item name="android:textColorPrimary">@color/white</item>
+        <item name="android:textColorSecondary">@color/white</item>
+        <item name="android:homeAsUpIndicator">@drawable/ic_back_arrow</item>
+        <item name="overlapAnchor">false</item>
+        <item name="android:dropDownVerticalOffset">?attr/actionBarSize</item>
     </style>
 </resources>

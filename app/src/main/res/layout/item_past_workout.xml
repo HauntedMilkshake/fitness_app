@@ -1,0 +1,138 @@
+<?xml version="1.0" encoding="utf-8"?>
+<androidx.constraintlayout.widget.ConstraintLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:app="http://schemas.android.com/apk/res-auto"
+    android:layout_width="match_parent"
+    android:layout_height="wrap_content"
+    android:layout_marginBottom="10dp"
+    android:background="@drawable/template_workout_border">
+
+    <com.google.android.material.textview.MaterialTextView
+        android:id="@+id/workout_name"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:layout_marginStart="15dp"
+        android:layout_marginTop="20dp"
+        android:textColor="@color/white"
+        android:textSize="18sp"
+        app:layout_constraintStart_toStartOf="parent"
+        app:layout_constraintTop_toTopOf="parent" />
+
+    <com.google.android.material.textview.MaterialTextView
+        android:id="@+id/workout_date"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:layout_marginTop="10dp"
+        android:textColor="@color/less_vibrant_text"
+        android:textSize="18sp"
+        app:layout_constraintStart_toStartOf="@id/workout_name"
+        app:layout_constraintTop_toBottomOf="@id/workout_name" />
+
+    <com.google.android.material.imageview.ShapeableImageView
+        android:id="@+id/duration_icon"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:layout_marginTop="10dp"
+        android:layout_marginEnd="5dp"
+        android:src="@drawable/ic_clock"
+        app:layout_constraintEnd_toStartOf="@+id/duration"
+        app:layout_constraintTop_toBottomOf="@id/workout_date" />
+
+    <com.google.android.material.textview.MaterialTextView
+        android:id="@+id/duration"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:textColor="@color/white"
+        android:textSize="17sp"
+        app:layout_constraintBottom_toBottomOf="@id/duration_icon"
+        app:layout_constraintEnd_toEndOf="@+id/volume_icon"
+        app:layout_constraintStart_toStartOf="parent"
+        app:layout_constraintTop_toTopOf="@id/duration_icon" />
+
+    <com.google.android.material.textview.MaterialTextView
+        android:id="@+id/pr_count"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:textColor="@color/white"
+        android:textSize="17sp"
+        app:layout_constraintBottom_toBottomOf="@id/duration_icon"
+        app:layout_constraintEnd_toEndOf="parent"
+        app:layout_constraintStart_toEndOf="@+id/volume"
+        app:layout_constraintTop_toTopOf="@id/duration_icon" />
+
+    <com.google.android.material.imageview.ShapeableImageView
+        android:id="@+id/pr_icon"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:layout_marginEnd="5dp"
+        android:src="@drawable/ic_trophy"
+        app:layout_constraintBottom_toBottomOf="@id/pr_count"
+        app:layout_constraintEnd_toStartOf="@id/pr_count"
+        app:layout_constraintTop_toTopOf="@id/pr_count" />
+
+    <com.google.android.material.imageview.ShapeableImageView
+        android:id="@+id/volume_icon"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:layout_marginEnd="5dp"
+        android:src="@drawable/ic_volume"
+        app:layout_constraintBottom_toBottomOf="@id/duration_icon"
+        app:layout_constraintEnd_toStartOf="@+id/volume"
+        app:layout_constraintTop_toTopOf="@id/duration_icon" />
+
+    <com.google.android.material.textview.MaterialTextView
+        android:id="@+id/volume"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:textColor="@color/white"
+        android:textSize="17sp"
+        app:layout_constraintBottom_toBottomOf="@id/volume_icon"
+        app:layout_constraintEnd_toEndOf="parent"
+        app:layout_constraintStart_toStartOf="parent"
+        app:layout_constraintTop_toTopOf="@id/volume_icon" />
+
+    <com.google.android.material.textview.MaterialTextView
+        android:id="@+id/exercise_column"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:layout_marginStart="10dp"
+        android:layout_marginTop="15dp"
+        android:text="@string/exercise"
+        android:textColor="@color/white"
+        android:textSize="17sp"
+        app:layout_constraintStart_toStartOf="parent"
+        app:layout_constraintTop_toBottomOf="@id/duration" />
+
+    <com.google.android.material.textview.MaterialTextView
+        android:id="@+id/exercises"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:layout_marginTop="10dp"
+        android:layout_marginBottom="10dp"
+        android:textColor="@color/less_vibrant_text"
+        android:textSize="15sp"
+        app:layout_constraintBottom_toBottomOf="parent"
+        app:layout_constraintStart_toStartOf="@id/exercise_column"
+        app:layout_constraintTop_toBottomOf="@id/exercise_column" />
+
+    <com.google.android.material.textview.MaterialTextView
+        android:id="@+id/best_set_column"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:layout_marginEnd="40dp"
+        android:text="@string/best_set"
+        android:textColor="@color/white"
+        android:textSize="17sp"
+        app:layout_constraintBottom_toBottomOf="@+id/exercise_column"
+        app:layout_constraintEnd_toEndOf="parent"
+        app:layout_constraintTop_toTopOf="@id/exercise_column" />
+
+    <com.google.android.material.textview.MaterialTextView
+        android:id="@+id/best_sets"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:layout_marginTop="10dp"
+        android:textColor="@color/less_vibrant_text"
+        android:textSize="15sp"
+        app:layout_constraintStart_toStartOf="@id/best_set_column"
+        app:layout_constraintTop_toBottomOf="@id/best_set_column" />
+</androidx.constraintlayout.widget.ConstraintLayout>

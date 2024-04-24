@@ -18,13 +18,14 @@
     <string name="username_text">Username</string>
     <!-- Strings used for welcome fragment-->
     <string name="welcome_text">Disciplined</string>
-    <string name="motivational_quote">Discipline is remembering what you want</string>
+    <string name="motivational_quote">"Discipline is remembering what you want"</string>
     <!-- Strings used for nav log in fragment   -->
     <string name="no_account_text">No account? Sign up here!</string>
     <!-- String used for signup fragment   -->
     <string name="already_have_account_text">Already have an account? Log in here!</string>
     <string name="confirm_password_text">Confirm <Password></Password></string>
     <!-- Strings used for profile fragment   -->
+    <string name="workout_text">%d workouts</string>
     <string name="top_bar_text">Profile</string>
     <string name="dashboard">Dashboard</string>
     <!-- Strings used for history fragment   -->
@@ -32,7 +33,7 @@
     <!-- Strings used for workout fragment   -->
     <string name="quick_start_text">quick start</string>
     <string name="start_empty_workout_text">start an empty workout</string>
-    <string name="my_templates_text">my templates</string>
+    <string name="my_templates_text">MY TEMPLATES</string>
     <string name="searchbar_hint">Dumbell press</string>
     <!-- Strings used for settings fragment   -->
     <string name="units_text">Units</string>
@@ -61,11 +62,84 @@
     <string name="switch_off">off</string>
     <string name="advanced_settings_text">Advanced settings</string>
     <string name="popup_exampel_title">Popup title</string>
+    <string name="new_password">New password</string>
+    <string name="cancel">cancel</string>
+    <string name="confirm">confirm</string>
     <!--  Strings used for create exercise fragment    -->
     <string name="new_exercise_placeholder_text">new exercise</string>
     <string name="add_name_hint">Add name</string>
+    <string name="no_results">Hmm... there are no results, so try creating an exercise</string>
     <!-- Strings used for edit profile fragment   -->
-    <string name="create_exercise" tools:ignore="ExtraTranslation">Create exercise</string>
+    <string name="create_exercise">Create exercise</string>
     <string name="edit_profile_text"> Edit profile</string>
     <string name="reset_password_text">Reset password</string>
+    <string name="confirm_changes">Confirm changes</string>
+    <!-- Strings used for edit profile fragment   -->
+    <string name="filter">Filter</string>
+    <string name="body_part">Body part</string>
+    <string name="category">Category</string>
+    <!-- Strings used for create workout template -->
+    <string name="new_workout_template">New workout template</string>
+    <string name="add_exercise">Add exercise</string>
+    <string name="template_name_placeholder">Example</string>
+    <string name="new_workout_template_hint">Workout template name</string>
+    <!-- Strings used for exercise template creation   -->
+    <string name="set_column_text">Set</string>
+    <string name="previous_column_text">Previous</string>
+    <string name="kg_column_text">(+kg)</string>
+    <string name="lbs_column_text">(+lbs)</string>
+    <string name="reps_column_text">reps</string>
+    <string name="add_set">add set</string>
+    <string name="cancel_text">cancel</string>
+    <!-- Strings used for workout fragment    -->
+    <string name="finish_workout"><font color="#3D8BC9">Finish</font></string>
+    <string name="cancel_workout">cancel workout</string>
+    <string name="edit_workout">Edit</string>
+    <string name="duplicate">Duplicate</string>
+    <string name="delete">Delete</string>
+    <string name="start_workout">Start workout</string>
+    <string name="add_note">Add note</string>
+    <string name="replace_exercise">Replace</string>
+    <string name="remove_exercise">Remove</string>
+    <string name="time">00:00:00</string>
+    <string name="warmup_set"> <font color="#FFA500"><b>W</b></font>  Warm up</string>
+    <string name="warmup_set_indicator"><font color="#FFA500"><b>W</b></font></string>
+    <string name="default_set_indicator"><font color="#3D8BC9"><b>1</b></font></string>
+    <string name="drop_set_indicator"><font color="#673ab7"><b>D</b></font></string>
+    <string name="failure_set_indicator"><font color="#ff0000"><b>F</b></font></string>
+    <string name="drop_set"><font color="#673ab7"><b>D</b></font>  Drop set</string>
+    <string name="failure_set"><font color="#ff0000"><b>F</b></font>   Failure</string>
+    <string name="workout_template_note">note</string>
+    <string name="rest_fragment_info">Choose a duration below or set your own</string>
+    <string name="create_custom_timer">create custom timer</string>
+    <string name="minute">1:00</string>
+    <string name="minute_and_half">1:30</string>
+    <string name="two_minutes">2:00</string>
+    <string name="two_minutes_and_half">2:30</string>
+    <string name="skip">skip</string>
+    <string name="about_rests">About rests</string>
+    <string name="rest_info">Rests are crucial for optimising gains. Make sure you not only feel ready not only physically but mentally as well. And don\'t forget to go hard!</string>
+    <string name="start_custom_rest">Start custom rest</string>
+    <string name="dialog_fragment_placeholder_title">Title</string>
+    <string name="edit_workout_template">Edit workout template</string>
+    <string name="kg_minus">-kg</string>
+    <string name="lbs_minus">-lbs</string>
+    <string name="best_set">Best set</string>
+    <string name="reset_settings">Reset settings</string>
+    <string name="search">Search</string>
+    <string name="save">Save</string>
+    <string name="timers">Timers</string>
+    <string name="save_as_workout_template">Save as workout template</string>
+    <string name="one_rep_max_text">1RM</string>
+    <string name="perform_again">perform again</string>
+    <string name="charts">Charts</string>
+    <string name="records">records</string>
+    <string name="Charts">Charts</string>
+    <string name="sets_performed">Sets performed</string>
+    <string name="personal_records">PERSONAL RECORDS</string>
+    <string name="estimated_1rm">Estimated 1RM</string>
+    <string name="max_volume">Max volume</string>
+    <string name="max_weight">Max weight</string>
+    <string name="history_measurement">HISTORY</string>
+    <string name="application_warning_text">Due to service errors we will be closing\nthe application in exactly:</string>
 </resources>

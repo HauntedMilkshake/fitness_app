@@ -1,0 +1,14 @@
+<?xml version="1.0" encoding="utf-8"?>
+<menu xmlns:android="http://schemas.android.com/apk/res/android">
+    <item
+        android:id="@+id/action_warmup_set"
+        android:title="@string/warmup_set" />
+
+    <item
+        android:id="@+id/action_drop_set"
+        android:title="@string/drop_set" />
+
+    <item
+        android:id="@+id/action_failure_set"
+        android:title="@string/failure_set" />
+</menu>
