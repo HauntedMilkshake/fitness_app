@@ -1,7 +1,6 @@
 package bg.zahov.app.ui.workout
 
 import android.app.Application
-import android.util.Log
 import android.view.View
 import androidx.lifecycle.AndroidViewModel
 import androidx.lifecycle.LiveData
@@ -218,24 +217,19 @@ class WorkoutViewModel(application: Application) : AndroidViewModel(application)
     fun addSet(position: Int) {
         var edgeCaseFlag = false
         val exercises = _exercises.value.orEmpty().toMutableList()
-        Log.d("add set", "inital list $exercises")
         val templateExercise =
             templateExercises.find { it.name == (exercises[position] as? ExerciseEntry)?.exerciseEntry?.name }
-        Log.d("add set", "template exercise ${if (templateExercise == null) "bad" else "good"}")
         if (exercises.size == 1 || position == exercises.size - 1) {
-            Log.d("add set", "adding first set")
             insertSetAtIndex(exercises, position + 1, position, templateExercise)
             edgeCaseFlag = true
         }
 
         if (!edgeCaseFlag) {
-            Log.d("add set", "adding not first set")
             var index = position + 1
             while (index < exercises.size && exercises[index] !is ExerciseEntry) {
                 index++
             }
 
-            Log.d("add set", "insert index:$index exercise position:$position")
             insertSetAtIndex(exercises, index, position, templateExercise)
         }
 

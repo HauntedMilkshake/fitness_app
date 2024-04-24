@@ -74,9 +74,8 @@ class FirebaseAuthentication {
 
     suspend fun init() {
         auth.currentUser?.uid?.let {
-            Log.d("initing with uid", it)
             firestore.initUser(it)
-        } ?: Log.d("failed to init", "failed to init")
+        }
         if (realm.doesRealmExist()) {
             realm.addSettings()
         } else {

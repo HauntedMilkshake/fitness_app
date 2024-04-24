@@ -15,8 +15,8 @@ import androidx.fragment.app.viewModels
 import androidx.navigation.fragment.findNavController
 import androidx.recyclerview.widget.LinearLayoutManager
 import bg.zahov.app.data.model.MeasurementType
-import bg.zahov.app.hideBottomNav
 import bg.zahov.app.setToolBarTitle
+import bg.zahov.app.showBottomNav
 import bg.zahov.app.showTopBar
 import bg.zahov.fitness.app.R
 import bg.zahov.fitness.app.databinding.FragmentMeasuresBinding
@@ -68,6 +68,11 @@ class MeasuresFragment : Fragment() {
                 }
             }
         }
+    }
+
+    override fun onResume() {
+        super.onResume()
+        requireActivity().showBottomNav()
     }
 
     override fun onDestroyView() {

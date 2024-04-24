@@ -1,7 +1,6 @@
 package bg.zahov.app.data.provider
 
 import android.os.CountDownTimer
-import android.util.Log
 import bg.zahov.app.data.interfaces.RestProvider
 import bg.zahov.app.data.model.RestState
 import bg.zahov.app.util.parseTimeStringToLong
@@ -41,12 +40,8 @@ class RestTimerProvider : RestProvider {
     override suspend fun startRest(duration: Long, elapsedTime: Long) {
         _restState.emit(RestState.Active)
         restTimerStart = LocalDateTime.now()
-        Log.d("Start of rest at start rest", restTimerStart.toString())
         restTimerEnd = restTimerStart.plusSeconds(duration / 1000)
-        Log.d("End  of rest at start rest", duration.toString())
-        Log.d("End  of rest at start rest", restTimerEnd.toString())
 
-        Log.d("rest duration", duration.timeToString())
 
         if (remainingTime == 0L) {
             _restTimer.value.fullRest = duration.timeToString()

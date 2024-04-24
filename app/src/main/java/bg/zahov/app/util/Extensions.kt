@@ -2,7 +2,6 @@ package bg.zahov.app.util
 
 import android.animation.ObjectAnimator
 import android.animation.PropertyValuesHolder
-import android.util.Log
 import android.view.View
 import bg.zahov.app.data.local.RealmExercise
 import bg.zahov.app.data.local.RealmSets
@@ -65,7 +64,6 @@ fun Exercise.toFirestoreMap(): Map<String, Any?> {
 }
 
 fun Sets.toFirestoreMap(): Map<String, Any?> {
-    Log.d("set key when saving", type.key)
     return mapOf(
         FirestoreFields.SETS_TYPE to type.key,
         FirestoreFields.SETS_FIRST_METRIC to firstMetric,

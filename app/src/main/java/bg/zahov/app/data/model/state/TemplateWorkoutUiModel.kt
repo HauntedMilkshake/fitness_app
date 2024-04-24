@@ -11,13 +11,15 @@ data class TemplateWorkoutUiModel(
     val lastPerformedText: String = "",
     val exercises: List<ExerciseAdapterWrapper> = listOf(),
     val deleted: Boolean = false,
+    val notify: String? = null
 )
 
 object TemplateWorkoutUiMapper {
     fun map(state: TemplateWorkoutInfoViewModel.State) = when (state) {
         is TemplateWorkoutInfoViewModel.State.Data -> TemplateWorkoutUiModel(
             lastPerformedText = state.lastPerformed,
-            exercises = state.exercises
+            exercises = state.exercises,
+            notify = state.message
         )
 
         TemplateWorkoutInfoViewModel.State.Default -> TemplateWorkoutUiModel()
@@ -26,12 +28,5 @@ object TemplateWorkoutUiMapper {
             lastPerformedVisibility = View.GONE,
             exercisesVisibility = View.GONE
         )
-
-        is TemplateWorkoutInfoViewModel.State.WorkoutActive -> TemplateWorkoutUiModel(
-            lastPerformedText = state.lastPerformed,
-            exercises = state.exercises,
-        )
-
-        is TemplateWorkoutInfoViewModel.State.Deleted -> TemplateWorkoutUiModel(deleted = true)
     }
 }

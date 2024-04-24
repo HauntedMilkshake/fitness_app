@@ -1,7 +1,6 @@
 package bg.zahov.app.ui.signup
 
 import android.app.Application
-import android.util.Log
 import androidx.lifecycle.AndroidViewModel
 import androidx.lifecycle.LiveData
 import androidx.lifecycle.MutableLiveData
@@ -64,7 +63,6 @@ class SignupViewModel(application: Application) : AndroidViewModel(application) 
                                 )
                             )
                         }
-                        Log.d("posting state", "posting...")
                     }
                     .addOnFailureListener {
                         _state.value = State.Error(it.message, false)

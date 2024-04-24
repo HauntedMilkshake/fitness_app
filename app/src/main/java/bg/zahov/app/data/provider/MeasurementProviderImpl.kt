@@ -27,8 +27,7 @@ class MeasurementProviderImpl : MeasurementProvider {
     private val selectedMeasurement: StateFlow<Measurements> = _selectedMeasurement
     private var selectedMeasurementValue = Measurements()
 
-    override suspend fun getMeasurement(type: MeasurementType): Flow<Measurements> =
-        measurementRepo.getMeasurement(type)
+    override suspend fun getMeasurement(type: MeasurementType) = measurementRepo.getMeasurement(type)
 
     override suspend fun getSelectedMeasurement(): Flow<Measurements> = selectedMeasurement
 
@@ -41,10 +40,9 @@ class MeasurementProviderImpl : MeasurementProvider {
     }
 
     override suspend fun selectMeasure(type: MeasurementType) {
-        getMeasurement(type).collect {
-            _selectedMeasurement.value = it
-            selectedMeasurementValue = it
-        }
+        val measurement = getMeasurement(type)
+        _selectedMeasurement.value = measurement
+        selectedMeasurementValue = measurement
     }
 
     override suspend fun addInputToSelectedMeasurement(

@@ -87,12 +87,26 @@ class TemplateWorkoutInfoViewModel(application: Application) : AndroidViewModel(
     }
 
     fun startWorkout() {
+        val oldState = _state.value as State.Data
         workout?.let {
-            viewModelScope.launch {
-                workoutStateProvider.startWorkout(it)
+            when (workoutState) {
+                WorkoutState.MINIMIZED, WorkoutState.ACTIVE -> {
+                    _state.value = State.Data(
+                        oldState.lastPerformed,
+                        oldState.exercises,
+                        "Cannot start a workout when one is active!"
+                    )
+                }
+
+                WorkoutState.INACTIVE -> {
+                    viewModelScope.launch {
+                        workoutStateProvider.startWorkout(it)
+                    }
+                }
+
+                null -> {} //noop
             }
         }
-
     }
 
     fun duplicateWorkout() {
@@ -126,16 +140,15 @@ class TemplateWorkoutInfoViewModel(application: Application) : AndroidViewModel(
 
     sealed interface State {
         object Default : State
-        object Deleted : State
-        data class Data(val lastPerformed: String, val exercises: List<ExerciseAdapterWrapper>) :
+        data class Data(
+            val lastPerformed: String,
+            val exercises: List<ExerciseAdapterWrapper>,
+            val message: String? = null,
+        ) :
             State
 
         data class Loading(val loadingVisibility: Int) : State
 
-        data class WorkoutActive(
-            val lastPerformed: String,
-            val exercises: List<ExerciseAdapterWrapper>,
-        ) : State
     }
 }
 

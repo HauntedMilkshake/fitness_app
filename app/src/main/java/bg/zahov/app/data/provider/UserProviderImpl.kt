@@ -25,11 +25,13 @@ class UserProviderImpl : UserProvider {
 
     override suspend fun changeUserName(newUsername: String) = userRepo.changeUserName(newUsername)
 
-    override suspend fun signup(email: String, password: String,
+    override suspend fun signup(
+        email: String, password: String,
     ): Task<AuthResult> = auth.signup(email, password)
 
     override suspend fun login(email: String, password: String): Task<AuthResult> =
         auth.login(email, password)
+
     override suspend fun logout() = auth.logout()
 
     override suspend fun deleteAccount() = auth.logout()
@@ -42,7 +44,8 @@ class UserProviderImpl : UserProvider {
     override fun isAuthenticated(): Boolean = auth.isAuthenticated()
 
     override suspend fun initDataSources() = auth.initDataSources()
-    override suspend fun createDataSources(username: String, userId: String) = auth.createDataSources(username, userId)
+    override suspend fun createDataSources(username: String, userId: String) =
+        auth.createDataSources(username, userId)
 
     override suspend fun updatePassword(newPassword: String): Task<Void> =
         auth.updatePassword(newPassword)
@@ -52,19 +55,4 @@ class UserProviderImpl : UserProvider {
         auth.reauthenticate(password)
 
     override suspend fun getEmail(): String = auth.getEmail()
-//    override suspend fun selectMeasure(type: MeasurementType) {
-//        Log.d("select measure", "inside provider")
-//        getUser().collect {
-//            Log.d("select measure", "inside flow before emit")
-////            _selectedMeasurement.emit(SelectedMeasurement(type, it.measurements[type] ?: listOf()))
-//        }
-//    }
-//
-//    override suspend fun getSelectedMeasure() = selectedMeasurement
-//    override suspend fun updateMeasurement(
-//        measurementType: MeasurementType,
-//        measurement: Measurement,
-//    ) {
-//        userRepo.updateMeasurement(measurementType, measurement)
-//    }
 }

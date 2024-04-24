@@ -2,7 +2,6 @@ package bg.zahov.app.ui.measures.info
 
 import android.graphics.Color
 import android.os.Bundle
-import android.util.Log
 import android.view.LayoutInflater
 import android.view.Menu
 import android.view.MenuInflater
@@ -15,6 +14,7 @@ import androidx.fragment.app.Fragment
 import androidx.fragment.app.viewModels
 import androidx.lifecycle.map
 import bg.zahov.app.data.model.state.MeasurementInformationUiMapper
+import bg.zahov.app.hideBottomNav
 import bg.zahov.app.setToolBarTitle
 import bg.zahov.app.showTopBar
 import bg.zahov.app.ui.measures.MeasuresFragment.Companion.MEASUREMENT_ARGS
@@ -40,6 +40,7 @@ class MeasurementInfoFragment : Fragment() {
     ): View {
         _binding = FragmentMeasurementInformationBinding.inflate(inflater, container, false)
         requireActivity().showTopBar()
+        requireActivity().hideBottomNav()
         return binding.root
     }
 

@@ -7,6 +7,7 @@ import androidx.lifecycle.LiveData
 import androidx.lifecycle.MutableLiveData
 import androidx.lifecycle.viewModelScope
 import bg.zahov.app.data.exception.CriticalDataNullException
+import bg.zahov.app.data.model.Measurement
 import bg.zahov.app.data.model.MeasurementType
 import bg.zahov.app.getMeasurementsProvider
 import bg.zahov.app.getServiceErrorProvider
@@ -27,23 +28,14 @@ class MeasurementInfoViewModel(application: Application) : AndroidViewModel(appl
     init {
         viewModelScope.launch {
             _state.postValue(State.Loading(View.VISIBLE))
-            val measureEntries = mutableListOf<Entry>()
+            var measureEntries = listOf<Entry>()
             var measurementType: MeasurementType?
             try {
                 measurementProvider.getSelectedMeasurement().collect {
                     measurementType =
                         if (it.measurements.keys.isNotEmpty()) it.measurements.keys.first() else null
                     if (it.measurements.values.isNotEmpty()) {
-                        it.measurements.values.first().sortedBy { item -> item.date.monthValue }
-                            .forEach { measurement ->
-                                measureEntries.add(
-                                    Entry(
-                                        measurement.date.dayOfMonth.toFloat(),
-                                        measurement.value.toFloat()
-                                    )
-                                )
-                            }
-
+                        measureEntries = filterEntries(it.measurements.values.first())
                     }
                     var measurementMax = 0f
                     var measurementMin = 0f
@@ -63,7 +55,7 @@ class MeasurementInfoViewModel(application: Application) : AndroidViewModel(appl
                             maxValue = measurementMax,
                             minValue = measurementMin,
                             suffix = measurementSuffix,
-                            entries = filterEntries(measureEntries)
+                            entries = measureEntries
                         )
                     )
                 }
@@ -73,21 +65,28 @@ class MeasurementInfoViewModel(application: Application) : AndroidViewModel(appl
         }
     }
 
-    private fun filterEntries(entries: List<Entry>): List<Entry> {
-        val groupedEntries = HashMap<Float, Entry>()
+    private fun filterEntries(measurements: List<Measurement>): List<Entry> {
+        val latestEntriesPerDay = mutableMapOf<Int, Measurement>()
 
-        for (entry in entries) {
-            if (!groupedEntries.containsKey(entry.x)) {
-                groupedEntries[entry.x] = entry
-            } else {
-                val existingEntry = groupedEntries[entry.x]!!
-                if (entry.y > existingEntry.y) {
-                    groupedEntries[entry.x] = entry
-                }
+        for (measurement in measurements) {
+            if (latestEntriesPerDay[measurement.date.dayOfMonth] == null || latestEntriesPerDay[measurement.date.dayOfMonth]!!.date.isBefore(
+                    measurement.date
+                )
+            ) {
+                latestEntriesPerDay[measurement.date.dayOfMonth] = measurement
             }
         }
-        return groupedEntries.values.toList()
+        val entries = latestEntriesPerDay.values.toList()
+        val result = entries.map { measurement ->
+            Entry().apply {
+                x = measurement.date.dayOfMonth.toFloat()
+                y = measurement.value.toFloat()
+            }
+        }.sortedBy { entry -> entry.x }
+
+        return result
     }
+
 
     sealed interface State {
         data class Loading(val loadingVisibility: Int) : State

@@ -27,8 +27,8 @@ class WorkoutStateManager : WorkoutActions {
     private val _shouldSave = MutableStateFlow(false)
     val shouldSave: Flow<Boolean> = _shouldSave
 
-    private val _state = MutableSharedFlow<WorkoutState>()
-    val state: SharedFlow<WorkoutState>
+    private val _state = MutableStateFlow(WorkoutState.INACTIVE)
+    val state: StateFlow<WorkoutState>
         get() = _state
 
     private val _template = MutableStateFlow<Workout?>(null)
@@ -62,7 +62,7 @@ class WorkoutStateManager : WorkoutActions {
     }
 
     override suspend fun <T> startWorkout(workout: T?, lastTime: Long?, isResuming: Boolean) {
-        if(isResuming) resuming = true
+        if (isResuming) resuming = true
         if (updateState(WorkoutState.ACTIVE)) {
             if (workout != null && workout is Workout) {
                 _template.value = workout
@@ -92,10 +92,10 @@ class WorkoutStateManager : WorkoutActions {
 
     }
 
-    private suspend fun updateState(newState: WorkoutState): Boolean {
+    private fun updateState(newState: WorkoutState): Boolean {
         return if (workoutState != newState) {
             workoutState = newState
-            _state.emit(workoutState)
+            _state.value = workoutState
             true
         } else {
             false
