@@ -135,25 +135,23 @@ fun String.parseTimeStringToLong(): Long {
     return ((hours * 60 * 60) + (minutes * 60) + seconds) * 1000
 }
 
-fun Exercise.toExerciseSetAdapterWrapper(units: Units): ExerciseSetAdapterExerciseWrapper {
+fun Exercise.toExerciseSetAdapterWrapper(units: Units = Units.METRIC): ExerciseSetAdapterExerciseWrapper {
     return ExerciseSetAdapterExerciseWrapper(
         noteVisibility = if(note.isNullOrEmpty()) View.GONE else View.VISIBLE,
         note =  note,
         name = this.name,
         backgroundResource = R.color.background,
         firstInputColumnVisibility = when (this.category) {
-            Category.RepsOnly -> View.GONE
-            Category.Cardio -> View.GONE
-            Category.Timed -> View.GONE
+//            Category.RepsOnly, Category.Cardio, Category.Timed  -> View.GONE
             else -> View.VISIBLE
         },
         firstInputColumnResource = when (this.category) {
-            Category.AssistedWeight -> {
-                when (units) {
-                    Units.METRIC -> R.string.kg_minus
-                    Units.BANANA -> R.string.lbs_minus
-                }
-            }
+//            Category.AssistedWeight -> {
+//                when (units) {
+//                    Units.METRIC -> R.string.kg_minus
+//                    Units.BANANA -> R.string.lbs_minus
+//                }
+//            }
 
             else -> {
                 when (units) {
@@ -161,10 +159,10 @@ fun Exercise.toExerciseSetAdapterWrapper(units: Units): ExerciseSetAdapterExerci
                     Units.BANANA -> R.string.lbs_column_text
                 }
             }
+
         },
         secondInputColumnResource = when (this.category) {
-            Category.Cardio -> R.string.time
-            Category.Timed -> R.string.time
+//            Category.Cardio,  Category.Timed  -> R.string.time
             else -> {
                 R.string.reps_column_text
             }
@@ -201,7 +199,7 @@ fun Sets.toExerciseSetAdapterSetWrapper(
             SetType.FAILURE -> R.string.failure_set_indicator
         },
         secondInputFieldVisibility = when (category) {
-            Category.RepsOnly, Category.Cardio, Category.Timed -> View.GONE
+//            Category.RepsOnly, Category.Cardio, Category.Timed -> View.GONE
             else -> View.VISIBLE
         },
         setNumber = number,
@@ -287,7 +285,7 @@ fun getOneRepEstimate(weight: Double, reps: Int): String =
 
 fun Exercise.getOneRepMaxes(): List<String> = this.sets.map {
     when (this.category) {
-        Category.RepsOnly, Category.Cardio, Category.Timed -> " "
+//        Category.RepsOnly, Category.Cardio, Category.Timed -> " "
         else -> {
             getOneRepEstimate(it.firstMetric ?: 1.0, it.secondMetric ?: 1)
         }

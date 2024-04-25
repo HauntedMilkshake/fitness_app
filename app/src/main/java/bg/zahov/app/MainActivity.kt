@@ -2,12 +2,16 @@ package bg.zahov.app
 
 import android.os.Bundle
 import android.view.Menu
+import android.view.MenuInflater
+import android.view.MenuItem
 import android.view.View
 import androidx.activity.viewModels
 import androidx.appcompat.app.AppCompatActivity
+import androidx.core.view.MenuProvider
 import androidx.fragment.app.FragmentActivity
 import androidx.lifecycle.map
 import androidx.navigation.findNavController
+import androidx.navigation.fragment.findNavController
 import androidx.navigation.ui.AppBarConfiguration
 import androidx.navigation.ui.navigateUp
 import androidx.navigation.ui.setupWithNavController
@@ -108,10 +112,22 @@ fun FragmentActivity.hideTopBar() {
 
 }
 
+fun FragmentActivity.setToolBarTitle(title: String) {
+    findViewById<MaterialToolbar>(R.id.toolbar)?.title = title
+}
+
 fun FragmentActivity.setToolBarTitle(title: Int) {
     findViewById<MaterialToolbar>(R.id.toolbar)?.setTitle(title)
 }
 
-fun FragmentActivity.setToolBarTitle(title: String) {
-    findViewById<MaterialToolbar>(R.id.toolbar)?.title = title
+
+fun FragmentActivity.clearMenu() {
+    this.addMenuProvider(
+        object : MenuProvider {
+            override fun onCreateMenu(menu: Menu, menuInflater: MenuInflater) {
+                menu.clear()
+            }
+            override fun onMenuItemSelected(menuItem: MenuItem) = false
+        }
+    )
 }

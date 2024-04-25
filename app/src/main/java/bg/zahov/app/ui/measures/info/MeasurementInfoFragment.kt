@@ -13,6 +13,7 @@ import androidx.core.view.MenuProvider
 import androidx.fragment.app.Fragment
 import androidx.fragment.app.viewModels
 import androidx.lifecycle.map
+import androidx.navigation.fragment.findNavController
 import bg.zahov.app.data.model.state.MeasurementInformationUiMapper
 import bg.zahov.app.hideBottomNav
 import bg.zahov.app.setToolBarTitle
@@ -55,8 +56,14 @@ class MeasurementInfoFragment : Fragment() {
                 menuInflater.inflate(R.menu.menu_toolbar_measures, menu)
             }
 
-            override fun onMenuItemSelected(menuItem: MenuItem) = false
-        })
+            override fun onMenuItemSelected(menuItem: MenuItem) = when(menuItem.itemId) {
+                R.id.home -> {
+                    findNavController().navigateUp()
+                    true
+                }
+                else -> false
+            }
+        }, viewLifecycleOwner)
         binding.apply {
             measurementInfoViewModel.state.map { MeasurementInformationUiMapper.map(it) }
                 .observe(viewLifecycleOwner) {

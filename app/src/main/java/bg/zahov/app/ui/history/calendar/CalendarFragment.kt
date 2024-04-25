@@ -136,6 +136,10 @@ class CalendarFragment : Fragment() {
         }
     }
 
+    override fun onResume() {
+        super.onResume()
+        requireActivity().hideBottomNav()
+    }
     override fun onDestroyView() {
         super.onDestroyView()
         _binding = null

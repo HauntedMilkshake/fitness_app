@@ -17,6 +17,7 @@ import androidx.navigation.fragment.findNavController
 import bg.zahov.app.data.model.state.AddExerciseUiMapper
 import bg.zahov.app.data.model.BodyPart
 import bg.zahov.app.data.model.Category
+import bg.zahov.app.hideBottomNav
 import bg.zahov.app.setToolBarTitle
 import bg.zahov.app.ui.custom.ExerciseView
 import bg.zahov.app.util.applyScaleAnimation
@@ -34,7 +35,7 @@ class AddExerciseFragment : Fragment() {
         savedInstanceState: Bundle?,
     ): View {
         _binding = FragmentNewExerciseBinding.inflate(inflater, container, false)
-
+        requireActivity().hideBottomNav()
         return binding.root
     }
 
@@ -111,6 +112,10 @@ class AddExerciseFragment : Fragment() {
         }
     }
 
+    override fun onResume() {
+        super.onResume()
+        requireActivity().hideBottomNav()
+    }
     override fun onDestroyView() {
         super.onDestroyView()
         _binding = null

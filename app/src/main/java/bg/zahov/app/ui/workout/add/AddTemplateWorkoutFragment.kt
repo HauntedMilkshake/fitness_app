@@ -2,6 +2,7 @@ package bg.zahov.app.ui.workout.add
 
 import android.os.Bundle
 import android.transition.TransitionInflater
+import android.util.Log
 import android.view.LayoutInflater
 import android.view.Menu
 import android.view.MenuInflater
@@ -12,6 +13,7 @@ import android.widget.Toast
 import androidx.appcompat.app.AppCompatActivity
 import androidx.core.os.bundleOf
 import androidx.core.view.MenuProvider
+import androidx.core.widget.addTextChangedListener
 import androidx.fragment.app.Fragment
 import androidx.fragment.app.viewModels
 import androidx.lifecycle.map
@@ -21,7 +23,6 @@ import androidx.recyclerview.widget.LinearLayoutManager
 import bg.zahov.app.data.model.state.AddTemplateWorkoutUiMapper
 import bg.zahov.app.data.model.SetType
 import bg.zahov.app.hideBottomNav
-import bg.zahov.app.hideTopBar
 import bg.zahov.app.setToolBarTitle
 import bg.zahov.app.util.SetSwipeGesture
 import bg.zahov.app.util.applyScaleAnimation
@@ -41,6 +42,7 @@ class AddTemplateWorkoutFragment : Fragment() {
     }
 
     private val id by lazy {
+        Log.d("getting edit", arguments?.getString("WORKOUT_ID").toString())
         arguments?.getString("WORKOUT_ID")
     }
 
@@ -58,12 +60,15 @@ class AddTemplateWorkoutFragment : Fragment() {
         val inflater = TransitionInflater.from(requireContext())
         enterTransition = inflater.inflateTransition(R.transition.slide_up)
         exitTransition = inflater.inflateTransition(R.transition.fade_out)
+        Log.d("on create", "on create")
         addWorkoutViewModel.initEditWorkoutId(
             edit,
             id ?: ""
         )
+
         requireActivity().hideBottomNav()
     }
+
     override fun onViewCreated(view: View, savedInstanceState: Bundle?) {
         super.onViewCreated(view, savedInstanceState)
         (activity as? AppCompatActivity)?.supportActionBar?.setDisplayHomeAsUpEnabled(true)
@@ -82,10 +87,6 @@ class AddTemplateWorkoutFragment : Fragment() {
                 }
 
                 R.id.save -> {
-                    binding.apply {
-                        addWorkoutViewModel.workoutName = workoutNameFieldText.text.toString()
-                        addWorkoutViewModel.workoutNote = workoutNoteFieldText.text.toString()
-                    }
                     addWorkoutViewModel.saveTemplateWorkout()
                     true
                 }
@@ -94,6 +95,21 @@ class AddTemplateWorkoutFragment : Fragment() {
             }
         })
         binding.apply {
+
+            workoutNameFieldText.apply {
+                setText(addWorkoutViewModel.workoutName)
+                addTextChangedListener {
+                    addWorkoutViewModel.onWorkoutNameChange(it.toString())
+                }
+            }
+            workoutNoteFieldText.apply {
+                setText(addWorkoutViewModel.workoutNote)
+                addTextChangedListener {
+                    addWorkoutViewModel.onWorkoutNoteChange(it.toString())
+                }
+            }
+            addWorkoutViewModel.workoutName = binding.workoutNameFieldText.text.toString()
+            addWorkoutViewModel.workoutNote = binding.workoutNoteFieldText.text.toString()
             val exerciseSetAdapter = ExerciseSetAdapter().apply {
                 itemClickListener = object : ExerciseSetAdapter.ItemClickListener<WorkoutEntry> {
                     override fun onAddSet(itemPosition: Int) {

@@ -36,12 +36,11 @@ class TemplateWorkoutAdapter : BaseAdapter<Workout>(
             itemView.setOnClickListener {
                 itemClickListener?.onWorkoutClicked(item, itemView)
             }
-            if (item.isTemplate) {
-                exercises.text =
-                    item.exercises.joinToString("\n") {
-                        "${if (it.sets.isNotEmpty()) "${it.sets.size} x " else ""}${it.name} "
-                    }
-            }
+
+            exercises.text =
+                item.exercises.joinToString("\n") {
+                    "${if (it.sets.isNotEmpty()) "${it.sets.size} x " else ""}${it.name} "
+                }
         }
     }
 

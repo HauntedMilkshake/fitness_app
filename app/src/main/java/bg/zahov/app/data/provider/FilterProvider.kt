@@ -1,8 +1,8 @@
 package bg.zahov.app.data.provider
 
 import bg.zahov.app.ui.exercise.filter.FilterWrapper
-import kotlinx.coroutines.flow.Flow
 import kotlinx.coroutines.flow.MutableSharedFlow
+import kotlinx.coroutines.flow.SharedFlow
 
 class FilterProvider {
     companion object {
@@ -15,7 +15,7 @@ class FilterProvider {
     }
 
     private val _filters = MutableSharedFlow<List<FilterWrapper>>()
-    val filters: Flow<List<FilterWrapper>>
+    val filters: SharedFlow<List<FilterWrapper>>
         get() = _filters
 
     private val selectedFilters = mutableListOf<FilterWrapper>()
@@ -32,7 +32,6 @@ class FilterProvider {
 
     private suspend fun emitSelectedFilters() {
         _filters.emit(selectedFilters)
-    }
 
-    fun getCachedFilters() = selectedFilters
+    }
 }

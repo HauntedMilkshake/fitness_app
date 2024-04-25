@@ -1,13 +1,13 @@
 package bg.zahov.app.ui.workout
 
 import android.app.Application
+import android.util.Log
 import android.view.View
 import androidx.lifecycle.AndroidViewModel
 import androidx.lifecycle.LiveData
 import androidx.lifecycle.MutableLiveData
 import androidx.lifecycle.viewModelScope
 import bg.zahov.app.data.local.RealmWorkoutState
-import bg.zahov.app.data.model.Category
 import bg.zahov.app.data.model.Exercise
 import bg.zahov.app.data.model.RestState
 import bg.zahov.app.data.model.SetType
@@ -255,7 +255,7 @@ class WorkoutViewModel(application: Application) : AndroidViewModel(application)
             SetEntry(
                 ExerciseSetAdapterSetWrapper(
                     secondInputFieldVisibility = when (templateExercise?.category) {
-                        Category.RepsOnly, Category.Cardio, Category.Timed -> View.GONE
+//                        Category.RepsOnly, Category.Cardio, Category.Timed -> View.GONE
                         else -> View.VISIBLE
                     },
                     setNumber = if (setNumber == 0) 1.toString() else setNumber.toString(),
@@ -319,6 +319,7 @@ class WorkoutViewModel(application: Application) : AndroidViewModel(application)
                 SetType.DEFAULT -> R.string.default_set_indicator
                 SetType.FAILURE -> R.string.failure_set_indicator
             }
+            Log.d("set type", setType.toString())
             set.type = setType
         }
         _exercises.value = captured
@@ -334,6 +335,7 @@ class WorkoutViewModel(application: Application) : AndroidViewModel(application)
         viewModelScope.launch {
             _name.postValue("")
             _exercises.postValue(listOf())
+            restTimerProvider.stopRest()
             workoutProvider.clearWorkoutState()
             workoutStateManager.cancel()
         }

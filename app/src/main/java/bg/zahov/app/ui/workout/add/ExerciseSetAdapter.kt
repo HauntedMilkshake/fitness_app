@@ -1,6 +1,6 @@
 package bg.zahov.app.ui.workout.add
 
-import android.annotation.SuppressLint
+import android.util.Log
 import android.view.KeyEvent
 import android.view.LayoutInflater
 import android.view.View
@@ -82,7 +82,6 @@ class ExerciseSetAdapter :
 
     override fun getItemCount(): Int = items.size
 
-    @SuppressLint("NotifyDataSetChanged")
     fun updateItems(newItems: List<WorkoutEntry>) {
         val oldList: List<WorkoutEntry> = ArrayList(items)
         items.clear()
@@ -205,9 +204,14 @@ class ExerciseSetAdapter :
             firstInputLayout.visibility = item.firstInputFieldVisibility
             secondInputLayout.visibility = item.secondInputFieldVisibility
             setIndicator.apply {
-                setText(item.setIndicator)
-                if (item.setIndicator == R.string.default_set_indicator) text =
-                    item.setNumber else setText(item.setIndicator)
+                Log.d("binding set type", item.set.type.toString())
+                when (item.set.type) {
+                    SetType.DEFAULT -> text = item.setNumber
+                    else -> {
+                        setText(item.setIndicator)
+                    }
+                }
+
                 setOnClickListener {
                     showSetMenu(bindingAdapterPosition, it)
                 }
@@ -261,6 +265,7 @@ class ExerciseSetAdapter :
                 PopupMenu(ContextThemeWrapper(clickedView.context, R.style.MyPopUp), clickedView)
             popupMenu.menuInflater.inflate(R.menu.menu_popup_set, popupMenu.menu)
             popupMenu.setOnMenuItemClickListener { item ->
+                notifyItemChanged(bindingAdapterPosition)
                 itemClickListener?.onSetTypeChanged(
                     itemPosition,
                     when (item.itemId) {
@@ -292,14 +297,14 @@ class ExerciseSetAdapter :
         }
 
         private fun getItemCount(): Int {
-            var count = 1;
+            var count = 1
             var index = bindingAdapterPosition
             while (index < items.size && items[index] is SetEntry) {
                 count++
                 index++
             }
 
-            return count;
+            return count
         }
     }
 
