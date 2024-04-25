@@ -17,6 +17,7 @@ import androidx.navigation.fragment.findNavController
 import androidx.recyclerview.widget.LinearLayoutManager
 import bg.zahov.app.data.model.Workout
 import bg.zahov.app.data.model.state.HistoryUiMapper
+import bg.zahov.app.hideBottomNav
 import bg.zahov.app.setToolBarTitle
 import bg.zahov.app.showBottomNav
 import bg.zahov.app.showTopBar
@@ -85,6 +86,11 @@ class HistoryFragment : Fragment() {
         }
     }
 
+    override fun onResume() {
+        super.onResume()
+        requireActivity().showTopBar()
+        requireActivity().showBottomNav()
+    }
     override fun onDestroyView() {
         super.onDestroyView()
         _binding = null

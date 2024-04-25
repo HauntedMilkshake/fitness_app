@@ -8,7 +8,7 @@ import com.google.android.material.textview.MaterialTextView
 
 class FilterAdapter(private val removableVisibility: Int) : BaseAdapter<FilterWrapper>(
     areItemsTheSame = { oldItem, newItem -> oldItem == newItem },
-    areContentsTheSame = { oldItem, newItem -> oldItem == newItem },
+    areContentsTheSame = { oldItem, newItem -> oldItem.backgroundResource == newItem.backgroundResource},
     layoutResId = R.layout.item_filter
 ) {
 
@@ -24,14 +24,15 @@ class FilterAdapter(private val removableVisibility: Int) : BaseAdapter<FilterWr
             itemView.setBackgroundResource(item.backgroundResource)
 
             itemView.setOnClickListener {
+                notifyItemChanged(bindingAdapterPosition)
                 item.apply {
-                    itemClickListener?.onItemClicked(this, itemView)
+                    itemClickListener?.onItemClicked(item, it)
                 }
             }
         }
     }
 
-    interface ItemClickListener<T> {
+    interface ItemClickListener<T>  {
         fun onItemClicked(item: T, clickedView: View)
     }
 

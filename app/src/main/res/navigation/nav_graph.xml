@@ -185,6 +185,9 @@
         <action
             android:id="@+id/create_workout_template_to_add_exercise"
             app:destination="@id/exercises" />
+        <action
+            android:id="@+id/create_workout_template_to_workout_no_pop"
+            app:destination="@id/workout" />
     </fragment>
 
     <fragment

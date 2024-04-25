@@ -7,7 +7,6 @@ import androidx.lifecycle.LiveData
 import androidx.lifecycle.MutableLiveData
 import androidx.lifecycle.viewModelScope
 import bg.zahov.app.data.exception.CriticalDataNullException
-import bg.zahov.app.data.model.Category
 import bg.zahov.app.data.model.Exercise
 import bg.zahov.app.data.model.SetType
 import bg.zahov.app.data.model.Sets
@@ -24,7 +23,6 @@ import bg.zahov.app.util.toExercise
 import bg.zahov.app.util.toExerciseSetAdapterSetWrapper
 import bg.zahov.app.util.toExerciseSetAdapterWrapper
 import bg.zahov.fitness.app.R
-import kotlinx.coroutines.flow.filter
 import kotlinx.coroutines.launch
 import java.lang.Exception
 import java.time.LocalDateTime
@@ -60,6 +58,7 @@ class AddTemplateWorkoutViewModel(application: Application) : AndroidViewModel(a
 
     var workoutNote: String = ""
     var workoutName: String = ""
+    private var workoutDate = LocalDateTime.now()
     private var exerciseToReplaceIndex: Int? = null
     private lateinit var templates: List<Workout>
     private var edit = false
@@ -135,7 +134,7 @@ class AddTemplateWorkoutViewModel(application: Application) : AndroidViewModel(a
     private fun createWorkoutEntryArray(exercises: List<Exercise>): List<WorkoutEntry> {
         val workoutEntries = mutableListOf<WorkoutEntry>()
         exercises.forEach {
-            workoutEntries.add(ExerciseEntry(it.toExerciseSetAdapterWrapper(Units.valueOf(settings.units))))
+            workoutEntries.add(ExerciseEntry(it.toExerciseSetAdapterWrapper()))
             it.sets.forEachIndexed { index, set ->
                 workoutEntries.add(
                     SetEntry(
@@ -156,12 +155,14 @@ class AddTemplateWorkoutViewModel(application: Application) : AndroidViewModel(a
         workoutIdToEdit = workoutId
         if (workoutIdToEdit.isNotEmpty()) {
             viewModelScope.launch {
-                workoutProvider.getTemplateWorkouts()
-                    .filter { it.find { workout -> workout.id == workoutId } != null }.collect {
-                        it.first().note?.let { note -> workoutNote = note }
-                        workoutName = it.first().name
-                        _currExercises.postValue(createWorkoutEntryArray(it.first().exercises))
+                workoutProvider.getTemplateWorkouts().collect { workouts ->
+                    workouts.find { it.id == workoutId }?.let { workout ->
+                        workout.note?.let { workoutNote = it }
+                        workoutName = workout.name
+                        workoutDate = workout.date
+                        _currExercises.postValue(createWorkoutEntryArray(workout.exercises))
                     }
+                }
             }
         }
     }
@@ -194,7 +195,7 @@ class AddTemplateWorkoutViewModel(application: Application) : AndroidViewModel(a
                         name = workoutName,
                         note = workoutNote,
                         duration = 0L,
-                        date = LocalDateTime.now(),
+                        date = workoutDate,
                         isTemplate = true,
                         exercises = exercises,
                         volume = null,
@@ -282,7 +283,7 @@ class AddTemplateWorkoutViewModel(application: Application) : AndroidViewModel(a
         templateExercise: Exercise?,
     ) {
         val setNumber = insertIndex - exercisePosition
-        val setEntry = if (templateExercise != null && setNumber <= templateExercise.sets.size) {
+        val setEntry = if (templateExercise != null && setNumber < templateExercise.sets.size) {
             SetEntry(
                 templateExercise.sets[setNumber].toExerciseSetAdapterSetWrapper(
                     setNumber.toString(),
@@ -294,7 +295,7 @@ class AddTemplateWorkoutViewModel(application: Application) : AndroidViewModel(a
             SetEntry(
                 ExerciseSetAdapterSetWrapper(
                     secondInputFieldVisibility = when (templateExercise?.category) {
-                        Category.RepsOnly, Category.Cardio, Category.Timed -> View.GONE
+//                        Category.RepsOnly, Category.Cardio, Category.Timed -> View.GONE
                         else -> View.VISIBLE
                     },
                     setNumber = if (setNumber == 0) 1.toString() else setNumber.toString(),
@@ -348,6 +349,14 @@ class AddTemplateWorkoutViewModel(application: Application) : AndroidViewModel(a
 
     fun changeNote(itemPosition: Int, text: String) {
         (_currExercises.value?.get(itemPosition) as? ExerciseEntry)?.exerciseEntry?.note = text
+    }
+
+    fun onWorkoutNameChange(newName: String) {
+        if (newName != workoutName) workoutName = newName
+    }
+
+    fun onWorkoutNoteChange(newNote: String) {
+        if (newNote != workoutNote) workoutNote = newNote
     }
 
     sealed interface State {

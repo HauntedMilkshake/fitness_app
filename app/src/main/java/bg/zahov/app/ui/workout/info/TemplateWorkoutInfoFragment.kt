@@ -17,6 +17,7 @@ import androidx.lifecycle.map
 import androidx.navigation.fragment.findNavController
 import androidx.recyclerview.widget.LinearLayoutManager
 import bg.zahov.app.data.model.state.TemplateWorkoutUiMapper
+import bg.zahov.app.hideBottomNav
 import bg.zahov.app.setToolBarTitle
 import bg.zahov.app.ui.exercise.ExerciseAdapter
 import bg.zahov.fitness.app.R
@@ -39,6 +40,7 @@ class TemplateWorkoutInfoFragment : Fragment() {
         savedInstanceState: Bundle?,
     ): View {
         _binding = FragmentTemplateWorkoutInfoBinding.inflate(inflater, container, false)
+        requireActivity().hideBottomNav()
         return binding.root
     }
 
@@ -115,6 +117,10 @@ class TemplateWorkoutInfoFragment : Fragment() {
         }
     }
 
+    override fun onResume() {
+        super.onResume()
+        requireActivity().hideBottomNav()
+    }
     override fun onDestroy() {
         super.onDestroy()
         _binding = null

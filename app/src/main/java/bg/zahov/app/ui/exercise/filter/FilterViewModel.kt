@@ -1,6 +1,7 @@
 package bg.zahov.app.ui.exercise.filter
 
 import android.app.Application
+import android.util.Log
 import androidx.lifecycle.AndroidViewModel
 import androidx.lifecycle.LiveData
 import androidx.lifecycle.MutableLiveData
@@ -26,14 +27,18 @@ class FilterViewModel(application: Application) : AndroidViewModel(application) 
         get() = _categoryFilters
 
     init {
-        filterManager.getCachedFilters().forEach { item ->
-            when {
-                BodyPart.fromKey(item.name) != null -> {
-                    toggleFilter(item, _bodyPartFilters)
-                }
+        viewModelScope.launch {
+            filterManager.filters.collect { item ->
+                item.forEach {
+                    when {
+                        BodyPart.fromKey(it.name) != null -> {
+                            toggleFilter(it, _bodyPartFilters)
+                        }
 
-                Category.fromKey(item.name) != null -> {
-                    toggleFilter(item, _categoryFilters)
+                        Category.fromKey(it.name) != null -> {
+                            toggleFilter(it, _categoryFilters)
+                        }
+                    }
                 }
             }
         }
@@ -42,17 +47,21 @@ class FilterViewModel(application: Application) : AndroidViewModel(application) 
     private fun toggleFilter(filter: FilterWrapper, filters: MutableLiveData<List<FilterWrapper>>) {
         val new = filters.value.orEmpty()
         new.find { itemToFind -> itemToFind.name == filter.name }?.let {
+            Log.d("toggling item", it.toString())
             it.backgroundResource =
-                if (it.backgroundResource == R.drawable.filter_item_clicked) R.drawable.filter_item_unclicked else R.drawable.filter_item_unclicked
+                if (it.backgroundResource == R.drawable.filter_item_clicked) R.drawable.filter_item_unclicked else R.drawable.filter_item_clicked
+            Log.d("toggling item", it.toString())
         }
         filters.postValue(new)
     }
 
     fun onFilterClicked(item: FilterWrapper) {
         viewModelScope.launch {
-            if (item.backgroundResource == R.drawable.filter_item_clicked) filterManager.addFilter(
-                item
-            ) else filterManager.removeFilter(item)
+            if (item.backgroundResource == R.drawable.filter_item_clicked) {
+                filterManager.removeFilter(item)
+            } else {
+                filterManager.addFilter(item)
+            }
         }
     }
 }

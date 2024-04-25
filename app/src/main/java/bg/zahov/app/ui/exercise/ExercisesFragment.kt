@@ -47,7 +47,6 @@ class ExercisesFragment : Fragment() {
     private val addable by lazy {
         arguments?.getBoolean("ADDABLE") ?: false
     }
-
     override fun onCreateView(
         inflater: LayoutInflater,
         container: ViewGroup?,
@@ -119,7 +118,7 @@ class ExercisesFragment : Fragment() {
                         else -> false
                     }
                 }
-            })
+            }, viewLifecycleOwner)
 
             requireActivity().setToolBarTitle(
                 when {
@@ -201,7 +200,7 @@ class ExercisesFragment : Fragment() {
                 setOnClickListener {
                     it.applyScaleAnimation()
                     exerciseViewModel.confirmSelectedExercises()
-                    findNavController().navigateUp()
+                    findNavController().popBackStack()
                 }
             }
         }
