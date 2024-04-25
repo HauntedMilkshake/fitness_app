@@ -8,11 +8,13 @@ import android.view.MenuItem
 import android.view.View
 import android.view.ViewGroup
 import android.widget.Toast
+import android.widget.Toolbar
 import androidx.appcompat.app.AppCompatActivity
 import androidx.core.view.MenuProvider
 import androidx.fragment.app.Fragment
 import androidx.fragment.app.viewModels
 import androidx.lifecycle.map
+import androidx.navigation.findNavController
 import androidx.navigation.fragment.findNavController
 import androidx.recyclerview.widget.LinearLayoutManager
 import bg.zahov.app.data.model.state.ExerciseUiMapper
@@ -47,6 +49,7 @@ class ExercisesFragment : Fragment() {
     private val addable by lazy {
         arguments?.getBoolean("ADDABLE") ?: false
     }
+
     override fun onCreateView(
         inflater: LayoutInflater,
         container: ViewGroup?,
@@ -58,6 +61,7 @@ class ExercisesFragment : Fragment() {
         exerciseViewModel.addable = addable
         requireActivity().showTopBar()
         if (addable || selectable || replaceable) requireActivity().hideBottomNav() else requireActivity().showBottomNav()
+        (activity as? AppCompatActivity)?.setSupportActionBar(activity?.findViewById(R.id.toolbar))
         return binding.root
     }
 
@@ -214,11 +218,13 @@ class ExercisesFragment : Fragment() {
 
     override fun onResume() {
         super.onResume()
+        (activity as? AppCompatActivity)?.setSupportActionBar(activity?.findViewById(R.id.toolbar))
         if (addable || selectable || replaceable) requireActivity().hideBottomNav() else requireActivity().showBottomNav()
     }
 
     override fun onDestroyView() {
         super.onDestroyView()
+        requireActivity().invalidateOptionsMenu()
         _binding = null
     }
 }

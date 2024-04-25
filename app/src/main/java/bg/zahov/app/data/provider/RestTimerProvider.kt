@@ -71,7 +71,7 @@ class RestTimerProvider : RestProvider {
     }
 
     override suspend fun stopRest() {
-        timer.cancel()
+        if (this::timer.isInitialized) timer.cancel()
         remainingTime = 0
         _restState.emit(RestState.Finished)
         _restState.value = RestState.Default
