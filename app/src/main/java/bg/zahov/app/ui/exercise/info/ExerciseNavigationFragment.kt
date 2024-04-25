@@ -18,6 +18,7 @@ import androidx.viewpager2.adapter.FragmentStateAdapter
 import bg.zahov.app.data.model.state.ExerciseNavigationUiMapper
 import bg.zahov.app.hideBottomNav
 import bg.zahov.app.hideTopBar
+import bg.zahov.app.showTopBar
 import bg.zahov.app.ui.exercise.info.charts.ExerciseChartsFragment
 import bg.zahov.app.ui.exercise.info.history.ExerciseHistoryFragment
 import bg.zahov.app.ui.exercise.info.records.ExerciseRecordsFragments
@@ -45,7 +46,6 @@ class ExerciseNavigationFragment : Fragment() {
 
     override fun onViewCreated(view: View, savedInstanceState: Bundle?) {
         super.onViewCreated(view, savedInstanceState)
-        (activity as? AppCompatActivity)?.setSupportActionBar(binding.toolbarExercise)
         (activity as? AppCompatActivity)?.supportActionBar?.setDisplayHomeAsUpEnabled(true)
         (activity as? AppCompatActivity)?.supportActionBar?.setHomeAsUpIndicator(R.drawable.ic_back_arrow)
         requireActivity().addMenuProvider(object : MenuProvider {
@@ -74,7 +74,7 @@ class ExerciseNavigationFragment : Fragment() {
             exerciseNavigationViewModel.state.map { ExerciseNavigationUiMapper.map(it) }
                 .observe(viewLifecycleOwner) {
                     toolbarExercise.title = it.exerciseName
-                    it.message?.let { message->
+                    it.message?.let { message ->
                         Toast.makeText(context, message, Toast.LENGTH_SHORT).show()
                     }
                 }
@@ -108,6 +108,12 @@ class ExerciseNavigationFragment : Fragment() {
         super.onResume()
         requireActivity().hideBottomNav()
     }
+
+    override fun onStop() {
+        super.onStop()
+        requireActivity().showTopBar()
+    }
+
     override fun onDestroyView() {
         super.onDestroyView()
         _binding = null
