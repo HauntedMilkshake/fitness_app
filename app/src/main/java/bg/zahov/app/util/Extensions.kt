@@ -198,10 +198,11 @@ fun Sets.toExerciseSetAdapterSetWrapper(
             SetType.DEFAULT -> R.string.default_set_indicator
             SetType.FAILURE -> R.string.failure_set_indicator
         },
-        secondInputFieldVisibility = when (category) {
-//            Category.RepsOnly, Category.Cardio, Category.Timed -> View.GONE
-            else -> View.VISIBLE
-        },
+//        secondInputFieldVisibility = when (category) {
+////            Category.RepsOnly, Category.Cardio, Category.Timed -> View.GONE
+//            else -> View.VISIBLE
+//        }
+        View.VISIBLE,
         setNumber = number,
         set = resumeSet ?: Sets(SetType.DEFAULT, 0.0, 0),
         backgroundResource = R.color.completed_set,
