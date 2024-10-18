@@ -2,6 +2,7 @@ package bg.zahov.app.util
 
 import android.animation.ObjectAnimator
 import android.animation.PropertyValuesHolder
+import android.annotation.SuppressLint
 import android.view.View
 import bg.zahov.app.data.local.RealmExercise
 import bg.zahov.app.data.local.RealmSets
@@ -20,7 +21,6 @@ import bg.zahov.app.ui.exercise.ExerciseAdapterWrapper
 import bg.zahov.app.ui.workout.add.ExerciseSetAdapterExerciseWrapper
 import bg.zahov.app.ui.workout.add.ExerciseSetAdapterSetWrapper
 import bg.zahov.fitness.app.R
-import com.google.common.hash.Hashing
 import com.google.firebase.Timestamp
 import java.nio.charset.StandardCharsets
 import java.time.Instant
@@ -110,11 +110,12 @@ fun View.applyScaleAnimation() {
     scaleAnimation.start()
 }
 
-fun hashString(input: String) =
-    Hashing.sha256().hashString(input, StandardCharsets.UTF_8).toString()
+fun hashString(input: String) = input
+//    Hashing.sha256().hashString(input, StandardCharsets.UTF_8).toString()
 
 fun generateRandomId(): String = UUID.randomUUID().toString().take(16)
 
+@SuppressLint("DefaultLocale")
 fun Long.timeToString(): String = String.format(
     "%02d:%02d:%02d",
     (this / (1000 * 60 * 60)) % 24,

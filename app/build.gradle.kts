@@ -1,3 +1,5 @@
+import org.gradle.kotlin.dsl.support.kotlinCompilerOptions
+
 plugins {
     id("com.android.application")
     id("org.jetbrains.kotlin.android")
@@ -37,6 +39,7 @@ android {
         sourceCompatibility = JavaVersion.VERSION_17
         targetCompatibility = JavaVersion.VERSION_17
     }
+
     kotlinOptions {
         jvmTarget = "17"
     }
@@ -50,6 +53,10 @@ android {
     buildFeatures {
         viewBinding = true
         compose = true
+    }
+
+    composeOptions {
+        kotlinCompilerExtensionVersion = "1.5.3"
     }
 }
 
@@ -80,8 +87,8 @@ dependencies {
     implementation("com.mikhaellopez:circularprogressbar:3.1.0")
     androidTestImplementation("androidx.test.ext:junit:1.2.1")
     androidTestImplementation("androidx.test.espresso:espresso-core:3.6.1")
-    implementation("io.realm.kotlin:library-base:3.0.0")
-    implementation("io.realm.kotlin:library-sync:1.11.0")
+    implementation("io.realm.kotlin:library-base:1.12.0")
+    implementation("io.realm.kotlin:library-sync:1.12.0")
     implementation("org.jetbrains.kotlinx:kotlinx-coroutines-android:1.7.3")
     implementation("androidx.lifecycle:lifecycle-livedata-ktx:2.8.6")
     implementation("com.google.android.flexbox:flexbox:3.0.0")
