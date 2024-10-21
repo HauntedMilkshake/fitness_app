@@ -28,11 +28,15 @@ fun CommonPasswordField(
     colors: TextFieldColors = TextFieldDefaults.colors(
         focusedIndicatorColor = Color.Transparent,
         unfocusedIndicatorColor = Color.Transparent
-    )
+    ),
+    onPasswordChange: (String) -> Unit
 ) {
     TextField(
         value = password.value,
-        onValueChange = { password.value = it },
+        onValueChange = {
+            password.value = it
+            onPasswordChange(it)
+        },
         label = label,
         singleLine = singleLine,
         leadingIcon = leadingIcon,

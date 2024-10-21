@@ -78,19 +78,28 @@ fun SignupScreen(signupViewModel: SignupViewModel = viewModel(), navController: 
             CommonTextField(
                 text = username,
                 label = { Text(stringResource(R.string.username_text)) },
-                leadingIcon = { Icon(painterResource(R.drawable.ic_profile), "Username") })
+                leadingIcon = { Icon(painterResource(R.drawable.ic_profile), "Username") }, onPasswordChange = {
+                    //TODO()
+                })
             CommonTextField(
                 text = email,
                 label = { Text(stringResource(R.string.email_text_field_hint)) },
-                leadingIcon = { Icon(painterResource(R.drawable.ic_email), "Email") })
+                leadingIcon = { Icon(painterResource(R.drawable.ic_email), "Email") }, onPasswordChange = {
+                    //TODO()
+                })
             CommonPasswordField(
                 password = password,
                 passwordVisible = showPassword,
-                label = { Text(stringResource(R.string.password_text_field_hint)) })
+                label = { Text(stringResource(R.string.password_text_field_hint)) },
+                onPasswordChange = {
+                    //TODO()
+                })
             CommonPasswordField(
                 password = confirmPassword,
                 passwordVisible = showPassword,
-                label = { Text(stringResource(R.string.confirm_password_text)) })
+                label = { Text(stringResource(R.string.confirm_password_text)) }, onPasswordChange = {
+                    //TODO()
+                })
         }
 
         Button(
