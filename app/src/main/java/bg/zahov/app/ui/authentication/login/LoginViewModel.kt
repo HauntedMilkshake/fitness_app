@@ -5,6 +5,8 @@ import androidx.lifecycle.AndroidViewModel
 import androidx.lifecycle.viewModelScope
 import bg.zahov.app.getServiceErrorProvider
 import bg.zahov.app.getUserProvider
+import bg.zahov.app.ui.authentication.AuthenticationState
+import bg.zahov.app.ui.authentication.UiInfo
 import bg.zahov.app.util.isEmail
 import kotlinx.coroutines.launch
 import kotlinx.coroutines.flow.MutableStateFlow
@@ -13,10 +15,23 @@ import kotlinx.coroutines.flow.asStateFlow
 import java.lang.IllegalArgumentException
 
 class LoginViewModel(application: Application) : AndroidViewModel(application) {
-    private val _uiState = MutableStateFlow<UiState>(UiState.Default)
-    val uiState: StateFlow<UiState> = _uiState.asStateFlow()
+    private val info: UiInfo = UiInfo()
 
-    private var counter:Int = 1
+    fun setInfo(
+        mail: String? = null,
+        password: String? = null,
+        passwordVisibility: Boolean? = null
+    ) {
+        mail?.let { info.mail = it }
+        passwordVisibility?.let { info.passwordVisibility = it }
+        password?.let { info.password = it }
+
+    }
+
+    private val _uiState = MutableStateFlow<AuthenticationState>(AuthenticationState.Default(info))
+    val uiState: StateFlow<AuthenticationState> = _uiState.asStateFlow()
+
+    private var counter: Int = 1
 
     private val auth by lazy {
         application.getUserProvider()
@@ -28,12 +43,12 @@ class LoginViewModel(application: Application) : AndroidViewModel(application) {
     fun login(email: String, password: String) {
         counter++
         if (email.isEmpty() || password.isEmpty()) {
-            _uiState.value = UiState.Error(message = "Don't leave empty fields", counter = counter)
+            notifyChange("Don't leave empty fields")
             return
         }
 
         if (!email.isEmail()) {
-            _uiState.value = UiState.Error(message = "Email not valid", counter = counter)
+            notifyChange("Email not valid")
             return
         }
 
@@ -41,14 +56,10 @@ class LoginViewModel(application: Application) : AndroidViewModel(application) {
             try {
                 auth.login(email, password)
                     .addOnSuccessListener {
-                        _uiState.value = UiState.Authenticated(isAuthenticated = true)
+                        _uiState.value = AuthenticationState.Authenticate
                     }
                     .addOnFailureListener {
-                        _uiState.value =
-                            it.message?.let {
-                                it1 ->
-                                UiState.Error(message = it1, counter = counter)
-                            }!!
+                        it.message?.let { it1 -> notifyChange(it1) }
                     }
             } catch (e: IllegalArgumentException) {
                 serviceError.initiateCountdown()
@@ -59,36 +70,28 @@ class LoginViewModel(application: Application) : AndroidViewModel(application) {
     fun sendPasswordResetEmail(email: String) {
         counter++
         if (email.isEmpty()) {
-            _uiState.value = UiState.Error(message = "Email must not be empty", counter = counter)
+            notifyChange("Email must not be empty")
             return
         }
 
         if (!email.isEmail()) {
-            _uiState.value = UiState.Error(message = "Email is not valid", counter = counter)
+            notifyChange("Email is not valid")
             return
         }
 
         viewModelScope.launch {
             auth.passwordResetByEmail(email)
-                .addOnSuccessListener {
-                    _uiState.value = UiState.Notification(
-                        message = "Rest password email has been sent",
-                        counter = counter
-                    )
-                }
-                .addOnFailureListener {
-                    _uiState.value = UiState.Error(
-                        message = "Couldn't send reset password email!",
-                        counter = counter
-                    )
-                }
+                .addOnSuccessListener { notifyChange("Rest password email has been sent") }
+                .addOnFailureListener { notifyChange("Couldn't send reset password email!") }
         }
     }
-    sealed interface UiState {
-        object Default : UiState
-        data class Authenticated(var isAuthenticated: Boolean) : UiState
-        data class Error(var message: String, var counter: Int) : UiState
-        data class Notification(var message: String, var counter: Int) : UiState
+
+    private fun notifyChange(text: String) {
+        _uiState.value = AuthenticationState.Notify(
+            uiInfo = info,
+            message = text,
+            stateCounter = counter
+        )
     }
 }
 

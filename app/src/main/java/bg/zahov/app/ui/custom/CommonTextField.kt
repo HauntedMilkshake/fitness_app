@@ -20,12 +20,16 @@ fun CommonTextField(
     colors: TextFieldColors = TextFieldDefaults.colors(
         focusedIndicatorColor = Color.Transparent,
         unfocusedIndicatorColor = Color.Transparent
-    )
+    ),
+    onTextChange: (String) -> Unit
 ) {
 
     TextField(
         value = text.value,
-        onValueChange = { text.value = it },
+        onValueChange = {
+            text.value = it
+            onTextChange(it)
+        },
         label = label,
         singleLine = singleLine,
         leadingIcon = leadingIcon,

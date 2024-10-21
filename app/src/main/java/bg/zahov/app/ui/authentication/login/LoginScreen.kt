@@ -4,6 +4,7 @@ import android.annotation.SuppressLint
 import android.widget.Toast
 import androidx.compose.foundation.clickable
 import androidx.compose.foundation.interaction.MutableInteractionSource
+import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.fillMaxHeight
@@ -33,6 +34,7 @@ import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import bg.zahov.fitness.app.R
 import androidx.lifecycle.viewmodel.compose.viewModel
 import androidx.navigation.NavController
+import bg.zahov.app.ui.authentication.AuthenticationState
 import bg.zahov.app.ui.custom.CommonPasswordField
 import bg.zahov.app.ui.custom.CommonTextField
 
@@ -40,12 +42,22 @@ import bg.zahov.app.ui.custom.CommonTextField
 @SuppressLint("UnrememberedMutableState")
 @Composable
 fun LoginScreen(loginViewModel: LoginViewModel = viewModel(), nav: NavController) {
+    val uiState by loginViewModel.uiState.collectAsStateWithLifecycle()
+    when (uiState) {
+        AuthenticationState.Authenticate -> nav.navigate(R.id.login_to_loading)
+        is AuthenticationState.Default -> {}
+
+        is AuthenticationState.Notify -> Toast.makeText(
+            LocalContext.current,
+            (uiState as AuthenticationState.Notify).message,
+            Toast.LENGTH_SHORT
+        ).show()
+    }
     val password = remember { mutableStateOf("") }
     val mail = remember { mutableStateOf("") }
     val showPassword = remember { mutableStateOf(false) }
     val interactionSource = remember { MutableInteractionSource() }
-    Toasts(loginViewModel = loginViewModel,
-        nav = { nav.navigate(R.id.login_to_loading) })
+
     Column(
         modifier = Modifier
             .fillMaxSize()
@@ -60,19 +72,26 @@ fun LoginScreen(loginViewModel: LoginViewModel = viewModel(), nav: NavController
         )
         Column(
             modifier = Modifier
-                .width(250.dp)
+                .width(240.dp)
                 .padding(top = 20.dp)
-                .align(Alignment.CenterHorizontally)
+                .align(Alignment.CenterHorizontally),
+            verticalArrangement = Arrangement.spacedBy(15.dp)
         ) {
             CommonTextField(
                 text = mail,
                 leadingIcon = { Icon(painterResource(R.drawable.ic_profile), "Username") },
-                label = { Text(stringResource(R.string.email_text_field_hint)) })
+                label = { Text(stringResource(R.string.email_text_field_hint)) },
+                onTextChange = {
+                    loginViewModel.setInfo(mail = it)
+                })
 
             CommonPasswordField(
                 password = password,
                 passwordVisible = showPassword,
-                label = { Text(stringResource(R.string.password_text_field_hint)) })
+                label = { Text(stringResource(R.string.password_text_field_hint)) },
+                onPasswordChange = {
+                    loginViewModel.setInfo(password = it)
+                })
 
             Text(
                 text = stringResource(R.string.forgot_password),
@@ -120,36 +139,6 @@ fun LoginScreen(loginViewModel: LoginViewModel = viewModel(), nav: NavController
                         nav.navigate(R.id.login_to_signup)
                     }
             )
-        }
-    }
-}
-
-@Composable
-fun Toasts(loginViewModel: LoginViewModel = viewModel(), nav: () -> Unit) {
-    val context = LocalContext.current
-    val uiState by loginViewModel.uiState.collectAsStateWithLifecycle()
-    when (uiState) {
-        is LoginViewModel.UiState.Authenticated -> {
-            nav()
-        }
-
-        is LoginViewModel.UiState.Error -> {
-            Toast.makeText(
-                context,
-                (uiState as LoginViewModel.UiState.Error).message,
-                Toast.LENGTH_SHORT
-            ).show()
-        }
-
-        is LoginViewModel.UiState.Notification -> {
-            Toast.makeText(
-                context,
-                (uiState as LoginViewModel.UiState.Notification).message,
-                Toast.LENGTH_SHORT
-            ).show()
-        }
-
-        LoginViewModel.UiState.Default -> {/*TODO(Nothing to do)*/
         }
     }
 }
