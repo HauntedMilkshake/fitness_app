@@ -2,35 +2,38 @@ package bg.zahov.app.ui.login
 
 import android.app.Application
 import androidx.lifecycle.AndroidViewModel
-import androidx.lifecycle.LiveData
-import androidx.lifecycle.MutableLiveData
 import androidx.lifecycle.viewModelScope
 import bg.zahov.app.getServiceErrorProvider
 import bg.zahov.app.getUserProvider
 import bg.zahov.app.util.isEmail
 import kotlinx.coroutines.launch
+import kotlinx.coroutines.flow.MutableStateFlow
+import kotlinx.coroutines.flow.StateFlow
+import kotlinx.coroutines.flow.asStateFlow
 import java.lang.IllegalArgumentException
 
 class LoginViewModel(application: Application) : AndroidViewModel(application) {
+    private val _uiState = MutableStateFlow<UiState>(UiState.Default)
+    val uiState: StateFlow<UiState> = _uiState.asStateFlow()
+
+    private var counter:Int = 1
+
     private val auth by lazy {
         application.getUserProvider()
     }
     private val serviceError by lazy {
         application.getServiceErrorProvider()
     }
-    private val _state = MutableLiveData<State>()
-    val state: LiveData<State>
-        get() = _state
-
 
     fun login(email: String, password: String) {
+        counter++
         if (email.isEmpty() || password.isEmpty()) {
-            _state.value = State.Error("Don't leave empty fields", false)
+            _uiState.value = UiState.Error(message = "Don't leave empty fields", counter = counter)
             return
         }
 
         if (!email.isEmail()) {
-            _state.value = State.Error("Email not valid", false)
+            _uiState.value = UiState.Error(message = "Email not valid", counter = counter)
             return
         }
 
@@ -38,10 +41,13 @@ class LoginViewModel(application: Application) : AndroidViewModel(application) {
             try {
                 auth.login(email, password)
                     .addOnSuccessListener {
-                        _state.value = State.Authenticated(true)
+                        _uiState.value = UiState.Authenticated(isAuthenticated = true)
                     }
                     .addOnFailureListener {
-                        _state.value = State.Error(it.message, false)
+                        _uiState.value =
+                            it.message?.let {
+                                it1 -> UiState.Error(message = it1, counter = counter)
+                            }!!
                     }
             } catch (e: IllegalArgumentException) {
                 serviceError.initiateCountdown()
@@ -50,31 +56,32 @@ class LoginViewModel(application: Application) : AndroidViewModel(application) {
     }
 
     fun sendPasswordResetEmail(email: String) {
+        counter++
         if (email.isEmpty()) {
-            _state.value = State.Error("Email must not be empty", false)
+            _uiState.value = UiState.Error(message = "Email must not be empty",counter = counter)
             return
         }
 
         if (!email.isEmail()) {
-            _state.value = State.Error("Email is not valid", false)
+            _uiState.value = UiState.Error(message = "Email is not valid",counter = counter)
             return
         }
 
         viewModelScope.launch {
             auth.passwordResetByEmail(email)
                 .addOnSuccessListener {
-                    _state.value = State.Notify("Rest password email has been sent")
+                    _uiState.value = UiState.Notification(message = "Rest password email has been sent",counter = counter)
                 }
                 .addOnFailureListener {
-                    _state.value = State.Error("Couldn't send reset password email!", false)
+                    _uiState.value = UiState.Error(message = "Couldn't send reset password email!",counter = counter)
                 }
         }
     }
-
-    sealed interface State {
-        data class Authenticated(val isAuthenticated: Boolean) : State
-        data class Error(val eMessage: String?, val shutdown: Boolean) : State
-        data class Notify(val nMessage: String) : State
+    sealed interface UiState {
+        object Default : UiState
+        data class Authenticated(var isAuthenticated: Boolean) : UiState
+        data class Error(var message: String, var counter: Int) : UiState
+        data class Notification(var message: String, var counter: Int) : UiState
     }
 }
 
