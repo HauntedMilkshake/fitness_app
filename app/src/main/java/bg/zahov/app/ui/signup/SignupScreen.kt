@@ -1,7 +1,6 @@
 package bg.zahov.app.ui.signup
 
 import android.content.Context
-import android.util.Log
 import android.widget.Toast
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Column
@@ -55,7 +54,7 @@ fun SignupScreen(signupViewModel: SignupViewModel = viewModel(), navController: 
         }
 
         is SignupViewModel.State.Authentication -> {
-            ShowToast(
+            showToast(
                 (state.value as SignupViewModel.State.Authentication).aMessage,
                 LocalContext.current
             )
@@ -63,7 +62,7 @@ fun SignupScreen(signupViewModel: SignupViewModel = viewModel(), navController: 
         }
 
         is SignupViewModel.State.Notify -> {
-            ShowToast((state.value as SignupViewModel.State.Notify).nMessage, LocalContext.current)
+            showToast((state.value as SignupViewModel.State.Notify).nMessage, LocalContext.current)
         }
     }
 
@@ -207,6 +206,6 @@ fun GenerateTextField(
     )
 }
 
-fun ShowToast(message: String, context: Context) {
+fun showToast(message: String, context: Context) {
     Toast.makeText(context, message, Toast.LENGTH_SHORT).show()
 }
