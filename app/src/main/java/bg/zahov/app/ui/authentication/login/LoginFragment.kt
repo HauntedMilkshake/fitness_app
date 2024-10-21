@@ -1,4 +1,4 @@
-package bg.zahov.app.ui.login
+package bg.zahov.app.ui.authentication.login
 
 import android.os.Bundle
 import android.view.LayoutInflater
@@ -23,7 +23,7 @@ class LoginFragment : Fragment() {
         return ComposeView(requireContext()).apply {
             setViewCompositionStrategy(ViewCompositionStrategy.DisposeOnViewTreeLifecycleDestroyed)
             setContent {
-                LoginScreen(loginViewModel ,findNavController())
+                LoginScreen(loginViewModel, findNavController())
             }
         }
     }

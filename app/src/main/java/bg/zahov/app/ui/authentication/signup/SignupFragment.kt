@@ -1,4 +1,4 @@
-package bg.zahov.app.ui.signup
+package bg.zahov.app.ui.authentication.signup
 
 import android.os.Bundle
 import android.view.LayoutInflater

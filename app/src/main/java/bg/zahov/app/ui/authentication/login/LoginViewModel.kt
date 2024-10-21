@@ -1,4 +1,4 @@
-package bg.zahov.app.ui.login
+package bg.zahov.app.ui.authentication.login
 
 import android.app.Application
 import androidx.lifecycle.AndroidViewModel
@@ -46,7 +46,8 @@ class LoginViewModel(application: Application) : AndroidViewModel(application) {
                     .addOnFailureListener {
                         _uiState.value =
                             it.message?.let {
-                                it1 -> UiState.Error(message = it1, counter = counter)
+                                it1 ->
+                                UiState.Error(message = it1, counter = counter)
                             }!!
                     }
             } catch (e: IllegalArgumentException) {
@@ -58,22 +59,28 @@ class LoginViewModel(application: Application) : AndroidViewModel(application) {
     fun sendPasswordResetEmail(email: String) {
         counter++
         if (email.isEmpty()) {
-            _uiState.value = UiState.Error(message = "Email must not be empty",counter = counter)
+            _uiState.value = UiState.Error(message = "Email must not be empty", counter = counter)
             return
         }
 
         if (!email.isEmail()) {
-            _uiState.value = UiState.Error(message = "Email is not valid",counter = counter)
+            _uiState.value = UiState.Error(message = "Email is not valid", counter = counter)
             return
         }
 
         viewModelScope.launch {
             auth.passwordResetByEmail(email)
                 .addOnSuccessListener {
-                    _uiState.value = UiState.Notification(message = "Rest password email has been sent",counter = counter)
+                    _uiState.value = UiState.Notification(
+                        message = "Rest password email has been sent",
+                        counter = counter
+                    )
                 }
                 .addOnFailureListener {
-                    _uiState.value = UiState.Error(message = "Couldn't send reset password email!",counter = counter)
+                    _uiState.value = UiState.Error(
+                        message = "Couldn't send reset password email!",
+                        counter = counter
+                    )
                 }
         }
     }
