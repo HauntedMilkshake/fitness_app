@@ -1,9 +1,7 @@
 package bg.zahov.app.ui.authentication.login
 
-import android.annotation.SuppressLint
 import android.widget.Toast
 import androidx.compose.foundation.clickable
-import androidx.compose.foundation.interaction.MutableInteractionSource
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.Row
@@ -18,7 +16,6 @@ import androidx.compose.material3.Text
 import androidx.compose.material3.TextButton
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.getValue
-import androidx.compose.runtime.remember
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
@@ -33,26 +30,54 @@ import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import bg.zahov.fitness.app.R
 import androidx.lifecycle.viewmodel.compose.viewModel
 import androidx.navigation.NavController
-import bg.zahov.app.ui.authentication.AuthenticationState
 import bg.zahov.app.ui.custom.CommonPasswordField
 import bg.zahov.app.ui.custom.CommonTextField
+import androidx.compose.runtime.LaunchedEffect
 
-
-@SuppressLint("UnrememberedMutableState")
 @Composable
-fun LoginScreen(loginViewModel: LoginViewModel = viewModel(), nav: NavController) {
-    val uiState by loginViewModel.uiState.collectAsStateWithLifecycle()
-    when (uiState) {
-        AuthenticationState.Authenticate -> nav.navigate(R.id.login_to_loading)
-        is AuthenticationState.Default -> {}
+fun LoginScreen(
+    viewModel: LoginViewModel = viewModel(),
+    navController: NavController
+) {
+    val context = LocalContext.current
+    val uiState by viewModel.uiState.collectAsStateWithLifecycle()
 
-        is AuthenticationState.Notify -> Toast.makeText(
-            LocalContext.current,
-            (uiState as AuthenticationState.Notify).message,
-            Toast.LENGTH_SHORT
-        ).show()
+    if (uiState.isUserLoggedIn) {
+        LaunchedEffect(Unit) {
+            navController.navigate(R.id.login_to_loading)
+        }
     }
-    val interactionSource = remember { MutableInteractionSource() }
+
+    uiState.userMessage?.let { userMessage ->
+        LaunchedEffect(Unit) {
+            Toast.makeText(context, userMessage, Toast.LENGTH_SHORT).show()
+            viewModel.messageShown()
+        }
+    }
+
+    LoginContent(
+        uiState = uiState,
+        onEmailChanged = { viewModel.onEmailChanged(it) },
+        onPasswordChanged = { viewModel.onPasswordChanged(it) },
+        onPasswordVisibilityClicked = { viewModel.onPasswordVisibilityChanged() },
+        onSendPasswordResetEmailClicked = { viewModel.sendPasswordResetEmail() },
+        onLoginClicked = { viewModel.login() },
+        onSignUpClicked = { navController.navigate(R.id.login_to_signup) }
+    )
+
+
+}
+
+@Composable
+fun LoginContent(
+    uiState: LoginUiState,
+    onEmailChanged: (String) -> Unit,
+    onPasswordChanged: (String) -> Unit,
+    onPasswordVisibilityClicked: () -> Unit,
+    onSendPasswordResetEmailClicked: () -> Unit,
+    onLoginClicked: () -> Unit,
+    onSignUpClicked: () -> Unit,
+) {
 
     Column(
         modifier = Modifier
@@ -74,38 +99,29 @@ fun LoginScreen(loginViewModel: LoginViewModel = viewModel(), nav: NavController
             verticalArrangement = Arrangement.spacedBy(15.dp)
         ) {
             CommonTextField(
-                text = loginViewModel.getInfoMail(),
+                text = uiState.email,
                 leadingIcon = { Icon(painterResource(R.drawable.ic_profile), "Username") },
                 label = { Text(stringResource(R.string.email_text_field_hint)) },
-                onTextChange = {
-                    loginViewModel.setInfo(mail = it)
-                })
+                onTextChange = onEmailChanged
+            )
 
             CommonPasswordField(
-                password = loginViewModel.getInfoPassword(),
-                passwordVisible = loginViewModel.getInfoPasswordVisibility(),
+                password = uiState.password,
+                passwordVisible = uiState.isPasswordVisible,
                 label = { Text(stringResource(R.string.password_text_field_hint)) },
-                onPasswordChange = {
-                    loginViewModel.setInfo(password = it)
-                },
-                onPasswordVisibilityChange = {
-                    loginViewModel.changePasswordVisibility()
-                })
+                onPasswordChange = onPasswordChanged,
+                onPasswordVisibilityChange = onPasswordVisibilityClicked
+            )
 
             Text(
                 text = stringResource(R.string.forgot_password),
                 modifier = Modifier
                     .padding(top = 15.dp)
-                    .clickable(
-                        interactionSource = interactionSource,
-                        indication = null
-                    ) { loginViewModel.sendPasswordResetEmail() },
+                    .clickable(onClick = onSendPasswordResetEmailClicked),
                 style = TextStyle(color = colorResource(R.color.less_vibrant_text))
             )
             TextButton(
-                onClick = {
-                    loginViewModel.login()
-                },
+                onClick = onLoginClicked,
                 modifier = Modifier
                     .padding(top = 15.dp)
                     .fillMaxWidth(),
@@ -131,12 +147,7 @@ fun LoginScreen(loginViewModel: LoginViewModel = viewModel(), nav: NavController
                 fontSize = 20.sp,
                 modifier = Modifier
                     .align(Alignment.CenterVertically)
-                    .clickable(
-                        interactionSource = interactionSource,
-                        indication = null
-                    ) {
-                        nav.navigate(R.id.login_to_signup)
-                    }
+                    .clickable(onClick = onSignUpClicked)
             )
         }
     }
