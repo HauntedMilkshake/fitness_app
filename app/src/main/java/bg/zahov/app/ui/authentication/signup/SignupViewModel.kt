@@ -4,6 +4,8 @@ import android.app.Application
 import androidx.lifecycle.AndroidViewModel
 import androidx.lifecycle.viewModelScope
 import bg.zahov.app.getUserProvider
+import bg.zahov.app.ui.authentication.AuthenticationState
+import bg.zahov.app.ui.authentication.UiInfo
 import bg.zahov.app.util.isEmail
 import kotlinx.coroutines.CancellationException
 import kotlinx.coroutines.CoroutineScope
@@ -17,9 +19,51 @@ class SignupViewModel(application: Application) : AndroidViewModel(application) 
         application.getUserProvider()
     }
     private var stateCounter = 0
-    private val _state = MutableStateFlow<State>(State.Default)
+    private val uiInfo = UiInfo()
+    private val _state = MutableStateFlow<AuthenticationState>(AuthenticationState.Default(uiInfo))
     val state = _state.asStateFlow()
 
+    fun onUsernameChange(newUsername: String) {
+        uiInfo.username = newUsername
+        updateState(uiInfo)
+    }
+
+    fun onEmailChange(newEmail: String) {
+        uiInfo.mail = newEmail
+        updateState(uiInfo)
+
+    }
+
+    fun onPasswordChange(newPassword: String) {
+        uiInfo.password = newPassword
+        updateState(uiInfo)
+
+    }
+
+    fun onConfirmPasswordChange(newPassword: String) {
+        uiInfo.confirmPassword = newPassword
+        updateState(uiInfo)
+
+    }
+
+    fun onPasswordVisibilityChange(visibility: Boolean) {
+        uiInfo.passwordVisibility = !visibility
+        updateState(uiInfo)
+
+    }
+
+    private fun updateState(newUiInfo: UiInfo) {
+        stateCounter++
+        _state.value = when (val currentState = _state.value) {
+            AuthenticationState.Authenticate -> AuthenticationState.Authenticate
+            is AuthenticationState.Default -> AuthenticationState.Default(newUiInfo, stateCounter)
+            is AuthenticationState.Notify -> AuthenticationState.Notify(
+                newUiInfo,
+                currentState.message,
+                stateCounter
+            )
+        }
+    }
 
     fun signUp(
         userName: String,
@@ -30,18 +74,20 @@ class SignupViewModel(application: Application) : AndroidViewModel(application) 
         stateCounter += 1
 
         if (areFieldsEmpty(userName, email, password)) {
-            _state.value = State.Notify("Do not leave empty fields", stateCounter)
+            _state.value =
+                AuthenticationState.Notify(uiInfo, "Do not leave empty fields", stateCounter)
             return
         }
 
         if (!email.isEmail()) {
-            _state.value = State.Notify("Email is not valid", stateCounter)
+            _state.value = AuthenticationState.Notify(uiInfo, "Email is not valid", stateCounter)
             return
         }
 
         if (password != confirmPassword || password.length < 6) {
             _state.value =
-                State.Notify(
+                AuthenticationState.Notify(
+                    uiInfo,
                     "Make sure the passwords are matching and at least 6 characters long",
                     stateCounter
                 )
@@ -55,26 +101,31 @@ class SignupViewModel(application: Application) : AndroidViewModel(application) 
                         CoroutineScope(Dispatchers.IO).launch {
                             it.user?.uid?.let {
                                 auth.createDataSources(userName, it)
-                                _state.value = State.Authentication(
-                                    "Successfully created account",
-                                    stateCounter
-                                )
+                                _state.value = AuthenticationState.Authenticate
 
                             } ?: run {
-                                _state.value = State.Notify(
+                                _state.value = AuthenticationState.Notify(
+                                    uiInfo,
                                     "There was an error while attempting to log in", stateCounter
                                 )
-
                             }
                         }
                     }
                     .addOnFailureListener {
-                        _state.value = State.Notify(it.message ?: "Unexpected error", stateCounter)
+                        _state.value = AuthenticationState.Notify(
+                            uiInfo,
+                            it.message ?: "Unexpected error",
+                            stateCounter
+                        )
 
                     }
             } catch (e: CancellationException) {
                 _state.value =
-                    State.Notify(e.message ?: "There is a problem with the services", stateCounter)
+                    AuthenticationState.Notify(
+                        uiInfo,
+                        e.message ?: "There is a problem with the services",
+                        stateCounter
+                    )
             }
 
         }
@@ -84,11 +135,6 @@ class SignupViewModel(application: Application) : AndroidViewModel(application) 
     private fun areFieldsEmpty(userName: String?, email: String?, pass: String?) =
         listOf(userName, email, pass).any { it.isNullOrEmpty() }
 
-    sealed interface State {
-        object Default : State
-        data class Authentication(val aMessage: String, var stateCounter: Int = 0) : State
-        data class Notify(val nMessage: String, var stateCounter: Int? = null) : State
-    }
 }
 
 

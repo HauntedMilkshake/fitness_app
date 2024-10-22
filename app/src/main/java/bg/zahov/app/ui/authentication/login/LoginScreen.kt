@@ -64,19 +64,19 @@ fun LoginScreen(loginViewModel: LoginViewModel = viewModel(), nav: NavController
                 .padding(top = 20.dp)
                 .align(Alignment.CenterHorizontally)
         ) {
-            CommonTextField(
-                text = mail,
-                leadingIcon = { Icon(painterResource(R.drawable.ic_profile), "Username") },
-                label = { Text(stringResource(R.string.email_text_field_hint)) }, onPasswordChange = {
-                    //TODO()
-                })
-
-            CommonPasswordField(
-                password = password,
-                passwordVisible = showPassword,
-                label = { Text(stringResource(R.string.password_text_field_hint)) }, onPasswordChange = {
-                    //TODO()
-                })
+//            CommonTextField(
+//                text = mail,
+//                leadingIcon = { Icon(painterResource(R.drawable.ic_profile), "Username") },
+//                label = { Text(stringResource(R.string.email_text_field_hint)) }, onPasswordChange = {
+//                    //TODO()
+//                })
+//
+//            CommonPasswordField(
+//                password = password,
+//                passwordVisible = showPassword,
+//                label = { Text(stringResource(R.string.password_text_field_hint)) }, onPasswordChange = {
+//                    //TODO()
+//                })
 
             Text(
                 text = stringResource(R.string.forgot_password),

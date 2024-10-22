@@ -2,7 +2,7 @@ package bg.zahov.app.ui.authentication
 
 sealed interface AuthenticationState {
     data object Authenticate : AuthenticationState
-    data class Default(val uiInfo: UiInfo) : AuthenticationState
+    data class Default(val uiInfo: UiInfo, val stateCounter: Int = 0) : AuthenticationState
     data class Notify(val uiInfo: UiInfo, val message: String, val stateCounter: Int = 0) :
         AuthenticationState
 }

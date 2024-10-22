@@ -7,8 +7,7 @@ import androidx.compose.material3.TextField
 import androidx.compose.material3.TextFieldColors
 import androidx.compose.material3.TextFieldDefaults
 import androidx.compose.runtime.Composable
-import androidx.compose.runtime.MutableState
-import androidx.compose.runtime.mutableStateOf
+import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.graphics.Shape
 import androidx.compose.ui.res.painterResource
@@ -19,8 +18,8 @@ import bg.zahov.fitness.app.R
 
 @Composable
 fun CommonPasswordField(
-    password: MutableState<String>,
-    passwordVisible: MutableState<Boolean> = mutableStateOf(false),
+    password: String,
+    passwordVisible: Boolean = false,
     label: @Composable (() -> Unit) = { Icon(painterResource(R.drawable.ic_password), "Password") },
     singleLine: Boolean = true,
     leadingIcon: @Composable (() -> Unit)? = null,
@@ -29,12 +28,14 @@ fun CommonPasswordField(
         focusedIndicatorColor = Color.Transparent,
         unfocusedIndicatorColor = Color.Transparent
     ),
-    onPasswordChange: (String) -> Unit
+    onPasswordChange: (String) -> Unit,
+    onPasswordVisibilityChange: (Boolean) -> Unit,
+    modifier: Modifier = Modifier
 ) {
     TextField(
-        value = password.value,
+        modifier = modifier,
+        value = password,
         onValueChange = {
-            password.value = it
             onPasswordChange(it)
         },
         label = label,
@@ -42,13 +43,13 @@ fun CommonPasswordField(
         leadingIcon = leadingIcon,
         shape = shape,
         colors = colors,
-        visualTransformation = if (passwordVisible.value) VisualTransformation.None else PasswordVisualTransformation(),
+        visualTransformation = if (passwordVisible) VisualTransformation.None else PasswordVisualTransformation(),
         trailingIcon = {
             IconButton(onClick = {
-                passwordVisible.value = !passwordVisible.value
+                onPasswordVisibilityChange(passwordVisible)
             }) {
                 Icon(
-                    painterResource(if (passwordVisible.value) R.drawable.ic_password_hidden else R.drawable.ic_password_visible),
+                    painterResource(if (passwordVisible) R.drawable.ic_password_hidden else R.drawable.ic_password_visible),
                     ""
                 )
             }
