@@ -24,8 +24,8 @@ import bg.zahov.fitness.app.R
 
 @Composable
 fun CommonPasswordField(
-    password: MutableState<String>,
-    passwordVisible: MutableState<Boolean> = mutableStateOf(false),
+    password: String,
+    passwordVisible: Boolean,
     label: @Composable (() -> Unit) = { Text("Password") },
     singleLine: Boolean = true,
     leadingIcon: @Composable (() -> Unit) = {
@@ -40,12 +40,12 @@ fun CommonPasswordField(
         unfocusedIndicatorColor = Color.Transparent
     ),
     onPasswordChange: (String) -> Unit,
+    onPasswordVisibilityChange: () -> Unit,
     @SuppressLint("ModifierParameter") modifier: Modifier = Modifier
 ) {
     TextField(
-        value = password.value,
+        value = password,
         onValueChange = {
-            password.value = it
             onPasswordChange(it)
         },
         label = label,
@@ -54,13 +54,11 @@ fun CommonPasswordField(
         leadingIcon = leadingIcon,
         shape = shape,
         colors = colors,
-        visualTransformation = if (passwordVisible.value) VisualTransformation.None else PasswordVisualTransformation(),
+        visualTransformation = if (passwordVisible) VisualTransformation.None else PasswordVisualTransformation(),
         trailingIcon = {
-            IconButton(onClick = {
-                passwordVisible.value = !passwordVisible.value
-            }) {
+            IconButton(onClick = { onPasswordVisibilityChange() }) {
                 Icon(
-                    painterResource(if (passwordVisible.value) R.drawable.ic_password_hidden else R.drawable.ic_password_visible),
+                    painterResource(if (passwordVisible) R.drawable.ic_password_hidden else R.drawable.ic_password_visible),
                     ""
                 )
             }

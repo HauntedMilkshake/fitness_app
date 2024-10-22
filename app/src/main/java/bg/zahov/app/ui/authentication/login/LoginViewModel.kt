@@ -17,21 +17,29 @@ import java.lang.IllegalArgumentException
 class LoginViewModel(application: Application) : AndroidViewModel(application) {
     private val info: UiInfo = UiInfo()
 
+    fun getInfoMail() = info.mail
+    fun getInfoPassword() = info.password
+    fun getInfoPasswordVisibility() = info.passwordVisibility
+
+    fun changePasswordVisibility() {
+        info.passwordVisibility = !info.passwordVisibility
+        notifyChange()
+    }
+
     fun setInfo(
         mail: String? = null,
         password: String? = null,
-        passwordVisibility: Boolean? = null
     ) {
         mail?.let { info.mail = it }
-        passwordVisibility?.let { info.passwordVisibility = it }
         password?.let { info.password = it }
+        notifyChange()
 
     }
+    private var counter: Int = 0
 
-    private val _uiState = MutableStateFlow<AuthenticationState>(AuthenticationState.Default(info))
+    private val _uiState = MutableStateFlow<AuthenticationState>(AuthenticationState.Default(info, counter))
     val uiState: StateFlow<AuthenticationState> = _uiState.asStateFlow()
 
-    private var counter: Int = 1
 
     private val auth by lazy {
         application.getUserProvider()
@@ -40,8 +48,7 @@ class LoginViewModel(application: Application) : AndroidViewModel(application) {
         application.getServiceErrorProvider()
     }
 
-    fun login(email: String, password: String) {
-        counter++
+    fun login(email: String = info.mail, password: String = info.password) {
         if (email.isEmpty() || password.isEmpty()) {
             notifyChange("Don't leave empty fields")
             return
@@ -67,8 +74,7 @@ class LoginViewModel(application: Application) : AndroidViewModel(application) {
         }
     }
 
-    fun sendPasswordResetEmail(email: String) {
-        counter++
+    fun sendPasswordResetEmail(email: String = info.mail) {
         if (email.isEmpty()) {
             notifyChange("Email must not be empty")
             return
@@ -86,12 +92,15 @@ class LoginViewModel(application: Application) : AndroidViewModel(application) {
         }
     }
 
-    private fun notifyChange(text: String) {
-        _uiState.value = AuthenticationState.Notify(
-            uiInfo = info,
-            message = text,
-            stateCounter = counter
-        )
+    private fun notifyChange(text: String? = null) {
+        counter++
+        _uiState.value = text?.let {
+            AuthenticationState.Notify(
+                uiInfo = info,
+                message = it,
+                stateCounter = counter
+                )
+        } ?: AuthenticationState.Default(info, counter)
     }
 }
 

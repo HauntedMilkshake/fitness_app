@@ -18,7 +18,6 @@ import androidx.compose.material3.Text
 import androidx.compose.material3.TextButton
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.getValue
-import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
@@ -53,9 +52,6 @@ fun LoginScreen(loginViewModel: LoginViewModel = viewModel(), nav: NavController
             Toast.LENGTH_SHORT
         ).show()
     }
-    val password = remember { mutableStateOf("") }
-    val mail = remember { mutableStateOf("") }
-    val showPassword = remember { mutableStateOf(false) }
     val interactionSource = remember { MutableInteractionSource() }
 
     Column(
@@ -78,7 +74,7 @@ fun LoginScreen(loginViewModel: LoginViewModel = viewModel(), nav: NavController
             verticalArrangement = Arrangement.spacedBy(15.dp)
         ) {
             CommonTextField(
-                text = mail,
+                text = loginViewModel.getInfoMail(),
                 leadingIcon = { Icon(painterResource(R.drawable.ic_profile), "Username") },
                 label = { Text(stringResource(R.string.email_text_field_hint)) },
                 onTextChange = {
@@ -86,11 +82,14 @@ fun LoginScreen(loginViewModel: LoginViewModel = viewModel(), nav: NavController
                 })
 
             CommonPasswordField(
-                password = password,
-                passwordVisible = showPassword,
+                password = loginViewModel.getInfoPassword(),
+                passwordVisible = loginViewModel.getInfoPasswordVisibility(),
                 label = { Text(stringResource(R.string.password_text_field_hint)) },
                 onPasswordChange = {
                     loginViewModel.setInfo(password = it)
+                },
+                onPasswordVisibilityChange = {
+                    loginViewModel.changePasswordVisibility()
                 })
 
             Text(
@@ -100,12 +99,12 @@ fun LoginScreen(loginViewModel: LoginViewModel = viewModel(), nav: NavController
                     .clickable(
                         interactionSource = interactionSource,
                         indication = null
-                    ) { loginViewModel.sendPasswordResetEmail(mail.value) },
+                    ) { loginViewModel.sendPasswordResetEmail() },
                 style = TextStyle(color = colorResource(R.color.less_vibrant_text))
             )
             TextButton(
                 onClick = {
-                    loginViewModel.login(mail.value, password.value)
+                    loginViewModel.login()
                 },
                 modifier = Modifier
                     .padding(top = 15.dp)
