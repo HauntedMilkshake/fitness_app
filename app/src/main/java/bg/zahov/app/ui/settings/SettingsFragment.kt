@@ -11,6 +11,8 @@ import android.view.MenuItem
 import android.view.View
 import android.view.ViewGroup
 import androidx.appcompat.app.AppCompatActivity
+import androidx.compose.ui.platform.ComposeView
+import androidx.compose.ui.platform.ViewCompositionStrategy
 import androidx.core.view.MenuProvider
 import androidx.fragment.app.Fragment
 import androidx.fragment.app.viewModels
@@ -39,9 +41,15 @@ class SettingsFragment : Fragment() {
         container: ViewGroup?,
         savedInstanceState: Bundle?,
     ): View {
-        _binding = FragmentSettingsBinding.inflate(inflater, container, false)
-        requireActivity().hideBottomNav()
-        return binding.root
+//        _binding = FragmentSettingsBinding.inflate(inflater, container, false)
+//        requireActivity().hideBottomNav()
+//        return binding.root
+        return ComposeView(requireContext()).apply {
+            setViewCompositionStrategy(ViewCompositionStrategy.DisposeOnViewTreeLifecycleDestroyed)
+        setContent {
+            SettingsScreen(settingsViewModel)
+        }
+        }
     }
 
     override fun onCreate(savedInstanceState: Bundle?) {
@@ -52,157 +60,157 @@ class SettingsFragment : Fragment() {
             TransitionInflater.from(requireContext()).inflateTransition(R.transition.fade_out)
     }
 
-    override fun onViewCreated(view: View, savedInstanceState: Bundle?) {
-        super.onViewCreated(view, savedInstanceState)
-        (activity as? AppCompatActivity)?.supportActionBar?.setDisplayHomeAsUpEnabled(true)
-        (activity as? AppCompatActivity)?.supportActionBar?.setHomeAsUpIndicator(R.drawable.ic_back_arrow)
-        requireActivity().setToolBarTitle(R.string.settings_text)
-        requireActivity().addMenuProvider(object : MenuProvider {
-            override fun onCreateMenu(menu: Menu, menuInflater: MenuInflater) {
-                menu.clear()
-                menuInflater.inflate(R.menu.menu_toolbar_settings, menu)
-            }
-
-            override fun onMenuItemSelected(menuItem: MenuItem): Boolean {
-                return when (menuItem.itemId) {
-                    R.id.home -> {
-                        findNavController().navigate(R.id.settings_to_home)
-                        true
-                    }
-
-                    R.id.reset -> {
-                        settingsViewModel.resetSettings()
-                        true
-                    }
-
-                    else -> false
-                }
-            }
-        })
-
-        binding.apply {
-            signOutButton.setOnClickListener {
-                settingsViewModel.logout()
-            }
-            editProfile.setOnClickListener {
-                findNavController().navigate(R.id.settings_to_edit_profile)
-            }
-            github.setOnClickListener {
-                openLink("https://github.com/HauntedMilkshake/fitness_app")
-            }
-            bugReport.setOnClickListener {
-                openLink("https://github.com/HauntedMilkshake/fitness_app/issues")
-            }
-            deleteAccount.setOnClickListener {
-                settingsViewModel.deleteAccount()
-            }
-
-        }
-        initDefaultSettingsViews()
-    }
-
-    private fun initRadioSettingsView(
-        view: RadioGroupSettingsView,
-        title: String,
-        radioOptions: List<String>,
-        settings: Settings,
-    ) {
-        view.initViewInformation(title, radioOptions, settings)
-        view.settingsChangeListener = object : SettingsChangeListener {
-            override fun onSettingChanged(title: String, newValue: Any) {
-                settingsViewModel.writeNewSetting(title, newValue)
-            }
-        }
-    }
-
-    private fun initSwitchSettingsView(
-        view: SwitchSettingsView,
-        title: String,
-        subtitle: String,
-        settings: Settings,
-    ) {
-        view.initViewInformation(title, subtitle, settings)
-        view.settingsChangeListener = object : SettingsChangeListener {
-            override fun onSettingChanged(title: String, newValue: Any) {
-                settingsViewModel.writeNewSetting(title, newValue)
-            }
-        }
-    }
-
-    private fun initDefaultSettingsViews() {
-        binding.apply {
-            settingsViewModel.state.map { SettingsUiMapper.map(it) }
-                .observe(viewLifecycleOwner) { model ->
-                    model.settings?.let {
-                        initRadioSettingsView(
-                            languageSettings,
-                            "Language",
-                            listOf(Language.English.name, Language.Bulgarian.name), it
-                        )
-                        initRadioSettingsView(
-                            unitSettings,
-                            "Units",
-                            listOf(Units.BANANA.name, Units.METRIC.name),
-                            it
-                        )
-                        initRadioSettingsView(
-                            themeSettings,
-                            "Theme",
-                            listOf(Theme.Light.name, Theme.Dark.name),
-                            it
-                        )
-                        initRadioSettingsView(
-                            restTimerSettings,
-                            "Timer increment value",
-                            listOf("30 s", "15 s", "5 s"),
-                            it
-                        )
-                        initRadioSettingsView(
-                            soundSettings,
-                            "Sound",
-                            listOf(Sound.SOUND_1.name, Sound.SOUND_2.name, Sound.SOUND_3.name),
-                            it
-                        )
-                        initSwitchSettingsView(
-                            soundEffectsSettings,
-                            "Sound effects",
-                            "Doesn't include rest timer alert",
-                            it
-                        )
-                        initSwitchSettingsView(vibrateSettings, "Vibrate upon finish", "", it)
-                        initSwitchSettingsView(
-                            samsungFitSettings,
-                            "Use samsung watch during workout",
-                            "",
-                            it
-                        )
-                        initSwitchSettingsView(
-                            showUpdateTemplateSettings,
-                            "Show update template",
-                            "Prompt when a workout is finished",
-                            it
-                        )
-                        initSwitchSettingsView(
-                            autoSyncSettings,
-                            "Automatic between device sync",
-                            "Turn this on if you want to use your account on another device",
-                            it
-                        )
-                        editProfile.setViewTitle("Edit")
-                        github.setViewTitle("Github")
-                        bugReport.setViewTitle("Bug report")
-                    }
-                    model.action?.let {
-                        findNavController().navigate(it)
-                    }
-                }
-        }
-    }
-
-    private fun openLink(link: String) {
-        val intent = Intent(Intent.ACTION_VIEW, Uri.parse(link))
-        startActivity(intent)
-    }
+//    override fun onViewCreated(view: View, savedInstanceState: Bundle?) {
+//        super.onViewCreated(view, savedInstanceState)
+//        (activity as? AppCompatActivity)?.supportActionBar?.setDisplayHomeAsUpEnabled(true)
+//        (activity as? AppCompatActivity)?.supportActionBar?.setHomeAsUpIndicator(R.drawable.ic_back_arrow)
+//        requireActivity().setToolBarTitle(R.string.settings_text)
+//        requireActivity().addMenuProvider(object : MenuProvider {
+//            override fun onCreateMenu(menu: Menu, menuInflater: MenuInflater) {
+//                menu.clear()
+//                menuInflater.inflate(R.menu.menu_toolbar_settings, menu)
+//            }
+//
+//            override fun onMenuItemSelected(menuItem: MenuItem): Boolean {
+//                return when (menuItem.itemId) {
+//                    R.id.home -> {
+//                        findNavController().navigate(R.id.settings_to_home)
+//                        true
+//                    }
+//
+//                    R.id.reset -> {
+//                        settingsViewModel.resetSettings()
+//                        true
+//                    }
+//
+//                    else -> false
+//                }
+//            }
+//        })
+//
+//        binding.apply {
+//            signOutButton.setOnClickListener {
+//                settingsViewModel.logout()
+//            }
+//            editProfile.setOnClickListener {
+//                findNavController().navigate(R.id.settings_to_edit_profile)
+//            }
+//            github.setOnClickListener {
+//                openLink("https://github.com/HauntedMilkshake/fitness_app")
+//            }
+//            bugReport.setOnClickListener {
+//                openLink("https://github.com/HauntedMilkshake/fitness_app/issues")
+//            }
+//            deleteAccount.setOnClickListener {
+//                settingsViewModel.deleteAccount()
+//            }
+//
+//        }
+//        initDefaultSettingsViews()
+//    }
+//
+//    private fun initRadioSettingsView(
+//        view: RadioGroupSettingsView,
+//        title: String,
+//        radioOptions: List<String>,
+//        settings: Settings,
+//    ) {
+//        view.initViewInformation(title, radioOptions, settings)
+//        view.settingsChangeListener = object : SettingsChangeListener {
+//            override fun onSettingChanged(title: String, newValue: Any) {
+//                settingsViewModel.writeNewSetting(title, newValue)
+//            }
+//        }
+//    }
+//
+//    private fun initSwitchSettingsView(
+//        view: SwitchSettingsView,
+//        title: String,
+//        subtitle: String,
+//        settings: Settings,
+//    ) {
+//        view.initViewInformation(title, subtitle, settings)
+//        view.settingsChangeListener = object : SettingsChangeListener {
+//            override fun onSettingChanged(title: String, newValue: Any) {
+//                settingsViewModel.writeNewSetting(title, newValue)
+//            }
+//        }
+//    }
+//
+//    private fun initDefaultSettingsViews() {
+//        binding.apply {
+//            settingsViewModel.state.map { SettingsUiMapper.map(it) }
+//                .observe(viewLifecycleOwner) { model ->
+//                    model.settings?.let {
+//                        initRadioSettingsView(
+//                            languageSettings,
+//                            "Language",
+//                            listOf(Language.English.name, Language.Bulgarian.name), it
+//                        )
+//                        initRadioSettingsView(
+//                            unitSettings,
+//                            "Units",
+//                            listOf(Units.BANANA.name, Units.METRIC.name),
+//                            it
+//                        )
+//                        initRadioSettingsView(
+//                            themeSettings,
+//                            "Theme",
+//                            listOf(Theme.Light.name, Theme.Dark.name),
+//                            it
+//                        )
+//                        initRadioSettingsView(
+//                            restTimerSettings,
+//                            "Timer increment value",
+//                            listOf("30 s", "15 s", "5 s"),
+//                            it
+//                        )
+//                        initRadioSettingsView(
+//                            soundSettings,
+//                            "Sound",
+//                            listOf(Sound.SOUND_1.name, Sound.SOUND_2.name, Sound.SOUND_3.name),
+//                            it
+//                        )
+//                        initSwitchSettingsView(
+//                            soundEffectsSettings,
+//                            "Sound effects",
+//                            "Doesn't include rest timer alert",
+//                            it
+//                        )
+//                        initSwitchSettingsView(vibrateSettings, "Vibrate upon finish", "", it)
+//                        initSwitchSettingsView(
+//                            samsungFitSettings,
+//                            "Use samsung watch during workout",
+//                            "",
+//                            it
+//                        )
+//                        initSwitchSettingsView(
+//                            showUpdateTemplateSettings,
+//                            "Show update template",
+//                            "Prompt when a workout is finished",
+//                            it
+//                        )
+//                        initSwitchSettingsView(
+//                            autoSyncSettings,
+//                            "Automatic between device sync",
+//                            "Turn this on if you want to use your account on another device",
+//                            it
+//                        )
+//                        editProfile.setViewTitle("Edit")
+//                        github.setViewTitle("Github")
+//                        bugReport.setViewTitle("Bug report")
+//                    }
+//                    model.action?.let {
+//                        findNavController().navigate(it)
+//                    }
+//                }
+//        }
+//    }
+//
+//    private fun openLink(link: String) {
+//        val intent = Intent(Intent.ACTION_VIEW, Uri.parse(link))
+//        startActivity(intent)
+//    }
 
     override fun onDestroyView() {
         super.onDestroyView()
