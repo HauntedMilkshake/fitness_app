@@ -5,6 +5,11 @@
     android:layout_height="match_parent"
     android:background="@color/background">
 
+    <androidx.compose.ui.platform.ComposeView
+        android:id="@+id/compose_view"
+        android:layout_width="match_parent"
+        android:layout_height="match_parent" />
+
     <com.google.android.material.imageview.ShapeableImageView
         android:id="@+id/profile_icon"
         android:layout_width="64dp"

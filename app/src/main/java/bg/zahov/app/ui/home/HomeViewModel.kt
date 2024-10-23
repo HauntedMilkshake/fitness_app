@@ -1,10 +1,13 @@
 package bg.zahov.app.ui.home
 
 import android.app.Application
+import android.view.View
+import androidx.compose.runtime.MutableState
 import androidx.lifecycle.AndroidViewModel
 import androidx.lifecycle.LiveData
 import androidx.lifecycle.MutableLiveData
 import androidx.lifecycle.viewModelScope
+import androidx.transition.Visibility
 import bg.zahov.app.data.exception.CriticalDataNullException
 import bg.zahov.app.data.local.RealmWorkoutState
 import bg.zahov.app.data.model.Workout
@@ -16,7 +19,11 @@ import bg.zahov.app.getWorkoutStateManager
 import bg.zahov.app.util.toExercise
 import bg.zahov.app.util.toLocalDateTimeRlm
 import com.github.mikephil.charting.data.BarEntry
+import com.github.mikephil.charting.formatter.IndexAxisValueFormatter
+import com.github.mikephil.charting.formatter.ValueFormatter
 import kotlinx.coroutines.async
+import kotlinx.coroutines.flow.MutableStateFlow
+import kotlinx.coroutines.flow.asStateFlow
 import kotlinx.coroutines.launch
 import java.time.DayOfWeek
 import java.time.Duration
@@ -42,14 +49,8 @@ class HomeViewModel(application: Application) : AndroidViewModel(application) {
     private val serviceErrorHandler by lazy {
         application.getServiceErrorProvider()
     }
-    private val _userName = MutableLiveData<String>()
-    val userName: LiveData<String>
-        get() = _userName
-
-    private val _state = MutableLiveData<State>(State.Default)
-    val state: LiveData<State>
-        get() = _state
-
+    private val _state = MutableStateFlow<HomeState>(HomeState.Loading)
+    val state = _state.asStateFlow()
 
     init {
         checkWorkoutState()
@@ -57,10 +58,9 @@ class HomeViewModel(application: Application) : AndroidViewModel(application) {
             launch {
                 try {
                     userRepo.getUser().collect {
-                        _userName.postValue(it.name)
+                        _state.value = HomeState.Default(username = it.name)
                     }
                 } catch (e: CriticalDataNullException) {
-                    serviceErrorHandler.initiateCountdown()
                 }
             }
             launch {
@@ -178,16 +178,19 @@ class HomeViewModel(application: Application) : AndroidViewModel(application) {
         }
     }
 
-    sealed interface State {
-        object Default : State
-        data class BarData(
-            val chartData: List<BarEntry>,
-            val numberOfWorkouts: Int,
-            val xMin: Float,
-            val xMax: Float,
-            val yMin: Float,
-            val yMax: Float,
-            val weekRanges: List<String>,
-        ) : State
+    sealed interface HomeState {
+        object Loading : HomeState
+        data class Default(val username: String, val numberOfWorkouts: String = "", val barData: BarData = BarData())
     }
+
+    data class BarData(
+        var chartVisibility: Int = View.GONE,
+        var xMin: Float = 0f,
+        var xMax: Float = 0f,
+        var yMin: Float = 0f,
+        var yMax: Float = 0f,
+        var chartData: List<BarEntry> = listOf(),
+        var weekRanges: List<String> = listOf(),
+        var xValueFormatter: ValueFormatter = IndexAxisValueFormatter(weekRanges.toTypedArray())
+    )
 }

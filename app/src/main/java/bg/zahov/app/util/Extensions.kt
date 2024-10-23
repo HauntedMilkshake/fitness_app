@@ -21,8 +21,9 @@ import bg.zahov.app.ui.exercise.ExerciseAdapterWrapper
 import bg.zahov.app.ui.workout.add.ExerciseSetAdapterExerciseWrapper
 import bg.zahov.app.ui.workout.add.ExerciseSetAdapterSetWrapper
 import bg.zahov.fitness.app.R
+import com.github.mikephil.charting.charts.BarChart
+import com.github.mikephil.charting.components.XAxis
 import com.google.firebase.Timestamp
-import java.nio.charset.StandardCharsets
 import java.time.Instant
 import java.time.LocalDateTime
 import java.time.ZoneOffset
@@ -138,8 +139,8 @@ fun String.parseTimeStringToLong(): Long {
 
 fun Exercise.toExerciseSetAdapterWrapper(units: Units = Units.METRIC): ExerciseSetAdapterExerciseWrapper {
     return ExerciseSetAdapterExerciseWrapper(
-        noteVisibility = if(note.isNullOrEmpty()) View.GONE else View.VISIBLE,
-        note =  note,
+        noteVisibility = if (note.isNullOrEmpty()) View.GONE else View.VISIBLE,
+        note = note,
         name = this.name,
         backgroundResource = R.color.background,
         firstInputColumnVisibility = when (this.category) {
@@ -310,4 +311,33 @@ fun String.filterIntegerInput(): Int {
         this.dropLast(this.length - this.indexOf(","))
     }
     return this.toIntOrNull() ?: 0
+}
+
+fun BarChart.setupBarChart() {
+    apply {
+        setFitBars(true)
+        legend.isEnabled = false
+        isDoubleTapToZoomEnabled = false
+        axisLeft.isEnabled = false
+        isDragEnabled = false
+        isHighlightFullBarEnabled = false
+        description.apply {
+            setPosition(250f, 60f)
+            text = "Weekly workouts"
+            textColor = android.graphics.Color.WHITE
+        }
+        xAxis.apply {
+            position = XAxis.XAxisPosition.BOTTOM
+            granularity = 1f
+            axisMinimum = 0f
+            textColor = android.graphics.Color.WHITE
+            setCenterAxisLabels(true)
+            isGranularityEnabled = true
+        }
+        axisRight.apply {
+            textColor = android.graphics.Color.WHITE
+            granularity = 1f
+            setDrawGridLines(false)
+        }
+    }
 }
