@@ -13,6 +13,7 @@ import androidx.compose.material3.Icon
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
@@ -26,8 +27,6 @@ import androidx.compose.ui.unit.dp
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import androidx.lifecycle.viewmodel.compose.viewModel
 import androidx.navigation.NavController
-import bg.zahov.app.ui.authentication.AuthenticationState
-import bg.zahov.app.ui.authentication.UiInfo
 import bg.zahov.app.ui.custom.CommonPasswordField
 import bg.zahov.app.ui.custom.CommonTextField
 import bg.zahov.fitness.app.R
@@ -35,41 +34,36 @@ import bg.zahov.fitness.app.R
 
 @Composable
 fun SignupScreen(signupViewModel: SignupViewModel = viewModel(), navController: NavController) {
-    val state = signupViewModel.state.collectAsStateWithLifecycle()
-    var uiInfo = (state.value as? AuthenticationState.Default)?.uiInfo ?: UiInfo()
+    val context = LocalContext.current
+    val uiState = signupViewModel.state.collectAsStateWithLifecycle()
+
+    if (uiState.value.isUserAuthenticated) {
+        LaunchedEffect(Unit) {
+            navController.navigate(R.id.signup_to_loading)
+        }
+    }
+
+    uiState.value.notifyUser?.let {
+        LaunchedEffect(Unit) {
+            showToast(it, context)
+            signupViewModel.messageShown()
+        }
+    }
+
     SignupContent(
         onNameChange = { signupViewModel.onUsernameChange(it) },
         onEmailChange = { signupViewModel.onEmailChange(it) },
         onPasswordChange = { signupViewModel.onPasswordChange(it) },
         onConfirmPasswordChange = { signupViewModel.onConfirmPasswordChange(it) },
-        onSignupButtonPressed = { username, email, password, confirmPassword ->
-            signupViewModel.signUp(
-                username,
-                email,
-                password,
-                confirmPassword
-            )
-        },
+        onSignupButtonPressed = { username, email, password, confirmPassword -> signupViewModel.signUp() },
         onPasswordVisibilityChange = { signupViewModel.onPasswordVisibilityChange(it) },
-        username = uiInfo.username,
-        email = uiInfo.mail,
-        password = uiInfo.password,
-        confirmPassword = uiInfo.confirmPassword,
-        showPassword = uiInfo.passwordVisibility,
+        username = uiState.value.username,
+        email = uiState.value.email,
+        password = uiState.value.password,
+        confirmPassword = uiState.value.confirmPassword,
+        showPassword = uiState.value.passwordVisibility,
         navController = navController
     )
-
-    when (state.value) {
-        AuthenticationState.Authenticate -> navController.navigate(R.id.signup_to_loading)
-        is AuthenticationState.Default -> uiInfo =
-            (state.value as AuthenticationState.Default).uiInfo
-
-        is AuthenticationState.Notify -> {
-            val capture = state.value as AuthenticationState.Notify
-            showToast(capture.message, LocalContext.current)
-            uiInfo = capture.uiInfo
-        }
-    }
 }
 
 @Composable
@@ -106,7 +100,7 @@ fun SignupContent(
             CommonTextField(
                 text = username,
                 label = { Text(stringResource(R.string.username_text)) },
-                leadingIcon = { Icon(painterResource(R.drawable.ic_profile), "Username") },
+                leadingIcon = { Icon(painterResource(R.drawable.ic_profile), null) },
                 onTextChange = {
 
                     onNameChange(it)
@@ -114,7 +108,7 @@ fun SignupContent(
             CommonTextField(
                 text = email,
                 label = { Text(stringResource(R.string.email_text_field_hint)) },
-                leadingIcon = { Icon(painterResource(R.drawable.ic_email), "Email") },
+                leadingIcon = { Icon(painterResource(R.drawable.ic_email), null) },
                 onTextChange = {
                     onEmailChange(it)
                 })
