@@ -38,7 +38,7 @@
 
     <fragment
         android:id="@+id/log_in"
-        android:name="bg.zahov.app.ui.login.LoginFragment"
+        android:name="bg.zahov.app.ui.authentication.login.LoginFragment"
         android:label="@string/login"
         tools:layout="@layout/fragment_log_in">
         <action
@@ -53,7 +53,7 @@
 
     <fragment
         android:id="@+id/signup"
-        android:name="bg.zahov.app.ui.signup.SignupFragment"
+        android:name="bg.zahov.app.ui.authentication.signup.SignupFragment"
         android:label="@string/register"
         tools:layout="@layout/fragment_sign_up">
         <action
