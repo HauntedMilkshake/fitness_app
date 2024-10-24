@@ -30,7 +30,6 @@ class SignupFragment : Fragment() {
                     onAuthenticate = { findNavController().navigate(R.id.signup_to_loading) })
             }
         }
-
     }
 
     override fun onStart() {

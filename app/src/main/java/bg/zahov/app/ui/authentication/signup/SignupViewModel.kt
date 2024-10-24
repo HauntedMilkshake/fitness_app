@@ -16,7 +16,6 @@ import kotlinx.coroutines.launch
  * ViewModel for the signup screen
  *
  * @param userProvider gives access to firebase authentication
- * @property _uiState
  */
 class SignupViewModel(userProvider: UserProvider = Inject.userProvider) : ViewModel() {
     private val auth by lazy {

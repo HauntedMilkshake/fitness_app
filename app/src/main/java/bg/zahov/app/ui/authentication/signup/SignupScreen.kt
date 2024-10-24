@@ -85,7 +85,6 @@ fun SignupContent(
     showPassword: Boolean,
     onNavigateToLogin: () -> Unit
 ) {
-    var areFieldsValid = false
     Column(
         Modifier
             .fillMaxSize()
