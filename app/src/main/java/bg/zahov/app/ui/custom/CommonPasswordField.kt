@@ -8,6 +8,11 @@ import androidx.compose.material3.TextField
 import androidx.compose.material3.TextFieldColors
 import androidx.compose.material3.TextFieldDefaults
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.LaunchedEffect
+import androidx.compose.runtime.getValue
+import androidx.compose.runtime.mutableStateOf
+import androidx.compose.runtime.remember
+import androidx.compose.runtime.setValue
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.graphics.Shape
@@ -17,7 +22,9 @@ import androidx.compose.ui.text.input.PasswordVisualTransformation
 import androidx.compose.ui.text.input.VisualTransformation
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
+import bg.zahov.app.util.isEmail
 import bg.zahov.fitness.app.R
+import kotlinx.coroutines.delay
 
 @Composable
 fun CommonPasswordField(
@@ -42,11 +49,16 @@ fun CommonPasswordField(
     modifier: Modifier = Modifier
 
 ) {
+    var isError by remember { mutableStateOf(false) }
+    var isActive by remember { mutableStateOf(false) }
+
     TextField(
         modifier = modifier,
         value = password,
         onValueChange = {
             onPasswordChange(it)
+            isError = false
+            isActive = true
         },
 
         label = label,
@@ -54,7 +66,7 @@ fun CommonPasswordField(
         leadingIcon = leadingIcon,
         shape = shape,
         colors = colors,
-        isError = (password.isBlank() || password.length < 6),
+        isError = isError,
         visualTransformation = if (passwordVisible) VisualTransformation.None else PasswordVisualTransformation(),
         trailingIcon = {
             IconButton(onClick = {
@@ -67,10 +79,19 @@ fun CommonPasswordField(
             }
         },
         supportingText = {
-            Text(
-                text = stringResource(R.string.password_helper_text),
-                fontSize = 12.sp
-            )
+            if (isError) {
+                Text(
+                    text = stringResource(R.string.password_helper_text),
+                    fontSize = 12.sp
+                )
+            }
         }
     )
+
+    LaunchedEffect(password) {
+        delay(1000)
+        if (isActive) {
+            isError = (password.isBlank() || password.length < 6)
+        }
+    }
 }
