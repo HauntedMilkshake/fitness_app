@@ -22,7 +22,6 @@ import bg.zahov.app.ui.workout.add.ExerciseSetAdapterExerciseWrapper
 import bg.zahov.app.ui.workout.add.ExerciseSetAdapterSetWrapper
 import bg.zahov.fitness.app.R
 import com.google.firebase.Timestamp
-import java.nio.charset.StandardCharsets
 import java.time.Instant
 import java.time.LocalDateTime
 import java.time.ZoneOffset

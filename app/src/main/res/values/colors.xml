@@ -8,6 +8,7 @@
     <color name="black">#FF000000</color>
     <color name="white">#FFFFFFFF</color>
     <color name="background">#293237</color>
+    <color name="disabled_button">#2D3A40</color>
     <color name="shadow">#000000</color>
     <color name="text">#808080</color>
     <color name="red">#ff0000</color>
