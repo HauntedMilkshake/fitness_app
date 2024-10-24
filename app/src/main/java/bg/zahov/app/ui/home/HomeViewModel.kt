@@ -1,21 +1,17 @@
 package bg.zahov.app.ui.home
 
-import android.app.Application
 import android.view.View
-import androidx.compose.runtime.MutableState
-import androidx.lifecycle.AndroidViewModel
-import androidx.lifecycle.LiveData
-import androidx.lifecycle.MutableLiveData
+import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
-import androidx.transition.Visibility
+import bg.zahov.app.Inject
 import bg.zahov.app.data.exception.CriticalDataNullException
+import bg.zahov.app.data.interfaces.RestProvider
+import bg.zahov.app.data.interfaces.ServiceErrorHandler
+import bg.zahov.app.data.interfaces.UserProvider
+import bg.zahov.app.data.interfaces.WorkoutActions
+import bg.zahov.app.data.interfaces.WorkoutProvider
 import bg.zahov.app.data.local.RealmWorkoutState
 import bg.zahov.app.data.model.Workout
-import bg.zahov.app.getRestTimerProvider
-import bg.zahov.app.getServiceErrorProvider
-import bg.zahov.app.getUserProvider
-import bg.zahov.app.getWorkoutProvider
-import bg.zahov.app.getWorkoutStateManager
 import bg.zahov.app.util.toExercise
 import bg.zahov.app.util.toLocalDateTimeRlm
 import com.github.mikephil.charting.data.BarEntry
@@ -23,7 +19,8 @@ import com.github.mikephil.charting.formatter.IndexAxisValueFormatter
 import com.github.mikephil.charting.formatter.ValueFormatter
 import kotlinx.coroutines.async
 import kotlinx.coroutines.flow.MutableStateFlow
-import kotlinx.coroutines.flow.asStateFlow
+import kotlinx.coroutines.flow.StateFlow
+import kotlinx.coroutines.flow.update
 import kotlinx.coroutines.launch
 import java.time.DayOfWeek
 import java.time.Duration
@@ -32,33 +29,40 @@ import java.time.LocalDateTime
 import java.time.format.DateTimeFormatter
 import java.time.temporal.TemporalAdjusters
 
-class HomeViewModel(application: Application) : AndroidViewModel(application) {
-    private val userRepo by lazy {
-        application.getUserProvider()
-    }
+class HomeViewModel(
+    userProvider: UserProvider = Inject.userProvider,
+    workoutRepository: WorkoutProvider = Inject.workoutProvider,
+    workoutStateManager: WorkoutActions = Inject.workoutState,
+    restProvider: RestProvider = Inject.restTimerProvider,
+    serviceErrorHandler: ServiceErrorHandler = Inject.serviceErrorHandler
+) : ViewModel() {
 
+    private val userRepo by lazy {
+        userProvider
+    }
     private val workoutRepo by lazy {
-        application.getWorkoutProvider()
+        workoutRepository
     }
     private val workoutStateManager by lazy {
-        application.getWorkoutStateManager()
+        workoutStateManager
     }
     private val workoutRestManager by lazy {
-        application.getRestTimerProvider()
+        restProvider
     }
     private val serviceErrorHandler by lazy {
-        application.getServiceErrorProvider()
+        serviceErrorHandler
     }
-    private val _state = MutableStateFlow<HomeState>(HomeState.Loading)
-    val state = _state.asStateFlow()
+
+    private val _uiState = MutableStateFlow<HomeUiState>(HomeUiState())
+    val state: StateFlow<HomeUiState> = _uiState
 
     init {
         checkWorkoutState()
         viewModelScope.launch {
             launch {
                 try {
-                    userRepo.getUser().collect {
-                        _state.value = HomeState.Default(username = it.name)
+                    userRepo.getUser().collect { user ->
+                        updateState(user.name)
                     }
                 } catch (e: CriticalDataNullException) {
                 }
@@ -73,15 +77,15 @@ class HomeViewModel(application: Application) : AndroidViewModel(application) {
                                 it.value.toFloat()
                             )
                         }
-                        _state.postValue(
-                            State.BarData(
-                                chartData = barData,
-                                numberOfWorkouts = pastWorkouts.size,
-                                xMin = workoutPerWeekMap.keys.min().toFloat(),
+                        updateState(
+                            pastWorkouts.size.toString(), barData = BarData(
                                 xMax = workoutPerWeekMap.keys.max().toFloat(),
-                                yMin = workoutPerWeekMap.values.min().toFloat(),
+                                xMin = workoutPerWeekMap.keys.min().toFloat(),
                                 yMax = workoutPerWeekMap.values.max().toFloat(),
-                                getWeekRangesForCurrentMonth()
+                                yMin = workoutPerWeekMap.values.min().toFloat(),
+                                chartData = barData,
+                                chartVisibility = View.VISIBLE,
+                                weekRanges = getWeekRangesForCurrentMonth()
                             )
                         )
                     }
@@ -91,6 +95,18 @@ class HomeViewModel(application: Application) : AndroidViewModel(application) {
             }
         }
     }
+
+    //TODD()
+    private fun updateState(
+        username: String? = null,
+        workoutCount: String? = null,
+        barData: BarData? = null
+    ) {
+        _uiState.update { old ->
+            old.copy()
+        }
+    }
+
 
     private fun getWorkoutsPerWeek(workouts: List<Workout>): Map<Int, Int> {
         val weekRanges = getWeekRangesForCurrentMonth()
@@ -178,10 +194,13 @@ class HomeViewModel(application: Application) : AndroidViewModel(application) {
         }
     }
 
-    sealed interface HomeState {
-        object Loading : HomeState
-        data class Default(val username: String, val numberOfWorkouts: String = "", val barData: BarData = BarData())
-    }
+
+    data class HomeUiState(
+        val isLoading: Boolean = false,
+        val username: String = "",
+        val numberOfWorkouts: String = "",
+        val barData: BarData = BarData()
+    )
 
     data class BarData(
         var chartVisibility: Int = View.GONE,

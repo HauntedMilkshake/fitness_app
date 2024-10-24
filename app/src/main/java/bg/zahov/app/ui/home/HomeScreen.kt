@@ -19,6 +19,8 @@ import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import androidx.compose.ui.viewinterop.AndroidView
+import androidx.lifecycle.compose.collectAsStateWithLifecycle
+import androidx.lifecycle.viewmodel.compose.viewModel
 import bg.zahov.fitness.app.R
 import com.github.mikephil.charting.charts.BarChart
 import com.github.mikephil.charting.data.BarData
@@ -28,13 +30,13 @@ import com.github.mikephil.charting.formatter.IndexAxisValueFormatter
 
 @Preview
 @Composable
-//homeViewModel: HomeViewModel = viewModel(), navController: NavController
-fun HomeScreen() {
-    HomeScreenContent("", "")
+fun HomeScreen(homeViewModel: HomeViewModel = viewModel()) {
+    val uiState = homeViewModel.state.collectAsStateWithLifecycle()
+    HomeScreenContent(uiState.value.username, uiState.value.numberOfWorkouts, uiState.value.barData)
 }
 
 @Composable
-fun HomeScreenContent(username: String, numberOfWorkouts: String) {
+fun HomeScreenContent(username: String, numberOfWorkouts: String, barData: HomeViewModel.BarData) {
     Column(
         Modifier
             .fillMaxSize()
@@ -58,13 +60,14 @@ fun HomeScreenContent(username: String, numberOfWorkouts: String) {
             color = colorResource(R.color.text),
             fontSize = 20.sp
         )
-//        BarChartComponent()
+        //TODO() loading
+        BarChartComponent(barData = barData)
     }
 
 }
 
 @Composable
-fun BarChartComponent(modifier: Modifier = Modifier, barData: HomeViewModel.State.BarData) {
+fun BarChartComponent(modifier: Modifier = Modifier, barData: HomeViewModel.BarData) {
     AndroidView(modifier = modifier,
         factory = { context ->
             BarChart(context).apply {
