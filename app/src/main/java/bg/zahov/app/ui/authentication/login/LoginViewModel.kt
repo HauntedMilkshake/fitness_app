@@ -1,10 +1,9 @@
 package bg.zahov.app.ui.authentication.login
 
-import android.app.Application
-import androidx.lifecycle.AndroidViewModel
+import bg.zahov.app.Inject
+import bg.zahov.app.data.interfaces.UserProvider
+import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
-import bg.zahov.app.getServiceErrorProvider
-import bg.zahov.app.getUserProvider
 import bg.zahov.app.util.isEmail
 import kotlinx.coroutines.launch
 import kotlinx.coroutines.flow.MutableStateFlow
@@ -12,17 +11,14 @@ import kotlinx.coroutines.flow.StateFlow
 import kotlinx.coroutines.flow.asStateFlow
 import java.lang.IllegalArgumentException
 
-class LoginViewModel(application: Application) : AndroidViewModel(application) {
+class LoginViewModel(userProvider: UserProvider = Inject.userProvider) : ViewModel() {
     private val _uiState = MutableStateFlow<UiState>(UiState.Default)
     val uiState: StateFlow<UiState> = _uiState.asStateFlow()
 
-    private var counter:Int = 1
+    private var counter: Int = 1
 
     private val auth by lazy {
-        application.getUserProvider()
-    }
-    private val serviceError by lazy {
-        application.getServiceErrorProvider()
+        userProvider
     }
 
     fun login(email: String, password: String) {
@@ -45,13 +41,11 @@ class LoginViewModel(application: Application) : AndroidViewModel(application) {
                     }
                     .addOnFailureListener {
                         _uiState.value =
-                            it.message?.let {
-                                it1 ->
+                            it.message?.let { it1 ->
                                 UiState.Error(message = it1, counter = counter)
                             }!!
                     }
             } catch (e: IllegalArgumentException) {
-                serviceError.initiateCountdown()
             }
         }
     }
@@ -84,6 +78,7 @@ class LoginViewModel(application: Application) : AndroidViewModel(application) {
                 }
         }
     }
+
     sealed interface UiState {
         object Default : UiState
         data class Authenticated(var isAuthenticated: Boolean) : UiState

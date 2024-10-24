@@ -54,8 +54,7 @@
     <fragment
         android:id="@+id/signup"
         android:name="bg.zahov.app.ui.authentication.signup.SignupFragment"
-        android:label="@string/register"
-        tools:layout="@layout/fragment_sign_up">
+        android:label="@string/register">
         <action
             android:id="@+id/signup_to_login"
             app:destination="@id/log_in" />

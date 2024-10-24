@@ -14,7 +14,7 @@
     <string name="email_text_field_hint">Email</string>
     <string name="password_text_field_hint">Password</string>
     <string name="forgot_password">Forgot password?</string>
-    <string name="password_helper_text">Use a password with numbers</string>
+    <string name="password_helper_text">Passwords must be at least 6 characters long and matching</string>
     <string name="username_text">Username</string>
     <!-- Strings used for welcome fragment-->
     <string name="welcome_text">Disciplined</string>
@@ -24,6 +24,9 @@
     <!-- String used for signup fragment   -->
     <string name="already_have_account_text">Already have an account? Log in here!</string>
     <string name="confirm_password_text">Confirm <Password></Password></string>
+    <string name="no_empty_fields">Don\'t leave empty fields</string>
+    <string name="wrong_password">Passwords must be at least 6 characters long</string>
+    <string name="wrong_email">Email address must be in the format: user@example.com.</string>
     <!-- Strings used for profile fragment   -->
     <string name="workout_text">%d workouts</string>
     <string name="top_bar_text">Profile</string>
