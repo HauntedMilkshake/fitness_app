@@ -1,6 +1,5 @@
 package bg.zahov.app.ui.authentication.login
 
-import android.annotation.SuppressLint
 import android.widget.Toast
 import androidx.compose.foundation.clickable
 import androidx.compose.foundation.interaction.MutableInteractionSource
@@ -17,6 +16,7 @@ import androidx.compose.material3.Icon
 import androidx.compose.material3.Text
 import androidx.compose.material3.TextButton
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.remember
 import androidx.compose.ui.Alignment
@@ -32,34 +32,57 @@ import androidx.compose.ui.unit.sp
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import bg.zahov.fitness.app.R
 import androidx.lifecycle.viewmodel.compose.viewModel
-import androidx.navigation.NavController
-import bg.zahov.app.ui.authentication.AuthenticationState
 import bg.zahov.app.ui.custom.CommonPasswordField
 import bg.zahov.app.ui.custom.CommonTextField
 
-
-@SuppressLint("UnrememberedMutableState")
 @Composable
-fun LoginScreen(loginViewModel: LoginViewModel = viewModel(), nav: NavController) {
+fun LoginScreen(loginViewModel: LoginViewModel = viewModel(), nav: (Int) -> Unit) {
     val uiState by loginViewModel.uiState.collectAsStateWithLifecycle()
-    when (uiState) {
-        AuthenticationState.Authenticate -> nav.navigate(R.id.login_to_loading)
-        is AuthenticationState.Default -> {}
-
-        is AuthenticationState.Notify -> Toast.makeText(
-            LocalContext.current,
-            (uiState as AuthenticationState.Notify).message,
-            Toast.LENGTH_SHORT
-        ).show()
+    val context = LocalContext.current
+    if (uiState.isLoggedInfo) {
+        LaunchedEffect(Unit) {
+            nav(R.id.login_to_loading)
+        }
     }
-    val interactionSource = remember { MutableInteractionSource() }
 
+    uiState.message?.let { message ->
+        LaunchedEffect(Unit) {
+            Toast.makeText(context, message, Toast.LENGTH_SHORT).show()
+            loginViewModel.shownMessage()
+        }
+    }
+    LoginContent(
+        email = uiState.email,
+        onEmailChange = { loginViewModel.onEmailChange(email = it) },
+        password = uiState.password,
+        onPasswordChange = { loginViewModel.onPasswordChange(password = it) },
+        passwordVisibility = uiState.passwordVisibility,
+        onPasswordVisibilityChange = { loginViewModel.onPasswordVisibilityChange() },
+        navigateSignUp = { nav(R.id.login_to_signup) },
+        logIn = { loginViewModel.login() },
+        resetPassword = { loginViewModel.sendPasswordResetEmail() }
+        )
+}
+
+@Composable
+fun LoginContent(
+    email: String,
+    onEmailChange: (String) -> Unit,
+    password: String,
+    onPasswordChange: (String) -> Unit,
+    passwordVisibility: Boolean,
+    onPasswordVisibilityChange: () -> Unit,
+    navigateSignUp: () -> Unit,
+    logIn: () -> Unit,
+    resetPassword: () -> Unit
+) {
+    val interactionSource = remember { MutableInteractionSource() }
     Column(
         modifier = Modifier
             .fillMaxSize()
     ) {
         Text(
-            "Login",
+            text = stringResource(R.string.login),
             fontSize = 40.sp,
             color = Color.White,
             modifier = Modifier
@@ -71,43 +94,35 @@ fun LoginScreen(loginViewModel: LoginViewModel = viewModel(), nav: NavController
                 .width(240.dp)
                 .padding(top = 20.dp)
                 .align(Alignment.CenterHorizontally),
-            verticalArrangement = Arrangement.spacedBy(15.dp)
+            verticalArrangement = Arrangement.spacedBy(16.dp)
         ) {
             CommonTextField(
-                text = loginViewModel.getInfoMail(),
+                text = email,
                 leadingIcon = { Icon(painterResource(R.drawable.ic_profile), "Username") },
                 label = { Text(stringResource(R.string.email_text_field_hint)) },
-                onTextChange = {
-                    loginViewModel.setInfo(mail = it)
-                })
+                onTextChange = { onEmailChange(it) })
 
             CommonPasswordField(
-                password = loginViewModel.getInfoPassword(),
-                passwordVisible = loginViewModel.getInfoPasswordVisibility(),
+                password = password,
+                passwordVisible = passwordVisibility,
                 label = { Text(stringResource(R.string.password_text_field_hint)) },
-                onPasswordChange = {
-                    loginViewModel.setInfo(password = it)
-                },
-                onPasswordVisibilityChange = {
-                    loginViewModel.changePasswordVisibility()
-                })
+                onPasswordChange = { onPasswordChange(it) },
+                onPasswordVisibilityChange = { onPasswordVisibilityChange() })
 
             Text(
                 text = stringResource(R.string.forgot_password),
                 modifier = Modifier
-                    .padding(top = 15.dp)
+                    .padding(top = 16.dp)
                     .clickable(
                         interactionSource = interactionSource,
                         indication = null
-                    ) { loginViewModel.sendPasswordResetEmail() },
+                    ) { resetPassword() },
                 style = TextStyle(color = colorResource(R.color.less_vibrant_text))
             )
             TextButton(
-                onClick = {
-                    loginViewModel.login()
-                },
+                onClick = { logIn() },
                 modifier = Modifier
-                    .padding(top = 15.dp)
+                    .padding(top = 16.dp)
                     .fillMaxWidth(),
                 colors = ButtonColors(
                     containerColor = colorResource(R.color.text),
@@ -134,9 +149,7 @@ fun LoginScreen(loginViewModel: LoginViewModel = viewModel(), nav: NavController
                     .clickable(
                         interactionSource = interactionSource,
                         indication = null
-                    ) {
-                        nav.navigate(R.id.login_to_signup)
-                    }
+                    ) { navigateSignUp() }
             )
         }
     }

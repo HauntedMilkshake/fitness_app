@@ -23,7 +23,7 @@ class LoginFragment : Fragment() {
         return ComposeView(requireContext()).apply {
             setViewCompositionStrategy(ViewCompositionStrategy.DisposeOnViewTreeLifecycleDestroyed)
             setContent {
-                LoginScreen(loginViewModel, findNavController())
+                LoginScreen(loginViewModel, nav = { findNavController().navigate(it) })
             }
         }
     }

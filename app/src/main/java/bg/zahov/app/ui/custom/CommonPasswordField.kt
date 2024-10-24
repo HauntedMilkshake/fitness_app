@@ -41,7 +41,7 @@ fun CommonPasswordField(
     ),
     onPasswordChange: (String) -> Unit,
     onPasswordVisibilityChange: () -> Unit,
-    @SuppressLint("ModifierParameter") modifier: Modifier = Modifier
+    modifier: Modifier = Modifier
 ) {
     TextField(
         value = password,

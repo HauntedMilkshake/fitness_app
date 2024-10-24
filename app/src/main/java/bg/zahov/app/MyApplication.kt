@@ -15,6 +15,15 @@ import bg.zahov.app.data.provider.WorkoutStateManager
 import com.google.firebase.Firebase
 import com.google.firebase.initialize
 
+object Inject {
+    val userProvider by lazy {
+        UserProviderImpl.getInstance()
+    }
+    val serviceErrorHandler by lazy {
+        ServiceErrorHandlerImpl.getInstance()
+    }
+}
+
 class MyApplication : Application() {
     val userProvider by lazy {
         UserProviderImpl.getInstance()
