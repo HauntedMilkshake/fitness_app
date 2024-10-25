@@ -29,12 +29,18 @@ import java.time.LocalDateTime
 import java.time.format.DateTimeFormatter
 import java.time.temporal.TemporalAdjusters
 
+/**
+ * @param userProvider - access to everything related to the user ( in here we only use the username)
+ * @param workoutRepository - access to history of previous workouts
+ * @param workoutStateManager - check local db(realm) if a workout is stored in it(whenever the user clears the app and reopens it) and starts it again
+ * @param restProvider - makes sure to resume previous rest if the app has been opened and it would still need to be running
+ */
 class HomeViewModel(
     userProvider: UserProvider = Inject.userProvider,
     workoutRepository: WorkoutProvider = Inject.workoutProvider,
     workoutStateManager: WorkoutActions = Inject.workoutState,
     restProvider: RestProvider = Inject.restTimerProvider,
-    serviceErrorHandler: ServiceErrorHandler = Inject.serviceErrorHandler
+    serviceErrorManager: ServiceErrorHandler = Inject.serviceErrorHandler
 ) : ViewModel() {
 
     private val userRepo by lazy {
@@ -50,21 +56,29 @@ class HomeViewModel(
         restProvider
     }
     private val serviceErrorHandler by lazy {
-        serviceErrorHandler
+        serviceErrorManager
     }
 
     private val _uiState = MutableStateFlow<HomeUiState>(HomeUiState())
     val state: StateFlow<HomeUiState> = _uiState
 
+    /**
+     * fetch data asap
+     * convert past workouts to appropriate chart information
+     * check if we stopped the app during a workout
+     */
     init {
         checkWorkoutState()
         viewModelScope.launch {
             launch {
                 try {
                     userRepo.getUser().collect { user ->
-                        updateState(user.name)
+                        _uiState.update { old ->
+                            old.copy(username = user.name)
+                        }
                     }
                 } catch (e: CriticalDataNullException) {
+                    serviceErrorHandler.initiateCountdown()
                 }
             }
             launch {
@@ -77,17 +91,21 @@ class HomeViewModel(
                                 it.value.toFloat()
                             )
                         }
-                        updateState(
-                            pastWorkouts.size.toString(), barData = BarData(
-                                xMax = workoutPerWeekMap.keys.max().toFloat(),
-                                xMin = workoutPerWeekMap.keys.min().toFloat(),
-                                yMax = workoutPerWeekMap.values.max().toFloat(),
-                                yMin = workoutPerWeekMap.values.min().toFloat(),
-                                chartData = barData,
-                                chartVisibility = View.VISIBLE,
-                                weekRanges = getWeekRangesForCurrentMonth()
+                        _uiState.update { old ->
+                            old.copy(
+                                numberOfWorkouts = pastWorkouts.size.toString(), barData = BarData(
+                                    xMax = workoutPerWeekMap.keys.max().toFloat(),
+                                    xMin = workoutPerWeekMap.keys.min().toFloat(),
+                                    yMax = workoutPerWeekMap.values.max().toFloat(),
+                                    yMin = workoutPerWeekMap.values.min().toFloat(),
+                                    chartData = barData,
+                                    chartVisibility = View.VISIBLE,
+                                    weekRanges = getWeekRangesForCurrentMonth()
+                                ),
+                                isChartLoading = false
                             )
-                        )
+                        }
+
                     }
                 } catch (e: CriticalDataNullException) {
                     serviceErrorHandler.initiateCountdown()
@@ -95,18 +113,6 @@ class HomeViewModel(
             }
         }
     }
-
-    //TODD()
-    private fun updateState(
-        username: String? = null,
-        workoutCount: String? = null,
-        barData: BarData? = null
-    ) {
-        _uiState.update { old ->
-            old.copy()
-        }
-    }
-
 
     private fun getWorkoutsPerWeek(workouts: List<Workout>): Map<Int, Int> {
         val weekRanges = getWeekRangesForCurrentMonth()
@@ -127,7 +133,9 @@ class HomeViewModel(
         return workoutsPerWeek
     }
 
-
+    /**
+     * we only want to show information for the current month, and we also need to provide them for the x axis of the barChart
+     */
     private fun getWeekRangesForCurrentMonth(): List<String> {
         val today = LocalDate.now()
         val firstDayOfMonth = today.withDayOfMonth(1)
@@ -151,6 +159,9 @@ class HomeViewModel(
         return weekRanges
     }
 
+    /**
+     * if stored isn't default the means we must resume a workout
+     */
     private suspend fun checkPreviousState(previousState: RealmWorkoutState) {
         if (previousState.id != "default") {
             val lastTime =
@@ -187,6 +198,9 @@ class HomeViewModel(
         }
     }
 
+    /**
+     * making sure we don't need to resume a workout before clearing it
+     */
     private fun checkWorkoutState() {
         viewModelScope.launch {
             async { workoutRepo.getPreviousWorkoutState()?.let { checkPreviousState(it) } }.await()
@@ -199,7 +213,8 @@ class HomeViewModel(
         val isLoading: Boolean = false,
         val username: String = "",
         val numberOfWorkouts: String = "",
-        val barData: BarData = BarData()
+        val barData: BarData = BarData(),
+        val isChartLoading: Boolean = true
     )
 
     data class BarData(
