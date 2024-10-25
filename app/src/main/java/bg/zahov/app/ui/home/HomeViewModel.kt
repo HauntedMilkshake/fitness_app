@@ -29,6 +29,25 @@ import java.time.LocalDateTime
 import java.time.format.DateTimeFormatter
 import java.time.temporal.TemporalAdjusters
 
+data class HomeUiState(
+    val isLoading: Boolean = false,
+    val username: String = "",
+    val numberOfWorkouts: String = "",
+    val barData: BarData = BarData(),
+    val isChartLoading: Boolean = true
+)
+
+data class BarData(
+    var chartVisibility: Int = View.GONE,
+    var xMin: Float = 0f,
+    var xMax: Float = 0f,
+    var yMin: Float = 0f,
+    var yMax: Float = 0f,
+    var chartData: List<BarEntry> = listOf(),
+    var weekRanges: List<String> = listOf(),
+    var xValueFormatter: ValueFormatter = IndexAxisValueFormatter(weekRanges.toTypedArray())
+)
+
 /**
  * @param userRepo - access to everything related to the user ( in here we only use the username)
  * @param workoutRepo - access to history of previous workouts
@@ -44,7 +63,7 @@ class HomeViewModel(
 ) : ViewModel() {
 
     private val _uiState = MutableStateFlow<HomeUiState>(HomeUiState())
-    val state: StateFlow<HomeUiState> = _uiState
+    val uiState: StateFlow<HomeUiState> = _uiState
 
     /**
      * fetch data asap
@@ -191,24 +210,4 @@ class HomeViewModel(
             workoutRepo.clearWorkoutState()
         }
     }
-
-
-    data class HomeUiState(
-        val isLoading: Boolean = false,
-        val username: String = "",
-        val numberOfWorkouts: String = "",
-        val barData: BarData = BarData(),
-        val isChartLoading: Boolean = true
-    )
-
-    data class BarData(
-        var chartVisibility: Int = View.GONE,
-        var xMin: Float = 0f,
-        var xMax: Float = 0f,
-        var yMin: Float = 0f,
-        var yMax: Float = 0f,
-        var chartData: List<BarEntry> = listOf(),
-        var weekRanges: List<String> = listOf(),
-        var xValueFormatter: ValueFormatter = IndexAxisValueFormatter(weekRanges.toTypedArray())
-    )
 }

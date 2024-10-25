@@ -36,7 +36,7 @@ import com.github.mikephil.charting.formatter.IndexAxisValueFormatter
 @Preview
 @Composable
 fun HomeScreen(homeViewModel: HomeViewModel = viewModel()) {
-    val uiState by homeViewModel.state.collectAsStateWithLifecycle()
+    val uiState by homeViewModel.uiState.collectAsStateWithLifecycle()
     HomeScreenContent(
         uiState.username,
         uiState.numberOfWorkouts,
