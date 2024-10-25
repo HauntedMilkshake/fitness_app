@@ -28,7 +28,6 @@ import androidx.lifecycle.viewmodel.compose.viewModel
 import bg.zahov.app.util.setupBarChart
 import bg.zahov.fitness.app.R
 import com.github.mikephil.charting.charts.BarChart
-import com.github.mikephil.charting.data.BarData
 import com.github.mikephil.charting.data.BarDataSet
 import androidx.compose.runtime.getValue
 import com.github.mikephil.charting.formatter.IndexAxisValueFormatter
@@ -49,7 +48,7 @@ fun HomeScreen(homeViewModel: HomeViewModel = viewModel()) {
 fun HomeScreenContent(
     username: String,
     numberOfWorkouts: String,
-    barData: HomeViewModel.BarData,
+    barData: BarData,
     isChartLoading: Boolean = true
 ) {
     Column(
@@ -108,7 +107,7 @@ fun HomeScreenContent(
 fun BarChartComponent(
     modifier: Modifier = Modifier
         .fillMaxWidth()
-        .height(200.dp), barData: HomeViewModel.BarData
+        .height(200.dp), barData: BarData
 ) {
     AndroidView(modifier = modifier,
         factory = { context ->
@@ -126,7 +125,7 @@ fun BarChartComponent(
                 }
                 val dataSet = BarDataSet(barData.chartData, "workouts")
                 dataSet.setDrawValues(false)
-                val barData = BarData(dataSet)
+                val barData =  com.github.mikephil.charting.data.BarData(dataSet)
                 barData.barWidth = 0.5f
                 data = barData
             }
