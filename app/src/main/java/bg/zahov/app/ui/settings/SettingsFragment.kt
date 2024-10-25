@@ -41,14 +41,12 @@ class SettingsFragment : Fragment() {
         container: ViewGroup?,
         savedInstanceState: Bundle?,
     ): View {
-//        _binding = FragmentSettingsBinding.inflate(inflater, container, false)
-//        requireActivity().hideBottomNav()
-//        return binding.root
         return ComposeView(requireContext()).apply {
+            requireActivity().hideBottomNav()
             setViewCompositionStrategy(ViewCompositionStrategy.DisposeOnViewTreeLifecycleDestroyed)
-        setContent {
-            SettingsScreen(settingsViewModel)
-        }
+            setContent {
+                SettingsScreen(settingsViewModel)
+            }
         }
     }
 
