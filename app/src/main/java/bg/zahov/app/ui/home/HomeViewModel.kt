@@ -26,6 +26,25 @@ import java.time.LocalDateTime
 import java.time.format.DateTimeFormatter
 import java.time.temporal.TemporalAdjusters
 
+data class HomeUiState(
+    val isLoading: Boolean = false,
+    val username: String = "",
+    val numberOfWorkouts: String = "",
+    val barData: BarData = BarData(),
+    val isChartLoading: Boolean = true
+)
+
+data class BarData(
+    var chartVisibility: Int = View.GONE,
+    var xMin: Float = 0f,
+    var xMax: Float = 0f,
+    var yMin: Float = 0f,
+    var yMax: Float = 0f,
+    var chartData: List<BarEntry> = listOf(),
+    var weekRanges: List<String> = listOf(),
+    var xValueFormatter: ValueFormatter = IndexAxisValueFormatter(weekRanges.toTypedArray())
+)
+
 /**
  * Represents the UI state for the Home screen.
  *
