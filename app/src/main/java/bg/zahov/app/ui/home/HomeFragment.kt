@@ -20,8 +20,7 @@ import bg.zahov.app.showBottomNav
 import bg.zahov.app.showTopBar
 import bg.zahov.fitness.app.R
 
-class
-HomeFragment : Fragment() {
+class HomeFragment : Fragment() {
     private val homeViewModel: HomeViewModel by viewModels()
     override fun onCreateView(
         inflater: LayoutInflater, container: ViewGroup?, savedInstanceState: Bundle?,
@@ -32,73 +31,9 @@ HomeFragment : Fragment() {
         return ComposeView(requireContext()).apply {
             setViewCompositionStrategy(ViewCompositionStrategy.DisposeOnViewTreeLifecycleDestroyed)
             setContent {
-//                homeViewModel, navController = findNavController()
-                HomeScreen()
+                HomeScreen(homeViewModel)
             }
         }
-    }
-
-    override fun onViewCreated(view: View, savedInstanceState: Bundle?) {
-        super.onViewCreated(view, savedInstanceState)
-//        binding.apply {
-//            homeViewModel.state.map { HomeUiMapper.map(it) }.observe(viewLifecycleOwner) {
-//                loadingIndicator.visibility = it.loadingVisibility
-//                weeklyWorkoutsChart.apply {
-//                    visibility = it.chartVisibility
-//                    xAxis.apply {
-//                        valueFormatter = IndexAxisValueFormatter(it.weekRanges.toTypedArray())
-//                        axisMaximum = it.xMax
-//                        axisMinimum = it.xMin
-//                    }
-//                    axisRight.apply {
-//                        axisMaximum = it.yMax
-//                        axisMinimum = it.yMin
-//                    }
-//
-//                    val dataSet = BarDataSet(it.lineData, "workouts")
-//                    dataSet.setDrawValues(false)
-//                    val barData = BarData(dataSet)
-//                    barData.barWidth = 0.5f
-//                    data = barData
-//                    weeklyWorkoutsChart.notifyDataSetChanged()
-//                    weeklyWorkoutsChart.invalidate()
-//                }
-//                numberOfWorkouts.apply {
-//                    visibility = it.textFieldVisibility
-//                    text = getString(R.string.workout_text, it.numberOfWorkouts)
-//                }
-//            }
-//            homeViewModel.userName.observe(viewLifecycleOwner) {
-//                profileName.text = it
-//            }
-//
-//            weeklyWorkoutsChart.apply {
-//                setFitBars(true)
-//                legend.isEnabled = false
-//                isDoubleTapToZoomEnabled = false
-//                axisLeft.isEnabled = false
-//                isDragEnabled = false
-//                isHighlightFullBarEnabled = false
-//                description.apply {
-//                    setPosition(250f, 60f)
-//                    text = "Weekly workouts"
-//                    textColor = Color.WHITE
-//                }
-//                xAxis.apply {
-//                    position = XAxis.XAxisPosition.BOTTOM
-//                    granularity = 1f
-//                    axisMinimum = 0f
-//                    textColor = Color.WHITE
-//                    setCenterAxisLabels(true)
-//                    isGranularityEnabled = true
-//                }
-//                axisRight.apply {
-//                    textColor = Color.WHITE
-//                    granularity = 1f
-//                    setDrawGridLines(false)
-//                }
-//            }
-//        }
     }
 
     private fun setupTopBar() {
