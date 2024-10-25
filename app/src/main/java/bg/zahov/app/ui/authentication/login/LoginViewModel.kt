@@ -16,7 +16,7 @@ import java.lang.IllegalArgumentException
  * authentication backend service. It is responsible for managing the UI state and updating the
  * UI based on user interactions such as entering email, password, or toggling password visibility.
  *
- * @property uiState A [StateFlow] of [UiInfo], which contains the current UI state including email, password, message, password visibility and login check.
+ * @property uiState A [StateFlow] of [LoginData], which contains the current UI state including email, password, message, password visibility and login check.
  *
  * @constructor
  * @param auth Injected user authentication provider that handles login and password reset logic.
@@ -26,9 +26,26 @@ class LoginViewModel(
     private val auth: UserProvider = Inject.userProvider,
     private val serviceError: ServiceErrorHandler = Inject.serviceErrorHandler
 ) : ViewModel() {
+    /**
+     * Data class that represents the UI state for the login screen.
+     *
+     * @property email The email input from the user.
+     * @property password The password input from the user.
+     * @property message An optional message to be displayed (e.g., errors or success messages).
+     * @property passwordVisibility Boolean flag indicating whether the password is visible or hidden.
+     * @property isLoggedInfo Boolean flag indicating whether the user is logged in or not.
+     */
+    data class LoginData(
+        var email: String = "",
+        var password: String = "",
+        val message: String? = null,
+        var passwordVisibility: Boolean = false,
+        var isLoggedInfo: Boolean = false
+    )
+
     // Holds the current UI state as a MutableStateFlow to observe and react to changes.
-    private val _uiState = MutableStateFlow(UiInfo())
-    val uiState: StateFlow<UiInfo> = _uiState
+    private val _uiState = MutableStateFlow(LoginData())
+    val uiState: StateFlow<LoginData> = _uiState
 
     /**
      * Updates the password in the UI state when the user changes the password input.
@@ -106,21 +123,4 @@ class LoginViewModel(
     fun shownMessage() {
         notifyChange(null)
     }
-
-    /**
-     * Data class that represents the UI state for the login screen.
-     *
-     * @property email The email input from the user.
-     * @property password The password input from the user.
-     * @property message An optional message to be displayed (e.g., errors or success messages).
-     * @property passwordVisibility Boolean flag indicating whether the password is visible or hidden.
-     * @property isLoggedInfo Boolean flag indicating whether the user is logged in or not.
-     */
-    data class UiInfo(
-        var email: String = "",
-        var password: String = "",
-        val message: String? = null,
-        var passwordVisibility: Boolean = false,
-        var isLoggedInfo: Boolean = false
-    )
 }
