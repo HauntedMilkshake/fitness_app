@@ -11,6 +11,7 @@ import androidx.fragment.app.viewModels
 import androidx.navigation.fragment.findNavController
 import bg.zahov.app.hideBottomNav
 import bg.zahov.app.hideTopBar
+import bg.zahov.fitness.app.R
 
 class LoginFragment : Fragment() {
     private val loginViewModel: LoginViewModel by viewModels()
@@ -23,7 +24,9 @@ class LoginFragment : Fragment() {
         return ComposeView(requireContext()).apply {
             setViewCompositionStrategy(ViewCompositionStrategy.DisposeOnViewTreeLifecycleDestroyed)
             setContent {
-                LoginScreen(loginViewModel, findNavController())
+                LoginScreen(loginViewModel,
+                    onAuthenticate = { findNavController().navigate(R.id.login_to_loading) },
+                    onNavigateToSignUp = { findNavController().navigate(R.id.login_to_signup) })
             }
         }
     }
