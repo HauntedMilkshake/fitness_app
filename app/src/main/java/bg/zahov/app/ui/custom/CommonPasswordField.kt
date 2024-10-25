@@ -22,7 +22,6 @@ import androidx.compose.ui.text.input.PasswordVisualTransformation
 import androidx.compose.ui.text.input.VisualTransformation
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
-import bg.zahov.app.util.isEmail
 import bg.zahov.fitness.app.R
 import kotlinx.coroutines.delay
 

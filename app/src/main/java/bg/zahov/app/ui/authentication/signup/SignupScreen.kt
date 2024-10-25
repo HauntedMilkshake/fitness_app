@@ -30,6 +30,8 @@ import bg.zahov.app.ui.custom.CommonPasswordField
 import bg.zahov.app.ui.custom.CommonTextField
 import bg.zahov.app.util.isEmail
 import bg.zahov.fitness.app.R
+import androidx.compose.runtime.getValue
+
 
 @Composable
 fun SignupScreen(
@@ -38,15 +40,15 @@ fun SignupScreen(
     onNavigateToLogin: () -> Unit
 ) {
     val context = LocalContext.current
-    val uiState = signupViewModel.uiState.collectAsStateWithLifecycle()
+    val uiState by signupViewModel.uiState.collectAsStateWithLifecycle()
 
-    if (uiState.value.isUserAuthenticated) {
+    if (uiState.isUserAuthenticated) {
         LaunchedEffect(Unit) {
             onAuthenticate()
         }
     }
 
-    uiState.value.notifyUser?.let {
+    uiState.notifyUser?.let {
         LaunchedEffect(Unit) {
             showToast(it, context)
             signupViewModel.messageShown()
@@ -54,17 +56,17 @@ fun SignupScreen(
     }
 
     SignupContent(
+        username = uiState.username,
+        email = uiState.email,
+        password = uiState.password,
+        showPassword = uiState.passwordVisibility,
+        confirmPassword = uiState.confirmPassword,
         onNameChange = { signupViewModel.onUsernameChange(it) },
         onEmailChange = { signupViewModel.onEmailChange(it) },
         onPasswordChange = { signupViewModel.onPasswordChange(it) },
         onConfirmPasswordChange = { signupViewModel.onConfirmPasswordChange(it) },
         onSignupButtonPressed = { signupViewModel.signUp() },
         onPasswordVisibilityChange = { signupViewModel.onPasswordVisibilityChange(it) },
-        username = uiState.value.username,
-        email = uiState.value.email,
-        password = uiState.value.password,
-        confirmPassword = uiState.value.confirmPassword,
-        showPassword = uiState.value.passwordVisibility,
         onNavigateToLogin = onNavigateToLogin
 
     )
@@ -72,17 +74,17 @@ fun SignupScreen(
 
 @Composable
 fun SignupContent(
+    username: String,
+    email: String,
+    password: String,
+    showPassword: Boolean,
+    confirmPassword: String,
     onNameChange: (String) -> Unit,
     onEmailChange: (String) -> Unit,
     onPasswordChange: (String) -> Unit,
     onConfirmPasswordChange: (String) -> Unit,
     onSignupButtonPressed: () -> Unit,
     onPasswordVisibilityChange: (Boolean) -> Unit,
-    username: String,
-    email: String,
-    password: String,
-    confirmPassword: String,
-    showPassword: Boolean,
     onNavigateToLogin: () -> Unit
 ) {
     Column(

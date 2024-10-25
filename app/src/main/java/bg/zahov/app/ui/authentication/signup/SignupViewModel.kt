@@ -4,9 +4,8 @@ import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
 import bg.zahov.app.Inject
 import bg.zahov.app.data.interfaces.UserProvider
+import com.google.firebase.auth.FirebaseAuthUserCollisionException
 import kotlinx.coroutines.CancellationException
-import kotlinx.coroutines.CoroutineScope
-import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.StateFlow
 import kotlinx.coroutines.flow.update
@@ -15,42 +14,39 @@ import kotlinx.coroutines.launch
 /**
  * ViewModel for the signup screen
  *
- * @param userProvider gives access to firebase authentication
+ * @param auth gives access to firebase authentication
  */
-class SignupViewModel(userProvider: UserProvider = Inject.userProvider) : ViewModel() {
-    private val auth by lazy {
-        userProvider
-    }
+class SignupViewModel(private val auth: UserProvider = Inject.userProvider) : ViewModel() {
     private val _uiState = MutableStateFlow(SignupUiState())
 
-    internal val uiState: StateFlow<SignupUiState> = _uiState
+    val uiState: StateFlow<SignupUiState> = _uiState
 
 
-    internal fun onUsernameChange(newUsername: String) {
+    fun onUsernameChange(newUsername: String) {
         _uiState.update { old ->
             old.copy(username = newUsername)
         }
     }
 
-    internal fun onEmailChange(newEmail: String) {
+    fun onEmailChange(newEmail: String) {
         _uiState.update { old ->
             old.copy(email = newEmail)
         }
     }
 
-    internal fun onPasswordChange(newPassword: String) {
+    fun onPasswordChange(newPassword: String) {
         _uiState.update { old ->
             old.copy(password = newPassword)
         }
     }
 
-    internal fun onConfirmPasswordChange(newPassword: String) {
+    fun onConfirmPasswordChange(newPassword: String) {
         _uiState.update { old ->
             old.copy(confirmPassword = newPassword)
         }
     }
 
-    internal fun onPasswordVisibilityChange(visibility: Boolean) {
+    fun onPasswordVisibilityChange(visibility: Boolean) {
         _uiState.update { old ->
             old.copy(passwordVisibility = !visibility)
         }
@@ -59,27 +55,27 @@ class SignupViewModel(userProvider: UserProvider = Inject.userProvider) : ViewMo
     /**
      * Initiates the signup process with the provided email and password.
      */
-    internal fun signUp() {
+    fun signUp() {
         viewModelScope.launch {
             try {
-                auth.signup(_uiState.value.email, _uiState.value.password)
-                    .addOnSuccessListener {
-                        CoroutineScope(Dispatchers.IO).launch {
-                            it.user?.uid?.let {
-                                auth.createDataSources(_uiState.value.username, it)
-                                _uiState.update { old ->
-                                    old.copy(isUserAuthenticated = true)
-                                }
-                            } ?: run {
-                                showMessage("There was an error while attempting to log in")
-                            }
-                        }
+                auth.signup(_uiState.value.email, _uiState.value.password).user?.uid?.let {
+                    auth.createDataSources(_uiState.value.username, it)
+                    _uiState.update { old ->
+                        old.copy(isUserAuthenticated = true)
                     }
-                    .addOnFailureListener {
-                        showMessage("There was an error while attempting to log in")
+                } ?: showMessage("There was an error while attempting to log in")
+            } catch (e: Exception) {
+                when (e) {
+                    is FirebaseAuthUserCollisionException -> {
+                        showMessage(
+                            e.message ?: "There is already another user with the same email"
+                        )
                     }
-            } catch (e: CancellationException) {
-                showMessage(e.message ?: "There is a problem with the services")
+
+                    is CancellationException -> throw e
+                    else -> showMessage("Something went wrong")
+
+                }
             }
 
         }
@@ -99,7 +95,7 @@ class SignupViewModel(userProvider: UserProvider = Inject.userProvider) : ViewMo
     /**
      * Resets the notification message to null after it has been shown.
      */
-    internal fun messageShown() {
+    fun messageShown() {
         showMessage(null)
     }
 }
