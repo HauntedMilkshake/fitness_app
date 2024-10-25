@@ -2,8 +2,12 @@ package bg.zahov.app.ui.authentication.signup
 
 import android.content.Context
 import android.widget.Toast
+import androidx.compose.foundation.clickable
+import androidx.compose.foundation.interaction.MutableInteractionSource
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Column
+import androidx.compose.foundation.layout.Row
+import androidx.compose.foundation.layout.fillMaxHeight
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.width
@@ -31,7 +35,8 @@ import bg.zahov.app.ui.custom.CommonTextField
 import bg.zahov.app.util.isEmail
 import bg.zahov.fitness.app.R
 import androidx.compose.runtime.getValue
-
+import androidx.compose.runtime.remember
+import androidx.compose.ui.unit.sp
 
 @Composable
 fun SignupScreen(
@@ -87,6 +92,7 @@ fun SignupContent(
     onPasswordVisibilityChange: (Boolean) -> Unit,
     onNavigateToLogin: () -> Unit
 ) {
+    val interactionSource = remember { MutableInteractionSource() }
     Column(
         Modifier
             .fillMaxSize()
@@ -151,7 +157,7 @@ fun SignupContent(
                 colorResource(R.color.disabled_button),
                 colorResource(R.color.background)
             ),
-            enabled = !username.isBlank() && !email.isBlank() && email.isEmail() && password == confirmPassword && password.length >= 6,
+            enabled = username.isNotBlank() && email.isEmail() && password == confirmPassword && password.length >= 6,
             onClick = onSignupButtonPressed,
         ) {
             Text(
@@ -161,18 +167,22 @@ fun SignupContent(
             )
         }
 
-        Button(
+        Row(
             modifier = Modifier
-                .width(240.dp)
-                .weight(1f), colors = ButtonColors(
-                containerColor = colorResource(R.color.background),
-                colorResource(R.color.white),
-                colorResource(R.color.background),
-                colorResource(R.color.background)
-            ),
-            onClick = onNavigateToLogin
+                .fillMaxHeight()
+                .align(Alignment.CenterHorizontally),
         ) {
-            Text(text = stringResource(R.string.already_have_account_text), color = Color.White)
+            Text(
+                text = stringResource(R.string.already_have_account_text),
+                color = Color.White,
+                fontSize = 20.sp,
+                modifier = Modifier
+                    .align(Alignment.CenterVertically)
+                    .clickable(
+                        interactionSource = interactionSource,
+                        indication = null
+                    ) { onNavigateToLogin() }
+            )
         }
     }
 }

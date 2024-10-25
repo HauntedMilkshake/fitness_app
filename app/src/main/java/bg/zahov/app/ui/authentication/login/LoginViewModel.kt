@@ -5,7 +5,6 @@ import androidx.lifecycle.viewModelScope
 import bg.zahov.app.Inject
 import bg.zahov.app.data.interfaces.ServiceErrorHandler
 import bg.zahov.app.data.interfaces.UserProvider
-import bg.zahov.app.util.isEmail
 import kotlinx.coroutines.launch
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.StateFlow
@@ -20,23 +19,13 @@ import java.lang.IllegalArgumentException
  * @property uiState A [StateFlow] of [UiInfo], which contains the current UI state including email, password, message, password visibility and login check.
  *
  * @constructor
- * @param userProvider Injected user authentication provider that handles login and password reset logic.
- * @param errorProvider Injected error handler that manages errors and starts the error-handling countdown.
+ * @param auth Injected user authentication provider that handles login and password reset logic.
+ * @param serviceError Injected error handler that manages errors and starts the error-handling countdown.
  */
 class LoginViewModel(
-    userProvider: UserProvider = Inject.userProvider,
-    errorProvider: ServiceErrorHandler = Inject.serviceErrorHandler
+    private val auth: UserProvider = Inject.userProvider,
+    private val serviceError: ServiceErrorHandler = Inject.serviceErrorHandler
 ) : ViewModel() {
-
-    // The authentication service for handling login and password reset.
-    private val auth by lazy {
-        userProvider
-    }
-
-    private val serviceError by lazy {
-        errorProvider
-    }
-
     // Holds the current UI state as a MutableStateFlow to observe and react to changes.
     private val _uiState = MutableStateFlow(UiInfo())
     val uiState: StateFlow<UiInfo> = _uiState
@@ -73,21 +62,9 @@ class LoginViewModel(
      * If an error occurs, displays the error message.
      */
     fun login() {
-        val currentEmail = _uiState.value.email
-        val currentPassword = _uiState.value.password
-        if (currentEmail.isEmpty() || currentPassword.isEmpty()) {
-            notifyChange("Don't leave empty fields")
-            return
-        }
-
-        if (!currentEmail.isEmail()) {
-            notifyChange("Email not valid")
-            return
-        }
-
         viewModelScope.launch {
             try {
-                auth.login(currentEmail, currentPassword)
+                auth.login(_uiState.value.email, _uiState.value.password)
                     .addOnSuccessListener {
                         _uiState.update { old -> old.copy(isLoggedInfo = true) }
                     }
@@ -101,23 +78,12 @@ class LoginViewModel(
     }
 
     /**
-     * Sends a password reset email to the user's email if it's valid and not empty.
+     * Sends a password reset email to the user's email.
      * Displays a success message upon successful email dispatch, or an error message if it fails.
      */
     fun sendPasswordResetEmail() {
-        val email = _uiState.value.email
-        if (email.isEmpty()) {
-            notifyChange("Email must not be empty")
-            return
-        }
-
-        if (!email.isEmail()) {
-            notifyChange("Email is not valid")
-            return
-        }
-
         viewModelScope.launch {
-            auth.passwordResetByEmail(email)
+            auth.passwordResetByEmail(email = _uiState.value.email)
                 .addOnSuccessListener { notifyChange("Rest password email has been sent") }
                 .addOnFailureListener { notifyChange("Couldn't send reset password email!") }
         }

@@ -27,6 +27,7 @@ import androidx.compose.ui.res.colorResource
 import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.text.TextStyle
+import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
@@ -34,14 +35,19 @@ import bg.zahov.fitness.app.R
 import androidx.lifecycle.viewmodel.compose.viewModel
 import bg.zahov.app.ui.custom.CommonPasswordField
 import bg.zahov.app.ui.custom.CommonTextField
+import bg.zahov.app.util.isEmail
 
 @Composable
-fun LoginScreen(loginViewModel: LoginViewModel = viewModel(), nav: (Int) -> Unit) {
+fun LoginScreen(
+    loginViewModel: LoginViewModel = viewModel(),
+    onAuthenticate: () -> Unit,
+    onNavigateToSignUp: () -> Unit
+) {
     val uiState by loginViewModel.uiState.collectAsStateWithLifecycle()
     val context = LocalContext.current
     if (uiState.isLoggedInfo) {
         LaunchedEffect(Unit) {
-            nav(R.id.login_to_loading)
+            onAuthenticate()
         }
     }
 
@@ -53,15 +59,15 @@ fun LoginScreen(loginViewModel: LoginViewModel = viewModel(), nav: (Int) -> Unit
     }
     LoginContent(
         email = uiState.email,
-        onEmailChange = { loginViewModel.onEmailChange(email = it) },
         password = uiState.password,
-        onPasswordChange = { loginViewModel.onPasswordChange(password = it) },
         passwordVisibility = uiState.passwordVisibility,
+        onEmailChange = { loginViewModel.onEmailChange(email = it) },
+        onPasswordChange = { loginViewModel.onPasswordChange(password = it) },
         onPasswordVisibilityChange = { loginViewModel.onPasswordVisibilityChange() },
-        navigateSignUp = { nav(R.id.login_to_signup) },
+        navigateSignUp = onNavigateToSignUp,
         logIn = { loginViewModel.login() },
         resetPassword = { loginViewModel.sendPasswordResetEmail() }
-        )
+    )
 }
 
 @Composable
@@ -100,7 +106,9 @@ fun LoginContent(
                 text = email,
                 leadingIcon = { Icon(painterResource(R.drawable.ic_profile), "Username") },
                 label = { Text(stringResource(R.string.email_text_field_hint)) },
-                onTextChange = { onEmailChange(it) })
+                onTextChange = { onEmailChange(it) },
+                isEmail = true
+            )
 
             CommonPasswordField(
                 password = password,
@@ -111,13 +119,14 @@ fun LoginContent(
 
             Text(
                 text = stringResource(R.string.forgot_password),
+                color = Color.White,
                 modifier = Modifier
                     .padding(top = 16.dp)
                     .clickable(
                         interactionSource = interactionSource,
-                        indication = null
+                        indication = null,
+                        enabled = email.isEmail()
                     ) { resetPassword() },
-                style = TextStyle(color = colorResource(R.color.less_vibrant_text))
             )
             TextButton(
                 onClick = { logIn() },
@@ -126,12 +135,17 @@ fun LoginContent(
                     .fillMaxWidth(),
                 colors = ButtonColors(
                     containerColor = colorResource(R.color.text),
-                    contentColor = Color.White,
-                    disabledContainerColor = colorResource(R.color.text),
-                    disabledContentColor = colorResource(R.color.text)
-                )
+                    contentColor = colorResource(R.color.white),
+                    disabledContainerColor = colorResource(R.color.disabled_button),
+                    disabledContentColor = colorResource(R.color.background)
+                ),
+                enabled = email.isEmail() && password.length >= 6,
             ) {
-                Text(text = "Login")
+                Text(
+                    text = "Login",
+                    color = Color.White,
+                    fontWeight = FontWeight.Bold
+                )
             }
         }
         Row(
