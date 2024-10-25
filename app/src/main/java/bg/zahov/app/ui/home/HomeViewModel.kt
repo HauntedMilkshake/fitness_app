@@ -30,34 +30,18 @@ import java.time.format.DateTimeFormatter
 import java.time.temporal.TemporalAdjusters
 
 /**
- * @param userProvider - access to everything related to the user ( in here we only use the username)
- * @param workoutRepository - access to history of previous workouts
+ * @param userRepo - access to everything related to the user ( in here we only use the username)
+ * @param workoutRepo - access to history of previous workouts
  * @param workoutStateManager - check local db(realm) if a workout is stored in it(whenever the user clears the app and reopens it) and starts it again
- * @param restProvider - makes sure to resume previous rest if the app has been opened and it would still need to be running
+ * @param workoutRestManager - makes sure to resume previous rest if the app has been opened and it would still need to be running
  */
 class HomeViewModel(
-    userProvider: UserProvider = Inject.userProvider,
-    workoutRepository: WorkoutProvider = Inject.workoutProvider,
-    workoutStateManager: WorkoutActions = Inject.workoutState,
-    restProvider: RestProvider = Inject.restTimerProvider,
-    serviceErrorManager: ServiceErrorHandler = Inject.serviceErrorHandler
+    private val userRepo: UserProvider = Inject.userProvider,
+    private val workoutRepo: WorkoutProvider = Inject.workoutProvider,
+    private val workoutStateManager: WorkoutActions = Inject.workoutState,
+    private val workoutRestManager: RestProvider = Inject.restTimerProvider,
+    private val serviceErrorHandler: ServiceErrorHandler = Inject.serviceErrorHandler
 ) : ViewModel() {
-
-    private val userRepo by lazy {
-        userProvider
-    }
-    private val workoutRepo by lazy {
-        workoutRepository
-    }
-    private val workoutStateManager by lazy {
-        workoutStateManager
-    }
-    private val workoutRestManager by lazy {
-        restProvider
-    }
-    private val serviceErrorHandler by lazy {
-        serviceErrorManager
-    }
 
     private val _uiState = MutableStateFlow<HomeUiState>(HomeUiState())
     val state: StateFlow<HomeUiState> = _uiState
