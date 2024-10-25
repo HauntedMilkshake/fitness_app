@@ -7,6 +7,7 @@ import bg.zahov.app.data.repository.UserRepositoryImpl
 import com.google.android.gms.tasks.Task
 import com.google.firebase.auth.AuthResult
 import kotlinx.coroutines.flow.Flow
+import kotlinx.coroutines.tasks.await
 
 class UserProviderImpl : UserProvider {
     companion object {
@@ -27,7 +28,7 @@ class UserProviderImpl : UserProvider {
 
     override suspend fun signup(
         email: String, password: String,
-    ): Task<AuthResult> = auth.signup(email, password)
+    ): AuthResult = auth.signup(email, password).await()
 
     override suspend fun login(email: String, password: String): Task<AuthResult> =
         auth.login(email, password)

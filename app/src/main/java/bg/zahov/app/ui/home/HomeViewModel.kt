@@ -1,18 +1,18 @@
 package bg.zahov.app.ui.home
 
-import android.app.Application
-import androidx.lifecycle.AndroidViewModel
 import androidx.lifecycle.LiveData
 import androidx.lifecycle.MutableLiveData
+import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
+import bg.zahov.app.Inject
 import bg.zahov.app.data.exception.CriticalDataNullException
+import bg.zahov.app.data.interfaces.RestProvider
+import bg.zahov.app.data.interfaces.ServiceErrorHandler
+import bg.zahov.app.data.interfaces.UserProvider
+import bg.zahov.app.data.interfaces.WorkoutProvider
 import bg.zahov.app.data.local.RealmWorkoutState
 import bg.zahov.app.data.model.Workout
-import bg.zahov.app.getRestTimerProvider
-import bg.zahov.app.getServiceErrorProvider
-import bg.zahov.app.getUserProvider
-import bg.zahov.app.getWorkoutProvider
-import bg.zahov.app.getWorkoutStateManager
+import bg.zahov.app.data.provider.WorkoutStateManager
 import bg.zahov.app.util.toExercise
 import bg.zahov.app.util.toLocalDateTimeRlm
 import com.github.mikephil.charting.data.BarEntry
@@ -25,22 +25,28 @@ import java.time.LocalDateTime
 import java.time.format.DateTimeFormatter
 import java.time.temporal.TemporalAdjusters
 
-class HomeViewModel(application: Application) : AndroidViewModel(application) {
+class HomeViewModel(
+    userProvider: UserProvider = Inject.userProvider,
+    workoutProvider: WorkoutProvider = Inject.workoutProvider,
+    serviceErrorManager: ServiceErrorHandler = Inject.serviceErrorHandler,
+    workoutStateManager: WorkoutStateManager = Inject.workoutState,
+    workoutRestProvider: RestProvider = Inject.restTimerProvider
+) : ViewModel() {
     private val userRepo by lazy {
-        application.getUserProvider()
+        userProvider
     }
 
     private val workoutRepo by lazy {
-        application.getWorkoutProvider()
+        workoutProvider
     }
     private val workoutStateManager by lazy {
-        application.getWorkoutStateManager()
+        workoutStateManager
     }
     private val workoutRestManager by lazy {
-        application.getRestTimerProvider()
+        workoutRestProvider
     }
     private val serviceErrorHandler by lazy {
-        application.getServiceErrorProvider()
+        serviceErrorManager
     }
     private val _userName = MutableLiveData<String>()
     val userName: LiveData<String>

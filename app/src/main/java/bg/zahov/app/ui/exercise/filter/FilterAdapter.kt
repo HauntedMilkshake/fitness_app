@@ -12,7 +12,7 @@ class FilterAdapter(private val removableVisibility: Int) : BaseAdapter<FilterWr
     layoutResId = R.layout.item_filter
 ) {
 
-    internal var itemClickListener: ItemClickListener<FilterWrapper>? = null
+     var itemClickListener: ItemClickListener<FilterWrapper>? = null
 
     inner class FilterAdapterViewHolder(view: View) : BaseViewHolder<FilterWrapper>(view) {
         private val filterView = view.findViewById<MaterialTextView>(R.id.text)
