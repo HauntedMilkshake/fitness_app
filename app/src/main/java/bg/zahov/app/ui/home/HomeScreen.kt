@@ -30,14 +30,18 @@ import bg.zahov.fitness.app.R
 import com.github.mikephil.charting.charts.BarChart
 import com.github.mikephil.charting.data.BarData
 import com.github.mikephil.charting.data.BarDataSet
-import com.github.mikephil.charting.data.LineData
 import com.github.mikephil.charting.formatter.IndexAxisValueFormatter
 
 @Preview
 @Composable
 fun HomeScreen(homeViewModel: HomeViewModel = viewModel()) {
     val uiState = homeViewModel.state.collectAsStateWithLifecycle()
-    HomeScreenContent(uiState.value.username, uiState.value.numberOfWorkouts, uiState.value.barData)
+    HomeScreenContent(
+        uiState.value.username,
+        uiState.value.numberOfWorkouts,
+        uiState.value.barData,
+        isChartLoading = uiState.value.isChartLoading
+    )
 }
 
 @Composable
