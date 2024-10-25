@@ -1,94 +1,122 @@
 package bg.zahov.app.ui.authentication.signup
 
-import android.app.Application
-import androidx.lifecycle.AndroidViewModel
+import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
-import bg.zahov.app.getUserProvider
-import bg.zahov.app.util.isEmail
+import bg.zahov.app.Inject
+import bg.zahov.app.data.interfaces.UserProvider
+import com.google.firebase.auth.FirebaseAuthUserCollisionException
 import kotlinx.coroutines.CancellationException
-import kotlinx.coroutines.CoroutineScope
-import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.flow.MutableStateFlow
-import kotlinx.coroutines.flow.asStateFlow
+import kotlinx.coroutines.flow.StateFlow
+import kotlinx.coroutines.flow.update
 import kotlinx.coroutines.launch
 
-class SignupViewModel(application: Application) : AndroidViewModel(application) {
-    private val auth by lazy {
-        application.getUserProvider()
+/**
+ * ViewModel for the signup screen
+ *
+ * @param auth gives access to firebase authentication
+ */
+class SignupViewModel(private val auth: UserProvider = Inject.userProvider) : ViewModel() {
+    private val _uiState = MutableStateFlow(SignupUiState())
+
+    val uiState: StateFlow<SignupUiState> = _uiState
+
+
+    fun onUsernameChange(newUsername: String) {
+        _uiState.update { old ->
+            old.copy(username = newUsername)
+        }
     }
-    private var stateCounter = 0
-    private val _state = MutableStateFlow<State>(State.Default)
-    val state = _state.asStateFlow()
 
-
-    fun signUp(
-        userName: String,
-        email: String,
-        password: String,
-        confirmPassword: String,
-    ) {
-        stateCounter += 1
-
-        if (areFieldsEmpty(userName, email, password)) {
-            _state.value = State.Notify("Do not leave empty fields", stateCounter)
-            return
+    fun onEmailChange(newEmail: String) {
+        _uiState.update { old ->
+            old.copy(email = newEmail)
         }
+    }
 
-        if (!email.isEmail()) {
-            _state.value = State.Notify("Email is not valid", stateCounter)
-            return
+    fun onPasswordChange(newPassword: String) {
+        _uiState.update { old ->
+            old.copy(password = newPassword)
         }
+    }
 
-        if (password != confirmPassword || password.length < 6) {
-            _state.value =
-                State.Notify(
-                    "Make sure the passwords are matching and at least 6 characters long",
-                    stateCounter
-                )
-            return
+    fun onConfirmPasswordChange(newPassword: String) {
+        _uiState.update { old ->
+            old.copy(confirmPassword = newPassword)
         }
+    }
 
+    fun onPasswordVisibilityChange(visibility: Boolean) {
+        _uiState.update { old ->
+            old.copy(passwordVisibility = !visibility)
+        }
+    }
+
+    /**
+     * Initiates the signup process with the provided email and password.
+     */
+    fun signUp() {
         viewModelScope.launch {
             try {
-                auth.signup(email, password)
-                    .addOnSuccessListener {
-                        CoroutineScope(Dispatchers.IO).launch {
-                            it.user?.uid?.let {
-                                auth.createDataSources(userName, it)
-                                _state.value = State.Authentication(
-                                    "Successfully created account",
-                                    stateCounter
-                                )
-
-                            } ?: run {
-                                _state.value = State.Notify(
-                                    "There was an error while attempting to log in", stateCounter
-                                )
-
-                            }
-                        }
+                auth.signup(_uiState.value.email, _uiState.value.password).user?.uid?.let {
+                    auth.createDataSources(_uiState.value.username, it)
+                    _uiState.update { old ->
+                        old.copy(isUserAuthenticated = true)
                     }
-                    .addOnFailureListener {
-                        _state.value = State.Notify(it.message ?: "Unexpected error", stateCounter)
-
+                } ?: showMessage("There was an error while attempting to log in")
+            } catch (e: Exception) {
+                when (e) {
+                    is FirebaseAuthUserCollisionException -> {
+                        showMessage(
+                            e.message ?: "There is already another user with the same email"
+                        )
                     }
-            } catch (e: CancellationException) {
-                _state.value =
-                    State.Notify(e.message ?: "There is a problem with the services", stateCounter)
+
+                    is CancellationException -> throw e
+                    else -> showMessage("Something went wrong")
+
+                }
             }
 
         }
-
     }
 
-    private fun areFieldsEmpty(userName: String?, email: String?, pass: String?) =
-        listOf(userName, email, pass).any { it.isNullOrEmpty() }
+    /**
+     * Updates the notification message in the UI state.
+     *
+     * @param text The message to be shown to the user.
+     */
+    private fun showMessage(text: String? = null) {
+        _uiState.update { old ->
+            old.copy(notifyUser = text)
+        }
+    }
 
-    sealed interface State {
-        object Default : State
-        data class Authentication(val aMessage: String, var stateCounter: Int = 0) : State
-        data class Notify(val nMessage: String, var stateCounter: Int? = null) : State
+    /**
+     * Resets the notification message to null after it has been shown.
+     */
+    fun messageShown() {
+        showMessage(null)
     }
 }
 
-
+/**
+ * Data class representing the UI state for the signup screen.
+ *
+ * @property username The username input by the user.
+ * @property email The email input by the user.
+ * @property password The password input by the user.
+ * @property confirmPassword The confirmed password input by the user.
+ * @property passwordVisibility Indicates whether the password is visible.
+ * @property isUserAuthenticated Indicates whether the user is authenticated.
+ * @property notifyUser A message to notify the user, or null if no message.
+ */
+data class SignupUiState(
+    val username: String = "",
+    val email: String = "",
+    val password: String = "",
+    val confirmPassword: String = "",
+    val passwordVisibility: Boolean = false,
+    val isUserAuthenticated: Boolean = false,
+    val notifyUser: String? = null
+)

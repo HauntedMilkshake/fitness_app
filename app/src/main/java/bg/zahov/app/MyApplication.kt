@@ -19,6 +19,33 @@ object Inject {
     val userProvider by lazy {
         UserProviderImpl.getInstance()
     }
+    val settingsProvider by lazy {
+        SettingsProviderImpl.getInstance()
+    }
+    val workoutProvider by lazy {
+        WorkoutProviderImpl.getInstance()
+    }
+    val workoutState by lazy {
+        WorkoutStateManager.getInstance()
+    }
+    val selectedExerciseProvider by lazy {
+        SelectableExerciseProvider.getInstance()
+    }
+    val replaceableExerciseProvider by lazy {
+        ReplaceableExerciseProvider.getInstance()
+    }
+    val workoutAddedExerciseProvider by lazy {
+        AddExerciseToWorkoutProvider.getInstance()
+    }
+    val restTimerProvider by lazy {
+        RestTimerProvider.getInstance()
+    }
+    val filterProvider by lazy {
+        FilterProvider.getInstance()
+    }
+    val measurementProvider by lazy {
+        MeasurementProviderImpl.getInstance()
+    }
     val serviceErrorHandler by lazy {
         ServiceErrorHandlerImpl.getInstance()
     }
@@ -58,6 +85,7 @@ class MyApplication : Application() {
     val serviceErrorHandler by lazy {
         ServiceErrorHandlerImpl.getInstance()
     }
+
     override fun onCreate() {
         super.onCreate()
         Firebase.initialize(this)
