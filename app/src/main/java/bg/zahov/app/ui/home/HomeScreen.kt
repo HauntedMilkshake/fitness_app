@@ -43,14 +43,14 @@ import com.github.mikephil.charting.formatter.ValueFormatter
 @Composable
 fun HomeScreen(homeViewModel: HomeViewModel = viewModel()) {
     val uiState by homeViewModel.uiState.collectAsStateWithLifecycle()
-    val chartFormatter = remember(uiState.barData) {
-        IndexAxisValueFormatter(uiState.barData.weekRanges.toTypedArray())
+    val chartFormatter = remember(uiState.data) {
+        IndexAxisValueFormatter(uiState.data.weekRanges.toTypedArray())
     }
 
     HomeScreenContent(
         uiState.username,
         uiState.numberOfWorkouts,
-        uiState.barData,
+        uiState.data,
         isChartLoading = uiState.isChartLoading,
         valueFormatter = chartFormatter
     )
@@ -60,7 +60,7 @@ fun HomeScreen(homeViewModel: HomeViewModel = viewModel()) {
 fun HomeScreenContent(
     username: String,
     numberOfWorkouts: String,
-    barData: BarData,
+    chartData: ChartData,
     isChartLoading: Boolean = true,
     valueFormatter: ValueFormatter
 ) {
@@ -78,9 +78,13 @@ fun HomeScreenContent(
                 contentDescription = null,
                 tint = Color.White
             )
-            Column(Modifier.padding(start = 16.dp).semantics(mergeDescendants = true){
-                contentDescription = "Username: $username, number of workouts: $numberOfWorkouts"
-            }) {
+            Column(
+                Modifier
+                    .padding(start = 16.dp)
+                    .semantics(mergeDescendants = true) {
+                        contentDescription =
+                            "Username: $username, number of workouts: $numberOfWorkouts"
+                    }) {
                 Text(
                     text = username,
                     style = MaterialTheme.typography.titleLarge,
@@ -111,7 +115,7 @@ fun HomeScreenContent(
                     trackColor = MaterialTheme.colorScheme.surfaceVariant
                 )
             } else {
-                BarChartComponent(barData = barData, chartFormatter = valueFormatter)
+                BarChartComponent(chartData = chartData, chartFormatter = valueFormatter)
             }
         }
     }
@@ -122,7 +126,7 @@ fun BarChartComponent(
     modifier: Modifier = Modifier
         .fillMaxWidth()
         .height(200.dp),
-    barData: BarData,
+    chartData: ChartData,
     chartFormatter: ValueFormatter
 ) {
     AndroidView(modifier = modifier,
@@ -131,11 +135,11 @@ fun BarChartComponent(
             chart.setupBarChart(context)
             chart.apply {
                 chart.xAxis.valueFormatter = chartFormatter
-                chart.xAxis.axisMaximum = barData.xMax
-                chart.xAxis.axisMinimum = barData.xMin
-                chart.axisRight.axisMaximum = barData.yMax
-                chart.axisRight.axisMinimum = barData.yMin
-                val dataSet = BarDataSet(barData.chartData, "")
+                chart.xAxis.axisMaximum = chartData.xMax
+                chart.xAxis.axisMinimum = chartData.xMin
+                chart.axisRight.axisMaximum = chartData.yMax
+                chart.axisRight.axisMinimum = chartData.yMin
+                val dataSet = BarDataSet(chartData.chartData, "")
                 dataSet.setDrawValues(false)
                 val barData = com.github.mikephil.charting.data.BarData(dataSet)
                 barData.barWidth = 0.5f
