@@ -9,7 +9,7 @@ import bg.zahov.app.util.toFormattedString
 import bg.zahov.fitness.app.R
 import com.google.android.material.textview.MaterialTextView
 
-class HistoryAdapter(private val units: Units = Units.METRIC) : BaseAdapter<Workout>(
+class HistoryAdapter(private val units: Units = Units.Metric) : BaseAdapter<Workout>(
     areItemsTheSame = { oldItem, newItem -> oldItem.id == newItem.id },
     areContentsTheSame = { oldItem, newItem -> oldItem == newItem },
     layoutResId = R.layout.item_past_workout
@@ -32,7 +32,7 @@ class HistoryAdapter(private val units: Units = Units.METRIC) : BaseAdapter<Work
             title.text = item.name
             date.text = item.date.toFormattedString()
             duration.text = item.duration?.timeToString()
-            volume.text = "${item.volume ?: 0} ${if (units == Units.METRIC) "kg" else "lbs"}"
+            volume.text = "${item.volume ?: 0} ${if (units == Units.Metric) "kg" else "lbs"}"
             prs.text = item.personalRecords.toString()
             exercises.text = item.exercises.joinToString("\n") {
                 "${if (it.sets.isNotEmpty()) "${it.sets.size} x " else ""}${it.name} "

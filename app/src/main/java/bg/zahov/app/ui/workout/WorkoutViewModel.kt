@@ -177,7 +177,7 @@ class WorkoutViewModel(application: Application) : AndroidViewModel(application)
     ): List<WorkoutEntry> {
         val workoutEntries = mutableListOf<WorkoutEntry>()
         exercises.forEach { exercise ->
-            workoutEntries.add(ExerciseEntry(exercise.toExerciseSetAdapterWrapper(if (::units.isInitialized) units else Units.METRIC)))
+            workoutEntries.add(ExerciseEntry(exercise.toExerciseSetAdapterWrapper(if (::units.isInitialized) units else Units.Metric)))
             val previousExercise = templateExercises.find { it.name == exercise.name }
             exercise.sets.forEachIndexed { index, set ->
                 val setCopy = Sets(set.type, set.firstMetric, set.secondMetric)

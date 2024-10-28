@@ -135,10 +135,10 @@ fun String.parseTimeStringToLong(): Long {
     return ((hours * 60 * 60) + (minutes * 60) + seconds) * 1000
 }
 
-fun Exercise.toExerciseSetAdapterWrapper(units: Units = Units.METRIC): ExerciseSetAdapterExerciseWrapper {
+fun Exercise.toExerciseSetAdapterWrapper(units: Units = Units.Metric): ExerciseSetAdapterExerciseWrapper {
     return ExerciseSetAdapterExerciseWrapper(
-        noteVisibility = if(note.isNullOrEmpty()) View.GONE else View.VISIBLE,
-        note =  note,
+        noteVisibility = if (note.isNullOrEmpty()) View.GONE else View.VISIBLE,
+        note = note,
         name = this.name,
         backgroundResource = R.color.background,
         firstInputColumnVisibility = when (this.category) {
@@ -155,8 +155,8 @@ fun Exercise.toExerciseSetAdapterWrapper(units: Units = Units.METRIC): ExerciseS
 
             else -> {
                 when (units) {
-                    Units.METRIC -> R.string.kg_column_text
-                    Units.BANANA -> R.string.lbs_column_text
+                    Units.Metric -> R.string.kg_column_text
+                    Units.Imperial -> R.string.lbs_column_text
                 }
             }
 

@@ -20,16 +20,16 @@ import java.io.File
 
 class RealmManager {
     companion object {
-        const val LANGUAGE_SETTING = "Language"
-        const val UNIT_SETTING = "Units"
-        const val SOUND_EFFECTS_SETTING = "Sound effect"
-        const val THEME_SETTING = "Theme"
-        const val REST_TIMER_SETTING = "Rest timer"
-        const val VIBRATION_SETTING = "Vibrate upon finish"
-        const val SOUND_SETTING = "Sound"
-        const val UPDATE_TEMPLATE_SETTING = "Show update template"
-        const val FIT_SETTING = "Use samsung watch during workout"
-        const val AUTOMATIC_SYNC_SETTING = "Automatic between device sync"
+        const val LANGUAGE_SETTING = "Language Settings"
+        const val UNIT_SETTING = "Units Settings"
+        const val SOUND_EFFECTS_SETTING = "soundEffectsSettings"
+        const val THEME_SETTING = "Theme Settings"
+        const val REST_TIMER_SETTING = "Reset Timer Settings"
+        const val VIBRATION_SETTING = "vibrateSettings"
+        const val SOUND_SETTING = "Sound Settings"
+        const val UPDATE_TEMPLATE_SETTING = "updateTemplateSettings"
+        const val WATCH_SETTINGS = "watchSettings"
+        const val AUTOMATIC_SYNC_SETTING = "autoSyncSettings"
 
         @Volatile
         private var instance: RealmManager? = null
@@ -104,8 +104,9 @@ class RealmManager {
             copyToRealm(workout)
         }
     }
-    suspend fun addSettings() = withRealm {realm ->
-        if(realm.query<Settings>().first().find() == null){
+
+    suspend fun addSettings() = withRealm { realm ->
+        if (realm.query<Settings>().first().find() == null) {
             realm.write {
                 copyToRealm(Settings())
             }
@@ -131,86 +132,77 @@ class RealmManager {
         realm.query<Settings>().find().first().asFlow()
     }
 
+    private suspend fun getSettingsOnce(): Settings = withRealm { realm ->
+        realm.query<Settings>().find().first()
+    }
+
     private suspend fun <T> withRealm(block: suspend (Realm) -> T): T {
         val realm = openRealm()
         return block(realm)
     }
 
     suspend fun resetSettings() = withRealm { realm ->
-        var settings: Settings? = null
-
-        getSettings().collect {
-            settings = it.obj
-        }
-
+        val settings = getSettingsOnce()
         realm.write {
-            settings?.let { coldSettings ->
-                findLatest(coldSettings)?.apply {
-                    language = Language.fromKey(LanguageKeys.ENGLISH)
-                    units = Units.fromKey(UnitsKeys.METRIC)
-                    soundEffects = true
-                    theme = Theme.fromKey(ThemeKeys.DARK)
-                    restTimer = 30
-                    vibration = true
-                    soundSettings = Sound.fromKey(SoundKeys.SOUND_1)
-                    updateTemplate = true
-                    fit = false
-                    automaticSync = true
-                }
+            findLatest(settings)?.apply {
+                language = Language.fromKey(LanguageKeys.ENGLISH)
+                units = Units.fromKey(UnitsKeys.METRIC)
+                soundEffects = true
+                theme = Theme.fromKey(ThemeKeys.DARK)
+                restTimer = 30
+                vibration = true
+                soundSettings = Sound.fromKey(SoundKeys.SOUND_1)
+                updateTemplate = true
+                enableWatch = false
+                automaticSync = true
             }
         }
     }
 
     suspend fun updateSetting(title: String, newValue: Any) = withRealm { realm ->
-        var settings: Settings? = null
-
-        getSettings().collect {
-            settings = it.obj
-        }
+        val settings = getSettingsOnce()
 
         realm.write {
-            settings?.let { coldSettings ->
-                findLatest(coldSettings)?.let {
-                    when (title) {
-                        LANGUAGE_SETTING -> {
-                            it.language = Language.fromKey((newValue as String))
-                        }
+            findLatest(settings)?.let {
+                when (title) {
+                    LANGUAGE_SETTING -> {
+                        it.language = Language.fromKey((newValue as String))
+                    }
 
-                        UNIT_SETTING -> {
-                            it.units = Units.fromKey((newValue as String))
-                        }
+                    UNIT_SETTING -> {
+                        it.units = Units.fromKey((newValue as String))
+                    }
 
-                        SOUND_EFFECTS_SETTING -> {
-                            it.soundEffects = (newValue as Boolean)
-                        }
+                    SOUND_EFFECTS_SETTING -> {
+                        it.soundEffects = (newValue as Boolean)
+                    }
 
-                        THEME_SETTING -> {
-                            it.theme = Theme.fromKey((newValue as String))
-                        }
+                    THEME_SETTING -> {
+                        it.theme = Theme.fromKey((newValue as String))
+                    }
 
-                        REST_TIMER_SETTING -> {
-                            it.restTimer = (newValue as Int)
-                        }
+                    REST_TIMER_SETTING -> {
+                        it.restTimer = (newValue as Int)
+                    }
 
-                        VIBRATION_SETTING -> {
-                            it.vibration = (newValue as Boolean)
-                        }
+                    VIBRATION_SETTING -> {
+                        it.vibration = (newValue as Boolean)
+                    }
 
-                        SOUND_SETTING -> {
-                            it.soundSettings = Sound.fromKey((newValue as String))
-                        }
+                    SOUND_SETTING -> {
+                        it.soundSettings = Sound.fromKey((newValue as String))
+                    }
 
-                        UPDATE_TEMPLATE_SETTING -> {
-                            it.updateTemplate = (newValue as Boolean)
-                        }
+                    UPDATE_TEMPLATE_SETTING -> {
+                        it.updateTemplate = (newValue as Boolean)
+                    }
 
-                        FIT_SETTING -> {
-                            it.fit = (newValue as Boolean)
-                        }
+                    WATCH_SETTINGS -> {
+                        it.enableWatch = (newValue as Boolean)
+                    }
 
-                        AUTOMATIC_SYNC_SETTING -> {
-                            it.automaticSync = (newValue as Boolean)
-                        }
+                    AUTOMATIC_SYNC_SETTING -> {
+                        it.automaticSync = (newValue as Boolean)
                     }
                 }
             }

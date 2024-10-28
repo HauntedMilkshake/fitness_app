@@ -24,7 +24,7 @@ class Settings : RealmObject {
     var vibration: Boolean = true
     var soundSettings: String = Sound.fromKey(SoundKeys.SOUND_1)
     var updateTemplate: Boolean = true
-    var fit: Boolean = false
+    var enableWatch: Boolean = false
     var automaticSync: Boolean = true
 }
 

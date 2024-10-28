@@ -15,7 +15,7 @@ enum class SetType(val key: String) {
     FAILURE(SetKeys.FAILURE);
 
     companion object {
-        fun fromKey(key: String) = values().firstOrNull { it.key == key }
+        fun fromKey(key: String) = entries.firstOrNull { it.key == key }
 
     }
 }

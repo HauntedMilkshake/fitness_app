@@ -4,13 +4,16 @@ class UnitsKeys {
     companion object {
         const val METRIC = "Metric"
         const val BANANA = "Imperial"
+
+        val units = listOf(METRIC, BANANA)
     }
 }
+
 enum class Units(val key: String) {
-    METRIC(UnitsKeys.METRIC),
-    BANANA(UnitsKeys.BANANA);
+    Metric(UnitsKeys.METRIC),
+    Imperial(UnitsKeys.BANANA);
 
     companion object {
-        fun fromKey(key: String) = values().firstOrNull { it.key == key }.toString()
+        fun fromKey(key: String) = entries.firstOrNull { it.key == key }.toString()
     }
 }
