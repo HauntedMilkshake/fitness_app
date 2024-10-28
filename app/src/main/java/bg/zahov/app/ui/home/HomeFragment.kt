@@ -25,8 +25,8 @@ class HomeFragment : Fragment() {
     override fun onCreateView(
         inflater: LayoutInflater, container: ViewGroup?, savedInstanceState: Bundle?,
     ): View {
-        requireActivity().showBottomNav()
-        requireActivity().showTopBar()
+        activity?.showBottomNav()
+        activity?.showTopBar()
         setupTopBar()
         return ComposeView(requireContext()).apply {
             setViewCompositionStrategy(ViewCompositionStrategy.DisposeOnViewTreeLifecycleDestroyed)
@@ -37,10 +37,9 @@ class HomeFragment : Fragment() {
     }
 
     private fun setupTopBar() {
-
         (activity as? AppCompatActivity)?.supportActionBar?.setDisplayHomeAsUpEnabled(false)
-        requireActivity().setToolBarTitle(R.string.profile)
-        requireActivity().addMenuProvider(object : MenuProvider {
+        activity?.setToolBarTitle(R.string.profile)
+        activity?.addMenuProvider(object : MenuProvider {
             override fun onCreateMenu(menu: Menu, menuInflater: MenuInflater) {
                 menu.clear()
                 menuInflater.inflate(R.menu.menu_toolbar_home, menu)
@@ -61,12 +60,12 @@ class HomeFragment : Fragment() {
 
     override fun onResume() {
         super.onResume()
-        requireActivity().showBottomNav()
+        activity?.showBottomNav()
         setupTopBar()
     }
 
     override fun onPause() {
         super.onPause()
-        requireActivity().clearMenu()
+        activity?.clearMenu()
     }
 }

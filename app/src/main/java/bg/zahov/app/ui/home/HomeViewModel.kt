@@ -1,6 +1,5 @@
 package bg.zahov.app.ui.home
 
-import android.view.View
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
 import bg.zahov.app.Inject
@@ -15,8 +14,6 @@ import bg.zahov.app.data.model.Workout
 import bg.zahov.app.util.toExercise
 import bg.zahov.app.util.toLocalDateTimeRlm
 import com.github.mikephil.charting.data.BarEntry
-import com.github.mikephil.charting.formatter.IndexAxisValueFormatter
-import com.github.mikephil.charting.formatter.ValueFormatter
 import kotlinx.coroutines.async
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.StateFlow
@@ -29,23 +26,37 @@ import java.time.LocalDateTime
 import java.time.format.DateTimeFormatter
 import java.time.temporal.TemporalAdjusters
 
+/**
+ * Represents the UI state for the Home screen.
+ *
+ * @property numberOfWorkouts The count of workouts completed.
+ * @property barData Data for the bar chart visualization.
+ * @property isChartLoading Indicates whether the bar chart data is still loading.
+ */
 data class HomeUiState(
-    val isLoading: Boolean = false,
     val username: String = "",
     val numberOfWorkouts: String = "",
     val barData: BarData = BarData(),
     val isChartLoading: Boolean = true
 )
 
+/**
+ * Represents the data for the bar chart visualization.
+ *
+ * @property xMin Minimum value on the X-axis(not very useful in our case where we show week ranges but still required).
+ * @property xMax Maximum value on the X-axis.
+ * @property yMin Minimum value on the Y-axis(lowest number of workouts per week).
+ * @property yMax Maximum value on the Y-axis(highest number of workouts per week).
+ * @property chartData The list of bar entries for the chart(BarEntry - a double (x,y) where x is where we have to place it on the x-axis and y is the value.
+ * @property weekRanges The range of weeks for the X-axis labels(for example for 10/24 they would look like 7-13, 14-20 and etc.)
+ */
 data class BarData(
-    var chartVisibility: Int = View.GONE,
     var xMin: Float = 0f,
-    var xMax: Float = 0f,
-    var yMin: Float = 0f,
-    var yMax: Float = 0f,
-    var chartData: List<BarEntry> = listOf(),
-    var weekRanges: List<String> = listOf(),
-    var xValueFormatter: ValueFormatter = IndexAxisValueFormatter(weekRanges.toTypedArray())
+    val xMax: Float = 0f,
+    val yMin: Float = 0f,
+    val yMax: Float = 0f,
+    val chartData: List<BarEntry> = listOf(),
+    val weekRanges: List<String> = listOf()
 )
 
 /**
@@ -62,6 +73,14 @@ class HomeViewModel(
     private val serviceErrorHandler: ServiceErrorHandler = Inject.serviceErrorHandler
 ) : ViewModel() {
 
+    /**
+     * @property uiState
+     * Holds the UI state for the Home screen.
+     *
+     * @property _uiState
+     * This property uses a MutableStateFlow to manage and emit changes
+     * to the HomeUiState, which can be observed by UI components.
+     */
     private val _uiState = MutableStateFlow<HomeUiState>(HomeUiState())
     val uiState: StateFlow<HomeUiState> = _uiState
 
@@ -102,7 +121,6 @@ class HomeViewModel(
                                     yMax = workoutPerWeekMap.values.max().toFloat(),
                                     yMin = workoutPerWeekMap.values.min().toFloat(),
                                     chartData = barData,
-                                    chartVisibility = View.VISIBLE,
                                     weekRanges = getWeekRangesForCurrentMonth()
                                 ),
                                 isChartLoading = false

@@ -312,32 +312,3 @@ fun String.filterIntegerInput(): Int {
     }
     return this.toIntOrNull() ?: 0
 }
-
-fun BarChart.setupBarChart() {
-    apply {
-        setFitBars(true)
-        legend.isEnabled = false
-        isDoubleTapToZoomEnabled = false
-        axisLeft.isEnabled = false
-        isDragEnabled = false
-        isHighlightFullBarEnabled = false
-        description.apply {
-            setPosition(250f, 60f)
-            text = "Weekly workouts"
-            textColor = android.graphics.Color.WHITE
-        }
-        xAxis.apply {
-            position = XAxis.XAxisPosition.BOTTOM
-            granularity = 1f
-            axisMinimum = 0f
-            textColor = android.graphics.Color.WHITE
-            setCenterAxisLabels(true)
-            isGranularityEnabled = true
-        }
-        axisRight.apply {
-            textColor = android.graphics.Color.WHITE
-            granularity = 1f
-            setDrawGridLines(false)
-        }
-    }
-}
