@@ -51,7 +51,7 @@ data class HomeUiState(
  * @property weekRanges The range of weeks for the X-axis labels(for example for 10/24 they would look like 7-13, 14-20 and etc.)
  */
 data class ChartData(
-    var xMin: Float = 0f,
+    val xMin: Float = 0f,
     val xMax: Float = 0f,
     val yMin: Float = 0f,
     val yMax: Float = 0f,
