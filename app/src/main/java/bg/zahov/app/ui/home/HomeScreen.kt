@@ -64,6 +64,12 @@ fun HomeScreenContent(
     isChartLoading: Boolean = true,
     valueFormatter: ValueFormatter
 ) {
+    val accessibilityText = stringResource(
+        R.string.home_accessibility_text,
+        username,
+        numberOfWorkouts
+    )
+
     Column(
         Modifier
             .fillMaxSize()
@@ -82,8 +88,7 @@ fun HomeScreenContent(
                 Modifier
                     .padding(start = 16.dp)
                     .semantics(mergeDescendants = true) {
-                        contentDescription =
-                            "Username: $username, number of workouts: $numberOfWorkouts"
+                        contentDescription = accessibilityText
                     }) {
                 Text(
                     text = username,
