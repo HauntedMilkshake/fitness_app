@@ -6,6 +6,8 @@
     android:layout_marginBottom="10dp"
     android:background="@drawable/template_workout_border">
 
+    <!--  Delete when finish_workouts is rewritten in compose  -->
+    <!--  Don't forget to delete border as well  -->
     <com.google.android.material.textview.MaterialTextView
         android:id="@+id/workout_name"
         android:layout_width="wrap_content"

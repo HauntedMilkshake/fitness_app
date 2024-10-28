@@ -1,7 +1,6 @@
 package bg.zahov.app.ui.history.info
 
 import android.os.Bundle
-import android.util.Log
 import android.view.LayoutInflater
 import android.view.Menu
 import android.view.MenuInflater
@@ -20,7 +19,7 @@ import bg.zahov.app.data.model.state.HistoryInfoUiMapper
 import bg.zahov.app.hideBottomNav
 import bg.zahov.app.setToolBarTitle
 import bg.zahov.app.showBottomNav
-import bg.zahov.app.ui.history.HistoryFragment.Companion.workoutId
+import bg.zahov.app.ui.history.HistoryFragment.Companion.WORKOUTID
 import bg.zahov.fitness.app.R
 import bg.zahov.fitness.app.databinding.FragmentHistoryInfoBinding
 
@@ -31,7 +30,7 @@ class HistoryInfoFragment : Fragment() {
 
     private val historyInfoViewModel: HistoryInfoViewModel by viewModels()
     private val id by lazy {
-        arguments?.getString(workoutId) ?: ""
+        arguments?.getString(WORKOUTID) ?: ""
     }
 
     override fun onCreateView(

@@ -76,8 +76,7 @@
 
     <fragment
         android:id="@+id/history"
-        android:name="bg.zahov.app.ui.history.HistoryFragment"
-        tools:layout="@layout/fragment_history">
+        android:name="bg.zahov.app.ui.history.HistoryFragment">
         <action
             android:id="@+id/history_to_calendar"
             app:destination="@id/calendar" />
