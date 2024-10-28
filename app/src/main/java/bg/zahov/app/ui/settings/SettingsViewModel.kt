@@ -12,21 +12,41 @@ import kotlinx.coroutines.flow.StateFlow
 import kotlinx.coroutines.flow.update
 import kotlinx.coroutines.launch
 
+/**
+ * ViewModel for managing app settings.
+ *
+ * @property repo Provides access to the user's settings via [SettingsProviderImpl].
+ * @property auth Manages user authentication and provides user actions via [UserProviderImpl].
+ * @property workoutState Manages the current workout state, ensuring any ongoing workout is tracked and can be cancelled on user logout or account deletion.
+ *
+ * This ViewModel handles:
+ * - Retrieving and updating user settings.
+ * - Logging out the user and resetting their settings.
+ * - Deleting the user's account and associated data.
+ */
 class SettingsViewModel(
     private val repo: SettingsProviderImpl = Inject.settingsProvider,
     private val auth: UserProviderImpl = Inject.userProvider,
     private val workoutState: WorkoutStateManager = Inject.workoutState
 ) : ViewModel() {
 
+    /**
+     * Data class representing the state of the settings UI.
+     *
+     * @property data Current settings data.
+     * @property returnBack Indicates if the UI should navigate back to welcome screen(e.g., after logout or account deletion).
+     */
     data class SettingsData(
         val data: Settings,
         val returnBack: Boolean = false
     )
 
+    // Holds the current UI state, updated whenever settings data changes
     private val _uiState = MutableStateFlow(SettingsData(data = Settings()))
     val uiState: StateFlow<SettingsData> = _uiState
 
     init {
+        // Initializes settings by collecting data from repo
         viewModelScope.launch {
             repo.getSettings().collect {
                 it.obj?.let { settings ->
@@ -36,18 +56,30 @@ class SettingsViewModel(
         }
     }
 
+    /**
+     * Updates a specific setting with a new value.
+     *
+     * @param title The title or key of the setting to be updated.
+     * @param newValue The new value for the specified setting.
+     */
     fun writeNewSetting(title: String, newValue: Any) {
         viewModelScope.launch {
             repo.addSetting(title, newValue)
         }
     }
 
+    /**
+     * Resets all user settings to their default values.
+     */
     fun resetSettings() {
         viewModelScope.launch {
             repo.resetSettings()
         }
     }
 
+    /**
+     * Logs out the current user, cancels ongoing workouts, and triggers UI navigation back.
+     */
     fun logout() {
         viewModelScope.launch {
             auth.logout()
@@ -56,6 +88,9 @@ class SettingsViewModel(
         }
     }
 
+    /**
+     * Deletes the user's account, cancels ongoing workouts, and triggers UI navigation back.
+     */
     fun deleteAccount() {
         viewModelScope.launch {
             workoutState.cancel()
