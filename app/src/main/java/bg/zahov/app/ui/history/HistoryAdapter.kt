@@ -41,7 +41,7 @@ class HistoryAdapter(private val units: Units = Units.METRIC) : BaseAdapter<Work
                 "${it.bestSet.firstMetric ?: 0} x ${it.bestSet.secondMetric ?: 0}"
             }
             itemView.setOnClickListener {
-                itemClickListener?.onWorkoutClick(item, bindingAdapterPosition)
+                itemClickListener?.onWorkoutClick(item, adapterPosition)
             }
         }
     }

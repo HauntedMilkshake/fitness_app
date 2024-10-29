@@ -31,7 +31,7 @@ class ExerciseAdapter : BaseAdapter<ExerciseAdapterWrapper>(
             exerciseBackground.setBackgroundResource(item.backgroundResource)
 
             itemView.setOnClickListener {
-                itemClickListener?.onItemClicked(item, bindingAdapterPosition)
+                itemClickListener?.onItemClicked(item, adapterPosition)
                 notifyDataSetChanged()
             }
         }
