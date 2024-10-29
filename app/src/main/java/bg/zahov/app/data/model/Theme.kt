@@ -11,7 +11,6 @@ enum class Theme(val key: String) {
 
         fun getListOfKeys(): List<String> {
             return Theme.entries.map { it.key }
-
         }
     }
 }
