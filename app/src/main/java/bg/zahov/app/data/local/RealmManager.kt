@@ -10,6 +10,7 @@ import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.flow.Flow
 import kotlinx.coroutines.withContext
 import java.io.File
+import bg.zahov.app.data.model.state.TypeSettings
 
 /**
  * Manages the Realm database instance, providing methods for accessing and manipulating user settings,
@@ -21,21 +22,7 @@ import java.io.File
  * @property realmConfig Lazy-loaded [RealmConfiguration] for the database schema and settings.
  */
 class RealmManager {
-
     companion object {
-        // Constants representing various settings keys.
-        const val LANGUAGE_SETTING = "Language Settings"
-        const val UNIT_SETTING = "Units Settings"
-        const val SOUND_EFFECTS_SETTING = "soundEffectsSettings"
-        const val THEME_SETTING = "Theme Settings"
-        const val REST_TIMER_SETTING = "Reset Timer Settings"
-        const val VIBRATION_SETTING = "vibrateSettings"
-        const val SOUND_SETTING = "Sound Settings"
-        const val UPDATE_TEMPLATE_SETTING = "updateTemplateSettings"
-        const val WATCH_SETTINGS = "watchSettings"
-        const val AUTOMATIC_SYNC_SETTING = "autoSyncSettings"
-
-        @Volatile
         private var instance: RealmManager? = null
 
         /**
@@ -46,7 +33,9 @@ class RealmManager {
         fun getInstance() =
             instance ?: synchronized(this) {
                 instance ?: RealmManager().also { instance = it }
+
             }
+
     }
 
     private var realmInstance: Realm? = null
@@ -81,14 +70,13 @@ class RealmManager {
      */
     private suspend fun openRealm(): Realm {
         return withContext(Dispatchers.IO) {
-            if (realmInstance == null || realmInstance?.isClosed() == true) {
+            realmInstance?.takeIf { !it.isClosed() } ?: run {
                 try {
-                    realmInstance = Realm.open(realmConfig)
+                    Realm.open(realmConfig).also { realmInstance = it }
                 } catch (e: IllegalArgumentException) {
                     throw e
                 }
             }
-            realmInstance!!
         }
     }
 
@@ -178,13 +166,13 @@ class RealmManager {
         val settings = getSettingsOnce()
         realm.write {
             findLatest(settings)?.apply {
-                language = Language.fromKey(LanguageKeys.ENGLISH)
-                units = Units.fromKey(UnitsKeys.METRIC)
+                language = Language.English.key
+                units = Units.METRIC.key
                 soundEffects = true
-                theme = Theme.fromKey(ThemeKeys.DARK)
+                theme = Theme.Dark.key
                 restTimer = 30
                 vibration = true
-                soundSettings = Sound.fromKey(SoundKeys.SOUND_1)
+                soundSettings = Sound.SOUND_2.key
                 updateTemplate = true
                 enableWatch = false
                 automaticSync = true
@@ -198,21 +186,40 @@ class RealmManager {
      * @param title The title of the setting to update.
      * @param newValue The new value for the setting.
      */
-    suspend fun updateSetting(title: String, newValue: Any) = withRealm { realm ->
+    suspend fun updateSetting(title: TypeSettings, newValue: Any) = withRealm { realm ->
         val settings = getSettingsOnce()
         realm.write {
             findLatest(settings)?.let {
                 when (title) {
-                    LANGUAGE_SETTING -> it.language = Language.fromKey(newValue as String)
-                    UNIT_SETTING -> it.units = Units.fromKey(newValue as String)
-                    SOUND_EFFECTS_SETTING -> it.soundEffects = newValue as Boolean
-                    THEME_SETTING -> it.theme = Theme.fromKey(newValue as String)
-                    REST_TIMER_SETTING -> it.restTimer = newValue as Int
-                    VIBRATION_SETTING -> it.vibration = newValue as Boolean
-                    SOUND_SETTING -> it.soundSettings = Sound.fromKey(newValue as String)
-                    UPDATE_TEMPLATE_SETTING -> it.updateTemplate = newValue as Boolean
-                    WATCH_SETTINGS -> it.enableWatch = newValue as Boolean
-                    AUTOMATIC_SYNC_SETTING -> it.automaticSync = newValue as Boolean
+                    TypeSettings.LANGUAGE_SETTING -> if (newValue is String)
+                        it.language = newValue
+
+                    TypeSettings.UNIT_SETTING -> if (newValue is String)
+                        it.units = newValue
+
+                    TypeSettings.SOUND_EFFECTS_SETTING -> if (newValue is Boolean)
+                        it.soundEffects = newValue
+
+                    TypeSettings.THEME_SETTING -> if (newValue is String)
+                        it.theme = newValue
+
+                    TypeSettings.REST_TIMER_SETTING -> if (newValue is Int)
+                        it.restTimer = newValue
+
+                    TypeSettings.VIBRATION_SETTING -> if (newValue is Boolean)
+                        it.vibration = newValue
+
+                    TypeSettings.SOUND_SETTING -> if (newValue is String)
+                        it.soundSettings = newValue
+
+                    TypeSettings.UPDATE_TEMPLATE_SETTING -> if (newValue is Boolean)
+                        it.updateTemplate = newValue
+
+                    TypeSettings.WATCH_SETTINGS -> if (newValue is Boolean)
+                        it.enableWatch = newValue
+
+                    TypeSettings.AUTOMATIC_SYNC_SETTING -> if (newValue is Boolean)
+                        it.automaticSync = newValue
                 }
             }
         }

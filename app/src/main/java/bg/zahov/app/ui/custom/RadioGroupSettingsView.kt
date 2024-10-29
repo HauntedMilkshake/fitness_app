@@ -20,6 +20,7 @@ import bg.zahov.app.data.model.Sound
 import bg.zahov.app.data.model.Theme
 import bg.zahov.app.data.model.Units
 import bg.zahov.app.data.local.Settings
+import bg.zahov.app.data.model.state.TypeSettings
 import bg.zahov.fitness.app.R
 import com.google.android.material.textview.MaterialTextView
 
@@ -30,7 +31,7 @@ class RadioGroupSettingsView @JvmOverloads constructor(
     defStyle: Int = 0,
 ) : RelativeLayout(context, attrs, defStyle) {
 
-    var settingsChangeListener: SettingsChangeListener? = null
+    private var settingsChangeListener: SettingsChangeListener? = null
 
     init {
         inflate(context, R.layout.view_radio_group_settings, this)
@@ -39,20 +40,20 @@ class RadioGroupSettingsView @JvmOverloads constructor(
     //FIXME again - meaningful names, see other comments in ExerciseView.
     // This component looks very similar, to the other one, can you use the same component for both?
     // I see that you are using a listener here, so maybe use this one as a starting point
-    fun initViewInformation(title: String, radioOptions: List<String>, settings: Settings) {
+    fun initViewInformation(type: TypeSettings, radioOptions: List<String>, settings: Settings) {
         val titleTextView: MaterialTextView = findViewById(R.id.titleTextView)
         val subtitleTextView: MaterialTextView = findViewById(R.id.subtitleTextView)
 
-        when (title) {
-            "Language" -> subtitleTextView.text = settings.language
-            "Units" -> subtitleTextView.text = settings.units
-            "Timer increment value" -> subtitleTextView.text = settings.restTimer.toString()
-            "Sound" -> subtitleTextView.text = settings.soundSettings
-            "Theme" -> subtitleTextView.text = settings.theme
-
+        when (type) {
+            TypeSettings.LANGUAGE_SETTING -> subtitleTextView.text = settings.language.toString()
+            TypeSettings.UNIT_SETTING -> subtitleTextView.text = settings.units.toString()
+            TypeSettings.REST_TIMER_SETTING -> subtitleTextView.text = settings.restTimer.toString()
+            TypeSettings.SOUND_SETTING -> subtitleTextView.text = settings.soundSettings.toString()
+            TypeSettings.THEME_SETTING -> subtitleTextView.text = settings.theme.toString()
+            else -> {}
         }
 
-        titleTextView.text = title
+        titleTextView.text = type.name
 
         val highlightAnimator = ObjectAnimator.ofFloat(this, "alpha", 1f, 0.5f)
         highlightAnimator.duration = 300
@@ -61,22 +62,23 @@ class RadioGroupSettingsView @JvmOverloads constructor(
 
         setOnClickListener {
             highlightAnimator.start()
-            showPopupWindow(title, radioOptions, settings, subtitleTextView)
+            showPopupWindow(type, radioOptions, settings, subtitleTextView)
         }
     }
 
     private fun showPopupWindow(
-        title: String,
+        type: TypeSettings,
         radioOptions: List<String>,
         settings: Settings,
         subtitleTextView: MaterialTextView,
     ) {
         val popupView: View = LayoutInflater.from(context).inflate(R.layout.popup_settings, null)
         popupView.setBackgroundResource(R.drawable.custom_popup_background)
-        val popupTitleTextView: MaterialTextView = popupView.findViewById(R.id.popup_title_text_view)
+        val popupTitleTextView: MaterialTextView =
+            popupView.findViewById(R.id.popup_title_text_view)
         val radioGroup: RadioGroup = popupView.findViewById(R.id.radio_group)
 
-        popupTitleTextView.text = title
+        popupTitleTextView.text = type.name
 
         radioOptions.forEachIndexed { index, _ ->
             val radioButton = RadioButton(context)
@@ -93,7 +95,7 @@ class RadioGroupSettingsView @JvmOverloads constructor(
                 ColorStateList.valueOf(ContextCompat.getColor(context, R.color.white))
             radioGroup.addView(radioButton)
 
-            if (currOption == getSelectedOption(title, settings)) {
+            if (currOption == getSelectedOption(type, settings)) {
                 radioButton.isChecked = true
             }
         }
@@ -101,21 +103,26 @@ class RadioGroupSettingsView @JvmOverloads constructor(
             val radioButton = radioGroup.findViewById<RadioButton>(index)
             val selectedOption = radioButton.text.toString()
 
-            when (title) {
-                "Language" -> Language.valueOf(selectedOption)
-                "Units" -> Units.valueOf(selectedOption)
-                "Timer increment value" -> selectedOption.split(" ").first().toInt()
-                "Sound" -> Sound.valueOf(selectedOption)
-                "Theme" -> Theme.valueOf(selectedOption)
+            when (type) {
+                TypeSettings.LANGUAGE_SETTING -> Language.valueOf(selectedOption)
+                TypeSettings.UNIT_SETTING -> Units.valueOf(selectedOption)
+                TypeSettings.REST_TIMER_SETTING -> selectedOption.split(" ").first().toInt()
+                TypeSettings.SOUND_SETTING -> Sound.valueOf(selectedOption)
+                TypeSettings.THEME_SETTING -> Theme.valueOf(selectedOption)
                 else -> null
             }?.let {
-                settingsChangeListener?.onSettingChanged(title, it)
-                subtitleTextView.text = when (title) {
-                    "Language" -> (it as Language).name
-                    "Units" -> (it as Units).name
-                    "Timer increment value" -> "$it s"
-                    "Sound" -> (it as Sound).name
-                    "Theme" -> (it as Theme).name
+                settingsChangeListener?.onSettingChanged(type, it)
+                subtitleTextView.text = when (type) {
+                    TypeSettings.LANGUAGE_SETTING -> (if (it is Language) {
+                        it.name
+                    } else {
+                        null
+                    }).toString()
+
+                    TypeSettings.UNIT_SETTING -> (if (it is Units) it.name else null).toString()
+                    TypeSettings.REST_TIMER_SETTING -> "$it s"
+                    TypeSettings.SOUND_SETTING -> (if (it is Sound) it.name else null).toString()
+                    TypeSettings.THEME_SETTING -> (if (it is Theme) it.name else null).toString()
                     else -> null
                 }
             }
@@ -132,13 +139,13 @@ class RadioGroupSettingsView @JvmOverloads constructor(
         popupWindow.showAtLocation(this, Gravity.CENTER, 0, 0)
     }
 
-    private fun getSelectedOption(title: String, settings: Settings): String? {
-        return when (title) {
-            "Language" -> settings.language
-            "Units" -> settings.units
-            "Timer increment value" -> "${settings.restTimer} s"
-            "Sound" -> settings.soundSettings
-            "Theme" -> settings.theme
+    private fun getSelectedOption(type: TypeSettings, settings: Settings): String? {
+        return when (type) {
+            TypeSettings.LANGUAGE_SETTING -> settings.language.toString()
+            TypeSettings.UNIT_SETTING -> settings.units.toString()
+            TypeSettings.REST_TIMER_SETTING -> "${settings.restTimer} s"
+            TypeSettings.SOUND_SETTING -> settings.soundSettings.toString()
+            TypeSettings.THEME_SETTING -> settings.theme.toString()
             else -> null
         }
     }

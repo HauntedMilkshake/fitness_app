@@ -1,8 +1,10 @@
 package bg.zahov.app.ui.settings
 
+import android.content.ActivityNotFoundException
 import android.content.Context
 import android.content.Intent
 import android.net.Uri
+import android.widget.Toast
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
@@ -14,6 +16,7 @@ import androidx.compose.material3.Button
 import androidx.compose.material3.ButtonColors
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.getValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
@@ -23,20 +26,7 @@ import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.unit.dp
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import androidx.lifecycle.viewmodel.compose.viewModel
-import bg.zahov.app.data.local.RealmManager.Companion.AUTOMATIC_SYNC_SETTING
-import bg.zahov.app.data.local.RealmManager.Companion.LANGUAGE_SETTING
-import bg.zahov.app.data.local.RealmManager.Companion.REST_TIMER_SETTING
-import bg.zahov.app.data.local.RealmManager.Companion.SOUND_EFFECTS_SETTING
-import bg.zahov.app.data.local.RealmManager.Companion.SOUND_SETTING
-import bg.zahov.app.data.local.RealmManager.Companion.THEME_SETTING
-import bg.zahov.app.data.local.RealmManager.Companion.UNIT_SETTING
-import bg.zahov.app.data.local.RealmManager.Companion.UPDATE_TEMPLATE_SETTING
-import bg.zahov.app.data.local.RealmManager.Companion.VIBRATION_SETTING
-import bg.zahov.app.data.local.RealmManager.Companion.WATCH_SETTINGS
-import bg.zahov.app.data.model.LanguageKeys.Companion.languages
-import bg.zahov.app.data.model.SoundKeys.Companion.sounds
-import bg.zahov.app.data.model.ThemeKeys.Companion.theme
-import bg.zahov.app.data.model.UnitsKeys.Companion.units
+import bg.zahov.app.data.model.state.TypeSettings
 import bg.zahov.fitness.app.R
 
 @Composable
@@ -49,101 +39,107 @@ fun SettingsScreen(
     val context = LocalContext.current
 
     if (uiState.returnBack) {
-        navigateBack()
+        LaunchedEffect(Unit) {
+            navigateBack()
+        }
     }
     SettingsContent(
         resetTimer = uiState.data.restTimer,
         changeResetTimer = { onDismiss ->
             RadioSettingsDialog(
-                title = REST_TIMER_SETTING,
-                items = listOf(30, 15, 5),
+                type = TypeSettings.REST_TIMER_SETTING,
                 onDismissRequest = onDismiss,
-                selected = uiState.data.restTimer.toString(),
-                setSelected = { viewModel.writeNewSetting(title = REST_TIMER_SETTING, it) })
+                selected = uiState.data.restTimer,
+                setSelected = { type: TypeSettings, value: Any ->
+                    viewModel.writeNewSetting(type = type, newValue = value)
+                })
         },
         sound = uiState.data.soundSettings,
         changeSound = { onDismiss ->
             RadioSettingsDialog(
-                title = SOUND_SETTING,
-                items = sounds,
+                type = TypeSettings.SOUND_SETTING,
                 onDismissRequest = onDismiss,
                 selected = uiState.data.soundSettings,
-                setSelected = { viewModel.writeNewSetting(title = SOUND_SETTING, it) })
+                setSelected = { type: TypeSettings, value: Any ->
+                    viewModel.writeNewSetting(type = type, newValue = value)
+                })
         },
         theme = uiState.data.theme,
         changeTheme = { onDismiss ->
             RadioSettingsDialog(
-                title = THEME_SETTING,
-                items = theme,
+                type = TypeSettings.THEME_SETTING,
                 onDismissRequest = onDismiss,
                 selected = uiState.data.theme,
-                setSelected = { viewModel.writeNewSetting(title = THEME_SETTING, it) })
+                setSelected = { type: TypeSettings, value: Any ->
+                    viewModel.writeNewSetting(type = type, newValue = value)
+                })
 
         },
         units = uiState.data.units,
         changeUnits = { onDismiss ->
             RadioSettingsDialog(
-                title = UNIT_SETTING,
-                items = units,
+                type = TypeSettings.UNIT_SETTING,
                 onDismissRequest = onDismiss,
                 selected = uiState.data.units,
-                setSelected = { viewModel.writeNewSetting(title = UNIT_SETTING, it) })
+                setSelected = { type: TypeSettings, value: Any ->
+                    viewModel.writeNewSetting(type = type, newValue = value)
+                })
 
         },
         language = uiState.data.language,
         changeLanguage = { onDismiss ->
             RadioSettingsDialog(
-                title = LANGUAGE_SETTING,
-                items = languages,
+                type = TypeSettings.LANGUAGE_SETTING,
                 onDismissRequest = onDismiss,
                 selected = uiState.data.language,
-                setSelected = { viewModel.writeNewSetting(title = LANGUAGE_SETTING, it) })
-
+                setSelected = { type: TypeSettings, value: Any ->
+                    viewModel.writeNewSetting(type = type, newValue = value)
+                })
         },
         navigateEditProfile = { navigateEditProfile() },
         enableSound = uiState.data.soundEffects,
         enableSoundChange = {
             viewModel.writeNewSetting(
-                title = SOUND_EFFECTS_SETTING,
+                type = TypeSettings.SOUND_EFFECTS_SETTING,
                 newValue = !uiState.data.soundEffects
             )
         },
         enableSync = uiState.data.automaticSync,
         enableSyncChange = {
             viewModel.writeNewSetting(
-                title = AUTOMATIC_SYNC_SETTING,
+                type = TypeSettings.AUTOMATIC_SYNC_SETTING,
                 newValue = !uiState.data.automaticSync
             )
         },
         enableVibrate = uiState.data.vibration,
         enableVibrateChange = {
             viewModel.writeNewSetting(
-                title = VIBRATION_SETTING,
+                type = TypeSettings.VIBRATION_SETTING,
                 newValue = !uiState.data.vibration
             )
         },
         showUpdate = uiState.data.updateTemplate,
         showUpdateChange = {
             viewModel.writeNewSetting(
-                title = UPDATE_TEMPLATE_SETTING,
+                type = TypeSettings.UPDATE_TEMPLATE_SETTING,
                 newValue = !uiState.data.updateTemplate
             )
         },
         enableWatch = uiState.data.enableWatch,
         useWatchChange = {
             viewModel.writeNewSetting(
-                title = WATCH_SETTINGS,
+                type = TypeSettings.UPDATE_TEMPLATE_SETTING,
                 newValue = !uiState.data.enableWatch
             )
         },
         github = {
-            openLink(
+            OpenLink(
                 context = context,
                 link = "https://github.com/HauntedMilkshake/fitness_app"
             )
         },
         bugReport = {
-            openLink(
+            OpenLink(
                 context = context,
                 link = "https://github.com/HauntedMilkshake/fitness_app/issues"
             )
@@ -175,8 +171,8 @@ fun SettingsContent(
     enableSyncChange: () -> Unit,
     showUpdateChange: () -> Unit,
     useWatchChange: () -> Unit,
-    github: () -> Unit,
-    bugReport: () -> Unit,
+    github: @Composable () -> Unit,
+    bugReport: @Composable () -> Unit,
     deleteAccount: () -> Unit,
     logout: () -> Unit
 ) {
@@ -276,7 +272,24 @@ fun SettingsContent(
     }
 }
 
-private fun openLink(context: Context, link: String) {
-    val intent = Intent(Intent.ACTION_VIEW, Uri.parse(link))
-    context.startActivity(intent)
+@Composable
+private fun OpenLink(context: Context, link: String) {
+    LaunchedEffect(Unit) {
+        try {
+            val intent = Intent(Intent.ACTION_VIEW, Uri.parse(link))
+            context.startActivity(intent)
+        } catch (e: ActivityNotFoundException) {
+            Toast.makeText(
+                context,
+                "No application found to open the link.",
+                Toast.LENGTH_SHORT
+            ).show()
+        } catch (e: Exception) {
+            Toast.makeText(
+                context,
+                "An error occurred while trying to open the link.",
+                Toast.LENGTH_SHORT
+            ).show()
+        }
+    }
 }

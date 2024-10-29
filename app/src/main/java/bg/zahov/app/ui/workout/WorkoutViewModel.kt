@@ -104,7 +104,7 @@ class WorkoutViewModel(application: Application) : AndroidViewModel(application)
             launch {
                 settingsProvider.getSettings().collect { objectChange ->
                     objectChange.obj?.units?.let {
-                        units = Units.valueOf(it)
+                        units = Units.findByKey(it)
                     }
                 }
             }
@@ -177,7 +177,7 @@ class WorkoutViewModel(application: Application) : AndroidViewModel(application)
     ): List<WorkoutEntry> {
         val workoutEntries = mutableListOf<WorkoutEntry>()
         exercises.forEach { exercise ->
-            workoutEntries.add(ExerciseEntry(exercise.toExerciseSetAdapterWrapper(if (::units.isInitialized) units else Units.Metric)))
+            workoutEntries.add(ExerciseEntry(exercise.toExerciseSetAdapterWrapper(if (::units.isInitialized) units else Units.METRIC)))
             val previousExercise = templateExercises.find { it.name == exercise.name }
             exercise.sets.forEachIndexed { index, set ->
                 val setCopy = Sets(set.type, set.firstMetric, set.secondMetric)

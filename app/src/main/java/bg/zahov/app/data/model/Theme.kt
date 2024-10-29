@@ -1,18 +1,17 @@
 package bg.zahov.app.data.model
 
-class ThemeKeys {
-    companion object {
-        const val DARK = "Dark"
-        const val LIGHT = "Light"
-
-        val theme = listOf(DARK, LIGHT)
-    }
-}
 enum class Theme(val key: String) {
-    Dark(ThemeKeys.DARK),
-    Light(ThemeKeys.LIGHT);
+    Dark("DARK"),
+    Light("LIGHT");
 
     companion object {
-        fun fromKey(key: String) = entries.firstOrNull { it.key == key }.toString()
+        fun findByKey(key: String): Theme {
+            return Theme.entries.find { it.key == key } ?: Dark
+        }
+
+        fun getListOfKeys(): List<String> {
+            return Theme.entries.map { it.key }
+
+        }
     }
 }

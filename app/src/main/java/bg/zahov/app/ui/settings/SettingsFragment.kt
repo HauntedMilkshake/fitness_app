@@ -58,9 +58,7 @@ class SettingsFragment : Fragment() {
                 SettingsScreen(
                     settingsViewModel,
                     navigateBack = { findNavController().navigate(R.id.settings_to_welcome) },
-                    navigateEditProfile = {
-                        findNavController().navigate(R.id.settings_to_edit_profile)
-                    })
+                    navigateEditProfile = { findNavController().navigate(R.id.settings_to_edit_profile) })
             }
         }
     }

@@ -3,7 +3,11 @@ package bg.zahov.app.ui.settings
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
 import bg.zahov.app.Inject
+import bg.zahov.app.data.interfaces.SettingsProvider
+import bg.zahov.app.data.interfaces.UserProvider
+import bg.zahov.app.data.interfaces.WorkoutActions
 import bg.zahov.app.data.local.Settings
+import bg.zahov.app.data.model.state.TypeSettings
 import bg.zahov.app.data.provider.SettingsProviderImpl
 import bg.zahov.app.data.provider.UserProviderImpl
 import bg.zahov.app.data.provider.WorkoutStateManager
@@ -25,9 +29,9 @@ import kotlinx.coroutines.launch
  * - Deleting the user's account and associated data.
  */
 class SettingsViewModel(
-    private val repo: SettingsProviderImpl = Inject.settingsProvider,
-    private val auth: UserProviderImpl = Inject.userProvider,
-    private val workoutState: WorkoutStateManager = Inject.workoutState
+    private val repo: SettingsProvider = Inject.settingsProvider,
+    private val auth: UserProvider = Inject.userProvider,
+    private val workoutState: WorkoutActions = Inject.workoutState
 ) : ViewModel() {
 
     /**
@@ -59,12 +63,12 @@ class SettingsViewModel(
     /**
      * Updates a specific setting with a new value.
      *
-     * @param title The title or key of the setting to be updated.
+     * @param type The type of the setting to be updated.
      * @param newValue The new value for the specified setting.
      */
-    fun writeNewSetting(title: String, newValue: Any) {
+    fun writeNewSetting(type: TypeSettings, newValue: Any) {
         viewModelScope.launch {
-            repo.addSetting(title, newValue)
+            repo.addSetting(type, newValue)
         }
     }
 

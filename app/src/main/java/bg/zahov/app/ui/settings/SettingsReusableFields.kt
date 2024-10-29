@@ -24,7 +24,7 @@ import androidx.compose.ui.unit.sp
 import bg.zahov.fitness.app.R
 
 @Composable
-fun SettingsButton(text: String, onClick: () -> Unit) {
+fun SettingsButton(text: String, onClick: @Composable () -> Unit) {
     Column(
         modifier = Modifier
             .fillMaxWidth()

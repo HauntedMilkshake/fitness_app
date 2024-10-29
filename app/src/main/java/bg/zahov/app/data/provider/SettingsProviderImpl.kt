@@ -2,6 +2,7 @@ package bg.zahov.app.data.provider
 
 import bg.zahov.app.data.interfaces.SettingsProvider
 import bg.zahov.app.data.local.Settings
+import bg.zahov.app.data.model.state.TypeSettings
 import bg.zahov.app.data.repository.SettingsRepositoryImpl
 import io.realm.kotlin.notifications.ObjectChange
 import kotlinx.coroutines.flow.Flow
@@ -45,10 +46,10 @@ class SettingsProviderImpl: SettingsProvider {
     /**
      * Adds or updates a setting with the specified title and value.
      *
-     * @param title The title or key of the setting to be updated.
+     * @param type The type of the setting to be updated.
      * @param value The new value to set.
      */
-    override suspend fun addSetting(title: String, value: Any) = settingsRepository.addSetting(title, value)
+    override suspend fun addSetting(type: TypeSettings, value: Any) = settingsRepository.addSetting(type, value)
 
     /**
      * Resets all settings to their default values.

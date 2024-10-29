@@ -1,8 +1,9 @@
 package bg.zahov.app.data.repository
 
+import bg.zahov.app.data.interfaces.SettingsProvider
 import bg.zahov.app.data.local.RealmManager
 import bg.zahov.app.data.local.Settings
-import bg.zahov.app.data.interfaces.SettingsRepository
+import bg.zahov.app.data.model.state.TypeSettings
 import io.realm.kotlin.notifications.ObjectChange
 import kotlinx.coroutines.flow.Flow
 
@@ -14,7 +15,7 @@ import kotlinx.coroutines.flow.Flow
  *
  * @property realm Handles database operations related to settings through [RealmManager].
  */
-class SettingsRepositoryImpl : SettingsRepository {
+class SettingsRepositoryImpl : SettingsProvider {
 
     companion object {
         @Volatile
@@ -43,11 +44,11 @@ class SettingsRepositoryImpl : SettingsRepository {
     /**
      * Adds or updates a specific setting.
      *
-     * @param title The title or key of the setting.
+     * @param type The type of the setting.
      * @param value The value to be set for the specified setting.
      */
-    override suspend fun addSetting(title: String, value: Any) {
-        realm.updateSetting(title, value)
+    override suspend fun addSetting(type: TypeSettings, value: Any) {
+        realm.updateSetting(type, value)
     }
 
     /**

@@ -1,19 +1,16 @@
 package bg.zahov.app.data.model
 
-class UnitsKeys {
-    companion object {
-        const val METRIC = "Metric"
-        const val BANANA = "Imperial"
-
-        val units = listOf(METRIC, BANANA)
-    }
-}
-
 enum class Units(val key: String) {
-    Metric(UnitsKeys.METRIC),
-    Imperial(UnitsKeys.BANANA);
+    METRIC("Metric"),
+    BANANA("Imperial");
 
     companion object {
-        fun fromKey(key: String) = entries.firstOrNull { it.key == key }.toString()
+        fun findByKey(key: String): Units {
+            return entries.find { it.key == key } ?: METRIC
+        }
+
+        fun getListOfKeys(): List<String> {
+            return entries.map { it.key }
+        }
     }
 }
