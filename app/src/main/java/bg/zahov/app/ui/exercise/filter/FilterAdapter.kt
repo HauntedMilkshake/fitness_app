@@ -24,7 +24,7 @@ class FilterAdapter(private val removableVisibility: Int) : BaseAdapter<FilterWr
             itemView.setBackgroundResource(item.backgroundResource)
 
             itemView.setOnClickListener {
-                notifyItemChanged(bindingAdapterPosition)
+                notifyItemChanged(adapterPosition)
                 item.apply {
                     itemClickListener?.onItemClicked(item, it)
                 }

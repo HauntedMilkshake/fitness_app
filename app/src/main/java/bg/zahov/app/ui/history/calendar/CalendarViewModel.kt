@@ -1,34 +1,33 @@
 package bg.zahov.app.ui.history.calendar
 
-import android.app.Application
 import android.view.View
-import androidx.lifecycle.AndroidViewModel
-import androidx.lifecycle.LiveData
-import androidx.lifecycle.MutableLiveData
+import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
+import bg.zahov.app.Inject
 import bg.zahov.app.data.exception.CriticalDataNullException
-import bg.zahov.app.getServiceErrorProvider
-import bg.zahov.app.getWorkoutProvider
+import bg.zahov.app.data.interfaces.ServiceErrorHandler
+import bg.zahov.app.data.interfaces.WorkoutProvider
+import kotlinx.coroutines.flow.MutableStateFlow
+import kotlinx.coroutines.flow.StateFlow
+import kotlinx.coroutines.flow.update
 import kotlinx.coroutines.launch
 import java.time.Month
 import java.time.YearMonth
 
-class CalendarViewModel(application: Application) : AndroidViewModel(application) {
-    private val workoutProvider by lazy {
-        application.getWorkoutProvider()
-    }
-    private val serviceError by lazy {
-        application.getServiceErrorProvider()
-    }
+data class WorkoutDate(val month: Month, val day: Int)
 
-    private val _workoutsPerMonthCheck = MutableLiveData<Map<WorkoutDate, Int>>()
-    val workoutsPerMonthCheck: LiveData<Map<WorkoutDate, Int>>
-        get() = _workoutsPerMonthCheck
+data class CalendarUiState(
+    val workoutsPerMonth: Map<WorkoutDate, Int> = mapOf(),
+    val numberOfWorkouts: Map<Month, Int> = mapOf()
+)
 
+class CalendarViewModel(
+    private val workoutProvider: WorkoutProvider = Inject.workoutProvider,
+    private val serviceError: ServiceErrorHandler = Inject.serviceErrorHandler
+) : ViewModel() {
 
-    private val _numberOfWorkouts = MutableLiveData<Map<Month, Int>>()
-    val numberOfWorkouts: LiveData<Map<Month, Int>>
-        get() = _numberOfWorkouts
+    private val _uiState = MutableStateFlow<CalendarUiState>(CalendarUiState())
+    val uiState: StateFlow<CalendarUiState> = _uiState
 
     init {
         viewModelScope.launch {
@@ -55,8 +54,12 @@ class CalendarViewModel(application: Application) : AndroidViewModel(application
                         }
                     }
 
-                    _workoutsPerMonthCheck.value = workoutsPerMonthCheck.toMap()
-                    _numberOfWorkouts.value = workoutsPerMonth.toMap()
+                    _uiState.update { old ->
+                        old.copy(
+                            workoutsPerMonth = workoutsPerMonthCheck.toMap(),
+                            numberOfWorkouts = workoutsPerMonth.toMap()
+                        )
+                    }
                 }
             } catch (e: CriticalDataNullException) {
                 serviceError.initiateCountdown()
@@ -65,7 +68,3 @@ class CalendarViewModel(application: Application) : AndroidViewModel(application
     }
 
 }
-
-data class WorkoutDate(val month: Month, val day: Int)
-
-

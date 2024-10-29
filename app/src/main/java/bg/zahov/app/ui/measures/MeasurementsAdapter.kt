@@ -20,7 +20,7 @@ class MeasurementsAdapter : BaseAdapter<AdapterMeasurement>(
             title.text = item.title
 
             itemView.setOnClickListener {
-                itemClickListener?.onItemClicked(item, bindingAdapterPosition)
+                itemClickListener?.onItemClicked(item, adapterPosition)
             }
         }
     }
