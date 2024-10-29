@@ -1,6 +1,5 @@
 package bg.zahov.app.ui.history
 
-import android.util.Log
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
 import bg.zahov.app.Inject
@@ -16,11 +15,9 @@ import kotlinx.coroutines.flow.update
 import kotlinx.coroutines.launch
 
 /**
- * @property isDataLoading Indicates whether the data is currently being loaded.
  * @property workouts A list of past workouts to be displayed.
  */
 data class HistoryUiState(
-    val isDataLoading: Boolean = true,
     val workouts: List<HistoryWorkout> = listOf()
 )
 
@@ -61,7 +58,7 @@ class HistoryViewModel(
             workoutProvider.getPastWorkouts().collect {
                 try {
                     _uiState.update { old ->
-                        old.copy(false, it.map { workout -> workout.toHistoryWorkout() })
+                        old.copy(it.map { workout -> workout.toHistoryWorkout() })
                     }
                 } catch (e: CriticalDataNullException) {
                     serviceError.initiateCountdown()

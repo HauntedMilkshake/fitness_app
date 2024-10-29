@@ -1,5 +1,11 @@
 package bg.zahov.app.ui.history
 
+import android.content.Context
+import androidx.compose.animation.AnimatedContent
+import androidx.compose.animation.core.tween
+import androidx.compose.animation.fadeIn
+import androidx.compose.animation.fadeOut
+import androidx.compose.animation.togetherWith
 import androidx.compose.foundation.border
 import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.Arrangement
@@ -9,7 +15,6 @@ import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.padding
-import androidx.compose.foundation.layout.width
 import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.foundation.lazy.items
 import androidx.compose.foundation.shape.RoundedCornerShape
@@ -22,6 +27,7 @@ import androidx.compose.runtime.getValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
+import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.res.colorResource
 import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.res.stringResource
@@ -35,27 +41,45 @@ import bg.zahov.fitness.app.R
 @Composable
 fun HistoryScreen(historyViewModel: HistoryViewModel = viewModel(), onItemClick: (String) -> Unit) {
     val uiState by historyViewModel.uiState.collectAsStateWithLifecycle()
-    HistoryContent(uiState.workouts, uiState.isDataLoading, onItemClick = { onItemClick(it) })
+    val context = LocalContext.current
+    HistoryContent(uiState.workouts, context, onItemClick = { onItemClick(it) })
 }
 
 @Composable
 fun HistoryContent(
     workouts: List<HistoryWorkout>,
-    isDataLoading: Boolean,
+    context: Context,
     onItemClick: (String) -> Unit
 ) {
-    if (isDataLoading) {
-        CircularProgressIndicator(
-            modifier = Modifier
-                .width(64.dp),
-            color = MaterialTheme.colorScheme.secondary,
-            trackColor = MaterialTheme.colorScheme.surfaceVariant
-        )
-    } else {
-        LazyColumn(Modifier.fillMaxSize()) {
-            items(workouts) {
-                Workout(it) {
-                    onItemClick(it)
+    AnimatedContent(
+        workouts.size,
+        transitionSpec = {
+            fadeIn(
+                animationSpec = tween(context.resources.getInteger(R.integer.animation_duration_medium))
+            ) togetherWith fadeOut(
+                targetAlpha = context.resources.getInteger(R.integer.animation_duration_medium)
+                    .toFloat()
+            )
+        },
+        label = ""
+    ) {
+        when (it) {
+            0 -> {
+                CircularProgressIndicator(
+                    modifier = Modifier,
+                    color = MaterialTheme.colorScheme.secondary,
+                    trackColor = MaterialTheme.colorScheme.surfaceVariant
+                )
+            }
+
+            else -> {
+
+                LazyColumn(Modifier.fillMaxSize()) {
+                    items(items = workouts, key = { it.id }) {
+                        Workout(it) {
+                            onItemClick(it)
+                        }
+                    }
                 }
             }
         }
