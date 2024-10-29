@@ -25,10 +25,15 @@ import bg.zahov.fitness.app.R
 
 @Composable
 fun SettingsButton(text: String, onClick: @Composable () -> Unit) {
+    val showError = remember { mutableStateOf(false) }
+    if (showError.value) {
+        onClick()
+        showError.value = false
+    }
     Column(
         modifier = Modifier
             .fillMaxWidth()
-            .clickable { onClick() }
+            .clickable { showError.value = true }
             .padding(6.dp)
     ) {
         Text(
