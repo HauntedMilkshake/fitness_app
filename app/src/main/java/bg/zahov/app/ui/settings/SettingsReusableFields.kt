@@ -8,6 +8,7 @@ import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.padding
 import androidx.compose.material3.HorizontalDivider
+import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Switch
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
@@ -40,7 +41,7 @@ fun SettingsButton(text: String, onClick: @Composable () -> Unit) {
             text = text,
             modifier = Modifier
                 .padding(start = 12.dp),
-            fontSize = 16.sp,
+            style = MaterialTheme.typography.titleMedium,
             color = colorResource(R.color.white)
 
         )
@@ -69,14 +70,14 @@ fun SettingsRadioButton(
             text = title,
             modifier = Modifier
                 .padding(start = 12.dp),
-            fontSize = 16.sp,
+            style = MaterialTheme.typography.titleMedium,
             color = colorResource(R.color.white)
         )
         Text(
             text = text,
             modifier = Modifier
                 .padding(top = 4.dp, start = 12.dp),
-            fontSize = 12.sp,
+            style = MaterialTheme.typography.titleSmall,
             color = colorResource(R.color.text)
         )
     }
@@ -99,13 +100,13 @@ fun SettingsSwitchButton(
             Text(
                 text = title,
                 modifier = Modifier.padding(start = 12.dp),
-                fontSize = 16.sp,
+                style = MaterialTheme.typography.titleMedium,
                 color = colorResource(R.color.white)
             )
             Text(
                 text = text,
                 modifier = Modifier.padding(start = 16.dp, top = 4.dp),
-                fontSize = 12.sp,
+                style = MaterialTheme.typography.titleSmall,
                 color = colorResource(R.color.text)
             )
         }
@@ -116,7 +117,6 @@ fun SettingsSwitchButton(
                 modifier = Modifier
                     .align(Alignment.End)
                     .padding(end = 12.dp),
-
                 )
         }
     }
@@ -126,7 +126,7 @@ fun SettingsSwitchButton(
 fun SettingsText(text: String) {
     Text(
         text = text,
-        fontSize = 20.sp,
+        style = MaterialTheme.typography.titleLarge,
         color = Color.White,
         modifier = Modifier.padding(top = 20.dp, start = 20.dp)
     )
