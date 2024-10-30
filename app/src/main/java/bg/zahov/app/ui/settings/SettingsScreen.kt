@@ -35,7 +35,6 @@ fun SettingsScreen(
     navigateEditProfile: () -> Unit
 ) {
     val uiState by viewModel.uiState.collectAsStateWithLifecycle()
-    val context = LocalContext.current
 
     if (uiState.returnBack) {
         LaunchedEffect(Unit) {
@@ -127,7 +126,7 @@ fun SettingsScreen(
         enableWatch = uiState.data.enableWatch,
         useWatchChange = {
             viewModel.writeNewSetting(
-                type = TypeSettings.UPDATE_TEMPLATE_SETTING,
+                type = TypeSettings.WATCH_SETTINGS,
                 newValue = !uiState.data.enableWatch
             )
         },
