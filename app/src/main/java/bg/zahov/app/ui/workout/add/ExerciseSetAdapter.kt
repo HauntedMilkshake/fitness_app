@@ -136,15 +136,15 @@ class ExerciseSetAdapter :
             noteLayout.visibility = item.noteVisibility
             noteEditText.setText(item.note)
             noteEditText.doAfterTextChanged {
-                textChangeListener?.onNoteChanged(bindingAdapterPosition, it.toString())
+                textChangeListener?.onNoteChanged(adapterPosition, it.toString())
             }
 
             options.setOnClickListener {
-                showExerciseMenu(bindingAdapterPosition, it)
+                showExerciseMenu(adapterPosition, it)
             }
 
             addSetButton.setOnClickListener {
-                itemClickListener?.onAddSet(bindingAdapterPosition)
+                itemClickListener?.onAddSet(adapterPosition)
             }
         }
 
@@ -213,7 +213,7 @@ class ExerciseSetAdapter :
                 }
 
                 setOnClickListener {
-                    showSetMenu(bindingAdapterPosition, it)
+                    showSetMenu(adapterPosition, it)
                 }
             }
 
@@ -221,7 +221,7 @@ class ExerciseSetAdapter :
                 if ((item.set.firstMetric ?: 0.0) > 0.0) setText(item.set.firstMetric.toString())
                 addTextChangedListener {
                     textChangeListener?.onInputFieldChanged(
-                        bindingAdapterPosition,
+                        adapterPosition,
                         it.toString(),
                         firstInputEditText.id
                     )
@@ -242,7 +242,7 @@ class ExerciseSetAdapter :
                 if ((item.set.secondMetric ?: 0) > 0) setText(item.set.secondMetric.toString())
                 addTextChangedListener {
                     textChangeListener?.onInputFieldChanged(
-                        bindingAdapterPosition,
+                        adapterPosition,
                         it.toString(),
                         secondInputEditText.id
                     )
@@ -265,7 +265,7 @@ class ExerciseSetAdapter :
                 PopupMenu(ContextThemeWrapper(clickedView.context, R.style.MyPopUp), clickedView)
             popupMenu.menuInflater.inflate(R.menu.menu_popup_set, popupMenu.menu)
             popupMenu.setOnMenuItemClickListener { item ->
-                notifyItemChanged(bindingAdapterPosition)
+                notifyItemChanged(adapterPosition)
                 itemClickListener?.onSetTypeChanged(
                     itemPosition,
                     when (item.itemId) {
@@ -292,13 +292,13 @@ class ExerciseSetAdapter :
         }
 
         fun deleteSet() {
-            notifyItemRangeChanged(bindingAdapterPosition, getItemCount())
-            swipeActionListener?.onDeleteSet(bindingAdapterPosition)
+            notifyItemRangeChanged(adapterPosition, getItemCount())
+            swipeActionListener?.onDeleteSet(adapterPosition)
         }
 
         private fun getItemCount(): Int {
             var count = 1
-            var index = bindingAdapterPosition
+            var index = adapterPosition
             while (index < items.size && items[index] is SetEntry) {
                 count++
                 index++
