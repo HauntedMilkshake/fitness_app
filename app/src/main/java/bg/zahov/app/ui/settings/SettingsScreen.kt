@@ -1,7 +1,6 @@
 package bg.zahov.app.ui.settings
 
 import android.content.ActivityNotFoundException
-import android.content.Context
 import android.content.Intent
 import android.net.Uri
 import android.widget.Toast
@@ -133,16 +132,10 @@ fun SettingsScreen(
             )
         },
         github = {
-            OpenLink(
-                context = context,
-                link = "https://github.com/HauntedMilkshake/fitness_app"
-            )
+            OpenLink(link = "https://github.com/HauntedMilkshake/fitness_app")
         },
         bugReport = {
-            OpenLink(
-                context = context,
-                link = "https://github.com/HauntedMilkshake/fitness_app/issues"
-            )
+            OpenLink(link = "https://github.com/HauntedMilkshake/fitness_app/issues")
         },
         deleteAccount = { viewModel.deleteAccount() },
         logout = { viewModel.logout() })
@@ -273,7 +266,11 @@ fun SettingsContent(
 }
 
 @Composable
-private fun OpenLink(context: Context, link: String) {
+private fun OpenLink(link: String) {
+    val context = LocalContext.current
+    val noAppMessage = stringResource(R.string.no_application)
+    val linkErrorMessage = stringResource(R.string.link_error)
+
     LaunchedEffect(Unit) {
         try {
             val intent = Intent(Intent.ACTION_VIEW, Uri.parse(link))
@@ -281,13 +278,13 @@ private fun OpenLink(context: Context, link: String) {
         } catch (e: ActivityNotFoundException) {
             Toast.makeText(
                 context,
-                "No application found to open the link.",
+                noAppMessage,
                 Toast.LENGTH_SHORT
             ).show()
         } catch (e: Exception) {
             Toast.makeText(
                 context,
-                "An error occurred while trying to open the link.",
+                linkErrorMessage,
                 Toast.LENGTH_SHORT
             ).show()
         }

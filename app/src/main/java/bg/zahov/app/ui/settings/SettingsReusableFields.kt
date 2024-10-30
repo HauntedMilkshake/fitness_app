@@ -94,6 +94,7 @@ fun SettingsSwitchButton(
         modifier = Modifier
             .fillMaxWidth()
             .padding(vertical = 6.dp),
+        horizontalArrangement = Arrangement.SpaceBetween,
         verticalAlignment = Alignment.CenterVertically
     ) {
         Column {
@@ -110,15 +111,13 @@ fun SettingsSwitchButton(
                 color = colorResource(R.color.text)
             )
         }
-        Column(modifier = Modifier.fillMaxWidth()) {
-            Switch(
-                checked = checked,
-                onCheckedChange = { onChecked() },
-                modifier = Modifier
-                    .align(Alignment.End)
-                    .padding(end = 12.dp),
-                )
-        }
+        Switch(
+            checked = checked,
+            onCheckedChange = { onChecked() },
+            modifier = Modifier
+                .align(Alignment.CenterVertically)
+                .padding(end = 12.dp),
+        )
     }
 }
 
