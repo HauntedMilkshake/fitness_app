@@ -8,11 +8,13 @@ import bg.zahov.app.data.interfaces.ServiceErrorHandler
 import bg.zahov.app.data.interfaces.WorkoutProvider
 import bg.zahov.app.data.model.Workout
 import bg.zahov.app.util.timeToString
-import bg.zahov.app.util.toFormattedString
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.StateFlow
 import kotlinx.coroutines.flow.update
 import kotlinx.coroutines.launch
+import java.time.LocalDateTime
+import java.time.format.DateTimeFormatter
+import java.util.Locale
 
 /**
  * @property workouts A list of past workouts to be displayed.
@@ -82,18 +84,14 @@ fun Workout.toHistoryWorkout(): HistoryWorkout {
         name = this.name,
         duration = this.duration?.timeToString() ?: "00:00:00",
         volume = "${this.volume ?: 0} kg",
-        //change date to use locale
-        date = this.date..toFormattedString(),
+        date = this.date.toFormattedString(),
         exercises = this.exercises.map { "${if (it.sets.isNotEmpty()) "${it.sets.size} x " else ""}${it.name} " },
         bestSets = this.exercises.map {
             "${it.bestSet.firstMetric ?: 0} x ${it.bestSet.secondMetric ?: 0}"
         },
-//        this.exercises.joinToString("\n") {
-//            "${if (it.sets.isNotEmpty()) "${it.sets.size} x " else ""}${it.name} "
-//        },
-//                bestSets = this.exercises.joinToString("\n") {
-//            "${it.bestSet.firstMetric ?: 0} x ${it.bestSet.secondMetric ?: 0}"
-//        },
         personalRecords = this.personalRecords.toString()
     )
 }
+
+fun LocalDateTime.toFormattedString(): String =
+    this.format(DateTimeFormatter.ofPattern("HH:mm, d MMMM", Locale.getDefault()))

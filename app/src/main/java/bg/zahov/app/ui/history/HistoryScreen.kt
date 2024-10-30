@@ -206,18 +206,6 @@ fun Workout(item: HistoryWorkout, onItemClick: (String) -> Unit) {
     }
 }
 
-//@Composable
-//fun Exercise(exercise: String) {
-//    Text(
-//        text = exercise,
-//        modifier = Modifier.weight(1f),
-//        color = colorResource(R.color.less_vibrant_text),
-//        style = MaterialTheme.typography.bodyLarge,
-//        softWrap = true,
-//        overflow = TextOverflow.Ellipsis
-//    )
-//}
-
 @Composable
 fun TextWithLeadingIcon(
     text: String,
