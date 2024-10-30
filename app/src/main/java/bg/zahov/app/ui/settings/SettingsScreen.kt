@@ -4,6 +4,7 @@ import android.content.ActivityNotFoundException
 import android.content.Intent
 import android.net.Uri
 import android.widget.Toast
+import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
@@ -36,11 +37,6 @@ fun SettingsScreen(
 ) {
     val uiState by viewModel.uiState.collectAsStateWithLifecycle()
 
-    if (uiState.returnBack) {
-        LaunchedEffect(Unit) {
-            navigateBack()
-        }
-    }
     SettingsContent(
         resetTimer = uiState.data.restTimer,
         changeResetTimer = { onDismiss ->
@@ -136,8 +132,15 @@ fun SettingsScreen(
         bugReport = {
             OpenLink(link = "https://github.com/HauntedMilkshake/fitness_app/issues")
         },
-        deleteAccount = { viewModel.deleteAccount() },
-        logout = { viewModel.logout() })
+        deleteAccount = {
+            navigateBack()
+            viewModel.deleteAccount()
+        },
+        logout = {
+            navigateBack()
+            viewModel.logout()
+        }
+    )
 }
 
 @Composable
@@ -172,70 +175,66 @@ fun SettingsContent(
         modifier = Modifier
             .verticalScroll(rememberScrollState())
             .fillMaxSize()
+            .fillMaxWidth(),
+        verticalArrangement = Arrangement.spacedBy(16.dp)
     ) {
-        ColumnTemplate {
-            SettingsText(stringResource(R.string.profile))
-            SettingsButton(text = stringResource(R.string.edit_profile_text)) { navigateEditProfile() }
-        }
-        ColumnTemplate {
-            SettingsText(stringResource(R.string.units_and_locale_text))
-            SettingsRadioButton(
-                title = stringResource(R.string.language_text),
-                text = language,
-                dialog = { onDismiss -> changeLanguage(onDismiss) })
-            SettingsRadioButton(
-                title = stringResource(R.string.units_text),
-                text = units,
-                dialog = { onDismiss -> changeUnits(onDismiss) })
-        }
-        ColumnTemplate {
-            SettingsText(stringResource(R.string.general_text))
-            SettingsSwitchButton(
-                title = stringResource(R.string.sound_effects_text),
-                text = stringResource(R.string.no_rest_timer_included_text),
-                checked = enableSound
-            ) { enableSoundChange() }
-            SettingsRadioButton(
-                title = stringResource(R.string.theme_text),
-                text = theme,
-                dialog = { onDismiss -> changeTheme(onDismiss) })
-        }
-        ColumnTemplate {
-            SettingsText(stringResource(R.string.rest_timer_text))
-            SettingsRadioButton(
-                title = stringResource(R.string.timer_increment_value_text),
-                text = resetTimer.toString(),
-                dialog = { onDismiss -> changeResetTimer(onDismiss) })
-            SettingsSwitchButton(
-                title = stringResource(R.string.vibrate_upon_finish_text),
-                checked = enableVibrate
-            ) { enableVibrateChange() }
-            SettingsRadioButton(
-                title = stringResource(R.string.sound_text),
-                text = sound,
-                dialog = { onDismiss -> changeSound(onDismiss) })
-        }
-        ColumnTemplate {
-            SettingsText(stringResource(R.string.advanced_settings_text))
-            SettingsSwitchButton(
-                title = stringResource(R.string.sync_option_text),
-                text = stringResource(R.string.sync_option_explain),
-                checked = enableSync
-            ) { enableSyncChange() }
-            SettingsSwitchButton(
-                title = stringResource(R.string.show_update_template),
-                text = stringResource(R.string.show_update_template_explain),
-                checked = showUpdate
-            ) { showUpdateChange() }
-            SettingsSwitchButton(
-                title = stringResource(R.string.use_watch_option),
-                checked = enableWatch
-            ) { useWatchChange() }
-        }
-        ColumnTemplate {
-            SettingsButton(stringResource(R.string.github_text)) { github() }
-            SettingsButton(stringResource(R.string.bug_report_text)) { bugReport() }
-        }
+        SettingsText(stringResource(R.string.profile))
+        SettingsButton(text = stringResource(R.string.edit_profile_text)) { navigateEditProfile() }
+        Divider()
+        SettingsText(stringResource(R.string.units_and_locale_text))
+        SettingsRadioButton(
+            title = stringResource(R.string.language_text),
+            text = language,
+            dialog = { onDismiss -> changeLanguage(onDismiss) })
+        SettingsRadioButton(
+            title = stringResource(R.string.units_text),
+            text = units,
+            dialog = { onDismiss -> changeUnits(onDismiss) })
+        Divider()
+        SettingsText(stringResource(R.string.general_text))
+        SettingsSwitchButton(
+            title = stringResource(R.string.sound_effects_text),
+            text = stringResource(R.string.no_rest_timer_included_text),
+            checked = enableSound
+        ) { enableSoundChange() }
+        SettingsRadioButton(
+            title = stringResource(R.string.theme_text),
+            text = theme,
+            dialog = { onDismiss -> changeTheme(onDismiss) })
+        Divider()
+        SettingsText(stringResource(R.string.rest_timer_text))
+        SettingsRadioButton(
+            title = stringResource(R.string.timer_increment_value_text),
+            text = resetTimer.toString(),
+            dialog = { onDismiss -> changeResetTimer(onDismiss) })
+        SettingsSwitchButton(
+            title = stringResource(R.string.vibrate_upon_finish_text),
+            checked = enableVibrate
+        ) { enableVibrateChange() }
+        SettingsRadioButton(
+            title = stringResource(R.string.sound_text),
+            text = sound,
+            dialog = { onDismiss -> changeSound(onDismiss) })
+        Divider()
+        SettingsText(stringResource(R.string.advanced_settings_text))
+        SettingsSwitchButton(
+            title = stringResource(R.string.sync_option_text),
+            text = stringResource(R.string.sync_option_explain),
+            checked = enableSync
+        ) { enableSyncChange() }
+        SettingsSwitchButton(
+            title = stringResource(R.string.show_update_template),
+            text = stringResource(R.string.show_update_template_explain),
+            checked = showUpdate
+        ) { showUpdateChange() }
+        SettingsSwitchButton(
+            title = stringResource(R.string.use_watch_option),
+            checked = enableWatch
+        ) { useWatchChange() }
+        Divider()
+        SettingsButton(stringResource(R.string.github_text)) { github() }
+        SettingsButton(stringResource(R.string.bug_report_text)) { bugReport() }
+        Divider()
         Column(modifier = Modifier.fillMaxWidth()) {
             Button(
                 modifier = Modifier

@@ -21,7 +21,6 @@ import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.res.colorResource
 import androidx.compose.ui.unit.dp
-import androidx.compose.ui.unit.sp
 import bg.zahov.fitness.app.R
 
 @Composable
@@ -122,30 +121,18 @@ fun SettingsSwitchButton(
 }
 
 @Composable
-fun SettingsText(text: String) {
-    Text(
-        text = text,
-        style = MaterialTheme.typography.titleLarge,
-        color = Color.White,
-        modifier = Modifier.padding(top = 20.dp, start = 20.dp)
-    )
-}
+fun SettingsText(text: String) = Text(
+    text = text,
+    style = MaterialTheme.typography.titleLarge,
+    color = Color.White,
+    modifier = Modifier.padding(top = 20.dp, start = 20.dp)
+)
 
 @Composable
-fun ColumnTemplate(items: @Composable (() -> Unit)) {
-    Column(
-        modifier = Modifier
-            .fillMaxWidth()
-            .padding(bottom = 16.dp),
-        verticalArrangement = Arrangement.spacedBy(16.dp)
-    ) {
-        items()
-        HorizontalDivider(
-            modifier = Modifier
-                .fillMaxWidth()
-                .height(1.dp)
-                .padding(top = 4.dp),
-            color = colorResource(R.color.white)
-        )
-    }
-}
+fun Divider() = HorizontalDivider(
+    modifier = Modifier
+        .fillMaxWidth()
+        .height(1.dp)
+        .padding(top = 4.dp, bottom = 16.dp),
+    color = colorResource(R.color.white)
+)

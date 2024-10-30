@@ -10,7 +10,6 @@ import bg.zahov.app.data.local.Settings
 import bg.zahov.app.data.model.state.TypeSettings
 import bg.zahov.app.data.provider.SettingsProviderImpl
 import bg.zahov.app.data.provider.UserProviderImpl
-import bg.zahov.app.data.provider.WorkoutStateManager
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.StateFlow
 import kotlinx.coroutines.flow.update
@@ -38,12 +37,8 @@ class SettingsViewModel(
      * Data class representing the state of the settings UI.
      *
      * @property data Current settings data.
-     * @property returnBack Indicates if the UI should navigate back to welcome screen(e.g., after logout or account deletion).
      */
-    data class SettingsData(
-        val data: Settings,
-        val returnBack: Boolean = false
-    )
+    data class SettingsData(val data: Settings)
 
     // Holds the current UI state, updated whenever settings data changes
     private val _uiState = MutableStateFlow(SettingsData(data = Settings()))
@@ -82,24 +77,22 @@ class SettingsViewModel(
     }
 
     /**
-     * Logs out the current user, cancels ongoing workouts, and triggers UI navigation back.
+     * Logs out the current user, cancels ongoing workouts.
      */
     fun logout() {
         viewModelScope.launch {
             auth.logout()
             workoutState.cancel()
-            _uiState.update { old -> old.copy(returnBack = true) }
         }
     }
 
     /**
-     * Deletes the user's account, cancels ongoing workouts, and triggers UI navigation back.
+     * Deletes the user's account, cancels ongoing workouts.
      */
     fun deleteAccount() {
         viewModelScope.launch {
             workoutState.cancel()
             auth.deleteAccount()
-            _uiState.update { old -> old.copy(returnBack = true) }
         }
     }
 }
