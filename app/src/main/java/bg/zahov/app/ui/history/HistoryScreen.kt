@@ -20,6 +20,7 @@ import androidx.compose.foundation.lazy.items
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material3.CircularProgressIndicator
 import androidx.compose.material3.Icon
+import androidx.compose.material3.LocalContentColor
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
@@ -27,15 +28,19 @@ import androidx.compose.runtime.getValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
+import androidx.compose.ui.graphics.painter.Painter
 import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.res.colorResource
 import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.res.stringResource
+import androidx.compose.ui.text.TextStyle
 import androidx.compose.ui.text.font.FontWeight
+import androidx.compose.ui.text.style.TextOverflow
 import androidx.compose.ui.unit.dp
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import androidx.lifecycle.viewmodel.compose.viewModel
 import bg.zahov.fitness.app.R
+import kotlin.math.min
 
 
 @Composable
@@ -73,7 +78,6 @@ fun HistoryContent(
             }
 
             else -> {
-
                 LazyColumn(Modifier.fillMaxSize()) {
                     items(items = workouts, key = { it.id }) {
                         Workout(it) {
@@ -102,62 +106,53 @@ fun Workout(item: HistoryWorkout, onItemClick: (String) -> Unit) {
             Text(
                 text = item.name,
                 color = Color.White,
+                maxLines = 1,
+                overflow = TextOverflow.Ellipsis,
                 style = MaterialTheme.typography.titleMedium,
                 fontWeight = FontWeight.Bold
             )
             Text(
                 modifier = Modifier.padding(top = 4.dp),
                 text = item.date,
+                maxLines = 1,
+                overflow = TextOverflow.Ellipsis,
                 color = colorResource(R.color.less_vibrant_text),
                 style = MaterialTheme.typography.bodyLarge
             )
             Row(
                 Modifier
                     .fillMaxWidth()
-                    .padding(top = 8.dp),
+                    .padding(top = 8.dp)
+                    .align(Alignment.CenterHorizontally),
                 horizontalArrangement = Arrangement.SpaceEvenly
             ) {
-                Icon(
-                    painter = painterResource(R.drawable.ic_clock),
-                    contentDescription = null,
-                    tint = colorResource(R.color.less_vibrant_text)
-                )
-                Text(
-                    modifier = Modifier
-                        .weight(1f)
-                        .align(Alignment.CenterVertically)
-                        .padding(4.dp),
+                TextWithLeadingIcon(
                     text = item.duration,
-                    color = Color.White,
-                    style = MaterialTheme.typography.bodyMedium
-                )
-
-                Icon(
-                    painter = painterResource(R.drawable.ic_volume),
-                    contentDescription = null,
-                    tint = colorResource(R.color.less_vibrant_text)
-                )
-                Text(
-                    modifier = Modifier
+                    icon = painterResource(R.drawable.ic_clock),
+                    textModifier = Modifier
                         .weight(1f)
-                        .align(Alignment.CenterVertically),
+                        .padding(4.dp),
+                    iconColor = colorResource(R.color.less_vibrant_text),
+                    iconModifier = Modifier.align(Alignment.CenterVertically)
+                )
+                TextWithLeadingIcon(
                     text = item.volume,
-                    color = Color.White,
-                    style = MaterialTheme.typography.bodyMedium
-                )
-
-                Icon(
-                    painter = painterResource(R.drawable.ic_trophy),
-                    contentDescription = null,
-                    tint = colorResource(R.color.less_vibrant_text)
-                )
-                Text(
-                    modifier = Modifier
+                    icon = painterResource(R.drawable.ic_volume),
+                    textModifier = Modifier
                         .weight(1f)
-                        .align(Alignment.CenterVertically),
+                        .padding(4.dp),
+                    iconColor = colorResource(R.color.less_vibrant_text),
+                    iconModifier = Modifier.align(Alignment.CenterVertically)
+                )
+                TextWithLeadingIcon(
                     text = item.personalRecords,
-                    color = Color.White,
-                    style = MaterialTheme.typography.bodyMedium
+                    icon = painterResource(R.drawable.ic_trophy),
+                    textModifier = Modifier
+                        .align(Alignment.CenterVertically)
+                        .weight(1f)
+                        .padding(4.dp),
+                    iconColor = colorResource(R.color.less_vibrant_text),
+                    iconModifier = Modifier.align(Alignment.CenterVertically)
                 )
             }
             Row(
@@ -177,23 +172,77 @@ fun Workout(item: HistoryWorkout, onItemClick: (String) -> Unit) {
                     style = MaterialTheme.typography.bodyLarge
                 )
             }
-            Row(
-                modifier = Modifier
-                    .fillMaxWidth()
-                    .padding(top = 12.dp),
-                horizontalArrangement = Arrangement.SpaceBetween
-            ) {
-                Text(
-                    text = item.exercises,
-                    color = colorResource(R.color.less_vibrant_text),
-                    style = MaterialTheme.typography.bodyLarge
+            val textFieldCount =
+                if (item.bestSets.size > 5 && item.exercises.size > 5) 5 else min(
+                    item.exercises.size,
+                    item.bestSets.size
                 )
-                Text(
-                    text = item.bestSets,
-                    color = colorResource(R.color.less_vibrant_text),
-                    style = MaterialTheme.typography.bodyLarge
-                )
+            for (i in 0 until textFieldCount) {
+                Row(
+                    modifier = Modifier
+                        .fillMaxWidth()
+                        .padding(top = 4.dp),
+                    horizontalArrangement = Arrangement.SpaceBetween
+                ) {
+                    Text(
+                        text = item.exercises[i],
+                        color = colorResource(R.color.less_vibrant_text),
+                        style = MaterialTheme.typography.bodyLarge,
+                        softWrap = true,
+                        overflow = TextOverflow.Ellipsis,
+                        maxLines = 1
+                    )
+
+                    Text(
+                        text = item.bestSets[i],
+                        color = colorResource(R.color.less_vibrant_text),
+                        style = MaterialTheme.typography.bodyLarge,
+                        overflow = TextOverflow.Ellipsis,
+                        maxLines = 1,
+                    )
+                }
             }
         }
     }
+}
+
+//@Composable
+//fun Exercise(exercise: String) {
+//    Text(
+//        text = exercise,
+//        modifier = Modifier.weight(1f),
+//        color = colorResource(R.color.less_vibrant_text),
+//        style = MaterialTheme.typography.bodyLarge,
+//        softWrap = true,
+//        overflow = TextOverflow.Ellipsis
+//    )
+//}
+
+@Composable
+fun TextWithLeadingIcon(
+    text: String,
+    icon: Painter,
+    textModifier: Modifier = Modifier,
+    textColor: Color = Color.White,
+    textStyle: TextStyle = MaterialTheme.typography.bodyMedium,
+    textSoftWrap: Boolean = false,
+    textOverflow: TextOverflow = TextOverflow.Ellipsis,
+    iconModifier: Modifier = Modifier,
+    iconColor: Color? = null,
+    contentDescription: String? = null
+) {
+    Icon(
+        modifier = iconModifier,
+        contentDescription = contentDescription,
+        painter = icon,
+        tint = iconColor ?: LocalContentColor.current
+    )
+    Text(
+        text = text,
+        modifier = textModifier,
+        color = textColor,
+        style = textStyle,
+        softWrap = textSoftWrap,
+        overflow = textOverflow
+    )
 }

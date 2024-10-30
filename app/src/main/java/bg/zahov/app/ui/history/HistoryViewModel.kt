@@ -35,8 +35,8 @@ data class HistoryWorkout(
     val duration: String,
     val volume: String,
     val date: String,
-    val exercises: String,
-    val bestSets: String,
+    val exercises: List<String>,
+    val bestSets: List<String>,
     val personalRecords: String
 )
 
@@ -82,13 +82,18 @@ fun Workout.toHistoryWorkout(): HistoryWorkout {
         name = this.name,
         duration = this.duration?.timeToString() ?: "00:00:00",
         volume = "${this.volume ?: 0} kg",
-        date = this.date.toFormattedString(),
-        exercises = this.exercises.joinToString("\n") {
-            "${if (it.sets.isNotEmpty()) "${it.sets.size} x " else ""}${it.name} "
-        },
-        bestSets = this.exercises.joinToString("\n") {
+        //change date to use locale
+        date = this.date..toFormattedString(),
+        exercises = this.exercises.map { "${if (it.sets.isNotEmpty()) "${it.sets.size} x " else ""}${it.name} " },
+        bestSets = this.exercises.map {
             "${it.bestSet.firstMetric ?: 0} x ${it.bestSet.secondMetric ?: 0}"
         },
+//        this.exercises.joinToString("\n") {
+//            "${if (it.sets.isNotEmpty()) "${it.sets.size} x " else ""}${it.name} "
+//        },
+//                bestSets = this.exercises.joinToString("\n") {
+//            "${it.bestSet.firstMetric ?: 0} x ${it.bestSet.secondMetric ?: 0}"
+//        },
         personalRecords = this.personalRecords.toString()
     )
 }
