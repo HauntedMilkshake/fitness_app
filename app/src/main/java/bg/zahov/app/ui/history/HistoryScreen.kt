@@ -1,6 +1,5 @@
 package bg.zahov.app.ui.history
 
-import android.content.Context
 import androidx.compose.animation.AnimatedContent
 import androidx.compose.animation.core.tween
 import androidx.compose.animation.fadeIn
@@ -9,7 +8,6 @@ import androidx.compose.animation.togetherWith
 import androidx.compose.foundation.border
 import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.Arrangement
-import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.fillMaxSize
@@ -29,8 +27,8 @@ import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.graphics.painter.Painter
-import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.res.colorResource
+import androidx.compose.ui.res.integerResource
 import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.text.TextStyle
@@ -39,30 +37,29 @@ import androidx.compose.ui.text.style.TextOverflow
 import androidx.compose.ui.unit.dp
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import androidx.lifecycle.viewmodel.compose.viewModel
+import bg.zahov.app.data.provider.model.HistoryWorkout
 import bg.zahov.fitness.app.R
-import kotlin.math.min
 
 
 @Composable
 fun HistoryScreen(historyViewModel: HistoryViewModel = viewModel(), onItemClick: (String) -> Unit) {
     val uiState by historyViewModel.uiState.collectAsStateWithLifecycle()
-    val context = LocalContext.current
-    HistoryContent(uiState.workouts, context, onItemClick = { onItemClick(it) })
+    HistoryContent(uiState.workouts, onItemClick = { onItemClick(it) })
 }
 
 @Composable
 fun HistoryContent(
     workouts: List<HistoryWorkout>,
-    context: Context,
     onItemClick: (String) -> Unit
 ) {
+    val animationDuration = integerResource(R.integer.animation_duration_medium)
     AnimatedContent(
         workouts.size,
         transitionSpec = {
             fadeIn(
-                animationSpec = tween(context.resources.getInteger(R.integer.animation_duration_medium))
+                animationSpec = tween(animationDuration)
             ) togetherWith fadeOut(
-                targetAlpha = context.resources.getInteger(R.integer.animation_duration_medium)
+                targetAlpha = animationDuration
                     .toFloat()
             )
         },
@@ -92,117 +89,118 @@ fun HistoryContent(
 
 @Composable
 fun Workout(item: HistoryWorkout, onItemClick: (String) -> Unit) {
-    Box(
+    Column(
         Modifier
             .fillMaxWidth()
             .padding(4.dp)
             .border(1.dp, colorResource(R.color.less_vibrant_text), RoundedCornerShape(4.dp))
+            .padding(12.dp)
             .clickable { onItemClick(item.id) }
     ) {
-        Column(
+        Text(
+            text = item.name,
+            color = Color.White,
+            maxLines = 1,
+            overflow = TextOverflow.Ellipsis,
+            style = MaterialTheme.typography.titleMedium,
+            fontWeight = FontWeight.Bold
+        )
+        Text(
+            modifier = Modifier.padding(top = 4.dp),
+            text = item.date,
+            maxLines = 1,
+            overflow = TextOverflow.Ellipsis,
+            color = colorResource(R.color.less_vibrant_text),
+            style = MaterialTheme.typography.bodyLarge
+        )
+        Row(
             Modifier
-                .padding(12.dp)
+                .fillMaxWidth()
+                .padding(top = 8.dp)
+                .align(Alignment.CenterHorizontally),
+            horizontalArrangement = Arrangement.SpaceEvenly
+        ) {
+            TextWithLeadingIcon(
+                text = item.duration,
+                icon = painterResource(R.drawable.ic_clock),
+                textModifier = Modifier
+                    .weight(1f)
+                    .padding(4.dp),
+                iconColor = colorResource(R.color.less_vibrant_text),
+                iconModifier = Modifier.align(Alignment.CenterVertically)
+            )
+            TextWithLeadingIcon(
+                text = stringResource(
+                    R.string.volume_for_history_workouts,
+                    item.volume,
+                    stringResource(R.string.kg)
+                ),
+                icon = painterResource(R.drawable.ic_volume),
+                textModifier = Modifier
+                    .weight(1f)
+                    .padding(4.dp),
+                iconColor = colorResource(R.color.less_vibrant_text),
+                iconModifier = Modifier.align(Alignment.CenterVertically)
+            )
+            TextWithLeadingIcon(
+                text = item.personalRecords,
+                icon = painterResource(R.drawable.ic_trophy),
+                textModifier = Modifier
+                    .align(Alignment.CenterVertically)
+                    .weight(1f)
+                    .padding(4.dp),
+                iconColor = colorResource(R.color.less_vibrant_text),
+                iconModifier = Modifier.align(Alignment.CenterVertically)
+            )
+        }
+        Row(
+            modifier = Modifier
+                .fillMaxWidth()
+                .padding(top = 8.dp),
+            horizontalArrangement = Arrangement.SpaceBetween
         ) {
             Text(
-                text = item.name,
+                text = stringResource(R.string.exercise),
                 color = Color.White,
-                maxLines = 1,
-                overflow = TextOverflow.Ellipsis,
-                style = MaterialTheme.typography.titleMedium,
-                fontWeight = FontWeight.Bold
-            )
-            Text(
-                modifier = Modifier.padding(top = 4.dp),
-                text = item.date,
-                maxLines = 1,
-                overflow = TextOverflow.Ellipsis,
-                color = colorResource(R.color.less_vibrant_text),
                 style = MaterialTheme.typography.bodyLarge
             )
-            Row(
-                Modifier
-                    .fillMaxWidth()
-                    .padding(top = 8.dp)
-                    .align(Alignment.CenterHorizontally),
-                horizontalArrangement = Arrangement.SpaceEvenly
-            ) {
-                TextWithLeadingIcon(
-                    text = item.duration,
-                    icon = painterResource(R.drawable.ic_clock),
-                    textModifier = Modifier
-                        .weight(1f)
-                        .padding(4.dp),
-                    iconColor = colorResource(R.color.less_vibrant_text),
-                    iconModifier = Modifier.align(Alignment.CenterVertically)
-                )
-                TextWithLeadingIcon(
-                    text = item.volume,
-                    icon = painterResource(R.drawable.ic_volume),
-                    textModifier = Modifier
-                        .weight(1f)
-                        .padding(4.dp),
-                    iconColor = colorResource(R.color.less_vibrant_text),
-                    iconModifier = Modifier.align(Alignment.CenterVertically)
-                )
-                TextWithLeadingIcon(
-                    text = item.personalRecords,
-                    icon = painterResource(R.drawable.ic_trophy),
-                    textModifier = Modifier
-                        .align(Alignment.CenterVertically)
-                        .weight(1f)
-                        .padding(4.dp),
-                    iconColor = colorResource(R.color.less_vibrant_text),
-                    iconModifier = Modifier.align(Alignment.CenterVertically)
-                )
-            }
-            Row(
-                modifier = Modifier
-                    .fillMaxWidth()
-                    .padding(top = 8.dp),
-                horizontalArrangement = Arrangement.SpaceBetween
-            ) {
-                Text(
-                    text = stringResource(R.string.exercise),
-                    color = Color.White,
-                    style = MaterialTheme.typography.bodyLarge
-                )
-                Text(
-                    text = stringResource(R.string.best_set),
-                    color = Color.White,
-                    style = MaterialTheme.typography.bodyLarge
-                )
-            }
-            val textFieldCount =
-                if (item.bestSets.size > 5 && item.exercises.size > 5) 5 else min(
-                    item.exercises.size,
-                    item.bestSets.size
-                )
-            for (i in 0 until textFieldCount) {
-                Row(
-                    modifier = Modifier
-                        .fillMaxWidth()
-                        .padding(top = 4.dp),
-                    horizontalArrangement = Arrangement.SpaceBetween
-                ) {
-                    Text(
-                        text = item.exercises[i],
-                        color = colorResource(R.color.less_vibrant_text),
-                        style = MaterialTheme.typography.bodyLarge,
-                        softWrap = true,
-                        overflow = TextOverflow.Ellipsis,
-                        maxLines = 1
-                    )
-
-                    Text(
-                        text = item.bestSets[i],
-                        color = colorResource(R.color.less_vibrant_text),
-                        style = MaterialTheme.typography.bodyLarge,
-                        overflow = TextOverflow.Ellipsis,
-                        maxLines = 1,
-                    )
-                }
-            }
+            Text(
+                text = stringResource(R.string.best_set),
+                color = Color.White,
+                style = MaterialTheme.typography.bodyLarge
+            )
         }
+
+        for (i in 0 until item.exercises.size) {
+            ExerciseWithSets(exerciseName = item.exercises[i], bestSet = item.bestSets[i])
+        }
+    }
+}
+
+@Composable
+fun ExerciseWithSets(exerciseName: String, bestSet: String) {
+    Row(
+        modifier = Modifier
+            .fillMaxWidth()
+            .padding(top = 4.dp),
+        horizontalArrangement = Arrangement.SpaceBetween
+    ) {
+        Text(
+            text = exerciseName,
+            color = colorResource(R.color.less_vibrant_text),
+            style = MaterialTheme.typography.bodyLarge,
+            softWrap = true,
+            overflow = TextOverflow.Ellipsis,
+            maxLines = 1
+        )
+
+        Text(
+            text = bestSet,
+            color = colorResource(R.color.less_vibrant_text),
+            style = MaterialTheme.typography.bodyLarge,
+            overflow = TextOverflow.Ellipsis,
+            maxLines = 1,
+        )
     }
 }
 

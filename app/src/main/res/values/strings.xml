@@ -145,4 +145,6 @@
     <string name="max_weight">Max weight</string>
     <string name="history_measurement">HISTORY</string>
     <string name="application_warning_text">Due to service errors we will be closing\nthe application in exactly:</string>
+    <string name="volume_for_history_workouts">%1$s %2$s</string>
+    <string name="kg">kg</string>
 </resources>

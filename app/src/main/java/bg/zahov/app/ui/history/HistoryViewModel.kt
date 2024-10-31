@@ -6,40 +6,19 @@ import bg.zahov.app.Inject
 import bg.zahov.app.data.exception.CriticalDataNullException
 import bg.zahov.app.data.interfaces.ServiceErrorHandler
 import bg.zahov.app.data.interfaces.WorkoutProvider
-import bg.zahov.app.data.model.Workout
-import bg.zahov.app.util.timeToString
+import bg.zahov.app.data.provider.model.HistoryWorkout
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.StateFlow
+import kotlinx.coroutines.flow.map
+import kotlinx.coroutines.flow.take
 import kotlinx.coroutines.flow.update
 import kotlinx.coroutines.launch
-import java.time.LocalDateTime
-import java.time.format.DateTimeFormatter
-import java.util.Locale
 
 /**
  * @property workouts A list of past workouts to be displayed.
  */
 data class HistoryUiState(
     val workouts: List<HistoryWorkout> = listOf()
-)
-
-/**
- * @property duration The duration of the workout in a string format (e.g., "00:30:00").
- * @property volume The total volume of weight lifted during the workout.
- * @property date The date when the workout was performed.
- * @property exercises exercises performed in the workout( 3 x exerciseName - example).
- * @property bestSets best sets for the workout(the ones where the most weight was lifted).
- * @property personalRecords number of personal records set during the workout.
- */
-data class HistoryWorkout(
-    val id: String,
-    val name: String,
-    val duration: String,
-    val volume: String,
-    val date: String,
-    val exercises: List<String>,
-    val bestSets: List<String>,
-    val personalRecords: String
 )
 
 /**
@@ -57,10 +36,15 @@ class HistoryViewModel(
 
     init {
         viewModelScope.launch {
-            workoutProvider.getPastWorkouts().collect {
+            workoutProvider.getHistoryWorkouts().collect { workouts ->
                 try {
                     _uiState.update { old ->
-                        old.copy(it.map { workout -> workout.toHistoryWorkout() })
+                        old.copy(workouts = workouts.map {
+                            it.copy(
+                                exercises = it.exercises.take(5),
+                                bestSets = it.bestSets.take(5)
+                            )
+                        })
                     }
                 } catch (e: CriticalDataNullException) {
                     serviceError.initiateCountdown()
@@ -69,29 +53,3 @@ class HistoryViewModel(
         }
     }
 }
-
-/**
- * Converts a [Workout] object to a [HistoryWorkout] object.
- *
- * This extension function transforms a [Workout] instance into a [HistoryWorkout] instance by extracting
- * relevant data and formatting it appropriately.
- *
- * @return A [HistoryWorkout] instance populated with data from this [Workout].
- */
-fun Workout.toHistoryWorkout(): HistoryWorkout {
-    return HistoryWorkout(
-        id = this.id,
-        name = this.name,
-        duration = this.duration?.timeToString() ?: "00:00:00",
-        volume = "${this.volume ?: 0} kg",
-        date = this.date.toFormattedString(),
-        exercises = this.exercises.map { "${if (it.sets.isNotEmpty()) "${it.sets.size} x " else ""}${it.name} " },
-        bestSets = this.exercises.map {
-            "${it.bestSet.firstMetric ?: 0} x ${it.bestSet.secondMetric ?: 0}"
-        },
-        personalRecords = this.personalRecords.toString()
-    )
-}
-
-fun LocalDateTime.toFormattedString(): String =
-    this.format(DateTimeFormatter.ofPattern("HH:mm, d MMMM", Locale.getDefault()))

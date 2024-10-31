@@ -33,7 +33,7 @@ class HistoryFragment : Fragment() {
                 HistoryScreen(historyViewModel) {
                     findNavController().navigate(
                         R.id.history_to_history_info,
-                        bundleOf(WORKOUTID to it)
+                        bundleOf(WORKOUT_ID_ARG_KEY to it)
                     )
                 }
             }
@@ -69,6 +69,6 @@ class HistoryFragment : Fragment() {
     }
 
     companion object {
-        const val WORKOUTID = "WORKOUT_ID"
+        const val WORKOUT_ID_ARG_KEY = "WORKOUT_ID"
     }
 }
