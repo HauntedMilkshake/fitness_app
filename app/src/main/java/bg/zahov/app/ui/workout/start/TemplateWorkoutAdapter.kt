@@ -30,7 +30,7 @@ class TemplateWorkoutAdapter : BaseAdapter<Workout>(
             title.text = item.name
             lastPerformed.text = "Last performed: ${item.date.toFormattedString()}"
             settings.setOnClickListener {
-                showCustomLayout(item, bindingAdapterPosition, it)
+                showCustomLayout(item, adapterPosition, it)
             }
 
             itemView.setOnClickListener {
