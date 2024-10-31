@@ -7,16 +7,21 @@ import bg.zahov.app.Inject
 import bg.zahov.app.data.exception.CriticalDataNullException
 import bg.zahov.app.data.interfaces.ServiceErrorHandler
 import bg.zahov.app.data.interfaces.WorkoutProvider
+import com.kizitonwose.calendar.core.firstDayOfWeekFromLocale
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.StateFlow
 import kotlinx.coroutines.flow.update
 import kotlinx.coroutines.launch
+import java.time.DayOfWeek
 import java.time.Month
 import java.time.YearMonth
 
 data class WorkoutDate(val month: Month, val day: Int)
 
 data class CalendarUiState(
+    val startMonth: YearMonth = YearMonth.now().minusMonths(3),
+    val endMonth: YearMonth = YearMonth.now(),
+    val firstDayOfWeek: DayOfWeek = firstDayOfWeekFromLocale(),
     val workoutsPerMonth: Map<WorkoutDate, Int> = mapOf(),
     val numberOfWorkouts: Map<Month, Int> = mapOf()
 )
