@@ -1,6 +1,5 @@
 package bg.zahov.app.data.remote
 
-import android.util.Log
 import bg.zahov.app.data.exception.AuthenticationException
 import bg.zahov.app.data.exception.CriticalDataNullException
 import bg.zahov.app.data.exception.DeleteRealmException

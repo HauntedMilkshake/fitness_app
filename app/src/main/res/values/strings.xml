@@ -31,6 +31,8 @@
     <string name="workout_text">%d workouts</string>
     <string name="top_bar_text">Profile</string>
     <string name="dashboard">Dashboard</string>
+    <string name="weekly_workouts">Weekly workouts</string>
+    <string name="home_accessibility_text">"Username: %1$s, number of workouts: %2$s"</string>
     <!-- Strings used for history fragment   -->
     <string name="history_top_bar_text">History</string>
     <!-- Strings used for workout fragment   -->
