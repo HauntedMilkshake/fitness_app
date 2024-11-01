@@ -5,7 +5,8 @@ import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.aspectRatio
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.padding
-import androidx.compose.foundation.shape.RoundedCornerShape
+import androidx.compose.foundation.layout.size
+import androidx.compose.material3.Icon
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
@@ -16,6 +17,8 @@ import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.res.colorResource
+import androidx.compose.ui.res.painterResource
+import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.text.TextStyle
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.dp
@@ -30,14 +33,14 @@ import java.time.Month
 @Composable
 fun CalendarScreen(calendarViewModel: CalendarViewModel = viewModel()) {
     val uiState by calendarViewModel.uiState.collectAsStateWithLifecycle()
-    val state = rememberCalendarState(
+    val calendarState = rememberCalendarState(
         startMonth = uiState.startMonth,
         endMonth = uiState.endMonth,
         firstVisibleMonth = uiState.endMonth,
         firstDayOfWeek = uiState.firstDayOfWeek
     )
     CalendarContent(
-        calendarState = state,
+        calendarState = calendarState,
         dayToHasUserWorkedOut = uiState.dayToHasUserWorkedOut,
         numberOfWorkoutsPerMonth = uiState.numberOfWorkoutsPerMonth
     )
@@ -49,17 +52,16 @@ fun CalendarContent(
     dayToHasUserWorkedOut: Map<LocalDate, Boolean>,
     numberOfWorkoutsPerMonth: Map<Month, String>
 ) {
-
-
     HorizontalCalendar(
         state = calendarState,
         dayContent = { Day(it, dayToHasUserWorkedOut[it.date] == true) },
         monthHeader = {
             MonthText(
-                modifier = Modifier
+                boxModifier = Modifier
                     .fillMaxWidth()
-                    .align(Alignment.CenterHorizontally)
-                    .padding(bottom = 24.dp, top = 24.dp),
+                    .padding(top = 24.dp, bottom = 24.dp),
+                boxAlignment = Alignment.Center,
+                textModifier = Modifier,
                 text = it.yearMonth.month.name,
                 style = MaterialTheme.typography.titleLarge,
                 fontWeight = FontWeight.Bold,
@@ -68,10 +70,15 @@ fun CalendarContent(
         },
         monthFooter = {
             MonthText(
-                modifier = Modifier.fillMaxWidth()
-                    .padding(start = 12.dp),
-                //extract to string resource
-                text = numberOfWorkoutsPerMonth[it.yearMonth.month] ?: "0",
+                boxModifier = Modifier.fillMaxWidth(),
+                boxAlignment = Alignment.CenterStart,
+                textModifier = Modifier
+                    .fillMaxWidth()
+                    .padding(start = 12.dp, top = 12.dp),
+                text = stringResource(
+                    R.string.workouts_for_month,
+                    numberOfWorkoutsPerMonth[it.yearMonth.month] ?: "0"
+                ),
                 style = MaterialTheme.typography.bodyLarge,
                 color = Color.White
             )
@@ -85,29 +92,43 @@ fun Day(day: CalendarDay, hasUserWorkedOut: Boolean = true) {
         modifier = Modifier
             .aspectRatio(1f)
             .background(
-                if (hasUserWorkedOut) colorResource(R.color.blue_text) else colorResource(R.color.background),
-                shape = RoundedCornerShape(16.dp)
-            ),
+                color = colorResource(R.color.background)
+            )
+            .padding(4.dp),
         contentAlignment = Alignment.Center
     ) {
         Text(text = day.date.dayOfMonth.toString(), color = Color.White)
+        if (hasUserWorkedOut) {
+            Icon(
+                painter = painterResource(R.drawable.ic_check_mark),
+                contentDescription = "",
+                modifier = Modifier
+                    .size(16.dp)
+                    .align(Alignment.TopEnd),
+                tint = Color.Unspecified
+            )
+        }
     }
 }
 
 @Composable
 fun MonthText(
-    modifier: Modifier,
+    boxModifier: Modifier = Modifier,
+    boxAlignment: Alignment,
+    textModifier: Modifier = Modifier,
     text: String,
     style: TextStyle,
     fontWeight: FontWeight? = null,
     color: Color
 ) {
-    Text(
-        modifier = modifier,
-        text = text,
-        style = style,
-        fontWeight = fontWeight,
-        color = color
-    )
+    Box(modifier = boxModifier, contentAlignment = boxAlignment) {
+        Text(
+            modifier = textModifier,
+            text = text,
+            style = style,
+            fontWeight = fontWeight,
+            color = color
+        )
+    }
 }
 
