@@ -1,151 +1,158 @@
 package bg.zahov.app.ui.exercise
 
-import android.app.Application
-import android.view.View
-import androidx.lifecycle.AndroidViewModel
-import androidx.lifecycle.LiveData
-import androidx.lifecycle.MutableLiveData
+import android.util.Log
+import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
+import bg.zahov.app.Inject
 import bg.zahov.app.data.exception.CriticalDataNullException
+import bg.zahov.app.data.interfaces.ServiceErrorHandler
+import bg.zahov.app.data.interfaces.WorkoutProvider
+import bg.zahov.app.data.model.BodyPart
+import bg.zahov.app.data.model.Category
 import bg.zahov.app.data.model.Exercise
-import bg.zahov.app.getAddExerciseToWorkoutProvider
-import bg.zahov.app.getFilterProvider
-import bg.zahov.app.getReplaceableExerciseProvider
-import bg.zahov.app.getSelectableExerciseProvider
-import bg.zahov.app.getServiceErrorProvider
-import bg.zahov.app.getWorkoutProvider
-import bg.zahov.app.ui.exercise.filter.FilterWrapper
-import bg.zahov.app.util.toExerciseAdapterWrapper
-import bg.zahov.fitness.app.R
+import bg.zahov.app.data.model.Filter
+import bg.zahov.app.data.model.FilterWrapper
+import bg.zahov.app.data.provider.AddExerciseToWorkoutProvider
+import bg.zahov.app.data.provider.FilterProvider
+import bg.zahov.app.data.provider.ReplaceableExerciseProvider
+import bg.zahov.app.data.provider.SelectableExerciseProvider
+import bg.zahov.app.util.toExerciseWrapper
+import kotlinx.coroutines.flow.MutableStateFlow
+import kotlinx.coroutines.flow.StateFlow
+import kotlinx.coroutines.flow.update
 import kotlinx.coroutines.launch
 
-class ExerciseViewModel(application: Application) : AndroidViewModel(application) {
-    private val repo by lazy {
-        application.getWorkoutProvider()
-    }
+data class ExercisesWrapper(
+    val name: String,
+    val bodyPart: BodyPart,
+    val category: Category,
+    var selected: Boolean = false
+)
 
-    private val selectableExerciseProvider by lazy {
-        application.getSelectableExerciseProvider()
-    }
+enum class ExerciseFlag {
+    Default,
+    Selecting,
+    Replacing,
+    Adding;
+}
 
-    private val replaceableExerciseProvider by lazy {
-        application.getReplaceableExerciseProvider()
-    }
+class ExerciseViewModel(
+    private val repo: WorkoutProvider = Inject.workoutProvider,
+    private val selectableExerciseProvider: SelectableExerciseProvider = Inject.selectedExerciseProvider,
+    private val replaceableExerciseProvider: ReplaceableExerciseProvider = Inject.replaceableExerciseProvider,
+    private val addExerciseToWorkoutProvider: AddExerciseToWorkoutProvider = Inject.workoutAddedExerciseProvider,
+    private val filterProvider: FilterProvider = Inject.filterProvider,
+    private val serviceError: ServiceErrorHandler = Inject.serviceErrorHandler
+) : ViewModel() {
+    data class UiState(
+        val exercises: List<ExercisesWrapper> = listOf(),
+        val filters: List<FilterWrapper> = listOf(),
+        val loading: Boolean = true,
+        val search: String = "",
+        val flag: ExerciseFlag = ExerciseFlag.Default,
+        val showDialog: Boolean = false
+    )
 
-    private val addExerciseToWorkoutProvider by lazy {
-        application.getAddExerciseToWorkoutProvider()
-    }
+    private val _uiState = MutableStateFlow(UiState())
+    val uiState: StateFlow<UiState> = _uiState
 
-    private val filterProvider by lazy {
-        application.getFilterProvider()
-    }
-
-    private val serviceError by lazy {
-        application.getServiceErrorProvider()
-    }
-    private val _state = MutableLiveData<State>()
-    val state: LiveData<State>
-        get() = _state
-
-    private val _userExercises = MutableLiveData<List<ExerciseAdapterWrapper>>()
-    val userExercises: LiveData<List<ExerciseAdapterWrapper>>
-        get() = _userExercises
-
-    private val _searchFilters = MutableLiveData<List<FilterWrapper>>(listOf())
-    val searchFilters: LiveData<List<FilterWrapper>>
-        get() = _searchFilters
-
-    var replaceable = false
-    var selectable = false
-    var addable = false
-    private var search: String? = null
-    private var exerciseTemplates = listOf<Exercise>()
-    private val allExercises: MutableList<ExerciseAdapterWrapper> = mutableListOf()
     private var currentlySelectedExerciseToReplace: Int? = null
-    private var currentSearchFilters = listOf<FilterWrapper>()
+    private var allExercises: List<Exercise> = mutableListOf()
 
     init {
         viewModelScope.launch {
             launch {
-                _state.postValue(State.Loading(View.VISIBLE))
-                try {
-                    repo.getTemplateExercises().collect {
-                        exerciseTemplates = it
-                        val templateExercises =
-                            it.map { exercise -> exercise.toExerciseAdapterWrapper() }
-
-                        _userExercises.postValue(templateExercises)
-
-                        allExercises.apply {
-                            clear()
-                            addAll(templateExercises)
-                        }
-
-                        _state.postValue(State.Default)
+                filterProvider.filters.collect { filters ->
+                    _uiState.update { old ->
+                        old.copy(filters = filters, loading = true)
                     }
-                } catch (e: CriticalDataNullException) {
-                    serviceError.stopApplication()
+                    _uiState.update { old ->
+                        old.copy(exercises = getFiltered(), loading = false)
+                    }
                 }
             }
             launch {
-                filterProvider.filters.collect {
-                    currentSearchFilters = it
-                    _searchFilters.postValue(it)
-                    searchExercises(search)
+                try {
+                    repo.getTemplateExercises().collect { exercises ->
+                        allExercises = exercises
+                        _uiState.update { old ->
+                            old.copy(
+                                exercises = allExercises.map { it.toExerciseWrapper() },
+                                loading = false
+                            )
+                        }
+                    }
+                } catch (e: CriticalDataNullException) {
+                    serviceError.stopApplication()
                 }
             }
         }
     }
 
     fun onExerciseClicked(position: Int) {
-        val captured = _userExercises.value.orEmpty().toMutableList()
+        _uiState.update { old ->
+            val updatedExercises = old.exercises.mapIndexed { index, exercise ->
+                when (index) {
+                    position -> exercise.copy(selected = exercise.selected.not())
+                    currentlySelectedExerciseToReplace -> exercise.copy(selected = false)
+                    else -> exercise
+                }
+            }
+            currentlySelectedExerciseToReplace =
+                if (_uiState.value.flag == ExerciseFlag.Replacing) position else null
+            old.copy(exercises = updatedExercises)
+        }
+    }
 
-        if (replaceable) {
-            currentlySelectedExerciseToReplace?.let { index ->
-                captured[index].backgroundResource = R.color.background
+    private fun getFiltered(
+        filter: List<FilterWrapper> = _uiState.value.filters,
+        exercises: List<ExercisesWrapper> = allExercises.map { it.toExerciseWrapper() },
+        searchString: String = _uiState.value.search
+    ): List<ExercisesWrapper> {
+        return exercises.filter { exercise ->
+            val matchesFilters = filter.isEmpty() ||
+                    filter.any { filterWrapper ->
+                        matchesFilter(exercise, filterWrapper.filter)
+                    }
+
+            val matchesSearch = searchString.isBlank() ||
+                    exercise.name.contains(searchString, ignoreCase = true)
+
+            matchesFilters && matchesSearch
+        }
+    }
+
+    private fun matchesFilter(exercise: ExercisesWrapper, filter: Filter): Boolean {
+        return when (filter) {
+            is Filter.CategoryFilter -> {
+                exercise.category == filter.category
+            }
+
+            is Filter.BodyPartFilter -> {
+                exercise.bodyPart == filter.bodyPart
             }
         }
-
-        captured[position].backgroundResource =
-            if (captured[position].backgroundResource == R.color.selected) {
-                R.color.background
-            } else {
-                R.color.selected
-            }
-
-        currentlySelectedExerciseToReplace = if (replaceable) position else null
-
-        _userExercises.value = captured
     }
+
 
     fun setClickedExercise(name: String) {
         viewModelScope.launch {
-            exerciseTemplates.find { it.name == name }?.let {
+            allExercises.find { it.name == name }?.let {
                 repo.setClickedTemplateExercise(it)
             }
         }
     }
 
     fun onConfirm() {
-        replaceable = false
-        selectable = false
-        addable = false
-
-        val selectedExercises = _userExercises.value.orEmpty()
-        selectedExercises.forEach {
-            if (it.backgroundResource == R.color.selected) {
-                it.backgroundResource = R.color.background
-            }
-        }
-        _userExercises.value = selectedExercises
-        resetSelectedExercises()
+        _uiState.update { old -> old.copy(flag = ExerciseFlag.Default) }
+        selectableExerciseProvider.resetSelectedExercises()
     }
 
     fun confirmSelectedExercises() {
-        when {
-            replaceable -> {
-                _userExercises.value?.find { it.backgroundResource == R.color.selected }?.let {
-                    exerciseTemplates.find { template -> template.name == it.name }?.let {
+        when (_uiState.value.flag) {
+            ExerciseFlag.Replacing -> {
+                _uiState.value.exercises.find { it.selected }?.let {
+                    allExercises.find { template -> template.name == it.name }?.let {
                         replaceableExerciseProvider.updateExerciseToReplace(it)
                     }
                 }
@@ -153,80 +160,52 @@ class ExerciseViewModel(application: Application) : AndroidViewModel(application
 
             else -> {
                 val selectedExercises = mutableListOf<Exercise>()
-                _userExercises.value?.forEach {
-                    if (it.backgroundResource == R.color.selected) {
-                        exerciseTemplates.find { exercise -> exercise.name == it.name }
-                            ?.let { found ->
-                                selectedExercises.add(found)
-                            }
+                _uiState.value.exercises.forEach {
+                    if (it.selected) {
+                        allExercises
+                            .find { exercise -> exercise.name == it.name }
+                            ?.let { found -> selectedExercises.add(found) }
                     }
                 }
 
                 if (selectedExercises.isNotEmpty()) {
-                    if (addable) {
+                    if (_uiState.value.flag == ExerciseFlag.Adding) {
                         addExerciseToWorkoutProvider.addExercises(selectedExercises)
                     }
-                    if (selectable) selectableExerciseProvider.addExercises(selectedExercises)
+                    if (_uiState.value.flag == ExerciseFlag.Selecting)
+                        selectableExerciseProvider.addExercises(selectedExercises)
                 }
             }
         }
         onConfirm()
     }
 
+    fun onSearchChange(search: String) {
+        _uiState.update { old ->
+            old.copy(
+                search = search,
+                exercises = getFiltered(searchString = search)
+            )
+        }
+    }
 
-    fun searchExercises(name: String?) {
-        val selectedFilters = currentSearchFilters
-        val newExercises = _userExercises.value?.let {
-            when {
-                name.isNullOrEmpty() && selectedFilters.isEmpty() -> allExercises
-                name.isNullOrEmpty() && selectedFilters.isNotEmpty() -> {
-                    allExercises.filter { exercise ->
-                        selectedFilters.any { filter ->
-                            filter.name == exercise.bodyPart || filter.name == exercise.category
-                        }
-                    }
-                }
+    fun updateFlag(addable: Boolean, replaceable: Boolean, selectable: Boolean) {
+        val flag = when {
+            addable -> ExerciseFlag.Adding
+            replaceable -> ExerciseFlag.Replacing
+            selectable && replaceable.not() -> ExerciseFlag.Selecting
+            else -> ExerciseFlag.Default
+        }
+        _uiState.update { old -> old.copy(flag = flag) }
+    }
 
-                !name.isNullOrEmpty() && selectedFilters.isEmpty() -> allExercises.filter {
-                    it.name.contains(name, true)
-                }
-
-                else -> allExercises.filter { exercise ->
-                    val nameMatches = name.isNullOrEmpty() || exercise.name.contains(name, true)
-                    val categoryMatches =
-                        selectedFilters.any { filter -> filter.name == exercise.category }
-                    val bodyPartMatches =
-                        selectedFilters.any { filter -> filter.name == exercise.bodyPart }
-
-                    nameMatches && (categoryMatches || bodyPartMatches)
-                }
-            }
-        } ?: emptyList()
-
-        search = name
-        _userExercises.value = newExercises
-
-        if (newExercises.isEmpty()) _state.value = State.NoResults(View.VISIBLE)
+    fun updateShowDialog(showDialog: Boolean) {
+        _uiState.update { old -> old.copy(showDialog = showDialog) }
     }
 
     fun removeFilter(filter: FilterWrapper) {
         viewModelScope.launch {
-            filterProvider.removeFilter(filter)
+            filterProvider.updateFilter(filter)
         }
-        searchExercises(search)
-    }
-
-    private fun resetSelectedExercises() {
-        selectableExerciseProvider.resetSelectedExercises()
-    }
-
-    sealed interface State {
-        object Default : State
-
-        data class Loading(val loadingVisibility: Int) : State
-
-        data class ErrorFetching(val error: String?, val shutdown: Boolean) : State
-
-        data class NoResults(val resultsVisibility: Int) : State
     }
 }

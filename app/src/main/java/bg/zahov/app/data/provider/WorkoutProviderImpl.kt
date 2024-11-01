@@ -33,6 +33,7 @@ class WorkoutProviderImpl : WorkoutProvider {
         get() = _exerciseHistory
     private val workoutRepo = WorkoutRepositoryImpl.getInstance()
     fun getLastWorkout(): Workout? = lastWorkoutPerformed
+
     override suspend fun getTemplateWorkouts(): Flow<List<Workout>> =
         workoutRepo.getTemplateWorkouts()
 
@@ -61,6 +62,7 @@ class WorkoutProviderImpl : WorkoutProvider {
     }
 
     override suspend fun getWorkoutById(id: String) = workoutRepo.getWorkoutById(id)
+
     override suspend fun updateExercises(exercises: List<Exercise>) {
         workoutRepo.updateExercises(exercises)
     }

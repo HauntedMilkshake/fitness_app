@@ -83,6 +83,7 @@
     <string name="filter">Filter</string>
     <string name="body_part">Body part</string>
     <string name="category">Category</string>
+    <string name="select_filter">Select Filters</string>
     <!-- Strings used for create workout template -->
     <string name="new_workout_template">New workout template</string>
     <string name="add_exercise">Add exercise</string>

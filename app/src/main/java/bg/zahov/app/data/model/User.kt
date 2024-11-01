@@ -66,19 +66,28 @@ data class User(
     companion object {
         fun fromFirestoreMap(data: Map<String, Any>?): User = data?.let { firestoreData ->
             User(
-                name = (firestoreData[FirestoreFields.USER_NAME] as? String) ?: throw CriticalDataNullException("No user found"))
+                name = (firestoreData[FirestoreFields.USER_NAME] as? String)
+                    ?: throw CriticalDataNullException("No user found")
+            )
         } ?: throw CriticalDataNullException("No user found")
     }
 }
+
 data class Measurements(
     val measurements: Map<MeasurementType, List<Measurement>> = mapOf()
 ) {
     companion object {
-        fun fromFirestoreMap(data: Map<String, Any>?, measurementType: MeasurementType): Measurements {
+        fun fromFirestoreMap(
+            data: Map<String, Any>?,
+            measurementType: MeasurementType
+        ): Measurements {
             val measurementsMap = mutableMapOf<MeasurementType, List<Measurement>>()
             data?.let {
-            val measurements = (it[FirestoreFields.MEASUREMENTS_COLLECTION] as? List<Map<String, Any>>)?.mapNotNull { values -> Measurement.fromFirestoreMap(values) }.orEmpty()
-            measurementsMap[measurementType] = measurements
+                val measurements =
+                    (it[FirestoreFields.MEASUREMENTS_COLLECTION] as? List<Map<String, Any>>)?.mapNotNull { values ->
+                        Measurement.fromFirestoreMap(values)
+                    }.orEmpty()
+                measurementsMap[measurementType] = measurements
             }
             return Measurements(measurementsMap)
         }
@@ -107,7 +116,8 @@ data class Workout(
                 volume = it[FirestoreFields.WORKOUT_VOLUME] as? Double,
                 date = (it[FirestoreFields.WORKOUT_DATE] as? Timestamp)?.toLocalDateTime()
                     ?: throw CriticalDataNullException(""),
-                personalRecords = (it[FirestoreFields.WORKOUT_PERSONAL_RECORD] as? Long)?.toInt() ?: 0,
+                personalRecords = (it[FirestoreFields.WORKOUT_PERSONAL_RECORD] as? Long)?.toInt()
+                    ?: 0,
                 isTemplate = it[FirestoreFields.WORKOUT_IS_TEMPLATE] as? Boolean ?: false,
                 exercises = (it[FirestoreFields.WORKOUT_EXERCISES] as List<Map<String, Any>?>)
                     .mapNotNull { map ->
@@ -131,7 +141,8 @@ data class Exercise(
     companion object {
         fun fromFirestoreMap(data: Map<String, Any>?) = data?.let {
             Exercise(
-                name = it[FirestoreFields.EXERCISE_NAME] as? String ?: throw CriticalDataNullException("No name for exercise"),
+                name = it[FirestoreFields.EXERCISE_NAME] as? String
+                    ?: throw CriticalDataNullException("No name for exercise"),
                 bodyPart = it[FirestoreFields.EXERCISE_BODY_PART].toString()
                     .let { string -> BodyPart.valueOf(string) },
                 category = it[FirestoreFields.EXERCISE_CATEGORY].toString()
