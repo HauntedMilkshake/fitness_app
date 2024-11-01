@@ -22,32 +22,43 @@ import com.kizitonwose.calendar.compose.HorizontalCalendar
 import com.kizitonwose.calendar.compose.rememberCalendarState
 import com.kizitonwose.calendar.core.CalendarDay
 import bg.zahov.fitness.app.R
+import com.kizitonwose.calendar.compose.CalendarState
+import java.time.LocalDate
+import java.time.Month
 
 @Composable
 fun CalendarScreen(calendarViewModel: CalendarViewModel = viewModel()) {
     val uiState by calendarViewModel.uiState.collectAsStateWithLifecycle()
-    CalendarContent(uiState)
-}
-
-@Composable
-fun CalendarContent(uiState: CalendarUiState) {
-
     val state = rememberCalendarState(
         startMonth = uiState.startMonth,
         endMonth = uiState.endMonth,
         firstVisibleMonth = uiState.endMonth,
         firstDayOfWeek = uiState.firstDayOfWeek
     )
+    CalendarContent(
+        calendarState = state,
+        dayToHasUserWorkedOut = uiState.dayToHasUserWorkedOut,
+        numberOfWorkoutsPerMonth = uiState.numberOfWorkoutsPerMonth
+    )
+}
+
+@Composable
+fun CalendarContent(
+    calendarState: CalendarState,
+    dayToHasUserWorkedOut: Map<LocalDate, Boolean>,
+    numberOfWorkoutsPerMonth: Map<Month, String>
+) {
+
 
     HorizontalCalendar(
-        state = state,
-        dayContent = { Day(it) },
+        state = calendarState,
+        dayContent = { Day(it, dayToHasUserWorkedOut[it.date] == true) },
         monthHeader = {
             MonthText(
                 modifier = Modifier
                     .fillMaxWidth()
                     .align(Alignment.CenterHorizontally),
-                text = "", // determine the current month
+                text = it.yearMonth.month.name,
                 style = MaterialTheme.typography.titleLarge,
                 color = Color.White
             )
@@ -55,7 +66,8 @@ fun CalendarContent(uiState: CalendarUiState) {
         monthFooter = {
             MonthText(
                 modifier = Modifier.fillMaxWidth(),
-                text = "", // determine the current month the calendar is on
+                //extract to string resource
+                text = numberOfWorkoutsPerMonth[it.yearMonth.month] ?: "0",
                 style = MaterialTheme.typography.bodyLarge,
                 color = Color.White
             )

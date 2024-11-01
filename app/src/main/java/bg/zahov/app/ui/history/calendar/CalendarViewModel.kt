@@ -7,23 +7,25 @@ import bg.zahov.app.Inject
 import bg.zahov.app.data.exception.CriticalDataNullException
 import bg.zahov.app.data.interfaces.ServiceErrorHandler
 import bg.zahov.app.data.interfaces.WorkoutProvider
+import com.kizitonwose.calendar.core.CalendarDay
 import com.kizitonwose.calendar.core.firstDayOfWeekFromLocale
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.StateFlow
 import kotlinx.coroutines.flow.update
 import kotlinx.coroutines.launch
 import java.time.DayOfWeek
+import java.time.LocalDate
 import java.time.Month
+import java.time.Year
 import java.time.YearMonth
 
-data class WorkoutDate(val month: Month, val day: Int)
 
 data class CalendarUiState(
     val startMonth: YearMonth = YearMonth.now().minusMonths(3),
     val endMonth: YearMonth = YearMonth.now(),
     val firstDayOfWeek: DayOfWeek = firstDayOfWeekFromLocale(),
-    val workoutsPerMonth: Map<WorkoutDate, Int> = mapOf(),
-    val numberOfWorkouts: Map<Month, Int> = mapOf()
+    val dayToHasUserWorkedOut: Map<LocalDate, Boolean> = mapOf(),
+    val numberOfWorkoutsPerMonth: Map<Month, String> = mapOf()
 )
 
 class CalendarViewModel(
@@ -38,8 +40,8 @@ class CalendarViewModel(
         viewModelScope.launch {
             try {
                 workoutProvider.getPastWorkouts().collect { pastWorkouts ->
-                    val workoutsPerMonthCheck = mutableMapOf<WorkoutDate, Int>()
-                    val workoutsPerMonth = mutableMapOf<Month, Int>()
+                    val dayToHasUserWorkedOut = mutableMapOf<LocalDate, Boolean>()
+                    val numberOfWorkoutsPerMonth = mutableMapOf<Month, String>()
 
                     for (i in 0 until 4) {
                         val month = YearMonth.now().minusMonths(i.toLong())
@@ -47,22 +49,21 @@ class CalendarViewModel(
                             pastWorkouts.filter { workout -> workout.date.month == month.month }
                         val workoutCount = workoutsForMonth.size
 
-                        workoutsPerMonth[month.month] = workoutCount
+                        numberOfWorkoutsPerMonth[month.month] = workoutCount.toString()
 
                         val daysInMonth = month.lengthOfMonth()
                         for (dayOfMonth in 1..daysInMonth) {
-                            val workoutDate = WorkoutDate(month.month, dayOfMonth)
-                            val dayVisibility = if (workoutsForMonth.any { workout ->
-                                    workout.date.dayOfMonth == dayOfMonth
-                                }) View.VISIBLE else View.GONE
-                            workoutsPerMonthCheck[workoutDate] = dayVisibility
+                            val workoutDate =
+                                LocalDate.of(Year.now().value, month.month, dayOfMonth)
+                            dayToHasUserWorkedOut[workoutDate] =
+                                pastWorkouts.any {  it.date.toLocalDate() == workoutDate }
                         }
                     }
 
                     _uiState.update { old ->
                         old.copy(
-                            workoutsPerMonth = workoutsPerMonthCheck.toMap(),
-                            numberOfWorkouts = workoutsPerMonth.toMap()
+                            dayToHasUserWorkedOut = dayToHasUserWorkedOut,
+                            numberOfWorkoutsPerMonth = numberOfWorkoutsPerMonth
                         )
                     }
                 }
