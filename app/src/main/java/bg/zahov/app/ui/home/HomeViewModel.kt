@@ -138,6 +138,7 @@ class HomeViewModel(
         }
     }
 
+    //TODO(needs to be rewritten asap)
     private fun getWorkoutsPerWeek(workouts: List<Workout>): Map<Int, Int> {
         val weekRanges = getWeekRangesForCurrentMonth()
         val workoutsPerWeek = mutableMapOf<Int, Int>().apply {
