@@ -21,6 +21,8 @@ import bg.zahov.app.ui.exercise.ExerciseAdapterWrapper
 import bg.zahov.app.ui.workout.add.ExerciseSetAdapterExerciseWrapper
 import bg.zahov.app.ui.workout.add.ExerciseSetAdapterSetWrapper
 import bg.zahov.fitness.app.R
+import com.github.mikephil.charting.charts.BarChart
+import com.github.mikephil.charting.components.XAxis
 import com.google.firebase.Timestamp
 import java.time.Instant
 import java.time.LocalDateTime
@@ -138,8 +140,8 @@ fun String.parseTimeStringToLong(): Long {
 
 fun Exercise.toExerciseSetAdapterWrapper(units: Units = Units.METRIC): ExerciseSetAdapterExerciseWrapper {
     return ExerciseSetAdapterExerciseWrapper(
-        noteVisibility = if(note.isNullOrEmpty()) View.GONE else View.VISIBLE,
-        note =  note,
+        noteVisibility = if (note.isNullOrEmpty()) View.GONE else View.VISIBLE,
+        note = note,
         name = this.name,
         backgroundResource = R.color.background,
         firstInputColumnVisibility = when (this.category) {
@@ -268,14 +270,12 @@ fun RealmExercise.toExercise(): Exercise? {
 }
 
 fun RealmSets.toSets(): Sets? {
-    return if (SetType.fromKey(this.type) != null) {
+    return SetType.entries.firstOrNull { it.key == this.type }?.let { setType ->
         Sets(
-            type = SetType.fromKey(this.type)!!,
+            type = setType,
             firstMetric = this.firstMetric,
             secondMetric = this.secondMetric
         )
-    } else {
-        null
     }
 }
 
