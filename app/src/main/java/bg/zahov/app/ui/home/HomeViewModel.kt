@@ -138,7 +138,6 @@ class HomeViewModel(
         }
     }
 
-    //TODO(needs to be rewritten asap)
     private fun getWorkoutsPerWeek(workouts: List<Workout>): Map<Int, Int> {
         val weekRanges = getWeekRangesForCurrentMonth()
         val workoutsPerWeek = mutableMapOf<Int, Int>().apply {
@@ -163,6 +162,7 @@ class HomeViewModel(
     /**
      * we only want to show information for the current month, and we also need to provide them for the x axis of the barChart
      */
+    //TODO(needs to be rewritten asap)
     private fun getWeekRangesForCurrentMonth(): List<String> {
         val today = LocalDate.now()
         val firstDayOfMonth = today.withDayOfMonth(1)
