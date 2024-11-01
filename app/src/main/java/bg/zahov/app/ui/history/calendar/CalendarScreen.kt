@@ -4,6 +4,7 @@ import androidx.compose.foundation.background
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.aspectRatio
 import androidx.compose.foundation.layout.fillMaxWidth
+import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Text
@@ -57,15 +58,18 @@ fun CalendarContent(
             MonthText(
                 modifier = Modifier
                     .fillMaxWidth()
-                    .align(Alignment.CenterHorizontally),
+                    .align(Alignment.CenterHorizontally)
+                    .padding(bottom = 24.dp, top = 24.dp),
                 text = it.yearMonth.month.name,
                 style = MaterialTheme.typography.titleLarge,
+                fontWeight = FontWeight.Bold,
                 color = Color.White
             )
         },
         monthFooter = {
             MonthText(
-                modifier = Modifier.fillMaxWidth(),
+                modifier = Modifier.fillMaxWidth()
+                    .padding(start = 12.dp),
                 //extract to string resource
                 text = numberOfWorkoutsPerMonth[it.yearMonth.month] ?: "0",
                 style = MaterialTheme.typography.bodyLarge,

@@ -72,7 +72,8 @@ class HomeViewModel(
             launch {
                 try {
                     workoutRepo.getPastWorkouts().collect { pastWorkouts ->
-                        val workoutPerWeekMap = getWorkoutsPerWeek(pastWorkouts)
+                        val workoutPerWeekMap =
+                            getWorkoutsPerWeek(pastWorkouts.filter { it.date.month == LocalDate.now().month })
                         val barData = workoutPerWeekMap.map {
                             BarEntry(
                                 it.key.toFloat(),
