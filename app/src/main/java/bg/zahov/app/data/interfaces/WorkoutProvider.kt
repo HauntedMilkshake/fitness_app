@@ -30,6 +30,7 @@ interface WorkoutProvider {
         date: LocalDateTime,
         newExercises: List<Exercise>,
     )
+    suspend fun getPastWorkoutsForCurrentMonthWithWorkoutCount(): Flow<Pair<List<Workout>, Int>>
 
     suspend fun clearWorkoutState()
 }
