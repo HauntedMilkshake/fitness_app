@@ -269,14 +269,12 @@ fun RealmExercise.toExercise(): Exercise? {
 }
 
 fun RealmSets.toSets(): Sets? {
-    return if (SetType.fromKey(this.type) != null) {
+    return SetType.entries.firstOrNull { it.key == this.type }?.let { setType ->
         Sets(
-            type = SetType.fromKey(this.type)!!,
+            type = setType,
             firstMetric = this.firstMetric,
             secondMetric = this.secondMetric
         )
-    } else {
-        null
     }
 }
 
