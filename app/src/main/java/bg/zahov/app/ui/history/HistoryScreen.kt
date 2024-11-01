@@ -102,7 +102,7 @@ fun Workout(item: HistoryWorkout, onItemClick: (String) -> Unit) {
     ) {
         Text(
             text = item.name,
-            color = Color.White,
+            color = MaterialTheme.colorScheme.onSecondary,
             maxLines = 1,
             overflow = TextOverflow.Ellipsis,
             style = MaterialTheme.typography.titleMedium,
@@ -113,7 +113,7 @@ fun Workout(item: HistoryWorkout, onItemClick: (String) -> Unit) {
             text = item.date,
             maxLines = 1,
             overflow = TextOverflow.Ellipsis,
-            color = MaterialTheme.colorScheme.secondary,
+            color = MaterialTheme.colorScheme.onPrimary,
             style = MaterialTheme.typography.bodyLarge
         )
         Row(
@@ -163,12 +163,12 @@ fun Workout(item: HistoryWorkout, onItemClick: (String) -> Unit) {
         ) {
             Text(
                 text = stringResource(R.string.exercise),
-                color = Color.White,
+                color = MaterialTheme.colorScheme.onSecondary,
                 style = MaterialTheme.typography.bodyLarge
             )
             Text(
                 text = stringResource(R.string.best_set),
-                color = Color.White,
+                color = MaterialTheme.colorScheme.onSecondary,
                 style = MaterialTheme.typography.bodyLarge
             )
         }
@@ -189,7 +189,7 @@ fun ExerciseWithSets(exerciseName: String, bestSet: String) {
     ) {
         Text(
             text = exerciseName,
-            color = MaterialTheme.colorScheme.secondary,
+            color = MaterialTheme.colorScheme.onPrimary,
             style = MaterialTheme.typography.bodyLarge,
             softWrap = true,
             overflow = TextOverflow.Ellipsis,
@@ -198,7 +198,7 @@ fun ExerciseWithSets(exerciseName: String, bestSet: String) {
 
         Text(
             text = bestSet,
-            color = MaterialTheme.colorScheme.secondary,
+            color = MaterialTheme.colorScheme.onPrimary,
             style = MaterialTheme.typography.bodyLarge,
             overflow = TextOverflow.Ellipsis,
             maxLines = 1,
