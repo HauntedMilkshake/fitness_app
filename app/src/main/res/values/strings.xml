@@ -76,7 +76,9 @@
     <string name="create_exercise">Create exercise</string>
     <string name="edit_profile_text"> Edit profile</string>
     <string name="reset_password_text">Reset password</string>
-    <string name="confirm_changes">Confirm changes</string>
+    <string name="update_username">Update Username</string>
+    <string name="update_password">Update Password</string>
+    <string name="confirm_authentication">Confirm Identity</string>
     <!-- Strings used for edit profile fragment   -->
     <string name="filter">Filter</string>
     <string name="body_part">Body part</string>
