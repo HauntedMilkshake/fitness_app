@@ -13,9 +13,4 @@ enum class SetType(val key: String) {
     DROP_SET(SetKeys.DROP_SET),
     DEFAULT(SetKeys.DEFAULT),
     FAILURE(SetKeys.FAILURE);
-
-    companion object {
-        fun fromKey(key: String) = entries.firstOrNull { it.key == key }
-
-    }
 }

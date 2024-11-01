@@ -157,15 +157,13 @@ data class Sets(
     var secondMetric: Int?,
 ) {
     companion object {
-        fun fromFirestoreMap(data: Map<String, Any>?) = data?.let {
+        fun fromFirestoreMap(data: Map<String, Any>?) = data?.let { map ->
             Sets(
-                type = (it[FirestoreFields.SETS_TYPE] as? String)?.let { string ->
-                    SetType.fromKey(
-                        string
-                    )
+                type = (map[FirestoreFields.SETS_TYPE] as? String)?.let { string ->
+                    SetType.entries.firstOrNull { it.key == string }
                 } ?: SetType.DEFAULT,
-                firstMetric = it[FirestoreFields.SETS_FIRST_METRIC] as? Double,
-                secondMetric = (it[FirestoreFields.SETS_SECOND_METRIC] as? Long)?.toInt()
+                firstMetric = map[FirestoreFields.SETS_FIRST_METRIC] as? Double,
+                secondMetric = (map[FirestoreFields.SETS_SECOND_METRIC] as? Long)?.toInt()
             )
         }
     }
