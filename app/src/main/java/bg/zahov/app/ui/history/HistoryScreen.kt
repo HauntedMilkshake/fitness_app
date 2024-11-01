@@ -27,7 +27,6 @@ import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.graphics.painter.Painter
-import androidx.compose.ui.res.colorResource
 import androidx.compose.ui.res.integerResource
 import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.res.stringResource
@@ -38,6 +37,7 @@ import androidx.compose.ui.unit.dp
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import androidx.lifecycle.viewmodel.compose.viewModel
 import bg.zahov.app.data.provider.model.HistoryWorkout
+import bg.zahov.app.ui.theme.FitnessTheme
 import bg.zahov.fitness.app.R
 
 
@@ -53,37 +53,40 @@ fun HistoryContent(
     onItemClick: (String) -> Unit
 ) {
     val animationDuration = integerResource(R.integer.animation_duration_medium)
-    AnimatedContent(
-        workouts.size,
-        transitionSpec = {
-            fadeIn(
-                animationSpec = tween(animationDuration)
-            ) togetherWith fadeOut(
-                targetAlpha = animationDuration
-                    .toFloat()
-            )
-        },
-        label = ""
-    ) {
-        when (it) {
-            0 -> {
-                CircularProgressIndicator(
-                    modifier = Modifier,
-                    color = MaterialTheme.colorScheme.secondary,
-                    trackColor = MaterialTheme.colorScheme.surfaceVariant
+    FitnessTheme {
+        AnimatedContent(
+            workouts.size,
+            transitionSpec = {
+                fadeIn(
+                    animationSpec = tween(animationDuration)
+                ) togetherWith fadeOut(
+                    targetAlpha = animationDuration
+                        .toFloat()
                 )
-            }
+            },
+            label = ""
+        ) {
+            when (it) {
+                0 -> {
+                    CircularProgressIndicator(
+                        modifier = Modifier,
+                        color = MaterialTheme.colorScheme.secondary,
+                        trackColor = MaterialTheme.colorScheme.surfaceVariant
+                    )
+                }
 
-            else -> {
-                LazyColumn(Modifier.fillMaxSize()) {
-                    items(items = workouts, key = { it.id }) {
-                        Workout(it) {
-                            onItemClick(it)
+                else -> {
+                    LazyColumn(Modifier.fillMaxSize()) {
+                        items(items = workouts, key = { it.id }) {
+                            Workout(it) {
+                                onItemClick(it)
+                            }
                         }
                     }
                 }
             }
         }
+
     }
 }
 
@@ -93,7 +96,7 @@ fun Workout(item: HistoryWorkout, onItemClick: (String) -> Unit) {
         Modifier
             .fillMaxWidth()
             .padding(4.dp)
-            .border(1.dp, colorResource(R.color.less_vibrant_text), RoundedCornerShape(4.dp))
+            .border(1.dp, MaterialTheme.colorScheme.secondary, RoundedCornerShape(4.dp))
             .padding(12.dp)
             .clickable { onItemClick(item.id) }
     ) {
@@ -110,7 +113,7 @@ fun Workout(item: HistoryWorkout, onItemClick: (String) -> Unit) {
             text = item.date,
             maxLines = 1,
             overflow = TextOverflow.Ellipsis,
-            color = colorResource(R.color.less_vibrant_text),
+            color = MaterialTheme.colorScheme.secondary,
             style = MaterialTheme.typography.bodyLarge
         )
         Row(
@@ -126,20 +129,19 @@ fun Workout(item: HistoryWorkout, onItemClick: (String) -> Unit) {
                 textModifier = Modifier
                     .weight(1f)
                     .padding(4.dp),
-                iconColor = colorResource(R.color.less_vibrant_text),
+                iconColor = MaterialTheme.colorScheme.secondary,
                 iconModifier = Modifier.align(Alignment.CenterVertically)
             )
             TextWithLeadingIcon(
                 text = stringResource(
                     R.string.volume_for_history_workouts,
-                    item.volume,
-                    stringResource(R.string.kg)
+                    item.volume
                 ),
                 icon = painterResource(R.drawable.ic_volume),
                 textModifier = Modifier
                     .weight(1f)
                     .padding(4.dp),
-                iconColor = colorResource(R.color.less_vibrant_text),
+                iconColor = MaterialTheme.colorScheme.secondary,
                 iconModifier = Modifier.align(Alignment.CenterVertically)
             )
             TextWithLeadingIcon(
@@ -149,7 +151,7 @@ fun Workout(item: HistoryWorkout, onItemClick: (String) -> Unit) {
                     .align(Alignment.CenterVertically)
                     .weight(1f)
                     .padding(4.dp),
-                iconColor = colorResource(R.color.less_vibrant_text),
+                iconColor = MaterialTheme.colorScheme.secondary,
                 iconModifier = Modifier.align(Alignment.CenterVertically)
             )
         }
@@ -187,7 +189,7 @@ fun ExerciseWithSets(exerciseName: String, bestSet: String) {
     ) {
         Text(
             text = exerciseName,
-            color = colorResource(R.color.less_vibrant_text),
+            color = MaterialTheme.colorScheme.secondary,
             style = MaterialTheme.typography.bodyLarge,
             softWrap = true,
             overflow = TextOverflow.Ellipsis,
@@ -196,7 +198,7 @@ fun ExerciseWithSets(exerciseName: String, bestSet: String) {
 
         Text(
             text = bestSet,
-            color = colorResource(R.color.less_vibrant_text),
+            color = MaterialTheme.colorScheme.secondary,
             style = MaterialTheme.typography.bodyLarge,
             overflow = TextOverflow.Ellipsis,
             maxLines = 1,
