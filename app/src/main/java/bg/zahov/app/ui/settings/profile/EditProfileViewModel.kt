@@ -7,7 +7,7 @@ import bg.zahov.app.data.exception.CriticalDataNullException
 import bg.zahov.app.data.interfaces.ServiceErrorHandler
 import bg.zahov.app.data.interfaces.UserProvider
 import bg.zahov.app.data.model.state.EditProfileData
-import bg.zahov.app.ui.custom.ToastManager
+import bg.zahov.app.data.model.ToastManager
 import bg.zahov.fitness.app.R
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.StateFlow

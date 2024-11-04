@@ -25,7 +25,7 @@ import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import androidx.lifecycle.viewmodel.compose.viewModel
 import bg.zahov.app.ui.custom.CommonPasswordField
 import bg.zahov.app.ui.custom.CommonTextField
-import bg.zahov.app.ui.custom.ToastManager
+import bg.zahov.app.data.model.ToastManager
 import bg.zahov.fitness.app.R
 
 @Composable

@@ -1,4 +1,4 @@
-package bg.zahov.app.ui.custom
+package bg.zahov.app.data.model
 
 import androidx.annotation.StringRes
 import kotlinx.coroutines.flow.MutableStateFlow
