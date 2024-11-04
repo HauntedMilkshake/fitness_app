@@ -27,6 +27,7 @@ import com.kizitonwose.calendar.compose.rememberCalendarState
 import com.kizitonwose.calendar.core.CalendarDay
 import bg.zahov.fitness.app.R
 import com.kizitonwose.calendar.compose.CalendarState
+import com.kizitonwose.calendar.core.DayPosition
 import java.time.LocalDate
 import java.time.Month
 
@@ -97,7 +98,10 @@ fun Day(day: CalendarDay, hasUserWorkedOut: Boolean = true) {
             .padding(4.dp),
         contentAlignment = Alignment.Center
     ) {
-        Text(text = day.date.dayOfMonth.toString(), color = Color.White)
+        Text(
+            text = day.date.dayOfMonth.toString(),
+            color = if (day.position == DayPosition.MonthDate) Color.White else Color.Gray
+        )
         if (hasUserWorkedOut) {
             Icon(
                 painter = painterResource(R.drawable.ic_check_mark),
