@@ -1,5 +1,6 @@
 package bg.zahov.app.ui.home
 
+import android.util.Log
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
 import bg.zahov.app.Inject
@@ -115,11 +116,12 @@ class HomeViewModel(
                                     it.value.toFloat()
                                 )
                             }
+
                             _uiState.update { old ->
                                 old.copy(
                                     numberOfWorkouts = pastWorkouts.second.toString(),
                                     data = ChartData(
-                                        xMax = workoutPerWeekMap.keys.max().toFloat(),
+                                        xMax = workoutPerWeekMap.keys.size.toFloat(),
                                         xMin = workoutPerWeekMap.keys.min().toFloat(),
                                         yMax = workoutPerWeekMap.values.max().toFloat(),
                                         yMin = workoutPerWeekMap.values.min().toFloat(),
@@ -145,7 +147,6 @@ class HomeViewModel(
                 put(i, 0)
             }
         }
-
         workouts.forEach { workout ->
 
             val weekRangeIndex = weekRanges.indexOfFirst { weekRange ->
@@ -155,14 +156,12 @@ class HomeViewModel(
             val currentCount = workoutsPerWeek.getValue(weekRangeIndex)
             workoutsPerWeek[weekRangeIndex] = currentCount + 1
         }
-
         return workoutsPerWeek
     }
 
     /**
      * we only want to show information for the current month, and we also need to provide them for the x axis of the barChart
      */
-    //TODO(needs to be rewritten asap)
     private fun getWeekRangesForCurrentMonth(): List<String> {
         val today = LocalDate.now()
         val firstDayOfMonth = today.withDayOfMonth(1)
@@ -182,7 +181,6 @@ class HomeViewModel(
             startOfWeek = endOfWeek.plusDays(1)
             endOfWeek = startOfWeek.with(TemporalAdjusters.nextOrSame(DayOfWeek.SUNDAY))
         }
-
         return weekRanges
     }
 
