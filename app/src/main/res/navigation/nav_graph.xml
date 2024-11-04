@@ -67,8 +67,7 @@
 
     <fragment
         android:id="@+id/home"
-        android:name="bg.zahov.app.ui.home.HomeFragment"
-        tools:layout="@layout/fragment_home">
+        android:name="bg.zahov.app.ui.home.HomeFragment">
         <action
             android:id="@+id/home_to_settings"
             app:destination="@+id/settings" />
