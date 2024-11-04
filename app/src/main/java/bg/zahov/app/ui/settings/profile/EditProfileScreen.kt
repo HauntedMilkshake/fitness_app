@@ -25,6 +25,7 @@ import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import androidx.lifecycle.viewmodel.compose.viewModel
 import bg.zahov.app.ui.custom.CommonPasswordField
 import bg.zahov.app.ui.custom.CommonTextField
+import bg.zahov.app.ui.custom.ToastManager
 import bg.zahov.fitness.app.R
 
 @Composable
@@ -32,12 +33,14 @@ fun EditProfileScreen(viewModel: EditProfileViewModel = viewModel()) {
     val uiState by viewModel.state.collectAsStateWithLifecycle()
     val context = LocalContext.current
 
-    uiState.notify?.let { message ->
-        LaunchedEffect(Unit) {
-            Toast.makeText(context, message, Toast.LENGTH_SHORT).show()
-            viewModel.shownMessage()
+    val toastMessage by ToastManager.messages.collectAsStateWithLifecycle()
+    LaunchedEffect(toastMessage) {
+        toastMessage?.let { message ->
+            Toast.makeText(context, context.getString(message.messageResId), Toast.LENGTH_SHORT)
+                .show()
         }
     }
+
     EditProfileContent(
         authenticated = uiState.authenticated,
         username = uiState.username,
@@ -70,6 +73,11 @@ fun EditProfileContent(
     resetPassword: () -> Unit,
     dialog: @Composable (onDismiss: () -> Unit) -> Unit
 ) {
+    var showDialog by remember { mutableStateOf(false) }
+
+    if (showDialog && !authenticated) {
+        dialog { showDialog = false }
+    }
     Column(
         modifier = Modifier.fillMaxSize(),
         verticalArrangement = Arrangement.spacedBy(16.dp),
@@ -113,11 +121,6 @@ fun EditProfileContent(
             enabled = authenticated && password.length >= 6
         ) {
             Text(text = stringResource(R.string.update_password))
-        }
-        var showDialog by remember { mutableStateOf(false) }
-
-        if (showDialog && !authenticated) {
-            dialog { showDialog = false }
         }
         Button(
             colors = ButtonColors(

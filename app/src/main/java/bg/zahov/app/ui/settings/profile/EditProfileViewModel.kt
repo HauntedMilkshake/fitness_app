@@ -6,6 +6,9 @@ import bg.zahov.app.Inject
 import bg.zahov.app.data.exception.CriticalDataNullException
 import bg.zahov.app.data.interfaces.ServiceErrorHandler
 import bg.zahov.app.data.interfaces.UserProvider
+import bg.zahov.app.data.model.state.EditProfileData
+import bg.zahov.app.ui.custom.ToastManager
+import bg.zahov.fitness.app.R
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.StateFlow
 import kotlinx.coroutines.flow.update
@@ -19,29 +22,11 @@ import kotlinx.coroutines.launch
  */
 class EditProfileViewModel(
     private val repo: UserProvider = Inject.userProvider,
-    private val errorHandler: ServiceErrorHandler = Inject.serviceErrorHandler
+    private val errorHandler: ServiceErrorHandler = Inject.serviceErrorHandler,
+    private val toastManager: ToastManager = ToastManager
 ) : ViewModel() {
-
-    /**
-     * UI state for EditProfileViewModel, containing properties related to authentication,
-     * user credentials, password visibility, and notifications.
-     *
-     * @property authenticated Whether the user is authenticated.
-     * @property username The current username.
-     * @property password The current password.
-     * @property passwordVisibility Controls the visibility of the password.
-     * @property notify Optional notification message.
-     */
-    data class UiState(
-        val authenticated: Boolean = false,
-        val username: String = "",
-        val password: String = "",
-        val passwordVisibility: Boolean = false,
-        val notify: String? = null,
-    )
-
-    private val _state = MutableStateFlow(UiState())
-    val state: StateFlow<UiState> = _state
+    private val _state = MutableStateFlow(EditProfileData())
+    val state: StateFlow<EditProfileData> = _state
 
     /**
      * Updates the username in the UI state.
@@ -65,7 +50,7 @@ class EditProfileViewModel(
      * Toggles the visibility of the password field.
      */
     fun onPasswordVisibilityChange() {
-        _state.update { it.copy(passwordVisibility = !_state.value.passwordVisibility) }
+        _state.update { it.copy(passwordVisibility = _state.value.passwordVisibility.not()) }
     }
 
     init {
@@ -89,13 +74,11 @@ class EditProfileViewModel(
             repo.changeUserName(newUsername)
                 .addOnSuccessListener {
                     _state.update { old ->
-                        old.copy(
-                            username = newUsername,
-                            notify = "Successfully updated username"
-                        )
+                        old.copy(username = newUsername)
                     }
+                    toastManager.showToast(R.string.update_username_success)
                 }
-                .addOnFailureListener { notifyChange("Failed to updated username") }
+                .addOnFailureListener { toastManager.showToast(R.string.update_username_fail) }
         }
     }
 
@@ -109,13 +92,11 @@ class EditProfileViewModel(
             repo.reauthenticate(password)
                 .addOnSuccessListener {
                     _state.update { old ->
-                        old.copy(
-                            authenticated = true,
-                            notify = "Successfully re-authenticated!"
-                        )
+                        old.copy(authenticated = true)
                     }
+                    toastManager.showToast(R.string.re_authenticate_success)
                 }
-                .addOnFailureListener { notifyChange("Failed to re-authenticate!") }
+                .addOnFailureListener { toastManager.showToast(R.string.re_authenticate_fail) }
         }
     }
 
@@ -125,8 +106,8 @@ class EditProfileViewModel(
     fun sendPasswordResetLink() {
         viewModelScope.launch {
             repo.passwordResetForLoggedUser()
-                .addOnSuccessListener { notifyChange("Successfully updated password") }
-                .addOnFailureListener { notifyChange("Failed to send password reset link") }
+                .addOnSuccessListener { toastManager.showToast(R.string.reset_password_success) }
+                .addOnFailureListener { toastManager.showToast(R.string.reset_password_fail) }
         }
     }
 
@@ -137,24 +118,8 @@ class EditProfileViewModel(
         val newPassword = _state.value.password
         viewModelScope.launch {
             repo.updatePassword(newPassword)
-                .addOnSuccessListener { notifyChange("Successfully updated password") }
-                .addOnFailureListener { notifyChange("Failed to update password") }
+                .addOnSuccessListener { toastManager.showToast(R.string.update_password_success) }
+                .addOnFailureListener { toastManager.showToast(R.string.update_password_fail) }
         }
-    }
-
-    /**
-     * Clears the notification message in the UI state.
-     */
-    fun shownMessage() {
-        notifyChange(null)
-    }
-
-    /**
-     * Updates the notification message in the UI state.
-     *
-     * @param notify The new notification message, or null to clear.
-     */
-    private fun notifyChange(notify: String?) {
-        _state.update { old -> old.copy(notify = notify) }
     }
 }
