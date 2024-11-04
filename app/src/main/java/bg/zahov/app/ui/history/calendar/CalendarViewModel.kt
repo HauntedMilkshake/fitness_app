@@ -6,6 +6,7 @@ import bg.zahov.app.Inject
 import bg.zahov.app.data.exception.CriticalDataNullException
 import bg.zahov.app.data.interfaces.ServiceErrorHandler
 import bg.zahov.app.data.interfaces.WorkoutProvider
+import com.kizitonwose.calendar.core.daysOfWeek
 import com.kizitonwose.calendar.core.firstDayOfWeekFromLocale
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.StateFlow
@@ -25,6 +26,7 @@ import java.time.YearMonth
  * @property startMonth The starting month to display on the calendar. Defaults to three months ago.
  * @property endMonth The ending month to display on the calendar. Defaults to the current month.
  * @property firstDayOfWeek The first day of the week based on the user's locale.
+ * @property daysOfWeek A list of the days of the week from the user locale
  * @property dayToHasUserWorkedOut A map indicating whether the user has worked out on a specific date.
  * @property numberOfWorkoutsPerMonth A map that holds the number of workouts for each month.
  */
@@ -32,6 +34,7 @@ data class CalendarUiState(
     val startMonth: YearMonth = YearMonth.now().minusMonths(3),
     val endMonth: YearMonth = YearMonth.now(),
     val firstDayOfWeek: DayOfWeek = firstDayOfWeekFromLocale(),
+    val daysOfWeek: List<DayOfWeek> = daysOfWeek(firstDayOfWeek),
     val dayToHasUserWorkedOut: Map<LocalDate, Boolean> = mapOf(),
     val numberOfWorkoutsPerMonth: Map<Month, String> = mapOf()
 )
