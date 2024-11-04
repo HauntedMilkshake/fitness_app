@@ -34,6 +34,7 @@ class CalendarFragment : Fragment() {
             }
         }
     }
+
     private fun setupTopBar() {
         activity?.addMenuProvider(object : MenuProvider {
             override fun onCreateMenu(menu: Menu, menuInflater: MenuInflater) {
@@ -51,97 +52,7 @@ class CalendarFragment : Fragment() {
                     else -> false
                 }
             }
-
         })
-    }
-    override fun onViewCreated(view: View, savedInstanceState: Bundle?) {
-        super.onViewCreated(view, savedInstanceState)
-        requireActivity().addMenuProvider(object : MenuProvider {
-            override fun onCreateMenu(menu: Menu, menuInflater: MenuInflater) {
-                menu.clear()
-                menuInflater.inflate(R.menu.menu_toolbar_calendar, menu)
-            }
-
-            override fun onMenuItemSelected(menuItem: MenuItem): Boolean {
-                return when (menuItem.itemId) {
-                    R.id.home -> {
-                        findNavController().popBackStack()
-                        true
-                    }
-
-                    else -> false
-                }
-            }
-
-        })
-//        binding.apply {
-//            calendar.apply {
-//                monthHeaderBinder = object : MonthHeaderFooterBinder<MonthHeaderViewContainer> {
-//                    override fun bind(container: MonthHeaderViewContainer, data: CalendarMonth) {
-//                        container.monthTitle.text = data.yearMonth.month.name
-//                        container.titlesContainer.apply {
-//                            children.map { it as? TextView }.forEachIndexed { index, textView ->
-//                                textView?.text =
-//                                    daysOfWeek()[index].getDisplayName(
-//                                        TextStyle.SHORT,
-//                                        Locale.getDefault()
-//                                    )
-//                            }
-//                        }
-//                    }
-//
-//                    override fun create(view: View) = MonthHeaderViewContainer(view)
-//                }
-//                monthFooterBinder = object : MonthHeaderFooterBinder<MonthFooterViewContainer> {
-//                    override fun bind(
-//                        container: MonthFooterViewContainer,
-//                        data: CalendarMonth,
-//                    ) {
-//                        container.apply {
-//                            year.text = data.yearMonth.year.toString()
-//                            calendarViewModel.numberOfWorkouts.observe(viewLifecycleOwner) { map ->
-//                                map[data.yearMonth.month]?.let {
-//                                    footerText.text = it.toString()
-//                                }
-//                            }
-//                        }
-//                    }
-//
-//                    override fun create(view: View) = MonthFooterViewContainer(view)
-//                }
-//
-//                dayBinder = object : MonthDayBinder<DayViewContainer> {
-//                    override fun bind(container: DayViewContainer, data: CalendarDay) {
-//                        container.apply {
-//                            textView.text = data.date.dayOfMonth.toString()
-//                            calendarViewModel.workoutsPerMonthCheck.observe(viewLifecycleOwner) {
-//                                it[WorkoutDate(
-//                                    month = data.date.month,
-//                                    day = data.date.dayOfMonth
-//                                )]?.let { visibility ->
-//                                    checkImage.visibility = visibility
-//                                }
-//                            }
-//
-//                            if (data.position == DayPosition.MonthDate) {
-//                                textView.setTextColor(Color.WHITE)
-//                            } else {
-//                                textView.setTextColor(Color.GRAY)
-//                            }
-//
-//                        }
-//                    }
-//
-//                    override fun create(view: View) = DayViewContainer(view)
-//                }
-//
-//                setup(
-//                    YearMonth.now().minusMonths(3),
-//                    YearMonth.now(),
-//                    daysOfWeek().first()
-//                )
-//            }
-//        }
     }
 
     override fun onResume() {
