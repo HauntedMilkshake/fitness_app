@@ -106,7 +106,7 @@ class HomeViewModel(
             }
             launch {
                 try {
-                    workoutRepo.getPastWorkoutsForCurrentMonthWithWorkoutCount()
+                    workoutRepo.getCurrentMonthWorkouts()
                         .collect { pastWorkouts ->
                             val workoutPerWeekMap =
                                 getWorkoutsPerWeek(pastWorkouts.first)

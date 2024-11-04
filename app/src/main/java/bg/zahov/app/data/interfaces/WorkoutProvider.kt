@@ -30,7 +30,12 @@ interface WorkoutProvider {
         date: LocalDateTime,
         newExercises: List<Exercise>,
     )
-    suspend fun getPastWorkoutsForCurrentMonthWithWorkoutCount(): Flow<Pair<List<Workout>, Int>>
+
+    /**
+     * Filters from all workouts only those who were performed in the last month
+     * @return Pair.first - the workouts, Pair.second the size of all performed workouts, because we need it for the screen
+     */
+    suspend fun getCurrentMonthWorkouts(): Flow<Pair<List<Workout>, Int>>
 
     suspend fun clearWorkoutState()
 }

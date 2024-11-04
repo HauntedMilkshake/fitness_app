@@ -112,7 +112,16 @@ class WorkoutProviderImpl : WorkoutProvider {
         workoutRepo.updateTemplateWorkout(workoutId, date, newExercises)
     }
 
-    override suspend fun getPastWorkoutsForCurrentMonthWithWorkoutCount(): Flow<Pair<List<Workout>, Int>> {
+    /**
+     * Retrieves a flow of workouts from the current month along with their count.
+     *
+     * This function filters the workouts to include only those that occurred in the
+     * current month.
+     *
+     * @return A [Flow] emitting a [Pair] of a list of [Workout] objects and the
+     * number of workouts in the current month.
+     */
+    override suspend fun getCurrentMonthWorkouts(): Flow<Pair<List<Workout>, Int>> {
         return workoutRepo.getPastWorkouts()
             .mapNotNull {
                 Pair(it.filter { workout -> workout.date.month == LocalDate.now().month },
