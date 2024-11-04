@@ -84,7 +84,7 @@ fun CalendarContent(
 @Composable
 fun Day(
     day: CalendarDay, hasUserWorkedOut: Boolean = true,
-    boxModifier: Modifier = Modifier
+    modifier: Modifier = Modifier
         .aspectRatio(1f)
         .background(
             color = colorResource(R.color.background)
@@ -92,7 +92,7 @@ fun Day(
         .padding(4.dp)
 ) {
     Box(
-        modifier = boxModifier,
+        modifier = modifier,
         contentAlignment = Alignment.Center
     ) {
         Text(
@@ -114,17 +114,13 @@ fun Day(
 
 @Composable
 fun MonthHeader(
-    columnModifier: Modifier = Modifier.padding(top = 24.dp, bottom = 24.dp),
-    textModifier: Modifier = Modifier.padding(top = 8.dp, bottom = 4.dp),
-    daysModifier: Modifier = Modifier
-        .padding(top = 8.dp)
-        .fillMaxWidth(),
+    modifier: Modifier = Modifier.padding(top = 24.dp, bottom = 24.dp),
     text: String,
     daysOfWeek: List<DayOfWeek> = listOf()
 ) {
-    Column(modifier = columnModifier, horizontalAlignment = Alignment.CenterHorizontally) {
+    Column(modifier = modifier, horizontalAlignment = Alignment.CenterHorizontally) {
         Text(
-            modifier = textModifier,
+            modifier = Modifier.padding(top = 8.dp, bottom = 4.dp),
             text = text,
             style = MaterialTheme.typography.titleLarge,
             fontWeight = FontWeight.Bold,
@@ -132,7 +128,9 @@ fun MonthHeader(
         )
 
         LazyRow(
-            modifier = daysModifier,
+            modifier = Modifier
+                .padding(top = 8.dp)
+                .fillMaxWidth(),
             userScrollEnabled = false,
             horizontalArrangement = Arrangement.SpaceAround
         ) {
@@ -144,7 +142,7 @@ fun MonthHeader(
 }
 
 @Composable
-fun MonthHeaderDayText(modifier: Modifier, day: DayOfWeek) {
+fun MonthHeaderDayText(modifier: Modifier = Modifier, day: DayOfWeek) {
     Text(
         text = day.name.take(3),
         modifier = modifier,
@@ -157,22 +155,20 @@ fun MonthHeaderDayText(modifier: Modifier, day: DayOfWeek) {
 
 @Composable
 fun MonthFooter(
-    rowModifier: Modifier = Modifier.fillMaxWidth(),
-    yearTextModifier: Modifier = Modifier.padding(start = 12.dp, top = 12.dp),
-    workoutCountTextModifier: Modifier = Modifier.padding(end = 12.dp, top = 12.dp),
+    modifier: Modifier = Modifier.fillMaxWidth(),
     year: String,
     workoutCount: String,
 ) {
-    Row(modifier = rowModifier, horizontalArrangement = Arrangement.SpaceBetween) {
+    Row(modifier = modifier, horizontalArrangement = Arrangement.SpaceBetween) {
         Text(
-            modifier = yearTextModifier,
+            modifier = Modifier.padding(start = 12.dp, top = 12.dp),
             text = year,
             style = MaterialTheme.typography.bodyLarge,
             color = colorResource(R.color.less_vibrant_text)
         )
 
         Text(
-            modifier = workoutCountTextModifier,
+            modifier = Modifier.padding(end = 12.dp, top = 12.dp),
             text = workoutCount,
             style = MaterialTheme.typography.bodyLarge,
             color = colorResource(R.color.less_vibrant_text)
