@@ -3,28 +3,24 @@ package bg.zahov.app.data.local
 import bg.zahov.app.data.model.BodyPart
 import bg.zahov.app.data.model.Category
 import bg.zahov.app.data.model.Language
-import bg.zahov.app.data.model.LanguageKeys
 import bg.zahov.app.data.model.SetType
 import bg.zahov.app.data.model.Sound
-import bg.zahov.app.data.model.SoundKeys
 import bg.zahov.app.data.model.Theme
-import bg.zahov.app.data.model.ThemeKeys
 import bg.zahov.app.data.model.Units
-import bg.zahov.app.data.model.UnitsKeys
 import io.realm.kotlin.ext.realmListOf
 import io.realm.kotlin.types.RealmList
 import io.realm.kotlin.types.RealmObject
 
-class Settings : RealmObject {
-    var language: String = Language.fromKey(LanguageKeys.ENGLISH)
-    var units: String = Units.fromKey(UnitsKeys.METRIC)
+open class Settings : RealmObject {
+    var language: String = Language.English.key
+    var units: String = Units.METRIC.key
     var soundEffects: Boolean = true
-    var theme: String = Theme.fromKey(ThemeKeys.DARK)
+    var theme: String = Theme.Dark.key
     var restTimer: Int = 30
     var vibration: Boolean = true
-    var soundSettings: String = Sound.fromKey(SoundKeys.SOUND_1)
+    var soundSettings: String = Sound.SOUND_1.key
     var updateTemplate: Boolean = true
-    var fit: Boolean = false
+    var enableWatch: Boolean = false
     var automaticSync: Boolean = true
 }
 

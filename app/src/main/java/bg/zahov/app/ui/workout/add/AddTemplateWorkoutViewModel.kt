@@ -113,7 +113,7 @@ class AddTemplateWorkoutViewModel(application: Application) : AndroidViewModel(a
                     it?.let { replaced ->
                         val replacedEntry = ExerciseEntry(
                             replaced.toExerciseSetAdapterWrapper(
-                                Units.valueOf(settings.units)
+                                Units.valueOf(settings.units.toString())
                             )
                         )
                         exerciseToReplaceIndex?.let { indexToReplace ->
