@@ -15,17 +15,11 @@ import androidx.core.os.bundleOf
 import androidx.core.view.MenuProvider
 import androidx.fragment.app.Fragment
 import androidx.fragment.app.viewModels
-import androidx.lifecycle.map
 import androidx.navigation.fragment.findNavController
-import androidx.recyclerview.widget.LinearLayoutManager
-import bg.zahov.app.data.model.Workout
-import bg.zahov.app.data.model.state.StartWorkoutUiMapper
 import bg.zahov.app.setToolBarTitle
 import bg.zahov.app.showBottomNav
 import bg.zahov.app.showTopBar
-import bg.zahov.app.ui.authentication.signup.SignupScreen
 import bg.zahov.fitness.app.R
-import bg.zahov.fitness.app.databinding.FragmentStartWorkoutBinding
 
 class StartWorkoutFragment : Fragment() {
 
@@ -37,7 +31,14 @@ class StartWorkoutFragment : Fragment() {
         return ComposeView(requireContext()).apply {
             setViewCompositionStrategy(ViewCompositionStrategy.DisposeOnViewTreeLifecycleDestroyed)
             setContent {
-                StartWorkoutScreen(startWorkoutViewModel)
+                StartWorkoutScreen(startWorkoutViewModel,
+                    onAddTemplateWorkout = { findNavController().navigate(R.id.workout_to_create_workout_template) },
+                    onEditWorkout = {
+                    findNavController().navigate(
+                        R.id.workout_to_create_workout_template,
+                        bundleOf(EDIT_FLAG to true, WORKOUT_ID_ARG_KEY to it)
+                    )
+                })
             }
         }
     }
@@ -60,7 +61,8 @@ class StartWorkoutFragment : Fragment() {
         activity?.showTopBar()
         activity?.showBottomNav()
     }
-//    override fun onViewCreated(view: View, savedInstanceState: Bundle?) {
+
+    //    override fun onViewCreated(view: View, savedInstanceState: Bundle?) {
 //        super.onViewCreated(view, savedInstanceState)
 //        (activity as? AppCompatActivity)?.supportActionBar?.setDisplayHomeAsUpEnabled(false)
 //        requireActivity().setToolBarTitle(R.string.workout)
@@ -128,4 +130,8 @@ class StartWorkoutFragment : Fragment() {
 //            Toast.makeText(context, it, Toast.LENGTH_SHORT).show()
 //        }
 //    }
+    companion object {
+        const val WORKOUT_ID_ARG_KEY = "WORKOUT_ID"
+        const val EDIT_FLAG = "EDIT"
+    }
 }

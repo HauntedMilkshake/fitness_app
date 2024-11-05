@@ -1,117 +1,139 @@
 package bg.zahov.app.ui.workout.start
 
-import android.app.Application
-import androidx.lifecycle.AndroidViewModel
-import androidx.lifecycle.LiveData
-import androidx.lifecycle.MutableLiveData
+import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
+import bg.zahov.app.Inject
 import bg.zahov.app.data.exception.CriticalDataNullException
+import bg.zahov.app.data.interfaces.ServiceErrorHandler
+import bg.zahov.app.data.interfaces.WorkoutProvider
 import bg.zahov.app.data.model.Workout
 import bg.zahov.app.data.model.WorkoutState
-import bg.zahov.app.getServiceErrorProvider
-import bg.zahov.app.getWorkoutProvider
-import bg.zahov.app.getWorkoutStateManager
+import bg.zahov.app.data.provider.WorkoutStateManager
 import bg.zahov.app.util.generateRandomId
+import kotlinx.coroutines.flow.MutableStateFlow
+import kotlinx.coroutines.flow.StateFlow
+import kotlinx.coroutines.flow.update
 import kotlinx.coroutines.launch
 import java.time.LocalDateTime
 
-class StartWorkoutViewModel(application: Application) : AndroidViewModel(application) {
-    private val repo by lazy {
-        application.getWorkoutProvider()
-    }
+data class StartWorkoutUiState(
+    val workouts: List<StartWorkout> = listOf(),
+    val notifyUser: String? = null
+)
 
-    private val workoutState by lazy {
-        application.getWorkoutStateManager()
-    }
+data class StartWorkout(
+    val id: String,
+    val name: String,
+    val date: String,
+    val exercises: List<String>
+)
 
-    private val serviceError by lazy {
-        application.getServiceErrorProvider()
-    }
-    private val _state = MutableLiveData<State>()
-    val state: LiveData<State>
-        get() = _state
+class StartWorkoutViewModel(
+    private val repo: WorkoutProvider = Inject.workoutProvider,
+    private val workoutState: WorkoutStateManager = Inject.workoutState,
+    private val serviceError: ServiceErrorHandler = Inject.serviceErrorHandler
+) : ViewModel() {
 
-    private val _templates = MutableLiveData<List<Workout>>(listOf())
-    val templates: LiveData<List<Workout>>
-        get() = _templates
+    private val _uiState = MutableStateFlow<StartWorkoutUiState>(StartWorkoutUiState())
+    val uiState: StateFlow<StartWorkoutUiState> = _uiState
+
+    private var templates: List<Workout> = listOf()
+    private var currentWorkoutState: WorkoutState = WorkoutState.ACTIVE
 
     init {
-        getWorkouts()
         viewModelScope.launch {
-            workoutState.state.collect {
-                when (it) {
-                    WorkoutState.MINIMIZED -> _state.postValue(State.Active(true))
-                    WorkoutState.INACTIVE -> _state.postValue(State.Active(false))
-                    else -> {}
+            launch {
+                try {
+                    repo.getStartWorkouts().collect { workouts ->
+                        _uiState.update { old ->
+                            old.copy(workouts = workouts)
+                        }
+                    }
+                } catch (e: CriticalDataNullException) {
+                    serviceError.initiateCountdown()
                 }
             }
-        }
-    }
+            launch {
+                try {
+                    repo.getTemplateWorkouts().collect {
+                        templates = it
+                    }
+                } catch (e: CriticalDataNullException) {
 
-    private fun getWorkouts() {
-        viewModelScope.launch {
-            try {
-                repo.getTemplateWorkouts().collect {
-                    _templates.postValue(it)
                 }
-            } catch (e: CriticalDataNullException) {
-                serviceError.initiateCountdown()
+            }
+            launch {
+                workoutState.state.collect {
+                    currentWorkoutState = it
+                }
             }
         }
     }
 
     fun startEmptyWorkout() {
         viewModelScope.launch {
-            workoutState.startWorkout(null)
-        }
-    }
-
-    fun startWorkoutFromTemplate(position: Int) {
-        viewModelScope.launch {
-            _templates.value?.get(position)?.let {
-                workoutState.startWorkout(it)
+            if (currentWorkoutState == WorkoutState.INACTIVE) {
+                workoutState.startWorkout(workout = null)
+            } else {
+                showMessage("Cannot start a workout while one is active")
             }
         }
     }
 
-    fun deleteTemplateWorkout(position: Int) {
-        val list = _templates.value.orEmpty().toMutableList()
-        val toBeRemoved = list.removeAt(position)
+    fun startWorkoutFromTemplate(workout: StartWorkout) {
         viewModelScope.launch {
-            toBeRemoved.let { repo.deleteTemplateWorkout(it) }
+            if (currentWorkoutState == WorkoutState.INACTIVE) {
+                workoutState.startWorkout(workout = templates.find { it.id == workout.id })
+            } else {
+                showMessage("Cannot start a workout while one is active")
+            }
         }
-        _templates.value = list
-
     }
 
-    fun addDuplicateTemplateWorkout(position: Int) {
-        val template = _templates.value?.get(position)
-        val count = _templates.value?.count { template?.id == it.id }
-        template?.let { workout ->
-            val dupe = Workout(
-                id = generateRandomId(),
-                name = "${workout.name} duplicate $count",
-                volume = workout.volume,
-                duration = null,
-                date = LocalDateTime.now(),
-                isTemplate = true,
-                exercises = workout.exercises,
-                note = workout.note
-            )
-            val list = _templates.value?.toMutableList()
-            list?.add(dupe)
-            _templates.value = list ?: listOf()
-            viewModelScope.launch {
+    //TODO(Might need to rewrite it to work for firestore delete with id)
+    fun deleteTemplateWorkout(workout: StartWorkout) {
+        _uiState.update { old ->
+            val newList = old.workouts.toMutableList().also { it.remove(workout) }
+            old.copy(workouts = newList)
+        }
+
+        viewModelScope.launch {
+            templates.find { it.id == workout.id }?.let {
+                repo.deleteTemplateWorkout(it)
+            }
+        }
+    }
+
+    fun addDuplicateTemplateWorkout(newWorkout: StartWorkout) {
+        _uiState.update { old ->
+            val newList = old.workouts.toMutableList().also { it.add(newWorkout) }
+            old.copy(newList)
+        }
+
+        viewModelScope.launch {
+            templates.find { it.id == newWorkout.id }?.let {
                 repo.addTemplateWorkout(
-                    dupe
+                    Workout(
+                        id = generateRandomId(),
+                        name = "${it.name} duplicate",
+                        duration = 0,
+                        volume = 0.0,
+                        date = LocalDateTime.now(),
+                        isTemplate = true,
+                        exercises = it.exercises
+                    )
                 )
             }
         }
     }
 
-    sealed interface State {
-        data class Error(val error: String?) : State
+    fun messageShown() {
+        showMessage()
+    }
 
-        data class Active(val isWorkoutActive: Boolean, val message: String? = null) : State
+    private fun showMessage(text: String? = null) {
+        _uiState.update { old ->
+            old.copy(notifyUser = text)
+        }
     }
 }

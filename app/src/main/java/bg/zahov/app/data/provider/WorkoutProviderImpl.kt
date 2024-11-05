@@ -6,6 +6,7 @@ import bg.zahov.app.data.model.Exercise
 import bg.zahov.app.data.model.Workout
 import bg.zahov.app.data.repository.WorkoutRepositoryImpl
 import bg.zahov.app.ui.exercise.info.history.ExerciseHistoryInfo
+import bg.zahov.app.ui.workout.start.StartWorkout
 import bg.zahov.app.util.getOneRepMaxes
 import bg.zahov.app.util.toFormattedString
 import kotlinx.coroutines.flow.Flow
@@ -111,7 +112,17 @@ class WorkoutProviderImpl : WorkoutProvider {
         workoutRepo.updateTemplateWorkout(workoutId, date, newExercises)
     }
 
+    override suspend fun getStartWorkouts(): Flow<List<StartWorkout>> =
+        getTemplateWorkouts().mapNotNull { workouts -> workouts.map { it.toStartWorkout() } }
+
     override suspend fun clearWorkoutState() {
         workoutRepo.clearWorkoutState()
     }
 }
+
+fun Workout.toStartWorkout(): StartWorkout = StartWorkout(
+    id = this.id,
+    name = this.name,
+    date = this.date.toFormattedString(),
+    exercises = this.exercises.map { "${if (it.sets.isNotEmpty()) "${it.sets.size} x " else ""}${it.name} " }
+)

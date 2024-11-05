@@ -4,6 +4,7 @@ import bg.zahov.app.data.local.RealmWorkoutState
 import bg.zahov.app.data.model.Exercise
 import bg.zahov.app.data.model.Workout
 import bg.zahov.app.ui.exercise.info.history.ExerciseHistoryInfo
+import bg.zahov.app.ui.workout.start.StartWorkout
 import kotlinx.coroutines.flow.Flow
 import java.time.LocalDateTime
 
@@ -30,6 +31,7 @@ interface WorkoutProvider {
         date: LocalDateTime,
         newExercises: List<Exercise>,
     )
+    suspend fun getStartWorkouts(): Flow<List<StartWorkout>>
 
     suspend fun clearWorkoutState()
 }
