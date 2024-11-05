@@ -4,23 +4,24 @@ import bg.zahov.app.data.interfaces.WorkoutProvider
 import bg.zahov.app.data.local.RealmWorkoutState
 import bg.zahov.app.data.model.Exercise
 import bg.zahov.app.data.model.Workout
+import bg.zahov.app.data.provider.model.HistoryWorkout
 import bg.zahov.app.data.repository.WorkoutRepositoryImpl
 import bg.zahov.app.ui.exercise.info.history.ExerciseHistoryInfo
 import bg.zahov.app.util.getOneRepMaxes
-import bg.zahov.app.util.toFormattedString
+import bg.zahov.app.util.timeToString
 import kotlinx.coroutines.flow.Flow
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.mapNotNull
 import java.time.LocalDateTime
+import java.time.format.DateTimeFormatter
+import java.util.Locale
+
 
 class WorkoutProviderImpl : WorkoutProvider {
     companion object {
 
-        @Volatile
         private var instance: WorkoutProviderImpl? = null
-        fun getInstance() = instance ?: synchronized(this) {
-            instance ?: WorkoutProviderImpl().also { instance = it }
-        }
+        fun getInstance() = instance ?: WorkoutProviderImpl().also { instance = it }
     }
 
     private var lastWorkoutPerformed: Workout? = null
@@ -111,7 +112,37 @@ class WorkoutProviderImpl : WorkoutProvider {
         workoutRepo.updateTemplateWorkout(workoutId, date, newExercises)
     }
 
+    override suspend fun getHistoryWorkouts(): Flow<List<HistoryWorkout>> =
+        getPastWorkouts().mapNotNull { workouts -> workouts.map { it.toHistoryWorkout() } }
+
     override suspend fun clearWorkoutState() {
         workoutRepo.clearWorkoutState()
     }
 }
+
+
+/**
+ * Converts a [Workout] object to a [HistoryWorkout] object.
+ *
+ * This extension function transforms a [Workout] instance into a [HistoryWorkout] instance by extracting
+ * relevant data and formatting it appropriately.
+ *
+ * @return A [HistoryWorkout] instance populated with data from this [Workout].
+ */
+fun Workout.toHistoryWorkout(): HistoryWorkout {
+    return HistoryWorkout(
+        id = this.id,
+        name = this.name,
+        duration = this.duration?.timeToString() ?: "00:00:00",
+        volume = (this.volume ?: 0.0).toString(),
+        date = this.date.toFormattedString(),
+        exercises = this.exercises.map { "${if (it.sets.isNotEmpty()) "${it.sets.size} x " else ""}${it.name} " },
+        bestSets = this.exercises.map {
+            "${it.bestSet.firstMetric ?: 0} x ${it.bestSet.secondMetric ?: 0}"
+        },
+        personalRecords = this.personalRecords.toString()
+    )
+}
+
+fun LocalDateTime.toFormattedString(): String =
+    this.format(DateTimeFormatter.ofPattern("HH:mm, d MMMM", Locale.getDefault()))

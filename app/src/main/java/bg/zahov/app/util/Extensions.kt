@@ -26,6 +26,7 @@ import com.github.mikephil.charting.components.XAxis
 import com.google.firebase.Timestamp
 import java.time.Instant
 import java.time.LocalDateTime
+import java.time.ZoneId
 import java.time.ZoneOffset
 import java.time.format.DateTimeFormatter
 import java.util.Date
@@ -88,7 +89,7 @@ fun Measurement.toFirestoreMap(): Map<String, Any?> {
 fun Timestamp.toLocalDateTime(): LocalDateTime {
     return LocalDateTime.ofInstant(
         Instant.ofEpochSecond(this.seconds, this.nanoseconds.toLong()),
-        ZoneOffset.UTC
+        ZoneId.systemDefault()
     )
 }
 
