@@ -121,12 +121,10 @@ class WorkoutProviderImpl : WorkoutProvider {
      * @return A [Flow] emitting a [Pair] of a list of [Workout] objects and the
      * number of workouts in the current month.
      */
-    override suspend fun getCurrentMonthWorkouts(): Flow<Pair<List<Workout>, Int>> {
+    override suspend fun getCurrentMonthWorkouts(): Flow<List<Workout>> {
         return workoutRepo.getPastWorkouts()
-            .mapNotNull {
-                Pair(it.filter { workout -> workout.date.month == LocalDate.now().month },
-                    it.size)
-            }
+            .mapNotNull { workouts -> workouts.filter { workout -> workout.date.month == LocalDate.now().month } }
+
     }
 
     override suspend fun clearWorkoutState() {

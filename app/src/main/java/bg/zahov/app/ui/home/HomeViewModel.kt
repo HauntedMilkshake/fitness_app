@@ -108,7 +108,7 @@ class HomeViewModel(
                     workoutRepo.getCurrentMonthWorkouts()
                         .collect { pastWorkouts ->
                             val workoutPerWeekMap =
-                                getWorkoutsPerWeek(pastWorkouts.first)
+                                getWorkoutsPerWeek(pastWorkouts)
                             val barData = workoutPerWeekMap.map {
                                 BarEntry(
                                     it.key.toFloat(),
@@ -118,7 +118,7 @@ class HomeViewModel(
 
                             _uiState.update { old ->
                                 old.copy(
-                                    numberOfWorkouts = pastWorkouts.second.toString(),
+                                    numberOfWorkouts = pastWorkouts.size.toString(),
                                     data = ChartData(
                                         xMax = workoutPerWeekMap.keys.size.toFloat(),
                                         xMin = workoutPerWeekMap.keys.min().toFloat(),
