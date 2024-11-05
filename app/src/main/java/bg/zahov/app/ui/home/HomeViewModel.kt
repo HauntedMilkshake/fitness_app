@@ -58,40 +58,6 @@ data class ChartData(
     val chartData: List<BarEntry> = listOf(),
     val weekRanges: List<String> = listOf()
 )
-
-/**
- * Represents the UI state for the Home screen.
- *
- * @property numberOfWorkouts The count of workouts completed.
- * @property data Data for the bar chart visualization.
- * @property isChartLoading Indicates whether the bar chart data is still loading.
- */
-data class HomeUiState(
-    val username: String = "",
-    val numberOfWorkouts: String = "",
-    val data: ChartData = ChartData(),
-    val isChartLoading: Boolean = true
-)
-
-/**
- * Represents the data for the bar chart visualization.
- *
- * @property xMin Minimum value on the X-axis(not very useful in our case where we show week ranges but still required).
- * @property xMax Maximum value on the X-axis.
- * @property yMin Minimum value on the Y-axis(lowest number of workouts per week).
- * @property yMax Maximum value on the Y-axis(highest number of workouts per week).
- * @property chartData The list of bar entries for the chart(BarEntry - a double (x,y) where x is where we have to place it on the x-axis and y is the value.
- * @property weekRanges The range of weeks for the X-axis labels(for example for 10/24 they would look like 7-13, 14-20 and etc.)
- */
-data class ChartData(
-    val xMin: Float = 0f,
-    val xMax: Float = 0f,
-    val yMin: Float = 0f,
-    val yMax: Float = 0f,
-    val chartData: List<BarEntry> = listOf(),
-    val weekRanges: List<String> = listOf()
-)
-
 /**
  * @param userRepo - access to everything related to the user ( in here we only use the username)
  * @param workoutRepo - access to history of previous workouts
@@ -138,29 +104,32 @@ class HomeViewModel(
             }
             launch {
                 try {
-                    workoutRepo.getPastWorkouts().collect { pastWorkouts ->
-                        val workoutPerWeekMap = getWorkoutsPerWeek(pastWorkouts)
-                        val barData = workoutPerWeekMap.map {
-                            BarEntry(
-                                it.key.toFloat(),
-                                it.value.toFloat()
-                            )
-                        }
-                        _uiState.update { old ->
-                            old.copy(
-                                numberOfWorkouts = pastWorkouts.size.toString(), data = ChartData(
-                                    xMax = workoutPerWeekMap.keys.max().toFloat(),
-                                    xMin = workoutPerWeekMap.keys.min().toFloat(),
-                                    yMax = workoutPerWeekMap.values.max().toFloat(),
-                                    yMin = workoutPerWeekMap.values.min().toFloat(),
-                                    chartData = barData,
-                                    weekRanges = getWeekRangesForCurrentMonth()
-                                ),
-                                isChartLoading = false
-                            )
-                        }
+                    workoutRepo.getCurrentMonthWorkouts()
+                        .collect { pastWorkouts ->
+                            val workoutPerWeekMap =
+                                getWorkoutsPerWeek(pastWorkouts)
+                            val barData = workoutPerWeekMap.map {
+                                BarEntry(
+                                    it.key.toFloat(),
+                                    it.value.toFloat()
+                                )
+                            }
 
-                    }
+                            _uiState.update { old ->
+                                old.copy(
+                                    numberOfWorkouts = pastWorkouts.size.toString(),
+                                    data = ChartData(
+                                        xMax = workoutPerWeekMap.keys.size.toFloat(),
+                                        xMin = workoutPerWeekMap.keys.min().toFloat(),
+                                        yMax = workoutPerWeekMap.values.max().toFloat(),
+                                        yMin = workoutPerWeekMap.values.min().toFloat(),
+                                        chartData = barData,
+                                        weekRanges = getWeekRangesForCurrentMonth()
+                                    ),
+                                    isChartLoading = false
+                                )
+                            }
+                        }
                 } catch (e: CriticalDataNullException) {
                     serviceErrorHandler.initiateCountdown()
                 }

@@ -16,6 +16,7 @@ interface WorkoutProvider {
     suspend fun addTemplateExercise(newExercise: Exercise)
     suspend fun addWorkoutToHistory(newWorkout: Workout)
     suspend fun deleteTemplateWorkout(workout: Workout)
+    suspend fun getCurrentMonthWorkouts(): Flow<List<Workout>>
     suspend fun deleteWorkout(workout: Workout)
     suspend fun getWorkoutById(id: String): Flow<Workout>
     suspend fun updateExercises(exercises: List<Exercise>)

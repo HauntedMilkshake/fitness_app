@@ -12,6 +12,7 @@ import bg.zahov.app.util.timeToString
 import kotlinx.coroutines.flow.Flow
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.mapNotNull
+import java.time.LocalDate
 import java.time.LocalDateTime
 import java.time.format.DateTimeFormatter
 import java.util.Locale
@@ -113,6 +114,12 @@ class WorkoutProviderImpl : WorkoutProvider {
     ) {
         workoutRepo.updateTemplateWorkout(workoutId, date, newExercises)
     }
+    override suspend fun getCurrentMonthWorkouts(): Flow<List<Workout>> {
+        return workoutRepo.getPastWorkouts()
+            .mapNotNull { workouts -> workouts.filter { workout -> workout.date.month == LocalDate.now().month } }
+
+    }
+
 
     override suspend fun getHistoryWorkouts(): Flow<List<HistoryWorkout>> =
         getPastWorkouts().mapNotNull { workouts -> workouts.map { it.toHistoryWorkout() } }
