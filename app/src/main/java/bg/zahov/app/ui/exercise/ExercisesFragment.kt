@@ -34,7 +34,6 @@ class ExercisesFragment : Fragment() {
     private val addable by lazy {
         arguments?.getBoolean("ADDABLE") ?: false
     }
-    private var showDialog: Boolean = false
 
     override fun onCreateView(
         inflater: LayoutInflater,
@@ -118,7 +117,11 @@ class ExercisesFragment : Fragment() {
             )
             setViewCompositionStrategy(ViewCompositionStrategy.DisposeOnViewTreeLifecycleDestroyed)
             setContent {
-                ExercisesScreen()
+                ExercisesScreen(
+                    navigateInfo = {
+                        findNavController().navigate(R.id.exercises_to_exercise_info_navigation)
+                    }
+                )
             }
         }
     }
@@ -126,7 +129,7 @@ class ExercisesFragment : Fragment() {
     override fun onSaveInstanceState(outState: Bundle) {}
     override fun onPause() {
         super.onPause()
-        exerciseViewModel.onConfirm()
+        exerciseViewModel.resetExerciseSelection()
     }
 
     override fun onResume() {

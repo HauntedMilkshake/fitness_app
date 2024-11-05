@@ -1,10 +1,10 @@
 package bg.zahov.app.ui.exercise.filter
 
 import androidx.compose.foundation.layout.Column
+import androidx.compose.foundation.layout.ExperimentalLayoutApi
+import androidx.compose.foundation.layout.FlowRow
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.padding
-import androidx.compose.foundation.lazy.LazyRow
-import androidx.compose.foundation.lazy.items
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Surface
@@ -44,27 +44,16 @@ fun FilterDialog(filterViewModel: FilterViewModel = viewModel(), onDismiss: () -
                     text = stringResource(R.string.body_part),
                     style = MaterialTheme.typography.headlineMedium
                 )
-                LazyRow(modifier = Modifier.padding(vertical = 8.dp)) {
-                    items(uiState.list.filter { it.filter is Filter.BodyPartFilter }) { bodyPartFilter ->
-                        FilterItem(
-                            filterWrapper = bodyPartFilter,
-                            onItemSelected = { filterViewModel.onFilterClicked(it) }
-                        )
-                    }
-                }
-
+                FilterItem(
+                    list = uiState.list.filter { it.filter is Filter.BodyPartFilter },
+                    onItemSelected = { filterViewModel.onFilterClicked(it) })
                 Text(
                     text = stringResource(R.string.category),
                     style = MaterialTheme.typography.headlineMedium
                 )
-                LazyRow(modifier = Modifier.padding(vertical = 8.dp)) {
-                    items(uiState.list.filter { it.filter is Filter.CategoryFilter }) { filterWrapper ->
-                        FilterItem(
-                            filterWrapper = filterWrapper,
-                            onItemSelected = { filterViewModel.onFilterClicked(it) }
-                        )
-                    }
-                }
+                FilterItem(
+                    list = uiState.list.filter { it.filter is Filter.CategoryFilter },
+                    onItemSelected = { filterViewModel.onFilterClicked(it) })
             }
         }
     }
