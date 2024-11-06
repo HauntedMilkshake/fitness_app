@@ -53,7 +53,11 @@ fun EditProfileScreen(viewModel: EditProfileViewModel = viewModel()) {
         updateUsername = { viewModel.updateUsername() },
         resetPassword = { viewModel.sendPasswordResetLink() },
         dialog = { onDismiss ->
-            AuthenticateDialog(onDismiss = onDismiss,
+            AuthenticateDialog(password = uiState.passwordDialog,
+                passwordVisibility = uiState.passwordVisibilityDialog,
+                onPasswordChange = { viewModel.onPasswordChangeDialog(it) },
+                onPasswordVisibilityChange = { viewModel.onPasswordVisibilityChangeDialog() },
+                onDismiss = onDismiss,
                 authenticate = { viewModel.unlockFields(it) })
         }
     )

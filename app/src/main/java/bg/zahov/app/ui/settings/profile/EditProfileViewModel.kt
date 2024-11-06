@@ -53,6 +53,22 @@ class EditProfileViewModel(
         _state.update { it.copy(passwordVisibility = _state.value.passwordVisibility.not()) }
     }
 
+    /**
+     * Updates the password for the popup in the UI state.
+     *
+     * @param password The new password to be set.
+     */
+    fun onPasswordChangeDialog(password: String) {
+        _state.update { it.copy(password = password) }
+    }
+
+    /**
+     * Toggles the visibility of the password field in the popup.
+     */
+    fun onPasswordVisibilityChangeDialog() {
+        _state.update { it.copy(passwordVisibility = _state.value.passwordVisibility.not()) }
+    }
+
     init {
         viewModelScope.launch {
             try {

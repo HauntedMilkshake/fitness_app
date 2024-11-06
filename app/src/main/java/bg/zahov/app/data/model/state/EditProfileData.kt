@@ -8,10 +8,14 @@ package bg.zahov.app.data.model.state
  * @property username The current username.
  * @property password The current password.
  * @property passwordVisibility Controls the visibility of the password.
+ * @property passwordDialog The current password for the popup.
+ * @property passwordVisibility Controls the visibility of the password for the popup.
  */
 data class EditProfileData(
     val authenticated: Boolean = false,
     val username: String = "",
     val password: String = "",
     val passwordVisibility: Boolean = false,
+    val passwordDialog: String = "",
+    val passwordVisibilityDialog: Boolean = false,
 )
