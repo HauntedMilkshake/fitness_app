@@ -1,44 +1,55 @@
 package bg.zahov.app.ui.history
 
-import android.app.Application
-import android.view.View
-import androidx.lifecycle.AndroidViewModel
-import androidx.lifecycle.LiveData
-import androidx.lifecycle.MutableLiveData
+import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
+import bg.zahov.app.Inject
 import bg.zahov.app.data.exception.CriticalDataNullException
-import bg.zahov.app.data.model.Workout
-import bg.zahov.app.getServiceErrorProvider
-import bg.zahov.app.getWorkoutProvider
+import bg.zahov.app.data.interfaces.ServiceErrorHandler
+import bg.zahov.app.data.interfaces.WorkoutProvider
+import bg.zahov.app.data.provider.model.HistoryWorkout
+import kotlinx.coroutines.flow.MutableStateFlow
+import kotlinx.coroutines.flow.StateFlow
+import kotlinx.coroutines.flow.map
+import kotlinx.coroutines.flow.take
+import kotlinx.coroutines.flow.update
 import kotlinx.coroutines.launch
 
-class HistoryViewModel(application: Application) : AndroidViewModel(application) {
-    private val workoutProvider by lazy {
-        application.getWorkoutProvider()
-    }
-    private val serviceError by lazy {
-        application.getServiceErrorProvider()
-    }
-    private val _state = MutableLiveData<State>(State.Default)
-    val state: LiveData<State>
-        get() = _state
+/**
+ * @property workouts A list of past workouts to be displayed.
+ */
+data class HistoryUiState(
+    val workouts: List<HistoryWorkout> = listOf()
+)
+
+/**
+ * This ViewModel handles the fetching of past workouts and updates the UI state accordingly.
+ *
+ * @property workoutProvider An instance of [WorkoutProvider] used to retrieve past workouts.
+ * @property serviceError An instance of [ServiceErrorHandler] used for handling errors during data retrieval.
+ */
+class HistoryViewModel(
+    private val workoutProvider: WorkoutProvider = Inject.workoutProvider,
+    private val serviceError: ServiceErrorHandler = Inject.serviceErrorHandler
+) : ViewModel() {
+    private val _uiState = MutableStateFlow(HistoryUiState())
+    val uiState: StateFlow<HistoryUiState> = _uiState
 
     init {
         viewModelScope.launch {
-            _state.postValue(State.Loading(View.VISIBLE, View.GONE))
-            workoutProvider.getPastWorkouts().collect {
+            workoutProvider.getHistoryWorkouts().collect { workouts ->
                 try {
-                    _state.postValue(State.Data(it.sortedByDescending { item -> item.date }))
+                    _uiState.update { old ->
+                        old.copy(workouts = workouts.map {
+                            it.copy(
+                                exercises = it.exercises.take(5),
+                                bestSets = it.bestSets.take(5)
+                            )
+                        })
+                    }
                 } catch (e: CriticalDataNullException) {
                     serviceError.initiateCountdown()
                 }
             }
         }
-    }
-
-    sealed interface State {
-        object Default : State
-        data class Loading(val loadingVisibility: Int, val workoutsVisibility: Int) : State
-        data class Data(val workouts: List<Workout>) : State
     }
 }
