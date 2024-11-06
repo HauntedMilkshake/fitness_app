@@ -131,7 +131,7 @@ class HomeViewModel(
                                 )
                             }
 
-                        }
+                    }
                 } catch (e: CriticalDataNullException) {
                     serviceErrorHandler.initiateCountdown()
                 }
@@ -146,15 +146,15 @@ class HomeViewModel(
                 put(i, 0)
             }
         }
-        workouts.forEach { workout ->
 
+        workouts.forEach { workout ->
             val weekRangeIndex = weekRanges.indexOfFirst { weekRange ->
                 workout.date.dayOfMonth in weekRange.split(" - ")[0].toInt()..weekRange.split(" - ")[1].toInt()
             }
-
             val currentCount = workoutsPerWeek.getValue(weekRangeIndex)
             workoutsPerWeek[weekRangeIndex] = currentCount + 1
         }
+
         return workoutsPerWeek
     }
 
@@ -180,6 +180,7 @@ class HomeViewModel(
             startOfWeek = endOfWeek.plusDays(1)
             endOfWeek = startOfWeek.with(TemporalAdjusters.nextOrSame(DayOfWeek.SUNDAY))
         }
+
         return weekRanges
     }
 
