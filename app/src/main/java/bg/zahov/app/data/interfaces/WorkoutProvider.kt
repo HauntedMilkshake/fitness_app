@@ -32,6 +32,11 @@ interface WorkoutProvider {
         newExercises: List<Exercise>,
     )
 
+    /**
+     * Filters from all workouts only those who were performed in the last month
+     */
+    suspend fun getCurrentMonthWorkouts(): Flow<List<Workout>>
+
     suspend fun getHistoryWorkouts(): Flow<List<HistoryWorkout>>
 
     suspend fun clearWorkoutState()
