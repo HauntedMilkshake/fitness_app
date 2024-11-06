@@ -23,6 +23,7 @@ import bg.zahov.fitness.app.R
 class StartWorkoutFragment : Fragment() {
 
     private val startWorkoutViewModel: StartWorkoutViewModel by viewModels()
+
     override fun onCreateView(
         inflater: LayoutInflater, container: ViewGroup?, savedInstanceState: Bundle?,
     ): View {
@@ -41,7 +42,7 @@ class StartWorkoutFragment : Fragment() {
                     onEditWorkout = {
                         findNavController().navigate(
                             R.id.workout_to_create_workout_template,
-                            bundleOf(EDIT_FLAG to true, WORKOUT_ID_ARG_KEY to it)
+                            bundleOf(EDIT_FLAG_ARG_KEY to true, WORKOUT_ID_ARG_KEY to it)
                         )
                     })
             }
@@ -69,6 +70,6 @@ class StartWorkoutFragment : Fragment() {
 
     companion object {
         const val WORKOUT_ID_ARG_KEY = "WORKOUT_ID"
-        const val EDIT_FLAG = "EDIT"
+        const val EDIT_FLAG_ARG_KEY = "EDIT"
     }
 }

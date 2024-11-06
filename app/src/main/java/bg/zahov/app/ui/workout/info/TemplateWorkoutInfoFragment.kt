@@ -20,6 +20,7 @@ import bg.zahov.app.data.model.state.TemplateWorkoutUiMapper
 import bg.zahov.app.hideBottomNav
 import bg.zahov.app.setToolBarTitle
 import bg.zahov.app.ui.exercise.ExerciseAdapter
+import bg.zahov.app.ui.workout.start.StartWorkoutFragment.Companion.WORKOUT_ID_ARG_KEY
 import bg.zahov.fitness.app.R
 import bg.zahov.fitness.app.databinding.FragmentTemplateWorkoutInfoBinding
 
@@ -29,7 +30,7 @@ class TemplateWorkoutInfoFragment : Fragment() {
         get() = requireNotNull(_binding)
 
     private val workoutId by lazy {
-        arguments?.getString("WORKOUT_ID") ?: ""
+        arguments?.getString(WORKOUT_ID_ARG_KEY) ?: ""
     }
 
     private val templateWorkoutInfoViewModel: TemplateWorkoutInfoViewModel by viewModels()
@@ -121,6 +122,7 @@ class TemplateWorkoutInfoFragment : Fragment() {
         super.onResume()
         requireActivity().hideBottomNav()
     }
+
     override fun onDestroy() {
         super.onDestroy()
         _binding = null

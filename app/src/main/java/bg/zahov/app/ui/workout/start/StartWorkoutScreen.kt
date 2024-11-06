@@ -42,7 +42,6 @@ import androidx.compose.runtime.setValue
 import androidx.compose.ui.platform.LocalContext
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
 
-//1 up the text
 
 @Composable
 fun StartWorkoutScreen(
@@ -54,17 +53,18 @@ fun StartWorkoutScreen(
     val uiState by startWorkoutViewModel.uiState.collectAsStateWithLifecycle()
     val context = LocalContext.current
 
-    LaunchedEffect(Unit) {
-        uiState.notifyUser?.let {
+    uiState.notifyUser?.let {
+        LaunchedEffect(Unit) {
             showToast(it, context)
+            startWorkoutViewModel.messageShown()
         }
-        startWorkoutViewModel.messageShown()
     }
+
     StartWorkoutContent(workouts = uiState.workouts,
         onWorkoutClick = { onWorkoutClick(it) },
-        onWorkoutStart = { startWorkoutViewModel.startWorkoutFromTemplate(it) },
+        onWorkoutStart = { startWorkoutViewModel.startWorkout(it) },
         onAddTemplateWorkout = onAddTemplateWorkout,
-        onStartEmptyWorkout = { startWorkoutViewModel.startEmptyWorkout() },
+        onStartEmptyWorkout = { startWorkoutViewModel.startWorkout() },
         onEditWorkout = { onEditWorkout(it) },
         onDeleteWorkout = { startWorkoutViewModel.deleteTemplateWorkout(it) },
         onDuplicateWorkout = { startWorkoutViewModel.addDuplicateTemplateWorkout(it) }
@@ -128,7 +128,7 @@ fun StartWorkoutContent(
             }
         }
 
-        LazyColumn(Modifier.fillMaxSize()   ) {
+        LazyColumn(Modifier.fillMaxSize()) {
             items(items = workouts, key = { it.id }) {
                 Workout(
                     modifier = Modifier.animateItem(),
@@ -163,9 +163,9 @@ fun Workout(
         modifier = modifier
             .fillMaxWidth()
             .padding(12.dp)
+            .clickable { onWorkoutClick() }
             .border(1.dp, MaterialTheme.colorScheme.secondary, RoundedCornerShape(4.dp))
             .padding(12.dp)
-            .clickable { onWorkoutClick() }
     ) {
         Row(modifier = Modifier.fillMaxWidth(), horizontalArrangement = Arrangement.SpaceBetween) {
             Text(

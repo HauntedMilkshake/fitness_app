@@ -24,7 +24,7 @@ import bg.zahov.app.data.model.state.AddTemplateWorkoutUiMapper
 import bg.zahov.app.data.model.SetType
 import bg.zahov.app.hideBottomNav
 import bg.zahov.app.setToolBarTitle
-import bg.zahov.app.ui.workout.start.StartWorkoutFragment.Companion.EDIT_FLAG
+import bg.zahov.app.ui.workout.start.StartWorkoutFragment.Companion.EDIT_FLAG_ARG_KEY
 import bg.zahov.app.ui.workout.start.StartWorkoutFragment.Companion.WORKOUT_ID_ARG_KEY
 import bg.zahov.app.util.SetSwipeGesture
 import bg.zahov.app.util.applyScaleAnimation
@@ -40,7 +40,7 @@ class AddTemplateWorkoutFragment : Fragment() {
     private val addWorkoutViewModel: AddTemplateWorkoutViewModel by viewModels()
 
     private val edit by lazy {
-        arguments?.getBoolean(EDIT_FLAG) == true
+        arguments?.getBoolean(EDIT_FLAG_ARG_KEY) == true
     }
 
     private val id by lazy {

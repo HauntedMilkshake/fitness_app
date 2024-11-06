@@ -15,13 +15,11 @@ import kotlinx.coroutines.flow.mapNotNull
 import java.time.LocalDateTime
 
 class WorkoutProviderImpl : WorkoutProvider {
+
     companion object {
 
-        @Volatile
         private var instance: WorkoutProviderImpl? = null
-        fun getInstance() = instance ?: synchronized(this) {
-            instance ?: WorkoutProviderImpl().also { instance = it }
-        }
+        fun getInstance() = instance ?: WorkoutProviderImpl().also { instance = it }
     }
 
     private var lastWorkoutPerformed: Workout? = null
@@ -124,5 +122,7 @@ fun Workout.toStartWorkout(): StartWorkout = StartWorkout(
     id = this.id,
     name = this.name,
     date = this.date.toFormattedString(),
-    exercises = this.exercises.map { "${if (it.sets.isNotEmpty()) "${it.sets.size} x " else ""}${it.name} " }
+    exercises = this.exercises.map { "${if (it.sets.isNotEmpty()) "${it.sets.size} x " else ""}${it.name} " },
+    note = this.note ?: "",
+    personalRecords = this.personalRecords.toString()
 )
