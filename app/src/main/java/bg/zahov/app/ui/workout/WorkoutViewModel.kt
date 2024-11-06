@@ -13,6 +13,7 @@ import bg.zahov.app.data.model.RestState
 import bg.zahov.app.data.model.SetType
 import bg.zahov.app.data.model.Sets
 import bg.zahov.app.data.model.Units
+import bg.zahov.app.data.model.Units.METRIC
 import bg.zahov.app.data.model.Workout
 import bg.zahov.app.getAddExerciseToWorkoutProvider
 import bg.zahov.app.getRestTimerProvider
@@ -103,8 +104,8 @@ class WorkoutViewModel(application: Application) : AndroidViewModel(application)
             }
             launch {
                 settingsProvider.getSettings().collect { objectChange ->
-                    objectChange.obj?.units?.let {
-                        units = Units.valueOf(it)
+                    objectChange.obj?.units?.let {key->
+                        units = Units.entries.find { it.key == key } ?: METRIC
                     }
                 }
             }
