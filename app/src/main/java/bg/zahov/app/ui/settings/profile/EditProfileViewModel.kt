@@ -50,7 +50,7 @@ class EditProfileViewModel(
      * Toggles the visibility of the password field.
      */
     fun onPasswordVisibilityChange() {
-        _state.update { it.copy(passwordVisibility = _state.value.passwordVisibility.not()) }
+        _state.update { it.copy(passwordVisibilityDialog = _state.value.passwordVisibility.not()) }
     }
 
     /**
@@ -59,7 +59,7 @@ class EditProfileViewModel(
      * @param password The new password to be set.
      */
     fun onPasswordChangeDialog(password: String) {
-        _state.update { it.copy(password = password) }
+        _state.update { it.copy(passwordDialog = password) }
     }
 
     /**
