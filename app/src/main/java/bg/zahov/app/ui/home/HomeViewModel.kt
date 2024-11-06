@@ -105,29 +105,33 @@ class HomeViewModel(
             }
             launch {
                 try {
-                    workoutRepo.getPastWorkouts().collect { pastWorkouts ->
-                        val workoutPerWeekMap = getWorkoutsPerWeek(pastWorkouts)
-                        val barData = workoutPerWeekMap.map {
-                            BarEntry(
-                                it.key.toFloat(),
-                                it.value.toFloat()
-                            )
-                        }
-                        _uiState.update { old ->
-                            old.copy(
-                                numberOfWorkouts = pastWorkouts.size.toString(), data = ChartData(
-                                    xMax = workoutPerWeekMap.keys.max().toFloat(),
-                                    xMin = workoutPerWeekMap.keys.min().toFloat(),
-                                    yMax = workoutPerWeekMap.values.max().toFloat(),
-                                    yMin = workoutPerWeekMap.values.min().toFloat(),
-                                    chartData = barData,
-                                    weekRanges = getWeekRangesForCurrentMonth()
-                                ),
-                                isChartLoading = false
-                            )
-                        }
+                    workoutRepo.getCurrentMonthWorkouts()
+                        .collect { pastWorkouts ->
+                            val workoutPerWeekMap =
+                                getWorkoutsPerWeek(pastWorkouts)
+                            val barData = workoutPerWeekMap.map {
+                                BarEntry(
+                                    it.key.toFloat(),
+                                    it.value.toFloat()
+                                )
+                            }
 
-                    }
+                            _uiState.update { old ->
+                                old.copy(
+                                    numberOfWorkouts = pastWorkouts.size.toString(),
+                                    data = ChartData(
+                                        xMax = workoutPerWeekMap.keys.size.toFloat(),
+                                        xMin = workoutPerWeekMap.keys.min().toFloat(),
+                                        yMax = workoutPerWeekMap.values.max().toFloat(),
+                                        yMin = workoutPerWeekMap.values.min().toFloat(),
+                                        chartData = barData,
+                                        weekRanges = getWeekRangesForCurrentMonth()
+                                    ),
+                                    isChartLoading = false
+                                )
+                            }
+
+                        }
                 } catch (e: CriticalDataNullException) {
                     serviceErrorHandler.initiateCountdown()
                 }
@@ -142,15 +146,15 @@ class HomeViewModel(
                 put(i, 0)
             }
         }
-
         workouts.forEach { workout ->
+
             val weekRangeIndex = weekRanges.indexOfFirst { weekRange ->
                 workout.date.dayOfMonth in weekRange.split(" - ")[0].toInt()..weekRange.split(" - ")[1].toInt()
             }
+
             val currentCount = workoutsPerWeek.getValue(weekRangeIndex)
             workoutsPerWeek[weekRangeIndex] = currentCount + 1
         }
-
         return workoutsPerWeek
     }
 
@@ -176,7 +180,6 @@ class HomeViewModel(
             startOfWeek = endOfWeek.plusDays(1)
             endOfWeek = startOfWeek.with(TemporalAdjusters.nextOrSame(DayOfWeek.SUNDAY))
         }
-
         return weekRanges
     }
 
