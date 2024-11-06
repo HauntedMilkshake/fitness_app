@@ -25,6 +25,7 @@ import bg.zahov.app.data.model.SetType
 import bg.zahov.app.hideBottomNav
 import bg.zahov.app.setToolBarTitle
 import bg.zahov.app.ui.workout.start.StartWorkoutFragment.Companion.EDIT_FLAG
+import bg.zahov.app.ui.workout.start.StartWorkoutFragment.Companion.WORKOUT_ID_ARG_KEY
 import bg.zahov.app.util.SetSwipeGesture
 import bg.zahov.app.util.applyScaleAnimation
 import bg.zahov.fitness.app.R
@@ -43,8 +44,8 @@ class AddTemplateWorkoutFragment : Fragment() {
     }
 
     private val id by lazy {
-        Log.d("getting edit", arguments?.getString("WORKOUT_ID").toString())
-        arguments?.getString("WORKOUT_ID")
+        Log.d("getting edit", arguments?.getString(WORKOUT_ID_ARG_KEY).toString())
+        arguments?.getString(WORKOUT_ID_ARG_KEY)
     }
 
     override fun onCreateView(
@@ -61,7 +62,6 @@ class AddTemplateWorkoutFragment : Fragment() {
         val inflater = TransitionInflater.from(requireContext())
         enterTransition = inflater.inflateTransition(R.transition.slide_up)
         exitTransition = inflater.inflateTransition(R.transition.fade_out)
-        Log.d("on create", "on create")
         addWorkoutViewModel.initEditWorkoutId(
             edit,
             id ?: ""

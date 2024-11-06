@@ -1,5 +1,6 @@
 package bg.zahov.app.ui.workout.start
 
+import android.util.Log
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
 import bg.zahov.app.Inject
@@ -45,6 +46,7 @@ class StartWorkoutViewModel(
             launch {
                 try {
                     repo.getStartWorkouts().collect { workouts ->
+                        Log.d("DUPLICATE flow collect", workouts.toString())
                         _uiState.update { old ->
                             old.copy(workouts = workouts)
                         }
@@ -90,32 +92,13 @@ class StartWorkoutViewModel(
         }
     }
 
-    //TODO(Might need to rewrite it to work for firestore delete with id)
-    fun deleteTemplateWorkout(workout: StartWorkout) {
-        _uiState.update { old ->
-            val newList = old.workouts.toMutableList().also { it.remove(workout) }
-            old.copy(workouts = newList)
-        }
-
-        viewModelScope.launch {
-            templates.find { it.id == workout.id }?.let {
-                repo.deleteTemplateWorkout(it)
-            }
-        }
-    }
-
     fun addDuplicateTemplateWorkout(newWorkout: StartWorkout) {
-        _uiState.update { old ->
-            val newList = old.workouts.toMutableList().also { it.add(newWorkout) }
-            old.copy(newList)
-        }
-
         viewModelScope.launch {
             templates.find { it.id == newWorkout.id }?.let {
                 repo.addTemplateWorkout(
                     Workout(
                         id = generateRandomId(),
-                        name = "${it.name} duplicate",
+                        name = if (it.name.contains("duplicate")) it.name else "${it.name} duplicate",
                         duration = 0,
                         volume = 0.0,
                         date = LocalDateTime.now(),
@@ -123,6 +106,14 @@ class StartWorkoutViewModel(
                         exercises = it.exercises
                     )
                 )
+            }
+        }
+    }
+
+    fun deleteTemplateWorkout(workout: StartWorkout) {
+        viewModelScope.launch {
+            templates.find { it.id == workout.id }?.let {
+                repo.deleteTemplateWorkout(it)
             }
         }
     }

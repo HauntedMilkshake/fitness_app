@@ -2,16 +2,17 @@ package bg.zahov.app.ui.workout.start
 
 import android.content.Context
 import android.widget.Toast
+import androidx.compose.foundation.background
 import androidx.compose.foundation.border
 import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.Arrangement
-import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.lazy.LazyColumn
+import androidx.compose.foundation.lazy.items
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material3.Button
 import androidx.compose.material3.ButtonColors
@@ -41,14 +42,15 @@ import androidx.compose.runtime.setValue
 import androidx.compose.ui.platform.LocalContext
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
 
+//1 up the text
 
 @Composable
 fun StartWorkoutScreen(
     startWorkoutViewModel: StartWorkoutViewModel = viewModel(),
+    onWorkoutClick: (String) -> Unit,
     onEditWorkout: (String) -> Unit,
     onAddTemplateWorkout: () -> Unit
 ) {
-    //TODO(LaunchedUi effect)
     val uiState by startWorkoutViewModel.uiState.collectAsStateWithLifecycle()
     val context = LocalContext.current
 
@@ -56,9 +58,12 @@ fun StartWorkoutScreen(
         uiState.notifyUser?.let {
             showToast(it, context)
         }
+        startWorkoutViewModel.messageShown()
     }
     StartWorkoutContent(workouts = uiState.workouts,
-        onAddTemplateWorkout = { onAddTemplateWorkout() } ,
+        onWorkoutClick = { onWorkoutClick(it) },
+        onWorkoutStart = { startWorkoutViewModel.startWorkoutFromTemplate(it) },
+        onAddTemplateWorkout = onAddTemplateWorkout,
         onStartEmptyWorkout = { startWorkoutViewModel.startEmptyWorkout() },
         onEditWorkout = { onEditWorkout(it) },
         onDeleteWorkout = { startWorkoutViewModel.deleteTemplateWorkout(it) },
@@ -70,6 +75,8 @@ fun StartWorkoutScreen(
 @Composable
 fun StartWorkoutContent(
     workouts: List<StartWorkout>,
+    onWorkoutClick: (String) -> Unit,
+    onWorkoutStart: (StartWorkout) -> Unit,
     onAddTemplateWorkout: () -> Unit,
     onStartEmptyWorkout: () -> Unit,
     onEditWorkout: (String) -> Unit,
@@ -80,18 +87,20 @@ fun StartWorkoutContent(
         Text(
             modifier = Modifier.padding(top = 32.dp, start = 16.dp),
             text = stringResource(R.string.quick_start_text),
-            style = MaterialTheme.typography.labelSmall,
+            style = MaterialTheme.typography.labelMedium,
             color = colorResource(R.color.text)
         )
 
-        Button(modifier = Modifier
-            .fillMaxWidth()
-            .padding(12.dp), colors = ButtonColors(
-            containerColor = Color.Blue,
-            contentColor = Color.White,
-            colorResource(R.color.disabled_button),
-            colorResource(R.color.background)
-        ), onClick = { onStartEmptyWorkout() }) {
+        Button(
+            modifier = Modifier
+                .fillMaxWidth()
+                .padding(12.dp), colors = ButtonColors(
+                containerColor = Color.Blue,
+                contentColor = Color.White,
+                colorResource(R.color.disabled_button),
+                colorResource(R.color.background)
+            ), onClick = onStartEmptyWorkout
+        ) {
             Text(
                 text = stringResource(R.string.start_empty_workout_text),
                 style = MaterialTheme.typography.bodyLarge,
@@ -110,7 +119,7 @@ fun StartWorkoutContent(
                 color = colorResource(R.color.text)
             )
 
-            IconButton(onClick = { onAddTemplateWorkout() }) {
+            IconButton(onClick = onAddTemplateWorkout) {
                 Icon(
                     painter = painterResource(R.drawable.ic_plus),
                     tint = Color.Unspecified,
@@ -119,14 +128,18 @@ fun StartWorkoutContent(
             }
         }
 
-        LazyColumn(Modifier.fillMaxSize()) {
-            items(count = workouts.size, key = {}) {
-                Workout(workoutName = workouts[it].name,
-                    workoutDate = workouts[it].date,
-                    exercises = workouts[it].exercises,
-                    onEdit = { onEditWorkout(workouts[it].id) },
-                    onDelete = { onDeleteWorkout(workouts[it]) },
-                    onDuplicate = { onDuplicateWorkout(workouts[it]) })
+        LazyColumn(Modifier.fillMaxSize()   ) {
+            items(items = workouts, key = { it.id }) {
+                Workout(
+                    modifier = Modifier.animateItem(),
+                    workoutName = it.name,
+                    workoutDate = it.date,
+                    exercises = it.exercises,
+                    onWorkoutClick = { onWorkoutClick(it.id) },
+                    onWorkoutStart = { onWorkoutStart(it) },
+                    onEdit = { onEditWorkout(it.id) },
+                    onDelete = { onDeleteWorkout(it) },
+                    onDuplicate = { onDuplicateWorkout(it) })
             }
         }
     }
@@ -134,7 +147,10 @@ fun StartWorkoutContent(
 
 @Composable
 fun Workout(
+    modifier: Modifier,
     workoutName: String, workoutDate: String, exercises: List<String> = listOf(),
+    onWorkoutClick: () -> Unit,
+    onWorkoutStart: () -> Unit,
     onEdit: () -> Unit,
     onDelete: () -> Unit,
     onDuplicate: () -> Unit
@@ -143,37 +159,43 @@ fun Workout(
         mutableStateOf(false)
     }
 
-    //TODO(Make clickable)
     Column(
-        modifier = Modifier
+        modifier = modifier
             .fillMaxWidth()
+            .padding(12.dp)
             .border(1.dp, MaterialTheme.colorScheme.secondary, RoundedCornerShape(4.dp))
             .padding(12.dp)
+            .clickable { onWorkoutClick() }
     ) {
-        Row(modifier = Modifier.fillMaxWidth()) {
+        Row(modifier = Modifier.fillMaxWidth(), horizontalArrangement = Arrangement.SpaceBetween) {
             Text(
                 text = workoutName,
+                modifier = Modifier.weight(1f),
                 color = Color.White,
                 style = MaterialTheme.typography.titleMedium,
                 maxLines = 1,
-                softWrap = false,
+                softWrap = true,
                 overflow = TextOverflow.Ellipsis
             )
-            DropDown(isDropDownExpanded = isDropDownExpanded,
+            DropDown(
+                isDropDownExpanded = isDropDownExpanded,
                 onExpand = { isDropDownExpanded = true },
                 onClose = { isDropDownExpanded = false },
-                onEdit = { onEdit() },
-                onDuplicate = { onDelete() },
-                onDelete = { onDuplicate() })
+                onStart = onWorkoutStart,
+                onEdit = onEdit,
+                onDuplicate = onDuplicate,
+                onDelete = onDelete
+            )
         }
         Text(
             text = workoutDate,
+            modifier = Modifier.padding(top = 12.dp, bottom = 12.dp),
             color = colorResource(R.color.text),
             style = MaterialTheme.typography.titleSmall,
             maxLines = 1,
             overflow = TextOverflow.Ellipsis
         )
-        for (i in 0..exercises.size) {
+        for (i in 0 until exercises.size) {
             Text(
                 text = exercises[i],
                 color = colorResource(R.color.text),
@@ -191,47 +213,58 @@ fun DropDown(
     isDropDownExpanded: Boolean,
     onExpand: () -> Unit,
     onClose: () -> Unit,
+    onStart: () -> Unit,
     onEdit: () -> Unit,
     onDuplicate: () -> Unit,
     onDelete: () -> Unit
 ) {
     Column(
-        modifier = Modifier.fillMaxSize(),
+        modifier = Modifier.background(color = colorResource(R.color.background)),
         horizontalAlignment = Alignment.CenterHorizontally,
         verticalArrangement = Arrangement.Center
     ) {
-
-        Box {
-            Row(
-                horizontalArrangement = Arrangement.Center,
-                verticalAlignment = Alignment.CenterVertically,
+        Row(
+            verticalAlignment = Alignment.CenterVertically,
+            horizontalArrangement = Arrangement.Center,
+            modifier = Modifier
+                .background(colorResource(R.color.background))
+                .clickable {
+                    onExpand()
+                }
+        ) {
+            Icon(
+                painter = painterResource(id = R.drawable.ic_settings_dots),
+                contentDescription = "",
+                tint = Color.Unspecified,
                 modifier = Modifier.clickable {
                     onExpand()
                 }
-            ) {
-                Icon(
-                    painter = painterResource(id = R.drawable.ic_settings_dots),
-                    contentDescription = ""
-                )
-            }
-            DropdownMenu(
-                expanded = isDropDownExpanded,
-                onDismissRequest = {
-                    onClose()
-                }) {
-                MenuItem.entries.toList().forEachIndexed { index, item ->
-                    DropdownMenuItem(text = {
-                        Text(text = item.label)
-                    },
-                        onClick = {
-                            onClose()
-                            when (item) {
-                                MenuItem.EDIT -> onEdit()
-                                MenuItem.DELETE -> onDelete()
-                                MenuItem.DUPLICATE -> onDuplicate()
-                            }
-                        })
-                }
+            )
+        }
+        DropdownMenu(
+            modifier = Modifier.background(colorResource(R.color.background)),
+            expanded = isDropDownExpanded,
+            onDismissRequest = onClose
+        ) {
+            MenuItem.entries.toList().forEachIndexed { index, item ->
+                DropdownMenuItem(text = {
+                    Text(
+                        text = item.label,
+                        color = Color.White,
+                        maxLines = 1,
+                        overflow = TextOverflow.Ellipsis,
+                        style = MaterialTheme.typography.labelLarge
+                    )
+                },
+                    onClick = {
+                        when (item) {
+                            MenuItem.EDIT -> onEdit()
+                            MenuItem.DELETE -> onDelete()
+                            MenuItem.DUPLICATE -> onDuplicate()
+                            MenuItem.START -> onStart()
+                        }
+                        onClose()
+                    })
             }
         }
     }
@@ -242,5 +275,5 @@ fun showToast(message: String, context: Context) {
 }
 
 enum class MenuItem(val label: String) {
-    EDIT("Edit"), DELETE("Delete"), DUPLICATE("Duplicate")
+    EDIT("Edit"), DELETE("Delete"), DUPLICATE("Duplicate"), START("Start")
 }
