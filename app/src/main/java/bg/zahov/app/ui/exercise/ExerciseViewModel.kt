@@ -8,7 +8,6 @@ import bg.zahov.app.data.interfaces.ServiceErrorHandler
 import bg.zahov.app.data.interfaces.WorkoutProvider
 import bg.zahov.app.data.model.BodyPart
 import bg.zahov.app.data.model.Category
-import bg.zahov.app.data.model.Exercise
 import bg.zahov.app.data.model.Filter
 import bg.zahov.app.data.model.FilterWrapper
 import bg.zahov.app.data.model.state.ExerciseData
@@ -16,7 +15,6 @@ import bg.zahov.app.data.provider.AddExerciseToWorkoutProvider
 import bg.zahov.app.data.provider.FilterProvider
 import bg.zahov.app.data.provider.ReplaceableExerciseProvider
 import bg.zahov.app.data.provider.SelectableExerciseProvider
-import bg.zahov.app.util.toExerciseWrapper
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.StateFlow
 import kotlinx.coroutines.flow.update
@@ -69,8 +67,7 @@ class ExerciseViewModel(
     private val _exerciseData = MutableStateFlow(ExerciseData())
     val exerciseData: StateFlow<ExerciseData> = _exerciseData
 
-    private var currentlySelectedExerciseToReplace: Int? = null
-    private var allExercises: List<Exercise> = mutableListOf()
+    private var allExercises: List<ExercisesWrapper> = mutableListOf()
 
     init {
         viewModelScope.launch {
@@ -86,11 +83,11 @@ class ExerciseViewModel(
             }
             launch {
                 try {
-                    repo.getTemplateExercises().collect { exercises ->
+                    repo.getWrappedExercises().collect { exercises ->
                         allExercises = exercises
                         _exerciseData.update { old ->
                             old.copy(
-                                exercises = allExercises.map { it.toExerciseWrapper() },
+                                exercises = exercises,
                                 loading = false
                             )
                         }
@@ -103,23 +100,31 @@ class ExerciseViewModel(
     }
 
     /**
-     * Handles the click event on an exercise item.
+     * Handles the click event on an exercise item. It changes what item/s are selected
      *
-     * @param position The position of the clicked exercise in the list.
+     * @param name The name of the clicked exercise in the list.
      */
-    fun onExerciseClicked() {
+    fun onExerciseClicked(name: String) {
+        viewModelScope.launch {
+            allExercises.find { it.name == name }?.let {
+                it.selected = it.selected.not()
+            }
+        }
         _exerciseData.update { old ->
-            val updatedExercises = old.exercises.mapIndexed { index, exercise ->
-                when (index) {
-                    currentlySelectedExerciseToReplace -> exercise.copy(selected = false)
-                    else -> exercise
+            val updatedExercises = old.exercises.map { exercise ->
+                if (exercise.name == name) {
+                    exercise.copy(
+                        selected = allExercises.find { it.name == name }?.selected
+                            ?: exercise.selected
+                    )
+                } else {
+                    exercise
                 }
             }
             old.copy(exercises = updatedExercises)
-
         }
-        resetExerciseSelection()
     }
+
 
     /**
      * Filters exercises based on the current filters and search string.
@@ -131,7 +136,7 @@ class ExerciseViewModel(
      */
     private fun getFiltered(
         filter: List<FilterWrapper> = _exerciseData.value.filters,
-        exercises: List<ExercisesWrapper> = allExercises.map { it.toExerciseWrapper() },
+        exercises: List<ExercisesWrapper> = allExercises,
         searchString: String = _exerciseData.value.search
     ): List<ExercisesWrapper> {
         return exercises.filter { exercise ->
@@ -169,17 +174,17 @@ class ExerciseViewModel(
     /**
      * Sets the clicked exercise in the repository based on the exercise name.
      *
-     * @param name The name of the clicked exercise.
+     * @param position The positioon of the clicked exercise.
      */
-    fun setClickedExercise(position: Int) {
+    fun setClickedExercise(name: String) {
         viewModelScope.launch {
-            allExercises[position].let {
+            allExercises.find { it.name == name }?.let {
                 repo.setClickedTemplateExercise(it)
             }
         }
     }
 
-    /**
+    /**=
      * Confirms the selected exercises based on the current flag state.
      * Depending on the flag, it either replaces, adds, or selects exercises
      * from the user's selection.
@@ -187,14 +192,22 @@ class ExerciseViewModel(
     fun confirmSelectedExercises() {
         val selectedExercises = _exerciseData.value.exercises.filter { it.selected }
             .mapNotNull { selected -> allExercises.find { it.name == selected.name } }
+        viewModelScope.launch {
+            when (_exerciseData.value.flag) {
+                ExerciseFlag.Replacing -> replaceSelectedExercise(selectedExercises)
+                ExerciseFlag.Adding -> addExerciseToWorkoutProvider.addExercises(
+                    repo.getExercisesByWrapper(selectedExercises)
+                )
 
-        when (_exerciseData.value.flag) {
-            ExerciseFlag.Replacing -> replaceSelectedExercise(selectedExercises)
-            ExerciseFlag.Adding -> addExerciseToWorkoutProvider.addExercises(selectedExercises)
-            ExerciseFlag.Selecting -> selectableExerciseProvider.addExercises(selectedExercises)
-            else -> { /* No action needed */ }
+                ExerciseFlag.Selecting -> selectableExerciseProvider.addExercises(
+                    repo.getExercisesByWrapper(selectedExercises)
+                )
+
+                else -> { /* No action needed */
+                }
+            }
+            resetExerciseSelection()
         }
-        resetExerciseSelection()
     }
 
     /**
@@ -203,9 +216,12 @@ class ExerciseViewModel(
      *
      * @param selectedExercises A list of exercises that have been selected.
      */
-    private fun replaceSelectedExercise(selectedExercises: List<Exercise>) {
-        selectedExercises.firstOrNull()?.let { exercise ->
-            replaceableExerciseProvider.updateExerciseToReplace(exercise)
+    private fun replaceSelectedExercise(selectedExercises: List<ExercisesWrapper>) {
+        viewModelScope.launch {
+            selectedExercises.firstOrNull()?.let { exercise ->
+                repo.getExerciseByName(exercise.name)
+                    ?.let { replaceableExerciseProvider.updateExerciseToReplace(it) }
+            }
         }
     }
 

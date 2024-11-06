@@ -4,10 +4,12 @@ import androidx.compose.foundation.Image
 import androidx.compose.foundation.background
 import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.Arrangement
+import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.ExperimentalLayoutApi
 import androidx.compose.foundation.layout.FlowRow
 import androidx.compose.foundation.layout.Row
+import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
@@ -37,7 +39,11 @@ import bg.zahov.app.ui.exercise.filter.FilterDialog
 import bg.zahov.fitness.app.R
 
 @Composable
-fun ExercisesScreen(viewModel: ExerciseViewModel = viewModel(), navigateInfo: ()->Unit) {
+fun ExercisesScreen(
+    viewModel: ExerciseViewModel = viewModel(),
+    navigateInfo: () -> Unit,
+    navigateBack: () -> Unit
+) {
     val uiState by viewModel.exerciseData.collectAsStateWithLifecycle()
 
     if (uiState.showDialog) {
@@ -49,14 +55,18 @@ fun ExercisesScreen(viewModel: ExerciseViewModel = viewModel(), navigateInfo: ()
     ExercisesContent(
         filterItems = uiState.filters,
         exerciseItems = uiState.exercises,
+        showButton = uiState.flag != ExerciseFlag.Default,
         removeFilter = { viewModel.removeFilter(it) },
         clickExercise = {
             if (uiState.flag == ExerciseFlag.Default) {
-                viewModel.onExerciseClicked()
+                viewModel.setClickedExercise(it)
                 navigateInfo()
             } else {
-                viewModel.setClickedExercise(it)
+                viewModel.onExerciseClicked(it)
             }
+        }, onConfirm = {
+            viewModel.confirmSelectedExercises()
+            navigateBack()
         })
 
 }
@@ -67,7 +77,9 @@ fun ExercisesContent(
     filterItems: List<FilterWrapper>,
     exerciseItems: List<ExercisesWrapper>,
     removeFilter: (FilterWrapper) -> Unit,
-    clickExercise: (Int) -> Unit,
+    clickExercise: (String) -> Unit,
+    showButton: Boolean,
+    onConfirm: () -> Unit,
 ) {
     Column(verticalArrangement = Arrangement.spacedBy(16.dp)) {
         FlowRow(
@@ -78,12 +90,33 @@ fun ExercisesContent(
             }
             LazyColumn(modifier = Modifier.fillMaxWidth()) {
                 itemsIndexed(exerciseItems) { index, exercise ->
-                    ExerciseCards(exercise) { clickExercise(index) }
+                    ExerciseCards(exercise) { clickExercise(exercise.name) }
                 }
             }
         }
     }
-//    Button(onClick = {}) { Text(text = stringResource(R.string.confirm)) }
+    if (showButton) {
+        Box(
+            modifier = Modifier
+                .fillMaxSize()
+                .padding(16.dp)
+        ) {
+            Button(
+                onClick = onConfirm,
+                modifier = Modifier
+                    .align(Alignment.BottomEnd)
+                    .padding(16.dp)
+            ) {
+                Text(
+                    text = stringResource(R.string.confirm),
+                    style = MaterialTheme.typography.headlineLarge,
+                    maxLines = 1,
+                    overflow = TextOverflow.Ellipsis,
+                    color = Color.White
+                )
+            }
+        }
+    }
 }
 
 @Composable

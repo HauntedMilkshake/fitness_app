@@ -120,6 +120,9 @@ class ExercisesFragment : Fragment() {
                 ExercisesScreen(
                     navigateInfo = {
                         findNavController().navigate(R.id.exercises_to_exercise_info_navigation)
+                    },
+                    navigateBack = {
+                        findNavController().popBackStack()
                     }
                 )
             }
