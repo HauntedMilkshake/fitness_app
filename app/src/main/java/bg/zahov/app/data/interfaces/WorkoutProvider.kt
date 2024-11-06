@@ -3,6 +3,7 @@ package bg.zahov.app.data.interfaces
 import bg.zahov.app.data.local.RealmWorkoutState
 import bg.zahov.app.data.model.Exercise
 import bg.zahov.app.data.model.Workout
+import bg.zahov.app.data.provider.model.HistoryWorkout
 import bg.zahov.app.ui.exercise.info.history.ExerciseHistoryInfo
 import bg.zahov.app.ui.workout.start.StartWorkout
 import kotlinx.coroutines.flow.Flow
@@ -32,6 +33,13 @@ interface WorkoutProvider {
         newExercises: List<Exercise>,
     )
     suspend fun getStartWorkouts(): Flow<List<StartWorkout>>
+
+    /**
+     * Filters from all workouts only those who were performed in the last month
+     */
+    suspend fun getCurrentMonthWorkouts(): Flow<List<Workout>>
+
+    suspend fun getHistoryWorkouts(): Flow<List<HistoryWorkout>>
 
     suspend fun clearWorkoutState()
 }
