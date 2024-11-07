@@ -1,6 +1,5 @@
 package bg.zahov.app.ui.workout.start
 
-import android.content.Context
 import android.widget.Toast
 import androidx.compose.foundation.background
 import androidx.compose.foundation.border
@@ -29,7 +28,6 @@ import androidx.compose.runtime.remember
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
-import androidx.compose.ui.res.colorResource
 import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.text.font.FontWeight
@@ -41,6 +39,8 @@ import androidx.compose.runtime.getValue
 import androidx.compose.runtime.setValue
 import androidx.compose.ui.platform.LocalContext
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
+import bg.zahov.app.data.model.ToastManager
+import bg.zahov.app.ui.theme.FitnessTheme
 
 
 @Composable
@@ -51,12 +51,13 @@ fun StartWorkoutScreen(
     onAddTemplateWorkout: () -> Unit
 ) {
     val uiState by startWorkoutViewModel.uiState.collectAsStateWithLifecycle()
+    val toast by ToastManager.messages.collectAsStateWithLifecycle()
     val context = LocalContext.current
 
-    uiState.notifyUser?.let {
-        LaunchedEffect(Unit) {
-            showToast(it, context)
-            startWorkoutViewModel.messageShown()
+    LaunchedEffect(toast) {
+        toast?.let { message ->
+            Toast.makeText(context, context.getString(message.messageResId), Toast.LENGTH_SHORT)
+                .show()
         }
     }
 
@@ -83,63 +84,68 @@ fun StartWorkoutContent(
     onDeleteWorkout: (StartWorkout) -> Unit,
     onDuplicateWorkout: (StartWorkout) -> Unit,
 ) {
-    Column(modifier = Modifier.fillMaxSize()) {
-        Text(
-            modifier = Modifier.padding(top = 32.dp, start = 16.dp),
-            text = stringResource(R.string.quick_start_text),
-            style = MaterialTheme.typography.labelMedium,
-            color = colorResource(R.color.text)
-        )
-
-        Button(
-            modifier = Modifier
-                .fillMaxWidth()
-                .padding(12.dp), colors = ButtonColors(
-                containerColor = Color.Blue,
-                contentColor = Color.White,
-                colorResource(R.color.disabled_button),
-                colorResource(R.color.background)
-            ), onClick = onStartEmptyWorkout
-        ) {
+    FitnessTheme {
+        Column(modifier = Modifier.fillMaxSize()) {
             Text(
-                text = stringResource(R.string.start_empty_workout_text),
-                style = MaterialTheme.typography.bodyLarge,
-                maxLines = 1,
-                overflow = TextOverflow.Ellipsis,
-                color = Color.White,
-                fontWeight = FontWeight.Bold
-            )
-        }
-
-        Row(modifier = Modifier.fillMaxWidth(), horizontalArrangement = Arrangement.SpaceBetween) {
-            Text(
-                modifier = Modifier.padding(top = 16.dp, start = 16.dp),
-                text = stringResource(R.string.my_templates_text),
-                style = MaterialTheme.typography.labelSmall,
-                color = colorResource(R.color.text)
+                modifier = Modifier.padding(top = 32.dp, start = 16.dp),
+                text = stringResource(R.string.quick_start_text),
+                style = MaterialTheme.typography.labelMedium,
+                color = MaterialTheme.colorScheme.secondary
             )
 
-            IconButton(onClick = onAddTemplateWorkout) {
-                Icon(
-                    painter = painterResource(R.drawable.ic_plus),
-                    tint = Color.Unspecified,
-                    contentDescription = ""
+            Button(
+                modifier = Modifier
+                    .fillMaxWidth()
+                    .padding(12.dp), colors = ButtonColors(
+                    containerColor = MaterialTheme.colorScheme.primaryContainer,
+                    contentColor = MaterialTheme.colorScheme.onSecondary,
+                    disabledContainerColor = MaterialTheme.colorScheme.onErrorContainer,
+                    disabledContentColor = MaterialTheme.colorScheme.background
+                ), onClick = onStartEmptyWorkout
+            ) {
+                Text(
+                    text = stringResource(R.string.start_empty_workout_text),
+                    style = MaterialTheme.typography.bodyLarge,
+                    maxLines = 1,
+                    overflow = TextOverflow.Ellipsis,
+                    color = MaterialTheme.colorScheme.onSecondary,
+                    fontWeight = FontWeight.Bold
                 )
             }
-        }
 
-        LazyColumn(Modifier.fillMaxSize()) {
-            items(items = workouts, key = { it.id }) {
-                Workout(
-                    modifier = Modifier.animateItem(),
-                    workoutName = it.name,
-                    workoutDate = it.date,
-                    exercises = it.exercises,
-                    onWorkoutClick = { onWorkoutClick(it.id) },
-                    onWorkoutStart = { onWorkoutStart(it) },
-                    onEdit = { onEditWorkout(it.id) },
-                    onDelete = { onDeleteWorkout(it) },
-                    onDuplicate = { onDuplicateWorkout(it) })
+            Row(
+                modifier = Modifier.fillMaxWidth(),
+                horizontalArrangement = Arrangement.SpaceBetween
+            ) {
+                Text(
+                    modifier = Modifier.padding(top = 16.dp, start = 16.dp),
+                    text = stringResource(R.string.my_templates_text),
+                    style = MaterialTheme.typography.labelSmall,
+                    color = MaterialTheme.colorScheme.secondary
+                )
+
+                IconButton(onClick = onAddTemplateWorkout) {
+                    Icon(
+                        painter = painterResource(R.drawable.ic_plus),
+                        tint = Color.Unspecified,
+                        contentDescription = ""
+                    )
+                }
+            }
+
+            LazyColumn(Modifier.fillMaxSize()) {
+                items(items = workouts, key = { it.id }) {
+                    Workout(
+                        modifier = Modifier.animateItem(),
+                        workoutName = it.name,
+                        workoutDate = it.date,
+                        exercises = it.exercises,
+                        onWorkoutClick = { onWorkoutClick(it.id) },
+                        onWorkoutStart = { onWorkoutStart(it) },
+                        onEdit = { onEditWorkout(it.id) },
+                        onDelete = { onDeleteWorkout(it) },
+                        onDuplicate = { onDuplicateWorkout(it) })
+                }
             }
         }
     }
@@ -171,7 +177,7 @@ fun Workout(
             Text(
                 text = workoutName,
                 modifier = Modifier.weight(1f),
-                color = Color.White,
+                color = MaterialTheme.colorScheme.onSecondary,
                 style = MaterialTheme.typography.titleMedium,
                 maxLines = 1,
                 softWrap = true,
@@ -188,9 +194,9 @@ fun Workout(
             )
         }
         Text(
-            text = workoutDate,
+            text = stringResource(R.string.last_performed, workoutDate),
             modifier = Modifier.padding(top = 12.dp, bottom = 12.dp),
-            color = colorResource(R.color.text),
+            color = MaterialTheme.colorScheme.onSecondary,
             style = MaterialTheme.typography.titleSmall,
             maxLines = 1,
             overflow = TextOverflow.Ellipsis
@@ -198,7 +204,7 @@ fun Workout(
         for (i in 0 until exercises.size) {
             Text(
                 text = exercises[i],
-                color = colorResource(R.color.text),
+                color = MaterialTheme.colorScheme.secondary,
                 style = MaterialTheme.typography.titleSmall,
                 maxLines = 1,
                 overflow = TextOverflow.Ellipsis
@@ -219,7 +225,7 @@ fun DropDown(
     onDelete: () -> Unit
 ) {
     Column(
-        modifier = Modifier.background(color = colorResource(R.color.background)),
+        modifier = Modifier.background(color = MaterialTheme.colorScheme.primary),
         horizontalAlignment = Alignment.CenterHorizontally,
         verticalArrangement = Arrangement.Center
     ) {
@@ -227,7 +233,7 @@ fun DropDown(
             verticalAlignment = Alignment.CenterVertically,
             horizontalArrangement = Arrangement.Center,
             modifier = Modifier
-                .background(colorResource(R.color.background))
+                .background(color = MaterialTheme.colorScheme.primary)
                 .clickable {
                     onExpand()
                 }
@@ -242,7 +248,7 @@ fun DropDown(
             )
         }
         DropdownMenu(
-            modifier = Modifier.background(colorResource(R.color.background)),
+            modifier = Modifier.background(color = MaterialTheme.colorScheme.primary),
             expanded = isDropDownExpanded,
             onDismissRequest = onClose
         ) {
@@ -250,7 +256,7 @@ fun DropDown(
                 DropdownMenuItem(text = {
                     Text(
                         text = item.label,
-                        color = Color.White,
+                        color = MaterialTheme.colorScheme.secondary,
                         maxLines = 1,
                         overflow = TextOverflow.Ellipsis,
                         style = MaterialTheme.typography.labelLarge
@@ -268,10 +274,6 @@ fun DropDown(
             }
         }
     }
-}
-
-fun showToast(message: String, context: Context) {
-    Toast.makeText(context, message, Toast.LENGTH_SHORT).show()
 }
 
 enum class MenuItem(val label: String) {

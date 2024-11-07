@@ -11,6 +11,7 @@ import bg.zahov.app.data.model.Category
 import bg.zahov.app.data.model.Exercise
 import bg.zahov.app.data.model.SetType
 import bg.zahov.app.data.model.Sets
+import bg.zahov.app.data.model.ToastManager
 import bg.zahov.app.data.model.Workout
 import bg.zahov.app.data.model.WorkoutState
 import bg.zahov.app.data.provider.WorkoutStateManager
@@ -22,16 +23,15 @@ import kotlinx.coroutines.launch
 import java.time.LocalDate
 import java.time.LocalDateTime
 import java.time.format.DateTimeFormatter
+import bg.zahov.fitness.app.R
 
 /**
  * Represents the UI state for starting a workout.
  *
  * @property workouts A list of template workouts the user has created.
- * @property notifyUser An optional message to notify the user.
  */
 data class StartWorkoutUiState(
-    val workouts: List<StartWorkout> = listOf(),
-    val notifyUser: String? = null
+    val workouts: List<StartWorkout> = listOf()
 )
 
 /**
@@ -56,10 +56,12 @@ data class StartWorkout(
  *
  * @param repo The provider responsible for fetching workout templates.
  * @param workoutState The state manager responsible for tracking the current workout state.
+ * @param toastManager responsible for showing toasts to the user
  * @param serviceError The handler for managing service errors.
  */
 class StartWorkoutViewModel(
     private val repo: WorkoutProvider = Inject.workoutProvider,
+    private val toastManager: ToastManager = ToastManager,
     private val workoutState: WorkoutStateManager = Inject.workoutState,
     private val serviceError: ServiceErrorHandler = Inject.serviceErrorHandler
 ) : ViewModel() {
@@ -122,7 +124,7 @@ class StartWorkoutViewModel(
             if (currentWorkoutState == WorkoutState.INACTIVE) {
                 workoutState.startWorkout(workout = workout?.toWorkout(exerciseTemplates))
             } else {
-                showMessage("Cannot start a workout while one is active")
+                toastManager.showToast(R.string.starting_workout_while_another_is_active)
             }
         }
     }
@@ -163,25 +165,6 @@ class StartWorkoutViewModel(
     fun deleteTemplateWorkout(workout: StartWorkout) {
         viewModelScope.launch {
             repo.deleteTemplateWorkout(workout.toWorkout(exerciseTemplates))
-        }
-    }
-
-    /**
-     * Notifies the user that a message has been shown.
-     */
-    fun messageShown() {
-        showMessage()
-    }
-
-    /**
-     * Updates the UI state to show a message to the user.
-    e.
-     *
-     * @param text The text to display to the user, or `null` if no specific message is given.
-     */
-    private fun showMessage(text: String? = null) {
-        _uiState.update { old ->
-            old.copy(notifyUser = text)
         }
     }
 }
