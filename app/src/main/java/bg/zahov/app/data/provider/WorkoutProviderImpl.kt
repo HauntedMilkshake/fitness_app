@@ -115,6 +115,9 @@ class WorkoutProviderImpl : WorkoutProvider {
         workoutRepo.updateTemplateWorkout(workoutId, date, newExercises)
     }
 
+    /**
+     * Retrieves a list of start workouts by mapping template workouts.
+     */
     override suspend fun getStartWorkouts(): Flow<List<StartWorkout>> =
         getTemplateWorkouts().mapNotNull { workouts -> workouts.map { it.toStartWorkout() } }
 
@@ -141,6 +144,9 @@ class WorkoutProviderImpl : WorkoutProvider {
     }
 }
 
+/**
+ * Converts a `Workout` object to a `StartWorkout` object.
+ */
 fun Workout.toStartWorkout(): StartWorkout = StartWorkout(
     id = this.id,
     name = this.name,

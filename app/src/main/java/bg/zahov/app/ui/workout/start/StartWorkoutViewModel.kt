@@ -75,10 +75,13 @@ class StartWorkoutViewModel(
      */
     private var currentWorkoutState: WorkoutState = WorkoutState.ACTIVE
 
+    /**
+     * used for mapping to [Workout] because otherwise we lose information for set types
+     */
     private var exerciseTemplates: List<Exercise> = listOf()
 
     /**
-     * collect template workouts, state
+     * collect template workouts, state and exercises which are to be used for mapping
      */
     init {
         viewModelScope.launch {
@@ -110,6 +113,10 @@ class StartWorkoutViewModel(
         }
     }
 
+    /**
+     * Starts an empty workout or one from template if one isn't active
+     * else notifies the user
+     */
     fun startWorkout(workout: StartWorkout? = null) {
         viewModelScope.launch {
             if (currentWorkoutState == WorkoutState.INACTIVE) {
@@ -120,6 +127,15 @@ class StartWorkoutViewModel(
         }
     }
 
+    /**
+     * Adds a duplicate template workout to the repository.
+     *
+     * This method creates a new `Workout` object based on the `StartWorkout` passed as input, appending the word "duplicate"
+     * to the name if the workout's name does not already contain the word "duplicate". The newly created workout is then
+     * added to the repository as a template workout.
+     *
+     * @param newWorkout The `StartWorkout` object that contains the details of the workout to duplicate.
+     */
     fun addDuplicateTemplateWorkout(newWorkout: StartWorkout) {
         viewModelScope.launch {
             repo.addTemplateWorkout(
@@ -136,16 +152,33 @@ class StartWorkoutViewModel(
         }
     }
 
+    /**
+     * Deletes a template workout from the repository.
+     *
+     * This method deletes the workout (converted from the `StartWorkout` object) from the repository, effectively removing
+     * the template workout.
+     *
+     * @param workout The `StartWorkout` object representing the workout to delete.
+     */
     fun deleteTemplateWorkout(workout: StartWorkout) {
         viewModelScope.launch {
             repo.deleteTemplateWorkout(workout.toWorkout(exerciseTemplates))
         }
     }
 
+    /**
+     * Notifies the user that a message has been shown.
+     */
     fun messageShown() {
         showMessage()
     }
 
+    /**
+     * Updates the UI state to show a message to the user.
+    e.
+     *
+     * @param text The text to display to the user, or `null` if no specific message is given.
+     */
     private fun showMessage(text: String? = null) {
         _uiState.update { old ->
             old.copy(notifyUser = text)
@@ -153,6 +186,32 @@ class StartWorkoutViewModel(
     }
 }
 
+/**
+ * Converts a string representing a date and time into a `LocalDateTime` object.
+ *
+ * This function takes a string formatted as "HH:mm, d MMMM" (e.g., "13:00, 5 September") and parses it into a
+ * `LocalDateTime` object for the current year. This is useful when the input string does not include the year,
+ * but it is required for creating a `LocalDateTime` object.
+ *
+ * @return A `LocalDateTime` object that corresponds to the parsed date and time, with the current year.
+ */
+fun String.toLocalDateTime(): LocalDateTime =
+    LocalDateTime.parse(
+        "${LocalDate.now().year} $this",
+        DateTimeFormatter.ofPattern("yyyy HH:mm, d MMMM")
+    )
+
+/**
+ * Converts a `StartWorkout` to a `Workout` object.
+ *
+ * This extension function maps the `StartWorkout` to a `Workout` object, converting each exercise in the workout to
+ * an `Exercise` object. The function uses a regular expression to parse exercise names and sets. It looks for a
+ * matching `Exercise` template from the provided list (`exerciseTemplates`) based on the exercise's name.
+ *
+ * @param exerciseTemplates A list of available exercise templates that are used to determine additional information
+ * such as body part and category.
+ * @return A `Workout` object created from the `StartWorkout`.
+ */
 fun StartWorkout.toWorkout(exerciseTemplates: List<Exercise>) = Workout(
     id = this.id,
     name = this.name,
@@ -185,6 +244,3 @@ fun StartWorkout.toWorkout(exerciseTemplates: List<Exercise>) = Workout(
     note = this.note,
     personalRecords = this.personalRecords.toIntOrNull() ?: 0
 )
-
-fun String.toLocalDateTime(): LocalDateTime =
-    LocalDateTime.parse("${LocalDate.now().year} $this", DateTimeFormatter.ofPattern("yyyy HH:mm, d MMMM"))

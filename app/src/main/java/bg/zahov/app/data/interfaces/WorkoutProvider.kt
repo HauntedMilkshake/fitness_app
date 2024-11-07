@@ -32,6 +32,10 @@ interface WorkoutProvider {
         date: LocalDateTime,
         newExercises: List<Exercise>,
     )
+
+    /**
+     * Retrieves the list of template workouts mapped for the ui of the appropriate screen from the repository.
+     */
     suspend fun getStartWorkouts(): Flow<List<StartWorkout>>
 
     /**
