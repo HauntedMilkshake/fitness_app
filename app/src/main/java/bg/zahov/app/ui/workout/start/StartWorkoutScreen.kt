@@ -256,7 +256,7 @@ fun DropDown(
                 DropdownMenuItem(text = {
                     Text(
                         text = item.label,
-                        color = MaterialTheme.colorScheme.secondary,
+                        color = MaterialTheme.colorScheme.onSecondary,
                         maxLines = 1,
                         overflow = TextOverflow.Ellipsis,
                         style = MaterialTheme.typography.labelLarge
