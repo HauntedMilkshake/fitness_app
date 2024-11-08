@@ -17,8 +17,8 @@ import bg.zahov.app.data.model.Sets
 import bg.zahov.app.data.model.Units
 import bg.zahov.app.data.model.User
 import bg.zahov.app.data.model.Workout
+import bg.zahov.app.data.model.state.ExerciseData
 import bg.zahov.app.ui.exercise.ExerciseAdapterWrapper
-import bg.zahov.app.ui.exercise.ExercisesWrapper
 import bg.zahov.app.ui.workout.add.ExerciseSetAdapterExerciseWrapper
 import bg.zahov.app.ui.workout.add.ExerciseSetAdapterSetWrapper
 import bg.zahov.fitness.app.R
@@ -212,8 +212,8 @@ fun Sets.toExerciseSetAdapterSetWrapper(
     )
 }
 
-fun Exercise.toExerciseWrapper() =
-    ExercisesWrapper(
+fun Exercise.toExerciseData() =
+    ExerciseData(
         name = this.name,
         bodyPart = this.bodyPart,
         category = this.category

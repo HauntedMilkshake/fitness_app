@@ -1,7 +1,6 @@
 package bg.zahov.app.ui.exercise
 
 import androidx.compose.foundation.Image
-import androidx.compose.foundation.background
 import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
@@ -16,12 +15,14 @@ import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.layout.wrapContentHeight
 import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.foundation.lazy.itemsIndexed
+import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material3.Button
 import androidx.compose.material3.Card
 import androidx.compose.material3.CardColors
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.getValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
@@ -35,6 +36,8 @@ import androidx.compose.ui.unit.dp
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import androidx.lifecycle.viewmodel.compose.viewModel
 import bg.zahov.app.data.model.FilterWrapper
+import bg.zahov.app.data.model.state.ExerciseData
+import bg.zahov.app.data.model.state.ExerciseFlag
 import bg.zahov.app.ui.exercise.filter.FilterDialog
 import bg.zahov.fitness.app.R
 
@@ -51,6 +54,11 @@ fun ExercisesScreen(
             viewModel.updateShowDialog(false)
         })
     }
+    if (uiState.navigateBack) {
+        LaunchedEffect(Unit) {
+            navigateBack()
+        }
+    }
 
     ExercisesContent(
         filterItems = uiState.filters,
@@ -66,7 +74,6 @@ fun ExercisesScreen(
             }
         }, onConfirm = {
             viewModel.confirmSelectedExercises()
-            navigateBack()
         })
 
 }
@@ -75,9 +82,9 @@ fun ExercisesScreen(
 @Composable
 fun ExercisesContent(
     filterItems: List<FilterWrapper>,
-    exerciseItems: List<ExercisesWrapper>,
+    exerciseItems: List<ExerciseData>,
     removeFilter: (FilterWrapper) -> Unit,
-    clickExercise: (String) -> Unit,
+    clickExercise: (Int) -> Unit,
     showButton: Boolean,
     onConfirm: () -> Unit,
 ) {
@@ -90,7 +97,9 @@ fun ExercisesContent(
             }
             LazyColumn(modifier = Modifier.fillMaxWidth()) {
                 itemsIndexed(exerciseItems) { index, exercise ->
-                    ExerciseCards(exercise) { clickExercise(exercise.name) }
+                    if (exercise.toShow) {
+                        ExerciseCards(exercise) { clickExercise(index) }
+                    }
                 }
             }
         }
@@ -120,46 +129,56 @@ fun ExercisesContent(
 }
 
 @Composable
-fun ExerciseCards(exercise: ExercisesWrapper, onClick: (ExercisesWrapper) -> Unit) {
-    Row(
-        modifier = Modifier
-            .padding(12.dp)
-            .clickable { onClick(exercise) }
-            .background(colorResource(if (exercise.selected) R.color.selected else R.color.background)),
-        verticalAlignment = Alignment.CenterVertically,
+fun ExerciseCards(exercise: ExerciseData, onClick: (ExerciseData) -> Unit) {
+    Card(
+        modifier = Modifier.padding(16.dp),
+        shape = RoundedCornerShape(16.dp),
+        colors = CardColors(
+            containerColor = colorResource(if (exercise.selected) R.color.selected else R.color.background),
+            contentColor = colorResource(R.color.white),
+            disabledContentColor = colorResource(R.color.disabled_button),
+            disabledContainerColor = colorResource(R.color.less_vibrant_text)
+        ),
     ) {
-        Image(
-            modifier = Modifier.size(40.dp),
-            painter = painterResource(exercise.bodyPart.image),
-            contentDescription = exercise.bodyPart.body,
-            contentScale = ContentScale.Fit,
-        )
-        Column(
+        Row(
             modifier = Modifier
-                .weight(2f)
-                .padding(start = 8.dp)
+                .padding(12.dp)
+                .clickable { onClick(exercise) },
+            verticalAlignment = Alignment.CenterVertically,
         ) {
-            Text(
-                text = exercise.name,
-                style = MaterialTheme.typography.headlineLarge,
-                maxLines = 1,
-                overflow = TextOverflow.Ellipsis,
-                color = Color.White
+            Image(
+                modifier = Modifier.size(40.dp),
+                painter = painterResource(exercise.bodyPart.image),
+                contentDescription = exercise.bodyPart.body,
+                contentScale = ContentScale.Fit,
             )
-            Text(
-                text = exercise.bodyPart.body,
-                style = MaterialTheme.typography.labelMedium,
-                maxLines = 1,
-                overflow = TextOverflow.Ellipsis,
-                color = Color.White
-            )
-            Text(
-                text = exercise.category.key,
-                style = MaterialTheme.typography.labelMedium,
-                maxLines = 1,
-                overflow = TextOverflow.Ellipsis,
-                color = Color.White
-            )
+            Column(
+                modifier = Modifier
+                    .weight(2f)
+                    .padding(start = 8.dp)
+            ) {
+                Text(
+                    text = exercise.name,
+                    style = MaterialTheme.typography.headlineLarge,
+                    maxLines = 1,
+                    overflow = TextOverflow.Ellipsis,
+                    color = Color.White
+                )
+                Text(
+                    text = exercise.bodyPart.body,
+                    style = MaterialTheme.typography.labelMedium,
+                    maxLines = 1,
+                    overflow = TextOverflow.Ellipsis,
+                    color = Color.White
+                )
+                Text(
+                    text = exercise.category.key,
+                    style = MaterialTheme.typography.labelMedium,
+                    maxLines = 1,
+                    overflow = TextOverflow.Ellipsis,
+                    color = Color.White
+                )
+            }
         }
     }
 }

@@ -1,16 +1,17 @@
 package bg.zahov.app.ui.exercise
 
+import android.util.Log
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
 import bg.zahov.app.Inject
 import bg.zahov.app.data.exception.CriticalDataNullException
 import bg.zahov.app.data.interfaces.ServiceErrorHandler
 import bg.zahov.app.data.interfaces.WorkoutProvider
-import bg.zahov.app.data.model.BodyPart
-import bg.zahov.app.data.model.Category
 import bg.zahov.app.data.model.Filter
 import bg.zahov.app.data.model.FilterWrapper
 import bg.zahov.app.data.model.state.ExerciseData
+import bg.zahov.app.data.model.state.ExerciseFlag
+import bg.zahov.app.data.model.state.ExerciseScreenData
 import bg.zahov.app.data.provider.AddExerciseToWorkoutProvider
 import bg.zahov.app.data.provider.FilterProvider
 import bg.zahov.app.data.provider.ReplaceableExerciseProvider
@@ -19,32 +20,6 @@ import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.StateFlow
 import kotlinx.coroutines.flow.update
 import kotlinx.coroutines.launch
-
-/**
- * Wrapper class for exercise data, including its name, associated body part, category,
- * and selection state.
- *
- * @property name The name of the exercise.
- * @property bodyPart The body part associated with the exercise.
- * @property category The category of the exercise.
- * @property selected Indicates whether the exercise is selected.
- */
-data class ExercisesWrapper(
-    val name: String,
-    val bodyPart: BodyPart,
-    val category: Category,
-    var selected: Boolean = false
-)
-
-/**
- * Enum representing different states for exercise actions.
- */
-enum class ExerciseFlag {
-    Default,
-    Selecting,
-    Replacing,
-    Adding;
-}
 
 /**
  * ViewModel class that manages the state for exercise-related operations.
@@ -64,10 +39,18 @@ class ExerciseViewModel(
     private val filterProvider: FilterProvider = Inject.filterProvider,
     private val serviceError: ServiceErrorHandler = Inject.serviceErrorHandler
 ) : ViewModel() {
-    private val _exerciseData = MutableStateFlow(ExerciseData())
-    val exerciseData: StateFlow<ExerciseData> = _exerciseData
+    /**
+     * Internal mutable state flow representing the current state of the exercise screen.
+     * Used to hold and update the UI state data including filters, exercises, loading status, etc.
+     */
+    private val _exerciseData = MutableStateFlow(ExerciseScreenData())
 
-    private var allExercises: List<ExercisesWrapper> = mutableListOf()
+    /**
+     * Public immutable view of the exercise screen state.
+     * Exposes the UI state data as a read-only flow for UI components.
+     */
+    val exerciseData: StateFlow<ExerciseScreenData> = _exerciseData
+
 
     init {
         viewModelScope.launch {
@@ -84,7 +67,6 @@ class ExerciseViewModel(
             launch {
                 try {
                     repo.getWrappedExercises().collect { exercises ->
-                        allExercises = exercises
                         _exerciseData.update { old ->
                             old.copy(
                                 exercises = exercises,
@@ -100,28 +82,29 @@ class ExerciseViewModel(
     }
 
     /**
-     * Handles the click event on an exercise item. It changes what item/s are selected
+     * Handles the click event on an exercise item, adjusting the selection state based on the current flag.
      *
-     * @param name The name of the clicked exercise in the list.
+     * - If the flag is `ExerciseFlag.Adding` or `ExerciseFlag.Selecting`, toggles the selection of the clicked exercise
+     *   without altering the selection states of other exercises.
+     * - If the flag is `ExerciseFlag.Replacing`, sets the clicked exercise as the only selected exercise,
+     *   deselecting all others.
+     *
+     * @param position The position of the clicked exercise in the list.
      */
-    fun onExerciseClicked(name: String) {
-        viewModelScope.launch {
-            allExercises.find { it.name == name }?.let {
-                it.selected = it.selected.not()
-            }
-        }
+    fun onExerciseClicked(position: Int) {
         _exerciseData.update { old ->
-            val updatedExercises = old.exercises.map { exercise ->
-                if (exercise.name == name) {
-                    exercise.copy(
-                        selected = allExercises.find { it.name == name }?.selected
-                            ?: exercise.selected
-                    )
-                } else {
-                    exercise
+            old.copy(
+                exercises = old.exercises.mapIndexed { index, exercise ->
+                    when (_exerciseData.value.flag) {
+                        ExerciseFlag.Adding, ExerciseFlag.Selecting -> if (index == position) exercise.copy(
+                            selected = exercise.selected.not()
+                        ) else exercise
+
+                        ExerciseFlag.Replacing -> exercise.copy(selected = index == position)
+                        else -> exercise
+                    }
                 }
-            }
-            old.copy(exercises = updatedExercises)
+            )
         }
     }
 
@@ -136,19 +119,21 @@ class ExerciseViewModel(
      */
     private fun getFiltered(
         filter: List<FilterWrapper> = _exerciseData.value.filters,
-        exercises: List<ExercisesWrapper> = allExercises,
+        exercises: List<ExerciseData> = _exerciseData.value.exercises,
         searchString: String = _exerciseData.value.search
-    ): List<ExercisesWrapper> {
-        return exercises.filter { exercise ->
-            val matchesFilters = filter.isEmpty() ||
-                    filter.any { filterWrapper ->
-                        matchesFilter(exercise, filterWrapper.filter)
-                    }
-
-            val matchesSearch = searchString.isBlank() ||
-                    exercise.name.contains(searchString, ignoreCase = true)
-
-            matchesFilters && matchesSearch
+    ): List<ExerciseData> {
+        return exercises.map { exercise ->
+            if ((filter.isEmpty() ||
+                        filter.any { filterWrapper ->
+                            matchesFilter(exercise, filterWrapper.filter)
+                        })
+                && (searchString.isBlank() ||
+                        exercise.name.contains(searchString, ignoreCase = true))
+            ) {
+                exercise.copy(toShow = true)
+            } else {
+                exercise.copy(toShow = false)
+            }
         }
     }
 
@@ -159,7 +144,10 @@ class ExerciseViewModel(
      * @param filter The filter to check.
      * @return True if the exercise matches the filter; otherwise, false.
      */
-    private fun matchesFilter(exercise: ExercisesWrapper, filter: Filter): Boolean {
+    private fun matchesFilter(
+        exercise: ExerciseData,
+        filter: Filter
+    ): Boolean {
         return when (filter) {
             is Filter.CategoryFilter -> {
                 exercise.category == filter.category
@@ -174,11 +162,11 @@ class ExerciseViewModel(
     /**
      * Sets the clicked exercise in the repository based on the exercise name.
      *
-     * @param position The positioon of the clicked exercise.
+     * @param position The position of the clicked exercise.
      */
-    fun setClickedExercise(name: String) {
+    fun setClickedExercise(position: Int) {
         viewModelScope.launch {
-            allExercises.find { it.name == name }?.let {
+            _exerciseData.value.exercises[position].let {
                 repo.setClickedTemplateExercise(it)
             }
         }
@@ -190,37 +178,73 @@ class ExerciseViewModel(
      * from the user's selection.
      */
     fun confirmSelectedExercises() {
-        val selectedExercises = _exerciseData.value.exercises.filter { it.selected }
-            .mapNotNull { selected -> allExercises.find { it.name == selected.name } }
-        viewModelScope.launch {
-            when (_exerciseData.value.flag) {
-                ExerciseFlag.Replacing -> replaceSelectedExercise(selectedExercises)
-                ExerciseFlag.Adding -> addExerciseToWorkoutProvider.addExercises(
-                    repo.getExercisesByWrapper(selectedExercises)
-                )
+        _exerciseData.value.exercises.filter { it.selected }.let {
+            if (it.isNotEmpty()) {
+                _exerciseData.update { old -> old.copy(loading = true) }
+                when (_exerciseData.value.flag) {
+                    ExerciseFlag.Replacing -> {
+                        replaceSelectedExercise(it)
+                    }
 
-                ExerciseFlag.Selecting -> selectableExerciseProvider.addExercises(
-                    repo.getExercisesByWrapper(selectedExercises)
-                )
+                    ExerciseFlag.Adding -> {
+                        addSelectedExercises(it)
+                    }
 
-                else -> { /* No action needed */
+                    ExerciseFlag.Selecting -> {
+                        selectSelectedExercises(it)
+                    }
+
+                    else -> {/* Unreachable code */
+                    }
                 }
+                resetExerciseSelection()
             }
-            resetExerciseSelection()
         }
     }
 
     /**
-     * Replaces the currently selected exercise with the first selected exercise
-     * from the provided list, if any.
+     * Replaces the currently selected exercise in the replaceableExerciseProvider with the first exercise
+     * from the provided list. It updates the state to navigate back after replacement.
      *
-     * @param selectedExercises A list of exercises that have been selected.
+     * @param selectedExercises A list of exercises selected by the user.
      */
-    private fun replaceSelectedExercise(selectedExercises: List<ExercisesWrapper>) {
+    private fun replaceSelectedExercise(selectedExercises: List<ExerciseData>) {
         viewModelScope.launch {
-            selectedExercises.firstOrNull()?.let { exercise ->
-                repo.getExerciseByName(exercise.name)
-                    ?.let { replaceableExerciseProvider.updateExerciseToReplace(it) }
+            selectedExercises.first().let { selected ->
+                repo.getExerciseByName(selected.name).collect { exercise ->
+                    exercise?.let { replaceableExerciseProvider.updateExerciseToReplace(it) }
+                    _exerciseData.update { old -> old.copy(navigateBack = true) }
+                }
+            }
+        }
+    }
+
+    /**
+     * Adds the selected exercises to the selectableExerciseProvider. After adding, it updates the state
+     * to navigate back to the previous screen.
+     *
+     * @param selectedExercises A list of exercises selected by the user.
+     */
+    private fun selectSelectedExercises(selectedExercises: List<ExerciseData>) {
+        viewModelScope.launch {
+            repo.getExercisesByWrapper(selectedExercises).collect {
+                selectableExerciseProvider.addExercises(it)
+                _exerciseData.update { old -> old.copy(navigateBack = true) }
+            }
+        }
+    }
+
+    /**
+     * Adds the selected exercises to the addExerciseToWorkoutProvider to include them in the workout.
+     * After adding, it updates the state to navigate back to the previous screen.
+     *
+     * @param selectedExercises A list of exercises selected by the user.
+     */
+    private fun addSelectedExercises(selectedExercises: List<ExerciseData>) {
+        viewModelScope.launch {
+            repo.getExercisesByWrapper(selectedExercises).collect {
+                addExerciseToWorkoutProvider.addExercises(it)
+                _exerciseData.update { old -> old.copy(navigateBack = true) }
             }
         }
     }
@@ -240,11 +264,12 @@ class ExerciseViewModel(
      * @param search The new search query.
      */
     fun onSearchChange(search: String) {
+        Log.d("changed", search)
         _exerciseData.update { old ->
-            old.copy(
-                search = search,
-                exercises = getFiltered(searchString = search)
-            )
+            old.copy(search = search, loading = true)
+        }
+        _exerciseData.update { old ->
+            old.copy(exercises = getFiltered(searchString = search), loading = false)
         }
     }
 
@@ -257,9 +282,9 @@ class ExerciseViewModel(
      */
     fun updateFlag(addable: Boolean, replaceable: Boolean, selectable: Boolean) {
         val flag = when {
-            addable -> ExerciseFlag.Adding
             replaceable -> ExerciseFlag.Replacing
-            selectable && replaceable.not() -> ExerciseFlag.Selecting
+            addable -> ExerciseFlag.Adding
+            selectable -> ExerciseFlag.Selecting
             else -> ExerciseFlag.Default
         }
         _exerciseData.update { old -> old.copy(flag = flag) }

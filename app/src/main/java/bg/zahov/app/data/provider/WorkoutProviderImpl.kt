@@ -1,20 +1,33 @@
 package bg.zahov.app.data.provider
 
-import androidx.compose.animation.core.rememberTransition
+import android.util.Log
 import bg.zahov.app.data.interfaces.WorkoutProvider
 import bg.zahov.app.data.local.RealmWorkoutState
 import bg.zahov.app.data.model.Exercise
 import bg.zahov.app.data.model.Workout
+import bg.zahov.app.data.model.state.ExerciseData
 import bg.zahov.app.data.provider.model.HistoryWorkout
 import bg.zahov.app.data.repository.WorkoutRepositoryImpl
-import bg.zahov.app.ui.exercise.ExercisesWrapper
 import bg.zahov.app.ui.exercise.info.history.ExerciseHistoryInfo
 import bg.zahov.app.util.getOneRepMaxes
 import bg.zahov.app.util.timeToString
-import bg.zahov.app.util.toExerciseWrapper
+import bg.zahov.app.util.toExerciseData
+import kotlinx.coroutines.CoroutineScope
+import kotlinx.coroutines.Dispatchers
+import kotlinx.coroutines.ExperimentalCoroutinesApi
+import kotlinx.coroutines.cancel
+import kotlinx.coroutines.coroutineScope
 import kotlinx.coroutines.flow.Flow
 import kotlinx.coroutines.flow.MutableStateFlow
+import kotlinx.coroutines.flow.collect
+import kotlinx.coroutines.flow.collectLatest
+import kotlinx.coroutines.flow.first
+import kotlinx.coroutines.flow.last
+import kotlinx.coroutines.flow.mapLatest
 import kotlinx.coroutines.flow.mapNotNull
+import kotlinx.coroutines.flow.takeWhile
+import kotlinx.coroutines.launch
+import kotlinx.coroutines.withContext
 import java.time.LocalDate
 import java.time.LocalDateTime
 import java.time.format.DateTimeFormatter
@@ -50,32 +63,23 @@ class WorkoutProviderImpl : WorkoutProvider {
     override suspend fun getTemplateExercises(): Flow<List<Exercise>> =
         workoutRepo.getTemplateExercises()
 
-    override suspend fun getExerciseByName(name: String): Exercise? {
-        var foundExercise: Exercise? = null
-        workoutRepo.getTemplateExercises()
-            .collect{templates->
-                templates.find { it.name == name }.let { foundExercise = it }
-                return@collect
-            }
-        return foundExercise
-    }
-    override suspend fun getExercisesByWrapper(exercises: List<ExercisesWrapper>): List<Exercise> {
-        val foundExercises: MutableList<Exercise> = mutableListOf()
-
-        workoutRepo.getTemplateExercises()
-            .collect { templates ->
-                exercises.forEach { exercise ->
-                    templates.find { exercise.name == it.name }?.let { foundExercises.add(it) }
-                }
-                return@collect
+    @OptIn(ExperimentalCoroutinesApi::class)
+    override suspend fun getExerciseByName(name: String): Flow<Exercise?> =
+        workoutRepo.getTemplateExercises().mapLatest{ templates ->
+                templates.find{ it.name == name }
             }
 
-        return foundExercises.toList()
-    }
 
-    override suspend fun getWrappedExercises(): Flow<List<ExercisesWrapper>> =
+    @OptIn(ExperimentalCoroutinesApi::class)
+    override suspend fun getExercisesByWrapper(exercises: List<ExerciseData>): Flow<List<Exercise>> =
+        workoutRepo.getTemplateExercises().mapLatest { templates ->
+            exercises.mapNotNull { exercise -> templates.find { it.name == exercise.name } }
+        }
+
+
+    override suspend fun getWrappedExercises(): Flow<List<ExerciseData>> =
         workoutRepo.getTemplateExercises()
-            .mapNotNull { exercise -> exercise.map { it.toExerciseWrapper() } }
+            .mapNotNull { exercise -> exercise.map { it.toExerciseData() } }
 
     override suspend fun addTemplateExercise(newExercise: Exercise) =
         workoutRepo.addTemplateExercise(newExercise)
@@ -105,7 +109,7 @@ class WorkoutProviderImpl : WorkoutProvider {
     override suspend fun getPastWorkoutById(id: String): Workout =
         workoutRepo.getPastWorkoutById(id)
 
-    override suspend fun setClickedTemplateExercise(item: ExercisesWrapper) {
+    override suspend fun setClickedTemplateExercise(item: ExerciseData) {
         getPastWorkouts().collect { workout ->
             val resultsList = workout.mapNotNull {
                 it.exercises.find { workoutExercise -> workoutExercise.name == item.name }
@@ -121,7 +125,7 @@ class WorkoutProviderImpl : WorkoutProvider {
                     }
             }.sortedBy { it.date }
             _exerciseHistory.value = resultsList
-            getExerciseByName(item.name).let {
+            getExerciseByName(item.name).collect{
                 _clickedExercise.emit(it)
             }
         }

@@ -24,6 +24,7 @@ import bg.zahov.app.data.model.state.AddTemplateWorkoutUiMapper
 import bg.zahov.app.data.model.SetType
 import bg.zahov.app.hideBottomNav
 import bg.zahov.app.setToolBarTitle
+import bg.zahov.app.ui.exercise.ExercisesFragment.Companion.REPLACE_EXERCISE_ARG
 import bg.zahov.app.util.SetSwipeGesture
 import bg.zahov.app.util.applyScaleAnimation
 import bg.zahov.fitness.app.R
@@ -124,7 +125,7 @@ class AddTemplateWorkoutFragment : Fragment() {
                         addWorkoutViewModel.setReplaceableExercise(itemPosition)
                         findNavController().navigate(
                             R.id.create_workout_template_to_add_exercise,
-                            bundleOf("REPLACING" to true)
+                            bundleOf(REPLACE_EXERCISE_ARG to true)
                         )
                     }
 
@@ -162,7 +163,7 @@ class AddTemplateWorkoutFragment : Fragment() {
             addExercise.setOnClickListener {
                 findNavController().navigate(
                     R.id.create_workout_template_to_add_exercise,
-                    bundleOf("SELECTABLE" to true)
+                    bundleOf("ADDABLE" to true)
                 )
             }
 

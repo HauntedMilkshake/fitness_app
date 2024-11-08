@@ -28,7 +28,7 @@ class ExercisesFragment : Fragment() {
     }
 
     private val replaceable by lazy {
-        arguments?.getBoolean("REPLACING") ?: false
+        arguments?.getBoolean(REPLACE_EXERCISE_ARG) ?: false
     }
 
     private val addable by lazy {
@@ -40,12 +40,12 @@ class ExercisesFragment : Fragment() {
         container: ViewGroup?,
         savedInstanceState: Bundle?,
     ): View {
+        exerciseViewModel.updateFlag(
+            replaceable = replaceable,
+            selectable = selectable,
+            addable = addable
+        )
         return ComposeView(requireContext()).apply {
-            exerciseViewModel.updateFlag(
-                replaceable = replaceable,
-                selectable = selectable,
-                addable = addable
-            )
             requireActivity().showTopBar()
             if (addable || selectable || replaceable) requireActivity().hideBottomNav() else requireActivity().showBottomNav()
             (activity as? AppCompatActivity)?.setSupportActionBar(activity?.findViewById(R.id.toolbar))
@@ -144,5 +144,9 @@ class ExercisesFragment : Fragment() {
     override fun onDestroyView() {
         super.onDestroyView()
         requireActivity().invalidateOptionsMenu()
+    }
+
+    companion object {
+        const val REPLACE_EXERCISE_ARG = "REPLACING"
     }
 }
