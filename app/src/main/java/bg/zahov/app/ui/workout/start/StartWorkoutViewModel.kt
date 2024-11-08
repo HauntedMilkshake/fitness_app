@@ -1,11 +1,8 @@
 package bg.zahov.app.ui.workout.start
 
-import androidx.core.content.ContextCompat.getString
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
 import bg.zahov.app.Inject
-import bg.zahov.app.data.exception.CriticalDataNullException
-import bg.zahov.app.data.interfaces.ServiceErrorHandler
 import bg.zahov.app.data.interfaces.WorkoutProvider
 import bg.zahov.app.data.model.BodyPart
 import bg.zahov.app.data.model.Category
@@ -21,9 +18,7 @@ import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.StateFlow
 import kotlinx.coroutines.flow.update
 import kotlinx.coroutines.launch
-import java.time.LocalDate
 import java.time.LocalDateTime
-import java.time.format.DateTimeFormatter
 import bg.zahov.fitness.app.R
 
 /**
@@ -46,7 +41,7 @@ data class StartWorkoutUiState(
 data class StartWorkout(
     val id: String,
     val name: String,
-    val date: String,
+    val date: LocalDateTime,
     val exercises: List<String>,
     val note: String = "",
     val personalRecords: String = "0"
@@ -161,21 +156,6 @@ class StartWorkoutViewModel(
 }
 
 /**
- * Converts a string representing a date and time into a `LocalDateTime` object.
- *
- * This function takes a string formatted as "HH:mm, d MMMM" (e.g., "13:00, 5 September") and parses it into a
- * `LocalDateTime` object for the current year. This is useful when the input string does not include the year,
- * but it is required for creating a `LocalDateTime` object.
- *
- * @return A `LocalDateTime` object that corresponds to the parsed date and time, with the current year.
- */
-fun String.toLocalDateTime(): LocalDateTime =
-    LocalDateTime.parse(
-        "${LocalDate.now().year} $this",
-        DateTimeFormatter.ofPattern("yyyy HH:mm, d MMMM")
-    )
-
-/**
  * Converts a `StartWorkout` to a `Workout` object.
  *
  * This extension function maps the `StartWorkout` to a `Workout` object, converting each exercise in the workout to
@@ -184,14 +164,14 @@ fun String.toLocalDateTime(): LocalDateTime =
  *
  * @param exerciseTemplates A list of available exercise templates that are used to determine additional information
  * such as body part and category.
- * @return A `Workout` object created from the `StartWorkout`.
+ * @return [Workout] object created from the `StartWorkout`.
  */
 fun StartWorkout.toWorkout(exerciseTemplates: List<Exercise>) = Workout(
     id = this.id,
     name = this.name,
     duration = 0,
     volume = 0.0,
-    date = this.date.toLocalDateTime(),
+    date = this.date,
     isTemplate = true,
     exercises = this.exercises.map { exercise ->
         val regex = """(\d+)\s*x\s*(.*)""".toRegex()

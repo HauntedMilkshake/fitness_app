@@ -1,5 +1,6 @@
 package bg.zahov.app.data.provider
 
+import bg.zahov.app.data.exception.CriticalDataNullException
 import bg.zahov.app.data.interfaces.WorkoutProvider
 import bg.zahov.app.data.local.RealmWorkoutState
 import bg.zahov.app.data.model.Exercise
@@ -12,12 +13,12 @@ import bg.zahov.app.util.getOneRepMaxes
 import bg.zahov.app.util.timeToString
 import kotlinx.coroutines.flow.Flow
 import kotlinx.coroutines.flow.MutableStateFlow
+import kotlinx.coroutines.flow.flowOf
 import kotlinx.coroutines.flow.mapNotNull
 import java.time.LocalDate
 import java.time.LocalDateTime
 import java.time.format.DateTimeFormatter
 import java.util.Locale
-
 
 class WorkoutProviderImpl : WorkoutProvider {
 
@@ -28,6 +29,7 @@ class WorkoutProviderImpl : WorkoutProvider {
     }
 
     private var lastWorkoutPerformed: Workout? = null
+
     private val _clickedExercise = MutableStateFlow<Exercise?>(null)
     private val clickedExercise: Flow<Exercise?>
         get() = _clickedExercise
@@ -35,7 +37,10 @@ class WorkoutProviderImpl : WorkoutProvider {
     private val _exerciseHistory = MutableStateFlow<List<ExerciseHistoryInfo>>(listOf())
     private val exerciseHistory: Flow<List<ExerciseHistoryInfo>>
         get() = _exerciseHistory
+
     private val workoutRepo = WorkoutRepositoryImpl.getInstance()
+    private val errorHandler = ServiceErrorHandlerImpl.getInstance()
+
     fun getLastWorkout(): Workout? = lastWorkoutPerformed
     override suspend fun getTemplateWorkouts(): Flow<List<Workout>> =
         workoutRepo.getTemplateWorkouts()
@@ -45,8 +50,22 @@ class WorkoutProviderImpl : WorkoutProvider {
     override suspend fun addTemplateWorkout(newWorkout: Workout) =
         workoutRepo.addTemplateWorkout(newWorkout)
 
-    override suspend fun getTemplateExercises(): Flow<List<Exercise>> =
+    /**
+     * Fetches the list of template exercises from the repository.
+     *
+     * This function makes a call to the `workoutRepo` to retrieve a list of exercises. If a `CriticalDataNullException`
+     * is thrown during the data retrieval, it initiates a countdown via the `errorHandler` and returns an empty list
+     * wrapped in a flow.
+     *
+     * @return A [Flow] emitting a [List] of [Exercise] objects. The flow will emit the list of exercises from the repository,
+     *         or an empty list if an exception occurs.
+     */
+    override suspend fun getTemplateExercises(): Flow<List<Exercise>> = try {
         workoutRepo.getTemplateExercises()
+    } catch (e: CriticalDataNullException) {
+        errorHandler.initiateCountdown()
+        flowOf(listOf<Exercise>())
+    }
 
     override suspend fun addTemplateExercise(newExercise: Exercise) =
         workoutRepo.addTemplateExercise(newExercise)
@@ -116,10 +135,22 @@ class WorkoutProviderImpl : WorkoutProvider {
     }
 
     /**
-     * Retrieves a list of start workouts by mapping template workouts.
+     * Retrieves a list of start workouts from the template workouts.
+     *
+     * This function fetches the template workouts by calling [getTemplateWorkouts] and converts each workout into a
+     * [StartWorkout] object. If the data retrieval results in a `CriticalDataNullException`, it initiates a countdown
+     * via the [errorHandler] and returns an empty list wrapped in a [Flow].
+     *
+     * @return A [Flow] emitting a [List] of [Workout] mapped to [StartWorkout] objects. If the data retrieval is successful, the flow will emit
+     *         a list of [StartWorkout] objects created from the template workouts. If an error occurs, the flow will emit
+     *         an empty list.
      */
-    override suspend fun getStartWorkouts(): Flow<List<StartWorkout>> =
+    override suspend fun getStartWorkouts(): Flow<List<StartWorkout>> = try {
         getTemplateWorkouts().mapNotNull { workouts -> workouts.map { it.toStartWorkout() } }
+    } catch (e: CriticalDataNullException) {
+        errorHandler.initiateCountdown()
+        flowOf(listOf<StartWorkout>())
+    }
 
     /**
      * Retrieves a flow of workouts from the current month along with their count.
@@ -144,14 +175,15 @@ class WorkoutProviderImpl : WorkoutProvider {
     }
 }
 
+
 /**
  * Converts a `Workout` object to a `StartWorkout` object.
  */
 fun Workout.toStartWorkout(): StartWorkout = StartWorkout(
     id = this.id,
     name = this.name,
-    date = this.date.toFormattedString(),
-    exercises = this.exercises.map { "${if (it.sets.isNotEmpty()) "${it.sets.size} x " else ""}${it.name} " },
+    date = this.date,
+    exercises = this.exercises.map { if (it.sets.isNotEmpty()) "${it.sets.size} x " else "" + it.name },
     note = this.note ?: "",
     personalRecords = this.personalRecords.toString()
 )
@@ -171,7 +203,7 @@ fun Workout.toHistoryWorkout(): HistoryWorkout {
         duration = this.duration?.timeToString() ?: "00:00:00",
         volume = (this.volume ?: 0.0).toString(),
         date = this.date.toFormattedString(),
-        exercises = this.exercises.map { if (it.sets.isNotEmpty()) "${it.sets.size}" else "" + " x " + it.name },
+        exercises = this.exercises.map { if (it.sets.isNotEmpty()) "${it.sets.size} x " else "" + it.name },
         bestSets = this.exercises.map {
             "${it.bestSet.firstMetric ?: 0} x ${it.bestSet.secondMetric ?: 0}"
         },

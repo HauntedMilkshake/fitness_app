@@ -40,6 +40,7 @@ import androidx.compose.runtime.setValue
 import androidx.compose.ui.platform.LocalContext
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import bg.zahov.app.data.model.ToastManager
+import bg.zahov.app.data.provider.toFormattedString
 import bg.zahov.app.ui.theme.FitnessTheme
 
 
@@ -75,7 +76,6 @@ fun StartWorkoutScreen(
             )
         }
     )
-
 }
 
 @Composable
@@ -143,7 +143,7 @@ fun StartWorkoutContent(
                     Workout(
                         modifier = Modifier.animateItem(),
                         workoutName = it.name,
-                        workoutDate = it.date,
+                        workoutDate = it.date.toFormattedString(),
                         exercises = it.exercises,
                         onWorkoutClick = { onWorkoutClick(it.id) },
                         onWorkoutStart = { onWorkoutStart(it) },
