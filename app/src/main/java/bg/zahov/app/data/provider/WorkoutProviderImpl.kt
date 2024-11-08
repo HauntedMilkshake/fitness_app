@@ -59,9 +59,9 @@ class WorkoutProviderImpl : WorkoutProvider {
 
 
     @OptIn(ExperimentalCoroutinesApi::class)
-    override suspend fun getExercisesByWrapper(exercises: List<ExerciseData>): Flow<List<Exercise>> =
+    override suspend fun getExercisesByNames(name: List<String>): Flow<List<Exercise>> =
         workoutRepo.getTemplateExercises().mapLatest { templates ->
-            exercises.mapNotNull { exercise -> templates.find { it.name == exercise.name } }
+            name.mapNotNull { name -> templates.find { it.name == name } }
         }
 
 

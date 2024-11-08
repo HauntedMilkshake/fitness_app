@@ -15,7 +15,7 @@ interface WorkoutProvider {
     suspend fun addTemplateWorkout(newWorkout: Workout)
     suspend fun getTemplateExercises(): Flow<List<Exercise>>
     suspend fun getExerciseByName(name: String): Flow<Exercise?>
-    suspend fun getExercisesByWrapper(exercises:List<ExerciseData>): Flow<List<Exercise>>
+    suspend fun getExercisesByNames(names:List<String>): Flow<List<Exercise>>
     suspend fun getWrappedExercises(): Flow<List<ExerciseData>>
     suspend fun addTemplateExercise(newExercise: Exercise)
     suspend fun addWorkoutToHistory(newWorkout: Workout)

@@ -2,7 +2,7 @@ package bg.zahov.app.data.model.state
 
 import bg.zahov.app.data.model.BodyPart
 import bg.zahov.app.data.model.Category
-import bg.zahov.app.data.model.FilterWrapper
+import bg.zahov.app.data.model.FilterItem
 
 /**
  * UI state representation for the exercise view, including a list of exercises,
@@ -17,7 +17,7 @@ import bg.zahov.app.data.model.FilterWrapper
  */
 data class ExerciseScreenData(
     val exercises: List<ExerciseData> = listOf(),
-    val filters: List<FilterWrapper> = listOf(),
+    val filters: List<FilterItem> = listOf(),
     val loading: Boolean = true,
     val search: String = "",
     val flag: ExerciseFlag = ExerciseFlag.Default,

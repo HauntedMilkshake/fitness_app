@@ -28,7 +28,7 @@ import bg.zahov.fitness.app.R
 
 @Composable
 fun FilterDialog(filterViewModel: FilterViewModel = viewModel(), onDismiss: () -> Unit) {
-    val uiState by filterViewModel.uiState.collectAsStateWithLifecycle()
+    val uiState by filterViewModel.filterData.collectAsStateWithLifecycle()
     val interactionSource = remember { MutableInteractionSource() }
 
     Dialog(onDismissRequest = onDismiss) {

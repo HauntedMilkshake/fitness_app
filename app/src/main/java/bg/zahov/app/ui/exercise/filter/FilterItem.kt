@@ -14,14 +14,14 @@ import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.res.colorResource
 import androidx.compose.ui.unit.dp
-import bg.zahov.app.data.model.FilterWrapper
+import bg.zahov.app.data.model.FilterItem
 import bg.zahov.fitness.app.R
 
 @OptIn(ExperimentalLayoutApi::class)
 @Composable
 fun FilterItem(
-    list: List<FilterWrapper>,
-    onItemSelected: (FilterWrapper) -> Unit
+    list: List<FilterItem>,
+    onItemSelected: (FilterItem) -> Unit
 ) {
     FlowRow(
         modifier = Modifier
@@ -30,7 +30,7 @@ fun FilterItem(
     ) {
         list.forEach { filterWrapper ->
             FilterItemBox(
-                filterWrapper = filterWrapper,
+                filterItem = filterWrapper,
                 onItemSelected = onItemSelected
             )
         }
@@ -39,20 +39,20 @@ fun FilterItem(
 
 @Composable
 fun FilterItemBox(
-    filterWrapper: FilterWrapper,
-    onItemSelected: (FilterWrapper) -> Unit
+    filterItem: FilterItem,
+    onItemSelected: (FilterItem) -> Unit
 ) {
     Box(
         modifier = Modifier
             .padding(4.dp)
-            .clickable { onItemSelected(filterWrapper) }
+            .clickable { onItemSelected(filterItem) }
             .background(
-                color = if (filterWrapper.selected) colorResource(R.color.selected)
+                color = if (filterItem.selected) colorResource(R.color.selected)
                 else colorResource(R.color.unselected_filter),
                 shape = RoundedCornerShape(8.dp)
             )
             .padding(horizontal = 16.dp, vertical = 8.dp)
     ) {
-        Text(text = filterWrapper.name, color = Color.White)
+        Text(text = filterItem.name, color = Color.White)
     }
 }

@@ -8,7 +8,7 @@ import bg.zahov.app.data.exception.CriticalDataNullException
 import bg.zahov.app.data.interfaces.ServiceErrorHandler
 import bg.zahov.app.data.interfaces.WorkoutProvider
 import bg.zahov.app.data.model.Filter
-import bg.zahov.app.data.model.FilterWrapper
+import bg.zahov.app.data.model.FilterItem
 import bg.zahov.app.data.model.state.ExerciseData
 import bg.zahov.app.data.model.state.ExerciseFlag
 import bg.zahov.app.data.model.state.ExerciseScreenData
@@ -139,7 +139,7 @@ class ExerciseViewModel(
      * @return A filtered list of exercises that match the filters and search query.
      */
     private fun getFiltered(
-        filter: List<FilterWrapper> = _exerciseData.value.filters,
+        filter: List<FilterItem> = _exerciseData.value.filters,
         exercises: List<ExerciseData> = _exerciseData.value.exercises,
         searchString: String = _exerciseData.value.search
     ): List<ExerciseData> {
@@ -235,7 +235,7 @@ class ExerciseViewModel(
      */
     private fun selectSelectedExercises(selectedExercises: List<ExerciseData>) {
         viewModelScope.launch {
-            repo.getExercisesByWrapper(selectedExercises).collect {
+            repo.getExercisesByNames(selectedExercises.map { it.name }).collect {
                 selectableExerciseProvider.addExercises(it)
                 _exerciseData.update { old -> old.copy(navigateBack = true) }
             }
@@ -250,7 +250,7 @@ class ExerciseViewModel(
      */
     private fun addSelectedExercises(selectedExercises: List<ExerciseData>) {
         viewModelScope.launch {
-            repo.getExercisesByWrapper(selectedExercises).collect {
+            repo.getExercisesByNames(selectedExercises.map{it.name}).collect {
                 addExerciseToWorkoutProvider.addExercises(it)
                 _exerciseData.update { old -> old.copy(navigateBack = true) }
             }
@@ -312,7 +312,7 @@ class ExerciseViewModel(
      *
      * @param filter The filter to remove.
      */
-    fun removeFilter(filter: FilterWrapper) {
+    fun removeFilter(filter: FilterItem) {
         viewModelScope.launch {
             filterProvider.updateFilter(filter)
         }
