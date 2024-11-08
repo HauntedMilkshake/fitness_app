@@ -255,7 +255,7 @@ fun DropDown(
             MenuItem.entries.toList().forEachIndexed { index, item ->
                 DropdownMenuItem(text = {
                     Text(
-                        text = item.label,
+                        text = stringResource(item.stringResource),
                         color = MaterialTheme.colorScheme.onSecondary,
                         maxLines = 1,
                         overflow = TextOverflow.Ellipsis,
@@ -276,6 +276,6 @@ fun DropDown(
     }
 }
 
-enum class MenuItem(val label: String) {
-    EDIT("Edit"), DELETE("Delete"), DUPLICATE("Duplicate"), START("Start")
+enum class MenuItem(val stringResource: Int) {
+    EDIT(R.string.edit_text), DELETE(R.string.delete), DUPLICATE(R.string.duplicate), START(R.string.start_workout)
 }
