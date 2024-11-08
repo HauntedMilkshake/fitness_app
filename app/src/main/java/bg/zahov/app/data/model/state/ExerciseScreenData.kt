@@ -22,7 +22,8 @@ data class ExerciseScreenData(
     val search: String = "",
     val flag: ExerciseFlag = ExerciseFlag.Default,
     val showDialog: Boolean = false,
-    val navigateBack: Boolean = false
+    val navigateBack: Boolean = false,
+    val navigateInfo: Boolean = false
 )
 
 /**

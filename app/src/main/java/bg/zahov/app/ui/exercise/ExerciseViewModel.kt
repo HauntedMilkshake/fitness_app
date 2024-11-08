@@ -81,6 +81,15 @@ class ExerciseViewModel(
         }
     }
 
+    fun onExerciseClicked(position: Int) {
+        if (_exerciseData.value.flag == ExerciseFlag.Default) {
+            updateExerciseInfoScreen(position)
+            _exerciseData.update { old -> old.copy(navigateInfo = true) }
+        } else {
+            setSelectedExercise(position)
+        }
+    }
+
     /**
      * Handles the click event on an exercise item, adjusting the selection state based on the current flag.
      *
@@ -91,7 +100,7 @@ class ExerciseViewModel(
      *
      * @param position The position of the clicked exercise in the list.
      */
-    fun onExerciseClicked(position: Int) {
+    private fun setSelectedExercise(position: Int) {
         _exerciseData.update { old ->
             old.copy(
                 exercises = old.exercises.mapIndexed { index, exercise ->
@@ -108,6 +117,18 @@ class ExerciseViewModel(
         }
     }
 
+    /**
+     * Sets the clicked exercise in the repository based on the exercise name.
+     *
+     * @param position The position of the clicked exercise.
+     */
+    private fun updateExerciseInfoScreen(position: Int) {
+        viewModelScope.launch {
+            _exerciseData.value.exercises[position].let {
+                repo.setClickedTemplateExercise(it)
+            }
+        }
+    }
 
     /**
      * Filters exercises based on the current filters and search string.
@@ -155,19 +176,6 @@ class ExerciseViewModel(
 
             is Filter.BodyPartFilter -> {
                 exercise.bodyPart == filter.bodyPart
-            }
-        }
-    }
-
-    /**
-     * Sets the clicked exercise in the repository based on the exercise name.
-     *
-     * @param position The position of the clicked exercise.
-     */
-    fun setClickedExercise(position: Int) {
-        viewModelScope.launch {
-            _exerciseData.value.exercises[position].let {
-                repo.setClickedTemplateExercise(it)
             }
         }
     }

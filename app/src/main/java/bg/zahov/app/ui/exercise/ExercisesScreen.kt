@@ -29,6 +29,7 @@ import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.getValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.focus.focusModifier
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.layout.ContentScale
 import androidx.compose.ui.res.colorResource
@@ -67,14 +68,8 @@ fun ExercisesScreen(
         exerciseItems = uiState.exercises,
         showButton = uiState.flag != ExerciseFlag.Default,
         removeFilter = { viewModel.removeFilter(it) },
-        clickExercise = {
-            if (uiState.flag == ExerciseFlag.Default) {
-                viewModel.setClickedExercise(it)
-                navigateInfo()
-            } else {
-                viewModel.onExerciseClicked(it)
-            }
-        }, onConfirm = {
+        clickExercise = { viewModel.onExerciseClicked(it) },
+        onConfirm = {
             viewModel.confirmSelectedExercises()
         })
     if (uiState.loading) {
@@ -102,12 +97,18 @@ fun ExercisesContent(
             modifier = Modifier.padding(16.dp),
         ) {
             filterItems.forEach { item ->
-                FilterCard(item) { removeFilter(it) }
+                FilterCard(
+                    filter = item,
+                    modifier = Modifier.padding(horizontal = 8.dp)
+                ) { removeFilter(it) }
             }
             LazyColumn(modifier = Modifier.fillMaxWidth()) {
                 itemsIndexed(exerciseItems) { index, exercise ->
                     if (exercise.toShow) {
-                        ExerciseCards(exercise) { clickExercise(index) }
+                        ExerciseCards(
+                            exercise = exercise,
+                            modifier = Modifier.padding(16.dp)
+                        ) { clickExercise(index) }
                     }
                 }
             }
@@ -143,9 +144,9 @@ fun ExercisesContent(
 }
 
 @Composable
-fun ExerciseCards(exercise: ExerciseData, onClick: (ExerciseData) -> Unit) {
+fun ExerciseCards(modifier: Modifier, exercise: ExerciseData, onClick: (ExerciseData) -> Unit) {
     Card(
-        modifier = Modifier.padding(16.dp),
+        modifier = modifier,
         shape = RoundedCornerShape(16.dp),
         colors = CardColors(
             containerColor = colorResource(if (exercise.selected) R.color.selected else R.color.background),
@@ -198,8 +199,8 @@ fun ExerciseCards(exercise: ExerciseData, onClick: (ExerciseData) -> Unit) {
 }
 
 @Composable
-fun FilterCard(filter: FilterWrapper, onClick: (FilterWrapper) -> Unit) {
-    Card(modifier = Modifier.padding(horizontal = 8.dp), colors = CardColors(
+fun FilterCard(modifier: Modifier, filter: FilterWrapper, onClick: (FilterWrapper) -> Unit) {
+    Card(modifier = modifier, colors = CardColors(
         contentColor = Color.White,
         containerColor = colorResource(R.color.selected),
         disabledContentColor = Color.White,
