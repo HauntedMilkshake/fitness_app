@@ -27,6 +27,7 @@ import kotlinx.coroutines.delay
 
 @Composable
 fun CommonPasswordField(
+    modifier: Modifier = Modifier,
     password: String,
     passwordVisible: Boolean = false,
     label: @Composable (() -> Unit)? = null,
@@ -45,8 +46,7 @@ fun CommonPasswordField(
     ),
     onPasswordChange: (String) -> Unit,
     onPasswordVisibilityChange: (Boolean) -> Unit,
-    modifier: Modifier = Modifier
-
+    enabled: Boolean = true
 ) {
     var isError by remember { mutableStateOf(false) }
     var isActive by remember { mutableStateOf(false) }
@@ -66,6 +66,7 @@ fun CommonPasswordField(
         shape = shape,
         colors = colors,
         isError = isError,
+        enabled = enabled,
         visualTransformation = if (passwordVisible) VisualTransformation.None else PasswordVisualTransformation(),
         trailingIcon = {
             IconButton(onClick = {

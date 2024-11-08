@@ -78,7 +78,9 @@
     <string name="create_exercise">Create exercise</string>
     <string name="edit_profile_text"> Edit profile</string>
     <string name="reset_password_text">Reset password</string>
-    <string name="confirm_changes">Confirm changes</string>
+    <string name="update_username">Update Username</string>
+    <string name="update_password">Update Password</string>
+    <string name="confirm_authentication">Confirm Identity</string>
     <!-- Strings used for edit profile fragment   -->
     <string name="filter">Filter</string>
     <string name="body_part">Body part</string>
@@ -148,6 +150,7 @@
     <string name="max_weight">Max weight</string>
     <string name="history_measurement">HISTORY</string>
     <string name="application_warning_text">Due to service errors we will be closing\nthe application in exactly:</string>
+    <string name="workouts_for_month">%1$s workouts</string>
     <string name="sync_option_text">Automatic between device sync</string>
     <string name="sync_option_explain">Activate to use your account on another device</string>
     <string name="show_update_template_explain">Prompt when a workout is finished</string>
@@ -155,4 +158,13 @@
     <string name="link_error">An error occurred while trying to open the link</string>
     <string name="no_application">No application found to open the link</string>
     <string name="volume_for_history_workouts">%1$s kg</string>
+    <!-- Strings used for toast messages    -->
+    <string name="update_password_success">"Successfully updated password</string>
+    <string name="update_password_fail">Failed to update password</string>
+    <string name="reset_password_success">Successfully updated password</string>
+    <string name="reset_password_fail">Failed to send password reset link</string>
+    <string name="re_authenticate_success">"Successfully re-authenticated!"</string>
+    <string name="re_authenticate_fail">"Failed to re-authenticate!"</string>
+    <string name="update_username_success">"Successfully updated username</string>
+    <string name="update_username_fail">Failed to update username</string>
 </resources>

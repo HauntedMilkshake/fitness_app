@@ -35,7 +35,8 @@ fun CommonTextField(
     ),
     onTextChange: (String) -> Unit,
     modifier: Modifier = Modifier,
-    isEmail: Boolean = false
+    isEmail: Boolean = false,
+    enabled: Boolean = true,
 ) {
     var isError by remember { mutableStateOf(false) }
     var isActive by remember { mutableStateOf(false) }
@@ -49,6 +50,7 @@ fun CommonTextField(
             isActive = true
         },
         isError = isError,
+        enabled = enabled,
         label = label,
         singleLine = singleLine,
         leadingIcon = leadingIcon,

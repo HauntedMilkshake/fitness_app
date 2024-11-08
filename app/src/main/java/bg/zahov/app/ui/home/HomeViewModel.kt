@@ -58,6 +58,7 @@ data class ChartData(
     val chartData: List<BarEntry> = listOf(),
     val weekRanges: List<String> = listOf()
 )
+
 /**
  * @param userRepo - access to everything related to the user ( in here we only use the username)
  * @param workoutRepo - access to history of previous workouts
@@ -129,7 +130,8 @@ class HomeViewModel(
                                     isChartLoading = false
                                 )
                             }
-                        }
+
+                    }
                 } catch (e: CriticalDataNullException) {
                     serviceErrorHandler.initiateCountdown()
                 }

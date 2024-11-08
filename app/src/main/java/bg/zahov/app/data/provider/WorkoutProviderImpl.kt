@@ -29,6 +29,7 @@ import kotlinx.coroutines.flow.takeWhile
 import kotlinx.coroutines.launch
 import kotlinx.coroutines.withContext
 import java.time.LocalDate
+import java.time.LocalDate
 import java.time.LocalDateTime
 import java.time.format.DateTimeFormatter
 import java.util.Locale
@@ -151,12 +152,20 @@ class WorkoutProviderImpl : WorkoutProvider {
         workoutRepo.updateTemplateWorkout(workoutId, date, newExercises)
     }
 
+    /**
+     * Retrieves a flow of workouts from the current month along with their count.
+     *
+     * This function filters the workouts to include only those that occurred in the
+     * current month.
+     *
+     * @return A [Flow] emitting a [Pair] of a list of [Workout] objects and the
+     * number of workouts in the current month.
+     */
     override suspend fun getCurrentMonthWorkouts(): Flow<List<Workout>> {
         return workoutRepo.getPastWorkouts()
             .mapNotNull { workouts -> workouts.filter { workout -> workout.date.month == LocalDate.now().month } }
 
     }
-
 
     override suspend fun getHistoryWorkouts(): Flow<List<HistoryWorkout>> =
         getPastWorkouts().mapNotNull { workouts -> workouts.map { it.toHistoryWorkout() } }
