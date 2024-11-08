@@ -1,16 +1,23 @@
 package bg.zahov.app.ui.exercise.filter
 
+import androidx.compose.foundation.Image
+import androidx.compose.foundation.clickable
+import androidx.compose.foundation.interaction.MutableInteractionSource
 import androidx.compose.foundation.layout.Column
+import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.padding
+import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Surface
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.getValue
+import androidx.compose.runtime.remember
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.res.colorResource
+import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.window.Dialog
@@ -22,6 +29,7 @@ import bg.zahov.fitness.app.R
 @Composable
 fun FilterDialog(filterViewModel: FilterViewModel = viewModel(), onDismiss: () -> Unit) {
     val uiState by filterViewModel.uiState.collectAsStateWithLifecycle()
+    val interactionSource = remember { MutableInteractionSource() }
 
     Dialog(onDismissRequest = onDismiss) {
         Surface(
@@ -32,12 +40,24 @@ fun FilterDialog(filterViewModel: FilterViewModel = viewModel(), onDismiss: () -
                 .fillMaxWidth(),
         ) {
             Column(modifier = Modifier.padding(16.dp)) {
-                Text(
-                    text = stringResource(R.string.select_filter),
-                    style = MaterialTheme.typography.headlineLarge,
-                    modifier = Modifier.padding(bottom = 8.dp),
-                    color = colorResource(R.color.white)
-                )
+                Row {
+                    Image(
+                        modifier = Modifier
+                            .size(40.dp)
+                            .clickable(
+                                interactionSource = interactionSource,
+                                indication = null
+                            ) { onDismiss() },
+                        painter = painterResource(R.drawable.ic_back_arrow),
+                        contentDescription = "dismiss"
+                    )
+                    Text(
+                        text = stringResource(R.string.select_filter),
+                        style = MaterialTheme.typography.headlineLarge,
+                        modifier = Modifier.padding(bottom = 8.dp),
+                        color = colorResource(R.color.white)
+                    )
+                }
 
                 Text(
                     text = stringResource(R.string.body_part),

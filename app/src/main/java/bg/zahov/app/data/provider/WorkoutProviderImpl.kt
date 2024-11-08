@@ -1,6 +1,5 @@
 package bg.zahov.app.data.provider
 
-import android.util.Log
 import bg.zahov.app.data.interfaces.WorkoutProvider
 import bg.zahov.app.data.local.RealmWorkoutState
 import bg.zahov.app.data.model.Exercise
@@ -12,23 +11,11 @@ import bg.zahov.app.ui.exercise.info.history.ExerciseHistoryInfo
 import bg.zahov.app.util.getOneRepMaxes
 import bg.zahov.app.util.timeToString
 import bg.zahov.app.util.toExerciseData
-import kotlinx.coroutines.CoroutineScope
-import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.ExperimentalCoroutinesApi
-import kotlinx.coroutines.cancel
-import kotlinx.coroutines.coroutineScope
 import kotlinx.coroutines.flow.Flow
 import kotlinx.coroutines.flow.MutableStateFlow
-import kotlinx.coroutines.flow.collect
-import kotlinx.coroutines.flow.collectLatest
-import kotlinx.coroutines.flow.first
-import kotlinx.coroutines.flow.last
 import kotlinx.coroutines.flow.mapLatest
 import kotlinx.coroutines.flow.mapNotNull
-import kotlinx.coroutines.flow.takeWhile
-import kotlinx.coroutines.launch
-import kotlinx.coroutines.withContext
-import java.time.LocalDate
 import java.time.LocalDate
 import java.time.LocalDateTime
 import java.time.format.DateTimeFormatter
@@ -66,9 +53,9 @@ class WorkoutProviderImpl : WorkoutProvider {
 
     @OptIn(ExperimentalCoroutinesApi::class)
     override suspend fun getExerciseByName(name: String): Flow<Exercise?> =
-        workoutRepo.getTemplateExercises().mapLatest{ templates ->
-                templates.find{ it.name == name }
-            }
+        workoutRepo.getTemplateExercises().mapLatest { templates ->
+            templates.find { it.name == name }
+        }
 
 
     @OptIn(ExperimentalCoroutinesApi::class)
@@ -126,7 +113,7 @@ class WorkoutProviderImpl : WorkoutProvider {
                     }
             }.sortedBy { it.date }
             _exerciseHistory.value = resultsList
-            getExerciseByName(item.name).collect{
+            getExerciseByName(item.name).collect {
                 _clickedExercise.emit(it)
             }
         }

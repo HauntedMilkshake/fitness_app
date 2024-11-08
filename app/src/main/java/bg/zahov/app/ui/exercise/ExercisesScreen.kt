@@ -13,12 +13,15 @@ import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.layout.wrapContentHeight
+import androidx.compose.foundation.layout.wrapContentSize
 import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.foundation.lazy.itemsIndexed
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material3.Button
+import androidx.compose.material3.ButtonColors
 import androidx.compose.material3.Card
 import androidx.compose.material3.CardColors
+import androidx.compose.material3.CircularProgressIndicator
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
@@ -30,7 +33,6 @@ import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.layout.ContentScale
 import androidx.compose.ui.res.colorResource
 import androidx.compose.ui.res.painterResource
-import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.text.style.TextOverflow
 import androidx.compose.ui.unit.dp
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
@@ -75,8 +77,15 @@ fun ExercisesScreen(
         }, onConfirm = {
             viewModel.confirmSelectedExercises()
         })
-
+    if (uiState.loading) {
+        CircularProgressIndicator(
+            modifier = Modifier,
+            color = MaterialTheme.colorScheme.secondary,
+            trackColor = MaterialTheme.colorScheme.surfaceVariant
+        )
+    }
 }
+
 
 @OptIn(ExperimentalLayoutApi::class)
 @Composable
@@ -108,20 +117,25 @@ fun ExercisesContent(
         Box(
             modifier = Modifier
                 .fillMaxSize()
-                .padding(16.dp)
+                .padding(16.dp),
         ) {
             Button(
                 onClick = onConfirm,
                 modifier = Modifier
                     .align(Alignment.BottomEnd)
                     .padding(16.dp)
+                    .wrapContentSize(),
+                colors = ButtonColors(
+                    containerColor = colorResource(R.color.text),
+                    contentColor = colorResource(R.color.white),
+                    disabledContentColor = colorResource(R.color.disabled_button),
+                    disabledContainerColor = colorResource(R.color.disabled_button),
+                )
             ) {
-                Text(
-                    text = stringResource(R.string.confirm),
-                    style = MaterialTheme.typography.headlineLarge,
-                    maxLines = 1,
-                    overflow = TextOverflow.Ellipsis,
-                    color = Color.White
+                Image(
+                    modifier = Modifier.size(40.dp),
+                    painter = painterResource(R.drawable.ic_check),
+                    contentDescription = "confirm"
                 )
             }
         }
