@@ -1,5 +1,6 @@
 package bg.zahov.app.ui.workout.start
 
+import androidx.core.content.ContextCompat.getString
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
 import bg.zahov.app.Inject
@@ -57,13 +58,11 @@ data class StartWorkout(
  * @param repo The provider responsible for fetching workout templates.
  * @param workoutState The state manager responsible for tracking the current workout state.
  * @param toastManager responsible for showing toasts to the user
- * @param serviceError The handler for managing service errors.
  */
 class StartWorkoutViewModel(
     private val repo: WorkoutProvider = Inject.workoutProvider,
     private val toastManager: ToastManager = ToastManager,
     private val workoutState: WorkoutStateManager = Inject.workoutState,
-    private val serviceError: ServiceErrorHandler = Inject.serviceErrorHandler
 ) : ViewModel() {
 
     /**
@@ -88,23 +87,15 @@ class StartWorkoutViewModel(
     init {
         viewModelScope.launch {
             launch {
-                try {
-                    repo.getStartWorkouts().collect { workouts ->
-                        _uiState.update { old ->
-                            old.copy(workouts = workouts)
-                        }
+                repo.getStartWorkouts().collect { workouts ->
+                    _uiState.update { old ->
+                        old.copy(workouts = workouts)
                     }
-                } catch (e: CriticalDataNullException) {
-                    serviceError.initiateCountdown()
                 }
             }
             launch {
-                try {
-                    repo.getTemplateExercises().collect { templates ->
-                        exerciseTemplates = templates
-                    }
-                } catch (e: CriticalDataNullException) {
-                    serviceError.initiateCountdown()
+                repo.getTemplateExercises().collect { templates ->
+                    exerciseTemplates = templates
                 }
             }
             launch {
@@ -124,7 +115,7 @@ class StartWorkoutViewModel(
             if (currentWorkoutState == WorkoutState.INACTIVE) {
                 workoutState.startWorkout(workout = workout?.toWorkout(exerciseTemplates))
             } else {
-                toastManager.showToast(R.string.starting_workout_while_another_is_active)
+                toastManager.showToast(R.string.toast_couldnt_start_workout)
             }
         }
     }
@@ -138,12 +129,12 @@ class StartWorkoutViewModel(
      *
      * @param newWorkout The `StartWorkout` object that contains the details of the workout to duplicate.
      */
-    fun addDuplicateTemplateWorkout(newWorkout: StartWorkout) {
+    fun addDuplicateTemplateWorkout(newWorkout: StartWorkout, duplicate: String) {
         viewModelScope.launch {
             repo.addTemplateWorkout(
                 Workout(
                     id = generateRandomId(),
-                    name = if (newWorkout.name.contains("duplicate")) newWorkout.name else "${newWorkout.name} duplicate",
+                    name = if (newWorkout.name.contains(duplicate)) newWorkout.name else "${newWorkout.name} duplicate",
                     duration = 0,
                     volume = 0.0,
                     date = LocalDateTime.now(),

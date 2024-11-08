@@ -17,7 +17,6 @@
         <activity
             android:name="bg.zahov.app.MainActivity"
             android:exported="true"
-            android:screenOrientation="portrait"
             android:theme="@style/Theme.Fitness_app"
             android:windowSoftInputMode="adjustPan">
             <intent-filter>

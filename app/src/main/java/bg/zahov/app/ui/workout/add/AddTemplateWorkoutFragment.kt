@@ -44,7 +44,6 @@ class AddTemplateWorkoutFragment : Fragment() {
     }
 
     private val id by lazy {
-        Log.d("getting edit", arguments?.getString(WORKOUT_ID_ARG_KEY).toString())
         arguments?.getString(WORKOUT_ID_ARG_KEY)
     }
 

@@ -24,7 +24,6 @@ import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.mutableStateOf
-import androidx.compose.runtime.remember
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
@@ -36,6 +35,7 @@ import androidx.compose.ui.unit.dp
 import androidx.lifecycle.viewmodel.compose.viewModel
 import bg.zahov.fitness.app.R
 import androidx.compose.runtime.getValue
+import androidx.compose.runtime.saveable.rememberSaveable
 import androidx.compose.runtime.setValue
 import androidx.compose.ui.platform.LocalContext
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
@@ -68,7 +68,12 @@ fun StartWorkoutScreen(
         onStartEmptyWorkout = { startWorkoutViewModel.startWorkout() },
         onEditWorkout = { onEditWorkout(it) },
         onDeleteWorkout = { startWorkoutViewModel.deleteTemplateWorkout(it) },
-        onDuplicateWorkout = { startWorkoutViewModel.addDuplicateTemplateWorkout(it) }
+        onDuplicateWorkout = {
+            startWorkoutViewModel.addDuplicateTemplateWorkout(
+                it,
+                context.getString(R.string.duplicate_workout_template)
+            )
+        }
     )
 
 }
@@ -161,7 +166,7 @@ fun Workout(
     onDelete: () -> Unit,
     onDuplicate: () -> Unit
 ) {
-    var isDropDownExpanded by remember {
+    var isDropDownExpanded by rememberSaveable {
         mutableStateOf(false)
     }
 
@@ -276,6 +281,11 @@ fun DropDown(
     }
 }
 
+/**
+ * Enum representing the different menu items
+ *
+ * @param stringResource corresponding string for the label
+ */
 enum class MenuItem(val stringResource: Int) {
     EDIT(R.string.edit_text), DELETE(R.string.delete), DUPLICATE(R.string.duplicate), START(R.string.start_workout)
 }
