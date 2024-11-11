@@ -1,6 +1,5 @@
 package bg.zahov.app.data.provider
 
-import bg.zahov.app.data.exception.CriticalDataNullException
 import bg.zahov.app.data.interfaces.WorkoutProvider
 import bg.zahov.app.data.local.RealmWorkoutState
 import bg.zahov.app.data.model.Exercise
@@ -13,7 +12,6 @@ import bg.zahov.app.util.getOneRepMaxes
 import bg.zahov.app.util.timeToString
 import kotlinx.coroutines.flow.Flow
 import kotlinx.coroutines.flow.MutableStateFlow
-import kotlinx.coroutines.flow.flowOf
 import kotlinx.coroutines.flow.mapNotNull
 import java.time.LocalDate
 import java.time.LocalDateTime
@@ -53,19 +51,12 @@ class WorkoutProviderImpl : WorkoutProvider {
     /**
      * Fetches the list of template exercises from the repository.
      *
-     * This function makes a call to the `workoutRepo` to retrieve a list of exercises. If a `CriticalDataNullException`
-     * is thrown during the data retrieval, it initiates a countdown via the `errorHandler` and returns an empty list
-     * wrapped in a flow.
+     * This function makes a call to the `workoutRepo` to retrieve a list of exercises.
      *
      * @return A [Flow] emitting a [List] of [Exercise] objects. The flow will emit the list of exercises from the repository,
-     *         or an empty list if an exception occurs.
      */
-    override suspend fun getTemplateExercises(): Flow<List<Exercise>> = try {
+    override suspend fun getTemplateExercises(): Flow<List<Exercise>> =
         workoutRepo.getTemplateExercises()
-    } catch (e: CriticalDataNullException) {
-        errorHandler.initiateCountdown()
-        flowOf(listOf<Exercise>())
-    }
 
     override suspend fun addTemplateExercise(newExercise: Exercise) =
         workoutRepo.addTemplateExercise(newExercise)
@@ -138,19 +129,13 @@ class WorkoutProviderImpl : WorkoutProvider {
      * Retrieves a list of start workouts from the template workouts.
      *
      * This function fetches the template workouts by calling [getTemplateWorkouts] and converts each workout into a
-     * [StartWorkout] object. If the data retrieval results in a `CriticalDataNullException`, it initiates a countdown
-     * via the [errorHandler] and returns an empty list wrapped in a [Flow].
+     * [StartWorkout] object.
      *
      * @return A [Flow] emitting a [List] of [Workout] mapped to [StartWorkout] objects. If the data retrieval is successful, the flow will emit
-     *         a list of [StartWorkout] objects created from the template workouts. If an error occurs, the flow will emit
-     *         an empty list.
+     *         a list of [StartWorkout] objects created from the template workouts.
      */
-    override suspend fun getStartWorkouts(): Flow<List<StartWorkout>> = try {
+    override suspend fun getStartWorkouts(): Flow<List<StartWorkout>> =
         getTemplateWorkouts().mapNotNull { workouts -> workouts.map { it.toStartWorkout() } }
-    } catch (e: CriticalDataNullException) {
-        errorHandler.initiateCountdown()
-        flowOf(listOf<StartWorkout>())
-    }
 
     /**
      * Retrieves a flow of workouts from the current month along with their count.
