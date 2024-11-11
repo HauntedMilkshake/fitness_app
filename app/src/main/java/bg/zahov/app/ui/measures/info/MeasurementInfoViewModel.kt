@@ -8,53 +8,61 @@ import bg.zahov.app.data.interfaces.MeasurementProvider
 import bg.zahov.app.data.interfaces.ServiceErrorHandler
 import bg.zahov.app.data.model.LineChartData
 import bg.zahov.app.data.model.Measurement
+import bg.zahov.app.data.model.MeasurementType
+import bg.zahov.app.data.model.state.MeasurementInfoData
 import com.github.mikephil.charting.data.Entry
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.StateFlow
 import kotlinx.coroutines.flow.update
 import kotlinx.coroutines.launch
+import java.time.LocalDateTime
 
+/**
+ * ViewModel that handles the logic and state for displaying and updating measurement data in the app.
+ * This includes managing chart data, user input, and state transitions (e.g., loading, error handling).
+ *
+ * @property measurementProvider The provider responsible for retrieving and updating measurement data.
+ * @property serviceError The service responsible for handling errors, including critical data errors.
+ */
 class MeasurementInfoViewModel(
     private val measurementProvider: MeasurementProvider = Inject.measurementProvider,
     private val serviceError: ServiceErrorHandler = Inject.serviceErrorHandler
-) :
-    ViewModel() {
-    data class MeasurementInfoData(
-        val data: LineChartData = LineChartData(),
-        val loading: Boolean = true,
-        val showDialog: Boolean = false,
-        val historyInput: String = "",
-    )
+) : ViewModel() {
 
+    /** State flow that holds the UI state for the measurement info screen. */
     private val _uiState = MutableStateFlow(MeasurementInfoData())
     val uiState: StateFlow<MeasurementInfoData> = _uiState
 
     init {
         viewModelScope.launch {
-            try {
-                measurementProvider.getSelectedMeasurement().collect {
-                    var measureEntries: List<Entry> = listOf()
-                    if (it.measurements.values.isNotEmpty()) {
-                        measureEntries = filterEntries(it.measurements.values.first())
-                    }
-                    _uiState.update { old ->
-                        old.copy(
-                            data = LineChartData(
-                                maxValue = measureEntries.maxOfOrNull { value -> value.y } ?: 0f,
-                                minValue = measureEntries.minOfOrNull { value -> value.y } ?: 0f,
-                                suffix = if (it.measurements.keys.isNotEmpty()) it.measurements.keys.first() else null,
-                                list = measureEntries
-                            ),
-                            loading = false
-                        )
-                    }
+            // Collect selected measurement data and update the UI state with chart data.
+            measurementProvider.getSelectedMeasurement().collect {
+                var measureEntries: List<Entry> = listOf()
+                if (it.measurements.values.isNotEmpty()) {
+                    measureEntries = filterEntries(it.measurements.values.first())
                 }
-            } catch (e: CriticalDataNullException) {
-                serviceError.initiateCountdown()
+                _uiState.update { old ->
+                    old.copy(
+                        data = LineChartData(
+                            maxValue = measureEntries.maxOfOrNull { value -> value.y } ?: 0f,
+                            minValue = measureEntries.minOfOrNull { value -> value.y } ?: 0f,
+                            suffix = if (it.measurements.keys.isNotEmpty()) it.measurements.keys.first() else null,
+                            list = measureEntries
+                        ),
+                        loading = false
+                    )
+                }
             }
         }
     }
 
+    /**
+     * Filters a list of measurements, grouping by the day of the month, and returning the most recent
+     * measurement per day.
+     *
+     * @param measurements The list of measurements to filter.
+     * @return A list of [Entry] objects representing the filtered data for the line chart.
+     */
     private fun filterEntries(measurements: List<Measurement>): List<Entry> {
         return measurements
             .groupBy { it.date.dayOfMonth }
@@ -68,7 +76,63 @@ class MeasurementInfoViewModel(
             .sortedBy { it.x }
     }
 
+    /**
+     * Updates the history input state based on user input.
+     *
+     * @param text The new text input entered by the user.
+     */
     fun onHistoryInputChange(text: String) {
-        _uiState.update { old -> old.copy(historyInput = text) }
+        if (text.isEmpty() || text.matches(Regex("^\\d+\$"))) {
+            _uiState.update { old -> old.copy(historyInput = text) }
+        }
+    }
+
+    /**
+     * Toggles the visibility of the dialog (e.g., for showing an input dialog).
+     */
+    fun changeShowDialog() {
+        _uiState.update { old ->
+            old.copy(showDialog = old.showDialog.not())
+        }
+    }
+
+    /**
+     * Updates the title of the measurement data (e.g., the type of measurement, such as "Weight").
+     *
+     * @param title The new title for the measurement data.
+     */
+    fun updateTitle(title: String) {
+        _uiState.update { old -> old.copy(dataType = title) }
+    }
+
+    /**
+     * Saves the user input as a measurement. This involves validating and filtering the input before
+     * updating the measurement data provider with the new value.
+     */
+    fun saveInput() {
+        viewModelScope.launch {
+            filterInput(_uiState.value.historyInput)?.let {
+                MeasurementType.fromKey(_uiState.value.dataType)?.let { enumValue ->
+                    measurementProvider.updateMeasurement(
+                        enumValue,
+                        Measurement(LocalDateTime.now(), it)
+                    )
+                    changeShowDialog()
+                }
+            }
+        }
+    }
+
+    /**
+     * Validates and filters the input string, ensuring it represents a valid, non-negative double value.
+     *
+     * @param input The string input to validate.
+     * @return The filtered value as a [Double] if valid, or null if invalid.
+     */
+    private fun filterInput(input: String): Double? {
+        val numberRegex = Regex("\\d*\\.?\\d+")
+        val matchResult = numberRegex.find(input)
+        return matchResult?.value?.toDoubleOrNull()?.takeIf { it >= 0.0 }
+            ?.let { String.format("%.2f", it).toDouble() }
     }
 }
