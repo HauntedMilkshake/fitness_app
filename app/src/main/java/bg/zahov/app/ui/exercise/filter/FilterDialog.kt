@@ -49,7 +49,7 @@ fun FilterDialog(filterViewModel: FilterViewModel = viewModel(), onDismiss: () -
                                 indication = null
                             ) { onDismiss() },
                         painter = painterResource(R.drawable.ic_back_arrow),
-                        contentDescription = "dismiss"
+                        contentDescription = stringResource(R.string.dismiss)
                     )
                     Text(
                         text = stringResource(R.string.select_filter),

@@ -167,4 +167,7 @@
     <string name="re_authenticate_fail">"Failed to re-authenticate!"</string>
     <string name="update_username_success">"Successfully updated username</string>
     <string name="update_username_fail">Failed to update username</string>
+    <!-- Strings used for exercise screen -->
+    <string name="remove_filter">Removes filter</string>
+    <string name="dismiss">Dismiss</string>
 </resources>

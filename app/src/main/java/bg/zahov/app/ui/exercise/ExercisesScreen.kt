@@ -33,6 +33,7 @@ import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.layout.ContentScale
 import androidx.compose.ui.res.colorResource
 import androidx.compose.ui.res.painterResource
+import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.text.style.TextOverflow
 import androidx.compose.ui.unit.dp
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
@@ -51,22 +52,6 @@ fun ExercisesScreen(
 ) {
     val uiState by viewModel.exerciseData.collectAsStateWithLifecycle()
 
-    if (uiState.showDialog) {
-        FilterDialog(onDismiss = {
-            viewModel.updateShowDialog(false)
-        })
-    }
-    if (uiState.navigateBack) {
-        LaunchedEffect(Unit) {
-            navigateBack()
-        }
-    }
-    if (uiState.navigateInfo) {
-        LaunchedEffect(Unit) {
-            navigateInfo()
-        }
-    }
-
     ExercisesContent(
         filterItems = uiState.filters,
         exerciseItems = uiState.exercises,
@@ -76,12 +61,28 @@ fun ExercisesScreen(
         onConfirm = {
             viewModel.confirmSelectedExercises()
         })
-    if (uiState.loading) {
-        CircularProgressIndicator(
-            modifier = Modifier,
-            color = MaterialTheme.colorScheme.secondary,
-            trackColor = MaterialTheme.colorScheme.surfaceVariant
-        )
+    when {
+        uiState.loading ->
+            CircularProgressIndicator(
+                modifier = Modifier,
+                color = MaterialTheme.colorScheme.secondary,
+                trackColor = MaterialTheme.colorScheme.surfaceVariant
+            )
+
+        uiState.navigateInfo ->
+            LaunchedEffect(Unit) {
+                navigateInfo()
+            }
+
+        uiState.navigateBack ->
+            LaunchedEffect(Unit) {
+                navigateBack()
+            }
+
+        uiState.showDialog ->
+            FilterDialog(onDismiss = {
+                viewModel.updateShowDialog(false)
+            })
     }
 }
 
@@ -119,30 +120,38 @@ fun ExercisesContent(
         }
     }
     if (showButton) {
-        Box(
+        ConfirmButton(onConfirm = onConfirm)
+    }
+}
+
+@Composable
+fun ConfirmButton(
+    modifier: Modifier = Modifier,
+    onConfirm: () -> Unit
+) {
+    Box(
+        modifier = Modifier
+            .fillMaxSize()
+            .padding(16.dp),
+    ) {
+        Button(
+            onClick = onConfirm,
             modifier = Modifier
-                .fillMaxSize()
-                .padding(16.dp),
+                .align(Alignment.BottomEnd)
+                .padding(16.dp)
+                .wrapContentSize(),
+            colors = ButtonColors(
+                containerColor = colorResource(R.color.text),
+                contentColor = colorResource(R.color.white),
+                disabledContentColor = colorResource(R.color.disabled_button),
+                disabledContainerColor = colorResource(R.color.disabled_button),
+            )
         ) {
-            Button(
-                onClick = onConfirm,
-                modifier = Modifier
-                    .align(Alignment.BottomEnd)
-                    .padding(16.dp)
-                    .wrapContentSize(),
-                colors = ButtonColors(
-                    containerColor = colorResource(R.color.text),
-                    contentColor = colorResource(R.color.white),
-                    disabledContentColor = colorResource(R.color.disabled_button),
-                    disabledContainerColor = colorResource(R.color.disabled_button),
-                )
-            ) {
-                Image(
-                    modifier = Modifier.size(40.dp),
-                    painter = painterResource(R.drawable.ic_check),
-                    contentDescription = "confirm"
-                )
-            }
+            Image(
+                modifier = Modifier.size(40.dp),
+                painter = painterResource(R.drawable.ic_check),
+                contentDescription = stringResource(R.string.confirm)
+            )
         }
     }
 }
@@ -224,7 +233,7 @@ fun FilterCard(
             Text(text = filter.name, maxLines = 1)
             Image(
                 painter = painterResource(R.drawable.ic_close),
-                contentDescription = "Removes the filter",
+                contentDescription = stringResource(R.string.remove_filter),
                 modifier = Modifier
                     .size(20.dp)
                     .wrapContentHeight()
