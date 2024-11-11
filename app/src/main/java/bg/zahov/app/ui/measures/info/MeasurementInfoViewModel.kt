@@ -1,63 +1,53 @@
 package bg.zahov.app.ui.measures.info
 
-import android.app.Application
-import android.view.View
-import androidx.lifecycle.AndroidViewModel
-import androidx.lifecycle.LiveData
-import androidx.lifecycle.MutableLiveData
+import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
+import bg.zahov.app.Inject
 import bg.zahov.app.data.exception.CriticalDataNullException
+import bg.zahov.app.data.interfaces.MeasurementProvider
+import bg.zahov.app.data.interfaces.ServiceErrorHandler
+import bg.zahov.app.data.model.LineChartData
 import bg.zahov.app.data.model.Measurement
-import bg.zahov.app.data.model.MeasurementType
-import bg.zahov.app.getMeasurementsProvider
-import bg.zahov.app.getServiceErrorProvider
 import com.github.mikephil.charting.data.Entry
+import kotlinx.coroutines.flow.MutableStateFlow
+import kotlinx.coroutines.flow.StateFlow
+import kotlinx.coroutines.flow.update
 import kotlinx.coroutines.launch
 
-class MeasurementInfoViewModel(application: Application) : AndroidViewModel(application) {
-    private val measurementProvider by lazy {
-        application.getMeasurementsProvider()
-    }
-    private val serviceError by lazy {
-        application.getServiceErrorProvider()
-    }
-    private val _state = MutableLiveData<State>()
-    val state: LiveData<State>
-        get() = _state
+class MeasurementInfoViewModel(
+    private val measurementProvider: MeasurementProvider = Inject.measurementProvider,
+    private val serviceError: ServiceErrorHandler = Inject.serviceErrorHandler
+) :
+    ViewModel() {
+    data class MeasurementInfoData(
+        val data: LineChartData = LineChartData(),
+        val loading: Boolean = true,
+        val showDialog: Boolean = false,
+        val historyInput: String = "",
+    )
+
+    private val _uiState = MutableStateFlow(MeasurementInfoData())
+    val uiState: StateFlow<MeasurementInfoData> = _uiState
 
     init {
         viewModelScope.launch {
-            _state.postValue(State.Loading(View.VISIBLE))
-            var measureEntries = listOf<Entry>()
-            var measurementType: MeasurementType?
             try {
                 measurementProvider.getSelectedMeasurement().collect {
-                    measurementType =
-                        if (it.measurements.keys.isNotEmpty()) it.measurements.keys.first() else null
+                    var measureEntries: List<Entry> = listOf()
                     if (it.measurements.values.isNotEmpty()) {
                         measureEntries = filterEntries(it.measurements.values.first())
                     }
-                    var measurementMax = 0f
-                    var measurementMin = 0f
-                    if (measureEntries.isNotEmpty()) {
-                        measurementMax = measureEntries.maxOf { value -> value.y }
-                        measurementMin = measureEntries.minOf { value -> value.y }
-                    }
-                    val measurementSuffix = when (measurementType) {
-                        MeasurementType.Weight -> "kg"
-                        MeasurementType.BodyFatPercentage -> "%"
-                        MeasurementType.CaloricIntake -> "kcal"
-                        else -> "sm"
-                    }
-
-                    _state.postValue(
-                        State.Data(
-                            maxValue = measurementMax,
-                            minValue = measurementMin,
-                            suffix = measurementSuffix,
-                            entries = measureEntries
+                    _uiState.update { old ->
+                        old.copy(
+                            data = LineChartData(
+                                maxValue = measureEntries.maxOfOrNull { value -> value.y } ?: 0f,
+                                minValue = measureEntries.minOfOrNull { value -> value.y } ?: 0f,
+                                suffix = if (it.measurements.keys.isNotEmpty()) it.measurements.keys.first() else null,
+                                list = measureEntries
+                            ),
+                            loading = false
                         )
-                    )
+                    }
                 }
             } catch (e: CriticalDataNullException) {
                 serviceError.initiateCountdown()
@@ -66,35 +56,19 @@ class MeasurementInfoViewModel(application: Application) : AndroidViewModel(appl
     }
 
     private fun filterEntries(measurements: List<Measurement>): List<Entry> {
-        val latestEntriesPerDay = mutableMapOf<Int, Measurement>()
-
-        for (measurement in measurements) {
-            if (latestEntriesPerDay[measurement.date.dayOfMonth] == null || latestEntriesPerDay[measurement.date.dayOfMonth]!!.date.isBefore(
-                    measurement.date
-                )
-            ) {
-                latestEntriesPerDay[measurement.date.dayOfMonth] = measurement
+        return measurements
+            .groupBy { it.date.dayOfMonth }
+            .mapNotNull { (_, dailyMeasurements) -> dailyMeasurements.maxByOrNull { it.date } }
+            .map { measurement ->
+                Entry().apply {
+                    x = measurement.date.dayOfMonth.toFloat()
+                    y = measurement.value.toFloat()
+                }
             }
-        }
-        val entries = latestEntriesPerDay.values.toList()
-        val result = entries.map { measurement ->
-            Entry().apply {
-                x = measurement.date.dayOfMonth.toFloat()
-                y = measurement.value.toFloat()
-            }
-        }.sortedBy { entry -> entry.x }
-
-        return result
+            .sortedBy { it.x }
     }
 
-
-    sealed interface State {
-        data class Loading(val loadingVisibility: Int) : State
-        data class Data(
-            val maxValue: Float,
-            val minValue: Float,
-            val suffix: String,
-            val entries: List<Entry>,
-        ) : State
+    fun onHistoryInputChange(text: String) {
+        _uiState.update { old -> old.copy(historyInput = text) }
     }
 }
