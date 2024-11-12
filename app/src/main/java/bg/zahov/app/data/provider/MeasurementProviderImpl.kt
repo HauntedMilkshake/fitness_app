@@ -9,6 +9,7 @@ import bg.zahov.app.data.repository.MeasurementRepositoryImpl
 import kotlinx.coroutines.flow.Flow
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.StateFlow
+import kotlinx.coroutines.flow.collect
 import kotlinx.coroutines.flow.update
 
 /**
@@ -78,7 +79,7 @@ class MeasurementProviderImpl : MeasurementProvider {
      */
     override suspend fun selectMeasure(type: MeasurementType) {
         val measurement = getMeasurement(type)
-        _selectedMeasurement.emit(measurement)
+        _selectedMeasurement.value = measurement
         selectedMeasurementValue = measurement
     }
 

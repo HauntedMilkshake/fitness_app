@@ -20,7 +20,10 @@ import com.github.mikephil.charting.data.LineDataSet
 import java.time.LocalDate
 
 @Composable
-fun CommonLineChart(modifier: Modifier = Modifier, data: LineChartData) {
+fun CommonLineChart(
+    modifier: Modifier = Modifier,
+    data: LineChartData
+) {
     val text = stringResource(R.string.measure)
     AndroidView(
         modifier = modifier
@@ -61,19 +64,22 @@ fun CommonLineChart(modifier: Modifier = Modifier, data: LineChartData) {
                     )
                 }
 
-                this.data = LineData(LineDataSet(data.list, "results").apply {
-                    valueTextColor = Color.WHITE
-                    valueTextSize = 13f
-                })
-
-                axisRight.apply {
-                    axisMaximum = data.maxValue
-                    axisMinimum = data.minValue
-                }
                 setDrawBorders(true)
-                setBorderColor(R.color.white)
+                setBorderColor(Color.WHITE)
                 setBorderWidth(1f)
             }
+        },
+        update = { chart ->
+            chart.data = LineData(LineDataSet(data.list, "results").apply {
+                valueTextColor = Color.WHITE
+                valueTextSize = 13f
+            })
+
+            chart.axisRight.apply {
+                axisMaximum = data.maxValue
+                axisMinimum = data.minValue
+            }
+            chart.invalidate()
         }
     )
 }

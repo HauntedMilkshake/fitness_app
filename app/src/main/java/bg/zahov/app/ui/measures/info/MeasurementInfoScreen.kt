@@ -13,7 +13,6 @@ import androidx.compose.material3.CircularProgressIndicator
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
-import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.remember
 import androidx.compose.ui.Modifier
@@ -31,7 +30,9 @@ import bg.zahov.fitness.app.R
 fun MeasurementInfoScreen(viewModel: MeasurementInfoViewModel = viewModel()) {
     val uiState by viewModel.uiState.collectAsStateWithLifecycle()
 
-    MeasurementInfoContent(data = uiState.data, onAddHistoryClick = { viewModel.changeShowDialog() })
+    MeasurementInfoContent(
+        data = uiState.data,
+        onAddHistoryClick = { viewModel.changeShowDialog() })
     when {
         uiState.loading -> CircularProgressIndicator(
             modifier = Modifier,

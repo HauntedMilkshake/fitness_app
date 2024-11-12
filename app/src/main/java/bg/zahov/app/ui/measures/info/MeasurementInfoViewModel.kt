@@ -1,5 +1,6 @@
 package bg.zahov.app.ui.measures.info
 
+import android.util.Log
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
 import bg.zahov.app.Inject

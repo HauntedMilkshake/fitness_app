@@ -68,7 +68,7 @@
     <string name="advanced_settings_text">Advanced settings</string>
     <string name="popup_exampel_title">Popup title</string>
     <string name="new_password">New password</string>
-    <string name="cancel">cancel</string>
+    <string name="cancel">Cancel</string>
     <string name="confirm">confirm</string>
     <!--  Strings used for create exercise fragment    -->
     <string name="new_exercise_placeholder_text">new exercise</string>
