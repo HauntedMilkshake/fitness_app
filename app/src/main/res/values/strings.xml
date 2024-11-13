@@ -167,4 +167,12 @@
     <string name="update_username_success">"Successfully updated username</string>
     <string name="update_username_fail">Failed to update username</string>
     <string name="add_history">Add to history</string>
+    <!-- Strings used for line chart    -->
+    <string name="results">Results</string>
+    <string name="weight_unit">kg</string>
+    <string name="body_fat_percentage_unit">%</string>
+    <string name="caloric_intake_unit">kcal</string>
+    <string name="default_unit">sm</string>
+    <!-- Strings used for line chart    -->
+
 </resources>

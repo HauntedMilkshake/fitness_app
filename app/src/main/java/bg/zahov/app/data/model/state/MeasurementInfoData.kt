@@ -3,7 +3,7 @@ package bg.zahov.app.data.model.state
 import bg.zahov.app.data.model.LineChartData
 
 /**
- * Data model representing the information related to a specific measurement,
+ * Data model representing the information for the ui related to a specific measurement,
  * including chart data, loading state, and user input.
  *
  * @property dataType The type of data (e.g., weight, body fat percentage, etc.) represented as a string.

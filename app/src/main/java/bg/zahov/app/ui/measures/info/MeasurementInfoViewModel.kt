@@ -1,10 +1,8 @@
 package bg.zahov.app.ui.measures.info
 
-import android.util.Log
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
 import bg.zahov.app.Inject
-import bg.zahov.app.data.exception.CriticalDataNullException
 import bg.zahov.app.data.interfaces.MeasurementProvider
 import bg.zahov.app.data.interfaces.ServiceErrorHandler
 import bg.zahov.app.data.model.LineChartData
@@ -38,10 +36,10 @@ class MeasurementInfoViewModel(
         viewModelScope.launch {
             // Collect selected measurement data and update the UI state with chart data.
             measurementProvider.getSelectedMeasurement().collect {
-                var measureEntries: List<Entry> = listOf()
-                if (it.measurements.values.isNotEmpty()) {
-                    measureEntries = filterEntries(it.measurements.values.first())
-                }
+                val measureEntries: List<Entry> =
+                    if (it.measurements.values.firstOrNull() != null) {
+                        filterEntries(it.measurements.values.first())
+                    } else emptyList()
                 _uiState.update { old ->
                     old.copy(
                         data = LineChartData(
@@ -67,15 +65,14 @@ class MeasurementInfoViewModel(
     private fun filterEntries(measurements: List<Measurement>): List<Entry> {
         return measurements
             .groupBy { it.date.dayOfMonth }
-            .mapNotNull { (_, dailyMeasurements) -> dailyMeasurements.maxByOrNull { it.date } }
-            .map { measurement ->
-                Entry().apply {
-                    x = measurement.date.dayOfMonth.toFloat()
-                    y = measurement.value.toFloat()
+            .mapNotNull { (_, dailyMeasurements) ->
+                dailyMeasurements.maxByOrNull { it.date }?.let { measurement ->
+                    Entry(measurement.date.dayOfMonth.toFloat(), measurement.value.toFloat())
                 }
             }
             .sortedBy { it.x }
     }
+
 
     /**
      * Updates the history input state based on user input.

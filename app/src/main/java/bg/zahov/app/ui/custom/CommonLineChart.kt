@@ -3,9 +3,10 @@ package bg.zahov.app.ui.custom
 import android.graphics.Color
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.height
+import androidx.compose.material3.MaterialTheme
 import androidx.compose.runtime.Composable
 import androidx.compose.ui.Modifier
-import androidx.compose.ui.res.stringResource
+import androidx.compose.ui.graphics.toArgb
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.viewinterop.AndroidView
 import bg.zahov.app.data.model.LineChartData
@@ -24,7 +25,7 @@ fun CommonLineChart(
     modifier: Modifier = Modifier,
     data: LineChartData
 ) {
-    val text = stringResource(R.string.measure)
+    val color =  MaterialTheme.colorScheme.secondary.toArgb()
     AndroidView(
         modifier = modifier
             .fillMaxWidth()
@@ -39,41 +40,42 @@ fun CommonLineChart(
                 axisLeft.isEnabled = false
 
                 description.apply {
-                    textColor = Color.WHITE
-                    this.text = text
+                    textColor = color
+                    this.text = context.getString(R.string.measure)
                 }
 
                 xAxis.apply {
                     axisMinimum = 1f
                     axisMaximum = LocalDate.now().lengthOfMonth().toFloat()
                     position = XAxis.XAxisPosition.BOTTOM
-                    textColor = Color.WHITE
+                    textColor = color
                     valueFormatter = MonthValueFormatter()
                 }
 
                 axisRight.apply {
-                    textColor = Color.WHITE
+                    textColor = color
                     granularity = 1f
                     valueFormatter = RightAxisValueFormatter(
                         when (data.suffix) {
-                            MeasurementType.Weight -> "kg"
-                            MeasurementType.BodyFatPercentage -> "%"
-                            MeasurementType.CaloricIntake -> "kcal"
-                            else -> "sm"
+                            MeasurementType.Weight -> context.getString(R.string.weight_unit)
+                            MeasurementType.BodyFatPercentage -> context.getString(R.string.body_fat_percentage_unit)
+                            MeasurementType.CaloricIntake -> context.getString(R.string.caloric_intake_unit)
+                            else -> context.getString(R.string.default_unit)
                         }
                     )
                 }
 
                 setDrawBorders(true)
-                setBorderColor(Color.WHITE)
+                setBorderColor(color)
                 setBorderWidth(1f)
             }
         },
         update = { chart ->
-            chart.data = LineData(LineDataSet(data.list, "results").apply {
-                valueTextColor = Color.WHITE
-                valueTextSize = 13f
-            })
+            chart.data =
+                LineData(LineDataSet(data.list, chart.context.getString(R.string.results)).apply {
+                    valueTextColor = color
+                    valueTextSize = 13f
+                })
 
             chart.axisRight.apply {
                 axisMaximum = data.maxValue
