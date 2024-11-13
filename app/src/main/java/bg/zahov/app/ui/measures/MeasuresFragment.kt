@@ -35,7 +35,7 @@ class MeasuresFragment : Fragment() {
 
             override fun onMenuItemSelected(menuItem: MenuItem) = false
         })
-        requireActivity().showTopBar()
+        activity?.showTopBar()
         return ComposeView(requireContext()).apply {
             setContent {
                 MeasuresScreen(navigateInfo = {
