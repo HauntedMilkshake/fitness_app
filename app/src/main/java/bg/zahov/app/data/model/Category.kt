@@ -28,8 +28,4 @@ enum class Category(val key: String) {
 //    RepsOnly(CategoryKeys.REPS_ONLY),
 //    Cardio(CategoryKeys.CARDIO),
 //    Timed(CategoryKeys.TIMED),
-
-    companion object {
-        fun fromKey(key: String) = values().firstOrNull { it.key.equals(key, true) }
-    }
 }

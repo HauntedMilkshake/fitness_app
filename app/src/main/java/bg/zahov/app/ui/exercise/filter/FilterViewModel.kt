@@ -29,14 +29,19 @@ class FilterViewModel(application: Application) : AndroidViewModel(application) 
     init {
         viewModelScope.launch {
             filterManager.filters.collect { item ->
-                item.forEach {
+                item.forEach { filter ->
                     when {
-                        BodyPart.fromKey(it.name) != null -> {
-                            toggleFilter(it, _bodyPartFilters)
+                        BodyPart.entries.firstOrNull { it.key == it.name } != null -> {
+                            toggleFilter(filter, _bodyPartFilters)
                         }
 
-                        Category.fromKey(it.name) != null -> {
-                            toggleFilter(it, _categoryFilters)
+                        Category.entries.firstOrNull {
+                            it.key.equals(
+                                filter.name,
+                                true
+                            )
+                        } != null -> {
+                            toggleFilter(filter, _categoryFilters)
                         }
                     }
                 }

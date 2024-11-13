@@ -61,8 +61,8 @@ class AddExerciseViewModel(application: Application) : AndroidViewModel(applicat
             repo.addTemplateExercise(
                 Exercise(
                     exerciseTitle,
-                    BodyPart.fromKey(_bodyPart.value!!)!!,
-                    Category.fromKey(_category.value!!)!!,
+                    BodyPart.entries.firstOrNull { it.key == _bodyPart.value!! }!!,
+                    Category.entries.firstOrNull { it.key.equals(_category.value!!, true) }!!,
                     true,
                 )
             )
@@ -71,11 +71,11 @@ class AddExerciseViewModel(application: Application) : AndroidViewModel(applicat
     }
 
     fun setBodyPart(info: String) {
-        _bodyPart.value = BodyPart.fromKey(info)?.toString()
+        _bodyPart.value = BodyPart.entries.firstOrNull { it.key == info }.toString()
     }
 
     fun setCategory(info: String) {
-        _category.value = Category.fromKey(info)?.toString()
+        _category.value = Category.entries.firstOrNull { it.key == info }.toString()
     }
 
     sealed interface State {

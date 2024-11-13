@@ -50,13 +50,14 @@ class MeasurementInputViewModel(application: Application) : AndroidViewModel(app
         viewModelScope.launch {
             filterInput(input)?.let {
                 if (type.isNotEmpty()) {
-                    MeasurementType.fromKey(type)?.let { enumValue ->
-                        measurementProvider.updateMeasurement(
-                            enumValue,
-                            Measurement(LocalDateTime.now(), it)
-                        )
-                        _state.postValue(State.Navigate(true))
-                    }
+                    MeasurementType.entries.firstOrNull { it.key.equals(type, true) }
+                        ?.let { enumValue ->
+                            measurementProvider.updateMeasurement(
+                                enumValue,
+                                Measurement(LocalDateTime.now(), it)
+                            )
+                            _state.postValue(State.Navigate(true))
+                        }
                 } else {
                     postNotifyState()
                 }

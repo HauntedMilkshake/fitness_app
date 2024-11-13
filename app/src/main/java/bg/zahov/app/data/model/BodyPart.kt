@@ -21,8 +21,4 @@ enum class BodyPart(val key: String) {
     Shoulders(BodyPartKeys.SHOULDERS),
     Other(BodyPartKeys.OTHER),
     Olympic(BodyPartKeys.OLYMPIC);
-
-    companion object {
-        fun fromKey(key: String) = values().firstOrNull { it.key == key }
-    }
 }

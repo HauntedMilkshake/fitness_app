@@ -252,14 +252,14 @@ fun Sets.toRealmSets(): RealmSets {
 }
 
 fun RealmExercise.toExercise(): Exercise? {
-    return if (this.name != "default" && BodyPart.fromKey(this.bodyPart) != null && Category.fromKey(
-            this.category
-        ) != null
-    ) {
+    val bodyPart = BodyPart.entries.firstOrNull { it.key == this.bodyPart }
+    val category = Category.entries.firstOrNull { it.key.equals(this.category, true) }
+
+    return if (this.name != "default" && bodyPart != null && category != null) {
         Exercise(
             name = this.name,
-            bodyPart = BodyPart.fromKey(this.bodyPart)!!,
-            category = Category.fromKey(this.category)!!,
+            bodyPart = bodyPart,
+            category = category,
             isTemplate = this.isTemplate,
             sets = this.sets.mapNotNull { it.toSets() }.toMutableList(),
             note = this.note
@@ -268,6 +268,7 @@ fun RealmExercise.toExercise(): Exercise? {
         null
     }
 }
+
 
 fun RealmSets.toSets(): Sets? {
     return SetType.entries.firstOrNull { it.key == this.type }?.let { setType ->

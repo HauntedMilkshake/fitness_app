@@ -17,9 +17,4 @@ enum class MeasurementType(val key: String) {
     RightThigh("Right thigh"),
     LeftCalf("Left calf"),
     RightCalf("Right calf");
-
-    companion object {
-        fun fromKey(key: String): MeasurementType? =
-            values().firstOrNull { it.key.equals(key, true) }
-    }
 }

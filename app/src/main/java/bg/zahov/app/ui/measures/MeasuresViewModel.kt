@@ -14,7 +14,7 @@ class MeasuresViewModel(application: Application) : AndroidViewModel(application
 
     fun onMeasurementClick(title: String) {
         viewModelScope.launch {
-            MeasurementType.fromKey(title)?.let {
+            MeasurementType.entries.firstOrNull { it.key.equals(title, true) }?.let {
                 measurementProvider.selectMeasure(it)
             }
         }
