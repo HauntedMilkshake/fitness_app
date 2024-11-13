@@ -3,10 +3,13 @@ package bg.zahov.app.ui.custom
 import android.content.Context
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.height
+import androidx.compose.material3.MaterialTheme
 import androidx.compose.runtime.Composable
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.graphics.toArgb
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.viewinterop.AndroidView
+import bg.zahov.app.data.model.Theme
 import bg.zahov.app.ui.home.ChartData
 import bg.zahov.fitness.app.R
 import com.github.mikephil.charting.charts.BarChart
@@ -21,13 +24,14 @@ fun CommonBarChart(
     chartData: ChartData,
     chartFormatter: ValueFormatter
 ) {
+    val color = MaterialTheme.colorScheme.secondary.toArgb()
     AndroidView(
         modifier = modifier
             .fillMaxWidth()
             .height(200.dp),
         factory = { context ->
             BarChart(context).apply {
-                setupBarChart(context)
+                setupBarChart(context, color)
 
                 xAxis.valueFormatter = chartFormatter
                 xAxis.axisMaximum = chartData.xMax
@@ -66,7 +70,7 @@ fun CommonBarChart(
     )
 }
 
-fun BarChart.setupBarChart(context: Context) {
+fun BarChart.setupBarChart(context: Context, color: Int) {
     setFitBars(true)
     legend.isEnabled = false
     isDoubleTapToZoomEnabled = false
@@ -77,20 +81,20 @@ fun BarChart.setupBarChart(context: Context) {
     description.apply {
         setPosition(250f, 60f)
         text = context.getString(R.string.weekly_workouts)
-        textColor = android.graphics.Color.WHITE
+        textColor = color
     }
 
     xAxis.apply {
         position = XAxis.XAxisPosition.BOTTOM
         granularity = 1f
         axisMinimum = 0f
-        textColor = android.graphics.Color.WHITE
+        textColor = color
         setCenterAxisLabels(true)
         isGranularityEnabled = true
     }
 
     axisRight.apply {
-        textColor = android.graphics.Color.WHITE
+        textColor = color
         granularity = 1f
         setDrawGridLines(false)
     }
