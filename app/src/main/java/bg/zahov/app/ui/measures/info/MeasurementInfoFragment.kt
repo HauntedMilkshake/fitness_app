@@ -31,8 +31,8 @@ class MeasurementInfoFragment : Fragment() {
         measurementInputViewModel.updateTitle(title)
         (activity as? AppCompatActivity)?.supportActionBar?.setDisplayHomeAsUpEnabled(true)
         (activity as? AppCompatActivity)?.supportActionBar?.setHomeAsUpIndicator(R.drawable.ic_back_arrow)
-        requireActivity().setToolBarTitle(title)
-        requireActivity().addMenuProvider(object : MenuProvider {
+        activity?.setToolBarTitle(title)
+        activity?.addMenuProvider(object : MenuProvider {
             override fun onCreateMenu(menu: Menu, menuInflater: MenuInflater) {
                 menu.clear()
                 menuInflater.inflate(R.menu.menu_toolbar_measures, menu)
@@ -47,10 +47,10 @@ class MeasurementInfoFragment : Fragment() {
                 else -> false
             }
         }, viewLifecycleOwner)
-        requireActivity().showTopBar()
-        requireActivity().hideBottomNav()
+        activity?.showTopBar()
+        activity?.hideBottomNav()
         return ComposeView(requireContext()).apply {
-            requireActivity().hideBottomNav()
+            activity?.hideBottomNav()
             setViewCompositionStrategy(ViewCompositionStrategy.DisposeOnViewTreeLifecycleDestroyed)
             setContent {
                 MeasurementInfoScreen()
