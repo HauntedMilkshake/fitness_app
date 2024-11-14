@@ -28,9 +28,13 @@ class MeasurementInfoViewModel(
     private val serviceError: ServiceErrorHandler = Inject.serviceErrorHandler
 ) : ViewModel() {
 
-    /** State flow that holds the UI state for the measurement info screen. */
     private val _uiState = MutableStateFlow(MeasurementInfoData())
+    /** State flow that holds the UI state for the measurement info screen. */
     val uiState: StateFlow<MeasurementInfoData> = _uiState
+
+    private val _dialogState = MutableStateFlow("")
+    /** State flow that holds the UI state for the dialog screen. */
+    val dialogState: StateFlow<String> = _dialogState
 
     init {
         viewModelScope.launch {
@@ -81,7 +85,7 @@ class MeasurementInfoViewModel(
      */
     fun onHistoryInputChange(text: String) {
         if (text.isEmpty() || text.matches(Regex("^\\d+\$"))) {
-            _uiState.update { old -> old.copy(historyInput = text) }
+            _dialogState.update { text }
         }
     }
 
@@ -109,7 +113,7 @@ class MeasurementInfoViewModel(
      */
     fun saveInput() {
         viewModelScope.launch {
-            filterInput(_uiState.value.historyInput)?.let {
+            filterInput(_dialogState.value)?.let {
                 MeasurementType.fromKey(_uiState.value.dataType)?.let { enumValue ->
                     measurementProvider.updateMeasurement(
                         enumValue,

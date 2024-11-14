@@ -29,6 +29,7 @@ import bg.zahov.fitness.app.R
 @Composable
 fun MeasurementInfoScreen(viewModel: MeasurementInfoViewModel = viewModel()) {
     val uiState by viewModel.uiState.collectAsStateWithLifecycle()
+    val inputState by viewModel.dialogState.collectAsStateWithLifecycle()
 
     MeasurementInfoContent(
         data = uiState.data,
@@ -41,7 +42,7 @@ fun MeasurementInfoScreen(viewModel: MeasurementInfoViewModel = viewModel()) {
         )
 
         uiState.showDialog -> MeasurementInfoDialog(
-            text = uiState.historyInput,
+            text = inputState,
             title = uiState.dataType,
             onDismissRequest = { viewModel.changeShowDialog() },
             onInputChange = { viewModel.onHistoryInputChange(it) },
