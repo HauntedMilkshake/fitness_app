@@ -26,7 +26,8 @@ class MeasurementInfoFragment : Fragment() {
         container: ViewGroup?,
         savedInstanceState: Bundle?,
     ): View {
-        val title = arguments?.getString(MEASUREMENT_ARGS) ?: "Measurement"
+        val title =
+            arguments?.getString(MEASUREMENT_ARGS) ?: context?.getString(R.string.measure) ?: ""
         val measurementInputViewModel: MeasurementInfoViewModel by viewModels()
         measurementInputViewModel.updateTitle(title)
         (activity as? AppCompatActivity)?.supportActionBar?.setDisplayHomeAsUpEnabled(true)
