@@ -127,8 +127,7 @@
 
     <fragment
         android:id="@+id/settings"
-        android:name="bg.zahov.app.ui.settings.SettingsFragment"
-        tools:layout="@layout/fragment_settings">
+        android:name="bg.zahov.app.ui.settings.SettingsFragment">
         <action
             android:id="@+id/settings_to_home"
             app:destination="@+id/home"
@@ -188,8 +187,7 @@
 
     <fragment
         android:id="@+id/start_workout"
-        android:name="bg.zahov.app.ui.workout.start.StartWorkoutFragment"
-        tools:layout="@layout/fragment_start_workout">
+        android:name="bg.zahov.app.ui.workout.start.StartWorkoutFragment">
         <action
             android:id="@+id/workout_to_create_workout_template"
             app:destination="@+id/create_workout_template" />

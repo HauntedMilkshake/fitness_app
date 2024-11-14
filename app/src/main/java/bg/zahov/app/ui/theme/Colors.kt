@@ -14,6 +14,7 @@ val selected = Color(0xFF296D98)
 val unselected_filter = Color(0xFF23395D)
 val input_field_background = Color(0xFF3D464B)
 val blue_text = Color(0xFF3D8BC9)
+val blue_button = Color.Blue
 val less_vibrant_text = Color(0xFFA5A7A9)
 val completed_set = Color(0xFF00FF00)
 val drop_set = Color(0xFF673AB7)
