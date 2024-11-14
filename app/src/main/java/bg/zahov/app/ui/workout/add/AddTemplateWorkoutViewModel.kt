@@ -11,6 +11,7 @@ import bg.zahov.app.data.model.Exercise
 import bg.zahov.app.data.model.SetType
 import bg.zahov.app.data.model.Sets
 import bg.zahov.app.data.model.Units
+import bg.zahov.app.data.model.Units.METRIC
 import bg.zahov.app.data.model.Workout
 import bg.zahov.app.getReplaceableExerciseProvider
 import bg.zahov.app.getSelectableExerciseProvider
@@ -113,7 +114,7 @@ class AddTemplateWorkoutViewModel(application: Application) : AndroidViewModel(a
                     it?.let { replaced ->
                         val replacedEntry = ExerciseEntry(
                             replaced.toExerciseSetAdapterWrapper(
-                                Units.valueOf(settings.units.toString())
+                                Units.entries.find { it.key == settings.units } ?: METRIC
                             )
                         )
                         exerciseToReplaceIndex?.let { indexToReplace ->

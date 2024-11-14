@@ -1,13 +1,11 @@
 package bg.zahov.app.data.repository
 
-import android.util.Log
-import bg.zahov.app.data.model.Exercise
-import bg.zahov.app.data.model.Workout
 import bg.zahov.app.data.interfaces.WorkoutRepository
 import bg.zahov.app.data.local.RealmManager
 import bg.zahov.app.data.local.RealmWorkoutState
+import bg.zahov.app.data.model.Exercise
+import bg.zahov.app.data.model.Workout
 import bg.zahov.app.data.remote.FirestoreManager
-import io.realm.kotlin.notifications.ObjectChange
 import kotlinx.coroutines.flow.Flow
 import java.time.LocalDateTime
 
