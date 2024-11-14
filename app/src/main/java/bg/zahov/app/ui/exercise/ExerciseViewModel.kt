@@ -250,7 +250,7 @@ class ExerciseViewModel(
      */
     private fun addSelectedExercises(selectedExercises: List<ExerciseData>) {
         viewModelScope.launch {
-            repo.getExercisesByNames(selectedExercises.map{it.name}).collect {
+            repo.getExercisesByNames(selectedExercises.map { it.name }).collect {
                 addExerciseToWorkoutProvider.addExercises(it)
                 _exerciseData.update { old -> old.copy(navigateBack = true) }
             }
@@ -262,7 +262,13 @@ class ExerciseViewModel(
      * to default and clearing any selected exercises.
      */
     fun resetExerciseSelection() {
-        _exerciseData.update { it.copy(flag = ExerciseFlag.Default) }
+        _exerciseData.update {
+            it.copy(
+                flag = ExerciseFlag.Default,
+                navigateInfo = false,
+                navigateBack = false
+            )
+        }
         selectableExerciseProvider.resetSelectedExercises()
     }
 

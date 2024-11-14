@@ -6,6 +6,7 @@ import bg.zahov.app.data.model.Workout
 import bg.zahov.app.data.model.state.ExerciseData
 import bg.zahov.app.data.provider.model.HistoryWorkout
 import bg.zahov.app.ui.exercise.info.history.ExerciseHistoryInfo
+import bg.zahov.app.ui.workout.start.StartWorkout
 import kotlinx.coroutines.flow.Flow
 import java.time.LocalDateTime
 
@@ -35,6 +36,11 @@ interface WorkoutProvider {
         date: LocalDateTime,
         newExercises: List<Exercise>,
     )
+
+    /**
+     * Retrieves the list of template workouts mapped for the ui of the appropriate screen from the repository.
+     */
+    suspend fun getStartWorkouts(): Flow<List<StartWorkout>>
 
     /**
      * Filters from all workouts only those who were performed in the last month
