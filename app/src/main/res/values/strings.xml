@@ -170,7 +170,7 @@
     <!-- Strings used for line chart    -->
     <string name="results">Results</string>
     <string name="weight_unit">kg</string>
-    <string name="body_fat_percentage_unit">%</string>
+    <string name="body_fat_percentage_unit" translatable="false">%</string>
     <string name="caloric_intake_unit">kcal</string>
     <string name="default_unit">sm</string>
     <!-- Strings used for line chart    -->
