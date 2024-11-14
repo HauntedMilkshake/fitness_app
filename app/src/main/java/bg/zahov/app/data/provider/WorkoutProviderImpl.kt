@@ -7,6 +7,7 @@ import bg.zahov.app.data.model.Workout
 import bg.zahov.app.data.provider.model.HistoryWorkout
 import bg.zahov.app.data.repository.WorkoutRepositoryImpl
 import bg.zahov.app.ui.exercise.info.history.ExerciseHistoryInfo
+import bg.zahov.app.ui.workout.start.StartWorkout
 import bg.zahov.app.util.getOneRepMaxes
 import bg.zahov.app.util.timeToString
 import kotlinx.coroutines.flow.Flow
@@ -17,8 +18,8 @@ import java.time.LocalDateTime
 import java.time.format.DateTimeFormatter
 import java.util.Locale
 
-
 class WorkoutProviderImpl : WorkoutProvider {
+
     companion object {
 
         private var instance: WorkoutProviderImpl? = null
@@ -26,6 +27,7 @@ class WorkoutProviderImpl : WorkoutProvider {
     }
 
     private var lastWorkoutPerformed: Workout? = null
+
     private val _clickedExercise = MutableStateFlow<Exercise?>(null)
     private val clickedExercise: Flow<Exercise?>
         get() = _clickedExercise
@@ -33,7 +35,10 @@ class WorkoutProviderImpl : WorkoutProvider {
     private val _exerciseHistory = MutableStateFlow<List<ExerciseHistoryInfo>>(listOf())
     private val exerciseHistory: Flow<List<ExerciseHistoryInfo>>
         get() = _exerciseHistory
+
     private val workoutRepo = WorkoutRepositoryImpl.getInstance()
+    private val errorHandler = ServiceErrorHandlerImpl.getInstance()
+
     fun getLastWorkout(): Workout? = lastWorkoutPerformed
     override suspend fun getTemplateWorkouts(): Flow<List<Workout>> =
         workoutRepo.getTemplateWorkouts()
@@ -43,6 +48,13 @@ class WorkoutProviderImpl : WorkoutProvider {
     override suspend fun addTemplateWorkout(newWorkout: Workout) =
         workoutRepo.addTemplateWorkout(newWorkout)
 
+    /**
+     * Fetches the list of template exercises from the repository.
+     *
+     * This function makes a call to the `workoutRepo` to retrieve a list of exercises.
+     *
+     * @return A [Flow] emitting a [List] of [Exercise] objects. The flow will emit the list of exercises from the repository,
+     */
     override suspend fun getTemplateExercises(): Flow<List<Exercise>> =
         workoutRepo.getTemplateExercises()
 
@@ -114,6 +126,18 @@ class WorkoutProviderImpl : WorkoutProvider {
     }
 
     /**
+     * Retrieves a list of start workouts from the template workouts.
+     *
+     * This function fetches the template workouts by calling [getTemplateWorkouts] and converts each workout into a
+     * [StartWorkout] object.
+     *
+     * @return A [Flow] emitting a [List] of [Workout] mapped to [StartWorkout] objects. If the data retrieval is successful, the flow will emit
+     *         a list of [StartWorkout] objects created from the template workouts.
+     */
+    override suspend fun getStartWorkouts(): Flow<List<StartWorkout>> =
+        getTemplateWorkouts().mapNotNull { workouts -> workouts.map { it.toStartWorkout() } }
+
+    /**
      * Retrieves a flow of workouts from the current month along with their count.
      *
      * This function filters the workouts to include only those that occurred in the
@@ -138,6 +162,18 @@ class WorkoutProviderImpl : WorkoutProvider {
 
 
 /**
+ * Converts a `Workout` object to a `StartWorkout` object.
+ */
+fun Workout.toStartWorkout(): StartWorkout = StartWorkout(
+    id = this.id,
+    name = this.name,
+    date = this.date,
+    exercises = this.exercises.map { if (it.sets.isNotEmpty()) "${it.sets.size} x " else "" + it.name },
+    note = this.note ?: "",
+    personalRecords = this.personalRecords.toString()
+)
+
+/**
  * Converts a [Workout] object to a [HistoryWorkout] object.
  *
  * This extension function transforms a [Workout] instance into a [HistoryWorkout] instance by extracting
@@ -152,7 +188,7 @@ fun Workout.toHistoryWorkout(): HistoryWorkout {
         duration = this.duration?.timeToString() ?: "00:00:00",
         volume = (this.volume ?: 0.0).toString(),
         date = this.date.toFormattedString(),
-        exercises = this.exercises.map { "${if (it.sets.isNotEmpty()) "${it.sets.size} x " else ""}${it.name} " },
+        exercises = this.exercises.map { if (it.sets.isNotEmpty()) "${it.sets.size} x " else "" + it.name },
         bestSets = this.exercises.map {
             "${it.bestSet.firstMetric ?: 0} x ${it.bestSet.secondMetric ?: 0}"
         },

@@ -1,69 +1,69 @@
 package bg.zahov.app.data.model
 
 /**
- * Defines various types of body measurements, each with an associated descriptive key.
+ * Enum class representing different types of body measurements.
+ * Each measurement type has an associated key that describes the measurement in a user-friendly format.
  *
- * @property key A human-readable description of the measurement type.
+ * @property key A descriptive name for the measurement type.
  */
 enum class MeasurementType(val key: String) {
-    /** Measurement of body weight. */
+    /** Represents the user's weight measurement. */
     Weight("Weight"),
 
-    /** Measurement of body fat percentage. */
+    /** Represents the user's body fat percentage measurement. */
     BodyFatPercentage("Body fat percentage"),
 
-    /** Measurement of daily caloric intake. */
+    /** Represents the user's caloric intake measurement. */
     CaloricIntake("Caloric intake"),
 
-    /** Measurement of neck circumference. */
+    /** Represents the measurement of the user's neck circumference. */
     Neck("Neck"),
 
-    /** Measurement of shoulder width. */
+    /** Represents the measurement of the user's shoulder width. */
     Shoulders("Shoulders"),
 
-    /** Measurement of chest circumference. */
+    /** Represents the measurement of the user's chest circumference. */
     Chest("Chest"),
 
-    /** Measurement of left bicep circumference. */
+    /** Represents the measurement of the user's left bicep circumference. */
     LeftBicep("Left bicep"),
 
-    /** Measurement of right bicep circumference. */
+    /** Represents the measurement of the user's right bicep circumference. */
     RightBicep("Right bicep"),
 
-    /** Measurement of left forearm circumference. */
+    /** Represents the measurement of the user's left forearm circumference. */
     LeftForearm("Left forearm"),
 
-    /** Measurement of right forearm circumference. */
+    /** Represents the measurement of the user's right forearm circumference. */
     RightForearm("Right forearm"),
 
-    /** Measurement of waist circumference. */
+    /** Represents the measurement of the user's waist circumference. */
     Waist("Waist"),
 
-    /** Measurement of hip circumference. */
+    /** Represents the measurement of the user's hip circumference. */
     Hips("Hips"),
 
-    /** Measurement of left thigh circumference. */
+    /** Represents the measurement of the user's left thigh circumference. */
     LeftThigh("Left thigh"),
 
-    /** Measurement of right thigh circumference. */
+    /** Represents the measurement of the user's right thigh circumference. */
     RightThigh("Right thigh"),
 
-    /** Measurement of left calf circumference. */
+    /** Represents the measurement of the user's left calf circumference. */
     LeftCalf("Left calf"),
 
-    /** Measurement of right calf circumference. */
+    /** Represents the measurement of the user's right calf circumference. */
     RightCalf("Right calf");
 
     /**
-     * Companion object that provides utility functions for [MeasurementType].
+     * Companion object for the [MeasurementType] enum, providing utility functions.
      */
     companion object {
         /**
-         * Finds the corresponding [MeasurementType] based on the given key.
-         * Comparison is case-insensitive.
+         * Finds the corresponding [MeasurementType] for a given key, ignoring case sensitivity.
          *
-         * @param key The key to look up.
-         * @return The matching [MeasurementType], or `null` if no match is found.
+         * @param key The key to match against the [MeasurementType] enum.
+         * @return The matching [MeasurementType] if found, or `null` otherwise.
          */
         fun fromKey(key: String): MeasurementType? =
             entries.firstOrNull { it.key.equals(key, true) }

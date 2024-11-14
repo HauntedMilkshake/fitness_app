@@ -27,6 +27,7 @@ import androidx.compose.ui.unit.dp
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import androidx.lifecycle.viewmodel.compose.viewModel
 import bg.zahov.app.data.model.state.TypeSettings
+import bg.zahov.app.ui.custom.CommonDivider
 import bg.zahov.fitness.app.R
 
 @Composable
@@ -183,7 +184,7 @@ fun SettingsContent(
     ) {
         SettingsText(stringResource(R.string.profile))
         SettingsButton(text = stringResource(R.string.edit_profile_text)) { navigateEditProfile() }
-        Divider()
+        CommonDivider()
         SettingsText(stringResource(R.string.units_and_locale_text))
         SettingsRadioButton(
             title = stringResource(R.string.language_text),
@@ -193,7 +194,7 @@ fun SettingsContent(
             title = stringResource(R.string.units_text),
             text = units,
             dialog = { onDismiss -> changeUnits(onDismiss) })
-        Divider()
+        CommonDivider()
         SettingsText(stringResource(R.string.general_text))
         SettingsSwitchButton(
             title = stringResource(R.string.sound_effects_text),
@@ -204,7 +205,7 @@ fun SettingsContent(
             title = stringResource(R.string.theme_text),
             text = theme,
             dialog = { onDismiss -> changeTheme(onDismiss) })
-        Divider()
+        CommonDivider()
         SettingsText(stringResource(R.string.rest_timer_text))
         SettingsRadioButton(
             title = stringResource(R.string.timer_increment_value_text),
@@ -218,7 +219,7 @@ fun SettingsContent(
             title = stringResource(R.string.sound_text),
             text = sound,
             dialog = { onDismiss -> changeSound(onDismiss) })
-        Divider()
+        CommonDivider()
         SettingsText(stringResource(R.string.advanced_settings_text))
         SettingsSwitchButton(
             title = stringResource(R.string.sync_option_text),
@@ -234,10 +235,10 @@ fun SettingsContent(
             title = stringResource(R.string.use_watch_option),
             checked = enableWatch
         ) { useWatchChange() }
-        Divider()
+        CommonDivider()
         SettingsButton(stringResource(R.string.github_text)) { github() }
         SettingsButton(stringResource(R.string.bug_report_text)) { bugReport() }
-        Divider()
+        CommonDivider()
         Column(modifier = Modifier.fillMaxWidth()) {
             Button(
                 modifier = Modifier
