@@ -127,12 +127,3 @@ fun SettingsText(text: String) = Text(
     color = Color.White,
     modifier = Modifier.padding(top = 20.dp, start = 20.dp)
 )
-
-@Composable
-fun Divider() = HorizontalDivider(
-    modifier = Modifier
-        .fillMaxWidth()
-        .height(1.dp)
-        .padding(top = 4.dp, bottom = 16.dp),
-    color = colorResource(R.color.white)
-)
