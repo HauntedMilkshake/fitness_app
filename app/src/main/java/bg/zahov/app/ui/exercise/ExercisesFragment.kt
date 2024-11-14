@@ -7,35 +7,20 @@ import android.view.MenuInflater
 import android.view.MenuItem
 import android.view.View
 import android.view.ViewGroup
-import android.widget.Toast
-import android.widget.Toolbar
 import androidx.appcompat.app.AppCompatActivity
+import androidx.compose.ui.platform.ComposeView
+import androidx.compose.ui.platform.ViewCompositionStrategy
 import androidx.core.view.MenuProvider
 import androidx.fragment.app.Fragment
 import androidx.fragment.app.viewModels
-import androidx.lifecycle.map
-import androidx.navigation.findNavController
 import androidx.navigation.fragment.findNavController
-import androidx.recyclerview.widget.LinearLayoutManager
-import bg.zahov.app.data.model.state.ExerciseUiMapper
 import bg.zahov.app.hideBottomNav
 import bg.zahov.app.setToolBarTitle
 import bg.zahov.app.showBottomNav
 import bg.zahov.app.showTopBar
-import bg.zahov.app.ui.exercise.filter.FilterAdapter
-import bg.zahov.app.ui.exercise.filter.FilterDialog
-import bg.zahov.app.ui.exercise.filter.FilterWrapper
-import bg.zahov.app.util.applyScaleAnimation
 import bg.zahov.fitness.app.R
-import bg.zahov.fitness.app.databinding.FragmentExercisesBinding
-import com.google.android.flexbox.FlexDirection
-import com.google.android.flexbox.FlexboxLayoutManager
-import com.google.android.flexbox.JustifyContent
 
 class ExercisesFragment : Fragment() {
-    private var _binding: FragmentExercisesBinding? = null
-    private val binding
-        get() = requireNotNull(_binding)
     private val exerciseViewModel: ExerciseViewModel by viewModels()
 
     private val selectable by lazy {
@@ -43,7 +28,7 @@ class ExercisesFragment : Fragment() {
     }
 
     private val replaceable by lazy {
-        arguments?.getBoolean("REPLACING") ?: false
+        arguments?.getBoolean(REPLACE_EXERCISE_ARG) ?: false
     }
 
     private val addable by lazy {
@@ -55,19 +40,15 @@ class ExercisesFragment : Fragment() {
         container: ViewGroup?,
         savedInstanceState: Bundle?,
     ): View {
-        _binding = FragmentExercisesBinding.inflate(inflater, container, false)
-        exerciseViewModel.replaceable = replaceable
-        exerciseViewModel.selectable = selectable && !replaceable
-        exerciseViewModel.addable = addable
-        requireActivity().showTopBar()
-        if (addable || selectable || replaceable) requireActivity().hideBottomNav() else requireActivity().showBottomNav()
-        (activity as? AppCompatActivity)?.setSupportActionBar(activity?.findViewById(R.id.toolbar))
-        return binding.root
-    }
-
-    override fun onViewCreated(view: View, savedInstanceState: Bundle?) {
-        super.onViewCreated(view, savedInstanceState)
-        binding.apply {
+        exerciseViewModel.updateFlag(
+            replaceable = replaceable,
+            selectable = selectable,
+            addable = addable
+        )
+        return ComposeView(requireContext()).apply {
+            requireActivity().showTopBar()
+            if (addable || selectable || replaceable) requireActivity().hideBottomNav() else requireActivity().showBottomNav()
+            (activity as? AppCompatActivity)?.setSupportActionBar(activity?.findViewById(R.id.toolbar))
             (activity as? AppCompatActivity)?.supportActionBar?.setDisplayHomeAsUpEnabled(selectable || replaceable || addable)
             (activity as? AppCompatActivity)?.supportActionBar?.setHomeAsUpIndicator(R.drawable.ic_close)
             requireActivity().addMenuProvider(object : MenuProvider {
@@ -88,15 +69,13 @@ class ExercisesFragment : Fragment() {
                                 setOnQueryTextListener(object :
                                     androidx.appcompat.widget.SearchView.OnQueryTextListener {
                                     override fun onQueryTextSubmit(query: String?): Boolean {
-                                        query?.let { name ->
-                                            exerciseViewModel.searchExercises(name)
-                                        }
+                                        query?.let { }
                                         return true
                                     }
 
                                     override fun onQueryTextChange(query: String?): Boolean {
                                         query?.let { name ->
-                                            exerciseViewModel.searchExercises(name)
+                                            exerciseViewModel.onSearchChange(name)
                                         }
                                         return true
                                     }
@@ -107,10 +86,7 @@ class ExercisesFragment : Fragment() {
                         }
 
                         R.id.filter -> {
-                            FilterDialog().show(
-                                requireActivity().supportFragmentManager,
-                                FilterDialog.TAG
-                            )
+                            exerciseViewModel.updateShowDialog(true)
                             true
                         }
 
@@ -139,73 +115,16 @@ class ExercisesFragment : Fragment() {
                     }
                 }
             )
-
-            val filterAdapter = FilterAdapter(View.VISIBLE).apply {
-                itemClickListener = object : FilterAdapter.ItemClickListener<FilterWrapper> {
-                    override fun onItemClicked(item: FilterWrapper, clickedView: View) {
-                        exerciseViewModel.removeFilter(item)
+            setViewCompositionStrategy(ViewCompositionStrategy.DisposeOnViewTreeLifecycleDestroyed)
+            setContent {
+                ExercisesScreen(
+                    navigateInfo = {
+                        findNavController().navigate(R.id.exercises_to_exercise_info_navigation)
+                    },
+                    navigateBack = {
+                        findNavController().popBackStack()
                     }
-                }
-            }
-
-            filterItemsRecyclerView.apply {
-                layoutManager = FlexboxLayoutManager(context).apply {
-                    flexDirection = FlexDirection.ROW
-                    justifyContent = JustifyContent.FLEX_START
-                }
-                adapter = filterAdapter
-            }
-
-            exerciseViewModel.searchFilters.observe(viewLifecycleOwner) {
-                filterAdapter.updateItems(it)
-            }
-
-            val exerciseAdapter =
-                ExerciseAdapter().apply {
-                    itemClickListener =
-                        object : ExerciseAdapter.ItemClickListener<ExerciseAdapterWrapper> {
-                            override fun onItemClicked(
-                                item: ExerciseAdapterWrapper,
-                                position: Int,
-                            ) {
-                                when {
-                                    replaceable || selectable || addable -> exerciseViewModel.onExerciseClicked(
-                                        position
-                                    )
-
-                                    else -> {
-                                        exerciseViewModel.setClickedExercise(item.name)
-                                        findNavController().navigate(R.id.exercises_to_exercise_info_navigation)
-                                    }
-                                }
-                            }
-                        }
-                }
-
-            exercisesRecyclerView.apply {
-                layoutManager = LinearLayoutManager(context)
-                adapter = exerciseAdapter
-            }
-
-            exerciseViewModel.userExercises.observe(viewLifecycleOwner) {
-                exerciseAdapter.updateItems(it)
-            }
-
-            exerciseViewModel.state.map { ExerciseUiMapper.map(it) }.observe(viewLifecycleOwner) {
-                circularProgressIndicator.visibility = it.loadingVisibility
-                noResultsLabel.visibility = it.noResultsVisibility
-                it.error?.let { message ->
-                    Toast.makeText(context, message, Toast.LENGTH_SHORT).show()
-                }
-            }
-
-            confirm.apply {
-                visibility = if (selectable || replaceable || addable) View.VISIBLE else View.GONE
-                setOnClickListener {
-                    it.applyScaleAnimation()
-                    exerciseViewModel.confirmSelectedExercises()
-                    findNavController().popBackStack()
-                }
+                )
             }
         }
     }
@@ -213,7 +132,7 @@ class ExercisesFragment : Fragment() {
     override fun onSaveInstanceState(outState: Bundle) {}
     override fun onPause() {
         super.onPause()
-        exerciseViewModel.onConfirm()
+        exerciseViewModel.resetExerciseSelection()
     }
 
     override fun onResume() {
@@ -225,6 +144,9 @@ class ExercisesFragment : Fragment() {
     override fun onDestroyView() {
         super.onDestroyView()
         requireActivity().invalidateOptionsMenu()
-        _binding = null
+    }
+
+    companion object {
+        const val REPLACE_EXERCISE_ARG = "REPLACING"
     }
 }

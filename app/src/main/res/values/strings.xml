@@ -85,11 +85,13 @@
     <string name="filter">Filter</string>
     <string name="body_part">Body part</string>
     <string name="category">Category</string>
+    <string name="select_filter">Select Filters</string>
     <!-- Strings used for create workout template -->
     <string name="new_workout_template">New workout template</string>
     <string name="add_exercise">Add exercise</string>
     <string name="template_name_placeholder">Example</string>
     <string name="new_workout_template_hint">Workout template name</string>
+    <string name="duplicate_workout_template">duplicate</string>
     <!-- Strings used for exercise template creation   -->
     <string name="set_column_text">Set</string>
     <string name="previous_column_text">Previous</string>
@@ -98,6 +100,8 @@
     <string name="reps_column_text">reps</string>
     <string name="add_set">add set</string>
     <string name="cancel_text">cancel</string>
+    <!-- Strings used for start workout screen   -->
+    <string name="last_performed">Last performed: %1$s</string>
     <!-- Strings used for workout fragment    -->
     <string name="finish_workout"><font color="#3D8BC9">Finish</font></string>
     <string name="cancel_workout">cancel workout</string>
@@ -166,4 +170,8 @@
     <string name="re_authenticate_fail">"Failed to re-authenticate!"</string>
     <string name="update_username_success">"Successfully updated username</string>
     <string name="update_username_fail">Failed to update username</string>
+    <string name="toast_couldnt_start_workout">Cannot start workout</string>
+    <!-- Strings used for exercise screen -->
+    <string name="remove_filter">Removes filter</string>
+    <string name="dismiss">Dismiss</string>
 </resources>
