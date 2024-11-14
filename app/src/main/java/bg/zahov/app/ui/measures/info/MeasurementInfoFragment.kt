@@ -47,8 +47,8 @@ class MeasurementInfoFragment : Fragment() {
                 else -> false
             }
         }, viewLifecycleOwner)
-        requireActivity().showTopBar()
-        requireActivity().hideBottomNav()
+        activity?.showTopBar()
+        activity?.hideBottomNav()
         return ComposeView(requireContext()).apply {
             requireActivity().hideBottomNav()
             setViewCompositionStrategy(ViewCompositionStrategy.DisposeOnViewTreeLifecycleDestroyed)
