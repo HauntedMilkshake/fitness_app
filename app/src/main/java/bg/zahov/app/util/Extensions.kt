@@ -18,6 +18,7 @@ import bg.zahov.app.data.model.Sets
 import bg.zahov.app.data.model.Units
 import bg.zahov.app.data.model.User
 import bg.zahov.app.data.model.Workout
+import bg.zahov.app.data.model.state.ExerciseData
 import bg.zahov.app.ui.exercise.ExerciseAdapterWrapper
 import bg.zahov.app.ui.workout.add.ExerciseSetAdapterExerciseWrapper
 import bg.zahov.app.ui.workout.add.ExerciseSetAdapterSetWrapper
@@ -212,28 +213,26 @@ fun Sets.toExerciseSetAdapterSetWrapper(
     )
 }
 
-fun Exercise.toExerciseAdapterWrapper(): ExerciseAdapterWrapper {
-    return ExerciseAdapterWrapper(
+fun Exercise.toExerciseData() =
+    ExerciseData(
         name = this.name,
-        bodyPart = this.bodyPart.key,
-        category = this.category.key,
-        imageResource = when (this.bodyPart) {
-            BodyPart.Core -> R.drawable.ic_abs
-            BodyPart.Arms -> R.drawable.ic_arms
-            BodyPart.Back -> R.drawable.ic_back
-            BodyPart.Chest -> R.drawable.ic_chest
-            BodyPart.Legs -> R.drawable.ic_legs
-            BodyPart.Shoulders -> R.drawable.ic_shoulders
-            else -> R.drawable.ic_olympic
-        },
+        bodyPart = this.bodyPart,
+        category = this.category
+    )
+fun Exercise.toExerciseAdapterWrapper() =
+    ExerciseAdapterWrapper(
+        name = this.name,
+        bodyPart = this.bodyPart.toString(),
+        category = this.category.toString(),
+        imageResource = R.drawable.ic_exercise,
         backgroundResource = R.color.background
     )
-}
+
 
 fun Exercise.toRealmExercise(): RealmExercise {
     val realmExercise = RealmExercise()
     realmExercise.name = this.name
-    realmExercise.bodyPart = this.bodyPart.key
+    realmExercise.bodyPart = this.bodyPart.body
     realmExercise.category = this.category.key
     realmExercise.isTemplate = this.isTemplate
     realmExercise.sets.addAll(this.sets.map { it.toRealmSets() })
@@ -251,7 +250,7 @@ fun Sets.toRealmSets(): RealmSets {
 }
 
 fun RealmExercise.toExercise(): Exercise? {
-    val bodyPart = BodyPart.entries.firstOrNull { it.key == this.bodyPart }
+    val bodyPart = BodyPart.entries.firstOrNull { it.body == this.bodyPart }
     val category = Category.entries.firstOrNull { it.key.equals(this.category, true) }
 
     return if (this.name != DEFAULT_SETTING && bodyPart != null && category != null) {
@@ -295,11 +294,11 @@ fun Exercise.getOneRepMaxes(): List<String> = this.sets.map {
 }
 
 fun LocalDateTime.toRealmString(): String {
-    return this.format(DateTimeFormatter.ofPattern(RealmTimePattern.realmTimePattern))
+    return this.format(DateTimeFormatter.ofPattern(RealmTimePattern.REALM_TIME_PATTERN))
 }
 
 fun String.toLocalDateTimeRlm(): LocalDateTime {
-    return LocalDateTime.parse(this, DateTimeFormatter.ofPattern(RealmTimePattern.realmTimePattern))
+    return LocalDateTime.parse(this, DateTimeFormatter.ofPattern(RealmTimePattern.REALM_TIME_PATTERN))
 }
 
 fun String.filterIntegerInput(): Int {

@@ -13,6 +13,7 @@ import bg.zahov.app.getServiceErrorProvider
 import bg.zahov.app.getWorkoutProvider
 import bg.zahov.fitness.app.R
 import kotlinx.coroutines.launch
+
 class AddExerciseViewModel(application: Application) : AndroidViewModel(application) {
     private val repo by lazy {
         application.getWorkoutProvider()
@@ -48,12 +49,12 @@ class AddExerciseViewModel(application: Application) : AndroidViewModel(applicat
 
     fun addExercise(exerciseTitle: String?) {
         if (exerciseTitle.isNullOrEmpty() || _category.value.isNullOrEmpty() || _bodyPart.value.isNullOrEmpty()) {
-            _state.postValue(State.Added( message = "Please do not leave empty fields!"))
+            _state.postValue(State.Added(message = "Please do not leave empty fields!"))
             return
         }
 
         if (exercises.any { it.name.equals(exerciseTitle, false) }) {
-            _state.postValue(State.Added( message = "Names of template exercises must be unique!"))
+            _state.postValue(State.Added(message = "Names of template exercises must be unique!"))
             return
         }
 
@@ -61,17 +62,22 @@ class AddExerciseViewModel(application: Application) : AndroidViewModel(applicat
             repo.addTemplateExercise(
                 Exercise(
                     exerciseTitle,
-                    BodyPart.entries.firstOrNull { it.key == _bodyPart.value!! }!!,
+                    BodyPart.entries.firstOrNull { it.body == _bodyPart.value!! }!!,
                     Category.entries.firstOrNull { it.key.equals(_category.value!!, true) }!!,
                     true,
                 )
             )
-            _state.postValue(State.Added(R.id.add_exercise_to_exercises, "Successfully added an exercise"))
+            _state.postValue(
+                State.Added(
+                    R.id.add_exercise_to_exercises,
+                    "Successfully added an exercise"
+                )
+            )
         }
     }
 
     fun setBodyPart(info: String) {
-        _bodyPart.value = BodyPart.entries.firstOrNull { it.key == info }.toString()
+        _bodyPart.value = BodyPart.entries.firstOrNull { it.body == info }.toString()
     }
 
     fun setCategory(info: String) {

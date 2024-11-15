@@ -41,8 +41,9 @@ class RealmWorkoutState : RealmObject {
 }
 
 class RealmExercise : RealmObject {
+    var id: String = DEFAULT_SETTING
     var name: String = DEFAULT_SETTING
-    var bodyPart: String = BodyPart.Other.key
+    var bodyPart: String = BodyPart.Other.body
     var category: String = Category.None.key
     var isTemplate: Boolean = false
     var sets: RealmList<RealmSets> = realmListOf()
@@ -57,7 +58,7 @@ class RealmSets : RealmObject {
 }
 
 object RealmTimePattern {
-    const val realmTimePattern = "yyyy-MM-dd HH:mm:ss"
+    const val REALM_TIME_PATTERN = "yyyy-MM-dd HH:mm:ss"
 }
 object RealmDefaultSetting {
     const val DEFAULT_SETTING = "default"
