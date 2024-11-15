@@ -67,9 +67,8 @@ data class User(
     companion object {
         fun fromFirestoreMap(data: Map<String, Any>?): User = data?.let { firestoreData ->
             User(
-                name = (firestoreData[FirestoreFields.USER_NAME] as? String) ?: "-1"
-            )
-        } ?: User( name =  "-1")
+                name = (firestoreData[FirestoreFields.USER_NAME] as? String) ?: throw CriticalDataNullException("No user found"))
+        } ?: throw CriticalDataNullException("No user found")
     }
 }
 
@@ -141,7 +140,7 @@ data class Exercise(
     companion object {
         fun fromFirestoreMap(data: Map<String, Any>?): Exercise = data?.let {
             Exercise(
-                name = it[FirestoreFields.EXERCISE_NAME] as? String ?: "",
+                name = it[FirestoreFields.EXERCISE_NAME] as? String ?: throw CriticalDataNullException("No name for exercise"),
                 bodyPart = it[FirestoreFields.EXERCISE_BODY_PART].toString()
                     .let { string -> BodyPart.valueOf(string) },
                 category = it[FirestoreFields.EXERCISE_CATEGORY].toString()

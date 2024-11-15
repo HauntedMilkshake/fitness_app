@@ -36,8 +36,10 @@ import androidx.compose.runtime.remember
 import androidx.compose.ui.semantics.contentDescription
 import androidx.compose.ui.semantics.semantics
 import androidx.core.content.ContextCompat.getString
+import bg.zahov.app.ui.custom.CommonBarChart
 import com.github.mikephil.charting.formatter.IndexAxisValueFormatter
 import com.github.mikephil.charting.formatter.ValueFormatter
+import com.google.android.gms.common.internal.service.Common
 
 @Preview
 @Composable
@@ -120,59 +122,8 @@ fun HomeScreenContent(
                     trackColor = MaterialTheme.colorScheme.surfaceVariant
                 )
             } else {
-                BarChartComponent(chartData = chartData, chartFormatter = valueFormatter)
+                CommonBarChart(chartData = chartData, chartFormatter = valueFormatter)
             }
         }
     }
-}
-
-@Composable
-fun BarChartComponent(
-    modifier: Modifier = Modifier
-        .fillMaxWidth()
-        .height(200.dp),
-    chartData: ChartData,
-    chartFormatter: ValueFormatter
-) {
-    AndroidView(modifier = modifier,
-        factory = { context ->
-            val chart = BarChart(context)
-            chart.setupBarChart(context)
-            chart.apply {
-                chart.xAxis.valueFormatter = chartFormatter
-                chart.xAxis.axisMaximum = chartData.xMax
-                chart.xAxis.axisMinimum = chartData.xMin
-                chart.axisRight.axisMaximum = chartData.yMax
-                chart.axisRight.axisMinimum = chartData.yMin
-                val dataSet = BarDataSet(chartData.chartData, "")
-                dataSet.setDrawValues(false)
-                val barData = com.github.mikephil.charting.data.BarData(dataSet)
-                barData.barWidth = 0.5f
-                data = barData
-            }
-        })
-}
-
-fun BarChart.setupBarChart(context: Context) {
-    setFitBars(true)
-    legend.isEnabled = false
-    isDoubleTapToZoomEnabled = false
-    axisLeft.isEnabled = false
-    isDragEnabled = false
-    isHighlightFullBarEnabled = false
-
-    description.setPosition(250f, 60f)
-    description.text = getString(context, R.string.weekly_workouts)
-    description.textColor = android.graphics.Color.WHITE
-
-    xAxis.position = XAxis.XAxisPosition.BOTTOM
-    xAxis.granularity = 1f
-    xAxis.axisMinimum = 0f
-    xAxis.textColor = android.graphics.Color.WHITE
-    xAxis.setCenterAxisLabels(true)
-    xAxis.isGranularityEnabled = true
-
-    axisRight.textColor = android.graphics.Color.WHITE
-    axisRight.granularity = 1f
-    axisRight.setDrawGridLines(false)
 }

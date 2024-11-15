@@ -4,14 +4,18 @@ import bg.zahov.app.data.interfaces.WorkoutProvider
 import bg.zahov.app.data.local.RealmWorkoutState
 import bg.zahov.app.data.model.Exercise
 import bg.zahov.app.data.model.Workout
+import bg.zahov.app.data.model.state.ExerciseData
 import bg.zahov.app.data.provider.model.HistoryWorkout
 import bg.zahov.app.data.repository.WorkoutRepositoryImpl
 import bg.zahov.app.ui.exercise.info.history.ExerciseHistoryInfo
 import bg.zahov.app.ui.workout.start.StartWorkout
 import bg.zahov.app.util.getOneRepMaxes
 import bg.zahov.app.util.timeToString
+import bg.zahov.app.util.toExerciseData
+import kotlinx.coroutines.ExperimentalCoroutinesApi
 import kotlinx.coroutines.flow.Flow
 import kotlinx.coroutines.flow.MutableStateFlow
+import kotlinx.coroutines.flow.mapLatest
 import kotlinx.coroutines.flow.mapNotNull
 import java.time.LocalDate
 import java.time.LocalDateTime
@@ -40,6 +44,7 @@ class WorkoutProviderImpl : WorkoutProvider {
     private val errorHandler = ServiceErrorHandlerImpl.getInstance()
 
     fun getLastWorkout(): Workout? = lastWorkoutPerformed
+
     override suspend fun getTemplateWorkouts(): Flow<List<Workout>> =
         workoutRepo.getTemplateWorkouts()
 
@@ -58,6 +63,24 @@ class WorkoutProviderImpl : WorkoutProvider {
     override suspend fun getTemplateExercises(): Flow<List<Exercise>> =
         workoutRepo.getTemplateExercises()
 
+    @OptIn(ExperimentalCoroutinesApi::class)
+    override suspend fun getExerciseByName(name: String): Flow<Exercise?> =
+        workoutRepo.getTemplateExercises().mapLatest { templates ->
+            templates.find { it.name == name }
+        }
+
+
+    @OptIn(ExperimentalCoroutinesApi::class)
+    override suspend fun getExercisesByNames(name: List<String>): Flow<List<Exercise>> =
+        workoutRepo.getTemplateExercises().mapLatest { templates ->
+            name.mapNotNull { name -> templates.find { it.name == name } }
+        }
+
+
+    override suspend fun getWrappedExercises(): Flow<List<ExerciseData>> =
+        workoutRepo.getTemplateExercises()
+            .mapNotNull { exercise -> exercise.map { it.toExerciseData() } }
+
     override suspend fun addTemplateExercise(newExercise: Exercise) =
         workoutRepo.addTemplateExercise(newExercise)
 
@@ -75,6 +98,7 @@ class WorkoutProviderImpl : WorkoutProvider {
     }
 
     override suspend fun getWorkoutById(id: String) = workoutRepo.getWorkoutById(id)
+
     override suspend fun updateExercises(exercises: List<Exercise>) {
         workoutRepo.updateExercises(exercises)
     }
@@ -85,7 +109,7 @@ class WorkoutProviderImpl : WorkoutProvider {
     override suspend fun getPastWorkoutById(id: String): Workout =
         workoutRepo.getPastWorkoutById(id)
 
-    override suspend fun setClickedTemplateExercise(item: Exercise) {
+    override suspend fun setClickedTemplateExercise(item: ExerciseData) {
         getPastWorkouts().collect { workout ->
             val resultsList = workout.mapNotNull {
                 it.exercises.find { workoutExercise -> workoutExercise.name == item.name }
@@ -101,7 +125,9 @@ class WorkoutProviderImpl : WorkoutProvider {
                     }
             }.sortedBy { it.date }
             _exerciseHistory.value = resultsList
-            _clickedExercise.emit(item)
+            getExerciseByName(item.name).collect {
+                _clickedExercise.emit(it)
+            }
         }
     }
 

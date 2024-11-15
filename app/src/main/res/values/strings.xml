@@ -85,6 +85,7 @@
     <string name="filter">Filter</string>
     <string name="body_part">Body part</string>
     <string name="category">Category</string>
+    <string name="select_filter">Select Filters</string>
     <!-- Strings used for create workout template -->
     <string name="new_workout_template">New workout template</string>
     <string name="add_exercise">Add exercise</string>
@@ -178,4 +179,8 @@
     <string name="caloric_intake_unit">kcal</string>
     <string name="default_unit">sm</string>
     <!-- Strings used for line chart    -->
+    <!-- Strings used for exercise screen -->
+    <string name="remove_filter">Removes filter</string>
+    <string name="dismiss">Dismiss</string>
+    <!-- Strings used for exercise screen -->
 </resources>
