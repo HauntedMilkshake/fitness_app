@@ -33,7 +33,10 @@ sealed class Filter {
  * @property name The name of the filter, either category or body part name.
  * @property selected Boolean value indicating whether this filter is selected.
  */
-data class FilterItem(val filter: Filter) {
+data class FilterItem(
+    val filter: Filter,
+    var selected: Boolean = false
+) {
 
     /**
      * The name of the filter. Returns the name of the category or body part based on the type of filter.
@@ -43,10 +46,4 @@ data class FilterItem(val filter: Filter) {
             is Filter.BodyPartFilter -> filter.name
             is Filter.CategoryFilter -> filter.name
         }
-
-    /**
-     * A Boolean value indicating whether the filter is selected.
-     * Default is `false`.
-     */
-    var selected: Boolean = false
 }

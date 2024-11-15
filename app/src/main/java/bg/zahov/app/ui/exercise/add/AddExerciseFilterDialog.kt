@@ -1,5 +1,6 @@
 package bg.zahov.app.ui.exercise.add
 
+import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.fillMaxWidth
@@ -9,7 +10,7 @@ import androidx.compose.foundation.lazy.items
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.RadioButton
-import androidx.compose.material3.RadioButtonDefaults
+import androidx.compose.material3.RadioButtonColors
 import androidx.compose.material3.Surface
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
@@ -18,14 +19,13 @@ import androidx.compose.ui.res.colorResource
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.window.Dialog
-import bg.zahov.app.ui.exercise.filter.FilterWrapper
+import bg.zahov.app.data.model.FilterItem
 import bg.zahov.fitness.app.R
 
 @Composable
 fun AddExerciseFilterDialog(
-    filters: List<FilterWrapper>,
-    selected: FilterWrapper,
-    onSelect: (FilterWrapper) -> Unit,
+    filters: List<FilterItem>,
+    onSelect: (FilterItem) -> Unit,
     onDismiss: () -> Unit
 ) {
     Dialog(onDismissRequest = onDismiss) {
@@ -45,11 +45,24 @@ fun AddExerciseFilterDialog(
                 )
                 LazyColumn {
                     items(filters) { filter ->
-                        Row {
+                        Row(modifier = Modifier
+                            .fillMaxWidth()
+                            .clickable { onSelect(filter) }) {
                             RadioButton(
-                                selected = filter == selected,
+                                selected = filter.selected,
                                 onClick = { onSelect(filter) },
-                                colors = RadioButtonDefaults.colors(selectedColor = colorResource(R.color.white))
+                                colors = RadioButtonColors(
+                                    selectedColor = colorResource(R.color.white),
+                                    unselectedColor = colorResource(R.color.background),
+                                    disabledSelectedColor = colorResource(R.color.selected),
+                                    disabledUnselectedColor = colorResource(R.color.background)
+                                )
+                            )
+                            Text(
+                                text = filter.name,
+                                style = MaterialTheme.typography.bodySmall,
+                                modifier = Modifier.padding(bottom = 8.dp),
+                                color = colorResource(R.color.white)
                             )
                         }
                     }
