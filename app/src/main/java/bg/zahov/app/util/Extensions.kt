@@ -4,6 +4,7 @@ import android.animation.ObjectAnimator
 import android.animation.PropertyValuesHolder
 import android.annotation.SuppressLint
 import android.view.View
+import bg.zahov.app.data.local.RealmDefaultSetting.DEFAULT_SETTING
 import bg.zahov.app.data.local.RealmExercise
 import bg.zahov.app.data.local.RealmSets
 import bg.zahov.app.data.local.RealmTimePattern
@@ -21,8 +22,6 @@ import bg.zahov.app.ui.exercise.ExerciseAdapterWrapper
 import bg.zahov.app.ui.workout.add.ExerciseSetAdapterExerciseWrapper
 import bg.zahov.app.ui.workout.add.ExerciseSetAdapterSetWrapper
 import bg.zahov.fitness.app.R
-import com.github.mikephil.charting.charts.BarChart
-import com.github.mikephil.charting.components.XAxis
 import com.google.firebase.Timestamp
 import java.time.Instant
 import java.time.LocalDateTime
@@ -255,7 +254,7 @@ fun RealmExercise.toExercise(): Exercise? {
     val bodyPart = BodyPart.entries.firstOrNull { it.key == this.bodyPart }
     val category = Category.entries.firstOrNull { it.key.equals(this.category, true) }
 
-    return if (this.name != "default" && bodyPart != null && category != null) {
+    return if (this.name != DEFAULT_SETTING && bodyPart != null && category != null) {
         Exercise(
             name = this.name,
             bodyPart = bodyPart,

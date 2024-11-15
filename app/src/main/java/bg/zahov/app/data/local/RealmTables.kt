@@ -1,5 +1,6 @@
 package bg.zahov.app.data.local
 
+import bg.zahov.app.data.local.RealmDefaultSetting.DEFAULT_SETTING
 import bg.zahov.app.data.model.BodyPart
 import bg.zahov.app.data.model.Category
 import bg.zahov.app.data.model.Language
@@ -25,8 +26,8 @@ open class Settings : RealmObject {
 }
 
 class RealmWorkoutState : RealmObject {
-    var id: String = "default"
-    var name: String = "default"
+    var id: String = DEFAULT_SETTING
+    var name: String = DEFAULT_SETTING
     var duration: Long = 0L
     var volume: Double = 0.0
     var date: String = ""
@@ -40,7 +41,7 @@ class RealmWorkoutState : RealmObject {
 }
 
 class RealmExercise : RealmObject {
-    var name: String = "default"
+    var name: String = DEFAULT_SETTING
     var bodyPart: String = BodyPart.Other.key
     var category: String = Category.None.key
     var isTemplate: Boolean = false
@@ -57,4 +58,7 @@ class RealmSets : RealmObject {
 
 object RealmTimePattern {
     const val realmTimePattern = "yyyy-MM-dd HH:mm:ss"
+}
+object RealmDefaultSetting {
+    const val DEFAULT_SETTING = "default"
 }
