@@ -1,5 +1,6 @@
 package bg.zahov.app.data.local
 
+import bg.zahov.app.data.local.RealmDefaultSetting.DEFAULT_SETTING
 import bg.zahov.app.data.model.*
 import io.realm.kotlin.Realm
 import io.realm.kotlin.RealmConfiguration
@@ -136,7 +137,7 @@ class RealmManager {
             query<RealmSets>().find().forEach { delete(it) }
             query<RealmExercise>().find().forEach { delete(it) }
             query<RealmWorkoutState>().find().forEach {
-                if (it.id != "default") delete(it)
+                if (it.id != DEFAULT_SETTING) delete(it)
             }
         }
     }
