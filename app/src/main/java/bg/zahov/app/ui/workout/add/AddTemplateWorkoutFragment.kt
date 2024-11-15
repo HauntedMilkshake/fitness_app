@@ -24,6 +24,9 @@ import bg.zahov.app.data.model.state.AddTemplateWorkoutUiMapper
 import bg.zahov.app.data.model.SetType
 import bg.zahov.app.hideBottomNav
 import bg.zahov.app.setToolBarTitle
+import bg.zahov.app.ui.workout.start.StartWorkoutFragment.Companion.EDIT_FLAG_ARG_KEY
+import bg.zahov.app.ui.workout.start.StartWorkoutFragment.Companion.WORKOUT_ID_ARG_KEY
+import bg.zahov.app.ui.exercise.ExercisesFragment.Companion.REPLACE_EXERCISE_ARG
 import bg.zahov.app.util.SetSwipeGesture
 import bg.zahov.app.util.applyScaleAnimation
 import bg.zahov.fitness.app.R
@@ -38,12 +41,11 @@ class AddTemplateWorkoutFragment : Fragment() {
     private val addWorkoutViewModel: AddTemplateWorkoutViewModel by viewModels()
 
     private val edit by lazy {
-        arguments?.getBoolean("EDIT") ?: false
+        arguments?.getBoolean(EDIT_FLAG_ARG_KEY) == true
     }
 
     private val id by lazy {
-        Log.d("getting edit", arguments?.getString("WORKOUT_ID").toString())
-        arguments?.getString("WORKOUT_ID")
+        arguments?.getString(WORKOUT_ID_ARG_KEY)
     }
 
     override fun onCreateView(
@@ -124,7 +126,7 @@ class AddTemplateWorkoutFragment : Fragment() {
                         addWorkoutViewModel.setReplaceableExercise(itemPosition)
                         findNavController().navigate(
                             R.id.create_workout_template_to_add_exercise,
-                            bundleOf("REPLACING" to true)
+                            bundleOf(REPLACE_EXERCISE_ARG to true)
                         )
                     }
 
@@ -162,7 +164,7 @@ class AddTemplateWorkoutFragment : Fragment() {
             addExercise.setOnClickListener {
                 findNavController().navigate(
                     R.id.create_workout_template_to_add_exercise,
-                    bundleOf("SELECTABLE" to true)
+                    bundleOf("ADDABLE" to true)
                 )
             }
 

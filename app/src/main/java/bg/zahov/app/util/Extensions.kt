@@ -17,12 +17,11 @@ import bg.zahov.app.data.model.Sets
 import bg.zahov.app.data.model.Units
 import bg.zahov.app.data.model.User
 import bg.zahov.app.data.model.Workout
+import bg.zahov.app.data.model.state.ExerciseData
 import bg.zahov.app.ui.exercise.ExerciseAdapterWrapper
 import bg.zahov.app.ui.workout.add.ExerciseSetAdapterExerciseWrapper
 import bg.zahov.app.ui.workout.add.ExerciseSetAdapterSetWrapper
 import bg.zahov.fitness.app.R
-import com.github.mikephil.charting.charts.BarChart
-import com.github.mikephil.charting.components.XAxis
 import com.google.firebase.Timestamp
 import java.time.Instant
 import java.time.LocalDateTime
@@ -213,28 +212,26 @@ fun Sets.toExerciseSetAdapterSetWrapper(
     )
 }
 
-fun Exercise.toExerciseAdapterWrapper(): ExerciseAdapterWrapper {
-    return ExerciseAdapterWrapper(
+fun Exercise.toExerciseData() =
+    ExerciseData(
         name = this.name,
-        bodyPart = this.bodyPart.key,
-        category = this.category.key,
-        imageResource = when (this.bodyPart) {
-            BodyPart.Core -> R.drawable.ic_abs
-            BodyPart.Arms -> R.drawable.ic_arms
-            BodyPart.Back -> R.drawable.ic_back
-            BodyPart.Chest -> R.drawable.ic_chest
-            BodyPart.Legs -> R.drawable.ic_legs
-            BodyPart.Shoulders -> R.drawable.ic_shoulders
-            else -> R.drawable.ic_olympic
-        },
+        bodyPart = this.bodyPart,
+        category = this.category
+    )
+fun Exercise.toExerciseAdapterWrapper() =
+    ExerciseAdapterWrapper(
+        name = this.name,
+        bodyPart = this.bodyPart.toString(),
+        category = this.category.toString(),
+        imageResource = R.drawable.ic_exercise,
         backgroundResource = R.color.background
     )
-}
+
 
 fun Exercise.toRealmExercise(): RealmExercise {
     val realmExercise = RealmExercise()
     realmExercise.name = this.name
-    realmExercise.bodyPart = this.bodyPart.key
+    realmExercise.bodyPart = this.bodyPart.body
     realmExercise.category = this.category.key
     realmExercise.isTemplate = this.isTemplate
     realmExercise.sets.addAll(this.sets.map { it.toRealmSets() })

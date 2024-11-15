@@ -1,5 +1,6 @@
 package bg.zahov.app.data.remote
 
+import bg.zahov.app.data.exception.CriticalDataNullException
 import bg.zahov.app.data.model.Exercise
 import bg.zahov.app.data.model.FirestoreFields
 import bg.zahov.app.data.model.Measurement
@@ -7,6 +8,7 @@ import bg.zahov.app.data.model.MeasurementType
 import bg.zahov.app.data.model.Measurements
 import bg.zahov.app.data.model.User
 import bg.zahov.app.data.model.Workout
+import bg.zahov.app.util.generateRandomId
 import bg.zahov.app.util.toFirestoreMap
 import com.google.firebase.firestore.CollectionReference
 import com.google.firebase.firestore.DocumentReference

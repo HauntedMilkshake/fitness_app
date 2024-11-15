@@ -10,7 +10,10 @@ private val DarkColorScheme = darkColorScheme(
     secondary = less_vibrant_text,
     onPrimary = less_vibrant_text,
     onSecondary = white,
-    background = background
+    background = background,
+    primaryContainer = blue_button,
+    onPrimaryContainer = blue_text,
+    onErrorContainer = disabled_button
 )
 
 /**

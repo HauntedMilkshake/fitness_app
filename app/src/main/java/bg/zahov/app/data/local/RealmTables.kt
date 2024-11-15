@@ -40,8 +40,9 @@ class RealmWorkoutState : RealmObject {
 }
 
 class RealmExercise : RealmObject {
+    var id: String = "default"
     var name: String = "default"
-    var bodyPart: String = BodyPart.Other.key
+    var bodyPart: String = BodyPart.Other.body
     var category: String = Category.None.key
     var isTemplate: Boolean = false
     var sets: RealmList<RealmSets> = realmListOf()
