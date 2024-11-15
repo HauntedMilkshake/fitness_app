@@ -1,6 +1,7 @@
 package bg.zahov.app.ui.exercise.add
 
 import androidx.compose.foundation.clickable
+import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.fillMaxWidth
@@ -14,6 +15,7 @@ import androidx.compose.material3.RadioButtonColors
 import androidx.compose.material3.Surface
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
+import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.res.colorResource
 import androidx.compose.ui.res.stringResource
@@ -24,6 +26,7 @@ import bg.zahov.fitness.app.R
 
 @Composable
 fun AddExerciseFilterDialog(
+    modifier: Modifier = Modifier,
     filters: List<FilterItem>,
     onSelect: (FilterItem) -> Unit,
     onDismiss: () -> Unit
@@ -32,7 +35,7 @@ fun AddExerciseFilterDialog(
         Surface(
             shape = RoundedCornerShape(16.dp),
             color = colorResource(R.color.background),
-            modifier = Modifier
+            modifier = modifier
                 .padding(16.dp)
                 .fillMaxWidth(),
         ) {
@@ -43,25 +46,30 @@ fun AddExerciseFilterDialog(
                     modifier = Modifier.padding(bottom = 8.dp),
                     color = colorResource(R.color.white)
                 )
-                LazyColumn {
+                LazyColumn(
+                    verticalArrangement = Arrangement.Center,
+                    horizontalAlignment = Alignment.CenterHorizontally
+                ) {
                     items(filters) { filter ->
-                        Row(modifier = Modifier
-                            .fillMaxWidth()
-                            .clickable { onSelect(filter) }) {
+                        Row(
+                            modifier = Modifier
+                                .fillMaxWidth()
+                                .clickable { onSelect(filter) },
+                            verticalAlignment = Alignment.CenterVertically
+                        ) {
                             RadioButton(
                                 selected = filter.selected,
                                 onClick = { onSelect(filter) },
                                 colors = RadioButtonColors(
-                                    selectedColor = colorResource(R.color.white),
-                                    unselectedColor = colorResource(R.color.background),
-                                    disabledSelectedColor = colorResource(R.color.selected),
-                                    disabledUnselectedColor = colorResource(R.color.background)
+                                    selectedColor = colorResource(R.color.selected),
+                                    unselectedColor = colorResource(R.color.unselected_filter),
+                                    disabledSelectedColor = colorResource(R.color.disabled_button),
+                                    disabledUnselectedColor = colorResource(R.color.disabled_button)
                                 )
                             )
                             Text(
                                 text = filter.name,
-                                style = MaterialTheme.typography.bodySmall,
-                                modifier = Modifier.padding(bottom = 8.dp),
+                                style = MaterialTheme.typography.bodyMedium,
                                 color = colorResource(R.color.white)
                             )
                         }
