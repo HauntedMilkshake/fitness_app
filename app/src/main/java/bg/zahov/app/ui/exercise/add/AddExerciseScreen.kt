@@ -32,12 +32,13 @@ import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import androidx.lifecycle.viewmodel.compose.viewModel
 import bg.zahov.app.data.model.BodyPart
 import bg.zahov.app.data.model.Category
+import bg.zahov.app.data.model.state.AddExerciseEventState
 import bg.zahov.app.ui.custom.CommonTextField
 import bg.zahov.fitness.app.R
 
 @Composable
 fun AddExerciseScreen(navigate: () -> Unit, viewModel: AddExerciseViewModel = viewModel()) {
-    val uiState by viewModel.newExerciseData.collectAsStateWithLifecycle()
+    val uiState by viewModel.addExerciseData.collectAsStateWithLifecycle()
 
     AddExerciseContent(
         name = uiState.name,
@@ -45,30 +46,30 @@ fun AddExerciseScreen(navigate: () -> Unit, viewModel: AddExerciseViewModel = vi
         bodyPart = viewModel.getSelectedBodyPart(),
         onNameChange = { viewModel.onNameChange(it) },
         buttonEnabled = viewModel.checkButtonAvailability(),
-        showDialogCategory = { viewModel.changeEvent(AddExerciseViewModel.EventState.ShowCategoryFilter) },
-        showDialogBodyPart = { viewModel.changeEvent(AddExerciseViewModel.EventState.ShowBodyPartFilter) },
+        showDialogCategory = { viewModel.changeEvent(AddExerciseEventState.ShowCategoryFilter) },
+        showDialogBodyPart = { viewModel.changeEvent(AddExerciseEventState.ShowBodyPartFilter) },
         onConfirm = { viewModel.addExercise() })
 
-    when (uiState.uiEventState) {
-        AddExerciseViewModel.EventState.HideDialog -> {}
-        AddExerciseViewModel.EventState.ShowBodyPartFilter -> {
+    when (uiState.uiAddExerciseEventState) {
+        AddExerciseEventState.HideDialog -> {}
+        AddExerciseEventState.ShowBodyPartFilter -> {
             AddExerciseFilterDialog(
                 filters = uiState.bodyPartFilters,
                 onSelect = { viewModel.onBodyPartFilterChange(it) },
-                onDismiss = { viewModel.changeEvent(AddExerciseViewModel.EventState.HideDialog) })
+                onDismiss = { viewModel.changeEvent(AddExerciseEventState.HideDialog) })
         }
 
-        AddExerciseViewModel.EventState.ShowCategoryFilter -> {
+        AddExerciseEventState.ShowCategoryFilter -> {
             AddExerciseFilterDialog(
                 filters = uiState.categoryFilters,
                 onSelect = { viewModel.onCategoryFilterChange(it) },
-                onDismiss = { viewModel.changeEvent(AddExerciseViewModel.EventState.HideDialog) })
+                onDismiss = { viewModel.changeEvent(AddExerciseEventState.HideDialog) })
         }
 
-        AddExerciseViewModel.EventState.NavigateBack -> {
+        AddExerciseEventState.NavigateBack -> {
             LaunchedEffect(Unit) {
                 navigate()
-                viewModel.changeEvent(AddExerciseViewModel.EventState.HideDialog)
+                viewModel.changeEvent(AddExerciseEventState.HideDialog)
             }
         }
     }
