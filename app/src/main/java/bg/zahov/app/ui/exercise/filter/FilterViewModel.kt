@@ -19,7 +19,8 @@ import kotlinx.coroutines.launch
  *
  * @property filterManager The provider that supplies filter data and manages filter states.
  */
-class FilterViewModel(private val filterManager: FilterProvider = Inject.filterProvider) : ViewModel() {
+class FilterViewModel(private val filterManager: FilterProvider = Inject.filterProvider) :
+    ViewModel() {
 
     // Backing property for the UI state flow
     private val _filterData = MutableStateFlow(FilterData(filterManager.getAllFilters()))
@@ -62,14 +63,11 @@ class FilterViewModel(private val filterManager: FilterProvider = Inject.filterP
      */
     private fun toggleFilter(new: List<FilterItem>) {
         _filterData.update { old ->
-            old.copy(list = old.copy().list.apply {
-                forEach { it.selected = false }
-                new.forEach { filter ->
-                    find { itemToFind -> itemToFind.name == filter.name }?.let {
-                        it.selected = true
-                    }
+            old.copy(
+                list = old.list.map { item ->
+                    FilterItem(item.filter, new.any { filter -> filter.name == item.name })
                 }
-            })
+            )
         }
     }
 
