@@ -65,12 +65,72 @@ import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.input.KeyboardType
 import androidx.compose.ui.text.input.TextFieldValue
 import androidx.compose.ui.text.input.VisualTransformation
-import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import androidx.lifecycle.viewmodel.compose.viewModel
+import bg.zahov.app.data.model.BodyPart
+import bg.zahov.app.data.model.Category
 import bg.zahov.app.data.model.SetType
+import bg.zahov.app.data.model.Sets
+import bg.zahov.app.util.generateRandomId
 import kotlinx.coroutines.delay
 import kotlinx.coroutines.launch
 import java.time.LocalDateTime
+
+
+/**
+ * A sealed class representing a workout entry, which can be either an exercise or a set
+ *
+ * A list of workoutEntry would look something like:
+ * List<WorkoutEntry> { Exercise1, Set1ForExercise1, Set2ForExercise1, Exercise2, ... etc }
+ * where the arrangement of items is important
+ *
+ * ! Note that this class is defined here only because this file and the view model would
+ * be to large to place in a single commit, however to properly showcase this file we
+ * need it to be here. In the pull request for the view model this class will be
+ * moved to the appropriate place !
+ */
+sealed class WorkoutEntry {
+
+    /**
+     * A data class representing an exercise in the workout.
+     *
+     * @property id A unique identifier for the exercise entry, default is generated using [generateRandomId].
+     * @property name The name of the exercise.
+     * @property firstInputColumnVisibility Determines whether the first input column for the exercise is visible. Default is true.
+     * As of now it is not used however for future purposes I decided to leave it here
+     * @property note An optional note related to the exercise. Default is an empty string.
+     * @property bodyPart The body part targeted by the exercise.
+     * @property category The category of the exercise (e.g., strength, endurance, etc.).
+     */
+    data class ExerciseEntry(
+        val id: String = generateRandomId(),
+        val name: String,
+        val firstInputColumnVisibility: Boolean = true,
+        val note: String = "",
+        val bodyPart: BodyPart,
+        val category: Category
+    ) : WorkoutEntry()
+
+    /**
+     * A data class representing a set in the exercise.
+     *
+     * @property id A unique identifier for the set entry, default is generated using [generateRandomId].
+     * @property setType The type of set (e.g., default, warm-up, etc.). Default is [SetType.DEFAULT].
+     * @property firstInputFieldVisibility Determines whether the first input field for the set is visible. Default is true.
+     * @property setNumber The number of the set (e.g., 1, 2, 3...).
+     * @property previousResults The results from the previous set, default is "-//-" indicating no prior results.
+     * @property set The specific set details (e.g., weight, repetitions, etc.).
+     * @property setCompleted Indicates whether the set has been completed. Default is false.
+     */
+    data class SetEntry(
+        val id: String = generateRandomId(),
+        val setType: SetType = SetType.DEFAULT,
+        val firstInputFieldVisibility: Boolean = true,
+        val setNumber: String,
+        val previousResults: String = "-//-",
+        val set: Sets,
+        val setCompleted: Boolean = false
+    ) : WorkoutEntry()
+}
 
 @Composable
 fun WorkoutScreen(
@@ -79,7 +139,6 @@ fun WorkoutScreen(
     onReplaceExercise: () -> Unit,
     onBackPressed: () -> Unit
 ) {
-    val state by workoutViewModel.uiState.collectAsStateWithLifecycle()
 
     BackHandler {
         onBackPressed()
@@ -93,28 +152,21 @@ fun WorkoutScreen(
     }
 
     WorkoutScreenContent(
-        name = if (state.workoutName.isEmpty()) workoutPrefix + state.workoutName else state.workoutName,
-        note = state.note,
-        exercises = state.exercises,
+        //imagine example is the name of the workout
+        name = if("Example".isEmpty()) workoutPrefix + "Example" else "Example",
+        note = "",
+        exercises = listOf<WorkoutEntry>(),
         onAddExercise = onAddExercise,
-        onDeleteSet = { workoutViewModel.removeSet(it) },
-        onCancel = { workoutViewModel.cancel() },
-        onNoteChange = { workoutViewModel.changeNote(it) },
-        onExerciseNoteChange = { pos, note -> workoutViewModel.changeExerciseNote(pos, note) },
-        onRemoveExercise = { workoutViewModel.removeExercise(it) },
+        onDeleteSet = {},
+        onCancel = {},
+        onNoteChange = {},
+        onExerciseNoteChange = { pos, note -> },
+        onRemoveExercise = {},
         onReplaceExercise = {
-            workoutViewModel.replaceExercise(it)
-            onReplaceExercise()
-        },
-        onAddSet = { workoutViewModel.addSet(it) },
-        onInputFieldChanged = { pos, value, type ->
-            workoutViewModel.onInputFieldChanged(
-                pos,
-                value,
-                type
-            )
-        },
-        onSetTypeChange = { pos, type -> workoutViewModel.onSetTypeChanged(pos, type) }
+            onReplaceExercise() },
+        onAddSet = { },
+        onInputFieldChanged = { pos, value, type -> },
+        onSetTypeChange = { pos, type -> }
     )
 }
 
@@ -135,6 +187,10 @@ fun WorkoutScreenContent(
     onInputFieldChanged: (Int, String, SetField) -> Unit,
     onSetTypeChange: (Int, SetType) -> Unit,
 ) {
+    /**
+     * In order to center the items of 2 independent rows we need to have
+     * pre-defined weight values to ensure consistency
+     */
     val weightValues by rememberSaveable {
         mutableStateOf(arrayOf(1f, 1f, 2f, 2f))
     }
@@ -165,7 +221,10 @@ fun WorkoutScreenContent(
                     )
                 }
             )
-
+            /**
+             * This structure ensures that the buttons placed within the Column that surrounds
+             * the LazyColumn are always visible
+             */
             Column(modifier = Modifier.fillMaxWidth()) {
                 LazyColumn(
                     modifier = Modifier
@@ -192,7 +251,11 @@ fun WorkoutScreenContent(
                                     onRemoveExercise = { onRemoveExercise(index) }
                                 )
                             }
-
+                            /**
+                             * Replicating a debounce effect because otherwise the
+                             * after the threshold of the swipe has been reached
+                             * the set just clips out and it made it look very choppy
+                             */
                             is WorkoutEntry.SetEntry -> {
                                 val scope = rememberCoroutineScope()
                                 var isRemoved by remember {
@@ -287,6 +350,10 @@ fun WorkoutScreenContent(
     }
 }
 
+/**
+ * generic text field used for the note of the workout and all
+ * of the notes of the exercies
+ */
 @Composable
 fun WorkoutScreenInputField(
     modifier: Modifier = Modifier,
@@ -309,6 +376,10 @@ fun WorkoutScreenInputField(
     )
 }
 
+/**
+ * This structure ensures that each independent item in the row would have
+ * an equal weight distributed despite the contents of the box
+ */
 @Composable
 fun ItemBox(modifier: Modifier = Modifier, content: @Composable () -> Unit) {
     Box(
@@ -429,6 +500,12 @@ fun Exercise(
     }
 }
 
+/**
+ * A custom text field
+ *
+ * allows for customization of the inner padding while still somewhat
+ * behaving like the regular text field
+ */
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
 fun SetInputField(
@@ -470,7 +547,10 @@ fun SetInputField(
         }
     }
 }
-
+/**
+ * a common text element used by the row that needs to have
+ * its items centered with the different items in the set
+ */
 @Composable
 fun SetColumnText(
     modifier: Modifier = Modifier,
@@ -502,7 +582,10 @@ fun WorkoutSet(
     var isDropDownExpanded by remember {
         mutableStateOf(false)
     }
-
+    /**
+     * This and the last row of [Exercise] are centered
+     * using [ItemBox] and [floatArrangement]
+     */
     Row(
         modifier = modifier.fillMaxWidth(),
     ) {
@@ -623,7 +706,7 @@ fun DropDown(
                 }
 
                 ItemType.SET -> {
-                    SetMenuItems.entries.toList().forEachIndexed { index, item ->
+                    SetMenuItem.entries.toList().forEachIndexed { index, item ->
                         DropdownMenuItem(text = {
                             Text(
                                 text = stringResource(item.stringResource),
@@ -634,9 +717,9 @@ fun DropDown(
                         },
                             onClick = {
                                 when (item) {
-                                    SetMenuItems.WARMUP -> onFirstOption()
-                                    SetMenuItems.DROP_SET -> onSecondOption()
-                                    SetMenuItems.FAILURE -> onThirdOption()
+                                    SetMenuItem.WARMUP -> onFirstOption()
+                                    SetMenuItem.DROP_SET -> onSecondOption()
+                                    SetMenuItem.FAILURE -> onThirdOption()
                                 }
                                 onClose()
                             })
@@ -647,18 +730,39 @@ fun DropDown(
     }
 }
 
-enum class SetMenuItems(val stringResource: Int) {
+/**
+ * Enum class representing the available set menu items for a workout.
+ * Each enum constant corresponds to a specific set type.
+ *
+ * @property stringResource The string resource ID associated with the set type name.
+ */
+enum class SetMenuItem(val stringResource: Int) {
     WARMUP(R.string.warmup_set), DROP_SET(R.string.drop_set), FAILURE(R.string.failure_set)
 }
 
+
+/**
+ * Enum class representing the available menu items for an exercise.
+ * Each enum constant corresponds to a specific action that can be performed on an exercise.
+ *
+ * @property stringResource The string resource ID associated with the exercise menu item.
+ */
 enum class ExerciseMenuItem(val stringResource: Int) {
     ADD_NOTE(R.string.add_note), REPLACE(R.string.replace_exercise), REMOVE(R.string.remove_exercise)
 }
 
+/**
+ * Enum class representing the different item types that can exist in a workout.
+ * This is used to distinguish between [SetMenuItem] and [ExerciseMenuItem] in [DropDown].
+ */
 enum class ItemType {
     EXERCISE, SET
 }
 
+/**
+ * Enum class representing the first and second input fields respectively.
+ * This is used to distinguish whether to write the value in [Sets.firstMetric] or [Sets.secondMetric].
+ */
 enum class SetField {
     WEIGHT, REPETITIONS
 }

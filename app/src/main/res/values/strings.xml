@@ -97,12 +97,16 @@
     <string name="previous_column_text">Previous</string>
     <string name="kg_column_text">(+kg)</string>
     <string name="lbs_column_text">(+lbs)</string>
-    <string name="reps_column_text">reps</string>
+    <string name="reps_column_text">Reps</string>
     <string name="add_set">add set</string>
     <string name="cancel_text">cancel</string>
     <!-- Strings used for start workout screen   -->
     <string name="last_performed">Last performed: %1$s</string>
     <!-- Strings used for workout fragment    -->
+    <string name="afternoon_workout">Afternoon</string>
+    <string name="night_workout">Night</string>
+    <string name="morning_workout">Morning</string>
+    <string name="noon_workout">Noon</string>
     <string name="finish_workout"><font color="#3D8BC9">Finish</font></string>
     <string name="cancel_workout">cancel workout</string>
     <string name="edit_workout">Edit</string>
