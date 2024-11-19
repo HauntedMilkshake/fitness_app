@@ -1,0 +1,664 @@
+package bg.zahov.app.ui.workout
+
+import androidx.activity.compose.BackHandler
+import androidx.compose.animation.core.Spring
+import androidx.compose.animation.core.spring
+import androidx.compose.foundation.ExperimentalFoundationApi
+import androidx.compose.foundation.background
+import androidx.compose.foundation.clickable
+import androidx.compose.foundation.interaction.MutableInteractionSource
+import androidx.compose.foundation.layout.Arrangement
+import androidx.compose.foundation.layout.Box
+import androidx.compose.foundation.layout.Column
+import androidx.compose.foundation.layout.IntrinsicSize
+import androidx.compose.foundation.layout.PaddingValues
+import androidx.compose.foundation.layout.Row
+import androidx.compose.foundation.layout.fillMaxHeight
+import androidx.compose.foundation.layout.fillMaxSize
+import androidx.compose.foundation.layout.fillMaxWidth
+import androidx.compose.foundation.layout.height
+import androidx.compose.foundation.layout.padding
+import androidx.compose.foundation.layout.size
+import androidx.compose.foundation.layout.width
+import androidx.compose.foundation.lazy.LazyColumn
+import androidx.compose.foundation.lazy.itemsIndexed
+import androidx.compose.foundation.shape.RoundedCornerShape
+import androidx.compose.foundation.text.BasicTextField
+import androidx.compose.foundation.text.KeyboardOptions
+import androidx.compose.foundation.text.selection.LocalTextSelectionColors
+import androidx.compose.foundation.text.selection.TextSelectionColors
+import androidx.compose.material3.Button
+import androidx.compose.material3.ButtonColors
+import androidx.compose.material3.ButtonDefaults
+import androidx.compose.material3.DropdownMenu
+import androidx.compose.material3.DropdownMenuItem
+import androidx.compose.material3.ExperimentalMaterial3Api
+import androidx.compose.material3.Icon
+import androidx.compose.material3.MaterialTheme
+import androidx.compose.material3.SwipeToDismissBox
+import androidx.compose.material3.SwipeToDismissBoxValue
+import androidx.compose.material3.Text
+import androidx.compose.material3.TextField
+import androidx.compose.material3.TextFieldDefaults
+import androidx.compose.material3.rememberSwipeToDismissBoxState
+import androidx.compose.runtime.Composable
+import androidx.compose.runtime.CompositionLocalProvider
+import androidx.compose.runtime.LaunchedEffect
+import androidx.compose.runtime.mutableStateOf
+import androidx.compose.runtime.remember
+import androidx.compose.ui.Modifier
+import androidx.compose.ui.graphics.Color
+import androidx.compose.ui.res.stringResource
+import androidx.compose.ui.text.style.TextOverflow
+import androidx.compose.ui.unit.dp
+import bg.zahov.app.ui.theme.FitnessTheme
+import bg.zahov.fitness.app.R
+import androidx.compose.runtime.getValue
+import androidx.compose.runtime.rememberCoroutineScope
+import androidx.compose.runtime.saveable.rememberSaveable
+import androidx.compose.runtime.setValue
+import androidx.compose.ui.Alignment
+import androidx.compose.ui.graphics.SolidColor
+import androidx.compose.ui.res.painterResource
+import androidx.compose.ui.text.TextRange
+import androidx.compose.ui.text.font.FontWeight
+import androidx.compose.ui.text.input.KeyboardType
+import androidx.compose.ui.text.input.TextFieldValue
+import androidx.compose.ui.text.input.VisualTransformation
+import androidx.lifecycle.compose.collectAsStateWithLifecycle
+import androidx.lifecycle.viewmodel.compose.viewModel
+import bg.zahov.app.data.model.SetType
+import kotlinx.coroutines.delay
+import kotlinx.coroutines.launch
+import java.time.LocalDateTime
+
+@Composable
+fun WorkoutScreen(
+    workoutViewModel: WorkoutViewModel = viewModel(),
+    onAddExercise: () -> Unit,
+    onReplaceExercise: () -> Unit,
+    onBackPressed: () -> Unit
+) {
+    val state by workoutViewModel.uiState.collectAsStateWithLifecycle()
+
+    BackHandler {
+        onBackPressed()
+    }
+
+    val workoutPrefix = when (LocalDateTime.now().hour) {
+        in 6..11 -> stringResource(R.string.morning_workout)
+        in 12..16 -> stringResource(R.string.noon_workout)
+        in 17..20 -> stringResource(R.string.afternoon_workout)
+        else -> stringResource(R.string.night_workout)
+    }
+
+    WorkoutScreenContent(
+        name = if (state.workoutName.isEmpty()) workoutPrefix + state.workoutName else state.workoutName,
+        note = state.note,
+        exercises = state.exercises,
+        onAddExercise = onAddExercise,
+        onDeleteSet = { workoutViewModel.removeSet(it) },
+        onCancel = { workoutViewModel.cancel() },
+        onNoteChange = { workoutViewModel.changeNote(it) },
+        onExerciseNoteChange = { pos, note -> workoutViewModel.changeExerciseNote(pos, note) },
+        onRemoveExercise = { workoutViewModel.removeExercise(it) },
+        onReplaceExercise = {
+            workoutViewModel.replaceExercise(it)
+            onReplaceExercise()
+        },
+        onAddSet = { workoutViewModel.addSet(it) },
+        onInputFieldChanged = { pos, value, type ->
+            workoutViewModel.onInputFieldChanged(
+                pos,
+                value,
+                type
+            )
+        },
+        onSetTypeChange = { pos, type -> workoutViewModel.onSetTypeChanged(pos, type) }
+    )
+}
+
+@OptIn(ExperimentalFoundationApi::class)
+@Composable
+fun WorkoutScreenContent(
+    name: String,
+    note: String,
+    exercises: List<WorkoutEntry>,
+    onAddExercise: () -> Unit,
+    onCancel: () -> Unit,
+    onNoteChange: (String) -> Unit,
+    onExerciseNoteChange: (Int, String) -> Unit,
+    onRemoveExercise: (Int) -> Unit,
+    onReplaceExercise: (Int) -> Unit,
+    onDeleteSet: (Int) -> Unit,
+    onAddSet: (Int) -> Unit,
+    onInputFieldChanged: (Int, String, SetField) -> Unit,
+    onSetTypeChange: (Int, SetType) -> Unit,
+) {
+    val weightValues by rememberSaveable {
+        mutableStateOf(arrayOf(1f, 1f, 2f, 2f))
+    }
+    FitnessTheme {
+        Column(
+            modifier = Modifier
+                .fillMaxSize()
+                .padding(top = 16.dp)
+        ) {
+            Text(
+                text = name,
+                modifier = Modifier.padding(start = 16.dp),
+                style = MaterialTheme.typography.titleLarge,
+                color = MaterialTheme.colorScheme.onSecondaryContainer
+            )
+
+            WorkoutScreenInputField(
+                modifier = Modifier
+                    .fillMaxWidth()
+                    .padding(12.dp),
+                value = note,
+                onValueChanged = { onNoteChange(it) },
+                label = {
+                    Text(
+                        text = stringResource(R.string.add_note),
+                        style = MaterialTheme.typography.labelMedium,
+                        color = MaterialTheme.colorScheme.secondary
+                    )
+                }
+            )
+
+            Column(modifier = Modifier.fillMaxWidth()) {
+                LazyColumn(
+                    modifier = Modifier
+                        .weight(1f)
+                        .padding(start = 8.dp, end = 8.dp, bottom = 8.dp),
+                    verticalArrangement = Arrangement.spacedBy(4.dp),
+                    horizontalAlignment = Alignment.CenterHorizontally
+                ) {
+                    itemsIndexed(
+                        items = exercises,
+                        key = { index, item -> if (item is WorkoutEntry.ExerciseEntry) item.id else (item as WorkoutEntry.SetEntry).id }) { index, it ->
+
+                        when (it) {
+                            is WorkoutEntry.ExerciseEntry -> {
+                                Exercise(
+                                    modifier = Modifier.animateItem(fadeOutSpec = spring(stiffness = Spring.StiffnessLow)),
+                                    it.name,
+                                    note = it.note,
+                                    floatArrangement = weightValues,
+                                    labelColor = MaterialTheme.colorScheme.onSecondaryContainer,
+                                    onExerciseNoteChange = { onExerciseNoteChange(index, it) },
+                                    onAddSet = { onAddSet(index) },
+                                    onReplaceExercise = { onReplaceExercise(index) },
+                                    onRemoveExercise = { onRemoveExercise(index) }
+                                )
+                            }
+
+                            is WorkoutEntry.SetEntry -> {
+                                val scope = rememberCoroutineScope()
+                                var isRemoved by remember {
+                                    mutableStateOf(false)
+                                }
+
+                                val dismissState = rememberSwipeToDismissBoxState(
+                                    confirmValueChange = { value ->
+                                        if (value == SwipeToDismissBoxValue.EndToStart) {
+                                            isRemoved = true
+                                        }
+                                        true
+                                    }
+                                )
+
+                                LaunchedEffect(isRemoved) {
+                                    scope.launch {
+                                        delay(150)
+                                        if (isRemoved) {
+                                            onDeleteSet(index)
+                                        }
+                                    }
+                                }
+
+                                SwipeToDismissBox(
+                                    state = dismissState,
+                                    backgroundContent = { /* noop */ },
+                                    enableDismissFromStartToEnd = false
+                                ) {
+                                    WorkoutSet(
+                                        modifier = Modifier
+                                            .fillMaxWidth()
+                                            .animateItem(),
+                                        setIndicator = if (it.setType == SetType.DEFAULT) it.setNumber else it.setType.key,
+                                        previous = it.previousResults,
+                                        weight = if (it.set.firstMetric == null || it.set.firstMetric == 0.0) "" else it.set.firstMetric.toString(),
+                                        reps = if (it.set.secondMetric == null || it.set.secondMetric == 0) "" else it.set.secondMetric.toString(),
+                                        floatArrangement = weightValues,
+                                        onInputFieldChanged = { value, type ->
+                                            onInputFieldChanged(
+                                                index,
+                                                value,
+                                                type
+                                            )
+                                        },
+                                        onChangeSetType = { onSetTypeChange(index, it) }
+                                    )
+                                }
+                            }
+                        }
+                    }
+                }
+                Column(modifier = Modifier.padding(bottom = 16.dp)) {
+                    Button(
+                        onClick = onAddExercise,
+                        modifier = Modifier
+                            .fillMaxWidth()
+                            .padding(start = 12.dp, end = 12.dp, top = 16.dp),
+                        shape = RoundedCornerShape(4.dp),
+                        elevation = ButtonDefaults.buttonElevation(defaultElevation = 8.dp)
+                    ) {
+                        Text(
+                            text = stringResource(R.string.add_exercise),
+                            maxLines = 1,
+                            overflow = TextOverflow.Ellipsis
+                        )
+                    }
+
+                    Button(
+                        modifier = Modifier
+                            .fillMaxWidth()
+                            .padding(start = 12.dp, end = 12.dp, top = 4.dp),
+                        onClick = onCancel,
+                        colors = ButtonColors(
+                            containerColor = MaterialTheme.colorScheme.background,
+                            contentColor = MaterialTheme.colorScheme.onError,
+                            disabledContentColor = Color.Unspecified,
+                            disabledContainerColor = Color.Unspecified
+                        ),
+                        shape = RoundedCornerShape(4.dp),
+                        elevation = ButtonDefaults.buttonElevation(defaultElevation = 8.dp)
+                    ) {
+                        Text(
+                            text = stringResource(R.string.cancel),
+                            maxLines = 1,
+                            overflow = TextOverflow.Ellipsis
+                        )
+                    }
+                }
+            }
+        }
+    }
+}
+
+@Composable
+fun WorkoutScreenInputField(
+    modifier: Modifier = Modifier,
+    value: String,
+    label: @Composable (() -> Unit)? = null,
+    onValueChanged: (String) -> Unit
+) {
+    TextField(
+        modifier = modifier,
+        value = value,
+        onValueChange = { onValueChanged(it) },
+        label = label,
+        shape = RoundedCornerShape(12.dp),
+        maxLines = 1,
+        colors = TextFieldDefaults.colors(
+            focusedIndicatorColor = Color.Transparent,
+            unfocusedIndicatorColor = Color.Transparent,
+            cursorColor = MaterialTheme.colorScheme.tertiary,
+        )
+    )
+}
+
+@Composable
+fun ItemBox(modifier: Modifier = Modifier, content: @Composable () -> Unit) {
+    Box(
+        modifier = modifier
+            .height(IntrinsicSize.Max)
+            .padding(vertical = 2.dp), contentAlignment = Alignment.Center
+    ) {
+        content()
+    }
+}
+
+@Composable
+fun Exercise(
+    modifier: Modifier = Modifier,
+    name: String,
+    note: String,
+    labelColor: Color,
+    floatArrangement: Array<Float>,
+    onAddSet: () -> Unit,
+    onExerciseNoteChange: (String) -> Unit,
+    onReplaceExercise: () -> Unit,
+    onRemoveExercise: () -> Unit
+) {
+    var isDropDownExpanded by rememberSaveable {
+        mutableStateOf(false)
+    }
+    var isNoteVisible by rememberSaveable {
+        mutableStateOf(false)
+    }
+
+    Column(
+        modifier = modifier
+            .fillMaxWidth()
+    ) {
+        if (isNoteVisible) {
+            WorkoutScreenInputField(
+                modifier = Modifier
+                    .fillMaxWidth()
+                    .padding(horizontal = 4.dp),
+                value = note,
+                onValueChanged = {
+                    onExerciseNoteChange(it)
+                })
+        }
+
+        Row(
+            modifier = Modifier
+                .fillMaxWidth()
+                .padding(top = 8.dp, bottom = 8.dp),
+            horizontalArrangement = Arrangement.SpaceBetween,
+            verticalAlignment = Alignment.CenterVertically
+        ) {
+            Text(
+                text = name,
+                color = MaterialTheme.colorScheme.onSecondaryContainer,
+                fontWeight = FontWeight.Bold,
+                style = MaterialTheme.typography.titleMedium
+            )
+
+            DropDown(
+                isDropDownExpanded = isDropDownExpanded,
+                itemType = ItemType.EXERCISE,
+                onExpand = { isDropDownExpanded = true },
+                onClose = { isDropDownExpanded = false },
+                onFirstOption = { isNoteVisible = !isNoteVisible },
+                onSecondOption = onReplaceExercise,
+                onThirdOption = onRemoveExercise
+            )
+        }
+
+        Button(
+            onClick = onAddSet,
+            modifier = Modifier.fillMaxWidth(),
+            shape = RoundedCornerShape(4.dp),
+            elevation = ButtonDefaults.buttonElevation(defaultElevation = 8.dp)
+        ) {
+            Text(
+                text = stringResource(R.string.add_set),
+                overflow = TextOverflow.Ellipsis,
+                maxLines = 1,
+                style = MaterialTheme.typography.labelLarge
+            )
+        }
+
+        Row(
+            modifier = Modifier
+                .fillMaxSize()
+                .padding(top = 12.dp),
+        ) {
+            ItemBox(modifier = Modifier.weight(floatArrangement[0])) {
+                SetColumnText(
+                    columnText = stringResource(R.string.set_column_text),
+                    color = labelColor
+                )
+            }
+
+            ItemBox(modifier = Modifier.weight(floatArrangement[1])) {
+                SetColumnText(
+                    columnText = stringResource(R.string.previous_column_text),
+                    color = labelColor
+                )
+            }
+            ItemBox(modifier = Modifier.weight(floatArrangement[2])) {
+
+                SetColumnText(
+                    columnText = stringResource(R.string.weight_text),
+                    color = labelColor
+                )
+            }
+
+            ItemBox(modifier = Modifier.weight(floatArrangement[3])) {
+                SetColumnText(
+                    columnText = stringResource(R.string.reps_column_text),
+                    color = labelColor
+                )
+            }
+        }
+    }
+}
+
+@OptIn(ExperimentalMaterial3Api::class)
+@Composable
+fun SetInputField(
+    modifier: Modifier = Modifier,
+    value: String,
+    onValueChanged: (String) -> Unit
+) {
+    val customTextSelectionColors =
+        TextSelectionColors(handleColor = Color.Transparent, backgroundColor = Color.Transparent)
+    val interactionSource = remember { MutableInteractionSource() }
+    CompositionLocalProvider(LocalTextSelectionColors provides customTextSelectionColors) {
+        BasicTextField(
+            modifier = modifier.fillMaxHeight(),
+            value = value,
+            singleLine = true,
+            enabled = true,
+            textStyle = MaterialTheme.typography.bodyLarge.copy(color = MaterialTheme.colorScheme.primary),
+            cursorBrush = SolidColor(MaterialTheme.colorScheme.onTertiaryContainer),
+            keyboardOptions = KeyboardOptions(keyboardType = KeyboardType.Number),
+            onValueChange = {
+                onValueChanged(it)
+            },
+            interactionSource = interactionSource,
+        ) { innerTextField ->
+            TextFieldDefaults.DecorationBox(
+                value = TextFieldValue(text = value, selection = TextRange(value.length)).text,
+                innerTextField = innerTextField,
+                enabled = true,
+                singleLine = true,
+                interactionSource = interactionSource,
+                visualTransformation = VisualTransformation.None,
+                colors = TextFieldDefaults.colors(
+                    focusedIndicatorColor = Color.Transparent,
+                    unfocusedIndicatorColor = Color.Transparent,
+                ),
+                shape = RoundedCornerShape(8.dp),
+                contentPadding = PaddingValues(start = 4.dp)
+            )
+        }
+    }
+}
+
+@Composable
+fun SetColumnText(
+    modifier: Modifier = Modifier,
+    columnText: String,
+    color: Color = MaterialTheme.colorScheme.onSecondaryContainer
+) {
+    Text(
+        modifier = modifier.padding(bottom = 8.dp),
+        text = columnText,
+        style = MaterialTheme.typography.labelMedium,
+        fontWeight = FontWeight.Bold,
+        color = color,
+        maxLines = 1,
+        overflow = TextOverflow.Ellipsis
+    )
+}
+
+@Composable
+fun WorkoutSet(
+    modifier: Modifier = Modifier,
+    setIndicator: String,
+    previous: String,
+    weight: String,
+    reps: String,
+    floatArrangement: Array<Float>,
+    onInputFieldChanged: (String, SetField) -> Unit,
+    onChangeSetType: (SetType) -> Unit
+) {
+    var isDropDownExpanded by remember {
+        mutableStateOf(false)
+    }
+
+    Row(
+        modifier = modifier.fillMaxWidth(),
+    ) {
+        ItemBox(modifier = Modifier.weight(floatArrangement[0])) {
+            DropDown(
+                option = setIndicator,
+                isDropDownExpanded = isDropDownExpanded,
+                itemType = ItemType.SET,
+                onExpand = { isDropDownExpanded = true },
+                onClose = { isDropDownExpanded = false },
+                onFirstOption = { onChangeSetType(SetType.WARMUP) },
+                onSecondOption = { onChangeSetType(SetType.DROP_SET) },
+                onThirdOption = { onChangeSetType(SetType.FAILURE) },
+            )
+        }
+
+        ItemBox(modifier = Modifier.weight(floatArrangement[1])) {
+            Text(
+                text = previous,
+                style = MaterialTheme.typography.labelLarge,
+                color = MaterialTheme.colorScheme.onSecondaryContainer
+            )
+        }
+
+        ItemBox(modifier = Modifier.weight(floatArrangement[2])) {
+            SetInputField(
+                modifier = Modifier
+                    .fillMaxHeight()
+                    .width(width = 64.dp),
+                value = weight,
+                onValueChanged = { onInputFieldChanged(it, SetField.WEIGHT) }
+            )
+        }
+
+        ItemBox(modifier = Modifier.weight(floatArrangement[3])) {
+            SetInputField(
+                modifier = Modifier
+                    .fillMaxHeight()
+                    .width(width = 64.dp),
+                value = reps,
+                onValueChanged = { onInputFieldChanged(it, SetField.REPETITIONS) }
+            )
+        }
+    }
+}
+
+
+@Composable
+fun DropDown(
+    modifier: Modifier = Modifier,
+    option: String? = null,
+    isDropDownExpanded: Boolean,
+    itemType: ItemType,
+    onExpand: () -> Unit,
+    onClose: () -> Unit,
+    onFirstOption: () -> Unit,
+    onSecondOption: () -> Unit,
+    onThirdOption: () -> Unit
+) {
+    Column(
+        modifier = modifier.background(color = Color.Transparent),
+        horizontalAlignment = Alignment.CenterHorizontally,
+        verticalArrangement = Arrangement.Center
+    ) {
+        Row(
+            verticalAlignment = Alignment.CenterVertically,
+            horizontalArrangement = Arrangement.Center,
+            modifier = Modifier
+                .background(color = Color.Transparent)
+                .clickable {
+                    onExpand()
+                }
+        ) {
+            if (option != null) {
+                Text(
+                    modifier = Modifier.clickable {
+                        onExpand()
+                    },
+                    text = option,
+                    color = MaterialTheme.colorScheme.onTertiaryContainer,
+                    maxLines = 1,
+                    overflow = TextOverflow.Ellipsis,
+                    style = MaterialTheme.typography.labelLarge
+                )
+            } else {
+                Icon(
+                    modifier = Modifier.size(24.dp),
+                    painter = painterResource(R.drawable.ic_settings_dots_blue),
+                    tint = MaterialTheme.colorScheme.onTertiaryContainer,
+                    contentDescription = ""
+                )
+            }
+        }
+        DropdownMenu(
+            expanded = isDropDownExpanded,
+            onDismissRequest = onClose
+        ) {
+            when (itemType) {
+                ItemType.EXERCISE -> {
+                    ExerciseMenuItem.entries.toList().forEachIndexed { index, item ->
+                        DropdownMenuItem(text = {
+                            Text(
+                                text = stringResource(item.stringResource),
+                                maxLines = 1,
+                                overflow = TextOverflow.Ellipsis,
+                                style = MaterialTheme.typography.labelLarge
+                            )
+                        },
+                            onClick = {
+                                when (item) {
+                                    ExerciseMenuItem.ADD_NOTE -> onFirstOption()
+                                    ExerciseMenuItem.REPLACE -> onSecondOption()
+                                    ExerciseMenuItem.REMOVE -> onThirdOption()
+                                }
+                                onClose()
+                            })
+                    }
+                }
+
+                ItemType.SET -> {
+                    SetMenuItems.entries.toList().forEachIndexed { index, item ->
+                        DropdownMenuItem(text = {
+                            Text(
+                                text = stringResource(item.stringResource),
+                                maxLines = 1,
+                                overflow = TextOverflow.Ellipsis,
+                                style = MaterialTheme.typography.labelLarge
+                            )
+                        },
+                            onClick = {
+                                when (item) {
+                                    SetMenuItems.WARMUP -> onFirstOption()
+                                    SetMenuItems.DROP_SET -> onSecondOption()
+                                    SetMenuItems.FAILURE -> onThirdOption()
+                                }
+                                onClose()
+                            })
+                    }
+                }
+            }
+        }
+    }
+}
+
+enum class SetMenuItems(val stringResource: Int) {
+    WARMUP(R.string.warmup_set), DROP_SET(R.string.drop_set), FAILURE(R.string.failure_set)
+}
+
+enum class ExerciseMenuItem(val stringResource: Int) {
+    ADD_NOTE(R.string.add_note), REPLACE(R.string.replace_exercise), REMOVE(R.string.remove_exercise)
+}
+
+enum class ItemType {
+    EXERCISE, SET
+}
+
+enum class SetField {
+    WEIGHT, REPETITIONS
+}
