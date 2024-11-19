@@ -152,7 +152,7 @@ fun WorkoutScreen(
     }
 
     WorkoutScreenContent(
-        //imagine example is the name of the workout
+        //placeholder Example for state.name
         name = if("Example".isEmpty()) workoutPrefix + "Example" else "Example",
         note = "",
         exercises = listOf<WorkoutEntry>(),
