@@ -68,7 +68,7 @@
     <string name="advanced_settings_text">Advanced settings</string>
     <string name="popup_exampel_title">Popup title</string>
     <string name="new_password">New password</string>
-    <string name="cancel">cancel</string>
+    <string name="cancel">Cancel</string>
     <string name="confirm">confirm</string>
     <!--  Strings used for create exercise fragment    -->
     <string name="new_exercise_placeholder_text">new exercise</string>
@@ -170,8 +170,17 @@
     <string name="re_authenticate_fail">"Failed to re-authenticate!"</string>
     <string name="update_username_success">"Successfully updated username</string>
     <string name="update_username_fail">Failed to update username</string>
+    <string name="add_history">Add to history</string>
     <string name="toast_couldnt_start_workout">Cannot start workout</string>
+    <!-- Strings used for line chart    -->
+    <string name="results">Results</string>
+    <string name="weight_unit">kg</string>
+    <string name="body_fat_percentage_unit" translatable="false">%</string>
+    <string name="caloric_intake_unit">kcal</string>
+    <string name="default_unit">sm</string>
+    <!-- Strings used for line chart    -->
     <!-- Strings used for exercise screen -->
     <string name="remove_filter">Removes filter</string>
     <string name="dismiss">Dismiss</string>
+    <!-- Strings used for exercise screen -->
 </resources>
