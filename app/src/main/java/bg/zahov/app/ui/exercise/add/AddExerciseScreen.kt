@@ -30,6 +30,7 @@ import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import androidx.lifecycle.viewmodel.compose.viewModel
 import bg.zahov.app.data.model.BodyPart
 import bg.zahov.app.data.model.Category
+import bg.zahov.app.data.model.FilterItem
 import bg.zahov.app.ui.custom.CommonTextField
 import bg.zahov.app.ui.theme.FitnessTheme
 import bg.zahov.fitness.app.R
@@ -48,18 +49,15 @@ fun AddExerciseScreen(navigate: () -> Unit, viewModel: AddExerciseViewModel = vi
         name = uiState.name,
         category = uiState.selectedCategory,
         bodyPart = uiState.selectedBodyPart,
+        dialogFilters = uiDialogState.toShow,
         onNameChange = { viewModel.onNameChange(it) },
         buttonEnabled = viewModel.checkButtonAvailability(),
         showDialogCategory = { viewModel.showDialog(showCategory = true) },
         showDialogBodyPart = { viewModel.showDialog(showBodyPart = true) },
         onConfirm = { viewModel.addExercise() },
-        dialog = {
-            if (uiDialogState.showDialog)
-                AddExerciseFilterDialog(
-                    filters = uiDialogState.toShow,
-                    onSelect = { viewModel.onFilterChange(it) },
-                    onDismiss = { viewModel.showDialog() })
-        }
+        showDialog = uiDialogState.showDialog,
+        onFilterChange = { viewModel.onFilterChange(it) },
+        onDismiss = { viewModel.showDialog() },
     )
 }
 
@@ -70,74 +68,82 @@ fun AddExerciseContent(
     buttonEnabled: Boolean = true,
     category: Category?,
     bodyPart: BodyPart?,
+    dialogFilters: List<FilterItem>,
+    showDialog: Boolean = false,
     onNameChange: (String) -> Unit,
     showDialogBodyPart: () -> Unit,
     showDialogCategory: () -> Unit,
     onConfirm: () -> Unit,
-    dialog: @Composable () -> Unit
+    onFilterChange: (FilterItem) -> Unit,
+    onDismiss: () -> Unit,
 ) {
     val interactionSource = remember { MutableInteractionSource() }
     FitnessTheme {
-        dialog()
-        Column(
-            modifier = modifier.padding(16.dp),
-            verticalArrangement = Arrangement.spacedBy(16.dp),
-            horizontalAlignment = Alignment.CenterHorizontally
-        ) {
-            CommonTextField(
-                text = name,
-                label = {
-                    Text(
-                        stringResource(R.string.add_name_hint),
-                        color = MaterialTheme.colorScheme.secondary
-                    )
-                },
-                onTextChange = { onNameChange(it) },
+        if (showDialog)
+            AddExerciseFilterDialog(
+                filters = dialogFilters,
+                onSelect = { onFilterChange(it) },
+                onDismiss = onDismiss
             )
-            Row(
-                modifier = Modifier
-                    .clickable(
-                        interactionSource = interactionSource,
-                        indication = null
-                    ) { showDialogCategory() }
-                    .fillMaxWidth(),
-                verticalAlignment = Alignment.CenterVertically
-            ) {
+    }
+    Column(
+        modifier = modifier.padding(16.dp),
+        verticalArrangement = Arrangement.spacedBy(16.dp),
+        horizontalAlignment = Alignment.CenterHorizontally
+    ) {
+        CommonTextField(
+            text = name,
+            label = {
                 Text(
-                    text = stringResource(R.string.category),
-                    color = MaterialTheme.colorScheme.secondary,
-                    style = MaterialTheme.typography.titleLarge,
+                    stringResource(R.string.add_name_hint),
+                    color = MaterialTheme.colorScheme.secondary
                 )
-                Text(
-                    modifier = Modifier.padding(start = 8.dp),
-                    text = category?.name ?: "",
-                    color = MaterialTheme.colorScheme.secondary,
-                    style = MaterialTheme.typography.bodyLarge,
-                )
-            }
-            Row(
-                modifier = Modifier
-                    .clickable(
-                        interactionSource = interactionSource,
-                        indication = null
-                    ) { showDialogBodyPart() }
-                    .fillMaxWidth(),
-                verticalAlignment = Alignment.CenterVertically
-            ) {
-                Text(
-                    text = stringResource(R.string.body_part),
-                    color = MaterialTheme.colorScheme.secondary,
-                    style = MaterialTheme.typography.titleLarge,
-                )
-                Text(
-                    modifier = Modifier.padding(start = 8.dp),
-                    text = bodyPart?.name ?: "",
-                    color = MaterialTheme.colorScheme.secondary,
-                    style = MaterialTheme.typography.bodyLarge,
-                )
-            }
-            ConfirmButton(onConfirm = onConfirm, enabled = buttonEnabled)
+            },
+            onTextChange = { onNameChange(it) },
+        )
+        Row(
+            modifier = Modifier
+                .clickable(
+                    interactionSource = interactionSource,
+                    indication = null
+                ) { showDialogCategory() }
+                .fillMaxWidth(),
+            verticalAlignment = Alignment.CenterVertically
+        ) {
+            Text(
+                text = stringResource(R.string.category),
+                color = MaterialTheme.colorScheme.secondary,
+                style = MaterialTheme.typography.titleLarge,
+            )
+            Text(
+                modifier = Modifier.padding(start = 8.dp),
+                text = category?.name ?: "",
+                color = MaterialTheme.colorScheme.secondary,
+                style = MaterialTheme.typography.bodyLarge,
+            )
         }
+        Row(
+            modifier = Modifier
+                .clickable(
+                    interactionSource = interactionSource,
+                    indication = null
+                ) { showDialogBodyPart() }
+                .fillMaxWidth(),
+            verticalAlignment = Alignment.CenterVertically
+        ) {
+            Text(
+                text = stringResource(R.string.body_part),
+                color = MaterialTheme.colorScheme.secondary,
+                style = MaterialTheme.typography.titleLarge,
+            )
+            Text(
+                modifier = Modifier.padding(start = 8.dp),
+                text = bodyPart?.name ?: "",
+                color = MaterialTheme.colorScheme.secondary,
+                style = MaterialTheme.typography.bodyLarge,
+            )
+        }
+        ConfirmButton(onConfirm = onConfirm, enabled = buttonEnabled)
     }
 }
 

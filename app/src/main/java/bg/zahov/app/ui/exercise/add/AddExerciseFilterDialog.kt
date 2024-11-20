@@ -17,7 +17,6 @@ import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
-import androidx.compose.ui.res.colorResource
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.window.Dialog
@@ -34,17 +33,17 @@ fun AddExerciseFilterDialog(
     Dialog(onDismissRequest = onDismiss) {
         Surface(
             shape = RoundedCornerShape(16.dp),
-            color = colorResource(R.color.background),
+            color = MaterialTheme.colorScheme.background,
             modifier = modifier
                 .padding(16.dp)
                 .fillMaxWidth(),
         ) {
             Column(modifier = Modifier.padding(16.dp)) {
                 Text(
+                    modifier = Modifier.padding(bottom = 8.dp),
                     text = stringResource(R.string.filter),
                     style = MaterialTheme.typography.headlineLarge,
-                    modifier = Modifier.padding(bottom = 8.dp),
-                    color = colorResource(R.color.white)
+                    color = MaterialTheme.colorScheme.secondary
                 )
                 LazyColumn(
                     verticalArrangement = Arrangement.Center,
@@ -61,16 +60,16 @@ fun AddExerciseFilterDialog(
                                 selected = filter.selected,
                                 onClick = { onSelect(filter) },
                                 colors = RadioButtonColors(
-                                    selectedColor = colorResource(R.color.selected),
-                                    unselectedColor = colorResource(R.color.unselected_filter),
-                                    disabledSelectedColor = colorResource(R.color.disabled_button),
-                                    disabledUnselectedColor = colorResource(R.color.disabled_button)
+                                    selectedColor = MaterialTheme.colorScheme.primaryContainer,
+                                    unselectedColor = MaterialTheme.colorScheme.secondary,
+                                    disabledSelectedColor = MaterialTheme.colorScheme.surfaceVariant,
+                                    disabledUnselectedColor = MaterialTheme.colorScheme.background
                                 )
                             )
                             Text(
                                 text = filter.name,
                                 style = MaterialTheme.typography.bodyMedium,
-                                color = colorResource(R.color.white)
+                                color = MaterialTheme.colorScheme.secondary
                             )
                         }
                     }
