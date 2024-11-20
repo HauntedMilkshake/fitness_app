@@ -30,6 +30,7 @@ import androidx.compose.foundation.text.selection.TextSelectionColors
 import androidx.compose.material3.Button
 import androidx.compose.material3.ButtonColors
 import androidx.compose.material3.ButtonDefaults
+import androidx.compose.material3.ButtonElevation
 import androidx.compose.material3.DropdownMenu
 import androidx.compose.material3.DropdownMenuItem
 import androidx.compose.material3.ExperimentalMaterial3Api
@@ -58,6 +59,7 @@ import androidx.compose.runtime.rememberCoroutineScope
 import androidx.compose.runtime.saveable.rememberSaveable
 import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
+import androidx.compose.ui.graphics.Shape
 import androidx.compose.ui.graphics.SolidColor
 import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.text.TextRange
@@ -71,10 +73,9 @@ import bg.zahov.app.data.model.Category
 import bg.zahov.app.data.model.SetType
 import bg.zahov.app.data.model.Sets
 import bg.zahov.app.util.generateRandomId
+import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.delay
 import kotlinx.coroutines.launch
-import java.time.LocalDateTime
-
 
 /**
  * A sealed class representing a workout entry, which can be either an exercise or a set
@@ -139,23 +140,28 @@ fun WorkoutScreen(
     onReplaceExercise: () -> Unit,
     onBackPressed: () -> Unit
 ) {
+    val scope = rememberCoroutineScope()
+
+    /**
+     * In order to center the items of 2 independent rows we need to have
+     * pre-defined weight values to ensure consistency
+     */
+    val weightValues by rememberSaveable {
+        mutableStateOf(arrayOf(1f, 1f, 2f, 2f))
+    }
 
     BackHandler {
         onBackPressed()
     }
 
-    val workoutPrefix = when (LocalDateTime.now().hour) {
-        in 6..11 -> stringResource(R.string.morning_workout)
-        in 12..16 -> stringResource(R.string.noon_workout)
-        in 17..20 -> stringResource(R.string.afternoon_workout)
-        else -> stringResource(R.string.night_workout)
-    }
-
     WorkoutScreenContent(
         //placeholder Example for state.name
-        name = if("Example".isEmpty()) workoutPrefix + "Example" else "Example",
+        //placeholder workoutPrefix for state.workoutPrefix
+        name = if ("Example".isEmpty()) "workoutPrefix" + "Example" else "Example",
         note = "",
         exercises = listOf<WorkoutEntry>(),
+        scope = scope,
+        weightValues = weightValues,
         onAddExercise = onAddExercise,
         onDeleteSet = {},
         onCancel = {},
@@ -163,7 +169,8 @@ fun WorkoutScreen(
         onExerciseNoteChange = { pos, note -> },
         onRemoveExercise = {},
         onReplaceExercise = {
-            onReplaceExercise() },
+            onReplaceExercise()
+        },
         onAddSet = { },
         onInputFieldChanged = { pos, value, type -> },
         onSetTypeChange = { pos, type -> }
@@ -176,6 +183,8 @@ fun WorkoutScreenContent(
     name: String,
     note: String,
     exercises: List<WorkoutEntry>,
+    scope: CoroutineScope,
+    weightValues: Array<Float>,
     onAddExercise: () -> Unit,
     onCancel: () -> Unit,
     onNoteChange: (String) -> Unit,
@@ -187,13 +196,7 @@ fun WorkoutScreenContent(
     onInputFieldChanged: (Int, String, SetField) -> Unit,
     onSetTypeChange: (Int, SetType) -> Unit,
 ) {
-    /**
-     * In order to center the items of 2 independent rows we need to have
-     * pre-defined weight values to ensure consistency
-     */
-    val weightValues by rememberSaveable {
-        mutableStateOf(arrayOf(1f, 1f, 2f, 2f))
-    }
+
     FitnessTheme {
         Column(
             modifier = Modifier
@@ -257,66 +260,32 @@ fun WorkoutScreenContent(
                              * the set just clips out and it made it look very choppy
                              */
                             is WorkoutEntry.SetEntry -> {
-                                val scope = rememberCoroutineScope()
-                                var isRemoved by remember {
-                                    mutableStateOf(false)
-                                }
-
-                                val dismissState = rememberSwipeToDismissBoxState(
-                                    confirmValueChange = { value ->
-                                        if (value == SwipeToDismissBoxValue.EndToStart) {
-                                            isRemoved = true
-                                        }
-                                        true
-                                    }
+                                WorkoutSet(
+                                    modifier = Modifier
+                                        .fillMaxSize()
+                                        .animateItem(),
+                                    setIndicator = if (it.setType == SetType.DEFAULT) it.setNumber else it.setType.key,
+                                    previous = it.previousResults,
+                                    weight = if (it.set.firstMetric == null || it.set.firstMetric == 0.0) "" else it.set.firstMetric.toString(),
+                                    reps = if (it.set.secondMetric == null || it.set.secondMetric == 0) "" else it.set.secondMetric.toString(),
+                                    scope = scope,
+                                    floatArrangement = weightValues,
+                                    onInputFieldChanged = { value, type ->
+                                        onInputFieldChanged(
+                                            index,
+                                            value,
+                                            type
+                                        )
+                                    },
+                                    onChangeSetType = { type -> onSetTypeChange(index, type) },
+                                    onDeleteSet = { onDeleteSet(index) },
                                 )
-
-                                LaunchedEffect(isRemoved) {
-                                    scope.launch {
-                                        delay(150)
-                                        if (isRemoved) {
-                                            onDeleteSet(index)
-                                        }
-                                    }
-                                }
-
-                                SwipeToDismissBox(
-                                    state = dismissState,
-                                    backgroundContent = { /* noop */ },
-                                    enableDismissFromStartToEnd = false
-                                ) {
-                                    WorkoutSet(
-                                        modifier = Modifier
-                                            .fillMaxWidth()
-                                            .animateItem(),
-                                        setIndicator = if (it.setType == SetType.DEFAULT) it.setNumber else it.setType.key,
-                                        previous = it.previousResults,
-                                        weight = if (it.set.firstMetric == null || it.set.firstMetric == 0.0) "" else it.set.firstMetric.toString(),
-                                        reps = if (it.set.secondMetric == null || it.set.secondMetric == 0) "" else it.set.secondMetric.toString(),
-                                        floatArrangement = weightValues,
-                                        onInputFieldChanged = { value, type ->
-                                            onInputFieldChanged(
-                                                index,
-                                                value,
-                                                type
-                                            )
-                                        },
-                                        onChangeSetType = { onSetTypeChange(index, it) }
-                                    )
-                                }
                             }
                         }
                     }
                 }
                 Column(modifier = Modifier.padding(bottom = 16.dp)) {
-                    Button(
-                        onClick = onAddExercise,
-                        modifier = Modifier
-                            .fillMaxWidth()
-                            .padding(start = 12.dp, end = 12.dp, top = 16.dp),
-                        shape = RoundedCornerShape(4.dp),
-                        elevation = ButtonDefaults.buttonElevation(defaultElevation = 8.dp)
-                    ) {
+                    WorkoutButton(onClick = onAddExercise) {
                         Text(
                             text = stringResource(R.string.add_exercise),
                             maxLines = 1,
@@ -324,19 +293,14 @@ fun WorkoutScreenContent(
                         )
                     }
 
-                    Button(
-                        modifier = Modifier
-                            .fillMaxWidth()
-                            .padding(start = 12.dp, end = 12.dp, top = 4.dp),
+                    WorkoutButton(
                         onClick = onCancel,
                         colors = ButtonColors(
                             containerColor = MaterialTheme.colorScheme.background,
                             contentColor = MaterialTheme.colorScheme.onError,
                             disabledContentColor = Color.Unspecified,
                             disabledContainerColor = Color.Unspecified
-                        ),
-                        shape = RoundedCornerShape(4.dp),
-                        elevation = ButtonDefaults.buttonElevation(defaultElevation = 8.dp)
+                        )
                     ) {
                         Text(
                             text = stringResource(R.string.cancel),
@@ -347,6 +311,28 @@ fun WorkoutScreenContent(
                 }
             }
         }
+    }
+}
+
+@Composable
+fun WorkoutButton(
+    modifier: Modifier = Modifier,
+    onClick: () -> Unit,
+    colors: ButtonColors = ButtonDefaults.buttonColors(),
+    shape: Shape = RoundedCornerShape(4.dp),
+    elevation: ButtonElevation? = ButtonDefaults.buttonElevation(defaultElevation = 8.dp),
+    content: @Composable () -> Unit
+) {
+    Button(
+        modifier = modifier
+            .fillMaxWidth()
+            .padding(start = 12.dp, end = 12.dp, top = 4.dp),
+        onClick = onClick,
+        colors = colors,
+        shape = shape,
+        elevation = elevation
+    ) {
+        content()
     }
 }
 
@@ -547,6 +533,7 @@ fun SetInputField(
         }
     }
 }
+
 /**
  * a common text element used by the row that needs to have
  * its items centered with the different items in the set
@@ -570,6 +557,60 @@ fun SetColumnText(
 
 @Composable
 fun WorkoutSet(
+    modifier: Modifier = Modifier,
+    setIndicator: String,
+    previous: String,
+    weight: String,
+    reps: String,
+    scope: CoroutineScope,
+    floatArrangement: Array<Float>,
+    onInputFieldChanged: (String, SetField) -> Unit,
+    onChangeSetType: (SetType) -> Unit,
+    onDeleteSet: () -> Unit
+) {
+    var isRemoved by remember {
+        mutableStateOf(false)
+    }
+
+    val dismissState = rememberSwipeToDismissBoxState(
+        confirmValueChange = { value ->
+            if (value == SwipeToDismissBoxValue.EndToStart) {
+                isRemoved = true
+            }
+            true
+        }
+    )
+
+    LaunchedEffect(isRemoved) {
+        scope.launch {
+            delay(150)
+            if (isRemoved) {
+                onDeleteSet()
+            }
+        }
+    }
+
+    SwipeToDismissBox(
+        state = dismissState,
+        backgroundContent = { /* noop */ },
+        enableDismissFromStartToEnd = false
+    ) {
+        WorkoutSetRow(
+            modifier = modifier,
+            setIndicator = setIndicator,
+            previous = previous,
+            weight = weight,
+            reps = reps,
+            floatArrangement = floatArrangement,
+//            weightValues,
+            onInputFieldChanged = { value, type -> onInputFieldChanged(value, type) },
+            onChangeSetType = { onChangeSetType(it) }
+        )
+    }
+}
+
+@Composable
+fun WorkoutSetRow(
     modifier: Modifier = Modifier,
     setIndicator: String,
     previous: String,
@@ -728,41 +769,4 @@ fun DropDown(
             }
         }
     }
-}
-
-/**
- * Enum class representing the available set menu items for a workout.
- * Each enum constant corresponds to a specific set type.
- *
- * @property stringResource The string resource ID associated with the set type name.
- */
-enum class SetMenuItem(val stringResource: Int) {
-    WARMUP(R.string.warmup_set), DROP_SET(R.string.drop_set), FAILURE(R.string.failure_set)
-}
-
-
-/**
- * Enum class representing the available menu items for an exercise.
- * Each enum constant corresponds to a specific action that can be performed on an exercise.
- *
- * @property stringResource The string resource ID associated with the exercise menu item.
- */
-enum class ExerciseMenuItem(val stringResource: Int) {
-    ADD_NOTE(R.string.add_note), REPLACE(R.string.replace_exercise), REMOVE(R.string.remove_exercise)
-}
-
-/**
- * Enum class representing the different item types that can exist in a workout.
- * This is used to distinguish between [SetMenuItem] and [ExerciseMenuItem] in [DropDown].
- */
-enum class ItemType {
-    EXERCISE, SET
-}
-
-/**
- * Enum class representing the first and second input fields respectively.
- * This is used to distinguish whether to write the value in [Sets.firstMetric] or [Sets.secondMetric].
- */
-enum class SetField {
-    WEIGHT, REPETITIONS
 }
