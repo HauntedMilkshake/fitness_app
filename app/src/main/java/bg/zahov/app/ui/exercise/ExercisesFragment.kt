@@ -23,16 +23,8 @@ import bg.zahov.fitness.app.R
 class ExercisesFragment : Fragment() {
     private val exerciseViewModel: ExerciseViewModel by viewModels()
 
-    private val selectable by lazy {
-        arguments?.getBoolean("SELECTABLE") ?: false
-    }
-
-    private val replaceable by lazy {
-        arguments?.getBoolean(REPLACE_EXERCISE_ARG) ?: false
-    }
-
-    private val addable by lazy {
-        arguments?.getBoolean("ADDABLE") ?: false
+    private val state by lazy {
+        arguments?.getString(STATE_ARG)
     }
 
     override fun onCreateView(
@@ -40,16 +32,12 @@ class ExercisesFragment : Fragment() {
         container: ViewGroup?,
         savedInstanceState: Bundle?,
     ): View {
-        exerciseViewModel.updateFlag(
-            replaceable = replaceable,
-            selectable = selectable,
-            addable = addable
-        )
+        exerciseViewModel.updateFlag(state)
         return ComposeView(requireContext()).apply {
             requireActivity().showTopBar()
-            if (addable || selectable || replaceable) requireActivity().hideBottomNav() else requireActivity().showBottomNav()
+            if (state != null) requireActivity().hideBottomNav() else requireActivity().showBottomNav()
             (activity as? AppCompatActivity)?.setSupportActionBar(activity?.findViewById(R.id.toolbar))
-            (activity as? AppCompatActivity)?.supportActionBar?.setDisplayHomeAsUpEnabled(selectable || replaceable || addable)
+            (activity as? AppCompatActivity)?.supportActionBar?.setDisplayHomeAsUpEnabled(state != null)
             (activity as? AppCompatActivity)?.supportActionBar?.setHomeAsUpIndicator(R.drawable.ic_close)
             requireActivity().addMenuProvider(object : MenuProvider {
                 override fun onCreateMenu(menu: Menu, menuInflater: MenuInflater) {
@@ -101,12 +89,16 @@ class ExercisesFragment : Fragment() {
             }, viewLifecycleOwner)
 
             requireActivity().setToolBarTitle(
-                when {
-                    selectable || addable -> {
+                when (state) {
+                    ADD_EXERCISE_ARG -> {
                         R.string.add_exercise
                     }
 
-                    replaceable -> {
+                    SELECT_EXERCISE_ARG -> {
+                        R.string.add_exercise
+                    }
+
+                    REPLACE_EXERCISE_ARG -> {
                         R.string.replace_exercise
                     }
 
@@ -138,7 +130,7 @@ class ExercisesFragment : Fragment() {
     override fun onResume() {
         super.onResume()
         (activity as? AppCompatActivity)?.setSupportActionBar(activity?.findViewById(R.id.toolbar))
-        if (addable || selectable || replaceable) requireActivity().hideBottomNav() else requireActivity().showBottomNav()
+        if (state != null) requireActivity().hideBottomNav() else requireActivity().showBottomNav()
     }
 
     override fun onDestroyView() {
@@ -148,5 +140,8 @@ class ExercisesFragment : Fragment() {
 
     companion object {
         const val REPLACE_EXERCISE_ARG = "REPLACING"
+        const val ADD_EXERCISE_ARG = "SELECTING"
+        const val SELECT_EXERCISE_ARG = "ADDING"
+        const val STATE_ARG = "State"
     }
 }

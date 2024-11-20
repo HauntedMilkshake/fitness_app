@@ -16,6 +16,9 @@ import bg.zahov.app.data.provider.AddExerciseToWorkoutProvider
 import bg.zahov.app.data.provider.FilterProvider
 import bg.zahov.app.data.provider.ReplaceableExerciseProvider
 import bg.zahov.app.data.provider.SelectableExerciseProvider
+import bg.zahov.app.ui.exercise.ExercisesFragment.Companion.ADD_EXERCISE_ARG
+import bg.zahov.app.ui.exercise.ExercisesFragment.Companion.REPLACE_EXERCISE_ARG
+import bg.zahov.app.ui.exercise.ExercisesFragment.Companion.SELECT_EXERCISE_ARG
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.StateFlow
 import kotlinx.coroutines.flow.update
@@ -59,9 +62,7 @@ class ExerciseViewModel(
                     _exerciseData.update { old ->
                         old.copy(filters = filters, loading = true)
                     }
-                    _exerciseData.update { old ->
-                        old.copy(exercises = getFiltered(), loading = false)
-                    }
+                    getFiltered()
                 }
             }
             launch {
@@ -134,27 +135,26 @@ class ExerciseViewModel(
      * Filters exercises based on the current filters and search string.
      *
      * @param filter The list of filters to apply.
-     * @param exercises The list of exercises to filter.
      * @param searchString The search query to match against exercise names.
-     * @return A filtered list of exercises that match the filters and search query.
      */
     private fun getFiltered(
         filter: List<FilterItem> = _exerciseData.value.filters,
-        exercises: List<ExerciseData> = _exerciseData.value.exercises,
         searchString: String = _exerciseData.value.search
-    ): List<ExerciseData> {
-        return exercises.map { exercise ->
-            if ((filter.isEmpty() ||
-                        filter.any { filterWrapper ->
-                            matchesFilter(exercise, filterWrapper.filter)
-                        })
-                && (searchString.isBlank() ||
-                        exercise.name.contains(searchString, ignoreCase = true))
-            ) {
-                exercise.copy(toShow = true)
-            } else {
-                exercise.copy(toShow = false)
-            }
+    ) {
+        _exerciseData.update {
+            it.copy(exercises = it.copy().exercises.map { exercise ->
+                if ((filter.isEmpty() ||
+                            filter.any { filterWrapper ->
+                                matchesFilter(exercise, filterWrapper.filter)
+                            })
+                    && (searchString.isBlank() ||
+                            exercise.name.contains(searchString, ignoreCase = true))
+                ) {
+                    exercise.copy(toShow = true)
+                } else {
+                    exercise.copy(toShow = false)
+                }
+            }, loading = false)
         }
     }
 
@@ -278,30 +278,28 @@ class ExerciseViewModel(
      * @param search The new search query.
      */
     fun onSearchChange(search: String) {
-        Log.d("changed", search)
         _exerciseData.update { old ->
             old.copy(search = search, loading = true)
         }
-        _exerciseData.update { old ->
-            old.copy(exercises = getFiltered(searchString = search), loading = false)
-        }
+        getFiltered()
     }
 
     /**
-     * Updates the exercise action flag based on the provided parameters.
+     * Updates the exercise action flag based on the provided parameter.
      *
-     * @param addable Indicates if exercises can be added.
-     * @param replaceable Indicates if exercises can be replaced.
-     * @param selectable Indicates if exercises can be selected.
+     * @param state A string mapped to a state.
      */
-    fun updateFlag(addable: Boolean, replaceable: Boolean, selectable: Boolean) {
-        val flag = when {
-            replaceable -> ExerciseFlag.Replacing
-            addable -> ExerciseFlag.Adding
-            selectable -> ExerciseFlag.Selecting
-            else -> ExerciseFlag.Default
+    fun updateFlag(state: String?) {
+        _exerciseData.update { old ->
+            old.copy(
+                flag = when (state) {
+                    REPLACE_EXERCISE_ARG -> ExerciseFlag.Replacing
+                    ADD_EXERCISE_ARG -> ExerciseFlag.Adding
+                    SELECT_EXERCISE_ARG -> ExerciseFlag.Selecting
+                    else -> ExerciseFlag.Default
+                }
+            )
         }
-        _exerciseData.update { old -> old.copy(flag = flag) }
     }
 
     /**

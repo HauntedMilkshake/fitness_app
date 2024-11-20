@@ -1,9 +1,7 @@
 package bg.zahov.app.ui.workout
 
-import android.media.MediaPlayer
 import android.os.Bundle
 import android.transition.TransitionInflater
-import android.util.Log
 import android.view.LayoutInflater
 import android.view.View
 import android.view.ViewGroup
@@ -17,12 +15,15 @@ import androidx.lifecycle.map
 import androidx.navigation.fragment.findNavController
 import androidx.recyclerview.widget.ItemTouchHelper
 import androidx.recyclerview.widget.LinearLayoutManager
-import bg.zahov.app.data.model.state.OnGoingWorkoutUiMapper
 import bg.zahov.app.data.model.SetType
+import bg.zahov.app.data.model.state.OnGoingWorkoutUiMapper
 import bg.zahov.app.hideBottomNav
 import bg.zahov.app.hideTopBar
 import bg.zahov.app.showBottomNav
 import bg.zahov.app.showTopBar
+import bg.zahov.app.ui.exercise.ExercisesFragment.Companion.REPLACE_EXERCISE_ARG
+import bg.zahov.app.ui.exercise.ExercisesFragment.Companion.SELECT_EXERCISE_ARG
+import bg.zahov.app.ui.exercise.ExercisesFragment.Companion.STATE_ARG
 import bg.zahov.app.ui.workout.add.ExerciseSetAdapter
 import bg.zahov.app.ui.workout.add.WorkoutEntry
 import bg.zahov.app.util.SetSwipeGesture
@@ -83,7 +84,7 @@ class WorkoutFragment : Fragment() {
                         onGoingWorkoutViewModel.onExerciseReplace(itemPosition)
                         findNavController().navigate(
                             R.id.workout_to_add_exercise,
-                            bundleOf("REPLACEABLE" to true)
+                            bundleOf(STATE_ARG to REPLACE_EXERCISE_ARG)
                         )
                     }
 
@@ -149,7 +150,7 @@ class WorkoutFragment : Fragment() {
             addExercise.setOnClickListener {
                 findNavController().navigate(
                     R.id.workout_to_add_exercise,
-                    bundleOf("ADDABLE" to true)
+                    bundleOf(STATE_ARG to SELECT_EXERCISE_ARG)
                 )
             }
 

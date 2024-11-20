@@ -112,17 +112,17 @@ class MeasurementInfoViewModel(
      * updating the measurement data provider with the new value.
      */
     fun saveInput() {
-        viewModelScope.launch {
-            filterInput(_dialogState.value)?.let {
-                MeasurementType.fromKey(_uiState.value.dataType)?.let { enumValue ->
-                    measurementProvider.updateMeasurement(
-                        enumValue,
-                        Measurement(LocalDateTime.now(), it)
-                    )
-                    changeShowDialog()
-                }
-            }
-        }
+//        viewModelScope.launch {
+//            filterInput(_dialogState.value)?.let {
+//                MeasurementType.fromKey(_uiState.value.dataType)?.let { enumValue ->
+//                    measurementProvider.updateMeasurement(
+//                        enumValue,
+//                        Measurement(LocalDateTime.now(), it)
+//                    )
+//                    changeShowDialog()
+//                }
+//            }
+//        }
     }
 
     /**
