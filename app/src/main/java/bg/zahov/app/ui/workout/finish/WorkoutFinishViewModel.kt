@@ -1,31 +1,36 @@
 package bg.zahov.app.ui.workout.finish
 
-import android.app.Application
-import androidx.lifecycle.AndroidViewModel
-import androidx.lifecycle.LiveData
-import androidx.lifecycle.MutableLiveData
+import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
+import bg.zahov.app.Inject
+import bg.zahov.app.data.interfaces.WorkoutProvider
 import bg.zahov.app.data.model.Workout
-import bg.zahov.app.getWorkoutProvider
+import kotlinx.coroutines.flow.MutableStateFlow
+import kotlinx.coroutines.flow.StateFlow
+import kotlinx.coroutines.flow.update
 import kotlinx.coroutines.launch
 
-class WorkoutFinishViewModel(application: Application) : AndroidViewModel(application) {
-    private val workoutProvider by lazy {
-        application.getWorkoutProvider()
-    }
-    private val _workout = MutableLiveData<Workout>()
-    val workout: LiveData<Workout>
-        get() = _workout
+data class WorkoutFinishUiState(
+    val workout: Workout = Workout(),
+    val isLoading: Boolean = true,
+    val workoutCount: Int = 0,
+)
 
-    private val _workoutCount = MutableLiveData<String>()
-    val workoutCount: LiveData<String>
-        get() = _workoutCount
+class WorkoutFinishViewModel(private val workoutProvider: WorkoutProvider = Inject.workoutProvider) :
+    ViewModel() {
+
+    private val _uiState = MutableStateFlow(WorkoutFinishUiState())
+    val uiState: StateFlow<WorkoutFinishUiState> = _uiState
 
     init {
-        _workout.value = workoutProvider.getLastWorkout()
+        _uiState.update { old ->
+            old.copy(isLoading = false, workout = workoutProvider.getLastWorkout() ?: Workout())
+        }
         viewModelScope.launch {
             workoutProvider.getPastWorkouts().collect {
-                _workoutCount.postValue(" This is your workout number ${it.size}!")
+                _uiState.update { old ->
+                    old.copy(workoutCount = it.size)
+                }
             }
         }
     }

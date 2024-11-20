@@ -161,6 +161,8 @@
     <string name="link_error">An error occurred while trying to open the link</string>
     <string name="no_application">No application found to open the link</string>
     <string name="volume_for_history_workouts">%1$s kg</string>
+    <!-- String used for finish workout   -->
+    <string name="this_is_your_workout_number">This is your workout number %1$i</string>
     <!-- Strings used for toast messages    -->
     <string name="update_password_success">"Successfully updated password</string>
     <string name="update_password_fail">Failed to update password</string>
