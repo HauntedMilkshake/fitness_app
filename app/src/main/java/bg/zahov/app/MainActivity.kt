@@ -7,21 +7,23 @@ import android.view.MenuItem
 import android.view.View
 import androidx.activity.viewModels
 import androidx.appcompat.app.AppCompatActivity
+import androidx.compose.runtime.collectAsState
 import androidx.core.view.MenuProvider
 import androidx.fragment.app.FragmentActivity
+import androidx.lifecycle.lifecycleScope
 import androidx.lifecycle.map
 import androidx.navigation.findNavController
 import androidx.navigation.fragment.findNavController
 import androidx.navigation.ui.AppBarConfiguration
 import androidx.navigation.ui.navigateUp
 import androidx.navigation.ui.setupWithNavController
-import bg.zahov.app.data.model.state.ServiceStateUiMapper
 import bg.zahov.app.data.model.state.WorkoutManagerUiMapper
 import bg.zahov.fitness.app.R
 import bg.zahov.fitness.app.databinding.ActivityMainBinding
 import com.google.android.material.appbar.AppBarLayout
 import com.google.android.material.appbar.MaterialToolbar
 import com.google.android.material.bottomnavigation.BottomNavigationView
+import kotlinx.coroutines.launch
 
 class MainActivity : AppCompatActivity() {
 
@@ -47,11 +49,12 @@ class MainActivity : AppCompatActivity() {
             if (it.openWorkout) navController.navigate(R.id.to_workout_fragment)
         }
 
-        serviceErrorViewModel.serviceState.map { ServiceStateUiMapper.map(it) }.observe(this) {
-            it.action?.let { action -> navController.navigate(action) }
-            if(it.shutdown) finish()
+        lifecycleScope.launch {
+            serviceErrorViewModel.serviceState.collect {
+                if (it.navigateToShuttingDown) navController.navigate(R.id.to_shutting_down_fragment)
+                if (it.shutDown) finish()
+            }
         }
-
         workoutManagerViewModel.template.observe(this) {
             binding.workoutName.text = it.name
         }
@@ -127,6 +130,7 @@ fun FragmentActivity.clearMenu() {
             override fun onCreateMenu(menu: Menu, menuInflater: MenuInflater) {
                 menu.clear()
             }
+
             override fun onMenuItemSelected(menuItem: MenuItem) = false
         }
     )

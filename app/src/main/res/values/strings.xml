@@ -152,7 +152,7 @@
     <string name="max_volume">Max volume</string>
     <string name="max_weight">Max weight</string>
     <string name="history_measurement">HISTORY</string>
-    <string name="application_warning_text">Due to service errors we will be closing\nthe application in exactly:</string>
+    <string name="application_warning_text">Due to service errors we will be closing the application in exactly:</string>
     <string name="workouts_for_month">%1$s workouts</string>
     <string name="sync_option_text">Automatic between device sync</string>
     <string name="sync_option_explain">Activate to use your account on another device</string>
