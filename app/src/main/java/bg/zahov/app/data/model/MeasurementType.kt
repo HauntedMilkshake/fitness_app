@@ -54,18 +54,4 @@ enum class MeasurementType(val key: String) {
 
     /** Represents the measurement of the user's right calf circumference. */
     RightCalf("Right calf");
-
-    /**
-     * Companion object for the [MeasurementType] enum, providing utility functions.
-     */
-    companion object {
-        /**
-         * Finds the corresponding [MeasurementType] for a given key, ignoring case sensitivity.
-         *
-         * @param key The key to match against the [MeasurementType] enum.
-         * @return The matching [MeasurementType] if found, or `null` otherwise.
-         */
-        fun fromKey(key: String): MeasurementType? =
-            entries.firstOrNull { it.key.equals(key, true) }
-    }
 }

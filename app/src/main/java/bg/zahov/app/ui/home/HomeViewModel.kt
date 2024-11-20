@@ -9,6 +9,7 @@ import bg.zahov.app.data.interfaces.ServiceErrorHandler
 import bg.zahov.app.data.interfaces.UserProvider
 import bg.zahov.app.data.interfaces.WorkoutActions
 import bg.zahov.app.data.interfaces.WorkoutProvider
+import bg.zahov.app.data.local.RealmDefaultSetting.DEFAULT_SETTING
 import bg.zahov.app.data.local.RealmWorkoutState
 import bg.zahov.app.data.model.Workout
 import bg.zahov.app.util.toExercise
@@ -188,7 +189,7 @@ class HomeViewModel(
      * if stored isn't default the means we must resume a workout
      */
     private suspend fun checkPreviousState(previousState: RealmWorkoutState) {
-        if (previousState.id != "default") {
+        if (previousState.id != DEFAULT_SETTING) {
             val lastTime =
                 Duration.between(LocalDateTime.now(), previousState.date.toLocalDateTimeRlm())
             if (previousState.restTimerStart.isNotEmpty() && previousState.restTimerEnd.isNotEmpty() && !LocalDateTime.now()

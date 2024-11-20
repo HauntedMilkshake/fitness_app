@@ -65,11 +65,7 @@ class FilterViewModel(private val filterManager: FilterProvider = Inject.filterP
         _filterData.update { old ->
             old.copy(
                 list = old.list.map { item ->
-                    if (new.any { filter -> filter.name == item.name }) {
-                        item.copy(selected = true)
-                    } else {
-                        item.copy(selected = false)
-                    }
+                    FilterItem(item.filter, new.any { filter -> filter.name == item.name })
                 }
             )
         }

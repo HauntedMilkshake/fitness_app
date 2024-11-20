@@ -4,6 +4,7 @@ import android.animation.ObjectAnimator
 import android.animation.PropertyValuesHolder
 import android.annotation.SuppressLint
 import android.view.View
+import bg.zahov.app.data.local.RealmDefaultSetting.DEFAULT_SETTING
 import bg.zahov.app.data.local.RealmExercise
 import bg.zahov.app.data.local.RealmSets
 import bg.zahov.app.data.local.RealmTimePattern
@@ -249,14 +250,14 @@ fun Sets.toRealmSets(): RealmSets {
 }
 
 fun RealmExercise.toExercise(): Exercise? {
-    return if (this.name != "default" && BodyPart.fromKey(this.bodyPart) != null && Category.fromKey(
-            this.category
-        ) != null
-    ) {
+    val bodyPart = BodyPart.entries.firstOrNull { it.body == this.bodyPart }
+    val category = Category.entries.firstOrNull { it.key.equals(this.category, true) }
+
+    return if (this.name != DEFAULT_SETTING && bodyPart != null && category != null) {
         Exercise(
             name = this.name,
-            bodyPart = BodyPart.fromKey(this.bodyPart)!!,
-            category = Category.fromKey(this.category)!!,
+            bodyPart = bodyPart,
+            category = category,
             isTemplate = this.isTemplate,
             sets = this.sets.mapNotNull { it.toSets() }.toMutableList(),
             note = this.note
@@ -265,6 +266,7 @@ fun RealmExercise.toExercise(): Exercise? {
         null
     }
 }
+
 
 fun RealmSets.toSets(): Sets? {
     return SetType.entries.firstOrNull { it.key == this.type }?.let { setType ->
@@ -292,11 +294,11 @@ fun Exercise.getOneRepMaxes(): List<String> = this.sets.map {
 }
 
 fun LocalDateTime.toRealmString(): String {
-    return this.format(DateTimeFormatter.ofPattern(RealmTimePattern.realmTimePattern))
+    return this.format(DateTimeFormatter.ofPattern(RealmTimePattern.REALM_TIME_PATTERN))
 }
 
 fun String.toLocalDateTimeRlm(): LocalDateTime {
-    return LocalDateTime.parse(this, DateTimeFormatter.ofPattern(RealmTimePattern.realmTimePattern))
+    return LocalDateTime.parse(this, DateTimeFormatter.ofPattern(RealmTimePattern.REALM_TIME_PATTERN))
 }
 
 fun String.filterIntegerInput(): Int {

@@ -36,14 +36,4 @@ enum class Category(val key: String) {
 
     /** Timed category, for exercises measured by time duration rather than reps or weight. */
     Timed("Timed");
-
-    companion object {
-        /**
-         * Finds a [Category] from the given key.
-         *
-         * @param key The string representation of the category.
-         * @return The matching [Category] instance, or `null` if no match is found.
-         */
-        fun fromKey(key: String) = entries.firstOrNull { it.key.equals(key, true) }
-    }
 }
