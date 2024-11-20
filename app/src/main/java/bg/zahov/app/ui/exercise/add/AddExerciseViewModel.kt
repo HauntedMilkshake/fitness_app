@@ -4,12 +4,10 @@ import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
 import bg.zahov.app.Inject
 import bg.zahov.app.data.interfaces.WorkoutProvider
-import bg.zahov.app.data.model.BodyPart
-import bg.zahov.app.data.model.Category
 import bg.zahov.app.data.model.Exercise
 import bg.zahov.app.data.model.Filter
 import bg.zahov.app.data.model.FilterItem
-import bg.zahov.app.data.model.state.AddExerciseEventState
+import bg.zahov.app.data.model.state.AddDialogExerciseData
 import bg.zahov.app.data.model.state.AddExerciseData
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.StateFlow
@@ -33,6 +31,15 @@ class AddExerciseViewModel(
      */
     val addExerciseData: StateFlow<AddExerciseData> = _addExerciseData
 
+    //A private mutable state flow that holds the current UI state for adding an exercise.
+    private val _addDialogExerciseData = MutableStateFlow(AddDialogExerciseData())
+
+    /**
+     * Publicly exposed immutable state flow that represents the UI state for adding an exercise.
+     */
+    val addDialogExerciseData: StateFlow<AddDialogExerciseData> = _addDialogExerciseData
+
+
     /**
      * Updates the exercise name in the UI state.
      *
@@ -45,35 +52,32 @@ class AddExerciseViewModel(
     }
 
     /**
-     * Updates the current UI event state.
+     * Updates the dialog state to show body part filters, category filters, or hide the dialog.
      *
-     * @param event The new event state to transition to.
+     * @param showBodyPart A flag indicating whether to show the body part filters in the dialog. Defaults to `false`.
+     * @param showCategory A flag indicating whether to show the category filters in the dialog. Defaults to `false`.
+     *
+     * If `showBodyPart` is `true`, the `toShow` list is populated with the body part filters, and the dialog is displayed.
+     * If `showCategory` is `true`, the `toShow` list is populated with the category filters, and the dialog is displayed.
+     * If both flags are `false`, the dialog is hidden.
      */
-    fun changeEvent(event: AddExerciseEventState) {
-        _addExerciseData.update { old -> old.copy(uiAddExerciseEventState = event) }
-    }
-
-    /**
-     * Attempts to add a new exercise. Validates the user input and, if valid,
-     * adds the exercise to the repository. If the operation is successful,
-     * navigates back to the previous screen.
-     */
-    fun addExercise() {
-        viewModelScope.launch {
-            getSelectedBodyPart()?.let { bodyPart ->
-                getSelectedCategory()?.let { category ->
-                    repo.addTemplateExercise(
-                        Exercise(
-                            _addExerciseData.value.name,
-                            bodyPart = bodyPart,
-                            category = category,
-                            true
-                        )
-                    )
-                    changeEvent(AddExerciseEventState.NavigateBack)
-                }
+    fun showDialog(showBodyPart: Boolean = false, showCategory: Boolean = false) {
+        if (showBodyPart)
+            _addDialogExerciseData.update { old ->
+                old.copy(
+                    toShow = _addDialogExerciseData.value.bodyPartFilters,
+                    showDialog = true
+                )
             }
-        }
+        else if (showCategory)
+            _addDialogExerciseData.update { old ->
+                old.copy(
+                    toShow = _addDialogExerciseData.value.categoryFilters,
+                    showDialog = true
+                )
+            }
+        else
+            _addDialogExerciseData.update { old -> old.copy(showDialog = false) }
     }
 
     /**
@@ -83,59 +87,74 @@ class AddExerciseViewModel(
      * @return `true` if all required fields are filled; otherwise `false`.
      */
     fun checkButtonAvailability() =
-        (getSelectedBodyPart() == null || getSelectedCategory() == null || _addExerciseData.value.name.isBlank()).not()
+        (_addExerciseData.value.selectedBodyPart == null || _addExerciseData.value.selectedCategory == null || _addExerciseData.value.name.isBlank()).not()
+
 
     /**
-     * Retrieves the selected body part filter from the list of filters.
-     *
-     * @return The selected `BodyPart`, or `null` if none is selected.
+     * Attempts to add a new exercise. Validates the user input and, if valid,
+     * adds the exercise to the repository. If the operation is successful,
+     * navigates back to the previous screen.
      */
-    fun getSelectedBodyPart(): BodyPart? {
-        return (_addExerciseData.value.bodyPartFilters
-            .firstOrNull { it.selected && it.filter is Filter.BodyPartFilter }
-            ?.filter as? Filter.BodyPartFilter)?.bodyPart
-    }
-
-    /**
-     * Retrieves the selected category filter from the list of filters.
-     *
-     * @return The selected `Category`, or `null` if none is selected.
-     */
-    fun getSelectedCategory(): Category? {
-        return (_addExerciseData.value.categoryFilters
-            .firstOrNull { it.selected && it.filter is Filter.CategoryFilter }
-            ?.filter as? Filter.CategoryFilter)?.category
-    }
-
-    /**
-     * Updates the selected category filter in the UI state. Marks the specified filter as selected
-     * and unselects all other filters.
-     *
-     * @param filter The `FilterItem` to mark as selected.
-     */
-    fun onCategoryFilterChange(filter: FilterItem) {
-        _addExerciseData.update { old ->
-            old.copy(
-                categoryFilters = old.categoryFilters.map { item ->
-                    item.copy(selected = (item.name == filter.name))
+    fun addExercise() {
+        viewModelScope.launch {
+            _addExerciseData.value.selectedBodyPart?.let { bodyPart ->
+                _addExerciseData.value.selectedCategory?.let { category ->
+                    repo.addTemplateExercise(
+                        Exercise(
+                            _addExerciseData.value.name,
+                            bodyPart = bodyPart,
+                            category = category,
+                            true
+                        )
+                    )
+                    _addExerciseData.update { old -> old.copy(navigateBack = true) }
                 }
-            )
+            }
         }
     }
 
     /**
-     * Updates the selected body part filter in the UI state. Marks the specified filter as selected
-     * and unselects all other filters.
+     * Updates the selected filter and ensures only the selected filter is marked as selected.
      *
      * @param filter The `FilterItem` to mark as selected.
      */
-    fun onBodyPartFilterChange(filter: FilterItem) {
-        _addExerciseData.update { old ->
-            old.copy(
-                bodyPartFilters = old.bodyPartFilters.map { item ->
-                    item.copy(selected = (item.name == filter.name))
+    fun onFilterChange(filter: FilterItem) {
+        when (filter.filter) {
+            is Filter.CategoryFilter -> {
+                _addDialogExerciseData.update {
+                    it.copy(
+                        categoryFilters = updateSelection(filter, it.categoryFilters),
+                        toShow = updateSelection(filter, it.categoryFilters)
+                    )
                 }
-            )
+                _addExerciseData.update { it.copy(selectedCategory = filter.filter.category) }
+            }
+
+            is Filter.BodyPartFilter -> {
+                _addDialogExerciseData.update {
+                    it.copy(
+                        bodyPartFilters = updateSelection(filter, it.bodyPartFilters),
+                        toShow = updateSelection(filter, it.bodyPartFilters)
+                    )
+                }
+                _addExerciseData.update { it.copy(selectedBodyPart = filter.filter.bodyPart) }
+            }
+        }
+    }
+
+    /**
+     * Updates the selection state for a list of filters based on the given filter.
+     *
+     * @param selectedFilter The filter to mark as selected.
+     * @param filters The list of filters to update.
+     * @return A new list of filters with updated selection states.
+     */
+    private fun updateSelection(
+        selectedFilter: FilterItem,
+        filters: List<FilterItem>
+    ): List<FilterItem> {
+        return filters.map { item ->
+            item.copy(selected = (item.name == selectedFilter.name))
         }
     }
 }

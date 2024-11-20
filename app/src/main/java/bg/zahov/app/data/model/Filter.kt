@@ -35,7 +35,7 @@ sealed class Filter {
  */
 data class FilterItem(
     val filter: Filter,
-    var selected: Boolean = false
+    val selected: Boolean = false
 ) {
 
     /**

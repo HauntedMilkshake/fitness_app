@@ -6,32 +6,39 @@ import bg.zahov.app.data.model.Filter
 import bg.zahov.app.data.model.FilterItem
 
 /**
- * Data class representing the UI state of the Add Exercise screen.
+ * Represents the state for adding an exercise.
  *
- * @property name The name of the exercise.
- * @property bodyPartFilters List of filters for selecting a body part.
- * @property categoryFilters List of filters for selecting a category.
- * @property uiAddExerciseEventState The current state of the UI, such as showing or hiding dialogs.
- * @property userMessageId A resource ID for user-facing messages (e.g., error or success).
+ * @property name The name of the exercise being added. Defaults to an empty string.
+ * @property navigateBack A flag indicating whether the UI should navigate back after an action. Defaults to `false`.
+ * @property userMessageId An optional message ID for user notifications or actions. Defaults to `null`.
+ * @property selectedBodyPart Saves the currently selected BodyPart filter. Defaults to `null`.
+ * @property selectedCategory Saves the currently selected Category filter. Defaults to `null`.
  */
 data class AddExerciseData(
     val name: String = "",
+    val navigateBack: Boolean = false,
+    val userMessageId: Int? = null,
+    val selectedBodyPart: BodyPart? = null,
+    val selectedCategory: Category? = null
+)
+
+/**
+ * Represents the UI state for managing the exercise addition dialog.
+ *
+ * @property toShow A list of `FilterItem` objects currently displayed in the dialog. Defaults to an empty list.
+ * @property showDialog A flag indicating whether the dialog is currently visible. Defaults to `false`.
+ * @property bodyPartFilters A list of filters for body parts, initialized with all available body parts.
+ * Each body part is wrapped in a `FilterItem` for tracking selection.
+ * @property categoryFilters A list of filters for exercise categories, initialized with all available categories.
+ * Each category is wrapped in a `FilterItem` for tracking selection.
+ */
+data class AddDialogExerciseData(
+    val toShow: List<FilterItem> = listOf(),
+    val showDialog: Boolean = false,
     val bodyPartFilters: List<FilterItem> = enumValues<BodyPart>().flatMap { bodyPart ->
         listOf(FilterItem(filter = Filter.BodyPartFilter(bodyPart)))
     },
     val categoryFilters: List<FilterItem> = enumValues<Category>().flatMap { category ->
         listOf(FilterItem(filter = Filter.CategoryFilter(category)))
     },
-    val uiAddExerciseEventState: AddExerciseEventState = AddExerciseEventState.HideDialog,
-    val userMessageId: Int? = null,
 )
-
-/**
- * Enum representing the possible UI states or events for the Add Exercise screen.
- */
-enum class AddExerciseEventState {
-    HideDialog,          // Dialog is hidden
-    ShowBodyPartFilter,  // Dialog for filtering by body part is shown
-    ShowCategoryFilter,  // Dialog for filtering by category is shown
-    NavigateBack,        // Triggers navigation back
-}
