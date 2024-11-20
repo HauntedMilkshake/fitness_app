@@ -97,12 +97,17 @@
     <string name="previous_column_text">Previous</string>
     <string name="kg_column_text">(+kg)</string>
     <string name="lbs_column_text">(+lbs)</string>
-    <string name="reps_column_text">reps</string>
+    <string name="reps_column_text">Reps</string>
     <string name="add_set">add set</string>
     <string name="cancel_text">cancel</string>
     <!-- Strings used for start workout screen   -->
     <string name="last_performed">Last performed: %1$s</string>
     <!-- Strings used for workout fragment    -->
+<!--    "Morning", "Noon", "Afternoon", "Night"-->
+    <string name="afternoon_workout">Afternoon workout</string>
+    <string name="night_workout">Night workout</string>
+    <string name="morning_workout">Morning workout</string>
+    <string name="noon_workout">Noon workout</string>
     <string name="finish_workout"><font color="#3D8BC9">Finish</font></string>
     <string name="cancel_workout">cancel workout</string>
     <string name="edit_workout">Edit</string>
@@ -161,6 +166,7 @@
     <string name="link_error">An error occurred while trying to open the link</string>
     <string name="no_application">No application found to open the link</string>
     <string name="volume_for_history_workouts">%1$s kg</string>
+    <string name="new_workout">New workout</string>
     <!-- Strings used for toast messages    -->
     <string name="update_password_success">"Successfully updated password</string>
     <string name="update_password_fail">Failed to update password</string>
@@ -170,6 +176,9 @@
     <string name="re_authenticate_fail">"Failed to re-authenticate!"</string>
     <string name="update_username_success">"Successfully updated username</string>
     <string name="update_username_fail">Failed to update username</string>
+    <string name="no_exercises">Cannot finish a workout without any exercises!</string>
+    <string name="no_sets">Cannot finish a workout without any sets!</string>
+    <string name="empty_sets">Cannot finish a workout with empty sets!</string>
     <string name="add_history">Add to history</string>
     <string name="toast_couldnt_start_workout">Cannot start workout</string>
     <!-- Strings used for line chart    -->
