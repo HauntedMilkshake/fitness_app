@@ -55,7 +55,6 @@ import androidx.compose.ui.unit.dp
 import bg.zahov.app.ui.theme.FitnessTheme
 import bg.zahov.fitness.app.R
 import androidx.compose.runtime.getValue
-import androidx.compose.runtime.rememberCoroutineScope
 import androidx.compose.runtime.saveable.rememberSaveable
 import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
@@ -73,9 +72,7 @@ import bg.zahov.app.data.model.Category
 import bg.zahov.app.data.model.SetType
 import bg.zahov.app.data.model.Sets
 import bg.zahov.app.util.generateRandomId
-import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.delay
-import kotlinx.coroutines.launch
 
 /**
  * A sealed class representing a workout entry, which can be either an exercise or a set
@@ -140,7 +137,6 @@ fun WorkoutScreen(
     onReplaceExercise: () -> Unit,
     onBackPressed: () -> Unit
 ) {
-    val scope = rememberCoroutineScope()
 
     /**
      * In order to center the items of 2 independent rows we need to have
@@ -160,7 +156,6 @@ fun WorkoutScreen(
         name = if ("Example".isEmpty()) "workoutPrefix" + "Example" else "Example",
         note = "",
         exercises = listOf<WorkoutEntry>(),
-        scope = scope,
         weightValues = weightValues,
         onAddExercise = onAddExercise,
         onDeleteSet = {},
@@ -183,7 +178,6 @@ fun WorkoutScreenContent(
     name: String,
     note: String,
     exercises: List<WorkoutEntry>,
-    scope: CoroutineScope,
     weightValues: Array<Float>,
     onAddExercise: () -> Unit,
     onCancel: () -> Unit,
@@ -268,7 +262,6 @@ fun WorkoutScreenContent(
                                     previous = it.previousResults,
                                     weight = if (it.set.firstMetric == null || it.set.firstMetric == 0.0) "" else it.set.firstMetric.toString(),
                                     reps = if (it.set.secondMetric == null || it.set.secondMetric == 0) "" else it.set.secondMetric.toString(),
-                                    scope = scope,
                                     floatArrangement = weightValues,
                                     onInputFieldChanged = { value, type ->
                                         onInputFieldChanged(
@@ -562,7 +555,6 @@ fun WorkoutSet(
     previous: String,
     weight: String,
     reps: String,
-    scope: CoroutineScope,
     floatArrangement: Array<Float>,
     onInputFieldChanged: (String, SetField) -> Unit,
     onChangeSetType: (SetType) -> Unit,
@@ -582,11 +574,9 @@ fun WorkoutSet(
     )
 
     LaunchedEffect(isRemoved) {
-        scope.launch {
-            delay(150)
-            if (isRemoved) {
-                onDeleteSet()
-            }
+        delay(150)
+        if (isRemoved) {
+            onDeleteSet()
         }
     }
 
