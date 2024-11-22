@@ -52,43 +52,37 @@ class AddExerciseViewModel(
     }
 
     /**
-     * Updates the dialog state to show body part filters, category filters, or hide the dialog.
-     *
-     * @param showBodyPart A flag indicating whether to show the body part filters in the dialog. Defaults to `false`.
-     * @param showCategory A flag indicating whether to show the category filters in the dialog. Defaults to `false`.
-     *
-     * If `showBodyPart` is `true`, the `toShow` list is populated with the body part filters, and the dialog is displayed.
-     * If `showCategory` is `true`, the `toShow` list is populated with the category filters, and the dialog is displayed.
-     * If both flags are `false`, the dialog is hidden.
+     * Displays the dialog with body part filters.
      */
-    fun showDialog(showBodyPart: Boolean = false, showCategory: Boolean = false) {
-        if (showBodyPart)
-            _addDialogExerciseData.update { old ->
-                old.copy(
-                    toShow = _addDialogExerciseData.value.bodyPartFilters,
-                    showDialog = true
-                )
-            }
-        else if (showCategory)
-            _addDialogExerciseData.update { old ->
-                old.copy(
-                    toShow = _addDialogExerciseData.value.categoryFilters,
-                    showDialog = true
-                )
-            }
-        else
-            _addDialogExerciseData.update { old -> old.copy(showDialog = false) }
+    fun showBodyPartDialog() {
+        _addDialogExerciseData.update { old ->
+            old.copy(
+                toShow = _addDialogExerciseData.value.bodyPartFilters,
+                showDialog = true
+            )
+        }
     }
 
     /**
-     * Checks whether the "Add Exercise" button should be enabled based on
-     * whether a name, body part, and category have been selected.
-     *
-     * @return `true` if all required fields are filled; otherwise `false`.
+     * Displays the dialog with category filters.
      */
-    fun checkButtonAvailability() =
-        (_addExerciseData.value.selectedBodyPart == null || _addExerciseData.value.selectedCategory == null || _addExerciseData.value.name.isBlank()).not()
+    fun showCategoryDialog() {
+        _addDialogExerciseData.update { old ->
+            old.copy(
+                toShow = _addDialogExerciseData.value.categoryFilters,
+                showDialog = true
+            )
+        }
+    }
 
+    /**
+     * Hides the dialog.
+     */
+    fun hideDialog() {
+        _addDialogExerciseData.update { old ->
+            old.copy(showDialog = false)
+        }
+    }
 
     /**
      * Attempts to add a new exercise. Validates the user input and, if valid,

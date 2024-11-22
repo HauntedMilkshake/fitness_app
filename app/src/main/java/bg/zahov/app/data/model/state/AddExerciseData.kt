@@ -20,7 +20,17 @@ data class AddExerciseData(
     val userMessageId: Int? = null,
     val selectedBodyPart: BodyPart? = null,
     val selectedCategory: Category? = null
-)
+){
+
+    /**
+     * Checks whether the "Add Exercise" button should be enabled based on
+     * whether a name, body part, and category have been selected.
+     *
+     * @property isButtonAvailable is `true` if all required fields are filled; otherwise `false`.
+     */
+    val isButtonAvailable: Boolean
+        get() = selectedBodyPart != null && selectedCategory != null && name.isNotEmpty()
+}
 
 /**
  * Represents the UI state for managing the exercise addition dialog.
