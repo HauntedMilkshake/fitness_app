@@ -43,7 +43,11 @@ class WorkoutProviderImpl : WorkoutProvider {
     private val workoutRepo = WorkoutRepositoryImpl.getInstance()
     private val errorHandler = ServiceErrorHandlerImpl.getInstance()
 
-    fun getLastWorkout(): Workout? = lastWorkoutPerformed
+    /**
+     * Returns the last performed workout of the user [lastWorkoutPerformed] if any that is
+     * initialized in [addWorkoutToHistory]
+     */
+    override fun getLastWorkout(): HistoryWorkout? = lastWorkoutPerformed?.toHistoryWorkout()
 
     override suspend fun getTemplateWorkouts(): Flow<List<Workout>> =
         workoutRepo.getTemplateWorkouts()

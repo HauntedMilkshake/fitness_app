@@ -5,15 +5,16 @@ import androidx.lifecycle.viewModelScope
 import bg.zahov.app.Inject
 import bg.zahov.app.data.interfaces.WorkoutProvider
 import bg.zahov.app.data.model.Workout
+import bg.zahov.app.data.provider.model.HistoryWorkout
+import com.google.api.ResourceDescriptor
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.StateFlow
 import kotlinx.coroutines.flow.update
 import kotlinx.coroutines.launch
 
 data class WorkoutFinishUiState(
-    val workout: Workout = Workout(),
-    val isLoading: Boolean = true,
-    val workoutCount: Int = 0,
+    val workout: HistoryWorkout = HistoryWorkout(),
+    val workoutCount: String = "",
 )
 
 class WorkoutFinishViewModel(private val workoutProvider: WorkoutProvider = Inject.workoutProvider) :
@@ -24,12 +25,13 @@ class WorkoutFinishViewModel(private val workoutProvider: WorkoutProvider = Inje
 
     init {
         _uiState.update { old ->
-            old.copy(isLoading = false, workout = workoutProvider.getLastWorkout() ?: Workout())
+            old.copy(workout = workoutProvider.getLastWorkout() ?: HistoryWorkout())
         }
+
         viewModelScope.launch {
             workoutProvider.getPastWorkouts().collect {
                 _uiState.update { old ->
-                    old.copy(workoutCount = it.size)
+                    old.copy(workoutCount = it.size.toString())
                 }
             }
         }

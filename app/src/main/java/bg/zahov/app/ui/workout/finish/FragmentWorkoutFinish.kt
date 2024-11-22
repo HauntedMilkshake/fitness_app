@@ -42,15 +42,6 @@ class FragmentWorkoutFinish : Fragment() {
     override fun onViewCreated(view: View, savedInstanceState: Bundle?) {
         super.onViewCreated(view, savedInstanceState)
         mediaPlayer?.start()
-//        ValueAnimator.ofFloat(1f, 1.2f).apply {
-//            duration = 500
-//            repeatCount = 1
-//            repeatMode = ValueAnimator.REVERSE
-//            addUpdateListener {
-//                binding.star.scaleX = it.animatedValue as Float
-//                binding.star.scaleY = it.animatedValue as Float
-//            }
-//        }.start()
     }
 
     override fun onDestroy() {

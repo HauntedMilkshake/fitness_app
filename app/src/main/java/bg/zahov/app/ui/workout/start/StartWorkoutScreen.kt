@@ -160,7 +160,6 @@ fun StartWorkoutContent(
 fun Workout(
     modifier: Modifier,
     workoutName: String, workoutDate: String, exercises: List<String> = listOf(),
-
     onWorkoutClick: () -> Unit,
     onWorkoutStart: () -> Unit,
     onEdit: () -> Unit,

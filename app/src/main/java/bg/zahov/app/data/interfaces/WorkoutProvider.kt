@@ -54,5 +54,5 @@ interface WorkoutProvider {
     /**
      * Returns the last performed workout if any
      */
-    fun getLastWorkout(): Workout?
+    fun getLastWorkout(): HistoryWorkout?
 }
