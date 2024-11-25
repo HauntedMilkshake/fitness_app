@@ -1,5 +1,6 @@
 package bg.zahov.app.ui.workout.finish
 
+import android.graphics.Paint
 import androidx.compose.animation.core.Animatable
 import androidx.compose.animation.core.tween
 import androidx.compose.foundation.layout.Arrangement
@@ -26,6 +27,7 @@ import bg.zahov.app.ui.history.Workout
 import bg.zahov.fitness.app.R
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.remember
+import androidx.compose.ui.Alignment
 import androidx.compose.ui.draw.scale
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.res.stringResource
@@ -50,45 +52,32 @@ fun WorkoutFinishContent(workout: HistoryWorkout, workoutCount: String, onClose:
     Column(
         modifier = Modifier
             .fillMaxSize()
-            .padding(8.dp)
+            .padding(8.dp),
+        horizontalAlignment = Alignment.CenterHorizontally
     ) {
-        RowAligner(hArrangement = Arrangement.Start) {
-            IconButton(onClick = onClose) {
-                Icon(
-                    modifier = Modifier.size(64.dp),
-                    painter = painterResource(R.drawable.ic_close),
-                    contentDescription = "",
-                    tint = MaterialTheme.colorScheme.tertiary
+        IconButton(modifier = Modifier.align(Alignment.Start), onClick = onClose) {
+            Icon(
+                modifier = Modifier.size(64.dp),
+                painter = painterResource(R.drawable.ic_close),
+                contentDescription = stringResource(R.string.close_icon_description),
+                tint = MaterialTheme.colorScheme.tertiary
 
-                )
-            }
+            )
         }
 
         Spacer(modifier = Modifier.height(24.dp))
 
-        RowAligner(hArrangement = Arrangement.Center) {
-            AnimatedIcon()
-        }
+        AnimatedIcon()
 
         Spacer(modifier = Modifier.height(24.dp))
 
         Workout(item = workout, onItemClick = {})
         Text(
+            modifier = Modifier.align(Alignment.Start),
             text = stringResource(R.string.this_is_your_workout_number, workoutCount),
             style = MaterialTheme.typography.labelMedium,
             color = MaterialTheme.colorScheme.onSecondary
         )
-    }
-}
-
-@Composable
-fun RowAligner(
-    modifier: Modifier = Modifier,
-    hArrangement: Arrangement.Horizontal,
-    content: @Composable () -> Unit,
-) {
-    Row(modifier = modifier.fillMaxWidth(), horizontalArrangement = hArrangement) {
-        content()
     }
 }
 
@@ -112,7 +101,7 @@ fun AnimatedIcon() {
             .size(64.dp)
             .scale(scale = scale.value),
         painter = painterResource(R.drawable.ic_star),
-        contentDescription = "",
+        contentDescription = stringResource(R.string.animated_star_icon_description),
         tint = Color.Unspecified
     )
 }

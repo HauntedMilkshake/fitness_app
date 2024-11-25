@@ -163,6 +163,8 @@
     <string name="volume_for_history_workouts">%1$s kg</string>
     <!-- String used for finish workout   -->
     <string name="this_is_your_workout_number">This is your workout number %1$s</string>
+    <string name="close_icon_description">Icon used for closing the screen</string>
+    <string name="animated_star_icon_description">Animated icon of a star</string>
     <!-- Strings used for toast messages    -->
     <string name="update_password_success">"Successfully updated password</string>
     <string name="update_password_fail">Failed to update password</string>

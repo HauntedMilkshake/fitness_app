@@ -179,7 +179,7 @@ fun Workout(item: HistoryWorkout, onItemClick: (String) -> Unit) {
 
 @Composable
 fun Exercises(exercises: List<String>, bestSets: List<String>) {
-    for (i in 0 until exercises.size) {
+    for (i in exercises.indices) {
         ExerciseWithSets(exerciseName = exercises[i], bestSet = bestSets[i])
     }
 }
