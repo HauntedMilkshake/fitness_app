@@ -139,10 +139,6 @@ class ExerciseViewModel(
                 exercises = it.exercises.map { exercise ->
                     val matchesFilter = matchesAnyFilter(exercise)
                     val matchesSearch = matchesSearch(exercise)
-
-                    // Debug logs for filtering process
-                    println("Exercise: ${exercise.name}, Matches Filter: $matchesFilter, Matches Search: $matchesSearch")
-
                     exercise.copy(toShow = matchesFilter && matchesSearch)
                 },
                 loading = false
@@ -161,10 +157,7 @@ class ExerciseViewModel(
         exercise: ExerciseData,
         searchString: String = _exerciseData.value.search
     ): Boolean {
-        val result = searchString.isBlank() || exercise.name.contains(searchString, ignoreCase = true)
-        // Debug log for search matching
-        println("matchesSearch -> Exercise: ${exercise.name}, SearchString: '$searchString', Result: $result")
-        return result
+        return searchString.isBlank() || exercise.name.contains(searchString, ignoreCase = true)
     }
 
     /**
@@ -178,28 +171,18 @@ class ExerciseViewModel(
         exercise: ExerciseData,
         filterList: List<FilterItem> = _exerciseData.value.filters
     ): Boolean {
-        // Separate filters by type
         val categoryFilters = filterList.filter { it.filter is Filter.CategoryFilter }
         val bodyPartFilters = filterList.filter { it.filter is Filter.BodyPartFilter }
 
-        // Check category filter match (mandatory if filters exist)
         val categoryMatch = categoryFilters.isEmpty() || categoryFilters.any { filterItem ->
-            val match = (filterItem.filter as Filter.CategoryFilter).category == exercise.category
-            println("CategoryFilter -> Exercise: ${exercise.name}, Category: ${exercise.category}, Filter: ${filterItem.filter.category}, Match: $match")
-            match
+            (filterItem.filter as Filter.CategoryFilter).category == exercise.category
         }
 
-        // Check body part filter match (mandatory if filters exist)
         val bodyPartMatch = bodyPartFilters.isEmpty() || bodyPartFilters.any { filterItem ->
-            val match = (filterItem.filter as Filter.BodyPartFilter).bodyPart == exercise.bodyPart
-            println("BodyPartFilter -> Exercise: ${exercise.name}, BodyPart: ${exercise.bodyPart}, Filter: ${filterItem.filter.bodyPart}, Match: $match")
-            match
+            (filterItem.filter as Filter.BodyPartFilter).bodyPart == exercise.bodyPart
         }
 
-        // Final result: must match both if filters exist
-        val result = categoryMatch && bodyPartMatch
-        println("matchesAnyFilter -> Exercise: ${exercise.name}, CategoryMatch: $categoryMatch, BodyPartMatch: $bodyPartMatch, Final Result: $result")
-        return result
+        return categoryMatch && bodyPartMatch
     }
 
 
