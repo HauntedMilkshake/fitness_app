@@ -16,7 +16,7 @@ import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.layout.wrapContentHeight
 import androidx.compose.foundation.layout.wrapContentSize
 import androidx.compose.foundation.lazy.LazyColumn
-import androidx.compose.foundation.lazy.itemsIndexed
+import androidx.compose.foundation.lazy.items
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material3.Button
 import androidx.compose.material3.ButtonColors
@@ -54,7 +54,7 @@ fun ExercisesScreen(
     ExercisesContent(
         showLoading = uiState.loading,
         filterItems = uiState.filters,
-        exerciseItems = uiState.exercises,
+        exerciseItems = uiState.exercisesToShow,
         showButton = uiState.flag != ExerciseFlag.Default,
         removeFilter = { viewModel.removeFilter(it) },
         clickExercise = { viewModel.onExerciseClicked(it) },
@@ -86,7 +86,7 @@ fun ExercisesScreen(
 fun ExercisesContent(
     showLoading: Boolean,
     filterItems: List<FilterItem>,
-    exerciseItems: List<ExerciseData>,
+    exerciseItems: List<IndexedValue<ExerciseData>>,
     removeFilter: (FilterItem) -> Unit,
     clickExercise: (Int) -> Unit,
     showButton: Boolean,
@@ -101,25 +101,20 @@ fun ExercisesContent(
             )
         }
         Column(verticalArrangement = Arrangement.spacedBy(16.dp)) {
-            FlowRow(
-                modifier = Modifier.padding(16.dp),
-            ) {
+            FlowRow(modifier = Modifier.padding(16.dp)) {
                 filterItems.forEach { item ->
                     FilterCard(
                         filter = item,
                         modifier = Modifier
                     ) { removeFilter(it) }
                 }
-                LazyColumn(modifier = Modifier.fillMaxWidth()) {
-                    Log.d("exercises", exerciseItems.toString())
-                    itemsIndexed(exerciseItems) { index, exercise ->
-                        Log.d("exercises", exercise.toShow.toString())
-                        if (exercise.toShow) {
-                            ExerciseCards(exercise = exercise) { clickExercise(index) }
-                        }
-                    }
+            }
+            LazyColumn(modifier = Modifier.fillMaxWidth()) {
+                items(exerciseItems) { exercise ->
+                    ExerciseCards(exercise = exercise.value) { clickExercise(exercise.index) }
                 }
             }
+
         }
         if (showButton) {
             ConfirmButton(onConfirm = onConfirm)

@@ -14,6 +14,9 @@ import bg.zahov.app.data.model.FilterItem
  * @property search The current search query.
  * @property flag The current action state for exercises (e.g., Adding, Replacing).
  * @property showDialog Indicates whether to show a dialog.
+ * @property exercisesToShow A filtered and indexed list of exercises that are currently visible in the UI,
+ * considering the `toShow` property of each exercise. The index corresponds to the exercise's position
+ * in the original `exercises` list.
  */
 data class ExerciseScreenData(
     val exercises: List<ExerciseData> = listOf(),
@@ -24,7 +27,10 @@ data class ExerciseScreenData(
     val showDialog: Boolean = false,
     val navigateBack: Boolean = false,
     val navigateInfo: Boolean = false
-)
+) {
+    val exercisesToShow: List<IndexedValue<ExerciseData>>
+        get() = exercises.withIndex().filter { it.value.toShow }
+}
 
 /**
  * Wrapper class for exercise data, including its name, associated body part, category,
