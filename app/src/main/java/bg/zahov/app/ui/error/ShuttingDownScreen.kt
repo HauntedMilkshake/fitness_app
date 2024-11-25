@@ -2,16 +2,13 @@ package bg.zahov.app.ui.error
 
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Column
-import androidx.compose.foundation.layout.defaultMinSize
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
-import androidx.compose.foundation.layout.wrapContentSize
 import androidx.compose.material3.Icon
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
-import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.res.painterResource
@@ -24,15 +21,11 @@ import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import androidx.lifecycle.viewmodel.compose.viewModel
 import bg.zahov.app.ui.theme.FitnessTheme
 import bg.zahov.fitness.app.R
-import kotlinx.coroutines.delay
 
 @Composable
 fun ShuttingDownScreen(viewModel: ShuttingDownViewModel = viewModel()) {
     val uiState = viewModel.state.collectAsStateWithLifecycle()
-    LaunchedEffect(uiState.value) {
-        delay(1000)
-        viewModel.lowerCountDown()
-    }
+
     ShuttingDownContent(timer = uiState.value)
 }
 

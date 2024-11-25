@@ -4,6 +4,7 @@ import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
 import bg.zahov.app.Inject
 import bg.zahov.app.data.interfaces.ServiceErrorHandler
+import kotlinx.coroutines.delay
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.StateFlow
 import kotlinx.coroutines.flow.update
@@ -25,16 +26,14 @@ class ShuttingDownViewModel(private val serviceErrorHandler: ServiceErrorHandler
      */
     val state: StateFlow<Int> = _state
 
-    /**
-     * Decreases the countdown by 1. When the countdown reaches zero, it triggers the shutdown of the application.
-     */
-    fun lowerCountDown() {
-        if (_state.value > 0) {
-            _state.update { old -> old - 1 }
-        } else {
-            viewModelScope.launch {
-                serviceErrorHandler.stopApplication()
+    init {
+        viewModelScope.launch {
+            while (_state.value > 0) {
+                delay(1000)
+                _state.update { old -> old - 1 }
             }
+            serviceErrorHandler.stopApplication()
+
         }
     }
 }
