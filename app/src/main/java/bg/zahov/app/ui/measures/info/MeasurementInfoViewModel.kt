@@ -29,10 +29,12 @@ class MeasurementInfoViewModel(
 ) : ViewModel() {
 
     private val _uiState = MutableStateFlow(MeasurementInfoData())
+
     /** State flow that holds the UI state for the measurement info screen. */
     val uiState: StateFlow<MeasurementInfoData> = _uiState
 
     private val _dialogState = MutableStateFlow("")
+
     /** State flow that holds the UI state for the dialog screen. */
     val dialogState: StateFlow<String> = _dialogState
 
@@ -112,17 +114,18 @@ class MeasurementInfoViewModel(
      * updating the measurement data provider with the new value.
      */
     fun saveInput() {
-//        viewModelScope.launch {
-//            filterInput(_dialogState.value)?.let {
-//                MeasurementType.fromKey(_uiState.value.dataType)?.let { enumValue ->
-//                    measurementProvider.updateMeasurement(
-//                        enumValue,
-//                        Measurement(LocalDateTime.now(), it)
-//                    )
-//                    changeShowDialog()
-//                }
-//            }
-//        }
+        viewModelScope.launch {
+            filterInput(_dialogState.value)?.let {
+                MeasurementType.entries.firstOrNull { it.key.equals(_uiState.value.dataType, true) }
+                    ?.let { enumValue ->
+                        measurementProvider.updateMeasurement(
+                            enumValue,
+                            Measurement(LocalDateTime.now(), it)
+                        )
+                        changeShowDialog()
+                    }
+            }
+        }
     }
 
     /**
