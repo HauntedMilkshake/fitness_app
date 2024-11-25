@@ -60,7 +60,7 @@ data class WorkoutUiState(
     val timer: String = "",
     val restTimer: String = "",
     val restState: RestState = RestState.Default,
-    val isFinished: Boolean = false
+    val isFinished: Boolean = false,
 )
 
 /**
@@ -89,7 +89,7 @@ sealed class WorkoutEntry {
         val firstInputColumnVisibility: Boolean = true,
         val note: String = "",
         val bodyPart: BodyPart,
-        val category: Category
+        val category: Category,
     ) : WorkoutEntry()
 
     /**
@@ -110,7 +110,7 @@ sealed class WorkoutEntry {
         val setNumber: String,
         val previousResults: String = "-//-",
         val set: Sets,
-        val setCompleted: Boolean = false
+        val setCompleted: Boolean = false,
     ) : WorkoutEntry()
 }
 
@@ -124,13 +124,13 @@ sealed class WorkoutEntry {
  * @property settingsProvider Provides access to user settings, such as units and preferences.
  * @property toastManager Manages the display of toast messages for user feedback.
  */
-class WorkoutViewModel(
+class WorkoutViewModelNew(
     private val workoutStateManager: WorkoutStateManager = Inject.workoutState,
     private val repo: WorkoutProvider = Inject.workoutProvider,
     private val addExerciseToWorkoutProvider: AddExerciseToWorkoutProvider = Inject.workoutAddedExerciseProvider,
     private val restTimerProvider: RestTimerProvider = Inject.restTimerProvider,
     private val settingsProvider: SettingsProvider = Inject.settingsProvider,
-    private val toastManager: ToastManager = ToastManager
+    private val toastManager: ToastManager = ToastManager,
 ) : ViewModel() {
 
     /**
@@ -425,7 +425,7 @@ class WorkoutViewModel(
     fun onInputFieldChanged(
         position: Int,
         metric: String,
-        setField: SetField
+        setField: SetField,
     ) {
         _uiState.update { old ->
             val newEntries = old.exercises.toMutableList()
@@ -509,77 +509,89 @@ class WorkoutViewModel(
      * adds it to the database
      */
     fun finishWorkout() {
+        if (canFinish()) {
+            viewModelScope.launch {
+                val (exercises, prs, volume) = getExerciseArrayAndPRs(_uiState.value.exercises)
+                workoutId?.let {
+                    repo.updateTemplateWorkout(it, workoutDate, exercises)
+                }
+                repo.addWorkoutToHistory(
+                    Workout(
+                        id = workoutId ?: hashString("${Random().nextInt(Int.MAX_VALUE)}"),
+                        name = _uiState.value.workoutName,
+                        date = workoutDate,
+                        exercises = exercises,
+                        note = _uiState.value.note,
+                        duration = _uiState.value.timer.parseTimeStringToLong(),
+                        isTemplate = false,
+                        personalRecords = prs,
+                        volume = volume
+                    )
+                )
 
+                addExerciseToWorkoutProvider.resetSelectedExercises()
+                workoutStateManager.finishWorkout()
+                repo.clearWorkoutState()
+                _uiState.update { old ->
+                    old.copy(isFinished = true)
+                }
+                clearState()
+            }
+        }
+    }
+
+    /**
+     * under some rules decides if the workout is eligible to be finished
+     */
+    private fun canFinish(): Boolean {
         if (_uiState.value.exercises.isEmpty()) {
             toastManager.showToast(R.string.no_exercises)
-            return
+            return false
         }
         if (_uiState.value.exercises.all { entry -> entry is WorkoutEntry.ExerciseEntry }) {
             toastManager.showToast(R.string.no_sets)
-            return
+            return false
         }
         if (_uiState.value.exercises.filterIsInstance<WorkoutEntry.SetEntry>().all {
                 (it.set.secondMetric ?: 0) == 0 || (it.set.firstMetric
                     ?: 0.0) == 0.0
             }) {
             toastManager.showToast(R.string.empty_sets)
-            return
+            return false
         }
-        viewModelScope.launch {
-            val (exercises, prs, volume) = getExerciseArrayAndPRs(_uiState.value.exercises)
-            workoutId?.let {
-                repo.updateTemplateWorkout(it, workoutDate, exercises)
-            }
-            repo.addWorkoutToHistory(
-                Workout(
-                    id = workoutId ?: hashString("${Random().nextInt(Int.MAX_VALUE)}"),
-                    name = _uiState.value.workoutName,
-                    date = workoutDate,
-                    exercises = exercises,
-                    note = _uiState.value.note,
-                    duration = _uiState.value.timer.parseTimeStringToLong(),
-                    isTemplate = false,
-                    personalRecords = prs,
-                    volume = volume
-                )
-            )
-
-            addExerciseToWorkoutProvider.resetSelectedExercises()
-            workoutStateManager.finishWorkout()
-            repo.clearWorkoutState()
-            _uiState.update { old ->
-                old.copy(isFinished = true)
-            }
-            clearState()
-        }
+        return true
     }
 
+
     /**
-     * Processes a list of workout entries to generate a collection of exercises, calculate personal records (PRs),
-     * and compute total volume.
+     * Processes a list of `WorkoutEntry` objects to organize exercises and calculate the total workout volume.
      *
-     * @param entries The list of `WorkoutEntry` objects representing exercises and sets in the workout.
-     * @param removeEmpty A flag indicating whether to exclude exercises with no valid sets from the final result.
-     * Defaults to `true`.
-     * @return A `Triple` containing:
-     * - A list of processed `Exercise` objects.
-     * - The count of personal records (PRs) achieved in the workout.
-     * - The total workout volume.
+     * This function separates the workout data into exercises and their respective sets, while maintaining the order
+     * of insertion. It also calculates the total volume of the workout based on the sets' weight and repetitions.
      *
-     * The function performs the following operations:
-     * 1. Groups sets under their corresponding exercises.
-     * 2. Calculates the total workout volume as the sum of weight × reps for all valid sets.
-     * 3. Identifies and updates personal records (PRs) for exercises, comparing current best sets with template data.
-     * 4. Optionally removes exercises with no valid sets or sets with zero/null metrics if `removeEmpty` is `true`.
+     * @param entries A list of `WorkoutEntry` objects representing exercises and sets in the workout.
+     * @return A pair containing:
+     *  - A `LinkedHashMap` where the key is the exercise name, and the value is an `Exercise` object with associated sets and details.
+     *  - A `Double` representing the total volume of the workout (sum of weight * repetitions for all sets).
+     *
+     * ## Details:
+     * - `WorkoutEntry.ExerciseEntry`: Initializes a new `Exercise` or retrieves an existing one by name. The exercise is stored in the map.
+     * - `WorkoutEntry.SetEntry`: Adds the set to the most recently added exercise and updates the total volume.
+     *   - If the set has valid weight and reps, it contributes to the workout volume (`volume += weight * reps`).
+     *   - For `SetType.DEFAULT` or `SetType.FAILURE`, the best set is updated if the weight exceeds the current best.
+     *
+     * ### Constraints:
+     * - The function assumes that sets (`WorkoutEntry.SetEntry`) are always added after an exercise (`WorkoutEntry.ExerciseEntry`).
+     * - If the same exercise appears multiple times, its sets are grouped under the same `Exercise` object.
+     *
      */
-    private suspend fun getExerciseArrayAndPRs(
+    private fun getExercisesFiltered(
         entries: List<WorkoutEntry>,
-        removeEmpty: Boolean = true,
-    ): Triple<List<Exercise>, Int, Double> {
-        val exercises = linkedMapOf<String, Exercise>() // Maintains insertion order for exercises.
-        var prs = 0 // Tracks the count of new personal records.
-        var volume = 0.0 // Tracks the total workout volume.
-        entries.forEach { entry ->
+    ): Pair<LinkedHashMap<String, Exercise>, Double> {
+        val exercises =
+            LinkedHashMap<String, Exercise>() // Maintains insertion order for exercises.
+        var volume = 0.0
+        for (entry in entries) {
             when (entry) {
                 is WorkoutEntry.ExerciseEntry -> {
                     // Adds a new exercise or retrieves the existing one by name.
@@ -591,59 +603,89 @@ class WorkoutViewModel(
                             isTemplate = false,
                             note = entry.note
                         )
+
                     }
                 }
 
                 is WorkoutEntry.SetEntry -> {
                     // Adds the set to the most recent exercise and calculates its contribution to volume.
-                    exercises.entries.last().value.apply {
-                        val reps = entry.set.secondMetric
-                        val weight = entry.set.firstMetric
-                        if (weight != null && weight != 0.0 && reps != null && reps != 0) {
+                    //when adding them in a list we eliminate the problem where if the user has performed an exercise twice
+                    val reps = entry.set.secondMetric
+                    val weight = entry.set.firstMetric
+                    if (weight != null && weight != 0.0 && reps != null && reps != 0) {
+
+                        exercises.entries.last().value.apply {
                             sets.add(entry.set)
 
                             volume += weight * reps
                             // Updates the best set if the current set is better for specific set types.
                             if (entry.set.type == SetType.DEFAULT || entry.set.type == SetType.FAILURE) {
-                                when (category) {
-                                    else -> if (weight > (bestSet.firstMetric ?: 0.0)) bestSet =
-                                        entry.set
-                                }
+                                if (weight > (bestSet.firstMetric ?: 0.0)) bestSet = entry.set
                             }
                         }
                     }
                 }
             }
         }
+        return Pair(exercises, volume)
+    }
 
-        // Removes exercises with no valid sets or sets with zero/null metrics if requested.
-        if (removeEmpty) exercises.entries.removeIf { it.value.sets.isEmpty() || it.value.sets.any { set -> set.firstMetric == null || set.firstMetric == 0.0 || set.secondMetric == null || set.secondMetric == 0 } }
+    /**
+     * Processes a list of `WorkoutEntry` objects to extract exercises, calculate volume, and track personal records (PRs).
+     *
+     * This function organizes the workout data into exercises, calculates the workout volume, and optionally updates
+     * the exercise data in the repository. It also compares the best sets of current exercises with template exercises
+     * to determine if a new personal record (PR) is achieved.
+     *
+     * @param entries A list of `WorkoutEntry` objects representing exercises and sets in the workout.
+     * @param updateExercises A boolean flag indicating whether to update the exercises in the repository.
+     * If we save it to realm there is no need to update them in the firestore repository
+     * @return A `Triple` containing:
+     *  - A `List` of `Exercise` objects reflecting the processed workout.
+     *  - An `Int` representing the count of PRs achieved during the workout.
+     *  - A `Double` representing the total workout volume (sum of weight * repetitions for all sets).
+     *
+     * ## Details:
+     * 1. **Extract and Calculate**:
+     *    - Calls `getExercisesFiltered` to extract exercises and calculate the total volume.
+     * 2. **PR Comparison** (if `updateExercises` is `true`):
+     *    - Compares the best set of each current exercise to its corresponding template exercise (if any).
+     *    - Updates the `Exercise.bestSet` to retain the higher-performing set.
+     *    - Increments the PR count (`prs`) if the current best set outperforms the template best set.
+     *    - Marks template exercises as such (`isTemplate = true`).
+     * 3. **Repository Update**:
+     *    - Updates the exercise repository with the modified exercises.
+     */
+    private suspend fun getExerciseArrayAndPRs(
+        entries: List<WorkoutEntry>,
+        updateExercises: Boolean = true,
+    ): Triple<List<Exercise>, Int, Double> {
+        val (exercises, volume) = getExercisesFiltered(entries)
+        var prs = 0
 
-        val temp = exercises.values.map { it.copy() }.toMutableList() // Copies exercise data
-        if (removeEmpty) {
-            // Updates exercises with template data and calculates new PRs if achieved.
-            //no need to update exercises when saving state
-            temp.forEach { currExercise ->
-                templateExercises.find { it.name == currExercise.name }?.let { template ->
-                    when (currExercise.category) {
-                        else -> {
-                            val currentBestSetResult = (currExercise.bestSet.firstMetric
-                                ?: 0.0) * (currExercise.bestSet.secondMetric ?: 0)
-                            val previousBestSetResult =
-                                (template.bestSet.firstMetric
-                                    ?: 0.0) * (template.bestSet.secondMetric
-                                    ?: 0)
 
-                            if (currentBestSetResult <= previousBestSetResult) {
-                                currExercise.bestSet = template.bestSet
-                            } else {
-                                prs++ // Increment PR count if the current best set surpasses the template best set.
-                            }
-                        }
+        if (updateExercises) {
+
+            templateExercises.forEach { previous ->
+                val curr = exercises[previous.name]
+                curr?.let { current ->
+                    val currentBestSetResult = (current.bestSet.firstMetric
+                        ?: 0.0) * (current.bestSet.secondMetric ?: 0)
+                    val previousBestSetResult =
+                        (previous.bestSet.firstMetric
+                            ?: 0.0) * (previous.bestSet.secondMetric
+                            ?: 0)
+
+                    if (currentBestSetResult <= previousBestSetResult) {
+                        exercises[previous.name]?.copy(bestSet = previous.bestSet)
+                     } else {
+                        prs++ // Increment PR count if the current best set surpasses the template best set.
                     }
-                    currExercise.isTemplate = true
+
+                    exercises[previous.name]?.copy(isTemplate = true)
                 }
             }
+
             repo.updateExercises(exercises.values.toList())
         }
         return Triple(exercises.values.toList(), prs, volume)
@@ -738,7 +780,7 @@ class WorkoutViewModel(
  * @return A list of [WorkoutEntry] objects, including the exercise details and sets.
  */
 fun Exercise.toWorkoutEntry(
-    templateExercise: List<Exercise>
+    templateExercise: List<Exercise>,
 ): List<WorkoutEntry> {
     val foundExercise = templateExercise.find { it.name == this.name }
     val entries = mutableListOf<WorkoutEntry>(
@@ -774,7 +816,7 @@ fun Exercise.toWorkoutEntry(
 fun Sets.toSetEntry(
     exerciseCategory: Category,
     setNumber: Int,
-    previousResults: String = ""
+    previousResults: String = "",
 ): WorkoutEntry.SetEntry {
     return WorkoutEntry.SetEntry(
         setType = this.type,
@@ -795,7 +837,7 @@ fun Sets.toSetEntry(
  * @return A list of [WorkoutEntry] objects corresponding to the exercises in the input list.
  */
 fun List<Exercise>.toWorkoutEntryList(
-    templateExercises: List<Exercise>
+    templateExercises: List<Exercise>,
 ): List<WorkoutEntry> {
     return this.flatMap { it.toWorkoutEntry(templateExercises) }
 }
