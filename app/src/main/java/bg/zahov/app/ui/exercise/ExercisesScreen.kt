@@ -1,5 +1,6 @@
 package bg.zahov.app.ui.exercise
 
+import android.util.Log
 import androidx.compose.foundation.Image
 import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.Arrangement
@@ -110,12 +111,11 @@ fun ExercisesContent(
                     ) { removeFilter(it) }
                 }
                 LazyColumn(modifier = Modifier.fillMaxWidth()) {
+                    Log.d("exercises", exerciseItems.toString())
                     itemsIndexed(exerciseItems) { index, exercise ->
+                        Log.d("exercises", exercise.toShow.toString())
                         if (exercise.toShow) {
-                            ExerciseCards(
-                                exercise = exercise,
-                                modifier = Modifier
-                            ) { clickExercise(index) }
+                            ExerciseCards(exercise = exercise) { clickExercise(index) }
                         }
                     }
                 }
@@ -166,7 +166,9 @@ fun ExerciseCards(
     onClick: (ExerciseData) -> Unit
 ) {
     Card(
-        modifier = modifier.padding(8.dp),
+        modifier = modifier
+            .padding(8.dp)
+            .clickable { onClick(exercise) },
         shape = RoundedCornerShape(16.dp),
         colors = CardColors(
             containerColor = if (exercise.selected) MaterialTheme.colorScheme.primaryContainer else MaterialTheme.colorScheme.secondaryContainer,
@@ -177,8 +179,7 @@ fun ExerciseCards(
     ) {
         Row(
             modifier = Modifier
-                .padding(12.dp)
-                .clickable { onClick(exercise) },
+                .padding(12.dp),
             verticalAlignment = Alignment.CenterVertically,
         ) {
             Image(

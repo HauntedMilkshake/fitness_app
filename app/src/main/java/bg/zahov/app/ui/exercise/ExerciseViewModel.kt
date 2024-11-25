@@ -1,6 +1,5 @@
 package bg.zahov.app.ui.exercise
 
-import android.util.Log
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
 import bg.zahov.app.Inject
@@ -132,53 +131,77 @@ class ExerciseViewModel(
     }
 
     /**
-     * Filters exercises based on the current filters and search string.
-     *
-     * @param filter The list of filters to apply.
-     * @param searchString The search query to match against exercise names.
+     * Updates the exercise list to show only the exercises that match the current filters and search string.
      */
-    private fun getFiltered(
-        filter: List<FilterItem> = _exerciseData.value.filters,
-        searchString: String = _exerciseData.value.search
-    ) {
+    private fun getFiltered() {
         _exerciseData.update {
-            it.copy(exercises = it.copy().exercises.map { exercise ->
-                if ((filter.isEmpty() ||
-                            filter.any { filterWrapper ->
-                                matchesFilter(exercise, filterWrapper.filter)
-                            })
-                    && (searchString.isBlank() ||
-                            exercise.name.contains(searchString, ignoreCase = true))
-                ) {
-                    exercise.copy(toShow = true)
-                } else {
-                    exercise.copy(toShow = false)
-                }
-            }, loading = false)
+            it.copy(
+                exercises = it.exercises.map { exercise ->
+                    val matchesFilter = matchesAnyFilter(exercise)
+                    val matchesSearch = matchesSearch(exercise)
+
+                    // Debug logs for filtering process
+                    println("Exercise: ${exercise.name}, Matches Filter: $matchesFilter, Matches Search: $matchesSearch")
+
+                    exercise.copy(toShow = matchesFilter && matchesSearch)
+                },
+                loading = false
+            )
         }
     }
 
     /**
-     * Checks if the given exercise matches the specified filter.
+     * Checks if an exercise matches the search string.
      *
-     * @param exercise The exercise to check against the filter.
-     * @param filter The filter to check.
-     * @return True if the exercise matches the filter; otherwise, false.
+     * @param exercise The exercise to test.
+     * @param searchString The search query to match against the exercise name. Defaults to the current search string in the state.
+     * @return `true` if the search string is blank or the exercise name contains the search string (case-insensitive).
      */
-    private fun matchesFilter(
+    private fun matchesSearch(
         exercise: ExerciseData,
-        filter: Filter
+        searchString: String = _exerciseData.value.search
     ): Boolean {
-        return when (filter) {
-            is Filter.CategoryFilter -> {
-                exercise.category == filter.category
-            }
-
-            is Filter.BodyPartFilter -> {
-                exercise.bodyPart == filter.bodyPart
-            }
-        }
+        val result = searchString.isBlank() || exercise.name.contains(searchString, ignoreCase = true)
+        // Debug log for search matching
+        println("matchesSearch -> Exercise: ${exercise.name}, SearchString: '$searchString', Result: $result")
+        return result
     }
+
+    /**
+     * Checks if an exercise matches the mandatory filters (body part and category).
+     *
+     * @param exercise The exercise to test.
+     * @param filterList The list of filters to evaluate. Defaults to the current filters in the state.
+     * @return `true` if the exercise matches both the body part and category filters, or if those filters are not present.
+     */
+    private fun matchesAnyFilter(
+        exercise: ExerciseData,
+        filterList: List<FilterItem> = _exerciseData.value.filters
+    ): Boolean {
+        // Separate filters by type
+        val categoryFilters = filterList.filter { it.filter is Filter.CategoryFilter }
+        val bodyPartFilters = filterList.filter { it.filter is Filter.BodyPartFilter }
+
+        // Check category filter match (mandatory if filters exist)
+        val categoryMatch = categoryFilters.isEmpty() || categoryFilters.any { filterItem ->
+            val match = (filterItem.filter as Filter.CategoryFilter).category == exercise.category
+            println("CategoryFilter -> Exercise: ${exercise.name}, Category: ${exercise.category}, Filter: ${filterItem.filter.category}, Match: $match")
+            match
+        }
+
+        // Check body part filter match (mandatory if filters exist)
+        val bodyPartMatch = bodyPartFilters.isEmpty() || bodyPartFilters.any { filterItem ->
+            val match = (filterItem.filter as Filter.BodyPartFilter).bodyPart == exercise.bodyPart
+            println("BodyPartFilter -> Exercise: ${exercise.name}, BodyPart: ${exercise.bodyPart}, Filter: ${filterItem.filter.bodyPart}, Match: $match")
+            match
+        }
+
+        // Final result: must match both if filters exist
+        val result = categoryMatch && bodyPartMatch
+        println("matchesAnyFilter -> Exercise: ${exercise.name}, CategoryMatch: $categoryMatch, BodyPartMatch: $bodyPartMatch, Final Result: $result")
+        return result
+    }
+
 
     /**=
      * Confirms the selected exercises based on the current flag state.

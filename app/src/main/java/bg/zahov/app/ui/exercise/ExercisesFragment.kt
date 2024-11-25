@@ -34,89 +34,88 @@ class ExercisesFragment : Fragment() {
     ): View {
         exerciseViewModel.updateFlag(state)
         return ComposeView(requireContext()).apply {
-            requireActivity().showTopBar()
-            if (state != null) requireActivity().hideBottomNav() else requireActivity().showBottomNav()
-            (activity as? AppCompatActivity)?.setSupportActionBar(activity?.findViewById(R.id.toolbar))
-            (activity as? AppCompatActivity)?.supportActionBar?.setDisplayHomeAsUpEnabled(state != null)
-            (activity as? AppCompatActivity)?.supportActionBar?.setHomeAsUpIndicator(R.drawable.ic_close)
-            requireActivity().addMenuProvider(object : MenuProvider {
-                override fun onCreateMenu(menu: Menu, menuInflater: MenuInflater) {
-                    menu.clear()
-                    menuInflater.inflate(R.menu.menu_toolbar_exercises, menu)
-                }
+            activity?.apply {
+                showTopBar()
+                if (state != null) hideBottomNav() else showBottomNav()
+                (this as? AppCompatActivity)?.setSupportActionBar(findViewById(R.id.toolbar))
+                (this as? AppCompatActivity)?.supportActionBar?.setDisplayHomeAsUpEnabled(state != null)
+                (this as? AppCompatActivity)?.supportActionBar?.setHomeAsUpIndicator(R.drawable.ic_close)
+                addMenuProvider(object : MenuProvider {
+                    override fun onCreateMenu(menu: Menu, menuInflater: MenuInflater) {
+                        menu.clear()
+                        menuInflater.inflate(R.menu.menu_toolbar_exercises, menu)
+                    }
 
-                override fun onMenuItemSelected(menuItem: MenuItem): Boolean {
-                    return when (menuItem.itemId) {
-                        R.id.home -> {
-                            findNavController().navigateUp()
-                            true
-                        }
-
-                        R.id.search -> {
-                            (menuItem.actionView as? androidx.appcompat.widget.SearchView)?.apply {
-                                setOnQueryTextListener(object :
-                                    androidx.appcompat.widget.SearchView.OnQueryTextListener {
-                                    override fun onQueryTextSubmit(query: String?): Boolean {
-                                        query?.let { }
-                                        return true
-                                    }
-
-                                    override fun onQueryTextChange(query: String?): Boolean {
-                                        query?.let { name ->
-                                            exerciseViewModel.onSearchChange(name)
-                                        }
-                                        return true
-                                    }
-                                })
+                    override fun onMenuItemSelected(menuItem: MenuItem): Boolean {
+                        return when (menuItem.itemId) {
+                            R.id.home -> {
+                                findNavController().navigateUp()
+                                true
                             }
 
-                            true
+                            R.id.search -> {
+                                (menuItem.actionView as? androidx.appcompat.widget.SearchView)?.apply {
+                                    setOnQueryTextListener(object :
+                                        androidx.appcompat.widget.SearchView.OnQueryTextListener {
+                                        override fun onQueryTextSubmit(query: String?): Boolean {
+                                            query?.let { }
+                                            return true
+                                        }
+
+                                        override fun onQueryTextChange(query: String?): Boolean {
+                                            query?.let { name ->
+                                                exerciseViewModel.onSearchChange(name)
+                                            }
+                                            return true
+                                        }
+                                    })
+                                }
+
+                                true
+                            }
+
+                            R.id.filter -> {
+                                exerciseViewModel.updateShowDialog(true)
+                                true
+                            }
+
+                            R.id.add -> {
+                                findNavController().navigate(R.id.exercise_to_create_exercise)
+                                true
+                            }
+
+                            else -> false
+                        }
+                    }
+                }, viewLifecycleOwner)
+
+                setToolBarTitle(
+                    when (state) {
+                        ADD_EXERCISE_ARG -> {
+                            R.string.add_exercise
                         }
 
-                        R.id.filter -> {
-                            exerciseViewModel.updateShowDialog(true)
-                            true
+                        SELECT_EXERCISE_ARG -> {
+                            R.string.add_exercise
                         }
 
-                        R.id.add -> {
-                            findNavController().navigate(R.id.exercise_to_create_exercise)
-                            true
+                        REPLACE_EXERCISE_ARG -> {
+                            R.string.replace_exercise
                         }
 
-                        else -> false
-                    }
-                }
-            }, viewLifecycleOwner)
-
-            requireActivity().setToolBarTitle(
-                when (state) {
-                    ADD_EXERCISE_ARG -> {
-                        R.string.add_exercise
-                    }
-
-                    SELECT_EXERCISE_ARG -> {
-                        R.string.add_exercise
-                    }
-
-                    REPLACE_EXERCISE_ARG -> {
-                        R.string.replace_exercise
-                    }
-
-                    else -> {
-                        R.string.exercise
-                    }
-                }
-            )
-            setViewCompositionStrategy(ViewCompositionStrategy.DisposeOnViewTreeLifecycleDestroyed)
-            setContent {
-                ExercisesScreen(
-                    navigateInfo = {
-                        findNavController().navigate(R.id.exercises_to_exercise_info_navigation)
-                    },
-                    navigateBack = {
-                        findNavController().popBackStack()
+                        else -> {
+                            R.string.exercise
+                        }
                     }
                 )
+                setViewCompositionStrategy(ViewCompositionStrategy.DisposeOnViewTreeLifecycleDestroyed)
+                setContent {
+                    ExercisesScreen(navigateInfo = {
+                        findNavController().navigate(R.id.exercises_to_exercise_info_navigation)
+                    }, navigateBack = {
+                        findNavController().popBackStack()
+                    })
+                }
             }
         }
     }
@@ -135,7 +134,7 @@ class ExercisesFragment : Fragment() {
 
     override fun onDestroyView() {
         super.onDestroyView()
-        requireActivity().invalidateOptionsMenu()
+        activity?.invalidateOptionsMenu()
     }
 
     companion object {
