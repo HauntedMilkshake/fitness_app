@@ -49,12 +49,7 @@ import java.util.Random
  */
 data class WorkoutUiState(
     val workoutName: String = "",
-    val workoutPrefix: TimeOfDay = when (LocalDateTime.now().hour) {
-        in 4..11 -> TimeOfDay.MORNING
-        in 12..16 -> TimeOfDay.NOON
-        in 17..20 -> TimeOfDay.AFTERNOON
-        else -> TimeOfDay.NIGHT
-    },
+    val workoutPrefix: TimeOfDay,
     val exercises: List<WorkoutEntry> = listOf(),
     val note: String = "",
     val timer: String = "",
@@ -115,6 +110,17 @@ sealed class WorkoutEntry {
 }
 
 /**
+ * @property exercises list of the exercises from the current session
+ * @property volume amount of weight lifted during the current session
+ * @property prs amount of personal records made during the current session
+ */
+data class ExerciseSummary(
+    val exercises: List<Exercise>,
+    val volume: Double,
+    val prs: Int,
+)
+
+/**
  * ViewModel responsible for managing the state and logic of a workout session.
  *
  * @property workoutStateManager Manages the state of the workout session.
@@ -136,7 +142,8 @@ class WorkoutViewModelNew(
     /**
      * A private mutable state flow that represents the UI state of the workout.
      */
-    private val _uiState = MutableStateFlow<WorkoutUiState>(WorkoutUiState())
+    private val _uiState =
+        MutableStateFlow<WorkoutUiState>(WorkoutUiState(workoutPrefix = calculateWorkoutPrefix()))
 
     /**
      * A public read-only state flow exposing the current workout UI state to observers.
@@ -172,91 +179,158 @@ class WorkoutViewModelNew(
     /**
      * Initializes the `WorkoutViewModel` by setting up multiple asynchronous data flows to manage the UI state
      */
-    init {
-        viewModelScope.launch {
-            // Observes whether the workout state should be saved and triggers the save operation.
-            launch {
-                workoutStateManager.shouldSave.collect {
-                    if (it) {
-                        saveWorkoutState()
-                    }
-                }
-            }
-            // Getting the units the user uses
-            launch {
-                settingsProvider.getSettings().collect { objectChange ->
-                    objectChange.obj?.units?.let { key ->
-                        units = Units.entries.find { it.key == key } ?: METRIC
-                    }
-                }
-            }
-            // If we want to start a workout from a template we save it beforehand
-            // and here we observe it to base the current workout on the template
-            launch {
-                workoutStateManager.template.collect {
-                    it?.let { workout ->
-                        _uiState.update { old ->
-                            val exercises = _uiState.value.exercises.toMutableList()
-                            exercises.addAll(
-                                workout.exercises.toWorkoutEntryList(
-                                    templateExercises
-                                )
-                            )
 
-                            old.copy(
-                                workoutName = workout.name,
-                                exercises = exercises,
-                                note = workout.note ?: ""
-                            )
-                        }
-                    }
+    init {
+        triggerWorkoutSave()
+        getUnits()
+        checkForTemplateWorkout()
+        observeTimer()
+        observeRestTimer()
+        addSelectedExercises()
+        getRestState()
+        getTemplateExercises()
+    }
+
+    private fun calculateWorkoutPrefix(): TimeOfDay {
+        return when (LocalDateTime.now().hour) {
+            in 4..11 -> TimeOfDay.MORNING
+            in 12..16 -> TimeOfDay.NOON
+            in 17..20 -> TimeOfDay.AFTERNOON
+            else -> TimeOfDay.NIGHT
+        }
+    }
+
+
+    /**
+     * Triggers the saving of the current workout state whenever the app enters a minimized state.
+     *
+     * This function observes the `shouldSave` flow from `workoutStateManager` and calls `saveWorkoutState()` when the flag is set.
+     */
+    private fun triggerWorkoutSave() {
+        viewModelScope.launch {
+            workoutStateManager.shouldSave.collect {
+                if (it) {
+                    saveWorkoutState()
                 }
             }
-            // Collecting the elapsed time for the current workout
-            launch {
-                workoutStateManager.timer.collect {
+        }
+    }
+
+    /**
+     * Retrieves the user's unit settings (e.g., [Units.METRIC] or [Units.BANANA]) from the `settingsProvider`.
+     */
+    private fun getUnits() {
+        viewModelScope.launch {
+            settingsProvider.getSettings().collect { objectChange ->
+                objectChange.obj?.units?.let { key ->
+                    units = Units.entries.find { it.key == key } ?: METRIC
+                }
+            }
+        }
+    }
+
+    /**
+     * Checks for a template workout and updates the UI state with its details if available.
+     */
+    private fun checkForTemplateWorkout() {
+        viewModelScope.launch {
+            workoutStateManager.template.collect {
+                it?.let { workout ->
                     _uiState.update { old ->
+                        val exercises = _uiState.value.exercises.toMutableList()
+                        exercises.addAll(
+                            workout.exercises.toWorkoutEntryList(
+                                templateExercises
+                            )
+                        )
+
                         old.copy(
-                            timer = it.toRestTime()
+                            workoutName = workout.name,
+                            exercises = exercises,
+                            note = workout.note ?: ""
                         )
                     }
                 }
             }
-            // After pressing add exercises we select exercises in the exercsies screen
-            // afterwards here we collect them
-            launch {
-                addExerciseToWorkoutProvider.selectedExercises.collect {
+        }
+    }
+
+    /**
+     * Observes the workout timer from `workoutStateManager` and updates the UI state with the current timer value.
+     *
+     * The timer value is converted to rest time format before updating the state.
+     */
+    private fun observeTimer() {
+        viewModelScope.launch {
+            workoutStateManager.timer.collect {
+                _uiState.update { old ->
+                    old.copy(
+                        timer = it.toRestTime()
+                    )
+                }
+            }
+        }
+    }
+
+    /**
+     * Observes the rest timer from `restTimerProvider` and updates the UI state with the elapsed rest time.
+     *
+     * If the elapsed time is null, no updates are made to the state.
+     */
+    private fun observeRestTimer() {
+        viewModelScope.launch {
+            restTimerProvider.restTimer.collect {
+                it.elapsedTime?.let { time ->
                     _uiState.update { old ->
-                        val exercisesToUpdate = _uiState.value.exercises.toMutableList()
-                        exercisesToUpdate.addAll(it.toWorkoutEntryList(templateExercises))
-                        old.copy(exercises = exercisesToUpdate)
-                    }
-                    addExerciseToWorkoutProvider.resetSelectedExercises()
-                }
-            }
-            // Collecting the rest timer
-            launch {
-                restTimerProvider.restTimer.collect {
-                    it.elapsedTime?.let { time ->
-                        _uiState.update { old ->
-                            old.copy(restTimer = time)
-                        }
+                        old.copy(restTimer = time)
                     }
                 }
             }
-            // Collecting rest state
-            launch {
-                restTimerProvider.restState.collect {
-                    _uiState.update { old ->
-                        old.copy(restState = it)
-                    }
+        }
+    }
+
+    /**
+     * Adds exercises selected from `addExerciseToWorkoutProvider` to the current workout's exercises.
+     *
+     * This function observes the selected exercises flow, appends them to the UI state's exercise list,
+     * and resets the selected exercises in the provider.
+     */
+    private fun addSelectedExercises() {
+        viewModelScope.launch {
+            addExerciseToWorkoutProvider.selectedExercises.collect {
+                _uiState.update { old ->
+                    val exercisesToUpdate = _uiState.value.exercises.toMutableList()
+                    exercisesToUpdate.addAll(it.toWorkoutEntryList(templateExercises))
+                    old.copy(exercises = exercisesToUpdate)
+                }
+                addExerciseToWorkoutProvider.resetSelectedExercises()
+            }
+        }
+    }
+
+    /**
+     * Retrieves the current rest state from `restTimerProvider` and updates the UI state with it.
+     *
+     * The rest state represents information such as whether the timer is active, paused, or completed.
+     * @see [RestState]
+     */
+    private fun getRestState() {
+        viewModelScope.launch {
+            restTimerProvider.restState.collect {
+                _uiState.update { old ->
+                    old.copy(restState = it)
                 }
             }
-            // collecting template exercises
-            launch {
-                repo.getTemplateExercises().collect {
-                    templateExercises = it
-                }
+        }
+    }
+
+    /**
+     * Fetches template exercises from the repository and updates the `templateExercises` property.
+     */
+    private fun getTemplateExercises() {
+        viewModelScope.launch {
+            repo.getTemplateExercises().collect {
+                templateExercises = it
             }
         }
     }
@@ -304,7 +378,7 @@ class WorkoutViewModelNew(
     fun addSet(position: Int) {
         _uiState.update { old ->
 
-            var edgeCaseFlag = false
+            var isFirstSet = false
             val exercises = old.exercises.toMutableList()
             val templateExercise =
                 templateExercises.find { it.name == (exercises[position] as? WorkoutEntry.ExerciseEntry)?.name }
@@ -317,10 +391,10 @@ class WorkoutViewModelNew(
                     templateExercise?.category ?: Category.Barbell,
                     templateExercise
                 )
-                edgeCaseFlag = true
+                isFirstSet = true
             }
 
-            if (!edgeCaseFlag) {
+            if (!isFirstSet) {
                 var index = position + 1
 
                 while (index < exercises.size && exercises[index] !is WorkoutEntry.ExerciseEntry) {
@@ -414,45 +488,57 @@ class WorkoutViewModelNew(
     }
 
     /**
-     * based on which field has changed
-     * writes the value in the appropriate field
+     * Updates the weight of the appropriate set
      *
      * @param position The index of the set for whom we want to change the value
      * @param metric The value we want to update
-     * @param setField We use it to determine whether we want to write to
-     * firstMetric - [SetField.REPETITIONS] or secondMetric - [SetField.WEIGHT].
      */
-    fun onInputFieldChanged(
+    fun onWeightChange(
         position: Int,
         metric: String,
-        setField: SetField,
     ) {
         _uiState.update { old ->
             val newEntries = old.exercises.toMutableList()
             if (position >= 0 && position < (old.exercises.size)) {
                 (newEntries[position] as? WorkoutEntry.SetEntry)?.let { setEntry ->
-                    val newSet = when (setField) {
-                        SetField.WEIGHT -> {
-                            Sets(
-                                type = setEntry.set.type,
-                                firstMetric = metric.filterDoubleInput(),
-                                secondMetric = setEntry.set.secondMetric
-                            )
-                        }
-
-                        SetField.REPETITIONS -> {
-                            Sets(
-                                type = setEntry.set.type,
-                                firstMetric = setEntry.set.firstMetric,
-                                secondMetric = metric.filterIntegerInput()
-                            )
-                        }
-                    }
+                    val newSet = Sets(
+                        type = setEntry.set.type,
+                        firstMetric = metric.filterDoubleInput(),
+                        secondMetric = setEntry.set.secondMetric
+                    )
                     newEntries[position] = setEntry.copy(set = newSet)
                 }
             }
             old.copy(exercises = newEntries)
         }
+
+    }
+
+    /**
+     * Updates the weight of the appropriate set
+     *
+     * @param position The index of the set for whom we want to change the value
+     * @param metric The value we want to update
+     */
+    fun onRepsChange(
+        position: Int,
+        metric: String,
+    ) {
+        _uiState.update { old ->
+            val newEntries = old.exercises.toMutableList()
+            if (position >= 0 && position < (old.exercises.size)) {
+                (newEntries[position] as? WorkoutEntry.SetEntry)?.let { setEntry ->
+                    val newSet = Sets(
+                        type = setEntry.set.type,
+                        firstMetric = setEntry.set.firstMetric,
+                        secondMetric = metric.filterIntegerInput()
+                    )
+                    newEntries[position] = setEntry.copy(set = newSet)
+                }
+            }
+            old.copy(exercises = newEntries)
+        }
+
     }
 
     /**
@@ -511,7 +597,11 @@ class WorkoutViewModelNew(
     fun finishWorkout() {
         if (canFinish()) {
             viewModelScope.launch {
-                val (exercises, prs, volume) = getExerciseArrayAndPRs(_uiState.value.exercises)
+                val exerciseSummary = getExerciseArrayAndPRs(_uiState.value.exercises)
+                val exercises = exerciseSummary.exercises
+                val prs = exerciseSummary.prs
+                val volume = exerciseSummary.volume
+
                 workoutId?.let {
                     repo.updateTemplateWorkout(it, workoutDate, exercises)
                 }
@@ -640,7 +730,7 @@ class WorkoutViewModelNew(
      * @param entries A list of `WorkoutEntry` objects representing exercises and sets in the workout.
      * @param updateExercises A boolean flag indicating whether to update the exercises in the repository.
      * If we save it to realm there is no need to update them in the firestore repository
-     * @return A `Triple` containing:
+     * @return [ExerciseSummary]:
      *  - A `List` of `Exercise` objects reflecting the processed workout.
      *  - An `Int` representing the count of PRs achieved during the workout.
      *  - A `Double` representing the total workout volume (sum of weight * repetitions for all sets).
@@ -659,7 +749,7 @@ class WorkoutViewModelNew(
     private suspend fun getExerciseArrayAndPRs(
         entries: List<WorkoutEntry>,
         updateExercises: Boolean = true,
-    ): Triple<List<Exercise>, Int, Double> {
+    ): ExerciseSummary {
         val (exercises, volume) = getExercisesFiltered(entries)
         var prs = 0
 
@@ -678,7 +768,7 @@ class WorkoutViewModelNew(
 
                     if (currentBestSetResult <= previousBestSetResult) {
                         exercises[previous.name]?.copy(bestSet = previous.bestSet)
-                     } else {
+                    } else {
                         prs++ // Increment PR count if the current best set surpasses the template best set.
                     }
 
@@ -688,7 +778,7 @@ class WorkoutViewModelNew(
 
             repo.updateExercises(exercises.values.toList())
         }
-        return Triple(exercises.values.toList(), prs, volume)
+        return ExerciseSummary(exercises = exercises.values.toList(), prs = prs, volume = volume)
     }
 
     /**
@@ -714,7 +804,7 @@ class WorkoutViewModelNew(
      * the vm is tied to the activity's scope
      */
     private fun clearState() {
-        _uiState.value = WorkoutUiState()
+        _uiState.value = WorkoutUiState(workoutPrefix = TimeOfDay.EMPTY)
     }
 
     /**
@@ -732,7 +822,10 @@ class WorkoutViewModelNew(
      *
      */
     private suspend fun saveWorkoutState() {
-        val (exercises, prs, volume) = getExerciseArrayAndPRs(_uiState.value.exercises, false)
+        val exerciseSummary = getExerciseArrayAndPRs(_uiState.value.exercises, false)
+        val exercises = exerciseSummary.exercises
+        val prs = exerciseSummary.prs
+        val volume = exerciseSummary.volume
 
         val workout = Workout(
             id = workoutId ?: hashString("${Random().nextInt(Int.MAX_VALUE)}"),
@@ -767,6 +860,7 @@ class WorkoutViewModelNew(
 
     }
 }
+
 
 /**
  * Converts an [Exercise] to a list of [WorkoutEntry] objects, including the exercise entry and its associated sets.
@@ -901,5 +995,6 @@ fun String.filterDoubleInput(): Double {
 enum class TimeOfDay(val stringResource: Int) {
     MORNING(R.string.morning_workout), NOON(R.string.noon_workout), AFTERNOON(R.string.afternoon_workout), NIGHT(
         R.string.night_workout
-    )
+    ),
+    EMPTY(0)
 }
