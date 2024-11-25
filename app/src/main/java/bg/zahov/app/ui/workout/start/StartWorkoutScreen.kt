@@ -1,7 +1,6 @@
 package bg.zahov.app.ui.workout.start
 
 import android.widget.Toast
-import androidx.compose.foundation.background
 import androidx.compose.foundation.border
 import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.Arrangement
@@ -14,7 +13,6 @@ import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.foundation.lazy.items
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material3.Button
-import androidx.compose.material3.ButtonColors
 import androidx.compose.material3.DropdownMenu
 import androidx.compose.material3.DropdownMenuItem
 import androidx.compose.material3.Icon
@@ -38,6 +36,7 @@ import androidx.compose.runtime.getValue
 import androidx.compose.runtime.saveable.rememberSaveable
 import androidx.compose.runtime.setValue
 import androidx.compose.ui.platform.LocalContext
+import androidx.compose.ui.tooling.preview.Preview
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import bg.zahov.app.data.model.ToastManager
 import bg.zahov.app.data.provider.toFormattedString
@@ -49,7 +48,7 @@ fun StartWorkoutScreen(
     startWorkoutViewModel: StartWorkoutViewModel = viewModel(),
     onWorkoutClick: (String) -> Unit,
     onEditWorkout: (String) -> Unit,
-    onAddTemplateWorkout: () -> Unit
+    onAddTemplateWorkout: () -> Unit,
 ) {
     val uiState by startWorkoutViewModel.uiState.collectAsStateWithLifecycle()
     val toast by ToastManager.messages.collectAsStateWithLifecycle()
@@ -95,25 +94,20 @@ fun StartWorkoutContent(
                 modifier = Modifier.padding(top = 32.dp, start = 16.dp),
                 text = stringResource(R.string.quick_start_text),
                 style = MaterialTheme.typography.labelMedium,
-                color = MaterialTheme.colorScheme.secondary
+                color = MaterialTheme.colorScheme.onBackground
             )
 
             Button(
                 modifier = Modifier
                     .fillMaxWidth()
-                    .padding(12.dp), colors = ButtonColors(
-                    containerColor = MaterialTheme.colorScheme.primaryContainer,
-                    contentColor = MaterialTheme.colorScheme.onSecondary,
-                    disabledContainerColor = MaterialTheme.colorScheme.onErrorContainer,
-                    disabledContentColor = MaterialTheme.colorScheme.background
-                ), onClick = onStartEmptyWorkout
+                    .padding(12.dp),
+                onClick = onStartEmptyWorkout
             ) {
                 Text(
                     text = stringResource(R.string.start_empty_workout_text),
                     style = MaterialTheme.typography.bodyLarge,
                     maxLines = 1,
                     overflow = TextOverflow.Ellipsis,
-                    color = MaterialTheme.colorScheme.onSecondary,
                     fontWeight = FontWeight.Bold
                 )
             }
@@ -126,7 +120,7 @@ fun StartWorkoutContent(
                     modifier = Modifier.padding(top = 16.dp, start = 16.dp),
                     text = stringResource(R.string.my_templates_text),
                     style = MaterialTheme.typography.labelSmall,
-                    color = MaterialTheme.colorScheme.secondary
+                    color = MaterialTheme.colorScheme.onBackground
                 )
 
                 IconButton(onClick = onAddTemplateWorkout) {
@@ -164,7 +158,7 @@ fun Workout(
     onWorkoutStart: () -> Unit,
     onEdit: () -> Unit,
     onDelete: () -> Unit,
-    onDuplicate: () -> Unit
+    onDuplicate: () -> Unit,
 ) {
     var isDropDownExpanded by rememberSaveable {
         mutableStateOf(false)
@@ -175,14 +169,18 @@ fun Workout(
             .fillMaxWidth()
             .padding(12.dp)
             .clickable { onWorkoutClick() }
-            .border(1.dp, MaterialTheme.colorScheme.secondary, RoundedCornerShape(4.dp))
+            .border(
+                1.dp,
+                MaterialTheme.colorScheme.secondary,
+                RoundedCornerShape(4.dp)
+            )
             .padding(12.dp)
     ) {
         Row(modifier = Modifier.fillMaxWidth(), horizontalArrangement = Arrangement.SpaceBetween) {
             Text(
                 text = workoutName,
                 modifier = Modifier.weight(1f),
-                color = MaterialTheme.colorScheme.onSecondary,
+                color = MaterialTheme.colorScheme.onSecondaryContainer,
                 style = MaterialTheme.typography.titleMedium,
                 maxLines = 1,
                 softWrap = true,
@@ -198,23 +196,24 @@ fun Workout(
                 onDelete = onDelete
             )
         }
+
         Text(
             text = stringResource(R.string.last_performed, workoutDate),
             modifier = Modifier.padding(top = 12.dp, bottom = 12.dp),
-            color = MaterialTheme.colorScheme.onSecondary,
+            color = MaterialTheme.colorScheme.onBackground,
             style = MaterialTheme.typography.titleSmall,
             maxLines = 1,
             overflow = TextOverflow.Ellipsis
         )
-        for (i in 0 until exercises.size) {
+
+        for (i in exercises.indices) {
             Text(
                 text = exercises[i],
-                color = MaterialTheme.colorScheme.secondary,
+                color = MaterialTheme.colorScheme.onSecondaryContainer,
                 style = MaterialTheme.typography.titleSmall,
                 maxLines = 1,
                 overflow = TextOverflow.Ellipsis
             )
-
         }
     }
 }
@@ -227,10 +226,9 @@ fun DropDown(
     onStart: () -> Unit,
     onEdit: () -> Unit,
     onDuplicate: () -> Unit,
-    onDelete: () -> Unit
+    onDelete: () -> Unit,
 ) {
     Column(
-        modifier = Modifier.background(color = MaterialTheme.colorScheme.primary),
         horizontalAlignment = Alignment.CenterHorizontally,
         verticalArrangement = Arrangement.Center
     ) {
@@ -238,7 +236,6 @@ fun DropDown(
             verticalAlignment = Alignment.CenterVertically,
             horizontalArrangement = Arrangement.Center,
             modifier = Modifier
-                .background(color = MaterialTheme.colorScheme.primary)
                 .clickable {
                     onExpand()
                 }
@@ -253,7 +250,6 @@ fun DropDown(
             )
         }
         DropdownMenu(
-            modifier = Modifier.background(color = MaterialTheme.colorScheme.primary),
             expanded = isDropDownExpanded,
             onDismissRequest = onClose
         ) {
@@ -261,7 +257,6 @@ fun DropDown(
                 DropdownMenuItem(text = {
                     Text(
                         text = stringResource(item.stringResource),
-                        color = MaterialTheme.colorScheme.onSecondary,
                         maxLines = 1,
                         overflow = TextOverflow.Ellipsis,
                         style = MaterialTheme.typography.labelLarge
