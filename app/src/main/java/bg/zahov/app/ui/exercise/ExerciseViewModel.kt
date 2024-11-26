@@ -81,6 +81,18 @@ class ExerciseViewModel(
         }
     }
 
+    /**
+     * Handles the event when an exercise is clicked.
+     *
+     * Depending on the current exercise flag, the function either navigates to the exercise
+     * information screen or sets the selected exercise.
+     *
+     * - If the flag is `ExerciseFlag.Default`, it updates the exercise information screen
+     *   and sets the navigation flag to `true`, indicating that the app should navigate to the exercise details.
+     * - Otherwise, it sets the clicked exercise as the selected exercise.
+     *
+     * @param position The position of the clicked exercise in the list.
+     */
     fun onExerciseClicked(position: Int) {
         if (_exerciseData.value.flag == ExerciseFlag.Default) {
             updateExerciseInfoScreen(position)
@@ -118,7 +130,7 @@ class ExerciseViewModel(
     }
 
     /**
-     * Sets the clicked exercise in the repository based on the exercise name.
+     * Sets the clicked exercise in the repository based on the exercise position in the list.
      *
      * @param position The position of the clicked exercise.
      */
@@ -161,11 +173,14 @@ class ExerciseViewModel(
     }
 
     /**
-     * Checks if an exercise matches the mandatory filters (body part and category).
+     * Determines whether an exercise matches any of the filters provided.
      *
-     * @param exercise The exercise to test.
-     * @param filterList The list of filters to evaluate. Defaults to the current filters in the state.
-     * @return `true` if the exercise matches both the body part and category filters, or if those filters are not present.
+     * The function checks both category and body part filters. If no filters are selected,
+     * the function defaults to matching all exercises (i.e., no filtering is applied).
+     *
+     * @param exercise The exercise data to be checked.
+     * @param filterList The list of filters to apply. Defaults to the current filters.
+     * @return `true` if the exercise matches any of the filters, or if no filters are selected; `false` otherwise.
      */
     private fun matchesAnyFilter(
         exercise: ExerciseData,

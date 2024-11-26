@@ -129,7 +129,7 @@ class ExercisesFragment : Fragment() {
     override fun onResume() {
         super.onResume()
         (activity as? AppCompatActivity)?.setSupportActionBar(activity?.findViewById(R.id.toolbar))
-        if (state != null) requireActivity().hideBottomNav() else requireActivity().showBottomNav()
+        if (state != null) activity?.hideBottomNav() else activity?.showBottomNav()
     }
 
     override fun onDestroyView() {
