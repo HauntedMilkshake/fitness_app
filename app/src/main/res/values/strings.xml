@@ -191,4 +191,6 @@
     <string name="remove_filter">Removes filter</string>
     <string name="dismiss">Dismiss</string>
     <!-- Strings used for exercise screen -->
+    <!-- Strings used for content description -->
+    <string name="launcher_icon_description">Flexed arm</string>
 </resources>
