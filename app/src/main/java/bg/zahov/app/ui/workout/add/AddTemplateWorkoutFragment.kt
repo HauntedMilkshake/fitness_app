@@ -24,12 +24,16 @@ import bg.zahov.app.data.model.state.AddTemplateWorkoutUiMapper
 import bg.zahov.app.data.model.SetType
 import bg.zahov.app.hideBottomNav
 import bg.zahov.app.setToolBarTitle
+import bg.zahov.app.ui.exercise.ExercisesFragment.Companion.ADD_EXERCISE_ARG
 import bg.zahov.app.ui.workout.start.StartWorkoutFragment.Companion.EDIT_FLAG_ARG_KEY
 import bg.zahov.app.ui.workout.start.StartWorkoutFragment.Companion.WORKOUT_ID_ARG_KEY
 import bg.zahov.app.ui.exercise.ExercisesFragment.Companion.REPLACE_EXERCISE_ARG
+import bg.zahov.app.ui.exercise.ExercisesFragment.Companion.SELECT_EXERCISE_ARG
+import bg.zahov.app.ui.exercise.ExercisesFragment.Companion.STATE_ARG
 import bg.zahov.app.util.SetSwipeGesture
 import bg.zahov.app.util.applyScaleAnimation
 import bg.zahov.fitness.app.R
+import bg.zahov.fitness.app.R.menu.menu_toolbar_add_workout
 import bg.zahov.fitness.app.databinding.FragmentAddWorkoutTemplateBinding
 
 class AddTemplateWorkoutFragment : Fragment() {
@@ -79,7 +83,7 @@ class AddTemplateWorkoutFragment : Fragment() {
         requireActivity().addMenuProvider(object : MenuProvider {
             override fun onCreateMenu(menu: Menu, menuInflater: MenuInflater) {
                 menu.clear()
-                menuInflater.inflate(R.menu.menu_toolbar_add_workout, menu)
+                menuInflater.inflate(menu_toolbar_add_workout, menu)
             }
 
             override fun onMenuItemSelected(menuItem: MenuItem): Boolean = when (menuItem.itemId) {
@@ -126,7 +130,7 @@ class AddTemplateWorkoutFragment : Fragment() {
                         addWorkoutViewModel.setReplaceableExercise(itemPosition)
                         findNavController().navigate(
                             R.id.create_workout_template_to_add_exercise,
-                            bundleOf(REPLACE_EXERCISE_ARG to true)
+                            bundleOf(STATE_ARG to SELECT_EXERCISE_ARG)
                         )
                     }
 
@@ -164,7 +168,7 @@ class AddTemplateWorkoutFragment : Fragment() {
             addExercise.setOnClickListener {
                 findNavController().navigate(
                     R.id.create_workout_template_to_add_exercise,
-                    bundleOf("ADDABLE" to true)
+                    bundleOf(STATE_ARG to SELECT_EXERCISE_ARG)
                 )
             }
 

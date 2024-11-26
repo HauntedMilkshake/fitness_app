@@ -1,6 +1,5 @@
 package bg.zahov.app.ui.exercise
 
-import android.util.Log
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
 import bg.zahov.app.Inject
@@ -16,6 +15,9 @@ import bg.zahov.app.data.provider.AddExerciseToWorkoutProvider
 import bg.zahov.app.data.provider.FilterProvider
 import bg.zahov.app.data.provider.ReplaceableExerciseProvider
 import bg.zahov.app.data.provider.SelectableExerciseProvider
+import bg.zahov.app.ui.exercise.ExercisesFragment.Companion.ADD_EXERCISE_ARG
+import bg.zahov.app.ui.exercise.ExercisesFragment.Companion.REPLACE_EXERCISE_ARG
+import bg.zahov.app.ui.exercise.ExercisesFragment.Companion.SELECT_EXERCISE_ARG
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.StateFlow
 import kotlinx.coroutines.flow.update
@@ -59,9 +61,7 @@ class ExerciseViewModel(
                     _exerciseData.update { old ->
                         old.copy(filters = filters, loading = true)
                     }
-                    _exerciseData.update { old ->
-                        old.copy(exercises = getFiltered(), loading = false)
-                    }
+                    getFiltered()
                 }
             }
             launch {
@@ -81,6 +81,18 @@ class ExerciseViewModel(
         }
     }
 
+    /**
+     * Handles the event when an exercise is clicked.
+     *
+     * Depending on the current exercise flag, the function either navigates to the exercise
+     * information screen or sets the selected exercise.
+     *
+     * - If the flag is `ExerciseFlag.Default`, it updates the exercise information screen
+     *   and sets the navigation flag to `true`, indicating that the app should navigate to the exercise details.
+     * - Otherwise, it sets the clicked exercise as the selected exercise.
+     *
+     * @param position The position of the clicked exercise in the list.
+     */
     fun onExerciseClicked(position: Int) {
         if (_exerciseData.value.flag == ExerciseFlag.Default) {
             updateExerciseInfoScreen(position)
@@ -118,7 +130,7 @@ class ExerciseViewModel(
     }
 
     /**
-     * Sets the clicked exercise in the repository based on the exercise name.
+     * Sets the clicked exercise in the repository based on the exercise position in the list.
      *
      * @param position The position of the clicked exercise.
      */
@@ -131,54 +143,63 @@ class ExerciseViewModel(
     }
 
     /**
-     * Filters exercises based on the current filters and search string.
-     *
-     * @param filter The list of filters to apply.
-     * @param exercises The list of exercises to filter.
-     * @param searchString The search query to match against exercise names.
-     * @return A filtered list of exercises that match the filters and search query.
+     * Updates the exercise list to show only the exercises that match the current filters and search string.
      */
-    private fun getFiltered(
-        filter: List<FilterItem> = _exerciseData.value.filters,
-        exercises: List<ExerciseData> = _exerciseData.value.exercises,
-        searchString: String = _exerciseData.value.search
-    ): List<ExerciseData> {
-        return exercises.map { exercise ->
-            if ((filter.isEmpty() ||
-                        filter.any { filterWrapper ->
-                            matchesFilter(exercise, filterWrapper.filter)
-                        })
-                && (searchString.isBlank() ||
-                        exercise.name.contains(searchString, ignoreCase = true))
-            ) {
-                exercise.copy(toShow = true)
-            } else {
-                exercise.copy(toShow = false)
-            }
+    private fun getFiltered() {
+        _exerciseData.update {
+            it.copy(
+                exercises = it.exercises.map { exercise ->
+                    val matchesFilter = matchesAnyFilter(exercise)
+                    val matchesSearch = matchesSearch(exercise)
+                    exercise.copy(toShow = matchesFilter && matchesSearch)
+                },
+                loading = false
+            )
         }
     }
 
     /**
-     * Checks if the given exercise matches the specified filter.
+     * Checks if an exercise matches the search string.
      *
-     * @param exercise The exercise to check against the filter.
-     * @param filter The filter to check.
-     * @return True if the exercise matches the filter; otherwise, false.
+     * @param exercise The exercise to test.
+     * @param searchString The search query to match against the exercise name. Defaults to the current search string in the state.
+     * @return `true` if the search string is blank or the exercise name contains the search string (case-insensitive).
      */
-    private fun matchesFilter(
+    private fun matchesSearch(
         exercise: ExerciseData,
-        filter: Filter
+        searchString: String = _exerciseData.value.search
     ): Boolean {
-        return when (filter) {
-            is Filter.CategoryFilter -> {
-                exercise.category == filter.category
-            }
-
-            is Filter.BodyPartFilter -> {
-                exercise.bodyPart == filter.bodyPart
-            }
-        }
+        return searchString.isBlank() || exercise.name.contains(searchString, ignoreCase = true)
     }
+
+    /**
+     * Determines whether an exercise matches any of the filters provided.
+     *
+     * The function checks both category and body part filters. If no filters are selected,
+     * the function defaults to matching all exercises (i.e., no filtering is applied).
+     *
+     * @param exercise The exercise data to be checked.
+     * @param filterList The list of filters to apply. Defaults to the current filters.
+     * @return `true` if the exercise matches any of the filters, or if no filters are selected; `false` otherwise.
+     */
+    private fun matchesAnyFilter(
+        exercise: ExerciseData,
+        filterList: List<FilterItem> = _exerciseData.value.filters
+    ): Boolean {
+        val categoryFilters = filterList.filter { it.filter is Filter.CategoryFilter }
+        val bodyPartFilters = filterList.filter { it.filter is Filter.BodyPartFilter }
+
+        val categoryMatch = categoryFilters.isEmpty() || categoryFilters.any { filterItem ->
+            (filterItem.filter as Filter.CategoryFilter).category == exercise.category
+        }
+
+        val bodyPartMatch = bodyPartFilters.isEmpty() || bodyPartFilters.any { filterItem ->
+            (filterItem.filter as Filter.BodyPartFilter).bodyPart == exercise.bodyPart
+        }
+
+        return categoryMatch && bodyPartMatch
+    }
+
 
     /**=
      * Confirms the selected exercises based on the current flag state.
@@ -278,30 +299,28 @@ class ExerciseViewModel(
      * @param search The new search query.
      */
     fun onSearchChange(search: String) {
-        Log.d("changed", search)
         _exerciseData.update { old ->
             old.copy(search = search, loading = true)
         }
-        _exerciseData.update { old ->
-            old.copy(exercises = getFiltered(searchString = search), loading = false)
-        }
+        getFiltered()
     }
 
     /**
-     * Updates the exercise action flag based on the provided parameters.
+     * Updates the exercise action flag based on the provided parameter.
      *
-     * @param addable Indicates if exercises can be added.
-     * @param replaceable Indicates if exercises can be replaced.
-     * @param selectable Indicates if exercises can be selected.
+     * @param state A string mapped to a state.
      */
-    fun updateFlag(addable: Boolean, replaceable: Boolean, selectable: Boolean) {
-        val flag = when {
-            replaceable -> ExerciseFlag.Replacing
-            addable -> ExerciseFlag.Adding
-            selectable -> ExerciseFlag.Selecting
-            else -> ExerciseFlag.Default
+    fun updateFlag(state: String?) {
+        _exerciseData.update { old ->
+            old.copy(
+                flag = when (state) {
+                    REPLACE_EXERCISE_ARG -> ExerciseFlag.Replacing
+                    ADD_EXERCISE_ARG -> ExerciseFlag.Adding
+                    SELECT_EXERCISE_ARG -> ExerciseFlag.Selecting
+                    else -> ExerciseFlag.Default
+                }
+            )
         }
-        _exerciseData.update { old -> old.copy(flag = flag) }
     }
 
     /**

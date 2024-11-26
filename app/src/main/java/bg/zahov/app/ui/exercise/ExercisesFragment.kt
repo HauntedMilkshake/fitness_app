@@ -23,16 +23,8 @@ import bg.zahov.fitness.app.R
 class ExercisesFragment : Fragment() {
     private val exerciseViewModel: ExerciseViewModel by viewModels()
 
-    private val selectable by lazy {
-        arguments?.getBoolean("SELECTABLE") ?: false
-    }
-
-    private val replaceable by lazy {
-        arguments?.getBoolean(REPLACE_EXERCISE_ARG) ?: false
-    }
-
-    private val addable by lazy {
-        arguments?.getBoolean("ADDABLE") ?: false
+    private val state by lazy {
+        arguments?.getString(STATE_ARG)
     }
 
     override fun onCreateView(
@@ -40,91 +32,90 @@ class ExercisesFragment : Fragment() {
         container: ViewGroup?,
         savedInstanceState: Bundle?,
     ): View {
-        exerciseViewModel.updateFlag(
-            replaceable = replaceable,
-            selectable = selectable,
-            addable = addable
-        )
+        exerciseViewModel.updateFlag(state)
         return ComposeView(requireContext()).apply {
-            requireActivity().showTopBar()
-            if (addable || selectable || replaceable) requireActivity().hideBottomNav() else requireActivity().showBottomNav()
-            (activity as? AppCompatActivity)?.setSupportActionBar(activity?.findViewById(R.id.toolbar))
-            (activity as? AppCompatActivity)?.supportActionBar?.setDisplayHomeAsUpEnabled(selectable || replaceable || addable)
-            (activity as? AppCompatActivity)?.supportActionBar?.setHomeAsUpIndicator(R.drawable.ic_close)
-            requireActivity().addMenuProvider(object : MenuProvider {
-                override fun onCreateMenu(menu: Menu, menuInflater: MenuInflater) {
-                    menu.clear()
-                    menuInflater.inflate(R.menu.menu_toolbar_exercises, menu)
-                }
+            activity?.apply {
+                showTopBar()
+                if (state != null) hideBottomNav() else showBottomNav()
+                (this as? AppCompatActivity)?.setSupportActionBar(findViewById(R.id.toolbar))
+                (this as? AppCompatActivity)?.supportActionBar?.setDisplayHomeAsUpEnabled(state != null)
+                (this as? AppCompatActivity)?.supportActionBar?.setHomeAsUpIndicator(R.drawable.ic_close)
+                addMenuProvider(object : MenuProvider {
+                    override fun onCreateMenu(menu: Menu, menuInflater: MenuInflater) {
+                        menu.clear()
+                        menuInflater.inflate(R.menu.menu_toolbar_exercises, menu)
+                    }
 
-                override fun onMenuItemSelected(menuItem: MenuItem): Boolean {
-                    return when (menuItem.itemId) {
-                        R.id.home -> {
-                            findNavController().navigateUp()
-                            true
-                        }
-
-                        R.id.search -> {
-                            (menuItem.actionView as? androidx.appcompat.widget.SearchView)?.apply {
-                                setOnQueryTextListener(object :
-                                    androidx.appcompat.widget.SearchView.OnQueryTextListener {
-                                    override fun onQueryTextSubmit(query: String?): Boolean {
-                                        query?.let { }
-                                        return true
-                                    }
-
-                                    override fun onQueryTextChange(query: String?): Boolean {
-                                        query?.let { name ->
-                                            exerciseViewModel.onSearchChange(name)
-                                        }
-                                        return true
-                                    }
-                                })
+                    override fun onMenuItemSelected(menuItem: MenuItem): Boolean {
+                        return when (menuItem.itemId) {
+                            R.id.home -> {
+                                findNavController().navigateUp()
+                                true
                             }
 
-                            true
+                            R.id.search -> {
+                                (menuItem.actionView as? androidx.appcompat.widget.SearchView)?.apply {
+                                    setOnQueryTextListener(object :
+                                        androidx.appcompat.widget.SearchView.OnQueryTextListener {
+                                        override fun onQueryTextSubmit(query: String?): Boolean {
+                                            query?.let { }
+                                            return true
+                                        }
+
+                                        override fun onQueryTextChange(query: String?): Boolean {
+                                            query?.let { name ->
+                                                exerciseViewModel.onSearchChange(name)
+                                            }
+                                            return true
+                                        }
+                                    })
+                                }
+
+                                true
+                            }
+
+                            R.id.filter -> {
+                                exerciseViewModel.updateShowDialog(true)
+                                true
+                            }
+
+                            R.id.add -> {
+                                findNavController().navigate(R.id.exercise_to_create_exercise)
+                                true
+                            }
+
+                            else -> false
+                        }
+                    }
+                }, viewLifecycleOwner)
+
+                setToolBarTitle(
+                    when (state) {
+                        ADD_EXERCISE_ARG -> {
+                            R.string.add_exercise
                         }
 
-                        R.id.filter -> {
-                            exerciseViewModel.updateShowDialog(true)
-                            true
+                        SELECT_EXERCISE_ARG -> {
+                            R.string.add_exercise
                         }
 
-                        R.id.add -> {
-                            findNavController().navigate(R.id.exercise_to_create_exercise)
-                            true
+                        REPLACE_EXERCISE_ARG -> {
+                            R.string.replace_exercise
                         }
 
-                        else -> false
-                    }
-                }
-            }, viewLifecycleOwner)
-
-            requireActivity().setToolBarTitle(
-                when {
-                    selectable || addable -> {
-                        R.string.add_exercise
-                    }
-
-                    replaceable -> {
-                        R.string.replace_exercise
-                    }
-
-                    else -> {
-                        R.string.exercise
-                    }
-                }
-            )
-            setViewCompositionStrategy(ViewCompositionStrategy.DisposeOnViewTreeLifecycleDestroyed)
-            setContent {
-                ExercisesScreen(
-                    navigateInfo = {
-                        findNavController().navigate(R.id.exercises_to_exercise_info_navigation)
-                    },
-                    navigateBack = {
-                        findNavController().popBackStack()
+                        else -> {
+                            R.string.exercise
+                        }
                     }
                 )
+                setViewCompositionStrategy(ViewCompositionStrategy.DisposeOnViewTreeLifecycleDestroyed)
+                setContent {
+                    ExercisesScreen(navigateInfo = {
+                        findNavController().navigate(R.id.exercises_to_exercise_info_navigation)
+                    }, navigateBack = {
+                        findNavController().popBackStack()
+                    })
+                }
             }
         }
     }
@@ -138,15 +129,18 @@ class ExercisesFragment : Fragment() {
     override fun onResume() {
         super.onResume()
         (activity as? AppCompatActivity)?.setSupportActionBar(activity?.findViewById(R.id.toolbar))
-        if (addable || selectable || replaceable) requireActivity().hideBottomNav() else requireActivity().showBottomNav()
+        if (state != null) activity?.hideBottomNav() else activity?.showBottomNav()
     }
 
     override fun onDestroyView() {
         super.onDestroyView()
-        requireActivity().invalidateOptionsMenu()
+        activity?.invalidateOptionsMenu()
     }
 
     companion object {
         const val REPLACE_EXERCISE_ARG = "REPLACING"
+        const val ADD_EXERCISE_ARG = "SELECTING"
+        const val SELECT_EXERCISE_ARG = "ADDING"
+        const val STATE_ARG = "State"
     }
 }

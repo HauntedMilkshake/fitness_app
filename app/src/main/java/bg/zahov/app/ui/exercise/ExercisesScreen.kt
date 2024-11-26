@@ -15,7 +15,7 @@ import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.layout.wrapContentHeight
 import androidx.compose.foundation.layout.wrapContentSize
 import androidx.compose.foundation.lazy.LazyColumn
-import androidx.compose.foundation.lazy.itemsIndexed
+import androidx.compose.foundation.lazy.items
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material3.Button
 import androidx.compose.material3.ButtonColors
@@ -29,9 +29,7 @@ import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.getValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
-import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.layout.ContentScale
-import androidx.compose.ui.res.colorResource
 import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.text.style.TextOverflow
@@ -42,6 +40,7 @@ import bg.zahov.app.data.model.FilterItem
 import bg.zahov.app.data.model.state.ExerciseData
 import bg.zahov.app.data.model.state.ExerciseFlag
 import bg.zahov.app.ui.exercise.filter.FilterDialog
+import bg.zahov.app.ui.theme.FitnessTheme
 import bg.zahov.fitness.app.R
 
 @Composable
@@ -51,24 +50,18 @@ fun ExercisesScreen(
     navigateBack: () -> Unit
 ) {
     val uiState by viewModel.exerciseData.collectAsStateWithLifecycle()
-
     ExercisesContent(
+        showLoading = uiState.loading,
         filterItems = uiState.filters,
-        exerciseItems = uiState.exercises,
+        exerciseItems = uiState.exercisesToShow,
         showButton = uiState.flag != ExerciseFlag.Default,
         removeFilter = { viewModel.removeFilter(it) },
         clickExercise = { viewModel.onExerciseClicked(it) },
         onConfirm = {
             viewModel.confirmSelectedExercises()
         })
-    when {
-        uiState.loading ->
-            CircularProgressIndicator(
-                modifier = Modifier,
-                color = MaterialTheme.colorScheme.secondary,
-                trackColor = MaterialTheme.colorScheme.surfaceVariant
-            )
 
+    when {
         uiState.navigateInfo ->
             LaunchedEffect(Unit) {
                 navigateInfo()
@@ -90,37 +83,41 @@ fun ExercisesScreen(
 @OptIn(ExperimentalLayoutApi::class)
 @Composable
 fun ExercisesContent(
+    showLoading: Boolean,
     filterItems: List<FilterItem>,
-    exerciseItems: List<ExerciseData>,
+    exerciseItems: List<IndexedValue<ExerciseData>>,
     removeFilter: (FilterItem) -> Unit,
     clickExercise: (Int) -> Unit,
     showButton: Boolean,
     onConfirm: () -> Unit,
 ) {
-    Column(verticalArrangement = Arrangement.spacedBy(16.dp)) {
-        FlowRow(
-            modifier = Modifier.padding(16.dp),
-        ) {
-            filterItems.forEach { item ->
-                FilterCard(
-                    filter = item,
-                    modifier = Modifier
-                ) { removeFilter(it) }
-            }
-            LazyColumn(modifier = Modifier.fillMaxWidth()) {
-                itemsIndexed(exerciseItems) { index, exercise ->
-                    if (exercise.toShow) {
-                        ExerciseCards(
-                            exercise = exercise,
-                            modifier = Modifier
-                        ) { clickExercise(index) }
-                    }
+    FitnessTheme {
+        if (showLoading) {
+            CircularProgressIndicator(
+                modifier = Modifier,
+                color = MaterialTheme.colorScheme.secondary,
+                trackColor = MaterialTheme.colorScheme.surfaceVariant
+            )
+        }
+        Column(verticalArrangement = Arrangement.spacedBy(16.dp)) {
+            FlowRow(modifier = Modifier.padding(16.dp)) {
+                filterItems.forEach { item ->
+                    FilterCard(
+                        filter = item,
+                        modifier = Modifier
+                    ) { removeFilter(it) }
                 }
             }
+            LazyColumn(modifier = Modifier.fillMaxWidth()) {
+                items(exerciseItems) { exercise ->
+                    ExerciseCards(exercise = exercise.value) { clickExercise(exercise.index) }
+                }
+            }
+
         }
-    }
-    if (showButton) {
-        ConfirmButton(onConfirm = onConfirm)
+        if (showButton) {
+            ConfirmButton(onConfirm = onConfirm)
+        }
     }
 }
 
@@ -130,7 +127,7 @@ fun ConfirmButton(
     onConfirm: () -> Unit
 ) {
     Box(
-        modifier = Modifier
+        modifier = modifier
             .fillMaxSize()
             .padding(16.dp),
     ) {
@@ -141,10 +138,10 @@ fun ConfirmButton(
                 .padding(16.dp)
                 .wrapContentSize(),
             colors = ButtonColors(
-                containerColor = colorResource(R.color.text),
-                contentColor = colorResource(R.color.white),
-                disabledContentColor = colorResource(R.color.disabled_button),
-                disabledContainerColor = colorResource(R.color.disabled_button),
+                containerColor = MaterialTheme.colorScheme.primaryContainer,
+                contentColor = MaterialTheme.colorScheme.onPrimaryContainer,
+                disabledContentColor = MaterialTheme.colorScheme.tertiaryContainer,
+                disabledContainerColor = MaterialTheme.colorScheme.tertiary,
             )
         ) {
             Image(
@@ -163,19 +160,20 @@ fun ExerciseCards(
     onClick: (ExerciseData) -> Unit
 ) {
     Card(
-        modifier = modifier.padding(8.dp),
+        modifier = modifier
+            .padding(8.dp)
+            .clickable { onClick(exercise) },
         shape = RoundedCornerShape(16.dp),
         colors = CardColors(
-            containerColor = colorResource(if (exercise.selected) R.color.selected else R.color.background),
-            contentColor = colorResource(R.color.white),
-            disabledContentColor = colorResource(R.color.disabled_button),
-            disabledContainerColor = colorResource(R.color.less_vibrant_text)
+            containerColor = if (exercise.selected) MaterialTheme.colorScheme.primaryContainer else MaterialTheme.colorScheme.secondaryContainer,
+            contentColor = MaterialTheme.colorScheme.onPrimaryContainer,
+            disabledContentColor = MaterialTheme.colorScheme.tertiaryContainer,
+            disabledContainerColor = MaterialTheme.colorScheme.tertiary
         ),
     ) {
         Row(
             modifier = Modifier
-                .padding(12.dp)
-                .clickable { onClick(exercise) },
+                .padding(12.dp),
             verticalAlignment = Alignment.CenterVertically,
         ) {
             Image(
@@ -194,21 +192,21 @@ fun ExerciseCards(
                     style = MaterialTheme.typography.headlineLarge,
                     maxLines = 1,
                     overflow = TextOverflow.Ellipsis,
-                    color = Color.White
+                    color = MaterialTheme.colorScheme.onSecondary
                 )
                 Text(
                     text = exercise.bodyPart.body,
                     style = MaterialTheme.typography.labelMedium,
                     maxLines = 1,
                     overflow = TextOverflow.Ellipsis,
-                    color = Color.White
+                    color = MaterialTheme.colorScheme.onSecondary
                 )
                 Text(
                     text = exercise.category.key,
                     style = MaterialTheme.typography.labelMedium,
                     maxLines = 1,
                     overflow = TextOverflow.Ellipsis,
-                    color = Color.White
+                    color = MaterialTheme.colorScheme.onSecondary
                 )
             }
         }
@@ -222,15 +220,15 @@ fun FilterCard(
     onClick: (FilterItem) -> Unit
 ) {
     Card(modifier = modifier.padding(horizontal = 8.dp), colors = CardColors(
-        contentColor = Color.White,
-        containerColor = colorResource(R.color.selected),
-        disabledContentColor = Color.White,
-        disabledContainerColor = colorResource(R.color.unselected_filter)
+        contentColor = MaterialTheme.colorScheme.primary,
+        containerColor = MaterialTheme.colorScheme.onPrimary,
+        disabledContentColor = MaterialTheme.colorScheme.secondary,
+        disabledContainerColor = MaterialTheme.colorScheme.onSecondary
     ), onClick = { onClick(filter) }) {
         Row(
             verticalAlignment = Alignment.CenterVertically, modifier = Modifier.padding(8.dp)
         ) {
-            Text(text = filter.name, maxLines = 1)
+            Text(text = filter.name, maxLines = 1, color = MaterialTheme.colorScheme.onSecondary)
             Image(
                 painter = painterResource(R.drawable.ic_close),
                 contentDescription = stringResource(R.string.remove_filter),
