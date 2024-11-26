@@ -1,47 +1,39 @@
 package bg.zahov.app.ui.error
 
-import android.app.Application
-import android.os.CountDownTimer
-import androidx.lifecycle.AndroidViewModel
-import androidx.lifecycle.LiveData
-import androidx.lifecycle.MutableLiveData
+import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
-import bg.zahov.app.getServiceErrorProvider
+import bg.zahov.app.Inject
+import bg.zahov.app.data.interfaces.ServiceErrorHandler
+import kotlinx.coroutines.delay
+import kotlinx.coroutines.flow.MutableStateFlow
+import kotlinx.coroutines.flow.StateFlow
+import kotlinx.coroutines.flow.update
 import kotlinx.coroutines.launch
 
-class ShuttingDownViewModel(application: Application) : AndroidViewModel(application) {
-    private val serviceErrorHandler by lazy {
-        application.getServiceErrorProvider()
-    }
-    private val _state = MutableLiveData<State>(State.CountDown(currentTime = "5"))
-    val state: LiveData<State>
-        get() = _state
-    private var countDownTimer: CountDownTimer? = null
+/**
+ * ViewModel responsible for managing the countdown state during application shutdown.
+ * It handles updating the countdown timer and triggers the application shutdown when the countdown reaches zero.
+ *
+ * @property serviceErrorHandler ServiceErrorHandler used to stop the application when countdown ends.
+ */
+class ShuttingDownViewModel(private val serviceErrorHandler: ServiceErrorHandler = Inject.serviceErrorHandler) :
+    ViewModel() {
+    //The current countdown state, which starts at 5 seconds.
+    private val _state = MutableStateFlow<Int>(5)
+
+    /**
+     * Exposes the current countdown state as a [StateFlow].
+     */
+    val state: StateFlow<Int> = _state
 
     init {
-        startCountdown()
-    }
-
-    private fun startCountdown() {
-        countDownTimer = object : CountDownTimer(5000, 1000) {
-            override fun onTick(millisUntilFinished: Long) {
-                _state.value = State.CountDown((millisUntilFinished / 1000).toString())
+        viewModelScope.launch {
+            while (_state.value > 0) {
+                delay(1000)
+                _state.update { old -> old - 1 }
             }
+            serviceErrorHandler.stopApplication()
 
-            override fun onFinish() {
-                viewModelScope.launch {
-                    serviceErrorHandler.stopApplication()
-                }
-            }
-        }.start()
-    }
-
-    override fun onCleared() {
-        super.onCleared()
-        countDownTimer?.cancel()
-    }
-
-    sealed interface State {
-        data class CountDown(val currentTime: String) : State
+        }
     }
 }

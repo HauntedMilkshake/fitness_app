@@ -83,8 +83,8 @@
     <string name="confirm_authentication">Confirm Identity</string>
     <!-- Strings used for edit profile fragment   -->
     <string name="filter">Filter</string>
-    <string name="body_part">Body part</string>
-    <string name="category">Category</string>
+    <string name="body_part">Body part:</string>
+    <string name="category">Category:</string>
     <string name="select_filter">Select Filters</string>
     <!-- Strings used for create workout template -->
     <string name="new_workout_template">New workout template</string>
@@ -167,6 +167,10 @@
     <string name="no_application">No application found to open the link</string>
     <string name="volume_for_history_workouts">%1$s kg</string>
     <string name="new_workout">New workout</string>
+    <!-- String used for finish workout   -->
+    <string name="this_is_your_workout_number">This is your workout number %1$s</string>
+    <string name="close_icon_description">Icon used for closing the screen</string>
+    <string name="animated_star_icon_description">Animated icon of a star</string>
     <!-- Strings used for toast messages    -->
     <string name="update_password_success">"Successfully updated password</string>
     <string name="update_password_fail">Failed to update password</string>
