@@ -43,7 +43,13 @@ class WorkoutProviderImpl : WorkoutProvider {
     private val workoutRepo = WorkoutRepositoryImpl.getInstance()
     private val errorHandler = ServiceErrorHandlerImpl.getInstance()
 
-    fun getLastWorkout(): Workout? = lastWorkoutPerformed
+    /**
+     * Returns the last performed workout of the user [lastWorkoutPerformed] if any that is
+     * initialized in [addWorkoutToHistory]
+     */
+    override fun getLastWorkout(): HistoryWorkout? {
+        return lastWorkoutPerformed?.toHistoryWorkout()
+    }
 
     override suspend fun getTemplateWorkouts(): Flow<List<Workout>> =
         workoutRepo.getTemplateWorkouts()
@@ -214,7 +220,10 @@ fun Workout.toHistoryWorkout(): HistoryWorkout {
         duration = this.duration?.timeToString() ?: "00:00:00",
         volume = (this.volume ?: 0.0).toString(),
         date = this.date.toFormattedString(),
-        exercises = this.exercises.map { if (it.sets.isNotEmpty()) "${it.sets.size} x " else "" + it.name },
+        exercises = this.exercises.map {
+            val prefix = if (it.sets.isNotEmpty()) "${it.sets.size} x " else ""
+            prefix + it.name
+        },
         bestSets = this.exercises.map {
             "${it.bestSet.firstMetric ?: 0} x ${it.bestSet.secondMetric ?: 0}"
         },

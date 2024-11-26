@@ -16,7 +16,7 @@ interface WorkoutProvider {
     suspend fun addTemplateWorkout(newWorkout: Workout)
     suspend fun getTemplateExercises(): Flow<List<Exercise>>
     suspend fun getExerciseByName(name: String): Flow<Exercise?>
-    suspend fun getExercisesByNames(names:List<String>): Flow<List<Exercise>>
+    suspend fun getExercisesByNames(names: List<String>): Flow<List<Exercise>>
     suspend fun getWrappedExercises(): Flow<List<ExerciseData>>
     suspend fun addTemplateExercise(newExercise: Exercise)
     suspend fun addWorkoutToHistory(newWorkout: Workout)
@@ -50,4 +50,9 @@ interface WorkoutProvider {
     suspend fun getHistoryWorkouts(): Flow<List<HistoryWorkout>>
 
     suspend fun clearWorkoutState()
+
+    /**
+     * Returns the last performed workout if any
+     */
+    fun getLastWorkout(): HistoryWorkout?
 }

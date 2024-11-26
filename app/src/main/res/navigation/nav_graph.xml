@@ -145,8 +145,7 @@
 
     <fragment
         android:id="@+id/edit_profile"
-        android:name="bg.zahov.app.ui.settings.profile.EditProfileFragment"
-        tools:layout="@layout/fragment_edit_profile">
+        android:name="bg.zahov.app.ui.settings.profile.EditProfileFragment">
         <action
             android:id="@+id/edit_profile_to_settings"
             app:destination="@+id/settings" />

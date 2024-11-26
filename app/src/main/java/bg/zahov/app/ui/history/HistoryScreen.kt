@@ -173,8 +173,8 @@ fun Workout(item: HistoryWorkout, onItemClick: (String) -> Unit) {
             )
         }
 
-        for (i in 0 until item.exercises.size) {
-            ExerciseWithSets(exerciseName = item.exercises[i], bestSet = item.bestSets[i])
+        for (i in item.exercises.indices) {
+            ExerciseWithSets(exerciseName = item.exercises[i], bestSet = item.exercises[i])
         }
     }
 }
