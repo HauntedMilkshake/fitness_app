@@ -9,26 +9,28 @@ import androidx.activity.viewModels
 import androidx.appcompat.app.AppCompatActivity
 import androidx.core.view.MenuProvider
 import androidx.fragment.app.FragmentActivity
+import androidx.lifecycle.lifecycleScope
 import androidx.lifecycle.map
 import androidx.navigation.findNavController
-import androidx.navigation.fragment.findNavController
 import androidx.navigation.ui.AppBarConfiguration
 import androidx.navigation.ui.navigateUp
 import androidx.navigation.ui.setupWithNavController
-import bg.zahov.app.data.model.state.ServiceStateUiMapper
+import bg.zahov.app.Inject.serviceErrorHandler
+import bg.zahov.app.data.model.ServiceState
+import bg.zahov.app.data.model.state.ShutDownData
 import bg.zahov.app.data.model.state.WorkoutManagerUiMapper
 import bg.zahov.fitness.app.R
 import bg.zahov.fitness.app.databinding.ActivityMainBinding
 import com.google.android.material.appbar.AppBarLayout
 import com.google.android.material.appbar.MaterialToolbar
 import com.google.android.material.bottomnavigation.BottomNavigationView
+import kotlinx.coroutines.launch
 
 class MainActivity : AppCompatActivity() {
 
     private lateinit var appBarConfiguration: AppBarConfiguration
     private lateinit var binding: ActivityMainBinding
     private val workoutManagerViewModel: WorkoutManagerViewModel by viewModels()
-    private val serviceErrorViewModel: ServiceErrorStateViewModel by viewModels()
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
@@ -46,12 +48,16 @@ class MainActivity : AppCompatActivity() {
             setWorkoutVisibility(it.trailingWorkoutVisibility)
             if (it.openWorkout) navController.navigate(R.id.to_workout_fragment)
         }
-
-        serviceErrorViewModel.serviceState.map { ServiceStateUiMapper.map(it) }.observe(this) {
-            it.action?.let { action -> navController.navigate(action) }
-            if(it.shutdown) finish()
+        lifecycleScope.launch {
+            serviceErrorHandler.observeServiceState()
+                .collect { serviceState ->
+                    when (serviceState) {
+                        ServiceState.Unavailable -> navController.navigate(R.id.to_shutting_down_fragment)
+                        ServiceState.Shutdown -> finish()
+                        else -> ShutDownData()
+                    }
+                }
         }
-
         workoutManagerViewModel.template.observe(this) {
             binding.workoutName.text = it.name
         }
@@ -127,6 +133,7 @@ fun FragmentActivity.clearMenu() {
             override fun onCreateMenu(menu: Menu, menuInflater: MenuInflater) {
                 menu.clear()
             }
+
             override fun onMenuItemSelected(menuItem: MenuItem) = false
         }
     )
