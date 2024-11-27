@@ -9,7 +9,6 @@ import android.view.View
 import android.view.ViewGroup
 import androidx.appcompat.app.AppCompatActivity
 import androidx.compose.ui.platform.ComposeView
-import androidx.core.os.bundleOf
 import androidx.core.view.MenuProvider
 import androidx.fragment.app.Fragment
 import androidx.fragment.app.viewModels
@@ -32,8 +31,7 @@ class HistoryFragment : Fragment() {
             setContent {
                 HistoryScreen(historyViewModel) {
                     findNavController().navigate(
-                        R.id.history_to_history_info,
-                        bundleOf(WORKOUT_ID_ARG_KEY to it)
+                        R.id.history_to_history_info
                     )
                 }
             }
@@ -66,9 +64,5 @@ class HistoryFragment : Fragment() {
         super.onResume()
         activity?.showTopBar()
         activity?.showBottomNav()
-    }
-
-    companion object {
-        const val WORKOUT_ID_ARG_KEY = "WORKOUT_ID"
     }
 }

@@ -191,4 +191,6 @@
     <string name="remove_filter">Removes filter</string>
     <string name="dismiss">Dismiss</string>
     <!-- Strings used for exercise screen -->
+    <!-- Strings used for history info   -->
+    <string name="workout_exists_toast">Such a workout already exists!</string>
 </resources>

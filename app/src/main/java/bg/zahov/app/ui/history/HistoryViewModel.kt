@@ -52,4 +52,9 @@ class HistoryViewModel(
             }
         }
     }
+    fun setClickedWorkout(workoutId: String) {
+        viewModelScope.launch {
+            workoutProvider.setClickedHistoryWorkout(workoutId = workoutId)
+        }
+    }
 }

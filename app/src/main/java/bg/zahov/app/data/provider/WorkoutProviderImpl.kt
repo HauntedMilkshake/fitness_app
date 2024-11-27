@@ -1,5 +1,6 @@
 package bg.zahov.app.data.provider
 
+import android.util.Log
 import bg.zahov.app.data.interfaces.WorkoutProvider
 import bg.zahov.app.data.local.RealmWorkoutState
 import bg.zahov.app.data.model.Exercise
@@ -8,13 +9,16 @@ import bg.zahov.app.data.model.state.ExerciseData
 import bg.zahov.app.data.provider.model.HistoryWorkout
 import bg.zahov.app.data.repository.WorkoutRepositoryImpl
 import bg.zahov.app.ui.exercise.info.history.ExerciseHistoryInfo
+import bg.zahov.app.ui.history.info.ExerciseDetails
+import bg.zahov.app.ui.history.info.HistoryInfoWorkout
 import bg.zahov.app.ui.workout.start.StartWorkout
-import bg.zahov.app.util.getOneRepMaxes
 import bg.zahov.app.util.timeToString
 import bg.zahov.app.util.toExerciseData
+import bg.zahov.app.util.toFormattedString
 import kotlinx.coroutines.ExperimentalCoroutinesApi
 import kotlinx.coroutines.flow.Flow
 import kotlinx.coroutines.flow.MutableStateFlow
+import kotlinx.coroutines.flow.StateFlow
 import kotlinx.coroutines.flow.mapLatest
 import kotlinx.coroutines.flow.mapNotNull
 import java.time.LocalDate
@@ -39,6 +43,9 @@ class WorkoutProviderImpl : WorkoutProvider {
     private val _exerciseHistory = MutableStateFlow<List<ExerciseHistoryInfo>>(listOf())
     private val exerciseHistory: Flow<List<ExerciseHistoryInfo>>
         get() = _exerciseHistory
+
+    private val _clickedPastWorkout = MutableStateFlow(HistoryInfoWorkout())
+    private val clickedPastWorkout: StateFlow<HistoryInfoWorkout> = _clickedPastWorkout
 
     private val workoutRepo = WorkoutRepositoryImpl.getInstance()
     private val errorHandler = ServiceErrorHandlerImpl.getInstance()
@@ -157,6 +164,16 @@ class WorkoutProviderImpl : WorkoutProvider {
         workoutRepo.updateTemplateWorkout(workoutId, date, newExercises)
     }
 
+    override suspend fun setClickedHistoryWorkout(workoutId: String) {
+        getPastWorkouts().collect {
+            it.find { workout -> workout.id == workoutId }?.let { result ->
+                _clickedPastWorkout.value = result.toHistoryInfoWorkout()
+            }
+        }
+    }
+
+    override fun getClickedHistoryWorkout(): Flow<HistoryInfoWorkout> = clickedPastWorkout
+
     /**
      * Retrieves a list of start workouts from the template workouts.
      *
@@ -229,6 +246,33 @@ fun Workout.toHistoryWorkout(): HistoryWorkout {
         },
         personalRecords = this.personalRecords.toString()
     )
+}
+
+fun Workout.toHistoryInfoWorkout(): HistoryInfoWorkout {
+    return HistoryInfoWorkout(
+        id = this.id,
+        workoutName = this.name,
+        workoutDate = this.date.toFormattedString(),
+        duration = this.duration?.timeToString() ?: "00:00:00",
+        volume = (this.volume ?: 0.0).toString(),
+        prs = this.personalRecords.toString(),
+        exercisesInfo = this.exercises.map { exercise ->
+            ExerciseDetails(
+                exerciseName = exercise.name,
+                sets = exercise.sets.map {
+                    "${it.secondMetric} x ${it.secondMetric}"
+                },
+                oneRepMaxes = exercise.getOneRepMaxes()
+            )
+        }
+    )
+}
+
+fun getOneRepEstimate(weight: Double, reps: Int): String =
+    (weight * (1 + (0.0333 * reps))).toInt().toString()
+
+fun Exercise.getOneRepMaxes(): List<String> = this.sets.map {
+    getOneRepEstimate(it.firstMetric ?: 1.0, it.secondMetric ?: 1)
 }
 
 fun LocalDateTime.toFormattedString(): String =
