@@ -1,6 +1,5 @@
 package bg.zahov.app.ui.custom
 
-import android.graphics.Color
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.height
 import androidx.compose.material3.MaterialTheme
@@ -25,7 +24,7 @@ fun CommonLineChart(
     modifier: Modifier = Modifier,
     data: LineChartData
 ) {
-    val color =  MaterialTheme.colorScheme.secondary.toArgb()
+    val color = MaterialTheme.colorScheme.secondary.toArgb()
     AndroidView(
         modifier = modifier
             .fillMaxWidth()
@@ -41,7 +40,7 @@ fun CommonLineChart(
 
                 description.apply {
                     textColor = color
-                    this.text = context.getString(R.string.measure)
+                    this.text = data.text
                 }
 
                 xAxis.apply {

@@ -17,6 +17,7 @@ import androidx.fragment.app.viewModels
 import androidx.navigation.fragment.findNavController
 import bg.zahov.app.hideBottomNav
 import bg.zahov.app.setToolBarTitle
+import bg.zahov.app.ui.exercise.info.ExerciseInfoScreen
 import bg.zahov.fitness.app.R
 
 class SettingsFragment : Fragment() {
@@ -55,10 +56,11 @@ class SettingsFragment : Fragment() {
             requireActivity().hideBottomNav()
             setViewCompositionStrategy(ViewCompositionStrategy.DisposeOnViewTreeLifecycleDestroyed)
             setContent {
-                SettingsScreen(
-                    settingsViewModel,
-                    navigateBack = { findNavController().navigate(R.id.settings_to_welcome) },
-                    navigateEditProfile = { findNavController().navigate(R.id.settings_to_edit_profile) })
+//                SettingsScreen(
+//                    settingsViewModel,
+//                    navigateBack = { findNavController().navigate(R.id.settings_to_welcome) },
+//                    navigateEditProfile = { findNavController().navigate(R.id.settings_to_edit_profile) })
+                ExerciseInfoScreen()
             }
         }
     }

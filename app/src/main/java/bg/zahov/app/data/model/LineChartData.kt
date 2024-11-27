@@ -12,6 +12,7 @@ import com.github.mikephil.charting.data.Entry
  * @property list A list of [Entry] objects representing the data points on the chart.
  */
 data class LineChartData(
+    val text: String = "",
     val maxValue: Float = 0f,
     val minValue: Float = 0f,
     val suffix: MeasurementType? = null,
