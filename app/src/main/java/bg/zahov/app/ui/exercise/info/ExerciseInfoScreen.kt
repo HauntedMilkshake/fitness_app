@@ -224,7 +224,6 @@ fun SharedTransitionScope.ChartDetails(
                         onClick = onConfirmClick
 
                     )
-                    CommonLineChart(modifier = Modifier.width(300.dp), data = chart)
                 }
             }
         }

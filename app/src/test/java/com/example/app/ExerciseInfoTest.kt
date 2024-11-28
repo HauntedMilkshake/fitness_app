@@ -65,7 +65,6 @@ class ExerciseInfoTest {
         composeTestRule.onNodeWithText("Weight Progress").assertIsDisplayed()
         composeTestRule.onNodeWithText("Running Distance").assertIsDisplayed()
 
-        // Validate history data is displayed
         composeTestRule.onNodeWithText("Bench Press").assertIsDisplayed()
         composeTestRule.onNodeWithText("Yesterday").assertIsDisplayed()
         composeTestRule.onNodeWithText("Deadlift").assertIsDisplayed()
