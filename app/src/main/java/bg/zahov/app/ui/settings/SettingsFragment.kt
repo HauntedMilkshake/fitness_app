@@ -56,11 +56,10 @@ class SettingsFragment : Fragment() {
             requireActivity().hideBottomNav()
             setViewCompositionStrategy(ViewCompositionStrategy.DisposeOnViewTreeLifecycleDestroyed)
             setContent {
-//                SettingsScreen(
-//                    settingsViewModel,
-//                    navigateBack = { findNavController().navigate(R.id.settings_to_welcome) },
-//                    navigateEditProfile = { findNavController().navigate(R.id.settings_to_edit_profile) })
-                ExerciseInfoScreen()
+                SettingsScreen(
+                    settingsViewModel,
+                    navigateBack = { findNavController().navigate(R.id.settings_to_welcome) },
+                    navigateEditProfile = { findNavController().navigate(R.id.settings_to_edit_profile) })
             }
         }
     }

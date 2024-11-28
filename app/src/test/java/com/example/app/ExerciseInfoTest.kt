@@ -4,7 +4,6 @@ import androidx.compose.ui.test.assertIsDisplayed
 import androidx.compose.ui.test.junit4.createComposeRule
 import androidx.compose.ui.test.onNodeWithText
 import androidx.compose.ui.test.performClick
-import androidx.compose.ui.test.onNodeWithTag
 import bg.zahov.app.data.model.LineChartData
 import bg.zahov.app.data.model.MeasurementType
 import bg.zahov.app.ui.exercise.info.ExerciseHistoryInfo
@@ -15,7 +14,8 @@ import org.junit.Test
 
 class ExerciseInfoTest {
 
-    @get:Rule val composeTestRule = createComposeRule()
+    @get:Rule
+    val composeTestRule = createComposeRule()
 
     @Test
     fun exerciseInfoContentDisplaysCorrectly() {
@@ -61,7 +61,6 @@ class ExerciseInfoTest {
             ExerciseInfoContent(charts = testCharts, history = testHistory)
         }
 
-        // Validate charts are displayed
         composeTestRule.onNodeWithText("Weight Progress").assertIsDisplayed()
         composeTestRule.onNodeWithText("Running Distance").assertIsDisplayed()
 
@@ -70,8 +69,7 @@ class ExerciseInfoTest {
         composeTestRule.onNodeWithText("Deadlift").assertIsDisplayed()
         composeTestRule.onNodeWithText("4 sets").assertIsDisplayed()
 
-        // Simulate click and validate behavior
         composeTestRule.onNodeWithText("Weight Progress").performClick()
-        composeTestRule.onNodeWithText("Weight Progress").assertIsDisplayed() // Example: Add post-click assertions
+        composeTestRule.onNodeWithText("Weight Progress").assertIsDisplayed()
     }
 }
