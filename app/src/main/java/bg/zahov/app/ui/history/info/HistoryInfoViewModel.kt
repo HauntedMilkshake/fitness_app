@@ -1,6 +1,5 @@
 package bg.zahov.app.ui.history.info
 
-import android.util.Log
 import bg.zahov.fitness.app.R
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope

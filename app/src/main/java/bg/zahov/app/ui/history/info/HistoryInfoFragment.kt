@@ -1,7 +1,6 @@
 package bg.zahov.app.ui.history.info
 
 import android.os.Bundle
-import android.util.Log
 import android.view.LayoutInflater
 import android.view.Menu
 import android.view.MenuInflater
@@ -30,7 +29,9 @@ class HistoryInfoFragment : Fragment() {
     private val binding
         get() = requireNotNull(_binding)
 
-    private val historyInfoViewModel: HistoryInfoViewModel by viewModels()
+    private val historyInfoViewModel: HistoryInfoViewModel by viewModels(
+        ownerProducer = { requireParentFragment() }
+    )
 
     override fun onCreateView(
         inflater: LayoutInflater, container: ViewGroup?, savedInstanceState: Bundle?,
