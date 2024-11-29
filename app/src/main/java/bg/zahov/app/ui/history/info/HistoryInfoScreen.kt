@@ -1,5 +1,7 @@
 package bg.zahov.app.ui.history.info
 
+import android.util.Log
+import android.widget.Toast
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.Row
@@ -13,6 +15,7 @@ import androidx.compose.material3.Button
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.res.stringResource
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
@@ -23,13 +26,31 @@ import bg.zahov.app.ui.custom.WorkoutStats
 import bg.zahov.app.ui.theme.FitnessTheme
 import androidx.compose.runtime.getValue
 import androidx.compose.ui.Alignment
+import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.dp
+import bg.zahov.app.data.model.ToastManager
 
 
 @Composable
-fun HistoryInfoScreen(historyInfoViewModel: HistoryInfoViewModel = viewModel()) {
+fun HistoryInfoScreen(historyInfoViewModel: HistoryInfoViewModel = viewModel(), onDelete: () -> Unit) {
     val state by historyInfoViewModel.uiState.collectAsStateWithLifecycle()
+    val toast by ToastManager.messages.collectAsStateWithLifecycle()
+    val context = LocalContext.current
+
+    LaunchedEffect(toast) {
+        toast?.let { message ->
+            Toast.makeText(context, context.getString(message.messageResId), Toast.LENGTH_SHORT)
+                .show()
+        }
+    }
+
+    if(state.isDeleted) {
+        LaunchedEffect(Unit) {
+            onDelete()
+        }
+    }
+
     HistoryInfoContent(
         date = state.workoutDate,
         duration = state.duration,

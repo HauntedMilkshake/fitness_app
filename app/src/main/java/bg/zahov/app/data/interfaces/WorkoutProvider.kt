@@ -37,7 +37,17 @@ interface WorkoutProvider {
         date: LocalDateTime,
         newExercises: List<Exercise>,
     )
+
+    /**
+     * Using the id, queries workouts performed in the past and stores the found value
+     *
+     * @param workoutId the id of the workout we want to find
+     */
     suspend fun setClickedHistoryWorkout(workoutId: String)
+
+    /**
+     * Allows to observe the clicked workout
+     */
     fun getClickedHistoryWorkout(): Flow<HistoryInfoWorkout>
 
     /**

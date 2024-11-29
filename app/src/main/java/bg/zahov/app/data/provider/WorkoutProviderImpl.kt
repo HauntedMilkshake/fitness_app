@@ -21,6 +21,7 @@ import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.StateFlow
 import kotlinx.coroutines.flow.mapLatest
 import kotlinx.coroutines.flow.mapNotNull
+import kotlinx.coroutines.flow.take
 import java.time.LocalDate
 import java.time.LocalDateTime
 import java.time.format.DateTimeFormatter
@@ -164,14 +165,24 @@ class WorkoutProviderImpl : WorkoutProvider {
         workoutRepo.updateTemplateWorkout(workoutId, date, newExercises)
     }
 
+    /**
+     * Queries the past workouts and converts it to a [HistoryInfoWorkout]
+     * @param workoutId
+     * @see HistoryInfoWorkout
+     * @see toHistoryInfoWorkout
+     */
     override suspend fun setClickedHistoryWorkout(workoutId: String) {
-        getPastWorkouts().collect {
-            it.find { workout -> workout.id == workoutId }?.let { result ->
+        getPastWorkouts().take(1).collect { workouts ->
+            workouts.find { workout -> workout.id == workoutId }?.let { result ->
                 _clickedPastWorkout.value = result.toHistoryInfoWorkout()
             }
         }
     }
 
+    /**
+     * Returns the last workout that has been clicked on
+     * @return [HistoryInfoWorkout]
+     */
     override fun getClickedHistoryWorkout(): Flow<HistoryInfoWorkout> = clickedPastWorkout
 
     /**

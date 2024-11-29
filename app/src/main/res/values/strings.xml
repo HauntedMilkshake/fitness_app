@@ -193,4 +193,5 @@
     <!-- Strings used for exercise screen -->
     <!-- Strings used for history info   -->
     <string name="workout_exists_toast">Such a workout already exists!</string>
+    <string name="failed_to_delete_workout_toast">Failed to delete the workout</string>
 </resources>
