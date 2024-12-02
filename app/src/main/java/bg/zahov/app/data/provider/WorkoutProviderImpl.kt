@@ -1,6 +1,5 @@
 package bg.zahov.app.data.provider
 
-import android.util.Log
 import bg.zahov.app.data.interfaces.WorkoutProvider
 import bg.zahov.app.data.local.RealmWorkoutState
 import bg.zahov.app.data.model.Exercise
