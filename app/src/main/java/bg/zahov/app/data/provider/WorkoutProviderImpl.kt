@@ -258,6 +258,16 @@ fun Workout.toHistoryWorkout(): HistoryWorkout {
     )
 }
 
+/**
+ * Converts a [Workout] object to a [HistoryInfoWorkout] object.
+ *
+ * Maps the properties of the [Workout] object into a new [HistoryInfoWorkout] object,
+ * formatting and transforming data where necessary. It includes details such as
+ * workout name, date, duration, volume, personal records, and exercise details.
+ *
+ * @receiver The [Workout] object to be converted.
+ * @return A [HistoryInfoWorkout] object containing the workout's historical data.
+ */
 fun Workout.toHistoryInfoWorkout(): HistoryInfoWorkout {
     return HistoryInfoWorkout(
         id = this.id,
@@ -278,9 +288,29 @@ fun Workout.toHistoryInfoWorkout(): HistoryInfoWorkout {
     )
 }
 
+/**
+ * Estimates the one-repetition maximum (1RM) for a given weight and repetition count using the Epley formula.
+ *
+ * The formula used is:
+ * `1RM = weight * (1 + (0.0333 * reps))`
+ *
+ * @param weight The weight lifted (in kilograms or pounds).
+ * @param reps The number of repetitions performed.
+ * @return A [String] representing the estimated one-rep max (1RM).
+ */
 fun getOneRepEstimate(weight: Double, reps: Int): String =
     (weight * (1 + (0.0333 * reps))).toInt().toString()
 
+/**
+ * Calculates the estimated one-rep max (1RM) for each set in the exercise.
+ *
+ * Iterates through all sets of the exercise and calculates the 1RM using
+ * [getOneRepEstimate]. If the weight ([firstMetric]) or reps ([secondMetric]) are null,
+ * default values of `1.0` for weight and `1` for reps are used.
+ *
+ * @receiver The [Exercise] object for which one-rep maxes are calculated.
+ * @return A [List] of [String] values representing the estimated one-rep max (1RM) for each set.
+ */
 fun Exercise.getOneRepMaxes(): List<String> = this.sets.map {
     getOneRepEstimate(it.firstMetric ?: 1.0, it.secondMetric ?: 1)
 }

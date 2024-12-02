@@ -54,7 +54,7 @@ fun HistoryScreen(historyViewModel: HistoryViewModel = viewModel(), onItemClick:
 @Composable
 fun HistoryContent(
     workouts: List<HistoryWorkout>,
-    onItemClick: (String) -> Unit,
+    onItemClick: (String) -> Unit
 ) {
     val animationDuration = integerResource(R.integer.animation_duration_medium)
     FitnessTheme {
@@ -163,7 +163,7 @@ fun TextWithLeadingIcon(
     textOverflow: TextOverflow = TextOverflow.Ellipsis,
     iconModifier: Modifier = Modifier,
     iconColor: Color? = null,
-    contentDescription: String? = null,
+    contentDescription: String? = null
 ) {
     Icon(
         modifier = iconModifier,
