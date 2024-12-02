@@ -1,8 +1,7 @@
-package com.example.app
+package bg.zahov.app.ui.exercise.info
 
 import bg.zahov.app.data.model.LineChartData
 import bg.zahov.app.data.model.MeasurementType
-import bg.zahov.app.ui.exercise.info.ExerciseHistoryInfo
 import com.github.mikephil.charting.data.Entry
 
 object ExerciseInfoTestData {

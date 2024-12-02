@@ -10,6 +10,7 @@ import androidx.compose.animation.fadeIn
 import androidx.compose.animation.fadeOut
 import androidx.compose.animation.scaleIn
 import androidx.compose.animation.scaleOut
+import androidx.compose.animation.slideOutVertically
 import androidx.compose.animation.togetherWith
 import androidx.compose.foundation.background
 import androidx.compose.foundation.clickable
@@ -32,6 +33,7 @@ import androidx.compose.runtime.Composable
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
+import androidx.compose.runtime.saveable.rememberSaveableStateHolder
 import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
@@ -48,10 +50,10 @@ import bg.zahov.fitness.app.R
 @Composable
 fun ExerciseInfoScreen() {
     ExerciseInfoContent(
-        oneRepMaxEst = TestData.testOneRepMaxEst,
-        maxVolume = TestData.testMaxVolume,
-        maxRep = TestData.testMaxRep,
-        history = TestData.testHistory
+        oneRepMaxEst = ExerciseInfoTestData.testOneRepMaxEst,
+        maxVolume = ExerciseInfoTestData.testMaxVolume,
+        maxRep = ExerciseInfoTestData.testMaxRep,
+        history = ExerciseInfoTestData.testHistory
     )
 }
 
@@ -64,7 +66,6 @@ fun ExerciseInfoContent(
     history: List<ExerciseHistoryInfo>
 ) {
     var selectedChart by remember { mutableStateOf<LineChartData?>(null) }
-
     FitnessTheme {
         SharedTransitionLayout(modifier = Modifier.fillMaxSize()) {
             Column(
@@ -76,29 +77,26 @@ fun ExerciseInfoContent(
             ) {
                 Row(
                     modifier = Modifier
+                        .animateContentSize()
                         .fillMaxWidth()
-                        .horizontalScroll(rememberScrollState())
-                        .padding(16.dp),
+                        .horizontalScroll(rememberScrollState()),
                     verticalAlignment = Alignment.CenterVertically,
                     horizontalArrangement = Arrangement.spacedBy(8.dp)
                 ) {
                     ExerciseChartInfo(
                         data = oneRepMaxEst,
                         selected = selectedChart == oneRepMaxEst,
-                        onClick = { selectedChart = oneRepMaxEst },
-                        sharedTransitionScope = this@SharedTransitionLayout
+                        onClick = { selectedChart = oneRepMaxEst }
                     )
                     ExerciseChartInfo(
                         data = maxVolume,
                         selected = selectedChart == maxVolume,
-                        onClick = { selectedChart = maxVolume },
-                        sharedTransitionScope = this@SharedTransitionLayout
+                        onClick = { selectedChart = maxVolume }
                     )
                     ExerciseChartInfo(
                         data = maxRep,
                         selected = selectedChart == maxRep,
-                        onClick = { selectedChart = maxRep },
-                        sharedTransitionScope = this@SharedTransitionLayout
+                        onClick = { selectedChart = maxRep }
                     )
                 }
 
@@ -108,17 +106,12 @@ fun ExerciseInfoContent(
                     style = MaterialTheme.typography.titleLarge
                 )
                 LazyColumn {
-                    items(history) { data ->
-                        ExerciseHistoryCard(data = data)
-                    }
+                    items(history) { data -> ExerciseHistoryCard(data = data) }
                 }
             }
             ChartDetails(
                 data = selectedChart,
-                sharedTransitionScope = this@SharedTransitionLayout,
-                onConfirmClick = {
-                    selectedChart = null
-                }
+                onConfirmClick = { selectedChart = null }
             )
         }
     }
@@ -127,69 +120,65 @@ fun ExerciseInfoContent(
 
 @OptIn(ExperimentalSharedTransitionApi::class)
 @Composable
-fun ChartDetails(
+fun SharedTransitionScope.ChartDetails(
     data: LineChartData?,
-    sharedTransitionScope: SharedTransitionScope,
     onConfirmClick: () -> Unit,
     modifier: Modifier = Modifier
 ) {
-    with(sharedTransitionScope) {
-        AnimatedContent(
-            modifier = modifier,
-            targetState = data,
-            transitionSpec = {
-                fadeIn() togetherWith fadeOut()
-            },
-            label = ""
-        ) { chart ->
-            Box(
-                modifier = Modifier.fillMaxSize(),
-                contentAlignment = Alignment.Center
-            ) {
-                chart?.let {
-                    Box(
+    AnimatedContent(
+        modifier = modifier.animateContentSize(),
+        targetState = data,
+        transitionSpec = { fadeIn() togetherWith fadeOut() },
+        label = ""
+    ) { chart ->
+        Box(
+            modifier = Modifier.fillMaxSize(),
+            contentAlignment = Alignment.Center
+        ) {
+            chart?.let {
+                Box(
+                    modifier = Modifier
+                        .fillMaxSize()
+                        .clickable { onConfirmClick() }
+                        .background(Color.Black.copy(alpha = 0.5f)),
+                )
+                Column(
+                    modifier = Modifier
+                        .sharedBounds(
+                            sharedContentState = rememberSharedContentState(key = "${it.text}-bound"),
+                            animatedVisibilityScope = this@AnimatedContent,
+                            clipInOverlayDuringTransition = OverlayClip(RoundedCornerShape(8.dp)),
+                            resizeMode = SharedTransitionScope.ResizeMode.RemeasureToBounds
+                        )
+                        .background(
+                            MaterialTheme.colorScheme.secondary,
+                            RoundedCornerShape(8.dp)
+                        )
+                        .clip(RoundedCornerShape(8.dp)),
+                    horizontalAlignment = Alignment.CenterHorizontally,
+                ) {
+                    Text(
                         modifier = Modifier
-                            .fillMaxSize()
-                            .clickable { onConfirmClick() }
-                            .background(Color.Black.copy(alpha = 0.5f)),
+                            .padding(horizontal = 8.dp, vertical = 4.dp)
+                            .sharedElement(
+                                rememberSharedContentState(key = it.text),
+                                animatedVisibilityScope = this@AnimatedContent
+                            ),
+                        text = it.text, color = MaterialTheme.colorScheme.onSecondary,
+                        style = MaterialTheme.typography.titleMedium
                     )
-                    Column(
+                    CommonLineChart(data = it)
+                    Text(
                         modifier = Modifier
-                            .padding(horizontal = 16.dp)
-                            .sharedBounds(
-                                sharedContentState = rememberSharedContentState(key = "${it.text}-bounds"),
-                                animatedVisibilityScope = this@AnimatedContent,
-                                clipInOverlayDuringTransition = OverlayClip(RoundedCornerShape(8.dp))
-                            )
-                            .background(
-                                MaterialTheme.colorScheme.secondary,
-                                RoundedCornerShape(8.dp)
-                            )
-                            .clip(RoundedCornerShape(8.dp))
-                    ) {
-                        Text(
-                            modifier = Modifier
-                                .padding(horizontal = 8.dp, vertical = 4.dp)
-                                .sharedElement(
-                                    rememberSharedContentState(key = it.text),
-                                    animatedVisibilityScope = this@AnimatedContent
-                                ),
-                            text = it.text, color = MaterialTheme.colorScheme.onSecondary,
-                            style = MaterialTheme.typography.titleMedium
-                        )
-                        CommonLineChart(modifier = Modifier.width(300.dp), data = it)
-                        Text(
-                            modifier = Modifier
-                                .padding(horizontal = 8.dp, vertical = 4.dp)
-                                .sharedElement(
-                                    rememberSharedContentState(key = it.maxValue),
-                                    animatedVisibilityScope = this@AnimatedContent
-                                ),
-                            text = "${stringResource(R.string.personal_records)}: ${it.maxValue}",
-                            color = MaterialTheme.colorScheme.onSecondary,
-                            style = MaterialTheme.typography.titleMedium
-                        )
-                    }
+                            .padding(horizontal = 8.dp, vertical = 4.dp)
+                            .sharedElement(
+                                rememberSharedContentState(key = it.maxValue),
+                                animatedVisibilityScope = this@AnimatedContent
+                            ),
+                        text = "${stringResource(R.string.personal_records)}: ${it.maxValue}",
+                        color = MaterialTheme.colorScheme.onSecondary,
+                        style = MaterialTheme.typography.titleMedium
+                    )
                 }
             }
         }
@@ -199,57 +188,55 @@ fun ChartDetails(
 
 @OptIn(ExperimentalSharedTransitionApi::class)
 @Composable
-fun ExerciseChartInfo(
+fun SharedTransitionScope.ExerciseChartInfo(
     data: LineChartData,
     selected: Boolean,
     onClick: () -> Unit,
-    sharedTransitionScope: SharedTransitionScope,
     modifier: Modifier = Modifier,
 ) {
-    with(sharedTransitionScope) {
-        AnimatedVisibility(
-            visible = selected.not(),
-            enter = fadeIn() + scaleIn(),
-            exit = fadeOut() + scaleOut(),
-            modifier = Modifier.animateContentSize()
+    AnimatedVisibility(
+        visible = selected.not(),
+        enter = fadeIn() + scaleIn(),
+        exit = fadeOut() + scaleOut(),
+        modifier = modifier.animateContentSize()
+    ) {
+        Column(
+            modifier = Modifier
+                .sharedBounds(
+                    rememberSharedContentState(key = "${data.text}-bound"),
+                    animatedVisibilityScope = this@AnimatedVisibility,
+                    enter = fadeIn(),
+                    exit = fadeOut(),
+                    resizeMode = SharedTransitionScope.ResizeMode.RemeasureToBounds,
+                    clipInOverlayDuringTransition = OverlayClip(RoundedCornerShape(8.dp)),
+                )
+                .animateContentSize()
+                .background(MaterialTheme.colorScheme.secondary, RoundedCornerShape(8.dp))
+                .clip(RoundedCornerShape(8.dp))
+                .clickable { onClick() },
+            horizontalAlignment = Alignment.CenterHorizontally
         ) {
-            Column(
-                modifier = modifier
-                    .padding(20.dp)
-                    .clickable { onClick() }
-                    .background(MaterialTheme.colorScheme.secondary, RoundedCornerShape(8.dp))
-                    .sharedBounds(
-                        rememberSharedContentState(key = "bounds-${data.text}"),
-                        animatedVisibilityScope = this@AnimatedVisibility,
-                        enter = fadeIn(),
-                        exit = fadeOut(),
-                        resizeMode = SharedTransitionScope.ResizeMode.ScaleToBounds()
+            Text(
+                modifier = Modifier
+                    .padding(horizontal = 8.dp, vertical = 4.dp)
+                    .sharedElement(
+                        rememberSharedContentState(key = data.text),
+                        animatedVisibilityScope = this@AnimatedVisibility
                     ),
-                horizontalAlignment = Alignment.CenterHorizontally,
-
-                ) {
-                Text(
-                    modifier = Modifier
-                        .padding(horizontal = 8.dp, vertical = 4.dp)
-                        .sharedElement(
-                            rememberSharedContentState(key = data.text),
-                            animatedVisibilityScope = this@AnimatedVisibility
-                        ),
-                    text = data.text, color = MaterialTheme.colorScheme.onSecondary,
-                    style = MaterialTheme.typography.titleMedium
-                )
-                Text(
-                    modifier = Modifier
-                        .padding(horizontal = 8.dp, vertical = 4.dp)
-                        .sharedElement(
-                            rememberSharedContentState(key = data.maxValue),
-                            animatedVisibilityScope = this@AnimatedVisibility
-                        ),
-                    text = "${stringResource(R.string.personal_records)}: ${data.maxValue}",
-                    color = MaterialTheme.colorScheme.onSecondary,
-                    style = MaterialTheme.typography.titleMedium
-                )
-            }
+                text = data.text, color = MaterialTheme.colorScheme.onSecondary,
+                style = MaterialTheme.typography.titleMedium
+            )
+            Text(
+                modifier = Modifier
+                    .padding(horizontal = 8.dp, vertical = 4.dp)
+                    .sharedElement(
+                        rememberSharedContentState(key = data.maxValue),
+                        animatedVisibilityScope = this@AnimatedVisibility
+                    ),
+                text = "${stringResource(R.string.personal_records)}: ${data.maxValue}",
+                color = MaterialTheme.colorScheme.onSecondary,
+                style = MaterialTheme.typography.titleMedium
+            )
         }
     }
 }
