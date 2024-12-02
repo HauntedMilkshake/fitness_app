@@ -5,6 +5,7 @@ import androidx.compose.animation.AnimatedVisibility
 import androidx.compose.animation.ExperimentalSharedTransitionApi
 import androidx.compose.animation.SharedTransitionLayout
 import androidx.compose.animation.SharedTransitionScope
+import androidx.compose.animation.animateContentSize
 import androidx.compose.animation.fadeIn
 import androidx.compose.animation.fadeOut
 import androidx.compose.animation.scaleIn
@@ -12,6 +13,7 @@ import androidx.compose.animation.scaleOut
 import androidx.compose.animation.togetherWith
 import androidx.compose.foundation.background
 import androidx.compose.foundation.clickable
+import androidx.compose.foundation.horizontalScroll
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
@@ -19,10 +21,9 @@ import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.padding
-import androidx.compose.foundation.layout.width
 import androidx.compose.foundation.lazy.LazyColumn
-import androidx.compose.foundation.lazy.LazyRow
 import androidx.compose.foundation.lazy.items
+import androidx.compose.foundation.rememberScrollState
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Text
@@ -37,7 +38,6 @@ import androidx.compose.ui.draw.clip
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.text.font.FontWeight
-import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import androidx.lifecycle.viewmodel.compose.viewModel
@@ -50,22 +50,23 @@ import bg.zahov.fitness.app.R
 @Composable
 fun ExerciseInfoScreen(viewModel: ExerciseInfoViewModel = viewModel()) {
     val uiState by viewModel.uiState.collectAsStateWithLifecycle()
-
     ExerciseInfoContent(
-        charts = listOf(uiState.maxRep, uiState.maxVolume, uiState.oneRepMaxEst),
+        oneRepMaxEst = uiState.oneRepMaxEst,
+        maxVolume = uiState.maxVolume,
+        maxRep = uiState.maxRep,
         history = uiState.exerciseHistory
     )
 }
 
-
 @OptIn(ExperimentalSharedTransitionApi::class)
 @Composable
 fun ExerciseInfoContent(
-    charts: List<LineChartData>,
+    oneRepMaxEst: LineChartData,
+    maxVolume: LineChartData,
+    maxRep: LineChartData,
     history: List<ExerciseHistoryInfo>
 ) {
     var selectedChart by remember { mutableStateOf<LineChartData?>(null) }
-
     FitnessTheme {
         SharedTransitionLayout(modifier = Modifier.fillMaxSize()) {
             Column(
@@ -75,35 +76,29 @@ fun ExerciseInfoContent(
                 horizontalAlignment = Alignment.CenterHorizontally,
                 verticalArrangement = Arrangement.spacedBy(20.dp)
             ) {
-                LazyRow(horizontalArrangement = Arrangement.spacedBy(8.dp)) {
-                    items(charts) { chart ->
-                        AnimatedVisibility(
-                            visible = chart != selectedChart,
-                            enter = fadeIn() + scaleIn(),
-                            exit = fadeOut() + scaleOut(),
-                            modifier = Modifier.animateItem()
-                        ) {
-                            Box(
-                                modifier = Modifier
-                                    .sharedBounds(
-                                        sharedContentState = rememberSharedContentState(key = "${chart.text}-bounds"),
-                                        animatedVisibilityScope = this@AnimatedVisibility,
-                                        clipInOverlayDuringTransition = OverlayClip(
-                                            RoundedCornerShape(8.dp)
-                                        )
-                                    )
-                            ) {
-                                ExerciseChartInfo(
-                                    data = chart,
-                                    modifier = Modifier.sharedElement(
-                                        state = rememberSharedContentState(key = chart.text),
-                                        animatedVisibilityScope = this@AnimatedVisibility
-                                    ),
-                                    onClick = { selectedChart = chart }
-                                )
-                            }
-                        }
-                    }
+                Row(
+                    modifier = Modifier
+                        .animateContentSize()
+                        .fillMaxWidth()
+                        .horizontalScroll(rememberScrollState()),
+                    verticalAlignment = Alignment.CenterVertically,
+                    horizontalArrangement = Arrangement.spacedBy(8.dp)
+                ) {
+                    ExerciseChartInfo(
+                        data = oneRepMaxEst,
+                        selected = selectedChart == oneRepMaxEst,
+                        onClick = { selectedChart = oneRepMaxEst }
+                    )
+                    ExerciseChartInfo(
+                        data = maxVolume,
+                        selected = selectedChart == maxVolume,
+                        onClick = { selectedChart = maxVolume }
+                    )
+                    ExerciseChartInfo(
+                        data = maxRep,
+                        selected = selectedChart == maxRep,
+                        onClick = { selectedChart = maxRep }
+                    )
                 }
 
                 Text(
@@ -112,16 +107,12 @@ fun ExerciseInfoContent(
                     style = MaterialTheme.typography.titleLarge
                 )
                 LazyColumn {
-                    items(history) { data ->
-                        ExerciseHistoryCard(data = data)
-                    }
+                    items(history) { data -> ExerciseHistoryCard(data = data) }
                 }
             }
             ChartDetails(
                 data = selectedChart,
-                onConfirmClick = {
-                    selectedChart = null
-                }
+                onConfirmClick = { selectedChart = null }
             )
         }
     }
@@ -132,99 +123,138 @@ fun ExerciseInfoContent(
 @Composable
 fun SharedTransitionScope.ChartDetails(
     data: LineChartData?,
-    modifier: Modifier = Modifier,
-    onConfirmClick: () -> Unit
+    onConfirmClick: () -> Unit,
+    modifier: Modifier = Modifier
 ) {
     AnimatedContent(
-        modifier = modifier,
+        modifier = modifier.animateContentSize(),
         targetState = data,
-        transitionSpec = {
-            fadeIn() togetherWith fadeOut()
-        },
+        transitionSpec = { fadeIn() togetherWith fadeOut() },
         label = ""
     ) { chart ->
         Box(
             modifier = Modifier.fillMaxSize(),
             contentAlignment = Alignment.Center
         ) {
-            if (chart != null) {
+            chart?.let {
                 Box(
                     modifier = Modifier
                         .fillMaxSize()
                         .clickable { onConfirmClick() }
                         .background(Color.Black.copy(alpha = 0.5f)),
-                    contentAlignment = Alignment.Center
-                ) {
-                    Column(
-                        modifier = Modifier
-                            .padding(horizontal = 16.dp)
-                            .sharedBounds(
-                                sharedContentState = rememberSharedContentState(key = "${chart.text}-bounds"),
-                                animatedVisibilityScope = this@AnimatedContent,
-                                clipInOverlayDuringTransition = OverlayClip(RoundedCornerShape(8.dp))
-                            )
-                            .background(
-                                MaterialTheme.colorScheme.secondary,
-                                RoundedCornerShape(8.dp)
-                            )
-                            .clip(RoundedCornerShape(8.dp))
-                    ) {
-
-                        ExerciseChartInfo(
-                            data = chart,
-                            modifier = Modifier.sharedElement(
-                                state = rememberSharedContentState(key = chart.text),
-                                animatedVisibilityScope = this@AnimatedContent,
-                            ),
-                            onClick = onConfirmClick
+                )
+                Column(
+                    modifier = Modifier
+                        .sharedBounds(
+                            sharedContentState = rememberSharedContentState(key = "${it.text}-bound"),
+                            animatedVisibilityScope = this@AnimatedContent,
+                            clipInOverlayDuringTransition = OverlayClip(RoundedCornerShape(8.dp)),
+                            resizeMode = SharedTransitionScope.ResizeMode.RemeasureToBounds
                         )
-                        CommonLineChart(modifier = Modifier.width(300.dp), data = chart)
-                    }
+                        .background(
+                            MaterialTheme.colorScheme.secondary,
+                            RoundedCornerShape(8.dp)
+                        )
+                        .clip(RoundedCornerShape(8.dp)),
+                    horizontalAlignment = Alignment.CenterHorizontally,
+                ) {
+                    Text(
+                        modifier = Modifier
+                            .padding(horizontal = 8.dp, vertical = 4.dp)
+                            .sharedElement(
+                                rememberSharedContentState(key = it.text),
+                                animatedVisibilityScope = this@AnimatedContent
+                            ),
+                        text = it.text, color = MaterialTheme.colorScheme.onSecondary,
+                        style = MaterialTheme.typography.titleMedium
+                    )
+                    CommonLineChart(data = it)
+                    Text(
+                        modifier = Modifier
+                            .padding(horizontal = 8.dp, vertical = 4.dp)
+                            .sharedElement(
+                                rememberSharedContentState(key = it.maxValue),
+                                animatedVisibilityScope = this@AnimatedContent
+                            ),
+                        text = "${stringResource(R.string.personal_records)}: ${it.maxValue}",
+                        color = MaterialTheme.colorScheme.onSecondary,
+                        style = MaterialTheme.typography.titleMedium
+                    )
                 }
             }
         }
     }
 }
 
-@Preview
+
+@OptIn(ExperimentalSharedTransitionApi::class)
 @Composable
-fun ExerciseChartInfo(
+fun SharedTransitionScope.ExerciseChartInfo(
+    data: LineChartData,
+    selected: Boolean,
+    onClick: () -> Unit,
     modifier: Modifier = Modifier,
-    data: LineChartData = LineChartData(),
-    onClick: () -> Unit = {}
 ) {
-    Column(
-        modifier = modifier
-            .padding(20.dp)
-            .clickable { onClick() }
-            .background(MaterialTheme.colorScheme.secondary, RoundedCornerShape(8.dp)),
-        horizontalAlignment = Alignment.CenterHorizontally
+    AnimatedVisibility(
+        visible = selected.not(),
+        enter = fadeIn() + scaleIn(),
+        exit = fadeOut() + scaleOut(),
+        modifier = modifier.animateContentSize()
     ) {
-        Text(
-            modifier = Modifier.padding(horizontal = 8.dp, vertical = 4.dp),
-            text = data.text, color = MaterialTheme.colorScheme.onSecondary,
-            style = MaterialTheme.typography.titleMedium
-        )
-        Text(
-            modifier = Modifier.padding(horizontal = 8.dp, vertical = 4.dp),
-            text = "${stringResource(R.string.personal_records)}: ${data.maxValue}",
-            color = MaterialTheme.colorScheme.onSecondary,
-            style = MaterialTheme.typography.titleMedium
-        )
+        Column(
+            modifier = Modifier
+                .sharedBounds(
+                    rememberSharedContentState(key = "${data.text}-bound"),
+                    animatedVisibilityScope = this@AnimatedVisibility,
+                    enter = fadeIn(),
+                    exit = fadeOut(),
+                    resizeMode = SharedTransitionScope.ResizeMode.RemeasureToBounds,
+                    clipInOverlayDuringTransition = OverlayClip(RoundedCornerShape(8.dp)),
+                )
+                .animateContentSize()
+                .background(MaterialTheme.colorScheme.secondary, RoundedCornerShape(8.dp))
+                .clip(RoundedCornerShape(8.dp))
+                .clickable { onClick() },
+            horizontalAlignment = Alignment.CenterHorizontally
+        ) {
+            Text(
+                modifier = Modifier
+                    .padding(horizontal = 8.dp, vertical = 4.dp)
+                    .sharedElement(
+                        rememberSharedContentState(key = data.text),
+                        animatedVisibilityScope = this@AnimatedVisibility
+                    ),
+                text = data.text, color = MaterialTheme.colorScheme.onSecondary,
+                style = MaterialTheme.typography.titleMedium
+            )
+            Text(
+                modifier = Modifier
+                    .padding(horizontal = 8.dp, vertical = 4.dp)
+                    .sharedElement(
+                        rememberSharedContentState(key = data.maxValue),
+                        animatedVisibilityScope = this@AnimatedVisibility
+                    ),
+                text = "${stringResource(R.string.personal_records)}: ${data.maxValue}",
+                color = MaterialTheme.colorScheme.onSecondary,
+                style = MaterialTheme.typography.titleMedium
+            )
+        }
     }
 }
 
-@Preview
 @Composable
 fun ExerciseHistoryCard(
-    modifier: Modifier = Modifier,
-    data: ExerciseHistoryInfo = ExerciseHistoryInfo()
+    data: ExerciseHistoryInfo,
+    modifier: Modifier = Modifier
 ) {
     Column(
-        modifier = Modifier
+        modifier = modifier
             .fillMaxWidth()
             .padding(16.dp)
-            .background(MaterialTheme.colorScheme.secondary, RoundedCornerShape(16.dp)),
+            .background(
+                MaterialTheme.colorScheme.secondary,
+                RoundedCornerShape(16.dp)
+            ),
         verticalArrangement = Arrangement.spacedBy(20.dp),
     ) {
         Text(
