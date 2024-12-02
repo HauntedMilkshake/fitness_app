@@ -194,4 +194,6 @@
     <!-- Strings used for history info   -->
     <string name="workout_exists_toast">Such a workout already exists!</string>
     <string name="failed_to_delete_workout_toast">Failed to delete the workout</string>
+    <!-- Strings used for content description -->
+    <string name="launcher_icon_description">Flexed arm</string>
 </resources>
