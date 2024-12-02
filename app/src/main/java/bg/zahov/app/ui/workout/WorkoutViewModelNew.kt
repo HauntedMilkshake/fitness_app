@@ -110,7 +110,7 @@ sealed class WorkoutEntry {
 }
 
 /**
- * @property exercises list of the exercises from the current session
+ * @property exercises a map of the exercises from the current session and their names as keys
  * @property volume amount of weight lifted during the current session
  * @property prs amount of personal records made during the current session
  */
@@ -660,9 +660,7 @@ class WorkoutViewModelNew(
      * of insertion. It also calculates the total volume of the workout based on the sets' weight and repetitions.
      *
      * @param entries A list of `WorkoutEntry` objects representing exercises and sets in the workout.
-     * @return A pair containing:
-     *  - A `LinkedHashMap` where the key is the exercise name, and the value is an `Exercise` object with associated sets and details.
-     *  - A `Double` representing the total volume of the workout (sum of weight * repetitions for all sets).
+     * @return [ExerciseSummary]
      *
      * ## Details:
      * - `WorkoutEntry.ExerciseEntry`: Initializes a new `Exercise` or retrieves an existing one by name. The exercise is stored in the map.
@@ -730,10 +728,6 @@ class WorkoutViewModelNew(
      * @param updateExercises A boolean flag indicating whether to update the exercises in the repository.
      * If we save it to realm there is no need to update them in the firestore repository
      * @return [ExerciseSummary]:
-     *  - A `List` of `Exercise` objects reflecting the processed workout.
-     *  - An `Int` representing the count of PRs achieved during the workout.
-     *  - A `Double` representing the total workout volume (sum of weight * repetitions for all sets).
-     *
      * ## Details:
      * 1. **Extract and Calculate**:
      *    - Calls `getExercisesFiltered` to extract exercises and calculate the total volume.
