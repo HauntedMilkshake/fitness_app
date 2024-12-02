@@ -274,7 +274,7 @@ fun Workout.toHistoryInfoWorkout(): HistoryInfoWorkout {
             ExerciseDetails(
                 exerciseName = exercise.name,
                 sets = exercise.sets.map {
-                    "${it.secondMetric} x ${it.secondMetric}"
+                    "${it.secondMetric} x ${it.firstMetric}"
                 },
                 oneRepMaxes = exercise.getOneRepMaxes()
             )

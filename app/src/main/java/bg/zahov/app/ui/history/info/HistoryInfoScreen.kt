@@ -30,6 +30,7 @@ import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.dp
 import bg.zahov.app.data.model.ToastManager
+import bg.zahov.app.data.provider.model.ExerciseDetails
 
 
 @Composable
