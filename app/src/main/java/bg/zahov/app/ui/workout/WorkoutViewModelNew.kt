@@ -115,7 +115,7 @@ sealed class WorkoutEntry {
  * @property prs amount of personal records made during the current session
  */
 data class ExerciseSummary(
-    val exercises: List<Exercise>,
+    val exercises: LinkedHashMap<String, Exercise>,
     val volume: Double,
     val prs: Int,
 )
@@ -598,7 +598,7 @@ class WorkoutViewModelNew(
         if (canFinish()) {
             viewModelScope.launch {
                 val exerciseSummary = getExerciseArrayAndPRs(_uiState.value.exercises)
-                val exercises = exerciseSummary.exercises
+                val exercises = exerciseSummary.exercises.values.toList()
                 val prs = exerciseSummary.prs
                 val volume = exerciseSummary.volume
 
@@ -677,11 +677,11 @@ class WorkoutViewModelNew(
      */
     private fun getExercisesFiltered(
         entries: List<WorkoutEntry>,
-    ): Pair<LinkedHashMap<String, Exercise>, Double> {
+    ): ExerciseSummary {
         val exercises =
-            LinkedHashMap<String, Exercise>() // Maintains insertion order for exercises.
+            LinkedHashMap<String, Exercise>()
         var volume = 0.0
-        for (entry in entries) {
+        entries.map { entry ->
             when (entry) {
                 is WorkoutEntry.ExerciseEntry -> {
                     // Adds a new exercise or retrieves the existing one by name.
@@ -693,7 +693,6 @@ class WorkoutViewModelNew(
                             isTemplate = false,
                             note = entry.note
                         )
-
                     }
                 }
 
@@ -717,7 +716,7 @@ class WorkoutViewModelNew(
                 }
             }
         }
-        return Pair(exercises, volume)
+        return ExerciseSummary(exercises = exercises, volume = volume, prs = 0)
     }
 
     /**
@@ -750,9 +749,10 @@ class WorkoutViewModelNew(
         entries: List<WorkoutEntry>,
         updateExercises: Boolean = true,
     ): ExerciseSummary {
-        val (exercises, volume) = getExercisesFiltered(entries)
+        val filtered = getExercisesFiltered(entries)
+        val exercises = filtered.exercises
+        val volume = filtered.volume
         var prs = 0
-
 
         if (updateExercises) {
 
@@ -778,7 +778,7 @@ class WorkoutViewModelNew(
 
             repo.updateExercises(exercises.values.toList())
         }
-        return ExerciseSummary(exercises = exercises.values.toList(), prs = prs, volume = volume)
+        return ExerciseSummary(exercises = exercises, prs = prs, volume = volume)
     }
 
     /**
@@ -823,7 +823,7 @@ class WorkoutViewModelNew(
      */
     private suspend fun saveWorkoutState() {
         val exerciseSummary = getExerciseArrayAndPRs(_uiState.value.exercises, false)
-        val exercises = exerciseSummary.exercises
+        val exercises = exerciseSummary.exercises.values.toList()
         val prs = exerciseSummary.prs
         val volume = exerciseSummary.volume
 
