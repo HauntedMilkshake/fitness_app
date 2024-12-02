@@ -5,11 +5,11 @@ import bg.zahov.app.data.local.RealmWorkoutState
 import bg.zahov.app.data.model.Exercise
 import bg.zahov.app.data.model.Workout
 import bg.zahov.app.data.model.state.ExerciseData
+import bg.zahov.app.data.provider.model.ExerciseDetails
+import bg.zahov.app.data.provider.model.HistoryInfoWorkout
 import bg.zahov.app.data.provider.model.HistoryWorkout
 import bg.zahov.app.data.repository.WorkoutRepositoryImpl
 import bg.zahov.app.ui.exercise.info.history.ExerciseHistoryInfo
-import bg.zahov.app.ui.history.info.ExerciseDetails
-import bg.zahov.app.ui.history.info.HistoryInfoWorkout
 import bg.zahov.app.ui.workout.start.StartWorkout
 import bg.zahov.app.util.timeToString
 import bg.zahov.app.util.toExerciseData
@@ -45,7 +45,7 @@ class WorkoutProviderImpl : WorkoutProvider {
         get() = _exerciseHistory
 
     private val _clickedPastWorkout = MutableStateFlow(HistoryInfoWorkout())
-    private val clickedPastWorkout: StateFlow<HistoryInfoWorkout> = _clickedPastWorkout
+    override val clickedPastWorkout: StateFlow<HistoryInfoWorkout> = _clickedPastWorkout
 
     private val workoutRepo = WorkoutRepositoryImpl.getInstance()
     private val errorHandler = ServiceErrorHandlerImpl.getInstance()
@@ -177,12 +177,6 @@ class WorkoutProviderImpl : WorkoutProvider {
             }
         }
     }
-
-    /**
-     * Returns the last workout that has been clicked on
-     * @return [HistoryInfoWorkout]
-     */
-    override fun getClickedHistoryWorkout(): Flow<HistoryInfoWorkout> = clickedPastWorkout
 
     /**
      * Retrieves a list of start workouts from the template workouts.
