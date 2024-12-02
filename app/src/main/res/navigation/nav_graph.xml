@@ -253,7 +253,7 @@
     </fragment>
     <fragment
         android:id="@+id/exercise_info_navigation"
-        android:name="bg.zahov.app.ui.exercise.info.ExerciseNavigationFragment"
+        android:name="bg.zahov.app.ui.exercise.info.ExerciseInfoFragment"
         tools:layout="@layout/fragment_exercise_history" />
     <fragment
         android:id="@+id/measurement_information"
