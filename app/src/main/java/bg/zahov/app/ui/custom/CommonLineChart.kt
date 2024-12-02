@@ -24,7 +24,7 @@ fun CommonLineChart(
     modifier: Modifier = Modifier,
     data: LineChartData
 ) {
-    val color = MaterialTheme.colorScheme.secondary.toArgb()
+    val color = MaterialTheme.colorScheme.onSecondary.toArgb()
     AndroidView(
         modifier = modifier
             .fillMaxWidth()
@@ -56,6 +56,7 @@ fun CommonLineChart(
                     granularity = 1f
                     valueFormatter = RightAxisValueFormatter(
                         when (data.suffix) {
+                            MeasurementType.Reps -> context.getString(R.string.reps_column_text)
                             MeasurementType.Weight -> context.getString(R.string.weight_unit)
                             MeasurementType.BodyFatPercentage -> context.getString(R.string.body_fat_percentage_unit)
                             MeasurementType.CaloricIntake -> context.getString(R.string.caloric_intake_unit)

@@ -5,9 +5,9 @@ import bg.zahov.app.data.local.RealmWorkoutState
 import bg.zahov.app.data.model.Exercise
 import bg.zahov.app.data.model.Workout
 import bg.zahov.app.data.model.state.ExerciseData
+import bg.zahov.app.data.model.state.ExerciseHistoryInfo
 import bg.zahov.app.data.provider.model.HistoryWorkout
 import bg.zahov.app.data.repository.WorkoutRepositoryImpl
-import bg.zahov.app.ui.exercise.info.history.ExerciseHistoryInfo
 import bg.zahov.app.ui.workout.start.StartWorkout
 import bg.zahov.app.util.getOneRepMaxes
 import bg.zahov.app.util.timeToString
@@ -117,16 +117,18 @@ class WorkoutProviderImpl : WorkoutProvider {
 
     override suspend fun setClickedTemplateExercise(item: ExerciseData) {
         getPastWorkouts().collect { workout ->
-            val resultsList = workout.mapNotNull {
-                it.exercises.find { workoutExercise -> workoutExercise.name == item.name }
+            val resultsList = workout.mapNotNull { workout1 ->
+                workout1.exercises.find { workoutExercise -> workoutExercise.name == item.name }
                     ?.let { previousExercise ->
                         ExerciseHistoryInfo(
-                            workoutId = it.id,
-                            workoutName = it.name,
-                            lastPerformed = it.date.toFormattedString(),
+                            workoutName = workout1.name,
+                            lastPerformed = workout1.date.toFormattedString(),
                             sets = previousExercise.sets,
-                            oneRepMaxes = previousExercise.getOneRepMaxes(),
-                            date = it.date
+                            setsPerformed = previousExercise.sets.joinToString(separator = "\n") {
+                                "${it.secondMetric ?: 0} x ${it.firstMetric}"
+                            },
+                            oneRepMaxes = previousExercise.getOneRepMaxes().joinToString("\n"),
+                            date = workout1.date
                         )
                     }
             }.sortedBy { it.date }

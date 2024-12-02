@@ -24,7 +24,6 @@ import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.foundation.lazy.LazyRow
 import androidx.compose.foundation.lazy.items
 import androidx.compose.foundation.shape.RoundedCornerShape
-import androidx.compose.material3.Card
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
@@ -40,72 +39,22 @@ import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
+import androidx.lifecycle.compose.collectAsStateWithLifecycle
+import androidx.lifecycle.viewmodel.compose.viewModel
 import bg.zahov.app.data.model.LineChartData
-import bg.zahov.app.data.model.MeasurementType
+import bg.zahov.app.data.model.state.ExerciseHistoryInfo
 import bg.zahov.app.ui.custom.CommonLineChart
 import bg.zahov.app.ui.theme.FitnessTheme
 import bg.zahov.fitness.app.R
-import com.github.mikephil.charting.data.Entry
-
 
 @Composable
-fun ExerciseInfoScreen() {
-    val testHistory = listOf(
-        ExerciseHistoryInfo(
-            workoutName = "Bench Press",
-            lastPerformed = "Yesterday",
-            setsPerformed = "5 sets",
-            oneRepMaxes = "100 kg"
-        ),
-        ExerciseHistoryInfo(
-            workoutName = "Deadlift",
-            lastPerformed = "2 days ago",
-            setsPerformed = "4 sets",
-            oneRepMaxes = "120 kg"
-        )
+fun ExerciseInfoScreen(viewModel: ExerciseInfoViewModel = viewModel()) {
+    val uiState by viewModel.uiState.collectAsStateWithLifecycle()
+
+    ExerciseInfoContent(
+        charts = listOf(uiState.maxRep, uiState.maxVolume, uiState.oneRepMaxEst),
+        history = uiState.exerciseHistory
     )
-    val testLineChartDataList = listOf(
-        LineChartData(
-            text = "Weight Progress",
-            maxValue = 100f,
-            minValue = 50f,
-            suffix = MeasurementType.Weight,
-            list = listOf(
-                Entry(1f, 60f),
-                Entry(2f, 65f),
-                Entry(3f, 70f),
-                Entry(4f, 75f),
-                Entry(5f, 80f)
-            )
-        ),
-        LineChartData(
-            text = "Running Distance",
-            maxValue = 20f,
-            minValue = 5f,
-            suffix = MeasurementType.Weight,
-            list = listOf(
-                Entry(1f, 6f),
-                Entry(2f, 8f),
-                Entry(3f, 12f),
-                Entry(4f, 15f),
-                Entry(5f, 18f)
-            )
-        ),
-        LineChartData(
-            text = "Calories Burned",
-            maxValue = 500f,
-            minValue = 100f,
-            suffix = MeasurementType.Weight,
-            list = listOf(
-                Entry(1f, 150f),
-                Entry(2f, 200f),
-                Entry(3f, 300f),
-                Entry(4f, 400f),
-                Entry(5f, 450f)
-            )
-        )
-    )
-    ExerciseInfoContent(charts = testLineChartDataList, history = testHistory)
 }
 
 
@@ -139,7 +88,9 @@ fun ExerciseInfoContent(
                                     .sharedBounds(
                                         sharedContentState = rememberSharedContentState(key = "${chart.text}-bounds"),
                                         animatedVisibilityScope = this@AnimatedVisibility,
-                                        clipInOverlayDuringTransition = OverlayClip(RoundedCornerShape(8.dp))
+                                        clipInOverlayDuringTransition = OverlayClip(
+                                            RoundedCornerShape(8.dp)
+                                        )
                                     )
                             ) {
                                 ExerciseChartInfo(
@@ -192,39 +143,43 @@ fun SharedTransitionScope.ChartDetails(
         },
         label = ""
     ) { chart ->
-        if (chart != null) {
-            Box(
-                modifier = Modifier.fillMaxSize(),
-                contentAlignment = Alignment.Center
-            ) {
+        Box(
+            modifier = Modifier.fillMaxSize(),
+            contentAlignment = Alignment.Center
+        ) {
+            if (chart != null) {
                 Box(
                     modifier = Modifier
                         .fillMaxSize()
                         .clickable { onConfirmClick() }
                         .background(Color.Black.copy(alpha = 0.5f)),
-                )
-                Column(
-                    modifier = Modifier
-                        .padding(horizontal = 16.dp)
-                        .sharedBounds(
-                            sharedContentState = rememberSharedContentState(key = "${chart.text}-bounds"),
-                            animatedVisibilityScope = this@AnimatedContent,
-                            clipInOverlayDuringTransition = OverlayClip(RoundedCornerShape(8.dp))
-                        )
-                        .background(MaterialTheme.colorScheme.secondary, RoundedCornerShape(8.dp))
-                        .clip(RoundedCornerShape(8.dp))
+                    contentAlignment = Alignment.Center
                 ) {
+                    Column(
+                        modifier = Modifier
+                            .padding(horizontal = 16.dp)
+                            .sharedBounds(
+                                sharedContentState = rememberSharedContentState(key = "${chart.text}-bounds"),
+                                animatedVisibilityScope = this@AnimatedContent,
+                                clipInOverlayDuringTransition = OverlayClip(RoundedCornerShape(8.dp))
+                            )
+                            .background(
+                                MaterialTheme.colorScheme.secondary,
+                                RoundedCornerShape(8.dp)
+                            )
+                            .clip(RoundedCornerShape(8.dp))
+                    ) {
 
-                    ExerciseChartInfo(
-                        data = chart,
-                        modifier = Modifier.sharedElement(
-                            state = rememberSharedContentState(key = chart.text),
-                            animatedVisibilityScope = this@AnimatedContent,
-                        ),
-                        onClick = onConfirmClick
-
-                    )
-                    CommonLineChart(modifier = Modifier.width(300.dp), data = chart)
+                        ExerciseChartInfo(
+                            data = chart,
+                            modifier = Modifier.sharedElement(
+                                state = rememberSharedContentState(key = chart.text),
+                                animatedVisibilityScope = this@AnimatedContent,
+                            ),
+                            onClick = onConfirmClick
+                        )
+                        CommonLineChart(modifier = Modifier.width(300.dp), data = chart)
+                    }
                 }
             }
         }
@@ -321,10 +276,3 @@ fun ExerciseHistoryCard(
         }
     }
 }
-
-data class ExerciseHistoryInfo(
-    val workoutName: String = "",
-    val lastPerformed: String = "",
-    val setsPerformed: String = "",
-    val oneRepMaxes: String = "",
-)

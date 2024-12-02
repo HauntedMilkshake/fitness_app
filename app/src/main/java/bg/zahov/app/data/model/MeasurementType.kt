@@ -53,5 +53,8 @@ enum class MeasurementType(val key: String) {
     LeftCalf("Left calf"),
 
     /** Represents the measurement of the user's right calf circumference. */
-    RightCalf("Right calf");
+    RightCalf("Right calf"),
+
+    /** Represents the measurement of the user's reps. */
+    Reps("Reps");
 }
