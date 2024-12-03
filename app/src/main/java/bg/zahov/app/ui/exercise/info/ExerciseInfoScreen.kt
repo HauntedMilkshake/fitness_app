@@ -10,9 +10,9 @@ import androidx.compose.animation.fadeIn
 import androidx.compose.animation.fadeOut
 import androidx.compose.animation.scaleIn
 import androidx.compose.animation.scaleOut
-import androidx.compose.animation.slideOutVertically
 import androidx.compose.animation.togetherWith
 import androidx.compose.foundation.background
+import androidx.compose.foundation.border
 import androidx.compose.foundation.clickable
 import androidx.compose.foundation.horizontalScroll
 import androidx.compose.foundation.layout.Arrangement
@@ -22,31 +22,35 @@ import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.padding
-import androidx.compose.foundation.layout.width
 import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.foundation.lazy.items
 import androidx.compose.foundation.rememberScrollState
 import androidx.compose.foundation.shape.RoundedCornerShape
+import androidx.compose.material3.Icon
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
-import androidx.compose.runtime.saveable.rememberSaveableStateHolder
 import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
 import androidx.compose.ui.graphics.Color
+import androidx.compose.ui.graphics.vector.ImageVector
+import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.text.font.FontWeight
+import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
 import bg.zahov.app.data.model.LineChartData
+import bg.zahov.app.ui.custom.CommonDivider
 import bg.zahov.app.ui.custom.CommonLineChart
 import bg.zahov.app.ui.theme.FitnessTheme
 import bg.zahov.fitness.app.R
 
+@Preview
 @Composable
 fun ExerciseInfoScreen() {
     ExerciseInfoContent(
@@ -73,7 +77,7 @@ fun ExerciseInfoContent(
                     .padding(12.dp)
                     .fillMaxWidth(),
                 horizontalAlignment = Alignment.CenterHorizontally,
-                verticalArrangement = Arrangement.spacedBy(20.dp)
+                verticalArrangement = Arrangement.spacedBy(12.dp)
             ) {
                 Row(
                     modifier = Modifier
@@ -99,13 +103,16 @@ fun ExerciseInfoContent(
                         onClick = { selectedChart = maxRep }
                     )
                 }
-
+                CommonDivider(modifier = Modifier.padding(0.dp))
                 Text(
                     text = stringResource(R.string.history),
                     color = MaterialTheme.colorScheme.onBackground,
-                    style = MaterialTheme.typography.titleLarge
+                    style = MaterialTheme.typography.displayLarge
                 )
-                LazyColumn {
+                LazyColumn(
+                    horizontalAlignment = Alignment.CenterHorizontally,
+                    verticalArrangement = Arrangement.spacedBy(4.dp)
+                ) {
                     items(history) { data -> ExerciseHistoryCard(data = data) }
                 }
             }
@@ -136,7 +143,7 @@ fun SharedTransitionScope.ChartDetails(
             contentAlignment = Alignment.Center
         ) {
             chart?.let {
-                val extractedText = it.textId?.let { it1 -> stringResource(it1) }?: ""
+                val extractedText = it.textId?.let { it1 -> stringResource(it1) } ?: ""
                 Box(
                     modifier = Modifier
                         .fillMaxSize()
@@ -159,26 +166,24 @@ fun SharedTransitionScope.ChartDetails(
                     horizontalAlignment = Alignment.CenterHorizontally,
                 ) {
                     Text(
-                        modifier = Modifier
-                            .padding(horizontal = 8.dp, vertical = 4.dp)
-                            .sharedElement(
-                                rememberSharedContentState(key = "$extractedText-text"),
-                                animatedVisibilityScope = this@AnimatedContent
-                            ),
+                        modifier = Modifier.sharedElement(
+                            rememberSharedContentState(key = "$extractedText-text"),
+                            animatedVisibilityScope = this@AnimatedContent
+                        ),
                         text = extractedText, color = MaterialTheme.colorScheme.onSecondary,
-                        style = MaterialTheme.typography.titleMedium
+                        style = MaterialTheme.typography.titleLarge
                     )
                     CommonLineChart(data = it)
                     Text(
                         modifier = Modifier
-                            .padding(horizontal = 8.dp, vertical = 4.dp)
+                            .padding(bottom = 4.dp)
                             .sharedElement(
                                 rememberSharedContentState(key = "$extractedText-value"),
                                 animatedVisibilityScope = this@AnimatedContent
                             ),
                         text = "${stringResource(R.string.personal_records)}: ${it.maxValue}",
                         color = MaterialTheme.colorScheme.onSecondary,
-                        style = MaterialTheme.typography.titleMedium
+                        style = MaterialTheme.typography.labelMedium
                     )
                 }
             }
@@ -201,7 +206,7 @@ fun SharedTransitionScope.ExerciseChartInfo(
         exit = fadeOut() + scaleOut(),
         modifier = modifier.animateContentSize()
     ) {
-        val extractedText = data.textId?.let { stringResource(it) }?: ""
+        val extractedText = data.textId?.let { stringResource(it) } ?: ""
         Column(
             modifier = Modifier
                 .sharedBounds(
@@ -215,29 +220,36 @@ fun SharedTransitionScope.ExerciseChartInfo(
                 .animateContentSize()
                 .background(MaterialTheme.colorScheme.secondary, RoundedCornerShape(8.dp))
                 .clip(RoundedCornerShape(8.dp))
-                .clickable { onClick() },
+                .clickable { onClick() }
+                .padding(4.dp),
             horizontalAlignment = Alignment.CenterHorizontally
         ) {
+            Row(
+                modifier = Modifier.fillMaxWidth(),
+                verticalAlignment = Alignment.CenterVertically
+            ) {
+                Icon(painter = painterResource(R.drawable.ic_trophy), contentDescription = null)
+                Box(contentAlignment = Alignment.Center) {
+                    Text(
+                        modifier = Modifier.sharedElement(
+                            rememberSharedContentState(key = "$extractedText-text"),
+                            animatedVisibilityScope = this@AnimatedVisibility
+                        ),
+                        text = extractedText, color = MaterialTheme.colorScheme.onSecondary,
+                        style = MaterialTheme.typography.titleLarge
+                    )
+                }
+            }
             Text(
                 modifier = Modifier
-                    .padding(horizontal = 8.dp, vertical = 4.dp)
-                    .sharedElement(
-                        rememberSharedContentState(key = "$extractedText-text"),
-                        animatedVisibilityScope = this@AnimatedVisibility
-                    ),
-                text = extractedText, color = MaterialTheme.colorScheme.onSecondary,
-                style = MaterialTheme.typography.titleMedium
-            )
-            Text(
-                modifier = Modifier
-                    .padding(horizontal = 8.dp, vertical = 4.dp)
+                    .padding(bottom = 4.dp)
                     .sharedElement(
                         rememberSharedContentState(key = "$extractedText-value"),
                         animatedVisibilityScope = this@AnimatedVisibility
                     ),
                 text = "${stringResource(R.string.personal_records)}: ${data.maxValue}",
                 color = MaterialTheme.colorScheme.onSecondary,
-                style = MaterialTheme.typography.titleMedium
+                style = MaterialTheme.typography.labelMedium
             )
         }
     }
@@ -251,31 +263,43 @@ fun ExerciseHistoryCard(
     Column(
         modifier = modifier
             .fillMaxWidth()
-            .padding(16.dp)
             .background(
                 MaterialTheme.colorScheme.secondary,
-                RoundedCornerShape(16.dp)
-            ),
-        verticalArrangement = Arrangement.spacedBy(20.dp),
+                RoundedCornerShape(8.dp)
+            )
+            .border(1.dp, MaterialTheme.colorScheme.surfaceContainer, RoundedCornerShape(8.dp))
+            .padding(8.dp),
+        verticalArrangement = Arrangement.spacedBy(4.dp),
     ) {
-        Text(
-            modifier = Modifier.padding(start = 16.dp),
-            text = data.workoutName,
-            color = MaterialTheme.colorScheme.onSecondary,
-            fontWeight = FontWeight.Bold,
-            style = MaterialTheme.typography.titleMedium
-        )
-        Text(
-            modifier = Modifier.padding(start = 16.dp),
-            text = data.lastPerformed,
-            color = MaterialTheme.colorScheme.onSecondary,
-            fontWeight = FontWeight.Bold,
-            style = MaterialTheme.typography.titleMedium
-        )
-
         Row(
             modifier = Modifier.fillMaxWidth(),
-            horizontalArrangement = Arrangement.SpaceAround
+            horizontalArrangement = Arrangement.SpaceBetween,
+            verticalAlignment = Alignment.CenterVertically
+        ) {
+            Text(
+                text = data.workoutName,
+                color = MaterialTheme.colorScheme.onSecondary,
+                fontWeight = FontWeight.Bold,
+                style = MaterialTheme.typography.titleLarge
+            )
+            Text(
+                text = data.lastPerformed,
+                color = MaterialTheme.colorScheme.onSecondary,
+                fontWeight = FontWeight.Bold,
+                style = MaterialTheme.typography.labelMedium
+            )
+        }
+        CommonDivider(
+            modifier = Modifier
+                .padding(0.dp)
+                .fillMaxWidth(),
+            color = MaterialTheme.colorScheme.onSecondary
+        )
+        Row(
+            modifier = Modifier
+                .fillMaxWidth()
+                .padding(4.dp),
+            horizontalArrangement = Arrangement.SpaceBetween
         ) {
             Column {
                 Text(
@@ -287,11 +311,10 @@ fun ExerciseHistoryCard(
                 Text(
                     text = data.setsPerformed,
                     color = MaterialTheme.colorScheme.onSecondary,
-                    fontWeight = FontWeight.Bold,
                     style = MaterialTheme.typography.bodyMedium
                 )
             }
-            Column {
+            Column(modifier = Modifier) {
                 Text(
                     text = stringResource(R.string.one_rep_max_text),
                     color = MaterialTheme.colorScheme.onSecondary,
