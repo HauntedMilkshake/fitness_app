@@ -3,6 +3,7 @@ package bg.zahov.app.data.model.state
 import bg.zahov.app.data.model.LineChartData
 import bg.zahov.app.data.model.MeasurementType
 import bg.zahov.app.data.model.Sets
+import bg.zahov.fitness.app.R
 import java.time.LocalDateTime
 
 /**
@@ -18,15 +19,15 @@ data class ExerciseHistoryData(
     val loading: Boolean = true,
     val exerciseHistory: List<ExerciseHistoryInfo> = listOf(),
     val oneRepMaxEst: LineChartData = LineChartData(
-        text = "One Rep Max Estimate",
+        text = R.string.one_rep_max_text,
         suffix = MeasurementType.Weight
     ),
     val maxVolume: LineChartData = LineChartData(
-        text = "Max Volume",
+        text = R.string.max_volume,
         suffix = MeasurementType.Weight
     ),
     val maxRep: LineChartData = LineChartData(
-        text = "Max Rep",
+        text = R.string.max_weight,
         suffix = MeasurementType.Reps
     ),
 )
