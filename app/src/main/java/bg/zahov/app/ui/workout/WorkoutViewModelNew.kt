@@ -191,6 +191,18 @@ class WorkoutViewModelNew(
         getTemplateExercises()
     }
 
+    /**
+     * Determines the current time of day and returns the corresponding [TimeOfDay] value.
+     *
+     * The function evaluates the current hour using [LocalDateTime.now] and maps it
+     * to a specific time of day:
+     * - 4 AM to 11 AM -> [TimeOfDay.MORNING]
+     * - 12 PM to 4 PM -> [TimeOfDay.NOON]
+     * - 5 PM to 8 PM -> [TimeOfDay.AFTERNOON]
+     * - Any other hour -> [TimeOfDay.NIGHT]
+     *
+     * @return The appropriate [TimeOfDay] based on the current hour.
+     */
     private fun calculateWorkoutPrefix(): TimeOfDay {
         return when (LocalDateTime.now().hour) {
             in 4..11 -> TimeOfDay.MORNING
