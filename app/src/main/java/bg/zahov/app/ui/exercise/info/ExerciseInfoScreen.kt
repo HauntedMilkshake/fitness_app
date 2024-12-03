@@ -136,6 +136,7 @@ fun SharedTransitionScope.ChartDetails(
             contentAlignment = Alignment.Center
         ) {
             chart?.let {
+                val extractedText = it.textId?.let { it1 -> stringResource(it1) }?: ""
                 Box(
                     modifier = Modifier
                         .fillMaxSize()
@@ -145,7 +146,7 @@ fun SharedTransitionScope.ChartDetails(
                 Column(
                     modifier = Modifier
                         .sharedBounds(
-                            sharedContentState = rememberSharedContentState(key = "${it.text}-bound"),
+                            sharedContentState = rememberSharedContentState(key = "$extractedText-bound"),
                             animatedVisibilityScope = this@AnimatedContent,
                             clipInOverlayDuringTransition = OverlayClip(RoundedCornerShape(8.dp)),
                             resizeMode = SharedTransitionScope.ResizeMode.RemeasureToBounds
@@ -161,10 +162,10 @@ fun SharedTransitionScope.ChartDetails(
                         modifier = Modifier
                             .padding(horizontal = 8.dp, vertical = 4.dp)
                             .sharedElement(
-                                rememberSharedContentState(key = it.text),
+                                rememberSharedContentState(key = "$extractedText-text"),
                                 animatedVisibilityScope = this@AnimatedContent
                             ),
-                        text = it.text, color = MaterialTheme.colorScheme.onSecondary,
+                        text = extractedText, color = MaterialTheme.colorScheme.onSecondary,
                         style = MaterialTheme.typography.titleMedium
                     )
                     CommonLineChart(data = it)
@@ -172,7 +173,7 @@ fun SharedTransitionScope.ChartDetails(
                         modifier = Modifier
                             .padding(horizontal = 8.dp, vertical = 4.dp)
                             .sharedElement(
-                                rememberSharedContentState(key = it.maxValue),
+                                rememberSharedContentState(key = "$extractedText-value"),
                                 animatedVisibilityScope = this@AnimatedContent
                             ),
                         text = "${stringResource(R.string.personal_records)}: ${it.maxValue}",
@@ -200,10 +201,11 @@ fun SharedTransitionScope.ExerciseChartInfo(
         exit = fadeOut() + scaleOut(),
         modifier = modifier.animateContentSize()
     ) {
+        val extractedText = data.textId?.let { stringResource(it) }?: ""
         Column(
             modifier = Modifier
                 .sharedBounds(
-                    rememberSharedContentState(key = "${data.text}-bound"),
+                    rememberSharedContentState(key = "$extractedText-bound"),
                     animatedVisibilityScope = this@AnimatedVisibility,
                     enter = fadeIn(),
                     exit = fadeOut(),
@@ -220,17 +222,17 @@ fun SharedTransitionScope.ExerciseChartInfo(
                 modifier = Modifier
                     .padding(horizontal = 8.dp, vertical = 4.dp)
                     .sharedElement(
-                        rememberSharedContentState(key = data.text),
+                        rememberSharedContentState(key = "$extractedText-text"),
                         animatedVisibilityScope = this@AnimatedVisibility
                     ),
-                text = data.text, color = MaterialTheme.colorScheme.onSecondary,
+                text = extractedText, color = MaterialTheme.colorScheme.onSecondary,
                 style = MaterialTheme.typography.titleMedium
             )
             Text(
                 modifier = Modifier
                     .padding(horizontal = 8.dp, vertical = 4.dp)
                     .sharedElement(
-                        rememberSharedContentState(key = data.maxValue),
+                        rememberSharedContentState(key = "$extractedText-value"),
                         animatedVisibilityScope = this@AnimatedVisibility
                     ),
                 text = "${stringResource(R.string.personal_records)}: ${data.maxValue}",
