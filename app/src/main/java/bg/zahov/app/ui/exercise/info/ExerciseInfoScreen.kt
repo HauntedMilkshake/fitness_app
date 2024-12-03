@@ -1,5 +1,6 @@
 package bg.zahov.app.ui.exercise.info
 
+import android.util.Log
 import androidx.compose.animation.AnimatedContent
 import androidx.compose.animation.AnimatedVisibility
 import androidx.compose.animation.ExperimentalSharedTransitionApi
@@ -43,6 +44,8 @@ import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import androidx.lifecycle.viewmodel.compose.viewModel
 import bg.zahov.app.data.model.LineChartData
 import bg.zahov.app.data.model.state.ExerciseHistoryInfo
+import bg.zahov.app.data.model.state.SharedElementKey
+import bg.zahov.app.ui.authentication.login.LoginContent
 import bg.zahov.app.ui.custom.CommonLineChart
 import bg.zahov.app.ui.theme.FitnessTheme
 import bg.zahov.fitness.app.R
@@ -137,6 +140,7 @@ fun SharedTransitionScope.ChartDetails(
             contentAlignment = Alignment.Center
         ) {
             chart?.let {
+                val extractedText = it.textId?.let { it1 -> stringResource(it1) }?: ""
                 Box(
                     modifier = Modifier
                         .fillMaxSize()
@@ -146,7 +150,7 @@ fun SharedTransitionScope.ChartDetails(
                 Column(
                     modifier = Modifier
                         .sharedBounds(
-                            sharedContentState = rememberSharedContentState(key = "${it.text}-bound"),
+                            sharedContentState = rememberSharedContentState(key = SharedElementKey.BOUND.generateKey(extractedText)),
                             animatedVisibilityScope = this@AnimatedContent,
                             clipInOverlayDuringTransition = OverlayClip(RoundedCornerShape(8.dp)),
                             resizeMode = SharedTransitionScope.ResizeMode.RemeasureToBounds
@@ -162,10 +166,10 @@ fun SharedTransitionScope.ChartDetails(
                         modifier = Modifier
                             .padding(horizontal = 8.dp, vertical = 4.dp)
                             .sharedElement(
-                                rememberSharedContentState(key = it.text),
+                                rememberSharedContentState(key = SharedElementKey.TEXT.generateKey(extractedText)),
                                 animatedVisibilityScope = this@AnimatedContent
                             ),
-                        text = it.text, color = MaterialTheme.colorScheme.onSecondary,
+                        text = extractedText, color = MaterialTheme.colorScheme.onSecondary,
                         style = MaterialTheme.typography.titleMedium
                     )
                     CommonLineChart(data = it)
@@ -173,7 +177,7 @@ fun SharedTransitionScope.ChartDetails(
                         modifier = Modifier
                             .padding(horizontal = 8.dp, vertical = 4.dp)
                             .sharedElement(
-                                rememberSharedContentState(key = it.maxValue),
+                                rememberSharedContentState(key = SharedElementKey.VALUE.generateKey(extractedText)),
                                 animatedVisibilityScope = this@AnimatedContent
                             ),
                         text = "${stringResource(R.string.personal_records)}: ${it.maxValue}",
@@ -201,10 +205,11 @@ fun SharedTransitionScope.ExerciseChartInfo(
         exit = fadeOut() + scaleOut(),
         modifier = modifier.animateContentSize()
     ) {
+        val extractedText = data.textId?.let { stringResource(it) }?: ""
         Column(
             modifier = Modifier
                 .sharedBounds(
-                    rememberSharedContentState(key = "${data.text}-bound"),
+                    rememberSharedContentState(key = SharedElementKey.BOUND.generateKey(extractedText)),
                     animatedVisibilityScope = this@AnimatedVisibility,
                     enter = fadeIn(),
                     exit = fadeOut(),
@@ -221,17 +226,17 @@ fun SharedTransitionScope.ExerciseChartInfo(
                 modifier = Modifier
                     .padding(horizontal = 8.dp, vertical = 4.dp)
                     .sharedElement(
-                        rememberSharedContentState(key = data.text),
+                        rememberSharedContentState(key = SharedElementKey.TEXT.generateKey(extractedText)),
                         animatedVisibilityScope = this@AnimatedVisibility
                     ),
-                text = data.text, color = MaterialTheme.colorScheme.onSecondary,
+                text = extractedText, color = MaterialTheme.colorScheme.onSecondary,
                 style = MaterialTheme.typography.titleMedium
             )
             Text(
                 modifier = Modifier
                     .padding(horizontal = 8.dp, vertical = 4.dp)
                     .sharedElement(
-                        rememberSharedContentState(key = data.maxValue),
+                        rememberSharedContentState(key = SharedElementKey.VALUE.generateKey(extractedText)),
                         animatedVisibilityScope = this@AnimatedVisibility
                     ),
                 text = "${stringResource(R.string.personal_records)}: ${data.maxValue}",
@@ -298,7 +303,7 @@ fun ExerciseHistoryCard(
                     style = MaterialTheme.typography.labelMedium
                 )
                 Text(
-                    text = data.oneRepMaxes,
+                    text = data.oneRepMaxes.joinToString(separator = "\n"),
                     color = MaterialTheme.colorScheme.onSecondary,
                     style = MaterialTheme.typography.bodyMedium
                 )

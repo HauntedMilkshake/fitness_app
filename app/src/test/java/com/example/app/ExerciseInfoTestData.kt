@@ -4,6 +4,7 @@ import bg.zahov.app.data.model.LineChartData
 import bg.zahov.app.data.model.MeasurementType
 import bg.zahov.app.data.model.state.ExerciseHistoryInfo
 import com.github.mikephil.charting.data.Entry
+import bg.zahov.fitness.app.R
 
 object ExerciseInfoTestData {
     val testHistory = listOf(
@@ -22,7 +23,7 @@ object ExerciseInfoTestData {
     )
     val testOneRepMaxEst =
         LineChartData(
-            text = "One Rep Max Estimate",
+            textId = R.string.one_rep_max_text,
             maxValue = 100f,
             minValue = 50f,
             suffix = MeasurementType.Weight,
@@ -35,7 +36,7 @@ object ExerciseInfoTestData {
             )
         )
     val testMaxVolume = LineChartData(
-        text = "Max Volume",
+        textId = R.string.max_volume,
         maxValue = 20f,
         minValue = 5f,
         suffix = MeasurementType.Weight,
@@ -48,7 +49,7 @@ object ExerciseInfoTestData {
         )
     )
     val testMaxRep = LineChartData(
-        text = "Max Rep",
+        textId = R.string.max_weight,
         maxValue = 500f,
         minValue = 100f,
         suffix = MeasurementType.Weight,

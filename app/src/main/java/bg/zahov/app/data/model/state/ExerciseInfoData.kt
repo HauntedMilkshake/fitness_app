@@ -19,15 +19,15 @@ data class ExerciseHistoryData(
     val loading: Boolean = true,
     val exerciseHistory: List<ExerciseHistoryInfo> = listOf(),
     val oneRepMaxEst: LineChartData = LineChartData(
-        text = R.string.one_rep_max_text,
+        textId = R.string.one_rep_max_title_text,
         suffix = MeasurementType.Weight
     ),
     val maxVolume: LineChartData = LineChartData(
-        text = R.string.max_volume,
+        textId = R.string.max_volume,
         suffix = MeasurementType.Weight
     ),
     val maxRep: LineChartData = LineChartData(
-        text = R.string.max_weight,
+        textId = R.string.max_weight,
         suffix = MeasurementType.Reps
     ),
 )
@@ -47,6 +47,27 @@ data class ExerciseHistoryInfo(
     val lastPerformed: String = "",
     val sets: List<Sets> = listOf(),
     val setsPerformed: String = "",
-    val oneRepMaxes: String = "",
+    val oneRepMaxes: List<String> = listOf(),
     val date: LocalDateTime = LocalDateTime.now(),
 )
+
+/**
+ * Enum class representing keys for shared elements in the ExerciseChartInfo UI.
+ */
+enum class SharedElementKey(private val keySuffix: String) {
+    BOUND("-bound"),
+    TEXT("-text"),
+    VALUE("-value");
+
+    /**
+     * Generates the full key by appending the suffix to a given base key.
+     * If the base key is null or empty, a fallback key is generated internally.
+     *
+     * @param baseKey The base key to which the suffix will be appended.
+     * @return The full key for the shared element.
+     */
+    fun generateKey(baseKey: String?): String {
+        val validatedBaseKey = baseKey.takeUnless { it.isNullOrEmpty() } ?: "defaultKey"
+        return "$validatedBaseKey$keySuffix"
+    }
+}

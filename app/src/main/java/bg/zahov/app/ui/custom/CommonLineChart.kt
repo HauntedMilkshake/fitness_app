@@ -40,7 +40,7 @@ fun CommonLineChart(
 
                 description.apply {
                     textColor = extractedTextColor
-                    this.text = data.text
+                    text = data.textId?.let { context.getString(it) }?: ""
                 }
 
                 xAxis.apply {

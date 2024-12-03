@@ -127,7 +127,7 @@ class WorkoutProviderImpl : WorkoutProvider {
                             setsPerformed = previousExercise.sets.joinToString(separator = "\n") {
                                 "${it.secondMetric ?: 0} x ${it.firstMetric}"
                             },
-                            oneRepMaxes = previousExercise.getOneRepMaxes().joinToString("\n"),
+                            oneRepMaxes = previousExercise.getOneRepMaxes(),
                             date = workout1.date
                         )
                     }

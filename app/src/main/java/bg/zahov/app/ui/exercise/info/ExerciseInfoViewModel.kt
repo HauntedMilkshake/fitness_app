@@ -30,34 +30,27 @@ class ExerciseInfoViewModel(private val workoutProvider: WorkoutProvider = Injec
 
     init {
         viewModelScope.launch {
-            collectExerciseHistory()
-        }
-    }
-
-    /**
-     * Collects exercise history from the workout provider and processes it
-     * to update the UI state with transformed data for chart entries.
-     */
-    private suspend fun collectExerciseHistory() {
-        workoutProvider.getExerciseHistory().collect { data ->
-            _uiState.update { old ->
-                old.copy(
-                    exerciseHistory = data,
-                    maxVolume = processMaxVolume(data),
-                    oneRepMaxEst = processOneRepMax(data),
-                    maxRep = processMaxRep(data)
-                )
+            workoutProvider.getExerciseHistory().collect { data ->
+                _uiState.update { old ->
+                    old.copy(
+                        exerciseHistory = data,
+                        maxVolume = processMaxVolume(old.maxVolume, data),
+                        oneRepMaxEst = processOneRepMax(old.oneRepMaxEst, data),
+                        maxRep = processMaxRep(old.maxRep, data)
+                    )
+                }
             }
         }
     }
 
     /**
-     * Processes the fetched data to calculate max volume chart entries.
+     * Processes the data to compute max volume chart entries.
      *
-     * @param data List of exercise sets grouped by date.
-     * @return A state object containing the max, min, and chart entries for max volume.
+     * @param currentState The current state of max volume.
+     * @param data The exercise history data.
+     * @return An updated state for max volume.
      */
-    private fun processMaxVolume(data: List<ExerciseHistoryInfo>): LineChartData {
+    private fun processMaxVolume(currentState: LineChartData, data: List<ExerciseHistoryInfo>): LineChartData {
         val maxVolume = data.flatMap { sets ->
             sets.sets.map {
                 Entry(
@@ -65,8 +58,8 @@ class ExerciseInfoViewModel(private val workoutProvider: WorkoutProvider = Injec
                     (it.secondMetric ?: 0).toFloat()
                 )
             }
-        }
-        return LineChartData(
+        }.sortedBy { it.x }
+        return currentState.copy(
             maxValue = maxVolume.maxOfOrNull { it.y } ?: 0f,
             minValue = maxVolume.minOfOrNull { it.y } ?: 0f,
             list = maxVolume
@@ -74,19 +67,22 @@ class ExerciseInfoViewModel(private val workoutProvider: WorkoutProvider = Injec
     }
 
     /**
-     * Processes the fetched data to calculate one-rep max chart entries.
+     * Processes the data to compute one-rep max chart entries.
      *
-     * @param data List of exercise sets grouped by date.
-     * @return A state object containing the max, min, and chart entries for one-rep max.
+     * @param currentState The current state of one-rep max.
+     * @param data The exercise history data.
+     * @return An updated state for one-rep max.
      */
-    private fun processOneRepMax(data: List<ExerciseHistoryInfo>): LineChartData {
-        val oneRepMax = data.map { sets ->
-            Entry(
-                sets.date.dayOfMonth.toFloat(),
-                sets.oneRepMaxes.toFloat()
-            )
-        }
-        return LineChartData(
+    private fun processOneRepMax(currentState: LineChartData, data: List<ExerciseHistoryInfo>): LineChartData {
+        val oneRepMax = data.flatMap { sets ->
+            sets.oneRepMaxes.map {
+                Entry(
+                    sets.date.dayOfMonth.toFloat(),
+                    it.toFloat()
+                )
+            }
+        }.sortedBy { it.x }
+        return currentState.copy(
             maxValue = oneRepMax.maxOfOrNull { it.y } ?: 0f,
             minValue = oneRepMax.minOfOrNull { it.y } ?: 0f,
             list = oneRepMax
@@ -94,12 +90,13 @@ class ExerciseInfoViewModel(private val workoutProvider: WorkoutProvider = Injec
     }
 
     /**
-     * Processes the fetched data to calculate max repetition chart entries.
+     * Processes the data to compute max repetition chart entries.
      *
-     * @param data List of exercise sets grouped by date.
-     * @return A state object containing the max, min, and chart entries for max repetition.
+     * @param currentState The current state of max repetitions.
+     * @param data The exercise history data.
+     * @return An updated state for max repetitions.
      */
-    private fun processMaxRep(data: List<ExerciseHistoryInfo>): LineChartData {
+    private fun processMaxRep(currentState: LineChartData, data: List<ExerciseHistoryInfo>): LineChartData {
         val maxRep = data.flatMap { sets ->
             sets.sets.map {
                 Entry(
@@ -107,12 +104,11 @@ class ExerciseInfoViewModel(private val workoutProvider: WorkoutProvider = Injec
                     ((it.secondMetric ?: 0).toDouble() * (it.firstMetric ?: 0.0)).toFloat()
                 )
             }
-        }
-        return LineChartData(
+        }.sortedBy { it.x }
+        return currentState.copy(
             maxValue = maxRep.maxOfOrNull { it.y } ?: 0f,
             minValue = maxRep.minOfOrNull { it.y } ?: 0f,
             list = maxRep
         )
     }
-
 }
