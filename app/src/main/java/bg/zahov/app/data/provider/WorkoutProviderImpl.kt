@@ -20,7 +20,6 @@ import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.StateFlow
 import kotlinx.coroutines.flow.mapLatest
 import kotlinx.coroutines.flow.mapNotNull
-import kotlinx.coroutines.flow.take
 import java.time.LocalDate
 import java.time.LocalDateTime
 import java.time.format.DateTimeFormatter
@@ -166,16 +165,12 @@ class WorkoutProviderImpl : WorkoutProvider {
 
     /**
      * Queries the past workouts and converts it to a [HistoryInfoWorkout]
-     * @param workoutId
+     * @param workout
      * @see HistoryInfoWorkout
      * @see toHistoryInfoWorkout
      */
-    override suspend fun setClickedHistoryWorkout(workoutId: String) {
-        getPastWorkouts().take(1).collect { workouts ->
-            workouts.find { workout -> workout.id == workoutId }?.let { result ->
-                _clickedPastWorkout.value = result.toHistoryInfoWorkout()
-            }
-        }
+    override suspend fun setClickedHistoryWorkout(workout: Workout) {
+        _clickedPastWorkout.value = workout.toHistoryInfoWorkout()
     }
 
     /**

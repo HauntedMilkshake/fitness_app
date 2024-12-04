@@ -44,11 +44,11 @@ interface WorkoutProvider {
     )
 
     /**
-     * Using the id, queries workouts performed in the past and stores the found value
+     * converts the workout to [HistoryInfoWorkout] and workout
      *
-     * @param workoutId the id of the workout we want to find
+     * @param workout the workout we want to change
      */
-    suspend fun setClickedHistoryWorkout(workoutId: String)
+    suspend fun setClickedHistoryWorkout(workout: Workout)
 
     /**
      * Retrieves the list of template workouts mapped for the ui of the appropriate screen from the repository.

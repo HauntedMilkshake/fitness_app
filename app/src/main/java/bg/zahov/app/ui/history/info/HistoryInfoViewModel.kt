@@ -1,6 +1,6 @@
 package bg.zahov.app.ui.history.info
 
-import bg.zahov.fitness.app.R
+import android.util.Log
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
 import bg.zahov.app.Inject
@@ -10,6 +10,7 @@ import bg.zahov.app.data.model.Workout
 import bg.zahov.app.data.model.WorkoutState
 import bg.zahov.app.data.provider.WorkoutStateManager
 import bg.zahov.app.data.provider.model.HistoryInfoWorkout
+import bg.zahov.fitness.app.R
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.StateFlow
 import kotlinx.coroutines.flow.update
@@ -32,9 +33,11 @@ class HistoryInfoViewModel(
     private val _uiState = MutableStateFlow(HistoryInfoWorkout())
     val uiState: StateFlow<HistoryInfoWorkout> = _uiState
 
-    private var templates: MutableList<Workout> = mutableListOf()
-    private var pastWorkouts: MutableList<Workout> = mutableListOf()
-    private var currentWorkoutState: WorkoutState? = null
+    private var templates: List<Workout> = listOf()
+
+    private var pastWorkouts: List<Workout> = listOf()
+
+    private val currentWorkoutState: WorkoutState? = null
 
     /**
      * Initializes the ViewModel by collecting template workouts, the current workout state,
@@ -44,21 +47,17 @@ class HistoryInfoViewModel(
         viewModelScope.launch {
             launch {
                 workoutProvider.getTemplateWorkouts().collect {
-                    templates = it.toMutableList()
+                    templates = it
                 }
             }
             launch {
                 workoutProvider.getPastWorkouts().collect {
-                    pastWorkouts = it.toMutableList()
-                }
-            }
-            launch {
-                workoutStateProvider.state.collect {
-                    currentWorkoutState = it
+                    pastWorkouts = it
                 }
             }
             launch {
                 workoutProvider.clickedPastWorkout.collect {
+                    Log.d("clicked workout", it.toString())
                     _uiState.update { old ->
                         old.copy(
                             id = it.id,
@@ -76,9 +75,9 @@ class HistoryInfoViewModel(
         }
     }
 
-    private fun getCorrespondingWorkout(): Workout? =
-        pastWorkouts.find { it.id == _uiState.value.id }
-
+    private fun getCorrespondingWorkout(): Workout? {
+        return pastWorkouts.find { it.id == _uiState.value.id }
+    }
 
     /**
      * Deletes the current workout from the history.
@@ -100,22 +99,20 @@ class HistoryInfoViewModel(
      * Displays a toast notification if the workout already exists as a template.
      */
     fun saveAsTemplate() {
-        if (templates.any { it.id == getCorrespondingWorkout()?.id }) {
-            toastManager.showToast(R.string.workout_exists_toast)
-            return
-        }
-
         viewModelScope.launch {
-            getCorrespondingWorkout()?.copy(
-                isTemplate = true,
-                duration = 0L,
-                volume = 0.0,
-                personalRecords = 0
-            )
-                ?.let {
-                    workoutProvider.addTemplateWorkout(it)
-                    templates.add(it)
-                }
+            if (templates.any { it.id == getCorrespondingWorkout()?.id }) {
+                toastManager.showToast(R.string.workout_exists_toast)
+            } else {
+                getCorrespondingWorkout()?.copy(
+                    isTemplate = true,
+                    duration = 0L,
+                    volume = 0.0,
+                    personalRecords = 0
+                )
+                    ?.let {
+                        workoutProvider.addTemplateWorkout(it)
+                    }
+            }
         }
     }
 
