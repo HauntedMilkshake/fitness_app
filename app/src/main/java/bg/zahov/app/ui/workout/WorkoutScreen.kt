@@ -67,68 +67,8 @@ import androidx.compose.ui.text.input.KeyboardType
 import androidx.compose.ui.text.input.TextFieldValue
 import androidx.compose.ui.text.input.VisualTransformation
 import androidx.lifecycle.viewmodel.compose.viewModel
-import bg.zahov.app.data.model.BodyPart
-import bg.zahov.app.data.model.Category
 import bg.zahov.app.data.model.SetType
-import bg.zahov.app.data.model.Sets
-import bg.zahov.app.util.generateRandomId
 import kotlinx.coroutines.delay
-
-/**
- * A sealed class representing a workout entry, which can be either an exercise or a set
- *
- * A list of workoutEntry would look something like:
- * List<WorkoutEntry> { Exercise1, Set1ForExercise1, Set2ForExercise1, Exercise2, ... etc }
- * where the arrangement of items is important
- *
- * ! Note that this class is defined here only because this file and the view model would
- * be to large to place in a single commit, however to properly showcase this file we
- * need it to be here. In the pull request for the view model this class will be
- * moved to the appropriate place !
- */
-sealed class WorkoutEntry {
-
-    /**
-     * A data class representing an exercise in the workout.
-     *
-     * @property id A unique identifier for the exercise entry, default is generated using [generateRandomId].
-     * @property name The name of the exercise.
-     * @property firstInputColumnVisibility Determines whether the first input column for the exercise is visible. Default is true.
-     * As of now it is not used however for future purposes I decided to leave it here
-     * @property note An optional note related to the exercise. Default is an empty string.
-     * @property bodyPart The body part targeted by the exercise.
-     * @property category The category of the exercise (e.g., strength, endurance, etc.).
-     */
-    data class ExerciseEntry(
-        val id: String = generateRandomId(),
-        val name: String,
-        val firstInputColumnVisibility: Boolean = true,
-        val note: String = "",
-        val bodyPart: BodyPart,
-        val category: Category
-    ) : WorkoutEntry()
-
-    /**
-     * A data class representing a set in the exercise.
-     *
-     * @property id A unique identifier for the set entry, default is generated using [generateRandomId].
-     * @property setType The type of set (e.g., default, warm-up, etc.). Default is [SetType.DEFAULT].
-     * @property firstInputFieldVisibility Determines whether the first input field for the set is visible. Default is true.
-     * @property setNumber The number of the set (e.g., 1, 2, 3...).
-     * @property previousResults The results from the previous set, default is "-//-" indicating no prior results.
-     * @property set The specific set details (e.g., weight, repetitions, etc.).
-     * @property setCompleted Indicates whether the set has been completed. Default is false.
-     */
-    data class SetEntry(
-        val id: String = generateRandomId(),
-        val setType: SetType = SetType.DEFAULT,
-        val firstInputFieldVisibility: Boolean = true,
-        val setNumber: String,
-        val previousResults: String = "-//-",
-        val set: Sets,
-        val setCompleted: Boolean = false
-    ) : WorkoutEntry()
-}
 
 @Composable
 fun WorkoutScreen(
