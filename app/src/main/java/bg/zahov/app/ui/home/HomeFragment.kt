@@ -15,53 +15,31 @@ import androidx.fragment.app.Fragment
 import androidx.fragment.app.viewModels
 import androidx.navigation.fragment.findNavController
 import bg.zahov.app.clearMenu
+import bg.zahov.app.hideTopBar
 import bg.zahov.app.setToolBarTitle
 import bg.zahov.app.showBottomNav
 import bg.zahov.app.showTopBar
 import bg.zahov.fitness.app.R
 
 class HomeFragment : Fragment() {
-    private val homeViewModel: HomeViewModel by viewModels()
     override fun onCreateView(
         inflater: LayoutInflater, container: ViewGroup?, savedInstanceState: Bundle?,
     ): View {
         activity?.showBottomNav()
-        activity?.showTopBar()
-        setupTopBar()
+        activity?.hideTopBar()
         return ComposeView(requireContext()).apply {
             setViewCompositionStrategy(ViewCompositionStrategy.DisposeOnViewTreeLifecycleDestroyed)
             setContent {
-                HomeScreen(homeViewModel)
+                HomeScreen(
+                ) { findNavController().navigate(R.id.home_to_settings) }
             }
         }
     }
 
-    private fun setupTopBar() {
-        (activity as? AppCompatActivity)?.supportActionBar?.setDisplayHomeAsUpEnabled(false)
-        activity?.setToolBarTitle(R.string.profile)
-        activity?.addMenuProvider(object : MenuProvider {
-            override fun onCreateMenu(menu: Menu, menuInflater: MenuInflater) {
-                menu.clear()
-                menuInflater.inflate(R.menu.menu_toolbar_home, menu)
-            }
-
-            override fun onMenuItemSelected(menuItem: MenuItem): Boolean {
-                return when (menuItem.itemId) {
-                    R.id.settings -> {
-                        findNavController().navigate(R.id.home_to_settings)
-                        true
-                    }
-
-                    else -> false
-                }
-            }
-        }, viewLifecycleOwner)
-    }
 
     override fun onResume() {
         super.onResume()
         activity?.showBottomNav()
-        setupTopBar()
     }
 
     override fun onPause() {
