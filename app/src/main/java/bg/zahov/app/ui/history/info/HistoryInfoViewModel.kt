@@ -1,6 +1,5 @@
 package bg.zahov.app.ui.history.info
 
-import android.util.Log
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
 import bg.zahov.app.Inject
@@ -57,7 +56,6 @@ class HistoryInfoViewModel(
             }
             launch {
                 workoutProvider.clickedPastWorkout.collect {
-                    Log.d("clicked workout", it.toString())
                     _uiState.update { old ->
                         old.copy(
                             id = it.id,
