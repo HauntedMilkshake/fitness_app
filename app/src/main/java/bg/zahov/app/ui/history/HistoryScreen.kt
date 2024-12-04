@@ -50,7 +50,7 @@ fun HistoryScreen(historyViewModel: HistoryViewModel = viewModel(), onItemClick:
 @Composable
 fun HistoryContent(
     workouts: List<HistoryWorkout>,
-    onItemClick: (String) -> Unit
+    onItemClick: (String) -> Unit,
 ) {
     val animationDuration = integerResource(R.integer.animation_duration_medium)
     FitnessTheme {
@@ -102,7 +102,7 @@ fun Workout(item: HistoryWorkout, onItemClick: (String) -> Unit) {
     ) {
         Text(
             text = item.name,
-            color = MaterialTheme.colorScheme.onSecondary,
+            color = MaterialTheme.colorScheme.onBackground,
             maxLines = 1,
             overflow = TextOverflow.Ellipsis,
             style = MaterialTheme.typography.titleMedium,
@@ -113,7 +113,7 @@ fun Workout(item: HistoryWorkout, onItemClick: (String) -> Unit) {
             text = item.date,
             maxLines = 1,
             overflow = TextOverflow.Ellipsis,
-            color = MaterialTheme.colorScheme.onPrimary,
+            color = MaterialTheme.colorScheme.onBackground,
             style = MaterialTheme.typography.bodyLarge
         )
         Row(
@@ -163,18 +163,18 @@ fun Workout(item: HistoryWorkout, onItemClick: (String) -> Unit) {
         ) {
             Text(
                 text = stringResource(R.string.exercise),
-                color = MaterialTheme.colorScheme.onSecondary,
+                color = MaterialTheme.colorScheme.onPrimaryContainer,
                 style = MaterialTheme.typography.bodyLarge
             )
             Text(
                 text = stringResource(R.string.best_set),
-                color = MaterialTheme.colorScheme.onSecondary,
+                color = MaterialTheme.colorScheme.onPrimaryContainer,
                 style = MaterialTheme.typography.bodyLarge
             )
         }
 
         for (i in item.exercises.indices) {
-            ExerciseWithSets(exerciseName = item.exercises[i], bestSet = item.exercises[i])
+            ExerciseWithSets(exerciseName = item.exercises[i], bestSet = item.bestSets[i])
         }
     }
 }
@@ -189,7 +189,7 @@ fun ExerciseWithSets(exerciseName: String, bestSet: String) {
     ) {
         Text(
             text = exerciseName,
-            color = MaterialTheme.colorScheme.onPrimary,
+            color = MaterialTheme.colorScheme.onBackground,
             style = MaterialTheme.typography.bodyLarge,
             softWrap = true,
             overflow = TextOverflow.Ellipsis,
@@ -198,7 +198,7 @@ fun ExerciseWithSets(exerciseName: String, bestSet: String) {
 
         Text(
             text = bestSet,
-            color = MaterialTheme.colorScheme.onPrimary,
+            color = MaterialTheme.colorScheme.onBackground,
             style = MaterialTheme.typography.bodyLarge,
             overflow = TextOverflow.Ellipsis,
             maxLines = 1,
@@ -217,7 +217,7 @@ fun TextWithLeadingIcon(
     textOverflow: TextOverflow = TextOverflow.Ellipsis,
     iconModifier: Modifier = Modifier,
     iconColor: Color? = null,
-    contentDescription: String? = null
+    contentDescription: String? = null,
 ) {
     Icon(
         modifier = iconModifier,
