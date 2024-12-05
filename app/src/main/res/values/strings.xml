@@ -198,4 +198,9 @@
     <!-- Strings used for exercise screen -->
     <!-- Strings used for content description -->
     <string name="launcher_icon_description">Flexed arm</string>
+    <!-- Strings used for content description -->
+    <!-- Strings used for top app bar-->
+    <string name="back_button">Go Back</string>
+    <string name="menu">Menu</string>
+    <!-- Strings used for top app bar-->
 </resources>
