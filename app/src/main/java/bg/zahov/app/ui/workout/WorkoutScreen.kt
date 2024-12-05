@@ -68,6 +68,7 @@ import androidx.compose.ui.text.input.TextFieldValue
 import androidx.compose.ui.text.input.VisualTransformation
 import androidx.lifecycle.viewmodel.compose.viewModel
 import bg.zahov.app.data.model.SetType
+import bg.zahov.app.ui.unused.WorkoutEntry
 import kotlinx.coroutines.delay
 
 @Composable
