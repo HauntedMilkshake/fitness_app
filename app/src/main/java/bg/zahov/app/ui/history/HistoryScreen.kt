@@ -106,7 +106,7 @@ fun Workout(item: HistoryWorkout, onItemClick: (String) -> Unit) {
     ) {
         Text(
             text = item.name,
-            color = MaterialTheme.colorScheme.onSecondary,
+            color = MaterialTheme.colorScheme.onBackground,
             maxLines = 1,
             overflow = TextOverflow.Ellipsis,
             style = MaterialTheme.typography.titleMedium,
@@ -117,7 +117,7 @@ fun Workout(item: HistoryWorkout, onItemClick: (String) -> Unit) {
             text = item.date,
             maxLines = 1,
             overflow = TextOverflow.Ellipsis,
-            color = MaterialTheme.colorScheme.onPrimary,
+            color = MaterialTheme.colorScheme.onBackground,
             style = MaterialTheme.typography.bodyLarge
         )
 
@@ -136,12 +136,12 @@ fun Workout(item: HistoryWorkout, onItemClick: (String) -> Unit) {
         ) {
             Text(
                 text = stringResource(R.string.exercise),
-                color = MaterialTheme.colorScheme.onSecondary,
+                color = MaterialTheme.colorScheme.onPrimaryContainer,
                 style = MaterialTheme.typography.bodyLarge
             )
             Text(
                 text = stringResource(R.string.best_set),
-                color = MaterialTheme.colorScheme.onSecondary,
+                color = MaterialTheme.colorScheme.onPrimaryContainer,
                 style = MaterialTheme.typography.bodyLarge
             )
         }
@@ -149,6 +149,33 @@ fun Workout(item: HistoryWorkout, onItemClick: (String) -> Unit) {
         for (i in item.exercises.indices) {
             ExerciseWithSets(exerciseName = item.exercises[i], bestSet = item.bestSets[i])
         }
+    }
+}
+
+@Composable
+fun ExerciseWithSets(exerciseName: String, bestSet: String) {
+    Row(
+        modifier = Modifier
+            .fillMaxWidth()
+            .padding(top = 4.dp),
+        horizontalArrangement = Arrangement.SpaceBetween
+    ) {
+        Text(
+            text = exerciseName,
+            color = MaterialTheme.colorScheme.onBackground,
+            style = MaterialTheme.typography.bodyLarge,
+            softWrap = true,
+            overflow = TextOverflow.Ellipsis,
+            maxLines = 1
+        )
+
+        Text(
+            text = bestSet,
+            color = MaterialTheme.colorScheme.onBackground,
+            style = MaterialTheme.typography.bodyLarge,
+            overflow = TextOverflow.Ellipsis,
+            maxLines = 1,
+        )
     }
 }
 
