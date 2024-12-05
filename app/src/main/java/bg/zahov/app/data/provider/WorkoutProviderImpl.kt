@@ -43,8 +43,9 @@ class WorkoutProviderImpl : WorkoutProvider {
     private val exerciseHistory: Flow<List<ExerciseHistoryInfo>>
         get() = _exerciseHistory
 
-    private val _clickedPastWorkout = MutableStateFlow(HistoryInfoWorkout())
-    override val clickedPastWorkout: StateFlow<HistoryInfoWorkout> = _clickedPastWorkout
+    override var clickedPastWorkout: StateFlow<HistoryInfoWorkout> =
+        MutableStateFlow(HistoryInfoWorkout())
+
 
     private val workoutRepo = WorkoutRepositoryImpl.getInstance()
     private val errorHandler = ServiceErrorHandlerImpl.getInstance()
@@ -170,8 +171,9 @@ class WorkoutProviderImpl : WorkoutProvider {
      * @see toHistoryInfoWorkout
      */
     override suspend fun setClickedHistoryWorkout(workout: Workout) {
-        _clickedPastWorkout.value = workout.toHistoryInfoWorkout()
+        (clickedPastWorkout as MutableStateFlow).value = workout.toHistoryInfoWorkout()
     }
+
 
     /**
      * Retrieves a list of start workouts from the template workouts.
