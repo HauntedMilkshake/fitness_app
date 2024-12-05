@@ -1,6 +1,5 @@
 package bg.zahov.app.ui.custom
 
-import android.graphics.Color
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.height
 import androidx.compose.material3.MaterialTheme
@@ -25,7 +24,7 @@ fun CommonLineChart(
     modifier: Modifier = Modifier,
     data: LineChartData
 ) {
-    val color =  MaterialTheme.colorScheme.secondary.toArgb()
+    val extractedTextColor = MaterialTheme.colorScheme.onSecondary.toArgb()
     AndroidView(
         modifier = modifier
             .fillMaxWidth()
@@ -40,20 +39,20 @@ fun CommonLineChart(
                 axisLeft.isEnabled = false
 
                 description.apply {
-                    textColor = color
-                    this.text = context.getString(R.string.measure)
+                    textColor = extractedTextColor
+                    text = data.textId?.let { context.getString(it) }?: ""
                 }
 
                 xAxis.apply {
                     axisMinimum = 1f
                     axisMaximum = LocalDate.now().lengthOfMonth().toFloat()
                     position = XAxis.XAxisPosition.BOTTOM
-                    textColor = color
+                    textColor = extractedTextColor
                     valueFormatter = MonthValueFormatter()
                 }
 
                 axisRight.apply {
-                    textColor = color
+                    textColor = extractedTextColor
                     granularity = 1f
                     valueFormatter = RightAxisValueFormatter(
                         when (data.suffix) {
@@ -66,14 +65,14 @@ fun CommonLineChart(
                 }
 
                 setDrawBorders(true)
-                setBorderColor(color)
+                setBorderColor(extractedTextColor)
                 setBorderWidth(1f)
             }
         },
         update = { chart ->
             chart.data =
                 LineData(LineDataSet(data.list, chart.context.getString(R.string.results)).apply {
-                    valueTextColor = color
+                    valueTextColor = extractedTextColor
                     valueTextSize = 13f
                 })
 
