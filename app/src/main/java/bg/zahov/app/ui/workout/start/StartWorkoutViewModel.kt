@@ -42,7 +42,7 @@ data class StartWorkout(
     val id: String,
     val name: String,
     val date: LocalDateTime,
-    val exercises: List<String>,
+    val exercises: List<Exercise>,
     val note: String = "",
     val personalRecords: String = "0"
 )
@@ -173,28 +173,29 @@ fun StartWorkout.toWorkout(exerciseTemplates: List<Exercise>) = Workout(
     volume = 0.0,
     date = this.date,
     isTemplate = true,
-    exercises = this.exercises.map { exercise ->
-        val regex = """(\d+)\s*x\s*(.*)""".toRegex()
-        val matchResult = regex.find(exercise.trim())
-
-        val (setsCount, name) = if (matchResult != null) {
-            val setsCount = matchResult.groupValues[1].toInt()
-            val name = matchResult.groupValues[2]
-            setsCount to name
-        } else {
-            1 to exercise.trim()
-        }
-
-        val exerciseTemplate = exerciseTemplates.find { it.name == name }
-
-        Exercise(
-            name = name,
-            bodyPart = exerciseTemplate?.bodyPart ?: BodyPart.Other,
-            category = exerciseTemplate?.category ?: Category.None,
-            isTemplate = false,
-            sets = MutableList(setsCount) { Sets(SetType.DEFAULT, null, null) },
-        )
-    },
+    exercises = this.exercises,
+//        .map { exercise ->
+//        val regex = """(\d+)\s*x\s*(.*)""".toRegex()
+//        val matchResult = regex.find(exercise.trim())
+//
+//        val (setsCount, name) = if (matchResult != null) {
+//            val setsCount = matchResult.groupValues[1].toInt()
+//            val name = matchResult.groupValues[2]
+//            setsCount to name
+//        } else {
+//            1 to exercise.trim()
+//        }
+//
+//        val exerciseTemplate = exerciseTemplates.find { it.name == name }
+//
+//        Exercise(
+//            name = name,
+//            bodyPart = exerciseTemplate?.bodyPart ?: BodyPart.Other,
+//            category = exerciseTemplate?.category ?: Category.None,
+//            isTemplate = false,
+//            sets = MutableList(setsCount) { Sets(SetType.DEFAULT, null, null) },
+//        )
+//    },
     note = this.note,
     personalRecords = this.personalRecords.toIntOrNull() ?: 0
 )

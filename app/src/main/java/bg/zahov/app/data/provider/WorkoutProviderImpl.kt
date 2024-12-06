@@ -217,7 +217,8 @@ fun Workout.toStartWorkout(): StartWorkout = StartWorkout(
     id = this.id,
     name = this.name,
     date = this.date,
-    exercises = this.exercises.map { if (it.sets.isNotEmpty()) "${it.sets.size} x " else "" + it.name },
+    exercises = this.exercises,
+//    .map { if (it.sets.isNotEmpty()) "${it.sets.size} x " else "" + it.name },
     note = this.note ?: "",
     personalRecords = this.personalRecords.toString()
 )
