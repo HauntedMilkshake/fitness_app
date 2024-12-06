@@ -45,30 +45,30 @@ import androidx.compose.material3.rememberSwipeToDismissBoxState
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.CompositionLocalProvider
 import androidx.compose.runtime.LaunchedEffect
+import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
-import androidx.compose.ui.Modifier
-import androidx.compose.ui.graphics.Color
-import androidx.compose.ui.res.stringResource
-import androidx.compose.ui.text.style.TextOverflow
-import androidx.compose.ui.unit.dp
-import bg.zahov.app.ui.theme.FitnessTheme
-import bg.zahov.fitness.app.R
-import androidx.compose.runtime.getValue
 import androidx.compose.runtime.saveable.rememberSaveable
 import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
+import androidx.compose.ui.Modifier
+import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.graphics.Shape
 import androidx.compose.ui.graphics.SolidColor
 import androidx.compose.ui.res.painterResource
+import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.text.TextRange
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.input.KeyboardType
 import androidx.compose.ui.text.input.TextFieldValue
 import androidx.compose.ui.text.input.VisualTransformation
+import androidx.compose.ui.text.style.TextOverflow
+import androidx.compose.ui.unit.dp
+import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import androidx.lifecycle.viewmodel.compose.viewModel
 import bg.zahov.app.data.model.SetType
-import bg.zahov.app.ui.unused.WorkoutEntry
+import bg.zahov.app.ui.theme.FitnessTheme
+import bg.zahov.fitness.app.R
 import kotlinx.coroutines.delay
 
 @Composable
@@ -76,8 +76,10 @@ fun WorkoutScreen(
     workoutViewModel: WorkoutViewModel = viewModel(),
     onAddExercise: () -> Unit,
     onReplaceExercise: () -> Unit,
-    onBackPressed: () -> Unit
+    onBackPressed: () -> Unit,
+    onCancel: () -> Unit,
 ) {
+    val state by workoutViewModel.uiState.collectAsStateWithLifecycle()
 
     /**
      * In order to center the items of 2 independent rows we need to have
@@ -92,24 +94,33 @@ fun WorkoutScreen(
     }
 
     WorkoutScreenContent(
-        //placeholder Example for state.name
-        //placeholder workoutPrefix for state.workoutPrefix
-        name = if ("Example".isEmpty()) "workoutPrefix" + "Example" else "Example",
-        note = "",
-        exercises = listOf<WorkoutEntry>(),
+        name = if (state.workoutName.isEmpty() && state.workoutPrefix != TimeOfDay.EMPTY) stringResource(
+            state.workoutPrefix.stringResource
+        ) else state.workoutName,
+        note = state.note,
+        exercises = state.exercises,
         weightValues = weightValues,
         onAddExercise = onAddExercise,
-        onDeleteSet = {},
-        onCancel = {},
-        onNoteChange = {},
-        onExerciseNoteChange = { pos, note -> },
-        onRemoveExercise = {},
+        onDeleteSet = { workoutViewModel.removeSet(it) },
+        onCancel = {
+            workoutViewModel.cancel()
+            onCancel()
+        },
+        onNoteChange = { workoutViewModel.changeNote(it) },
+        onExerciseNoteChange = { pos, note -> workoutViewModel.changeExerciseNote(pos, note) },
+        onRemoveExercise = { workoutViewModel.removeExercise(it) },
         onReplaceExercise = {
+            workoutViewModel.replaceExercise(it)
             onReplaceExercise()
         },
-        onAddSet = { },
-        onInputFieldChanged = { pos, value, type -> },
-        onSetTypeChange = { pos, type -> }
+        onAddSet = { workoutViewModel.addSet(it) },
+        onInputFieldChanged = { pos, value, type ->
+            when (type) {
+                SetField.WEIGHT -> workoutViewModel.onWeightChange(pos, value)
+                SetField.REPETITIONS -> workoutViewModel.onRepsChange(pos, value)
+            }
+        },
+        onSetTypeChange = { pos, type -> workoutViewModel.onSetTypeChanged(pos, type) }
     )
 }
 
@@ -131,7 +142,6 @@ fun WorkoutScreenContent(
     onInputFieldChanged: (Int, String, SetField) -> Unit,
     onSetTypeChange: (Int, SetType) -> Unit,
 ) {
-
     FitnessTheme {
         Column(
             modifier = Modifier
@@ -212,7 +222,7 @@ fun WorkoutScreenContent(
                                         )
                                     },
                                     onChangeSetType = { type -> onSetTypeChange(index, type) },
-                                    onDeleteSet = { onDeleteSet(index) },
+                                    onDeleteSet = { onDeleteSet(index) }
                                 )
                             }
                         }
@@ -255,7 +265,7 @@ fun WorkoutButton(
     colors: ButtonColors = ButtonDefaults.buttonColors(),
     shape: Shape = RoundedCornerShape(4.dp),
     elevation: ButtonElevation? = ButtonDefaults.buttonElevation(defaultElevation = 8.dp),
-    content: @Composable () -> Unit
+    content: @Composable () -> Unit,
 ) {
     Button(
         modifier = modifier
@@ -272,14 +282,14 @@ fun WorkoutButton(
 
 /**
  * generic text field used for the note of the workout and all
- * of the notes of the exercies
+ * of the notes of the exercises
  */
 @Composable
 fun WorkoutScreenInputField(
     modifier: Modifier = Modifier,
     value: String,
     label: @Composable (() -> Unit)? = null,
-    onValueChanged: (String) -> Unit
+    onValueChanged: (String) -> Unit,
 ) {
     TextField(
         modifier = modifier,
@@ -321,7 +331,7 @@ fun Exercise(
     onAddSet: () -> Unit,
     onExerciseNoteChange: (String) -> Unit,
     onReplaceExercise: () -> Unit,
-    onRemoveExercise: () -> Unit
+    onRemoveExercise: () -> Unit,
 ) {
     var isDropDownExpanded by rememberSaveable {
         mutableStateOf(false)
@@ -431,7 +441,7 @@ fun Exercise(
 fun SetInputField(
     modifier: Modifier = Modifier,
     value: String,
-    onValueChanged: (String) -> Unit
+    onValueChanged: (String) -> Unit,
 ) {
     val customTextSelectionColors =
         TextSelectionColors(handleColor = Color.Transparent, backgroundColor = Color.Transparent)
@@ -476,7 +486,7 @@ fun SetInputField(
 fun SetColumnText(
     modifier: Modifier = Modifier,
     columnText: String,
-    color: Color = MaterialTheme.colorScheme.onSecondaryContainer
+    color: Color = MaterialTheme.colorScheme.onSecondaryContainer,
 ) {
     Text(
         modifier = modifier.padding(bottom = 8.dp),
@@ -499,7 +509,7 @@ fun WorkoutSet(
     floatArrangement: Array<Float>,
     onInputFieldChanged: (String, SetField) -> Unit,
     onChangeSetType: (SetType) -> Unit,
-    onDeleteSet: () -> Unit
+    onDeleteSet: () -> Unit,
 ) {
     var isRemoved by remember {
         mutableStateOf(false)
@@ -533,7 +543,6 @@ fun WorkoutSet(
             weight = weight,
             reps = reps,
             floatArrangement = floatArrangement,
-//            weightValues,
             onInputFieldChanged = { value, type -> onInputFieldChanged(value, type) },
             onChangeSetType = { onChangeSetType(it) }
         )
@@ -549,7 +558,7 @@ fun WorkoutSetRow(
     reps: String,
     floatArrangement: Array<Float>,
     onInputFieldChanged: (String, SetField) -> Unit,
-    onChangeSetType: (SetType) -> Unit
+    onChangeSetType: (SetType) -> Unit,
 ) {
     var isDropDownExpanded by remember {
         mutableStateOf(false)
@@ -615,7 +624,7 @@ fun DropDown(
     onClose: () -> Unit,
     onFirstOption: () -> Unit,
     onSecondOption: () -> Unit,
-    onThirdOption: () -> Unit
+    onThirdOption: () -> Unit,
 ) {
     Column(
         modifier = modifier.background(color = Color.Transparent),

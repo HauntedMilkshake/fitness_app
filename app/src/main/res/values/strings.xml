@@ -103,11 +103,10 @@
     <!-- Strings used for start workout screen   -->
     <string name="last_performed">Last performed: %1$s</string>
     <!-- Strings used for workout fragment    -->
-<!--    "Morning", "Noon", "Afternoon", "Night"-->
-    <string name="afternoon_workout">Afternoon workout</string>
-    <string name="night_workout">Night workout</string>
-    <string name="morning_workout">Morning workout</string>
-    <string name="noon_workout">Noon workout</string>
+    <string name="afternoon_workout">Afternoon</string>
+    <string name="night_workout">Night</string>
+    <string name="morning_workout">Morning</string>
+    <string name="noon_workout">Noon</string>
     <string name="finish_workout"><font color="#3D8BC9">Finish</font></string>
     <string name="cancel_workout">cancel workout</string>
     <string name="edit_workout">Edit</string>
@@ -158,7 +157,7 @@
     <string name="max_volume">Max volume</string>
     <string name="max_weight">Max weight</string>
     <string name="history_measurement">HISTORY</string>
-    <string name="application_warning_text">Due to service errors we will be closing\nthe application in exactly:</string>
+    <string name="application_warning_text">Due to service errors we will be closing the application in exactly:</string>
     <string name="workouts_for_month">%1$s workouts</string>
     <string name="sync_option_text">Automatic between device sync</string>
     <string name="sync_option_explain">Activate to use your account on another device</string>
@@ -167,11 +166,11 @@
     <string name="link_error">An error occurred while trying to open the link</string>
     <string name="no_application">No application found to open the link</string>
     <string name="volume_for_history_workouts">%1$s kg</string>
-    <string name="new_workout">New workout</string>
     <!-- String used for finish workout   -->
     <string name="this_is_your_workout_number">This is your workout number %1$s</string>
     <string name="close_icon_description">Icon used for closing the screen</string>
     <string name="animated_star_icon_description">Animated icon of a star</string>
+    <string name="new_workout">New workout</string>
     <!-- Strings used for toast messages    -->
     <string name="update_password_success">"Successfully updated password</string>
     <string name="update_password_fail">Failed to update password</string>
