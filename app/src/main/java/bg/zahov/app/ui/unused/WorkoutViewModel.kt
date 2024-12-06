@@ -1,4 +1,4 @@
-package bg.zahov.app.ui.workout
+package bg.zahov.app.ui.unused
 
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
@@ -110,12 +110,12 @@ sealed class WorkoutEntry {
 }
 
 /**
- * @property exercises list of the exercises from the current session
+ * @property exercises a map of the exercises from the current session and their names as keys
  * @property volume amount of weight lifted during the current session
  * @property prs amount of personal records made during the current session
  */
 data class ExerciseSummary(
-    val exercises: List<Exercise>,
+    val exercises: LinkedHashMap<String, Exercise>,
     val volume: Double,
     val prs: Int,
 )
@@ -130,7 +130,7 @@ data class ExerciseSummary(
  * @property settingsProvider Provides access to user settings, such as units and preferences.
  * @property toastManager Manages the display of toast messages for user feedback.
  */
-class WorkoutViewModelNew(
+class WorkoutViewModel(
     private val workoutStateManager: WorkoutStateManager = Inject.workoutState,
     private val repo: WorkoutProvider = Inject.workoutProvider,
     private val addExerciseToWorkoutProvider: AddExerciseToWorkoutProvider = Inject.workoutAddedExerciseProvider,
@@ -191,6 +191,18 @@ class WorkoutViewModelNew(
         getTemplateExercises()
     }
 
+    /**
+     * Determines the current time of day and returns the corresponding [TimeOfDay] value.
+     *
+     * The function evaluates the current hour using [LocalDateTime.now] and maps it
+     * to a specific time of day:
+     * - 4 AM to 11 AM -> [TimeOfDay.MORNING]
+     * - 12 PM to 4 PM -> [TimeOfDay.NOON]
+     * - 5 PM to 8 PM -> [TimeOfDay.AFTERNOON]
+     * - Any other hour -> [TimeOfDay.NIGHT]
+     *
+     * @return The appropriate [TimeOfDay] based on the current hour.
+     */
     private fun calculateWorkoutPrefix(): TimeOfDay {
         return when (LocalDateTime.now().hour) {
             in 4..11 -> TimeOfDay.MORNING
@@ -598,7 +610,7 @@ class WorkoutViewModelNew(
         if (canFinish()) {
             viewModelScope.launch {
                 val exerciseSummary = getExerciseArrayAndPRs(_uiState.value.exercises)
-                val exercises = exerciseSummary.exercises
+                val exercises = exerciseSummary.exercises.values.toList()
                 val prs = exerciseSummary.prs
                 val volume = exerciseSummary.volume
 
@@ -660,9 +672,7 @@ class WorkoutViewModelNew(
      * of insertion. It also calculates the total volume of the workout based on the sets' weight and repetitions.
      *
      * @param entries A list of `WorkoutEntry` objects representing exercises and sets in the workout.
-     * @return A pair containing:
-     *  - A `LinkedHashMap` where the key is the exercise name, and the value is an `Exercise` object with associated sets and details.
-     *  - A `Double` representing the total volume of the workout (sum of weight * repetitions for all sets).
+     * @return [ExerciseSummary]
      *
      * ## Details:
      * - `WorkoutEntry.ExerciseEntry`: Initializes a new `Exercise` or retrieves an existing one by name. The exercise is stored in the map.
@@ -677,11 +687,11 @@ class WorkoutViewModelNew(
      */
     private fun getExercisesFiltered(
         entries: List<WorkoutEntry>,
-    ): Pair<LinkedHashMap<String, Exercise>, Double> {
+    ): ExerciseSummary {
         val exercises =
-            LinkedHashMap<String, Exercise>() // Maintains insertion order for exercises.
+            LinkedHashMap<String, Exercise>()
         var volume = 0.0
-        for (entry in entries) {
+        entries.map { entry ->
             when (entry) {
                 is WorkoutEntry.ExerciseEntry -> {
                     // Adds a new exercise or retrieves the existing one by name.
@@ -693,7 +703,6 @@ class WorkoutViewModelNew(
                             isTemplate = false,
                             note = entry.note
                         )
-
                     }
                 }
 
@@ -713,11 +722,13 @@ class WorkoutViewModelNew(
                                 if (weight > (bestSet.firstMetric ?: 0.0)) bestSet = entry.set
                             }
                         }
+                    } else {
+
                     }
                 }
             }
         }
-        return Pair(exercises, volume)
+        return ExerciseSummary(exercises = exercises, volume = volume, prs = 0)
     }
 
     /**
@@ -731,10 +742,6 @@ class WorkoutViewModelNew(
      * @param updateExercises A boolean flag indicating whether to update the exercises in the repository.
      * If we save it to realm there is no need to update them in the firestore repository
      * @return [ExerciseSummary]:
-     *  - A `List` of `Exercise` objects reflecting the processed workout.
-     *  - An `Int` representing the count of PRs achieved during the workout.
-     *  - A `Double` representing the total workout volume (sum of weight * repetitions for all sets).
-     *
      * ## Details:
      * 1. **Extract and Calculate**:
      *    - Calls `getExercisesFiltered` to extract exercises and calculate the total volume.
@@ -750,9 +757,10 @@ class WorkoutViewModelNew(
         entries: List<WorkoutEntry>,
         updateExercises: Boolean = true,
     ): ExerciseSummary {
-        val (exercises, volume) = getExercisesFiltered(entries)
+        val filtered = getExercisesFiltered(entries)
+        val exercises = filtered.exercises
+        val volume = filtered.volume
         var prs = 0
-
 
         if (updateExercises) {
 
@@ -778,7 +786,7 @@ class WorkoutViewModelNew(
 
             repo.updateExercises(exercises.values.toList())
         }
-        return ExerciseSummary(exercises = exercises.values.toList(), prs = prs, volume = volume)
+        return ExerciseSummary(exercises = exercises, prs = prs, volume = volume)
     }
 
     /**
@@ -823,7 +831,7 @@ class WorkoutViewModelNew(
      */
     private suspend fun saveWorkoutState() {
         val exerciseSummary = getExerciseArrayAndPRs(_uiState.value.exercises, false)
-        val exercises = exerciseSummary.exercises
+        val exercises = exerciseSummary.exercises.values.toList()
         val prs = exerciseSummary.prs
         val volume = exerciseSummary.volume
 

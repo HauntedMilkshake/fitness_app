@@ -28,7 +28,6 @@ import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.graphics.painter.Painter
 import androidx.compose.ui.res.integerResource
-import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.text.TextStyle
 import androidx.compose.ui.text.font.FontWeight
@@ -37,14 +36,19 @@ import androidx.compose.ui.unit.dp
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import androidx.lifecycle.viewmodel.compose.viewModel
 import bg.zahov.app.data.provider.model.HistoryWorkout
+import bg.zahov.app.ui.custom.ExerciseWithSets
+import bg.zahov.app.ui.custom.WorkoutStats
 import bg.zahov.app.ui.theme.FitnessTheme
 import bg.zahov.fitness.app.R
 
 
 @Composable
-fun HistoryScreen(historyViewModel: HistoryViewModel = viewModel(), onItemClick: (String) -> Unit) {
+fun HistoryScreen(historyViewModel: HistoryViewModel = viewModel(), onItemClick: () -> Unit) {
     val uiState by historyViewModel.uiState.collectAsStateWithLifecycle()
-    HistoryContent(uiState.workouts, onItemClick = { onItemClick(it) })
+    HistoryContent(uiState.workouts, onItemClick = {
+        historyViewModel.setClickedWorkout(it)
+        onItemClick()
+    })
 }
 
 @Composable
@@ -102,7 +106,7 @@ fun Workout(item: HistoryWorkout, onItemClick: (String) -> Unit) {
     ) {
         Text(
             text = item.name,
-            color = MaterialTheme.colorScheme.onSecondary,
+            color = MaterialTheme.colorScheme.onBackground,
             maxLines = 1,
             overflow = TextOverflow.Ellipsis,
             style = MaterialTheme.typography.titleMedium,
@@ -113,48 +117,17 @@ fun Workout(item: HistoryWorkout, onItemClick: (String) -> Unit) {
             text = item.date,
             maxLines = 1,
             overflow = TextOverflow.Ellipsis,
-            color = MaterialTheme.colorScheme.onPrimary,
+            color = MaterialTheme.colorScheme.onBackground,
             style = MaterialTheme.typography.bodyLarge
         )
-        Row(
-            Modifier
-                .fillMaxWidth()
-                .padding(top = 8.dp)
-                .align(Alignment.CenterHorizontally),
-            horizontalArrangement = Arrangement.SpaceEvenly
-        ) {
-            TextWithLeadingIcon(
-                text = item.duration,
-                icon = painterResource(R.drawable.ic_clock),
-                textModifier = Modifier
-                    .weight(1f)
-                    .padding(4.dp),
-                iconColor = MaterialTheme.colorScheme.secondary,
-                iconModifier = Modifier.align(Alignment.CenterVertically)
-            )
-            TextWithLeadingIcon(
-                text = stringResource(
-                    R.string.volume_for_history_workouts,
-                    item.volume
-                ),
-                icon = painterResource(R.drawable.ic_volume),
-                textModifier = Modifier
-                    .weight(1f)
-                    .padding(4.dp),
-                iconColor = MaterialTheme.colorScheme.secondary,
-                iconModifier = Modifier.align(Alignment.CenterVertically)
-            )
-            TextWithLeadingIcon(
-                text = item.personalRecords,
-                icon = painterResource(R.drawable.ic_trophy),
-                textModifier = Modifier
-                    .align(Alignment.CenterVertically)
-                    .weight(1f)
-                    .padding(4.dp),
-                iconColor = MaterialTheme.colorScheme.secondary,
-                iconModifier = Modifier.align(Alignment.CenterVertically)
-            )
-        }
+
+        WorkoutStats(
+            modifier = Modifier.align(Alignment.CenterHorizontally),
+            duration = item.duration,
+            volume = item.volume,
+            personalRecords = item.personalRecords
+        )
+
         Row(
             modifier = Modifier
                 .fillMaxWidth()
@@ -163,18 +136,18 @@ fun Workout(item: HistoryWorkout, onItemClick: (String) -> Unit) {
         ) {
             Text(
                 text = stringResource(R.string.exercise),
-                color = MaterialTheme.colorScheme.onSecondary,
+                color = MaterialTheme.colorScheme.onPrimaryContainer,
                 style = MaterialTheme.typography.bodyLarge
             )
             Text(
                 text = stringResource(R.string.best_set),
-                color = MaterialTheme.colorScheme.onSecondary,
+                color = MaterialTheme.colorScheme.onPrimaryContainer,
                 style = MaterialTheme.typography.bodyLarge
             )
         }
 
         for (i in item.exercises.indices) {
-            ExerciseWithSets(exerciseName = item.exercises[i], bestSet = item.exercises[i])
+            ExerciseWithSets(exerciseName = item.exercises[i], bestSet = item.bestSets[i])
         }
     }
 }
@@ -189,7 +162,7 @@ fun ExerciseWithSets(exerciseName: String, bestSet: String) {
     ) {
         Text(
             text = exerciseName,
-            color = MaterialTheme.colorScheme.onPrimary,
+            color = MaterialTheme.colorScheme.onBackground,
             style = MaterialTheme.typography.bodyLarge,
             softWrap = true,
             overflow = TextOverflow.Ellipsis,
@@ -198,7 +171,7 @@ fun ExerciseWithSets(exerciseName: String, bestSet: String) {
 
         Text(
             text = bestSet,
-            color = MaterialTheme.colorScheme.onPrimary,
+            color = MaterialTheme.colorScheme.onBackground,
             style = MaterialTheme.typography.bodyLarge,
             overflow = TextOverflow.Ellipsis,
             maxLines = 1,

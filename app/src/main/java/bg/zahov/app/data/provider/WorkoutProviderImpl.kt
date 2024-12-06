@@ -5,16 +5,19 @@ import bg.zahov.app.data.local.RealmWorkoutState
 import bg.zahov.app.data.model.Exercise
 import bg.zahov.app.data.model.Workout
 import bg.zahov.app.data.model.state.ExerciseData
-import bg.zahov.app.data.model.state.ExerciseHistoryInfo
+import bg.zahov.app.data.provider.model.ExerciseDetails
+import bg.zahov.app.data.provider.model.HistoryInfoWorkout
 import bg.zahov.app.data.provider.model.HistoryWorkout
 import bg.zahov.app.data.repository.WorkoutRepositoryImpl
+import bg.zahov.app.ui.exercise.info.history.ExerciseHistoryInfo
 import bg.zahov.app.ui.workout.start.StartWorkout
-import bg.zahov.app.util.getOneRepMaxes
 import bg.zahov.app.util.timeToString
 import bg.zahov.app.util.toExerciseData
+import bg.zahov.app.util.toFormattedString
 import kotlinx.coroutines.ExperimentalCoroutinesApi
 import kotlinx.coroutines.flow.Flow
 import kotlinx.coroutines.flow.MutableStateFlow
+import kotlinx.coroutines.flow.StateFlow
 import kotlinx.coroutines.flow.mapLatest
 import kotlinx.coroutines.flow.mapNotNull
 import java.time.LocalDate
@@ -39,6 +42,10 @@ class WorkoutProviderImpl : WorkoutProvider {
     private val _exerciseHistory = MutableStateFlow<List<ExerciseHistoryInfo>>(listOf())
     private val exerciseHistory: Flow<List<ExerciseHistoryInfo>>
         get() = _exerciseHistory
+
+    override var clickedPastWorkout: StateFlow<HistoryInfoWorkout> =
+        MutableStateFlow(HistoryInfoWorkout())
+
 
     private val workoutRepo = WorkoutRepositoryImpl.getInstance()
     private val errorHandler = ServiceErrorHandlerImpl.getInstance()
@@ -117,18 +124,16 @@ class WorkoutProviderImpl : WorkoutProvider {
 
     override suspend fun setClickedTemplateExercise(item: ExerciseData) {
         getPastWorkouts().collect { workout ->
-            val resultsList = workout.mapNotNull { workout1 ->
-                workout1.exercises.find { workoutExercise -> workoutExercise.name == item.name }
+            val resultsList = workout.mapNotNull {
+                it.exercises.find { workoutExercise -> workoutExercise.name == item.name }
                     ?.let { previousExercise ->
                         ExerciseHistoryInfo(
-                            workoutName = workout1.name,
-                            lastPerformed = workout1.date.toFormattedString(),
+                            workoutId = it.id,
+                            workoutName = it.name,
+                            lastPerformed = it.date.toFormattedString(),
                             sets = previousExercise.sets,
-                            setsPerformed = previousExercise.sets.joinToString(separator = "\n") {
-                                "${it.secondMetric ?: 0} x ${it.firstMetric}"
-                            },
                             oneRepMaxes = previousExercise.getOneRepMaxes(),
-                            date = workout1.date
+                            date = it.date
                         )
                     }
             }.sortedBy { it.date }
@@ -158,6 +163,17 @@ class WorkoutProviderImpl : WorkoutProvider {
     ) {
         workoutRepo.updateTemplateWorkout(workoutId, date, newExercises)
     }
+
+    /**
+     * Queries the past workouts and converts it to a [HistoryInfoWorkout]
+     * @param workout
+     * @see HistoryInfoWorkout
+     * @see toHistoryInfoWorkout
+     */
+    override suspend fun setClickedHistoryWorkout(workout: Workout) {
+        (clickedPastWorkout as MutableStateFlow).value = workout.toHistoryInfoWorkout()
+    }
+
 
     /**
      * Retrieves a list of start workouts from the template workouts.
@@ -231,6 +247,63 @@ fun Workout.toHistoryWorkout(): HistoryWorkout {
         },
         personalRecords = this.personalRecords.toString()
     )
+}
+
+/**
+ * Converts a [Workout] object to a [HistoryInfoWorkout] object.
+ *
+ * Maps the properties of the [Workout] object into a new [HistoryInfoWorkout] object,
+ * formatting and transforming data where necessary. It includes details such as
+ * workout name, date, duration, volume, personal records, and exercise details.
+ *
+ * @receiver The [Workout] object to be converted.
+ * @return A [HistoryInfoWorkout] object containing the workout's historical data.
+ */
+fun Workout.toHistoryInfoWorkout(): HistoryInfoWorkout {
+    return HistoryInfoWorkout(
+        id = this.id,
+        workoutName = this.name,
+        workoutDate = this.date.toFormattedString(),
+        duration = this.duration?.timeToString() ?: "00:00:00",
+        volume = (this.volume ?: 0.0).toString(),
+        prs = this.personalRecords.toString(),
+        exercisesInfo = this.exercises.map { exercise ->
+            ExerciseDetails(
+                exerciseName = exercise.name,
+                sets = exercise.sets.map {
+                    "${it.secondMetric} x ${it.firstMetric}"
+                },
+                oneRepMaxes = exercise.getOneRepMaxes()
+            )
+        }
+    )
+}
+
+/**
+ * Estimates the one-repetition maximum (1RM) for a given weight and repetition count using the Epley formula.
+ *
+ * The formula used is:
+ * `1RM = weight * (1 + (0.0333 * reps))`
+ *
+ * @param weight The weight lifted (in kilograms or pounds).
+ * @param reps The number of repetitions performed.
+ * @return A [String] representing the estimated one-rep max (1RM).
+ */
+fun getOneRepEstimate(weight: Double, reps: Int): String =
+    (weight * (1 + (0.0333 * reps))).toInt().toString()
+
+/**
+ * Calculates the estimated one-rep max (1RM) for each set in the exercise.
+ *
+ * Iterates through all sets of the exercise and calculates the 1RM using
+ * [getOneRepEstimate]. If the weight ([firstMetric]) or reps ([secondMetric]) are null,
+ * default values of `1.0` for weight and `1` for reps are used.
+ *
+ * @receiver The [Exercise] object for which one-rep maxes are calculated.
+ * @return A [List] of [String] values representing the estimated one-rep max (1RM) for each set.
+ */
+fun Exercise.getOneRepMaxes(): List<String> = this.sets.map {
+    getOneRepEstimate(it.firstMetric ?: 1.0, it.secondMetric ?: 1)
 }
 
 fun LocalDateTime.toFormattedString(): String =
