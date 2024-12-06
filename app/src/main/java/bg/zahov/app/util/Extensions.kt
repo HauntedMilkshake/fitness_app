@@ -281,18 +281,6 @@ fun RealmSets.toSets(): Sets? {
 fun LocalDateTime.toFormattedString(): String =
     this.format(DateTimeFormatter.ofPattern("HH:mm, d MMMM", Locale.ENGLISH))
 
-fun getOneRepEstimate(weight: Double, reps: Int): String =
-    (weight * (1 + (0.0333 * reps))).toInt().toString()
-
-fun Exercise.getOneRepMaxes(): List<String> = this.sets.map {
-    when (this.category) {
-//        Category.RepsOnly, Category.Cardio, Category.Timed -> " "
-        else -> {
-            getOneRepEstimate(it.firstMetric ?: 1.0, it.secondMetric ?: 1)
-        }
-    }
-}
-
 fun LocalDateTime.toRealmString(): String {
     return this.format(DateTimeFormatter.ofPattern(RealmTimePattern.REALM_TIME_PATTERN))
 }

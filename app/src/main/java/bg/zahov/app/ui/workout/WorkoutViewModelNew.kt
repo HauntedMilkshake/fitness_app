@@ -722,6 +722,8 @@ class WorkoutViewModelNew(
                                 if (weight > (bestSet.firstMetric ?: 0.0)) bestSet = entry.set
                             }
                         }
+                    } else {
+
                     }
                 }
             }
