@@ -43,22 +43,25 @@ import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.style.TextOverflow
-import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
+import androidx.lifecycle.compose.collectAsStateWithLifecycle
+import androidx.lifecycle.viewmodel.compose.viewModel
 import bg.zahov.app.data.model.LineChartData
+import bg.zahov.app.data.model.state.ExerciseHistoryInfo
+import bg.zahov.app.data.model.state.SharedElementKey
 import bg.zahov.app.ui.custom.CommonDivider
 import bg.zahov.app.ui.custom.CommonLineChart
 import bg.zahov.app.ui.theme.FitnessTheme
 import bg.zahov.fitness.app.R
 
-@Preview
 @Composable
-fun ExerciseInfoScreen() {
+fun ExerciseInfoScreen(viewModel: ExerciseInfoViewModel = viewModel()) {
+    val uiState by viewModel.uiState.collectAsStateWithLifecycle()
     ExerciseInfoContent(
-        oneRepMaxEst = ExerciseInfoTestData.testOneRepMaxEst,
-        maxVolume = ExerciseInfoTestData.testMaxVolume,
-        maxRep = ExerciseInfoTestData.testMaxRep,
-        history = ExerciseInfoTestData.testHistory
+        oneRepMaxEst = uiState.oneRepMaxEst,
+        maxVolume = uiState.maxVolume,
+        maxRep = uiState.maxRep,
+        history = uiState.exerciseHistory
     )
 }
 
@@ -154,7 +157,11 @@ fun SharedTransitionScope.ChartDetails(
                 Column(
                     modifier = Modifier
                         .sharedBounds(
-                            sharedContentState = rememberSharedContentState(key = "$extractedText-bound"),
+                            sharedContentState = rememberSharedContentState(
+                                key = SharedElementKey.BOUND.generateKey(
+                                    extractedText
+                                )
+                            ),
                             animatedVisibilityScope = this@AnimatedContent,
                             clipInOverlayDuringTransition = OverlayClip(RoundedCornerShape(8.dp)),
                             resizeMode = SharedTransitionScope.ResizeMode.RemeasureToBounds
@@ -179,7 +186,11 @@ fun SharedTransitionScope.ChartDetails(
                         modifier = Modifier
                             .padding(bottom = 4.dp)
                             .sharedElement(
-                                rememberSharedContentState(key = "$extractedText-value"),
+                                rememberSharedContentState(
+                                    key = SharedElementKey.VALUE.generateKey(
+                                        extractedText
+                                    )
+                                ),
                                 animatedVisibilityScope = this@AnimatedContent
                             ),
                         text = "${stringResource(R.string.personal_records)}: ${it.maxValue}",
@@ -211,7 +222,11 @@ fun SharedTransitionScope.ExerciseChartInfo(
         Column(
             modifier = Modifier
                 .sharedBounds(
-                    rememberSharedContentState(key = "$extractedText-bound"),
+                    rememberSharedContentState(
+                        key = SharedElementKey.BOUND.generateKey(
+                            extractedText
+                        )
+                    ),
                     animatedVisibilityScope = this@AnimatedVisibility,
                     enter = fadeIn(),
                     exit = fadeOut(),
@@ -245,7 +260,11 @@ fun SharedTransitionScope.ExerciseChartInfo(
                 modifier = Modifier
                     .padding(bottom = 4.dp)
                     .sharedElement(
-                        rememberSharedContentState(key = "$extractedText-value"),
+                        rememberSharedContentState(
+                            key = SharedElementKey.VALUE.generateKey(
+                                extractedText
+                            )
+                        ),
                         animatedVisibilityScope = this@AnimatedVisibility
                     ),
                 text = "${stringResource(R.string.personal_records)}: ${data.maxValue}",
@@ -341,7 +360,7 @@ fun ExerciseHistoryCard(
                     style = MaterialTheme.typography.labelMedium
                 )
                 Text(
-                    text = data.oneRepMaxes,
+                    text = data.oneRepMaxes.joinToString(separator = "\n"),
                     color = MaterialTheme.colorScheme.onSecondary,
                     overflow = TextOverflow.Ellipsis,
                     style = MaterialTheme.typography.bodyMedium
@@ -350,10 +369,3 @@ fun ExerciseHistoryCard(
         }
     }
 }
-
-data class ExerciseHistoryInfo(
-    val workoutName: String = "",
-    val lastPerformed: String = "",
-    val setsPerformed: String = "",
-    val oneRepMaxes: String = "",
-)

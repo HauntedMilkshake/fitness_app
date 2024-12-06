@@ -2,7 +2,7 @@ package com.example.app
 
 import bg.zahov.app.data.model.LineChartData
 import bg.zahov.app.data.model.MeasurementType
-import bg.zahov.app.ui.exercise.info.ExerciseHistoryInfo
+import bg.zahov.app.data.model.state.ExerciseHistoryInfo
 import com.github.mikephil.charting.data.Entry
 import bg.zahov.fitness.app.R
 

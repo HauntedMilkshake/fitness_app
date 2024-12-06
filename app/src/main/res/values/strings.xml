@@ -147,6 +147,7 @@
     <string name="timers">Timers</string>
     <string name="save_as_workout_template">Save as workout template</string>
     <string name="one_rep_max_text">1RM</string>
+    <string name="one_rep_max_title_text">One Rep Max</string>
     <string name="perform_again">perform again</string>
     <string name="charts">Charts</string>
     <string name="records">records</string>
