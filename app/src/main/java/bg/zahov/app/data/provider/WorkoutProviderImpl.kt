@@ -5,11 +5,11 @@ import bg.zahov.app.data.local.RealmWorkoutState
 import bg.zahov.app.data.model.Exercise
 import bg.zahov.app.data.model.Workout
 import bg.zahov.app.data.model.state.ExerciseData
+import bg.zahov.app.data.model.state.ExerciseHistoryInfo
 import bg.zahov.app.data.provider.model.ExerciseDetails
 import bg.zahov.app.data.provider.model.HistoryInfoWorkout
 import bg.zahov.app.data.provider.model.HistoryWorkout
 import bg.zahov.app.data.repository.WorkoutRepositoryImpl
-import bg.zahov.app.ui.exercise.info.history.ExerciseHistoryInfo
 import bg.zahov.app.ui.workout.start.StartWorkout
 import bg.zahov.app.util.timeToString
 import bg.zahov.app.util.toExerciseData
@@ -128,7 +128,6 @@ class WorkoutProviderImpl : WorkoutProvider {
                 it.exercises.find { workoutExercise -> workoutExercise.name == item.name }
                     ?.let { previousExercise ->
                         ExerciseHistoryInfo(
-                            workoutId = it.id,
                             workoutName = it.name,
                             lastPerformed = it.date.toFormattedString(),
                             sets = previousExercise.sets,
