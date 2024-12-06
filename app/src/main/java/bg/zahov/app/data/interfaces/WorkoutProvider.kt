@@ -4,13 +4,19 @@ import bg.zahov.app.data.local.RealmWorkoutState
 import bg.zahov.app.data.model.Exercise
 import bg.zahov.app.data.model.Workout
 import bg.zahov.app.data.model.state.ExerciseData
+import bg.zahov.app.data.provider.model.HistoryInfoWorkout
 import bg.zahov.app.data.provider.model.HistoryWorkout
 import bg.zahov.app.ui.exercise.info.history.ExerciseHistoryInfo
 import bg.zahov.app.ui.workout.start.StartWorkout
 import kotlinx.coroutines.flow.Flow
+import kotlinx.coroutines.flow.StateFlow
 import java.time.LocalDateTime
 
 interface WorkoutProvider {
+    /**
+     * observable exercise that was clicked in history screen
+     */
+    val clickedPastWorkout: StateFlow<HistoryInfoWorkout>
     suspend fun getTemplateWorkouts(): Flow<List<Workout>>
     suspend fun getPastWorkouts(): Flow<List<Workout>>
     suspend fun addTemplateWorkout(newWorkout: Workout)
@@ -36,6 +42,13 @@ interface WorkoutProvider {
         date: LocalDateTime,
         newExercises: List<Exercise>,
     )
+
+    /**
+     * converts the workout to [HistoryInfoWorkout] and workout
+     *
+     * @param workout the workout we want to change
+     */
+    suspend fun setClickedHistoryWorkout(workout: Workout)
 
     /**
      * Retrieves the list of template workouts mapped for the ui of the appropriate screen from the repository.

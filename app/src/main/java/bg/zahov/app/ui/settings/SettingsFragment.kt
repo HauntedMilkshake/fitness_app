@@ -17,6 +17,7 @@ import androidx.fragment.app.viewModels
 import androidx.navigation.fragment.findNavController
 import bg.zahov.app.hideBottomNav
 import bg.zahov.app.setToolBarTitle
+import bg.zahov.app.ui.exercise.info.ExerciseInfoScreen
 import bg.zahov.fitness.app.R
 
 class SettingsFragment : Fragment() {
