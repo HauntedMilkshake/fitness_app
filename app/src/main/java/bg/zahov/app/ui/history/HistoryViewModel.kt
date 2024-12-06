@@ -9,8 +9,6 @@ import bg.zahov.app.data.interfaces.WorkoutProvider
 import bg.zahov.app.data.provider.model.HistoryWorkout
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.StateFlow
-import kotlinx.coroutines.flow.map
-import kotlinx.coroutines.flow.take
 import kotlinx.coroutines.flow.update
 import kotlinx.coroutines.launch
 
@@ -48,6 +46,16 @@ class HistoryViewModel(
                     }
                 } catch (e: CriticalDataNullException) {
                     serviceError.initiateCountdown()
+                }
+            }
+        }
+    }
+
+    fun setClickedWorkout(workoutId: String) {
+        viewModelScope.launch {
+            workoutProvider.getPastWorkouts().collect {
+                it.find { workout -> workoutId == workout.id }?.let { workout ->
+                    workoutProvider.setClickedHistoryWorkout(workout)
                 }
             }
         }

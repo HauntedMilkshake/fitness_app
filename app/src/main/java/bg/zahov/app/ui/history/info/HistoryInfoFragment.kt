@@ -7,49 +7,55 @@ import android.view.MenuInflater
 import android.view.MenuItem
 import android.view.View
 import android.view.ViewGroup
-import android.widget.Toast
 import androidx.appcompat.app.AppCompatActivity
+import androidx.compose.ui.platform.ViewCompositionStrategy
 import androidx.core.view.MenuProvider
 import androidx.fragment.app.Fragment
 import androidx.fragment.app.viewModels
-import androidx.lifecycle.map
+import androidx.lifecycle.Lifecycle
+import androidx.lifecycle.lifecycleScope
+import androidx.lifecycle.repeatOnLifecycle
 import androidx.navigation.fragment.findNavController
-import androidx.recyclerview.widget.LinearLayoutManager
-import bg.zahov.app.data.model.state.HistoryInfoUiMapper
 import bg.zahov.app.hideBottomNav
 import bg.zahov.app.setToolBarTitle
 import bg.zahov.app.showBottomNav
-import bg.zahov.app.ui.history.HistoryFragment.Companion.WORKOUT_ID_ARG_KEY
 import bg.zahov.fitness.app.R
 import bg.zahov.fitness.app.databinding.FragmentHistoryInfoBinding
+import kotlinx.coroutines.launch
 
 class HistoryInfoFragment : Fragment() {
+
     private var _binding: FragmentHistoryInfoBinding? = null
     private val binding
-        get() = requireNotNull(_binding!!)
+        get() = requireNotNull(_binding)
 
-    private val historyInfoViewModel: HistoryInfoViewModel by viewModels()
-    private val id by lazy {
-        arguments?.getString(WORKOUT_ID_ARG_KEY) ?: ""
-    }
+    private val historyInfoViewModel: HistoryInfoViewModel by viewModels(
+        ownerProducer = { requireParentFragment() }
+    )
 
     override fun onCreateView(
         inflater: LayoutInflater, container: ViewGroup?, savedInstanceState: Bundle?,
     ): View {
+        activity?.hideBottomNav()
+        setupTopBar()
         _binding = FragmentHistoryInfoBinding.inflate(inflater, container, false)
-        historyInfoViewModel.queryWorkout(id)
-        requireActivity().hideBottomNav()
+
+        binding.composeScreen.setViewCompositionStrategy(ViewCompositionStrategy.DisposeOnViewTreeLifecycleDestroyed)
+        binding.composeScreen.setContent {
+            HistoryInfoScreen(
+                historyInfoViewModel = historyInfoViewModel,
+                onDelete = { findNavController().navigateUp() })
+        }
         return binding.root
     }
 
-    override fun onViewCreated(view: View, savedInstanceState: Bundle?) {
-        super.onViewCreated(view, savedInstanceState)
+    private fun setupTopBar() {
         (activity as? AppCompatActivity)?.supportActionBar?.apply {
             setDisplayHomeAsUpEnabled(true)
             setHomeAsUpIndicator(R.drawable.ic_back_arrow)
         }
 
-        requireActivity().addMenuProvider(object : MenuProvider {
+        activity?.addMenuProvider(object : MenuProvider {
             override fun onCreateMenu(menu: Menu, menuInflater: MenuInflater) {
                 menu.clear()
                 menuInflater.inflate(R.menu.menu_toolbar_history_info, menu)
@@ -64,7 +70,6 @@ class HistoryInfoFragment : Fragment() {
 
                     R.id.delete -> {
                         historyInfoViewModel.delete()
-                        findNavController().navigateUp()
                         true
                     }
 
@@ -77,42 +82,27 @@ class HistoryInfoFragment : Fragment() {
                 }
             }
         })
-        binding.apply {
-            val historyInfoAdapter = HistoryInfoAdapter()
-            historyInfoViewModel.state.map { HistoryInfoUiMapper.map(it) }
-                .observe(viewLifecycleOwner) {
-                    it.workout?.let { data ->
-                        requireActivity().setToolBarTitle(data.workoutName)
-                        lastPerformed.text = data.workoutDate
-                        duration.text = data.duration
-                        volume.text = data.volume
-                        prCount.text = data.prs
-                        historyInfoAdapter.updateItems(data.adapterData)
-                    }
-                    showToast(it.message)
+    }
+
+    override fun onViewCreated(view: View, savedInstanceState: Bundle?) {
+        super.onViewCreated(view, savedInstanceState)
+
+        lifecycleScope.launch {
+            viewLifecycleOwner.repeatOnLifecycle(state = Lifecycle.State.STARTED) {
+                historyInfoViewModel.uiState.collect {
+                    activity?.setToolBarTitle(it.workoutName)
                 }
-            exercisesRecyclerView.apply {
-                layoutManager = LinearLayoutManager(context)
-                adapter = historyInfoAdapter
-            }
-            performAgain.setOnClickListener {
-                historyInfoViewModel.performAgain()
             }
         }
     }
 
     override fun onResume() {
         super.onResume()
-        requireActivity().showBottomNav()
+        activity?.showBottomNav()
     }
-    private fun showToast(message: String?) {
-        message?.let {
-            Toast.makeText(context, it, Toast.LENGTH_SHORT).show()
-        }
-    }
+
     override fun onDestroyView() {
         super.onDestroyView()
         _binding = null
-        historyInfoViewModel.state.removeObservers(viewLifecycleOwner)
     }
 }

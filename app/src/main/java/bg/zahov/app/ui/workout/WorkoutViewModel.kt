@@ -723,7 +723,7 @@ class WorkoutViewModel(
                             }
                         }
                     } else {
-                        /*noop*/
+
                     }
                 }
             }
