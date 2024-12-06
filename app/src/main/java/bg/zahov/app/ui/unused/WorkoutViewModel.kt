@@ -1,4 +1,4 @@
-package bg.zahov.app.ui.workout
+package bg.zahov.app.ui.unused
 
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
@@ -130,7 +130,7 @@ data class ExerciseSummary(
  * @property settingsProvider Provides access to user settings, such as units and preferences.
  * @property toastManager Manages the display of toast messages for user feedback.
  */
-class WorkoutViewModelNew(
+class WorkoutViewModel(
     private val workoutStateManager: WorkoutStateManager = Inject.workoutState,
     private val repo: WorkoutProvider = Inject.workoutProvider,
     private val addExerciseToWorkoutProvider: AddExerciseToWorkoutProvider = Inject.workoutAddedExerciseProvider,
