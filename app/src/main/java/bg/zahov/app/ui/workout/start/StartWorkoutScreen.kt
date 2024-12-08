@@ -14,6 +14,7 @@ import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.padding
+import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.foundation.lazy.items
 import androidx.compose.foundation.shape.RoundedCornerShape
@@ -41,12 +42,11 @@ import androidx.compose.ui.text.style.TextOverflow
 import androidx.compose.ui.unit.dp
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import androidx.lifecycle.viewmodel.compose.viewModel
+import bg.zahov.app.data.model.BodyPart
 import bg.zahov.app.data.model.Category
-import bg.zahov.app.data.model.Exercise
 import bg.zahov.app.data.model.ToastManager
 import bg.zahov.app.data.provider.toFormattedString
 import bg.zahov.app.ui.theme.FitnessTheme
-import bg.zahov.app.ui.workout.start.DropDown
 import bg.zahov.fitness.app.R
 
 
@@ -158,7 +158,7 @@ fun StartWorkoutContent(
 @Composable
 fun Workout(
     modifier: Modifier,
-    workoutName: String, workoutDate: String, exercises: List<Exercise> = listOf(),
+    workoutName: String, workoutDate: String, exercises: List<StartWorkoutExercise> = listOf(),
     onWorkoutStart: () -> Unit,
     onEdit: () -> Unit,
     onDelete: () -> Unit,
@@ -213,7 +213,7 @@ fun WorkoutContent(
     sharedTransitionScope: SharedTransitionScope,
     animatedVisibilityScope: AnimatedVisibilityScope,
     modifier: Modifier,
-    workoutName: String, workoutDate: String, exercises: List<Exercise> = listOf(),
+    workoutName: String, workoutDate: String, exercises: List<StartWorkoutExercise> = listOf(),
     onWorkoutStart: () -> Unit,
     onEdit: () -> Unit,
     onDelete: () -> Unit,
@@ -228,9 +228,7 @@ fun WorkoutContent(
             modifier = modifier
                 .fillMaxWidth()
                 .padding(12.dp)
-                .clickable {
-                    onShowDetails()
-                }
+                .clickable { onShowDetails() }
                 .border(
                     1.dp,
                     MaterialTheme.colorScheme.secondary,
@@ -266,25 +264,26 @@ fun WorkoutContent(
                     onDuplicate = onDuplicate,
                     onDelete = onDelete
                 )
+            }
 
+            Text(
+                text = stringResource(R.string.last_performed, workoutDate),
+                modifier = Modifier.padding(top = 12.dp, bottom = 12.dp),
+                color = MaterialTheme.colorScheme.onBackground,
+                style = MaterialTheme.typography.titleSmall,
+                maxLines = 1,
+                overflow = TextOverflow.Ellipsis
+            )
+
+
+            exercises.forEach {
                 Text(
-                    text = stringResource(R.string.last_performed, workoutDate),
-                    modifier = Modifier.padding(top = 12.dp, bottom = 12.dp),
-                    color = MaterialTheme.colorScheme.onBackground,
+                    text = it.name,
+                    color = MaterialTheme.colorScheme.onSecondaryContainer,
                     style = MaterialTheme.typography.titleSmall,
                     maxLines = 1,
                     overflow = TextOverflow.Ellipsis
                 )
-
-                for (i in exercises.indices) {
-                    Text(
-                        text = "${if (exercises[i].sets.isNotEmpty()) "${exercises[i].sets.size} x " else ""}${exercises[i].name}",
-                        color = MaterialTheme.colorScheme.onSecondaryContainer,
-                        style = MaterialTheme.typography.titleSmall,
-                        maxLines = 1,
-                        overflow = TextOverflow.Ellipsis
-                    )
-                }
             }
         }
     }
@@ -296,7 +295,7 @@ fun WorkoutDetails(
     onBack: () -> Unit,
     sharedTransitionScope: SharedTransitionScope,
     animatedVisibilityScope: AnimatedVisibilityScope,
-    workoutName: String, workoutDate: String, exercises: List<Exercise> = listOf(),
+    workoutName: String, workoutDate: String, exercises: List<StartWorkoutExercise> = listOf(),
     onWorkoutStart: () -> Unit,
     onEdit: () -> Unit,
     onDelete: () -> Unit,
@@ -349,36 +348,67 @@ fun WorkoutDetails(
                     onDuplicate = onDuplicate,
                     onDelete = onDelete
                 )
+            }
 
-                Text(
-                    text = stringResource(R.string.last_performed, workoutDate),
-                    modifier = Modifier.padding(top = 12.dp, bottom = 12.dp),
-                    color = MaterialTheme.colorScheme.onBackground,
-                    style = MaterialTheme.typography.titleSmall,
-                    maxLines = 1,
-                    overflow = TextOverflow.Ellipsis
+            Text(
+                text = stringResource(R.string.last_performed, workoutDate),
+                modifier = Modifier.padding(top = 12.dp, bottom = 12.dp),
+                color = MaterialTheme.colorScheme.onBackground,
+                style = MaterialTheme.typography.titleSmall,
+                maxLines = 1,
+                overflow = TextOverflow.Ellipsis
+            )
+
+            exercises.forEach {
+                Exercise(
+                    exerciseName = it.exercise,
+                    bodyPart = it.bodyPart,
+                    category = it.category,
                 )
-
-                for (i in exercises.indices) {
-                    Text(
-                        text = "${if (exercises[i].sets.isNotEmpty()) "${exercises[i].sets.size} x " else ""}${exercises[i].name}",
-                        color = MaterialTheme.colorScheme.onSecondaryContainer,
-                        style = MaterialTheme.typography.titleSmall,
-                        maxLines = 1,
-                        overflow = TextOverflow.Ellipsis
-                    )
-                }
             }
         }
     }
 }
 
 @Composable
-fun Exercise(exerciseName: String, category: Category) {
+fun Exercise(exerciseName: String, bodyPart: BodyPart, category: Category) {
     Row(modifier = Modifier.fillMaxWidth()) {
-        Icon(painter = painterResource(when()))
-        Column {
-
+        Icon(
+            modifier = Modifier.size(64.dp),
+            painter = painterResource(
+                when (bodyPart) {
+                    BodyPart.Core -> R.drawable.ic_abs
+                    BodyPart.Arms -> R.drawable.ic_arms
+                    BodyPart.Back -> R.drawable.ic_back
+                    BodyPart.Chest -> R.drawable.ic_chest
+                    BodyPart.Legs -> R.drawable.ic_legs
+                    BodyPart.Shoulders -> R.drawable.ic_shoulders
+                    else -> R.drawable.ic_olympic
+                }
+            ), contentDescription = stringResource(R.string.muslce_part_description), tint = Color.Unspecified
+        )
+        Column(modifier = Modifier.padding(start = 8.dp), verticalArrangement = Arrangement.Center) {
+            Text(
+                text = exerciseName,
+                fontWeight = FontWeight.Bold,
+                color = MaterialTheme.colorScheme.onBackground
+            )
+            Text(
+                text = when (category) {
+                    Category.Barbell -> stringResource(id = R.string.barbell_category_text)
+                    Category.Dumbbell -> stringResource(id = R.string.dumbbell_category_text)
+                    Category.Machine -> stringResource(id = R.string.machine_category_text)
+                    Category.AdditionalWeight -> stringResource(id = R.string.additional_weight_category_text)
+                    Category.Cable -> stringResource(id = R.string.cable_category_text)
+                    Category.None -> stringResource(id = R.string.none_category_text)
+                    Category.AssistedWeight -> stringResource(id = R.string.assisted_weight_category_text)
+                    Category.RepsOnly -> stringResource(id = R.string.reps_only_category_text)
+                    Category.Cardio -> stringResource(id = R.string.cardio_category_text)
+                    Category.Timed -> stringResource(id = R.string.timed_category_text)
+                },
+                fontWeight = FontWeight.Bold,
+                color = MaterialTheme.colorScheme.onBackground
+            )
         }
     }
 }

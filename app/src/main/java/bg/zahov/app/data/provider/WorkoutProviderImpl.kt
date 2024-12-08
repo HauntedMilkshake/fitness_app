@@ -11,6 +11,7 @@ import bg.zahov.app.data.provider.model.HistoryInfoWorkout
 import bg.zahov.app.data.provider.model.HistoryWorkout
 import bg.zahov.app.data.repository.WorkoutRepositoryImpl
 import bg.zahov.app.ui.workout.start.StartWorkout
+import bg.zahov.app.ui.workout.start.StartWorkoutExercise
 import bg.zahov.app.util.timeToString
 import bg.zahov.app.util.toExerciseData
 import bg.zahov.app.util.toFormattedString
@@ -217,10 +218,27 @@ fun Workout.toStartWorkout(): StartWorkout = StartWorkout(
     id = this.id,
     name = this.name,
     date = this.date,
-    exercises = this.exercises,
-//    .map { if (it.sets.isNotEmpty()) "${it.sets.size} x " else "" + it.name },
+    exercises = this.exercises.map { it.toStartWorkoutExercise() },
     note = this.note ?: "",
     personalRecords = this.personalRecords.toString()
+)
+
+/**
+ * Converts an [Exercise] object to a [StartWorkoutExercise] object.
+ *
+ * @receiver The [Exercise] instance being converted.
+ * @return A new [StartWorkoutExercise] object with the following properties:
+ * - `name`: The name of the exercise.
+ * - `exercise`: A formatted string combining the number of sets (if available) and the exercise name.
+ *   If the `sets` list is not empty, it prepends the count of sets followed by " x ".
+ * - `bodyPart`: The targeted body part of the exercise.
+ * - `category`: The category of the exercise (e.g., Barbell, Dumbbell, Cardio).
+ */
+fun Exercise.toStartWorkoutExercise(): StartWorkoutExercise = StartWorkoutExercise(
+    name = this.name,
+    exercise = if (this.sets.isNotEmpty()) { "${this.sets.size} x " } else { "" } + this.name,
+    bodyPart = this.bodyPart,
+    category = this.category
 )
 
 /**
