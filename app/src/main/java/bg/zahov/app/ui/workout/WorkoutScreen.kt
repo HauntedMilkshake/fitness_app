@@ -65,22 +65,22 @@ import androidx.compose.ui.text.input.VisualTransformation
 import androidx.compose.ui.text.style.TextOverflow
 import androidx.compose.ui.unit.dp
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
-import androidx.lifecycle.viewmodel.compose.viewModel
 import bg.zahov.app.data.model.SetType
 import bg.zahov.app.ui.theme.FitnessTheme
+import bg.zahov.app.ui.workout.add.AddTemplateWorkoutViewModel
 import bg.zahov.fitness.app.R
 import kotlinx.coroutines.delay
 
 @Composable
 fun WorkoutScreen(
-    workoutViewModel: WorkoutViewModel = viewModel(),
+    isWorkoutScreen: Boolean = true,
+    workoutViewModel: WorkoutViewModel? = null,
+    addTemplateViewModel: AddTemplateWorkoutViewModel? = null,
     onAddExercise: () -> Unit,
     onReplaceExercise: () -> Unit,
     onBackPressed: () -> Unit,
     onCancel: () -> Unit,
 ) {
-    val state by workoutViewModel.uiState.collectAsStateWithLifecycle()
-
     /**
      * In order to center the items of 2 independent rows we need to have
      * pre-defined weight values to ensure consistency
@@ -89,39 +89,107 @@ fun WorkoutScreen(
         mutableStateOf(arrayOf(1f, 1f, 2f, 2f))
     }
 
-    BackHandler {
-        onBackPressed()
-    }
+    when (isWorkoutScreen) {
+        true -> {
+            workoutViewModel?.let {
+                val state by workoutViewModel.uiState.collectAsStateWithLifecycle()
 
-    WorkoutScreenContent(
-        name = if (state.workoutName.isEmpty() && state.workoutPrefix != TimeOfDay.EMPTY) stringResource(
-            state.workoutPrefix.stringResource
-        ) else state.workoutName,
-        note = state.note,
-        exercises = state.exercises,
-        weightValues = weightValues,
-        onAddExercise = onAddExercise,
-        onDeleteSet = { workoutViewModel.removeSet(it) },
-        onCancel = {
-            workoutViewModel.cancel()
-            onCancel()
-        },
-        onNoteChange = { workoutViewModel.changeNote(it) },
-        onExerciseNoteChange = { pos, note -> workoutViewModel.changeExerciseNote(pos, note) },
-        onRemoveExercise = { workoutViewModel.removeExercise(it) },
-        onReplaceExercise = {
-            workoutViewModel.replaceExercise(it)
-            onReplaceExercise()
-        },
-        onAddSet = { workoutViewModel.addSet(it) },
-        onInputFieldChanged = { pos, value, type ->
-            when (type) {
-                SetField.WEIGHT -> workoutViewModel.onWeightChange(pos, value)
-                SetField.REPETITIONS -> workoutViewModel.onRepsChange(pos, value)
+                BackHandler {
+                    onBackPressed()
+                }
+
+                WorkoutScreenContent(
+                    name = if (state.workoutName.isEmpty() && state.workoutPrefix != TimeOfDay.EMPTY) stringResource(
+                        state.workoutPrefix.stringResource
+                    ) else state.workoutName,
+                    note = state.note,
+                    exercises = state.exercises,
+                    isWorkoutScreen = true,
+                    weightValues = weightValues,
+                    onAddExercise = onAddExercise,
+                    onDeleteSet = { workoutViewModel.removeSet(it) },
+                    onCancel = {
+                        workoutViewModel.cancel()
+                        onCancel()
+                    },
+                    onNoteChange = { workoutViewModel.changeNote(it) },
+                    onExerciseNoteChange = { pos, note ->
+                        workoutViewModel.changeExerciseNote(
+                            pos,
+                            note
+                        )
+                    },
+                    onRemoveExercise = { workoutViewModel.removeExercise(it) },
+                    onReplaceExercise = {
+                        workoutViewModel.replaceExercise(it)
+                        onReplaceExercise()
+                    },
+                    onAddSet = { workoutViewModel.addSet(it) },
+                    onInputFieldChanged = { pos, value, type ->
+                        when (type) {
+                            SetField.WEIGHT -> workoutViewModel.onWeightChange(pos, value)
+                            SetField.REPETITIONS -> workoutViewModel.onRepsChange(pos, value)
+                        }
+                    },
+                    onSetTypeChange = { pos, type -> workoutViewModel.onSetTypeChanged(pos, type) }
+                )
             }
-        },
-        onSetTypeChange = { pos, type -> workoutViewModel.onSetTypeChanged(pos, type) }
-    )
+        }
+
+        false -> {
+            addTemplateViewModel?.let {
+                val state by addTemplateViewModel.uiState.collectAsStateWithLifecycle()
+
+                if (state.isAdded) {
+                    LaunchedEffect(Unit) {
+                        onBackPressed()
+                    }
+                }
+
+                WorkoutScreenContent(
+                    name = state.workoutName,
+                    note = state.note,
+                    exercises = state.exercises,
+                    isWorkoutScreen = false,
+                    weightValues = weightValues,
+                    onAddExercise = onAddExercise,
+                    onCancel = {
+                        addTemplateViewModel.resetSelectedExercises()
+                        onCancel()
+                    },
+                    onNoteChange = {
+                        addTemplateViewModel.onWorkoutNoteChange(it)
+                    },
+                    onExerciseNoteChange = { pos, note ->
+                        addTemplateViewModel.changeExerciseNote(
+                            pos,
+                            note
+                        )
+                    },
+                    onRemoveExercise = { addTemplateViewModel.removeExercise(it) },
+                    onReplaceExercise = {
+                        addTemplateViewModel.setReplaceableExercise(it)
+                        onReplaceExercise()
+                    },
+                    onDeleteSet = { addTemplateViewModel.removeSet(it) },
+                    onAddSet = { addTemplateViewModel.addSet(it) },
+                    onInputFieldChanged = { pos, value, field ->
+                        when (field) {
+                            SetField.WEIGHT -> addTemplateViewModel.onWeightChange(pos, value)
+                            SetField.REPETITIONS -> addTemplateViewModel.onRepsChange(pos, value)
+                        }
+                    },
+                    onSetTypeChange = { pos, type ->
+                        addTemplateViewModel.onSetTypeChanged(
+                            pos,
+                            type
+                        )
+                    },
+                    onWorkoutNameChanged = { addTemplateViewModel.onWorkoutNameChange(it) }
+                )
+            }
+        }
+    }
 }
 
 @OptIn(ExperimentalFoundationApi::class)
@@ -131,6 +199,7 @@ fun WorkoutScreenContent(
     note: String,
     exercises: List<WorkoutEntry>,
     weightValues: Array<Float>,
+    isWorkoutScreen: Boolean,
     onAddExercise: () -> Unit,
     onCancel: () -> Unit,
     onNoteChange: (String) -> Unit,
@@ -141,6 +210,7 @@ fun WorkoutScreenContent(
     onAddSet: (Int) -> Unit,
     onInputFieldChanged: (Int, String, SetField) -> Unit,
     onSetTypeChange: (Int, SetType) -> Unit,
+    onWorkoutNameChanged: ((String) -> Unit)? = null,
 ) {
     FitnessTheme {
         Column(
@@ -148,12 +218,29 @@ fun WorkoutScreenContent(
                 .fillMaxSize()
                 .padding(top = 16.dp)
         ) {
-            Text(
-                text = name,
-                modifier = Modifier.padding(start = 16.dp),
-                style = MaterialTheme.typography.titleLarge,
-                color = MaterialTheme.colorScheme.onSecondaryContainer
-            )
+            if (isWorkoutScreen) {
+                Text(
+                    text = name,
+                    modifier = Modifier.padding(start = 16.dp),
+                    style = MaterialTheme.typography.titleLarge,
+                    color = MaterialTheme.colorScheme.onSecondaryContainer
+                )
+            } else {
+                WorkoutScreenInputField(
+                    modifier = Modifier
+                        .fillMaxWidth()
+                        .padding(12.dp),
+                    value = name,
+                    label = {
+                        Text(
+                            text = stringResource(R.string.add_name_hint),
+                            style = MaterialTheme.typography.labelMedium,
+                            color = MaterialTheme.colorScheme.secondary
+                        )
+                    },
+                    onValueChanged = { onWorkoutNameChanged?.invoke(it) }
+                )
+            }
 
             WorkoutScreenInputField(
                 modifier = Modifier

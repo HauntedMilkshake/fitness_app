@@ -15,13 +15,10 @@ import bg.zahov.app.data.model.FirestoreFields
 import bg.zahov.app.data.model.Measurement
 import bg.zahov.app.data.model.SetType
 import bg.zahov.app.data.model.Sets
-import bg.zahov.app.data.model.Units
 import bg.zahov.app.data.model.User
 import bg.zahov.app.data.model.Workout
 import bg.zahov.app.data.model.state.ExerciseData
 import bg.zahov.app.ui.exercise.ExerciseAdapterWrapper
-import bg.zahov.app.ui.workout.add.ExerciseSetAdapterExerciseWrapper
-import bg.zahov.app.ui.workout.add.ExerciseSetAdapterSetWrapper
 import bg.zahov.fitness.app.R
 import com.google.firebase.Timestamp
 import java.time.Instant
@@ -136,81 +133,6 @@ fun String.parseTimeStringToLong(): Long {
     val seconds = if (parts.size == 3) parts[2].toLong() else 0
 
     return ((hours * 60 * 60) + (minutes * 60) + seconds) * 1000
-}
-
-fun Exercise.toExerciseSetAdapterWrapper(units: Units = Units.METRIC): ExerciseSetAdapterExerciseWrapper {
-    return ExerciseSetAdapterExerciseWrapper(
-        noteVisibility = if (note.isNullOrEmpty()) View.GONE else View.VISIBLE,
-        note = note,
-        name = this.name,
-        backgroundResource = R.color.background,
-        firstInputColumnVisibility = when (this.category) {
-//            Category.RepsOnly, Category.Cardio, Category.Timed  -> View.GONE
-            else -> View.VISIBLE
-        },
-        firstInputColumnResource = when (this.category) {
-//            Category.AssistedWeight -> {
-//                when (units) {
-//                    Units.METRIC -> R.string.kg_minus
-//                    Units.BANANA -> R.string.lbs_minus
-//                }
-//            }
-
-            else -> {
-                when (units) {
-                    Units.METRIC -> R.string.kg_column_text
-                    Units.BANANA -> R.string.lbs_column_text
-                }
-            }
-
-        },
-        secondInputColumnResource = when (this.category) {
-//            Category.Cardio,  Category.Timed  -> R.string.time
-            else -> {
-                R.string.reps_column_text
-            }
-        },
-        bodyPart = this.bodyPart,
-        category = this.category,
-        isTemplate = this.isTemplate
-    )
-}
-
-fun ExerciseSetAdapterExerciseWrapper.toExercise(): Exercise {
-    return Exercise(
-        name = this.name,
-        bodyPart = this.bodyPart,
-        category = this.category,
-        isTemplate = this.isTemplate,
-        note = this.note,
-        sets = mutableListOf(),
-        bestSet = Sets(SetType.DEFAULT, null, null)
-    )
-}
-
-fun Sets.toExerciseSetAdapterSetWrapper(
-    number: String,
-    category: Category,
-    previousResults: String = "-/-",
-    resumeSet: Sets? = null
-): ExerciseSetAdapterSetWrapper {
-    return ExerciseSetAdapterSetWrapper(
-        setIndicator = when (this.type) {
-            SetType.WARMUP -> R.string.warmup_set_indicator
-            SetType.DROP_SET -> R.string.drop_set_indicator
-            SetType.DEFAULT -> R.string.default_set_indicator
-            SetType.FAILURE -> R.string.failure_set_indicator
-        },
-//        secondInputFieldVisibility = when (category) {
-////            Category.RepsOnly, Category.Cardio, Category.Timed -> View.GONE
-//            else -> View.VISIBLE
-//        }
-        View.VISIBLE,
-        setNumber = number,
-        set = resumeSet ?: Sets(SetType.DEFAULT, 0.0, 0),
-        backgroundResource = R.color.completed_set,
-        previousResults = previousResults,
-    )
 }
 
 fun Exercise.toExerciseData() =
