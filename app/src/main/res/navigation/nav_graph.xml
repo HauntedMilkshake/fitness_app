@@ -167,8 +167,7 @@
 
     <fragment
         android:id="@+id/create_workout_template"
-        android:name="bg.zahov.app.ui.workout.add.AddTemplateWorkoutFragment"
-        tools:layout="@layout/fragment_add_workout_template">
+        android:name="bg.zahov.app.ui.workout.add.AddTemplateWorkoutFragment">
 
         <action
             android:id="@+id/create_workout_template_to_workout"
