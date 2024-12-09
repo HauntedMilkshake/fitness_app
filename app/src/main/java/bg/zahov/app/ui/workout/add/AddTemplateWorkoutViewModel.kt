@@ -1,10 +1,8 @@
 package bg.zahov.app.ui.workout.add
 
-import android.util.Log
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
 import bg.zahov.app.Inject
-import bg.zahov.app.data.interfaces.SettingsProvider
 import bg.zahov.app.data.interfaces.WorkoutProvider
 import bg.zahov.app.data.model.Category
 import bg.zahov.app.data.model.Exercise
@@ -24,10 +22,20 @@ import bg.zahov.app.util.generateRandomId
 import bg.zahov.fitness.app.R
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.StateFlow
+import kotlinx.coroutines.flow.first
 import kotlinx.coroutines.flow.update
 import kotlinx.coroutines.launch
 import java.time.LocalDateTime
 
+/**
+ * Represents the UI state for adding a template workout in the application.
+ *
+ * @property workoutName The name of the workout being added. Defaults to an empty string.
+ * @property workoutDate The date and time of the workout. Must be provided when creating the instance.
+ * @property exercises A list of exercises (or workout entries) included in the template workout. Defaults to an empty list.
+ * @property note An optional note associated with the workout. Defaults to an empty string.
+ * @property isAdded A flag indicating whether the workout has been successfully added. Defaults to `false`.
+ */
 data class AddTemplateWorkoutUiState(
     val workoutName: String = "",
     val workoutDate: LocalDateTime,
@@ -36,73 +44,137 @@ data class AddTemplateWorkoutUiState(
     val isAdded: Boolean = false,
 )
 
+/**
+ * ViewModel responsible for managing the state and logic for adding a template workout.
+ *
+ * @property workoutProvider Provides access to workout-related data and operations.
+ * @property selectableExerciseProvider Handles operations for selecting exercises to add to the workout.
+ * @property replaceableExerciseProvider Manages the replacement of existing exercises in the workout.
+ * @property toastManager Manages toast notifications to provide feedback to the user.
+ */
 class AddTemplateWorkoutViewModel(
     private val workoutProvider: WorkoutProvider = Inject.workoutProvider,
     private val selectableExerciseProvider: AddExerciseToWorkoutProvider = Inject.workoutAddedExerciseProvider,
     private val replaceableExerciseProvider: ReplaceableExerciseProvider = Inject.replaceableExerciseProvider,
-    private val settingsProvider: SettingsProvider = Inject.settingsProvider,
     private val toastManager: ToastManager = ToastManager,
 ) : ViewModel() {
 
+    /**
+     * The default date and time for the workout, initialized to the current date and time.
+     */
     private var workoutDate = LocalDateTime.now()
 
-    private val _uiState =
-        MutableStateFlow<AddTemplateWorkoutUiState>(AddTemplateWorkoutUiState(workoutDate = workoutDate))
+    /**
+     * The backing [MutableStateFlow] for the UI state, initialized with default values.
+     * Provides a reactive data source for observing UI changes.
+     */
+    private val _uiState = MutableStateFlow<AddTemplateWorkoutUiState>(
+        AddTemplateWorkoutUiState(workoutDate = workoutDate)
+    )
+
+    /**
+     * The public [StateFlow] exposing the UI state.
+     * Observers can collect this flow to react to UI state updates.
+     */
     val uiState: StateFlow<AddTemplateWorkoutUiState> = _uiState
 
+    /**
+     * The index of the exercise to be replaced, if applicable.
+     * Used when modifying an existing workout. Defaults to `null` when no replacement is needed.
+     */
     private var exerciseToReplaceIndex: Int? = null
-    private lateinit var templates: List<Workout>
+
+    /**
+     * A list of all available templates of workouts.
+     * Used to allow the user to select or modify a workout template.
+     */
+    private var templates: List<Workout> = listOf()
+
+    /**
+     * A flag indicating whether the current operation is editing an existing workout or adding a new one.
+     * Defaults to `false`, meaning a new workout is being created.
+     */
     private var edit = false
-    private lateinit var workoutIdToEdit: String
-    private lateinit var settings: bg.zahov.app.data.local.Settings
+
+    /**
+     * The ID of the workout being edited.
+     * Used to identify and fetch the workout when in edit mode. Defaults to an empty string.
+     */
+    private var workoutIdToEdit: String = ""
+
+    /**
+     * A list of exercises associated with the selected workout template.
+     * Populated when a template workout is selected.
+     */
     private var templateExercises = listOf<Exercise>()
 
     init {
         viewModelScope.launch {
-            launch {
-                workoutProvider.getTemplateExercises().collect {
-                    templateExercises = it
-                }
+            observeTemplateExercises()
+            observeTemplateWorkouts()
+            observeSelectedExercises()
+            observeExerciseToReplace()
+        }
+    }
+
+    /**
+     * Observes template exercises from the workout provider and updates the `templateExercises` field.
+     */
+    private fun observeTemplateExercises() {
+        viewModelScope.launch {
+            workoutProvider.getTemplateExercises().collect {
+                templateExercises = it
             }
-            launch {
-                settingsProvider.getSettings().collect { settingsObject ->
-                    settingsObject.obj?.let { collectedSettings ->
-                        settings = collectedSettings
+        }
+    }
+
+    /**
+     * Observes template workouts from the workout provider and updates the `templates` field.
+     */
+    private fun observeTemplateWorkouts() {
+        viewModelScope.launch {
+            workoutProvider.getTemplateWorkouts().collect {
+                templates = it
+            }
+        }
+    }
+
+    /**
+     * Observes selected exercises from the selectable exercise provider.
+     * Adds these exercises to the current UI state and resets the selected exercises.
+     */
+    private fun observeSelectedExercises() {
+        viewModelScope.launch {
+            selectableExerciseProvider.selectedExercises.collect {
+                if (it.isNotEmpty()) {
+                    _uiState.update { old ->
+                        val exercisesToUpdate = _uiState.value.exercises.toMutableList()
+                        exercisesToUpdate.addAll(it.toWorkoutEntryList(templateExercises))
+                        old.copy(exercises = exercisesToUpdate)
                     }
                 }
+                selectableExerciseProvider.resetSelectedExercises()
             }
-            launch {
-                workoutProvider.getTemplateWorkouts().collect {
-                    templates = it
-                }
-            }
+        }
+    }
 
-            launch {
-                selectableExerciseProvider.selectedExercises.collect {
-                    if(it.isNotEmpty()) {
-                        _uiState.update { old ->
-                            val exercisesToUpdate = _uiState.value.exercises.toMutableList()
-                            exercisesToUpdate.addAll(it.toWorkoutEntryList(templateExercises))
-                            old.copy(exercises = exercisesToUpdate)
-                        }
-                    }
-                    selectableExerciseProvider.resetSelectedExercises()
-                }
-            }
-
-            launch {
-                replaceableExerciseProvider.exerciseToReplace.collect {
-                    it?.let { replaced ->
-                        val replacedEntry = replaced.toWorkoutEntry(templateExercises)
-                        exerciseToReplaceIndex?.let { indexToReplace ->
-                            if (_uiState.value.exercises[indexToReplace] != replacedEntry) {
-                                _uiState.update { old ->
-                                    val captured = _uiState.value.exercises.toMutableList()
-                                    captured[indexToReplace] = replacedEntry.first()
-                                    old.copy(exercises = captured)
-                                }
-                                replaceableExerciseProvider.resetExerciseToReplace()
+    /**
+     * Observes the exercise to replace from the replaceable exercise provider.
+     * Updates the UI state with the replaced exercise if it differs from the current entry.
+     */
+    private fun observeExerciseToReplace() {
+        viewModelScope.launch {
+            replaceableExerciseProvider.exerciseToReplace.collect {
+                it?.let { replaced ->
+                    val replacedEntry = replaced.toWorkoutEntry(templateExercises)
+                    exerciseToReplaceIndex?.let { indexToReplace ->
+                        if (_uiState.value.exercises[indexToReplace] != replacedEntry) {
+                            _uiState.update { old ->
+                                val captured = _uiState.value.exercises.toMutableList()
+                                captured[indexToReplace] = replacedEntry.first()
+                                old.copy(exercises = captured)
                             }
+                            replaceableExerciseProvider.resetExerciseToReplace()
                         }
                     }
                 }
@@ -110,12 +182,22 @@ class AddTemplateWorkoutViewModel(
         }
     }
 
+    /**
+     * Initializes the workout editing process by setting the workout ID to edit and updating the UI state.
+     *
+     * This function checks if the `workoutIdToEdit` is empty before proceeding. If valid, it fetches the
+     * workout corresponding to the given ID and updates the UI state with its details.
+     *
+     * @param editFlag Indicates whether the workout is being edited.
+     * @param workoutId The ID of the workout to edit.
+     */
     fun initEditWorkoutId(editFlag: Boolean, workoutId: String) {
-        edit = editFlag
-        workoutIdToEdit = workoutId
-        if (workoutIdToEdit.isNotEmpty()) {
+        if (workoutIdToEdit.isEmpty()) {
+            edit = editFlag
+            workoutIdToEdit = workoutId
+
             viewModelScope.launch {
-                workoutProvider.getTemplateWorkouts().collect { workouts ->
+                workoutProvider.getTemplateWorkouts().first().let { workouts ->
                     workouts.find { it.id == workoutId }?.let { workout ->
                         _uiState.update { old ->
                             old.copy(
@@ -130,18 +212,36 @@ class AddTemplateWorkoutViewModel(
         }
     }
 
+    /**
+     * Clears any active toast messages by invoking the toast manager's clear function.
+     */
     fun clearToast() {
         toastManager.clearToast()
     }
 
+    /**
+     * Resets the list of selected exercises by invoking the selectable exercise provider's reset function.
+     */
     fun resetSelectedExercises() {
         selectableExerciseProvider.resetSelectedExercises()
     }
 
+    /**
+     * Sets the index of the exercise to be replaced.
+     *
+     * @param itemPosition The position of the exercise in the list that should be replaced.
+     */
     fun setReplaceableExercise(itemPosition: Int) {
         exerciseToReplaceIndex = itemPosition
     }
 
+    /**
+     * Checks whether a template workout can be added.
+     *
+     * Validates that the workout has exercises and a name. If not, it shows appropriate toast messages.
+     *
+     * @return `true` if a workout can be added; `false` otherwise.
+     */
     private fun canAdd(): Boolean {
         if (_uiState.value.exercises.isEmpty()) {
             toastManager.showToast(R.string.no_exercises)
@@ -154,11 +254,16 @@ class AddTemplateWorkoutViewModel(
         return true
     }
 
+    /**
+     * Adds a new template workout if the necessary conditions are met.
+     *
+     * This function checks if a workout can be added using `canAdd`. If valid, it creates a new workout
+     * with the UI state's details and invokes the workout provider to add it as a template workout.
+     * The UI state is then updated to reflect the addition, and the temporary state is cleared.
+     */
     fun addTemplateWorkout() {
         if (canAdd()) {
             viewModelScope.launch {
-                Log.d("upserting", "upserting")
-                Log.d("upserting", _uiState.value.toString())
                 workoutProvider.addTemplateWorkout(
                     Workout(
                         id = if (edit) workoutIdToEdit else generateRandomId(),
@@ -177,38 +282,14 @@ class AddTemplateWorkoutViewModel(
         }
     }
 
+    /**
+     * Clears temporary state by resetting the selected exercises.
+     * This is invoked after adding a template workout.
+     */
     private fun clear() {
         resetSelectedExercises()
     }
 
-    fun List<WorkoutEntry>.toExerciseList(): List<Exercise> {
-        val exercises = mutableListOf<Exercise>()
-        var currentExercisesIndex = 0
-        this.forEachIndexed { index, entry ->
-            when (entry) {
-                is WorkoutEntry.ExerciseEntry -> {
-                    if (index != 0) currentExercisesIndex++
-                    exercises.add(
-                        Exercise(
-                            name = entry.name,
-                            bodyPart = entry.bodyPart,
-                            category = entry.category,
-                            note = entry.note
-                        )
-                    )
-                }
-
-                is WorkoutEntry.SetEntry -> {
-                    val reps = entry.set.firstMetric
-                    val weight = entry.set.secondMetric
-                    if (reps != null && reps != 0.0 && weight != null && weight != 0) {
-                        exercises[currentExercisesIndex].sets.add(entry.set)
-                    }
-                }
-            }
-        }
-        return exercises
-    }
 
     /**
      * Removes the exercise for the current position
@@ -454,5 +535,34 @@ class AddTemplateWorkoutViewModel(
             old.copy(note = newNote)
         }
     }
+}
 
+
+fun List<WorkoutEntry>.toExerciseList(): List<Exercise> {
+    val exercises = mutableListOf<Exercise>()
+    var currentExercisesIndex = 0
+    this.forEachIndexed { index, entry ->
+        when (entry) {
+            is WorkoutEntry.ExerciseEntry -> {
+                if (index != 0) currentExercisesIndex++
+                exercises.add(
+                    Exercise(
+                        name = entry.name,
+                        bodyPart = entry.bodyPart,
+                        category = entry.category,
+                        note = entry.note
+                    )
+                )
+            }
+
+            is WorkoutEntry.SetEntry -> {
+                val reps = entry.set.firstMetric
+                val weight = entry.set.secondMetric
+                if (reps != null && reps != 0.0 && weight != null && weight != 0) {
+                    exercises[currentExercisesIndex].sets.add(entry.set)
+                }
+            }
+        }
+    }
+    return exercises
 }
