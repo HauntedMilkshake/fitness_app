@@ -1,6 +1,5 @@
 package bg.zahov.app.ui.workout
 
-import android.util.Log
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
 import bg.zahov.app.Inject
@@ -35,7 +34,7 @@ import java.time.LocalDateTime
 import java.util.Locale
 import java.util.Random
 
-/**
+/**g
  * Represents the UI state of a workout session.
  *
  * @property workoutName The name of the workout.
