@@ -34,7 +34,7 @@ import java.time.LocalDateTime
 import java.util.Locale
 import java.util.Random
 
-/**g
+/**
  * Represents the UI state of a workout session.
  *
  * @property workoutName The name of the workout.

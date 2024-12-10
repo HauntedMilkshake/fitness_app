@@ -31,14 +31,12 @@ import java.time.LocalDateTime
  * Represents the UI state for adding a template workout in the application.
  *
  * @property workoutName The name of the workout being added. Defaults to an empty string.
- * @property workoutDate The date and time of the workout. Must be provided when creating the instance.
  * @property exercises A list of exercises (or workout entries) included in the template workout. Defaults to an empty list.
  * @property note An optional note associated with the workout. Defaults to an empty string.
  * @property isAdded A flag indicating whether the workout has been successfully added. Defaults to `false`.
  */
 data class AddTemplateWorkoutUiState(
     val workoutName: String = "",
-    val workoutDate: LocalDateTime,
     val exercises: List<WorkoutEntry> = listOf(),
     val note: String = "",
     val isAdded: Boolean = false,
@@ -60,16 +58,11 @@ class AddTemplateWorkoutViewModel(
 ) : ViewModel() {
 
     /**
-     * The default date and time for the workout, initialized to the current date and time.
-     */
-    private var workoutDate = LocalDateTime.now()
-
-    /**
      * The backing [MutableStateFlow] for the UI state, initialized with default values.
      * Provides a reactive data source for observing UI changes.
      */
     private val _uiState = MutableStateFlow<AddTemplateWorkoutUiState>(
-        AddTemplateWorkoutUiState(workoutDate = workoutDate)
+        AddTemplateWorkoutUiState()
     )
 
     /**
@@ -202,7 +195,6 @@ class AddTemplateWorkoutViewModel(
                         _uiState.update { old ->
                             old.copy(
                                 workoutName = workout.name,
-                                workoutDate = workoutDate,
                                 exercises = workout.exercises.toWorkoutEntryList(templateExercises)
                             )
                         }
@@ -270,7 +262,7 @@ class AddTemplateWorkoutViewModel(
                         name = _uiState.value.workoutName,
                         note = _uiState.value.note,
                         duration = 0L,
-                        date = _uiState.value.workoutDate,
+                        date = LocalDateTime.now(),
                         isTemplate = true,
                         exercises = _uiState.value.exercises.toExerciseList(),
                         volume = null,

@@ -25,7 +25,7 @@ import bg.zahov.app.setToolBarTitle
 import bg.zahov.app.ui.exercise.ExercisesFragment.Companion.ADD_EXERCISE_ARG
 import bg.zahov.app.ui.exercise.ExercisesFragment.Companion.REPLACE_EXERCISE_ARG
 import bg.zahov.app.ui.exercise.ExercisesFragment.Companion.STATE_ARG
-import bg.zahov.app.ui.workout.WorkoutScreen
+import bg.zahov.app.ui.workout.AddTemplateWorkoutScreen
 import bg.zahov.app.ui.workout.start.StartWorkoutFragment.Companion.EDIT_FLAG_ARG_KEY
 import bg.zahov.app.ui.workout.start.StartWorkoutFragment.Companion.WORKOUT_ID_ARG_KEY
 import bg.zahov.fitness.app.R
@@ -59,8 +59,7 @@ class AddTemplateWorkoutFragment : Fragment() {
         return ComposeView(requireContext()).apply {
             setViewCompositionStrategy(ViewCompositionStrategy.DisposeOnViewTreeLifecycleDestroyed)
             setContent {
-                WorkoutScreen(
-                    isWorkoutScreen = false,
+                AddTemplateWorkoutScreen(
                     addTemplateViewModel = addWorkoutViewModel,
                     onAddExercise = {
                         findNavController().navigate(
