@@ -7,6 +7,7 @@ import android.view.MenuItem
 import android.view.View
 import androidx.activity.viewModels
 import androidx.appcompat.app.AppCompatActivity
+import androidx.compose.ui.platform.ComposeView
 import androidx.core.view.MenuProvider
 import androidx.fragment.app.FragmentActivity
 import androidx.lifecycle.lifecycleScope
@@ -38,103 +39,97 @@ class MainActivity : AppCompatActivity() {
         binding = ActivityMainBinding.inflate(layoutInflater)
         setContentView(binding.root)
 
-        val navController = findNavController(R.id.nav_host_fragment)
-        appBarConfiguration = AppBarConfiguration(navController.graph)
+        val composeView = findViewById<ComposeView>(R.id.parentCompose)
 
-        binding.bottomNavigation.setupWithNavController(navController)
-        setSupportActionBar(binding.toolbar)
-
-        workoutManagerViewModel.state.map { WorkoutManagerUiMapper.map(it) }.observe(this) {
-            setWorkoutVisibility(it.trailingWorkoutVisibility)
-            if (it.openWorkout) navController.navigate(R.id.to_workout_fragment)
-        }
-        lifecycleScope.launch {
-            serviceErrorHandler.observeServiceState()
-                .collect { serviceState ->
-                    when (serviceState) {
-                        ServiceState.Unavailable -> navController.navigate(R.id.to_shutting_down_fragment)
-                        ServiceState.Shutdown -> finish()
-                        else -> ShutDownData()
-                    }
-                }
-        }
-        workoutManagerViewModel.template.observe(this) {
-            binding.workoutName.text = it.name
-        }
-
-        workoutManagerViewModel.timer.observe(this) {
-            binding.timer.text = it
-        }
-
-        binding.trailingWorkout.setOnClickListener {
-            workoutManagerViewModel.updateStateToActive()
+        composeView.setContent {
+            App()
         }
     }
-
-    private fun setWorkoutVisibility(visibility: Int) {
-        binding.apply {
-            trailingWorkout.visibility = visibility
-        }
-    }
-
-    override fun onSupportNavigateUp(): Boolean {
-        val navController = findNavController(R.id.nav_host_fragment)
-        return navController.navigateUp(appBarConfiguration)
-                || super.onSupportNavigateUp()
-    }
-
-    override fun onCreateOptionsMenu(menu: Menu?): Boolean {
-        return super.onCreateOptionsMenu(menu)
-    }
-
-    override fun onPause() {
-        super.onPause()
-        workoutManagerViewModel.saveWorkoutState()
-    }
-
-    override fun onStop() {
-        super.onStop()
-        workoutManagerViewModel.saveWorkoutState()
-    }
 }
+//        val navController = findNavController(R.id.nav_host_fragment)
+//        appBarConfiguration = AppBarConfiguration(navController.graph)
+//
+//        binding.bottomNavigation.setupWithNavController(navController)
+//        setSupportActionBar(binding.toolbar)
+//
+//        workoutManagerViewModel.state.map { WorkoutManagerUiMapper.map(it) }.observe(this) {
+//            setWorkoutVisibility(it.trailingWorkoutVisibility)
+//            if (it.openWorkout) navController.navigate(R.id.to_workout_fragment)
+//        }
+//        lifecycleScope.launch {
+//            serviceErrorHandler.observeServiceState()
+//                .collect { serviceState ->
+//                    when (serviceState) {
+//                        ServiceState.Unavailable -> navController.navigate(R.id.to_shutting_down_fragment)
+//                        ServiceState.Shutdown -> finish()
+//                        else -> ShutDownData()
+//                    }
+//                }
+//        }
+//        workoutManagerViewModel.template.observe(this) {
+//            binding.workoutName.text = it.name
+//        }
+//
+//        workoutManagerViewModel.timer.observe(this) {
+//            binding.timer.text = it
+//        }
+//
+//        binding.trailingWorkout.setOnClickListener {
+//            workoutManagerViewModel.updateStateToActive()
+//        }
 
-fun FragmentActivity.hideBottomNav() {
-    findViewById<BottomNavigationView>(R.id.bottom_navigation)?.visibility = View.GONE
-
-}
-
-fun FragmentActivity.showBottomNav() {
-    findViewById<BottomNavigationView>(R.id.bottom_navigation)?.visibility = View.VISIBLE
-}
-
-fun FragmentActivity.showTopBar() {
-    findViewById<AppBarLayout>(R.id.top_bar)?.visibility = View.VISIBLE
-    findViewById<MaterialToolbar>(R.id.toolbar)?.visibility = View.VISIBLE
-}
-
-fun FragmentActivity.hideTopBar() {
-    findViewById<AppBarLayout>(R.id.top_bar)?.visibility = View.GONE
-    findViewById<MaterialToolbar>(R.id.toolbar)?.visibility = View.GONE
-
-}
-
-fun FragmentActivity.setToolBarTitle(title: String) {
-    findViewById<MaterialToolbar>(R.id.toolbar)?.title = title
-}
-
-fun FragmentActivity.setToolBarTitle(title: Int) {
-    findViewById<MaterialToolbar>(R.id.toolbar)?.setTitle(title)
-}
-
-
-fun FragmentActivity.clearMenu() {
-    this.addMenuProvider(
-        object : MenuProvider {
-            override fun onCreateMenu(menu: Menu, menuInflater: MenuInflater) {
-                menu.clear()
-            }
-
-            override fun onMenuItemSelected(menuItem: MenuItem) = false
-        }
-    )
-}
+//
+//    private fun setWorkoutVisibility(visibility: Int) {
+//        binding.apply {
+//            trailingWorkout.visibility = visibility
+//        }
+//    }
+//
+//    override fun onSupportNavigateUp(): Boolean {
+//        val navController = findNavController(R.id.nav_host_fragment)
+//        return navController.navigateUp(appBarConfiguration)
+//                || super.onSupportNavigateUp()
+//    }
+//
+//    override fun onCreateOptionsMenu(menu: Menu?): Boolean {
+//        return super.onCreateOptionsMenu(menu)
+//    }
+//
+//    override fun onPause() {
+//        super.onPause()
+//        workoutManagerViewModel.saveWorkoutState()
+//    }
+//
+//    override fun onStop() {
+//        super.onStop()
+//        workoutManagerViewModel.saveWorkoutState()
+//    }
+//}
+//
+//fun FragmentActivity.hideBottomNav() {
+//    findViewById<BottomNavigationView>(R.id.bottom_navigation)?.visibility = View.GONE
+//
+//}
+//
+//fun FragmentActivity.showBottomNav() {
+//    findViewById<BottomNavigationView>(R.id.bottom_navigation)?.visibility = View.VISIBLE
+//}
+//
+//fun FragmentActivity.showTopBar() {
+//    findViewById<AppBarLayout>(R.id.top_bar)?.visibility = View.VISIBLE
+//    findViewById<MaterialToolbar>(R.id.toolbar)?.visibility = View.VISIBLE
+//}
+//
+//fun FragmentActivity.hideTopBar() {
+//    findViewById<AppBarLayout>(R.id.top_bar)?.visibility = View.GONE
+//    findViewById<MaterialToolbar>(R.id.toolbar)?.visibility = View.GONE
+//
+//}
+//
+//fun FragmentActivity.setToolBarTitle(title: String) {
+//    findViewById<MaterialToolbar>(R.id.toolbar)?.title = title
+//}
+//
+//fun FragmentActivity.setToolBarTitle(title: Int) {
+//    findViewById<MaterialToolbar>(R.id.toolbar)?.setTitle(title)
+//}
