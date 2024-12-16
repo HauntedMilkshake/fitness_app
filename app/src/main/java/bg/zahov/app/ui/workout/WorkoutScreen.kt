@@ -86,7 +86,6 @@ fun AddTemplateWorkoutScreen(
      * In order to center the items of 2 independent rows we need to have
      * pre-defined weight values to ensure consistency
      */
-    val weightValues = remember { weights }
     val state by addTemplateViewModel.uiState.collectAsStateWithLifecycle()
 
     if (state.isAdded) {
@@ -98,7 +97,7 @@ fun AddTemplateWorkoutScreen(
     ScreenContent(
         note = state.note,
         exercises = state.exercises,
-        weightValues = weightValues,
+        weightValues = weights,
         onAddExercise = onAddExercise,
         onCancel = {
             addTemplateViewModel.resetSelectedExercises()
@@ -151,7 +150,6 @@ fun WorkoutScreen(
      * In order to center the items of 2 independent rows we need to have
      * pre-defined weight values to ensure consistency
      */
-    val weightValues = remember { weights }
     val state by workoutViewModel.uiState.collectAsStateWithLifecycle()
 
     BackHandler {
@@ -161,7 +159,7 @@ fun WorkoutScreen(
     ScreenContent(
         note = state.note,
         exercises = state.exercises,
-        weightValues = weightValues,
+        weightValues = weights,
         onAddExercise = onAddExercise,
         onDeleteSet = { workoutViewModel.removeSet(it) },
         onCancel = {
