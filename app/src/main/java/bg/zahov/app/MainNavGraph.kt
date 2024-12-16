@@ -14,9 +14,9 @@ fun MainNavGraph(
     navController: NavHostController,
 ) {
 
-    NavHost(modifier = modifier, navController = navController, startDestination = WelcomeScreen) {
+    NavHost(modifier = modifier, navController = navController, startDestination = WelcomeScreen() {
         composable<WelcomeScreen> {
-            WelcomeScreen(onSignup = { navController.navigate(SignupScreen) }, onLogin = {
+            WelcomeScreen(onSignup = { navController.navigate(SignupScreen(5)) }, onLogin = {
                 navController.navigate(
                     LoginScreen
                 )
