@@ -7,19 +7,17 @@ import bg.zahov.app.data.interfaces.WorkoutProvider
 import bg.zahov.app.data.model.BodyPart
 import bg.zahov.app.data.model.Category
 import bg.zahov.app.data.model.Exercise
-import bg.zahov.app.data.model.SetType
-import bg.zahov.app.data.model.Sets
 import bg.zahov.app.data.model.ToastManager
 import bg.zahov.app.data.model.Workout
 import bg.zahov.app.data.model.WorkoutState
 import bg.zahov.app.data.provider.WorkoutStateManager
 import bg.zahov.app.util.generateRandomId
+import bg.zahov.fitness.app.R
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.StateFlow
 import kotlinx.coroutines.flow.update
 import kotlinx.coroutines.launch
 import java.time.LocalDateTime
-import bg.zahov.fitness.app.R
 
 /**
  * Represents the UI state for starting a workout.
@@ -27,24 +25,42 @@ import bg.zahov.fitness.app.R
  * @property workouts A list of template workouts the user has created.
  */
 data class StartWorkoutUiState(
-    val workouts: List<StartWorkout> = listOf()
+    val workouts: List<StartWorkout> = listOf(),
 )
 
 /**
- * Template workout
+ * Represents a workout that is ready to be started or performed.
  *
  * @property id The unique identifier for the workout.
  * @property name The name of the workout.
- * @property date The date when the workout is created.
- * @property exercises A list of exercise names included in the workout.
+ * @property date The date and time when the workout was created.
+ * @property exercises A list of exercises included in the workout, represented by [StartWorkoutExercise].
+ * @property note Additional notes or comments associated with the workout (optional).
+ * @property personalRecords The count or description of personal records achieved during the workout, defaulting to "0".
  */
 data class StartWorkout(
     val id: String,
     val name: String,
     val date: LocalDateTime,
-    val exercises: List<String>,
+    val exercises: List<StartWorkoutExercise>,
     val note: String = "",
-    val personalRecords: String = "0"
+    val personalRecords: String = "0",
+)
+
+/**
+ * Represents an exercise that is part of a workout.
+ *
+ * @property name The name of the exercise (e.g., "Bench Press").
+ * @property exercise A formatted string describing the exercise, often combining sets and the exercise name.
+ * @property bodyPart The body part targeted by the exercise (e.g., Chest, Back, Legs).
+ * @property category The category of the exercise, indicating the type of equipment or approach used
+ * (e.g., Barbell, Dumbbell, Machine).
+ */
+data class StartWorkoutExercise(
+    val name: String,
+    val exercise: String,
+    val bodyPart: BodyPart,
+    val category: Category,
 )
 
 /**
@@ -72,11 +88,6 @@ class StartWorkoutViewModel(
     private var currentWorkoutState: WorkoutState = WorkoutState.ACTIVE
 
     /**
-     * used for mapping to [Workout] because otherwise we lose information for set types
-     */
-    private var exerciseTemplates: List<Exercise> = listOf()
-
-    /**
      * collect template workouts, state and exercises which are to be used for mapping
      */
     init {
@@ -86,11 +97,6 @@ class StartWorkoutViewModel(
                     _uiState.update { old ->
                         old.copy(workouts = workouts)
                     }
-                }
-            }
-            launch {
-                repo.getTemplateExercises().collect { templates ->
-                    exerciseTemplates = templates
                 }
             }
             launch {
@@ -108,7 +114,7 @@ class StartWorkoutViewModel(
     fun startWorkout(workout: StartWorkout? = null) {
         viewModelScope.launch {
             if (currentWorkoutState == WorkoutState.INACTIVE) {
-                workoutState.startWorkout(workout = workout?.toWorkout(exerciseTemplates))
+                workoutState.startWorkout(workout = workout?.toWorkout())
             } else {
                 toastManager.showToast(R.string.toast_couldnt_start_workout)
             }
@@ -134,7 +140,7 @@ class StartWorkoutViewModel(
                     volume = 0.0,
                     date = LocalDateTime.now(),
                     isTemplate = true,
-                    exercises = newWorkout.toWorkout(exerciseTemplates).exercises
+                    exercises = newWorkout.toWorkout().exercises
                 )
             )
         }
@@ -150,7 +156,7 @@ class StartWorkoutViewModel(
      */
     fun deleteTemplateWorkout(workout: StartWorkout) {
         viewModelScope.launch {
-            repo.deleteTemplateWorkout(workout.toWorkout(exerciseTemplates))
+            repo.deleteTemplateWorkout(workout.toWorkout())
         }
     }
 }
@@ -162,39 +168,31 @@ class StartWorkoutViewModel(
  * an `Exercise` object. The function uses a regular expression to parse exercise names and sets. It looks for a
  * matching `Exercise` template from the provided list (`exerciseTemplates`) based on the exercise's name.
  *
- * @param exerciseTemplates A list of available exercise templates that are used to determine additional information
- * such as body part and category.
  * @return [Workout] object created from the `StartWorkout`.
  */
-fun StartWorkout.toWorkout(exerciseTemplates: List<Exercise>) = Workout(
+fun StartWorkout.toWorkout() = Workout(
     id = this.id,
     name = this.name,
     duration = 0,
     volume = 0.0,
     date = this.date,
     isTemplate = true,
-    exercises = this.exercises.map { exercise ->
-        val regex = """(\d+)\s*x\s*(.*)""".toRegex()
-        val matchResult = regex.find(exercise.trim())
-
-        val (setsCount, name) = if (matchResult != null) {
-            val setsCount = matchResult.groupValues[1].toInt()
-            val name = matchResult.groupValues[2]
-            setsCount to name
-        } else {
-            1 to exercise.trim()
-        }
-
-        val exerciseTemplate = exerciseTemplates.find { it.name == name }
-
-        Exercise(
-            name = name,
-            bodyPart = exerciseTemplate?.bodyPart ?: BodyPart.Other,
-            category = exerciseTemplate?.category ?: Category.None,
-            isTemplate = false,
-            sets = MutableList(setsCount) { Sets(SetType.DEFAULT, null, null) },
-        )
-    },
+    exercises = this.exercises.map { it.toExercise() },
     note = this.note,
     personalRecords = this.personalRecords.toIntOrNull() ?: 0
+)
+
+/**
+ * Converts a [StartWorkoutExercise] object to an [Exercise] object.
+ *
+ * @receiver The [StartWorkoutExercise] instance being converted.
+ * @return A new [Exercise] object with the following properties:
+ * - `name`: The name of the exercise.
+ * - `bodyPart`: The targeted body part of the exercise.
+ * - `category`: The category of the exercise (e.g., Barbell, Dumbbell, Machine).
+ */
+fun StartWorkoutExercise.toExercise(): Exercise = Exercise(
+    name = this.name,
+    bodyPart = this.bodyPart,
+    category = this.category
 )
