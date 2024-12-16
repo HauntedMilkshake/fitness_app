@@ -1,20 +1,19 @@
 package bg.zahov.app
 
-import android.app.Application
 import android.view.View
-import androidx.lifecycle.AndroidViewModel
 import androidx.lifecycle.LiveData
 import androidx.lifecycle.MutableLiveData
+import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
 import bg.zahov.app.data.model.Workout
 import bg.zahov.app.data.model.WorkoutState
+import bg.zahov.app.data.provider.WorkoutStateManager
 import bg.zahov.app.util.timeToString
 import kotlinx.coroutines.launch
 
-class WorkoutManagerViewModel(application: Application) : AndroidViewModel(application) {
-    private val workoutStateManager by lazy {
-        application.getWorkoutStateManager()
-    }
+class WorkoutManagerViewModel(
+    private val workoutStateManager: WorkoutStateManager = Inject.workoutState
+) : ViewModel() {
 
     private val _state = MutableLiveData<State>(State.Inactive(View.GONE))
     val state: LiveData<State>
