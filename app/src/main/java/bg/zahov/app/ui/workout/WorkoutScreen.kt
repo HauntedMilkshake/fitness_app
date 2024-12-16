@@ -85,7 +85,7 @@ fun AddTemplateWorkoutScreen(
      * In order to center the items of 2 independent rows we need to have
      * pre-defined weight values to ensure consistency
      */
-    val weightValues = getWeightValues()
+    val weightValues = rememberSaveable { arrayOf(1f, 1f, 2f, 2f) }
     val state by addTemplateViewModel.uiState.collectAsStateWithLifecycle()
 
     if (state.isAdded) {
@@ -150,7 +150,7 @@ fun WorkoutScreen(
      * In order to center the items of 2 independent rows we need to have
      * pre-defined weight values to ensure consistency
      */
-    val weightValues = getWeightValues()
+    val weightValues = rememberSaveable { arrayOf(1f, 1f, 2f, 2f) }
     val state by workoutViewModel.uiState.collectAsStateWithLifecycle()
 
     BackHandler {
@@ -197,11 +197,6 @@ fun WorkoutScreen(
 }
 
 @Composable
-fun getWeightValues(): Array<Float> {
-    return rememberSaveable { arrayOf(1f, 1f, 2f, 2f) }
-}
-
-@Composable
 fun WorkoutTitleText(name: String, modifier: Modifier = Modifier) {
     Text(
         text = name,
@@ -212,7 +207,11 @@ fun WorkoutTitleText(name: String, modifier: Modifier = Modifier) {
 }
 
 @Composable
-fun WorkoutTitleField(name: String, modifier: Modifier = Modifier, onWorkoutNameChanged: (String) -> Unit) {
+fun WorkoutTitleField(
+    name: String,
+    modifier: Modifier = Modifier,
+    onWorkoutNameChanged: (String) -> Unit,
+) {
     WorkoutScreenInputField(
         modifier = modifier
             .fillMaxWidth()
