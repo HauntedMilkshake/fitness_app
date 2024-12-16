@@ -1,6 +1,11 @@
 package bg.zahov.app.ui.workout.start
 
 import android.widget.Toast
+import androidx.compose.animation.AnimatedContent
+import androidx.compose.animation.AnimatedVisibilityScope
+import androidx.compose.animation.ExperimentalSharedTransitionApi
+import androidx.compose.animation.SharedTransitionLayout
+import androidx.compose.animation.SharedTransitionScope
 import androidx.compose.foundation.border
 import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.Arrangement
@@ -9,6 +14,7 @@ import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.padding
+import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.foundation.lazy.items
 import androidx.compose.foundation.shape.RoundedCornerShape
@@ -21,32 +27,32 @@ import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.LaunchedEffect
+import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
+import androidx.compose.runtime.saveable.rememberSaveable
+import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
+import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.style.TextOverflow
 import androidx.compose.ui.unit.dp
-import androidx.lifecycle.viewmodel.compose.viewModel
-import bg.zahov.fitness.app.R
-import androidx.compose.runtime.getValue
-import androidx.compose.runtime.saveable.rememberSaveable
-import androidx.compose.runtime.setValue
-import androidx.compose.ui.platform.LocalContext
-import androidx.compose.ui.tooling.preview.Preview
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
+import androidx.lifecycle.viewmodel.compose.viewModel
+import bg.zahov.app.data.model.BodyPart
+import bg.zahov.app.data.model.Category
 import bg.zahov.app.data.model.ToastManager
 import bg.zahov.app.data.provider.toFormattedString
 import bg.zahov.app.ui.theme.FitnessTheme
+import bg.zahov.fitness.app.R
 
 
 @Composable
 fun StartWorkoutScreen(
     startWorkoutViewModel: StartWorkoutViewModel = viewModel(),
-    onWorkoutClick: (String) -> Unit,
     onEditWorkout: (String) -> Unit,
     onAddTemplateWorkout: () -> Unit,
 ) {
@@ -62,7 +68,6 @@ fun StartWorkoutScreen(
     }
 
     StartWorkoutContent(workouts = uiState.workouts,
-        onWorkoutClick = { onWorkoutClick(it) },
         onWorkoutStart = { startWorkoutViewModel.startWorkout(it) },
         onAddTemplateWorkout = onAddTemplateWorkout,
         onStartEmptyWorkout = { startWorkoutViewModel.startWorkout() },
@@ -80,7 +85,6 @@ fun StartWorkoutScreen(
 @Composable
 fun StartWorkoutContent(
     workouts: List<StartWorkout>,
-    onWorkoutClick: (String) -> Unit,
     onWorkoutStart: (StartWorkout) -> Unit,
     onAddTemplateWorkout: () -> Unit,
     onStartEmptyWorkout: () -> Unit,
@@ -134,12 +138,12 @@ fun StartWorkoutContent(
 
             LazyColumn(Modifier.fillMaxSize()) {
                 items(items = workouts, key = { it.id }) {
+
                     Workout(
                         modifier = Modifier.animateItem(),
                         workoutName = it.name,
                         workoutDate = it.date.toFormattedString(),
                         exercises = it.exercises,
-                        onWorkoutClick = { onWorkoutClick(it.id) },
                         onWorkoutStart = { onWorkoutStart(it) },
                         onEdit = { onEditWorkout(it.id) },
                         onDelete = { onDeleteWorkout(it) },
@@ -150,11 +154,66 @@ fun StartWorkoutContent(
     }
 }
 
+@OptIn(ExperimentalSharedTransitionApi::class)
 @Composable
 fun Workout(
     modifier: Modifier,
-    workoutName: String, workoutDate: String, exercises: List<String> = listOf(),
-    onWorkoutClick: () -> Unit,
+    workoutName: String, workoutDate: String, exercises: List<StartWorkoutExercise> = listOf(),
+    onWorkoutStart: () -> Unit,
+    onEdit: () -> Unit,
+    onDelete: () -> Unit,
+    onDuplicate: () -> Unit,
+) {
+    var showDetails by rememberSaveable {
+        mutableStateOf(false)
+    }
+
+    SharedTransitionLayout(modifier = modifier) {
+        AnimatedContent(
+            targetState = showDetails, label = ""
+        ) { targetState ->
+            if (!targetState) {
+                WorkoutContent(
+                    animatedVisibilityScope = this@AnimatedContent,
+                    sharedTransitionScope = this@SharedTransitionLayout,
+                    modifier = modifier,
+                    workoutName = workoutName,
+                    exercises = exercises,
+                    onShowDetails = {
+                        showDetails = true
+                    },
+                    workoutDate = workoutDate,
+                    onWorkoutStart = onWorkoutStart,
+                    onEdit = onEdit,
+                    onDelete = onDelete,
+                    onDuplicate = onDuplicate,
+                )
+            } else {
+                WorkoutDetails(
+                    onBack = { showDetails = false },
+                    sharedTransitionScope = this@SharedTransitionLayout,
+                    animatedVisibilityScope = this@AnimatedContent,
+                    workoutName = workoutName,
+                    workoutDate = workoutDate,
+                    exercises = exercises,
+                    onWorkoutStart = onWorkoutStart,
+                    onEdit = onEdit,
+                    onDelete = onDelete,
+                    onDuplicate = onDuplicate
+                )
+            }
+        }
+    }
+}
+
+@OptIn(ExperimentalSharedTransitionApi::class)
+@Composable
+fun WorkoutContent(
+    onShowDetails: () -> Unit,
+    sharedTransitionScope: SharedTransitionScope,
+    animatedVisibilityScope: AnimatedVisibilityScope,
+    modifier: Modifier,
+    workoutName: String, workoutDate: String, exercises: List<StartWorkoutExercise> = listOf(),
     onWorkoutStart: () -> Unit,
     onEdit: () -> Unit,
     onDelete: () -> Unit,
@@ -164,55 +223,191 @@ fun Workout(
         mutableStateOf(false)
     }
 
-    Column(
-        modifier = modifier
-            .fillMaxWidth()
-            .padding(12.dp)
-            .clickable { onWorkoutClick() }
-            .border(
-                1.dp,
-                MaterialTheme.colorScheme.secondary,
-                RoundedCornerShape(4.dp)
-            )
-            .padding(12.dp)
-    ) {
-        Row(modifier = Modifier.fillMaxWidth(), horizontalArrangement = Arrangement.SpaceBetween) {
-            Text(
-                text = workoutName,
-                modifier = Modifier.weight(1f),
-                color = MaterialTheme.colorScheme.onSecondaryContainer,
-                style = MaterialTheme.typography.titleMedium,
-                maxLines = 1,
-                softWrap = true,
-                overflow = TextOverflow.Ellipsis
-            )
-            DropDown(
-                isDropDownExpanded = isDropDownExpanded,
-                onExpand = { isDropDownExpanded = true },
-                onClose = { isDropDownExpanded = false },
-                onStart = onWorkoutStart,
-                onEdit = onEdit,
-                onDuplicate = onDuplicate,
-                onDelete = onDelete
-            )
-        }
+    with(sharedTransitionScope) {
+        Column(
+            modifier = modifier
+                .fillMaxWidth()
+                .padding(12.dp)
+                .clickable { onShowDetails() }
+                .border(
+                    1.dp,
+                    MaterialTheme.colorScheme.secondary,
+                    RoundedCornerShape(4.dp)
+                )
+                .padding(12.dp)
+                .sharedElement(
+                    rememberSharedContentState(key = workoutName),
+                    animatedVisibilityScope = animatedVisibilityScope
+                )
+        ) {
+            Row(
+                modifier = Modifier.fillMaxWidth(),
+                horizontalArrangement = Arrangement.SpaceBetween
+            ) {
+                Text(
+                    text = workoutName,
+                    modifier = Modifier
+                        .weight(1f),
+                    color = MaterialTheme.colorScheme.onSecondaryContainer,
+                    style = MaterialTheme.typography.titleMedium,
+                    maxLines = 1,
+                    softWrap = true,
+                    overflow = TextOverflow.Ellipsis
+                )
 
-        Text(
-            text = stringResource(R.string.last_performed, workoutDate),
-            modifier = Modifier.padding(top = 12.dp, bottom = 12.dp),
-            color = MaterialTheme.colorScheme.onBackground,
-            style = MaterialTheme.typography.titleSmall,
-            maxLines = 1,
-            overflow = TextOverflow.Ellipsis
-        )
+                DropDown(
+                    isDropDownExpanded = isDropDownExpanded,
+                    onExpand = { isDropDownExpanded = true },
+                    onClose = { isDropDownExpanded = false },
+                    onStart = onWorkoutStart,
+                    onEdit = onEdit,
+                    onDuplicate = onDuplicate,
+                    onDelete = onDelete
+                )
+            }
 
-        for (i in exercises.indices) {
             Text(
-                text = exercises[i],
-                color = MaterialTheme.colorScheme.onSecondaryContainer,
+                text = stringResource(R.string.last_performed, workoutDate),
+                modifier = Modifier.padding(top = 12.dp, bottom = 12.dp),
+                color = MaterialTheme.colorScheme.onBackground,
                 style = MaterialTheme.typography.titleSmall,
                 maxLines = 1,
                 overflow = TextOverflow.Ellipsis
+            )
+
+
+            exercises.forEach {
+                Text(
+                    text = it.name,
+                    color = MaterialTheme.colorScheme.onSecondaryContainer,
+                    style = MaterialTheme.typography.titleSmall,
+                    maxLines = 1,
+                    overflow = TextOverflow.Ellipsis
+                )
+            }
+        }
+    }
+}
+
+@OptIn(ExperimentalSharedTransitionApi::class)
+@Composable
+fun WorkoutDetails(
+    onBack: () -> Unit,
+    sharedTransitionScope: SharedTransitionScope,
+    animatedVisibilityScope: AnimatedVisibilityScope,
+    workoutName: String, workoutDate: String, exercises: List<StartWorkoutExercise> = listOf(),
+    onWorkoutStart: () -> Unit,
+    onEdit: () -> Unit,
+    onDelete: () -> Unit,
+    onDuplicate: () -> Unit,
+    modifier: Modifier = Modifier,
+) {
+    var isDropDownExpanded by rememberSaveable {
+        mutableStateOf(false)
+    }
+    with(sharedTransitionScope) {
+        Column(
+            modifier = modifier
+                .fillMaxWidth()
+                .padding(12.dp)
+                .clickable {
+                    onBack()
+                }
+                .border(
+                    1.dp,
+                    MaterialTheme.colorScheme.secondary,
+                    RoundedCornerShape(4.dp)
+                )
+                .padding(12.dp)
+                .sharedElement(
+                    rememberSharedContentState(key = workoutName),
+                    animatedVisibilityScope = animatedVisibilityScope
+                )
+        ) {
+            Row(
+                modifier = Modifier.fillMaxWidth(),
+                horizontalArrangement = Arrangement.SpaceBetween
+            ) {
+                Text(
+                    text = workoutName,
+                    modifier = Modifier
+                        .weight(1f),
+                    color = MaterialTheme.colorScheme.onSecondaryContainer,
+                    style = MaterialTheme.typography.titleMedium,
+                    maxLines = 1,
+                    softWrap = true,
+                    overflow = TextOverflow.Ellipsis
+                )
+
+                DropDown(
+                    isDropDownExpanded = isDropDownExpanded,
+                    onExpand = { isDropDownExpanded = true },
+                    onClose = { isDropDownExpanded = false },
+                    onStart = onWorkoutStart,
+                    onEdit = onEdit,
+                    onDuplicate = onDuplicate,
+                    onDelete = onDelete
+                )
+            }
+
+            Text(
+                text = stringResource(R.string.last_performed, workoutDate),
+                modifier = Modifier.padding(top = 12.dp, bottom = 12.dp),
+                color = MaterialTheme.colorScheme.onBackground,
+                style = MaterialTheme.typography.titleSmall,
+                maxLines = 1,
+                overflow = TextOverflow.Ellipsis
+            )
+
+            exercises.forEach {
+                Exercise(
+                    exerciseName = it.exercise,
+                    bodyPart = it.bodyPart,
+                    category = it.category,
+                )
+            }
+        }
+    }
+}
+
+@Composable
+fun Exercise(exerciseName: String, bodyPart: BodyPart, category: Category) {
+    Row(modifier = Modifier.fillMaxWidth()) {
+        Icon(
+            modifier = Modifier.size(64.dp),
+            painter = painterResource(
+                when (bodyPart) {
+                    BodyPart.Core -> R.drawable.ic_abs
+                    BodyPart.Arms -> R.drawable.ic_arms
+                    BodyPart.Back -> R.drawable.ic_back
+                    BodyPart.Chest -> R.drawable.ic_chest
+                    BodyPart.Legs -> R.drawable.ic_legs
+                    BodyPart.Shoulders -> R.drawable.ic_shoulders
+                    else -> R.drawable.ic_olympic
+                }
+            ), contentDescription = stringResource(R.string.muslce_part_description), tint = Color.Unspecified
+        )
+        Column(modifier = Modifier.padding(start = 8.dp), verticalArrangement = Arrangement.Center) {
+            Text(
+                text = exerciseName,
+                fontWeight = FontWeight.Bold,
+                color = MaterialTheme.colorScheme.onBackground
+            )
+            Text(
+                text = when (category) {
+                    Category.Barbell -> stringResource(id = R.string.barbell_category_text)
+                    Category.Dumbbell -> stringResource(id = R.string.dumbbell_category_text)
+                    Category.Machine -> stringResource(id = R.string.machine_category_text)
+                    Category.AdditionalWeight -> stringResource(id = R.string.additional_weight_category_text)
+                    Category.Cable -> stringResource(id = R.string.cable_category_text)
+                    Category.None -> stringResource(id = R.string.none_category_text)
+                    Category.AssistedWeight -> stringResource(id = R.string.assisted_weight_category_text)
+                    Category.RepsOnly -> stringResource(id = R.string.reps_only_category_text)
+                    Category.Cardio -> stringResource(id = R.string.cardio_category_text)
+                    Category.Timed -> stringResource(id = R.string.timed_category_text)
+                },
+                fontWeight = FontWeight.Bold,
+                color = MaterialTheme.colorScheme.onBackground
             )
         }
     }
