@@ -32,12 +32,6 @@ class StartWorkoutFragment : Fragment() {
             setViewCompositionStrategy(ViewCompositionStrategy.DisposeOnViewTreeLifecycleDestroyed)
             setContent {
                 StartWorkoutScreen(startWorkoutViewModel,
-                    onWorkoutClick = {
-                        findNavController().navigate(
-                            R.id.start_workout_to_template_workout_info,
-                            bundleOf(WORKOUT_ID_ARG_KEY to it)
-                        )
-                    },
                     onAddTemplateWorkout = { findNavController().navigate(R.id.workout_to_create_workout_template) },
                     onEditWorkout = {
                         findNavController().navigate(
