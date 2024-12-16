@@ -72,6 +72,7 @@ import bg.zahov.app.ui.workout.add.AddTemplateWorkoutViewModel
 import bg.zahov.fitness.app.R
 import kotlinx.coroutines.delay
 
+private val weights = arrayOf(1f, 1f, 2f, 2f)
 
 @Composable
 fun AddTemplateWorkoutScreen(
@@ -85,7 +86,7 @@ fun AddTemplateWorkoutScreen(
      * In order to center the items of 2 independent rows we need to have
      * pre-defined weight values to ensure consistency
      */
-    val weightValues = rememberSaveable { arrayOf(1f, 1f, 2f, 2f) }
+    val weightValues = remember { weights }
     val state by addTemplateViewModel.uiState.collectAsStateWithLifecycle()
 
     if (state.isAdded) {
@@ -144,13 +145,13 @@ fun WorkoutScreen(
     onAddExercise: () -> Unit,
     onReplaceExercise: () -> Unit,
     onBackPressed: () -> Unit,
-    onCancel: () -> Unit,
+    onCancel: () -> Unit
 ) {
     /**
      * In order to center the items of 2 independent rows we need to have
      * pre-defined weight values to ensure consistency
      */
-    val weightValues = rememberSaveable { arrayOf(1f, 1f, 2f, 2f) }
+    val weightValues = remember { weights }
     val state by workoutViewModel.uiState.collectAsStateWithLifecycle()
 
     BackHandler {
