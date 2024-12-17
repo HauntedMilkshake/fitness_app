@@ -1,6 +1,5 @@
 package bg.zahov.app.ui.loading
 
-import android.util.Log
 import androidx.compose.animation.core.AnimationSpec
 import androidx.compose.animation.core.animateFloatAsState
 import androidx.compose.animation.core.tween
@@ -26,7 +25,6 @@ import androidx.compose.ui.graphics.graphicsLayer
 import androidx.compose.ui.layout.ContentScale
 import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.unit.dp
-import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import androidx.lifecycle.viewmodel.compose.viewModel
 import bg.zahov.fitness.app.R
 import kotlinx.coroutines.delay
@@ -37,11 +35,10 @@ fun LoadingScreen(
     navigateWelcome: () -> Unit,
     navigateHome: () -> Unit
 ) {
-    val data = viewModel.uiState.collectAsStateWithLifecycle()
-    when {
-        data.value.navigateHome -> navigateHome()
-        data.value.navigateWelcome -> navigateWelcome()
-    }
+    viewModel.loading(
+        pass = { navigateHome() },
+        failed = { navigateWelcome() }
+    )
     LoadingScreenContent()
 }
 
