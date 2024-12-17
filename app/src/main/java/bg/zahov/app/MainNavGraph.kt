@@ -2,6 +2,7 @@ package bg.zahov.app
 
 import androidx.compose.runtime.Composable
 import androidx.compose.ui.Modifier
+import androidx.navigation.NavGraph.Companion.findStartDestination
 import androidx.navigation.NavHostController
 import androidx.navigation.compose.NavHost
 import androidx.navigation.compose.composable
@@ -25,24 +26,56 @@ fun MainNavGraph(
     NavHost(
         modifier = modifier,
         navController = navController,
-        startDestination = Welcome
+        startDestination = Loading
     ) {
         composable<Welcome> {
             WelcomeScreen(
-                onSignup = { navController.navigate(Signup) },
-                onLogin = { navController.navigate(Login) }
+                onSignup = {
+                    navController.navigate(Signup) {
+                        popUpTo(navController.graph.findStartDestination().id) {
+                            saveState = true
+                        }
+                        launchSingleTop = true
+                        restoreState = true
+                    }
+                },
+                onLogin = {
+                    navController.navigate(Login) {
+                        popUpTo(navController.graph.findStartDestination().id) {
+                            saveState = true
+                        }
+                        launchSingleTop = true
+                        restoreState = true
+                    }
+                }
             )
         }
         composable<Signup> {
             SignupScreen(
                 onAuthenticate = { navController.navigate(Loading) },
-                onNavigateToLogin = { navController.navigate(Login) }
+                onNavigateToLogin = {
+                    navController.navigate(Login) {
+                        popUpTo(navController.graph.findStartDestination().id) {
+                            saveState = true
+                        }
+                        launchSingleTop = true
+                        restoreState = true
+                    }
+                }
             )
         }
         composable<Login> {
             LoginScreen(
                 onAuthenticate = { navController.navigate(Loading) },
-                onNavigateToSignUp = { navController.navigate(Signup) }
+                onNavigateToSignUp = {
+                    navController.navigate(Signup) {
+                        popUpTo(navController.graph.findStartDestination().id) {
+                            saveState = true
+                        }
+                        launchSingleTop = true
+                        restoreState = true
+                    }
+                }
             )
         }
         composable<Loading> {
