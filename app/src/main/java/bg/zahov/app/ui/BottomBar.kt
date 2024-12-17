@@ -12,6 +12,7 @@ import androidx.compose.runtime.getValue
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.res.stringResource
+import androidx.navigation.NavDestination.Companion.hasRoute
 import androidx.navigation.NavDestination.Companion.hierarchy
 import androidx.navigation.NavGraph.Companion.findStartDestination
 import androidx.navigation.NavHostController
@@ -58,7 +59,11 @@ fun BottomBar(
     )
     val navBackStackEntry by navController.currentBackStackEntryAsState()
     val currentDestination = navBackStackEntry?.destination
-    if (screens.find { it.route == currentDestination }!=null)
+    if (screens.any {screen->
+            currentDestination?.hierarchy?.any {
+                it.hasRoute(route = screen.route::class)
+            } == true
+        })
         NavigationBar(
             modifier = modifier,
             containerColor = MaterialTheme.colorScheme.background,
@@ -69,9 +74,11 @@ fun BottomBar(
                         Text(text = stringResource(screen.titleId))
                     },
                     icon = {
-                        Icon(painter = painterResource(screen.iconId), contentDescription = "")
+                        Icon(painter = painterResource(screen.iconId), contentDescription = null)
                     },
-                    selected = currentDestination?.hierarchy?.any { it.hasRoute(screen.route::class) } == true,,
+                    selected = currentDestination?.hierarchy?.any {
+                        it.hasRoute(route = screen.route::class)
+                    } == true,
                     onClick = {
                         navController.navigate(screen.route) {
                             popUpTo(navController.graph.findStartDestination().id) {
@@ -93,8 +100,9 @@ fun BottomBar(
         }
 }
 
-data class BottomBarInfo<T: Any>(
-    val titleId: Int,
-    val iconId: Int,
-    val route: T,
-)
+data class BottomBarInfo<T : Any>(val titleId: Int, val iconId: Int, val route: T)
+
+
+
+
+
