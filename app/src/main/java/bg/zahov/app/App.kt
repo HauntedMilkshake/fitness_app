@@ -9,8 +9,6 @@ import androidx.compose.material3.Scaffold
 import androidx.compose.material3.Text
 import androidx.compose.material3.TopAppBar
 import androidx.compose.runtime.Composable
-import androidx.compose.runtime.mutableStateOf
-import androidx.compose.runtime.remember
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.res.stringResource
@@ -24,46 +22,36 @@ import bg.zahov.fitness.app.R
 @Composable
 fun App() {
     val navController = rememberNavController()
-    val showBottomBar = remember { mutableStateOf(false) }
-    val topBar = remember { mutableStateOf<TopBar?>(null) }
     FitnessTheme {
         Scaffold(
             topBar = {
-                topBar.value?.let { topbar ->
-                    TopAppBar(
-                        modifier = Modifier,
-                        title = {
-                            Text(
-                                text = stringResource(topbar.titleId),
-                                maxLines = 1,
-                                overflow = TextOverflow.Ellipsis,
-                                style = MaterialTheme.typography.titleLarge
+                TopAppBar(
+                    modifier = Modifier,
+                    title = {
+                        Text(
+                            text = stringResource(R.string.one_rep_max_title_text),
+                            maxLines = 1,
+                            overflow = TextOverflow.Ellipsis,
+                            style = MaterialTheme.typography.titleLarge
+                        )
+                    },
+                    actions = {
+                        IconButton(onClick = { }) {
+                            Icon(
+                                painter = painterResource(R.drawable.ic_settings),
+                                contentDescription = stringResource(R.string.menu)
                             )
-                        },
-                        actions = {
-                            IconButton(onClick = { }) {
-                                Icon(
-                                    painter = painterResource(R.drawable.ic_settings),
-                                    contentDescription = stringResource(R.string.menu)
-                                )
-                            }
                         }
-                    )
-                }
+                    }
+                )
             },
             bottomBar = {
-                if (showBottomBar.value) {
-                    BottomBar(navController = navController)
-                }
+                BottomBar(navController = navController)
             }
         ) { padding ->
             MainNavGraph(
                 modifier = Modifier.padding(padding),
                 navController = navController,
-                topBarCall = { top, bot ->
-                    topBar.value = top
-                    showBottomBar.value = bot
-                }
             )
         }
     }

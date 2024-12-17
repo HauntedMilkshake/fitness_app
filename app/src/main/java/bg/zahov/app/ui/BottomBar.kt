@@ -1,5 +1,6 @@
 package bg.zahov.app.ui
 
+import android.annotation.SuppressLint
 import androidx.compose.material3.Icon
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.NavigationBar
@@ -11,12 +12,18 @@ import androidx.compose.runtime.getValue
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.res.stringResource
+import androidx.navigation.NavDestination.Companion.hierarchy
 import androidx.navigation.NavGraph.Companion.findStartDestination
 import androidx.navigation.NavHostController
 import androidx.navigation.compose.currentBackStackEntryAsState
-import bg.zahov.app.Routes
+import bg.zahov.app.Exercises
+import bg.zahov.app.History
+import bg.zahov.app.Home
+import bg.zahov.app.Measure
+import bg.zahov.app.Workout
 import bg.zahov.fitness.app.R
 
+@SuppressLint("RestrictedApi")
 @Composable
 fun BottomBar(
     navController: NavHostController,
@@ -26,70 +33,68 @@ fun BottomBar(
         BottomBarInfo(
             titleId = R.string.home,
             iconId = R.drawable.ic_bottom_nav_home,
-            route = Routes.Home.route
+            route = Home
         ),
         BottomBarInfo(
             titleId = R.string.history,
             iconId = R.drawable.ic_clock,
-            route = Routes.History.route
+            route = History
         ),
         BottomBarInfo(
             titleId = R.string.workout,
             iconId = R.drawable.ic_plus,
-            route = Routes.Workout.route
+            route = Workout
         ),
         BottomBarInfo(
             titleId = R.string.exercise,
             iconId = R.drawable.ic_exercise,
-            route = Routes.Exercises.route
+            route = Exercises
         ),
         BottomBarInfo(
             titleId = R.string.measure,
             iconId = R.drawable.ic_measures,
-            route = Routes.Measure.route
+            route = Measure
         ),
-
-        )
-
-    NavigationBar(
-        modifier = modifier,
-        containerColor = MaterialTheme.colorScheme.onBackground,
-    ) {
-        val navBackStackEntry by navController.currentBackStackEntryAsState()
-        val currentRoute = navBackStackEntry?.destination?.route
-
-        screens.forEach { screen ->
-            NavigationBarItem(
-                label = {
-                    Text(text = stringResource(screen.titleId))
-                },
-                icon = {
-                    Icon(painter = painterResource(screen.iconId), contentDescription = "")
-                },
-                selected = currentRoute == screen.route,
-                onClick = {
-                    navController.navigate(screen.route) {
-                        popUpTo(navController.graph.findStartDestination().id) {
-                            saveState = true
+    )
+    val navBackStackEntry by navController.currentBackStackEntryAsState()
+    val currentDestination = navBackStackEntry?.destination
+    if (screens.find { it.route == currentDestination }!=null)
+        NavigationBar(
+            modifier = modifier,
+            containerColor = MaterialTheme.colorScheme.background,
+        ) {
+            screens.forEach { screen ->
+                NavigationBarItem(
+                    label = {
+                        Text(text = stringResource(screen.titleId))
+                    },
+                    icon = {
+                        Icon(painter = painterResource(screen.iconId), contentDescription = "")
+                    },
+                    selected = currentDestination?.hierarchy?.any { it.hasRoute(screen.route::class) } == true,,
+                    onClick = {
+                        navController.navigate(screen.route) {
+                            popUpTo(navController.graph.findStartDestination().id) {
+                                saveState = true
+                            }
+                            launchSingleTop = true
+                            restoreState = true
                         }
-                        launchSingleTop = true
-                        restoreState = true
-                    }
-                },
-                colors = NavigationBarItemDefaults.colors(
-                    unselectedTextColor = MaterialTheme.colorScheme.onPrimaryContainer,
-                    selectedTextColor = MaterialTheme.colorScheme.background,
-                    selectedIconColor = MaterialTheme.colorScheme.background,
-                    unselectedIconColor = MaterialTheme.colorScheme.onPrimaryContainer,
-                    indicatorColor = MaterialTheme.colorScheme.onPrimaryContainer
-                ),
-            )
+                    },
+                    colors = NavigationBarItemDefaults.colors(
+                        unselectedTextColor = MaterialTheme.colorScheme.onBackground,
+                        unselectedIconColor = MaterialTheme.colorScheme.onBackground,
+                        selectedTextColor = MaterialTheme.colorScheme.onBackground,
+                        selectedIconColor = MaterialTheme.colorScheme.onSecondary,
+                        indicatorColor = MaterialTheme.colorScheme.secondary
+                    ),
+                )
+            }
         }
-    }
 }
 
-data class BottomBarInfo(
+data class BottomBarInfo<T: Any>(
     val titleId: Int,
     val iconId: Int,
-    val route: String,
+    val route: T,
 )

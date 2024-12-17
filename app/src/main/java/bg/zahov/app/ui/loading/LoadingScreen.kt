@@ -35,10 +35,12 @@ fun LoadingScreen(
     navigateWelcome: () -> Unit,
     navigateHome: () -> Unit
 ) {
-    viewModel.loading(
-        pass = { navigateHome() },
-        failed = { navigateWelcome() }
-    )
+    LaunchedEffect(Unit) {
+        viewModel.loading(
+            pass = { navigateHome() },
+            failed = { navigateWelcome() }
+        )
+    }
     LoadingScreenContent()
 }
 

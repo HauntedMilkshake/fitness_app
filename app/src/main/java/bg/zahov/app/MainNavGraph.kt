@@ -21,48 +21,41 @@ import bg.zahov.app.ui.workout.WorkoutScreen
 fun MainNavGraph(
     modifier: Modifier = Modifier,
     navController: NavHostController,
-    topBarCall: (TopBar?, Boolean) -> Unit
 ) {
     NavHost(
         modifier = modifier,
         navController = navController,
-        startDestination = Routes.Welcome.route
+        startDestination = Welcome
     ) {
-        composable(Routes.Welcome.route) {
-            topBarCall(Routes.Welcome.topBar, Routes.Welcome.bottomBar)
+        composable<Welcome> {
             WelcomeScreen(
-                onSignup = { navController.navigate(Routes.Signup.route) },
-                onLogin = { navController.navigate(Routes.Login.route) }
+                onSignup = { navController.navigate(Signup) },
+                onLogin = { navController.navigate(Login) }
             )
         }
-        composable(Routes.Signup.route) {
-            topBarCall(Routes.Signup.topBar, Routes.Signup.bottomBar)
+        composable<Signup> {
             SignupScreen(
-                onAuthenticate = { navController.navigate(Routes.Loading.route) },
-                onNavigateToLogin = { navController.navigate(Routes.Login.route) }
+                onAuthenticate = { navController.navigate(Loading) },
+                onNavigateToLogin = { navController.navigate(Login) }
             )
         }
-        composable(Routes.Login.route) {
-            topBarCall(Routes.Login.topBar, Routes.Login.bottomBar)
+        composable<Login> {
             LoginScreen(
-                onAuthenticate = { navController.navigate(Routes.Loading.route) },
-                onNavigateToSignUp = { navController.navigate(Routes.Signup.route) }
+                onAuthenticate = { navController.navigate(Loading) },
+                onNavigateToSignUp = { navController.navigate(Signup) }
             )
         }
-        composable(Routes.Loading.route) {
-            topBarCall(Routes.Loading.topBar, Routes.Loading.bottomBar)
+        composable<Loading> {
             LoadingScreen(
-                navigateWelcome = { navController.navigate(Routes.Welcome.route) },
-                navigateHome = { navController.navigate(Routes.Home.route) }
+                navigateWelcome = { navController.navigate(Welcome) },
+                navigateHome = { navController.navigate(Home) }
             )
         }
-        composable(Routes.Home.route) {
-            topBarCall(Routes.Home.topBar, Routes.Home.bottomBar)
+        composable<Home> {
             HomeScreen()
         }
 
-        composable(Routes.Workout.route) {
-            topBarCall(Routes.Home.topBar, Routes.Home.bottomBar)
+        composable<Workout> {
             WorkoutScreen(
                 onCancel = {},
                 onAddExercise = {},
@@ -71,29 +64,24 @@ fun MainNavGraph(
             )
         }
 
-        composable(Routes.Exercises.route) {
-            topBarCall(Routes.Exercises.topBar, Routes.Exercises.bottomBar)
+        composable<Exercises> {
             ExercisesScreen(
-                navigateInfo = { navController.navigate(Routes.ExerciseInfo.route) },
+                navigateInfo = { navController.navigate(ExerciseInfo) },
                 navigateBack = { navController.navigateUp() })
         }
 
-        composable(Routes.ExerciseInfo.route) {
-            topBarCall(Routes.ExerciseInfo.topBar, Routes.ExerciseInfo.bottomBar)
+        composable<ExerciseInfo> {
             ExerciseInfoScreen()
         }
-        composable(Routes.History.route) {
-            topBarCall(Routes.History.topBar, Routes.History.bottomBar)
+        composable<History> {
             HistoryScreen(onItemClick = {})
         }
-        composable(Routes.Measure.route) {
-            topBarCall(Routes.Measure.topBar, Routes.Measure.bottomBar)
+        composable<Measure> {
             MeasuresScreen(
-                navigateInfo = { navController.navigate(Routes.MeasureInfo.route) }
+                navigateInfo = { navController.navigate(MeasureInfo) }
             )
         }
-        composable(Routes.MeasureInfo.route) {
-            topBarCall(Routes.MeasureInfo.topBar, Routes.MeasureInfo.bottomBar)
+        composable<MeasureInfo> {
             MeasurementInfoScreen()
         }
     }
