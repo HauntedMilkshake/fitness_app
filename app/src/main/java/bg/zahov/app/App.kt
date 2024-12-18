@@ -1,5 +1,7 @@
 package bg.zahov.app
 
+import androidx.compose.foundation.clickable
+import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.padding
 import androidx.compose.material3.ExperimentalMaterial3Api
 import androidx.compose.material3.Icon
@@ -13,15 +15,19 @@ import androidx.compose.ui.Modifier
 import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.text.style.TextOverflow
+import androidx.compose.ui.tooling.preview.Preview
+import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import androidx.navigation.compose.rememberNavController
 import bg.zahov.app.ui.BottomBar
 import bg.zahov.app.ui.theme.FitnessTheme
 import bg.zahov.fitness.app.R
+import androidx.compose.runtime.getValue
 
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
-fun App() {
+fun App(workoutManagerViewModel: WorkoutManagerViewModel) {
     val navController = rememberNavController()
+    val state by workoutManagerViewModel.state.collectAsStateWithLifecycle()
     FitnessTheme {
         Scaffold(
             topBar = {
@@ -46,7 +52,16 @@ fun App() {
                 )
             },
             bottomBar = {
-                BottomBar(navController = navController)
+                Column {
+                    if (state.trailingWorkoutVisibility) {
+                        TrailingWorkout(
+                            workoutName = state.workoutName,
+                            elapsedTime = state.timer,
+                            onClick = { workoutManagerViewModel.updateStateToActive() }
+                        )
+                    }
+                    BottomBar(navController = navController)
+                }
             }
         ) { padding ->
             MainNavGraph(
@@ -54,5 +69,15 @@ fun App() {
                 navController = navController,
             )
         }
+    }
+}
+
+@Composable
+fun TrailingWorkout(workoutName: String, elapsedTime: String, onClick: () -> Unit) {
+    Column(modifier = Modifier.clickable {
+        onClick()
+    }) {
+        Text(text = workoutName)
+        Text(text = elapsedTime)
     }
 }

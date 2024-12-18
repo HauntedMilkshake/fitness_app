@@ -68,8 +68,82 @@ import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import androidx.lifecycle.viewmodel.compose.viewModel
 import bg.zahov.app.data.model.SetType
 import bg.zahov.app.ui.theme.FitnessTheme
+import bg.zahov.app.ui.workout.add.AddTemplateWorkoutViewModel
 import bg.zahov.fitness.app.R
 import kotlinx.coroutines.delay
+
+private val weights = arrayOf(1f, 1f, 2f, 2f)
+
+@Composable
+fun AddTemplateWorkoutScreen(
+    workoutId: String? = null,
+    addTemplateViewModel: AddTemplateWorkoutViewModel = viewModel(),
+    onAddExercise: () -> Unit,
+    onReplaceExercise: () -> Unit,
+    onBackPressed: () -> Unit,
+    onCancel: () -> Unit,
+) {
+    /**
+     * In order to center the items of 2 independent rows we need to have
+     * pre-defined weight values to ensure consistency
+     */
+    val state by addTemplateViewModel.uiState.collectAsStateWithLifecycle()
+
+    workoutId?.let {
+        LaunchedEffect(workoutId) {
+            addTemplateViewModel.initEditWorkoutId(true , it)
+        }
+    }
+
+    if (state.isAdded) {
+        LaunchedEffect(Unit) {
+            onBackPressed()
+        }
+    }
+
+    ScreenContent(
+        note = state.note,
+        exercises = state.exercises,
+        weightValues = weights,
+        onAddExercise = onAddExercise,
+        onCancel = {
+            addTemplateViewModel.resetSelectedExercises()
+            onCancel()
+        },
+        onNoteChange = {
+            addTemplateViewModel.onWorkoutNoteChange(it)
+        },
+        onExerciseNoteChange = { pos, note ->
+            addTemplateViewModel.changeExerciseNote(
+                pos,
+                note
+            )
+        },
+        onRemoveExercise = { addTemplateViewModel.removeExercise(it) },
+        onReplaceExercise = {
+            addTemplateViewModel.setReplaceableExercise(it)
+            onReplaceExercise()
+        },
+        onDeleteSet = { addTemplateViewModel.removeSet(it) },
+        onAddSet = { addTemplateViewModel.addSet(it) },
+        onInputFieldChanged = { pos, value, field ->
+            when (field) {
+                SetField.WEIGHT -> addTemplateViewModel.onWeightChange(pos, value)
+                SetField.REPETITIONS -> addTemplateViewModel.onRepsChange(pos, value)
+            }
+        },
+        onSetTypeChange = { pos, type ->
+            addTemplateViewModel.onSetTypeChanged(
+                pos,
+                type
+            )
+        }
+    ) {
+        WorkoutTitleField(
+            name = state.workoutName,
+            onWorkoutNameChanged = { addTemplateViewModel.onWorkoutNameChange(it) })
+    }
+}
 
 @Composable
 fun WorkoutScreen(
@@ -77,29 +151,22 @@ fun WorkoutScreen(
     onAddExercise: () -> Unit,
     onReplaceExercise: () -> Unit,
     onBackPressed: () -> Unit,
-    onCancel: () -> Unit,
+    onCancel: () -> Unit
 ) {
-    val state by workoutViewModel.uiState.collectAsStateWithLifecycle()
-
     /**
      * In order to center the items of 2 independent rows we need to have
      * pre-defined weight values to ensure consistency
      */
-    val weightValues by rememberSaveable {
-        mutableStateOf(arrayOf(1f, 1f, 2f, 2f))
-    }
+    val state by workoutViewModel.uiState.collectAsStateWithLifecycle()
 
     BackHandler {
         onBackPressed()
     }
 
-    WorkoutScreenContent(
-        name = if (state.workoutName.isEmpty() && state.workoutPrefix != TimeOfDay.EMPTY) stringResource(
-            state.workoutPrefix.stringResource
-        ) else state.workoutName,
+    ScreenContent(
         note = state.note,
         exercises = state.exercises,
-        weightValues = weightValues,
+        weightValues = weights,
         onAddExercise = onAddExercise,
         onDeleteSet = { workoutViewModel.removeSet(it) },
         onCancel = {
@@ -107,7 +174,12 @@ fun WorkoutScreen(
             onCancel()
         },
         onNoteChange = { workoutViewModel.changeNote(it) },
-        onExerciseNoteChange = { pos, note -> workoutViewModel.changeExerciseNote(pos, note) },
+        onExerciseNoteChange = { pos, note ->
+            workoutViewModel.changeExerciseNote(
+                pos,
+                note
+            )
+        },
         onRemoveExercise = { workoutViewModel.removeExercise(it) },
         onReplaceExercise = {
             workoutViewModel.replaceExercise(it)
@@ -121,13 +193,50 @@ fun WorkoutScreen(
             }
         },
         onSetTypeChange = { pos, type -> workoutViewModel.onSetTypeChanged(pos, type) }
+    ) {
+        WorkoutTitleText(
+            name = if (state.workoutName.isEmpty() && state.workoutPrefix != TimeOfDay.EMPTY) stringResource(
+                state.workoutPrefix.stringResource
+            ) else state.workoutName
+        )
+    }
+}
+
+@Composable
+fun WorkoutTitleText(name: String, modifier: Modifier = Modifier) {
+    Text(
+        text = name,
+        modifier = modifier.padding(start = 16.dp),
+        style = MaterialTheme.typography.titleLarge,
+        color = MaterialTheme.colorScheme.onSecondaryContainer
+    )
+}
+
+@Composable
+fun WorkoutTitleField(
+    name: String,
+    modifier: Modifier = Modifier,
+    onWorkoutNameChanged: (String) -> Unit,
+) {
+    WorkoutScreenInputField(
+        modifier = modifier
+            .fillMaxWidth()
+            .padding(12.dp),
+        value = name,
+        label = {
+            Text(
+                text = stringResource(R.string.add_name_hint),
+                style = MaterialTheme.typography.labelMedium,
+                color = MaterialTheme.colorScheme.secondary
+            )
+        },
+        onValueChanged = { onWorkoutNameChanged(it) }
     )
 }
 
 @OptIn(ExperimentalFoundationApi::class)
 @Composable
-fun WorkoutScreenContent(
-    name: String,
+fun ScreenContent(
     note: String,
     exercises: List<WorkoutEntry>,
     weightValues: Array<Float>,
@@ -141,6 +250,7 @@ fun WorkoutScreenContent(
     onAddSet: (Int) -> Unit,
     onInputFieldChanged: (Int, String, SetField) -> Unit,
     onSetTypeChange: (Int, SetType) -> Unit,
+    content: @Composable () -> Unit,
 ) {
     FitnessTheme {
         Column(
@@ -148,12 +258,8 @@ fun WorkoutScreenContent(
                 .fillMaxSize()
                 .padding(top = 16.dp)
         ) {
-            Text(
-                text = name,
-                modifier = Modifier.padding(start = 16.dp),
-                style = MaterialTheme.typography.titleLarge,
-                color = MaterialTheme.colorScheme.onSecondaryContainer
-            )
+            content()
+
 
             WorkoutScreenInputField(
                 modifier = Modifier

@@ -206,6 +206,8 @@
     <string name="back_button">Go Back</string>
     <string name="menu">Menu</string>
     <!-- Strings used for top app bar-->
+    <!-- Strings used for adding a template workout-->
+    <string name = "no_workout_name_toast">Cannot add a workout without a name!</string>
     <!-- Strings used for StartWorkout -->
     <string name="barbell_category_text">Barbell</string>
     <string name="dumbbell_category_text">Dumbbell</string>

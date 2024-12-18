@@ -1,5 +1,5 @@
 //package bg.zahov.app.ui.workout
-//
+// TODO() - Cannot delete yet we need top bar
 //import android.os.Bundle
 //import android.transition.TransitionInflater
 //import android.view.LayoutInflater

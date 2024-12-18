@@ -21,7 +21,7 @@ import bg.zahov.app.Exercises
 import bg.zahov.app.History
 import bg.zahov.app.Home
 import bg.zahov.app.Measure
-import bg.zahov.app.Workout
+import bg.zahov.app.StartWorkout
 import bg.zahov.fitness.app.R
 
 @SuppressLint("RestrictedApi")
@@ -44,7 +44,7 @@ fun BottomBar(
         BottomBarInfo(
             titleId = R.string.workout,
             iconId = R.drawable.ic_plus,
-            route = Workout
+            route = StartWorkout
         ),
         BottomBarInfo(
             titleId = R.string.exercise,

@@ -1,58 +1,54 @@
 package bg.zahov.app
 
-import android.view.View
-import androidx.lifecycle.LiveData
-import androidx.lifecycle.MutableLiveData
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
-import bg.zahov.app.data.model.Workout
 import bg.zahov.app.data.model.WorkoutState
 import bg.zahov.app.data.provider.WorkoutStateManager
 import bg.zahov.app.util.timeToString
+import kotlinx.coroutines.flow.MutableStateFlow
+import kotlinx.coroutines.flow.StateFlow
+import kotlinx.coroutines.flow.update
 import kotlinx.coroutines.launch
 
+data class WorkoutUiState(
+    val trailingWorkoutVisibility: Boolean = false,
+    val workoutName: String = "",
+    val timer: String = ""
+)
+
 class WorkoutManagerViewModel(
-    private val workoutStateManager: WorkoutStateManager = Inject.workoutState
+    private val workoutStateManager: WorkoutStateManager = Inject.workoutState,
 ) : ViewModel() {
 
-    private val _state = MutableLiveData<State>(State.Inactive(View.GONE))
-    val state: LiveData<State>
+    private val _state = MutableStateFlow<WorkoutUiState>(WorkoutUiState())
+    val state: StateFlow<WorkoutUiState>
         get() = _state
-
-    private val _template = MutableLiveData<Workout>()
-    val template: LiveData<Workout>
-        get() = _template
-
-    private val _timer = MutableLiveData<String>()
-    val timer: LiveData<String>
-        get() = _timer
 
     init {
         viewModelScope.launch {
             launch {
                 workoutStateManager.template.collect {
-                    it?.let { _template.postValue(it) }
+                    it?.let {
+                        _state.update { old ->
+                            old.copy(workoutName = it.name)
+                        }
+                    }
                 }
             }
 
             launch {
                 workoutStateManager.state.collect {
-                    _state.postValue(
-                        when (it) {
-                            WorkoutState.MINIMIZED -> State.Minimized(View.VISIBLE)
-                            WorkoutState.ACTIVE -> State.Active(View.GONE, true)
-                            else -> State.Inactive(View.GONE)
-                        }
-                    )
-
+                    _state.update { old ->
+                        old.copy(trailingWorkoutVisibility = (it == WorkoutState.MINIMIZED))
+                    }
                 }
             }
 
             launch {
                 workoutStateManager.timer.collect {
-                    _timer.postValue(
-                        it.timeToString()
-                    )
+                    _state.update { old ->
+                        old.copy(timer = it.timeToString())
+                    }
                 }
             }
         }
@@ -69,11 +65,4 @@ class WorkoutManagerViewModel(
             workoutStateManager.saveWorkout()
         }
     }
-
-    sealed interface State {
-        data class Active(val visibility: Int, val openWorkout: Boolean = false) : State
-        data class Minimized(val visibility: Int) : State
-        data class Inactive(val visibility: Int) : State
-    }
-
 }
