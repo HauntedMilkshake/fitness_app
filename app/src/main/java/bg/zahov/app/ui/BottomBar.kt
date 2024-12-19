@@ -28,7 +28,7 @@ import bg.zahov.fitness.app.R
 @Composable
 fun BottomBar(
     navController: NavHostController,
-    modifier: Modifier = Modifier
+    modifier: Modifier = Modifier,
 ) {
     val screens = listOf(
         BottomBarInfo(
@@ -49,7 +49,7 @@ fun BottomBar(
         BottomBarInfo(
             titleId = R.string.exercise,
             iconId = R.drawable.ic_exercise,
-            route = Exercises
+            route = Exercises()
         ),
         BottomBarInfo(
             titleId = R.string.measure,
@@ -59,7 +59,7 @@ fun BottomBar(
     )
     val navBackStackEntry by navController.currentBackStackEntryAsState()
     val currentDestination = navBackStackEntry?.destination
-    if (screens.any {screen->
+    if (screens.any { screen ->
             currentDestination?.hierarchy?.any {
                 it.hasRoute(route = screen.route::class)
             } == true

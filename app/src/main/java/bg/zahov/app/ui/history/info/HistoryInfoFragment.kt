@@ -54,7 +54,7 @@
 //            setDisplayHomeAsUpEnabled(true)
 //            setHomeAsUpIndicator(R.drawable.ic_back_arrow)
 //        }
-//
+//         //TODO(We still need this for reference and the file can be deleted when the top bar is implemented)
 //        activity?.addMenuProvider(object : MenuProvider {
 //            override fun onCreateMenu(menu: Menu, menuInflater: MenuInflater) {
 //                menu.clear()

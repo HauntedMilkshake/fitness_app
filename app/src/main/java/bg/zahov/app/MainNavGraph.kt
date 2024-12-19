@@ -1,12 +1,8 @@
 package bg.zahov.app
 
-import android.util.Log
 import androidx.compose.runtime.Composable
 import androidx.compose.ui.Modifier
-import androidx.navigation.NavGraph.Companion.findStartDestination
 import androidx.navigation.NavHostController
-import androidx.navigation.NavOptions
-import androidx.navigation.NavType
 import androidx.navigation.compose.NavHost
 import androidx.navigation.compose.composable
 import androidx.navigation.toRoute
@@ -15,6 +11,7 @@ import bg.zahov.app.ui.authentication.signup.SignupScreen
 import bg.zahov.app.ui.exercise.ExercisesScreen
 import bg.zahov.app.ui.exercise.info.ExerciseInfoScreen
 import bg.zahov.app.ui.history.HistoryScreen
+import bg.zahov.app.ui.history.info.HistoryInfoScreen
 import bg.zahov.app.ui.home.HomeScreen
 import bg.zahov.app.ui.loading.LoadingScreen
 import bg.zahov.app.ui.measures.MeasuresScreen
@@ -104,15 +101,16 @@ fun MainNavGraph(
 
         composable<Workout> {
             WorkoutScreen(
-                onCancel = {},
-                onAddExercise = {},
-                onBackPressed = {},
-                onReplaceExercise = {}
+                onCancel = { navController.navigateUp() },
+                onAddExercise = { navController.navigate(Exercises(ExerciseArgs.ADD_EXERCISE_ARG)) },
+                onBackPressed = { navController.navigateUp() },
+                onReplaceExercise = { navController.navigate(Exercises(ExerciseArgs.REPLACE_EXERCISE_ARG)) }
             )
         }
 
         composable<Exercises> {
             ExercisesScreen(
+                args = (it.toRoute() as Exercises).state,
                 navigateInfo = { navController.navigate(ExerciseInfo) },
                 navigateBack = { navController.navigateUp() })
         }
@@ -121,7 +119,7 @@ fun MainNavGraph(
             ExerciseInfoScreen()
         }
         composable<History> {
-            HistoryScreen(onItemClick = {})
+            HistoryScreen(onItemClick = { navController.navigate(HistoryInfo) })
         }
         composable<Measure> {
             MeasuresScreen(
@@ -149,11 +147,23 @@ fun MainNavGraph(
         composable<AddTemplateWorkout> {
             AddTemplateWorkoutScreen(
                 workoutId = (it.toRoute() as AddTemplateWorkout).workoutId,
-                onAddExercise = { /* TODO() */  },
-                onReplaceExercise =  { /* TODO() */ },
+                onAddExercise = { navController.navigate(Exercises(ExerciseArgs.ADD_EXERCISE_ARG)) },
+                onReplaceExercise = { navController.navigate(Exercises(ExerciseArgs.REPLACE_EXERCISE_ARG)) },
                 onBackPressed = { navController.navigateUp() },
                 onCancel = { navController.navigateUp() }
             )
         }
+        composable<HistoryInfo> {
+            HistoryInfoScreen(
+                onDelete = { navController.navigateUp() }
+            )
+        }
     }
+}
+
+object ExerciseArgs {
+    const val REPLACE_EXERCISE_ARG = "REPLACING"
+    const val ADD_EXERCISE_ARG = "SELECTING"
+    const val SELECT_EXERCISE_ARG = "ADDING"
+    const val STATE_ARG = "State"
 }

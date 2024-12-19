@@ -36,7 +36,7 @@ data class AddTemplateWorkout(val workoutId: String? = null)
 data object Workout
 
 @Serializable
-data object Exercises
+data class Exercises(val state: String? = null)
 
 @Serializable
 object ExerciseInfo
@@ -46,3 +46,6 @@ object Measure
 
 @Serializable
 object MeasureInfo
+
+@Serializable
+object HistoryInfo

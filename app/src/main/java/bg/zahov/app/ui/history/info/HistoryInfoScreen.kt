@@ -1,6 +1,5 @@
 package bg.zahov.app.ui.history.info
 
-import android.util.Log
 import android.widget.Toast
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Column
@@ -32,9 +31,14 @@ import androidx.compose.ui.unit.dp
 import bg.zahov.app.data.model.ToastManager
 import bg.zahov.app.data.provider.model.ExerciseDetails
 
-
+////    private val historyInfoViewModel: HistoryInfoViewModel by viewModels(
+////        ownerProducer = { requireParentFragment() }
+////    )
 @Composable
-fun HistoryInfoScreen(historyInfoViewModel: HistoryInfoViewModel = viewModel(), onDelete: () -> Unit) {
+fun HistoryInfoScreen(
+    historyInfoViewModel: HistoryInfoViewModel = viewModel(),
+    onDelete: () -> Unit,
+) {
     val state by historyInfoViewModel.uiState.collectAsStateWithLifecycle()
     val toast by ToastManager.messages.collectAsStateWithLifecycle()
     val context = LocalContext.current
@@ -46,7 +50,7 @@ fun HistoryInfoScreen(historyInfoViewModel: HistoryInfoViewModel = viewModel(), 
         }
     }
 
-    if(state.isDeleted) {
+    if (state.isDeleted) {
         LaunchedEffect(Unit) {
             onDelete()
         }
@@ -71,7 +75,9 @@ fun HistoryInfoContent(
     onClick: () -> Unit,
 ) {
     FitnessTheme {
-        Column(modifier = Modifier.fillMaxSize().padding(8.dp)) {
+        Column(modifier = Modifier
+            .fillMaxSize()
+            .padding(8.dp)) {
             Text(
                 text = date,
                 style = MaterialTheme.typography.bodyLarge,
@@ -83,7 +89,12 @@ fun HistoryInfoContent(
                 volume = volume,
                 personalRecords = personalRecords
             )
-            Column(modifier = Modifier.fillMaxWidth().padding(top = 12.dp), horizontalAlignment = Alignment.CenterHorizontally) {
+            Column(
+                modifier = Modifier
+                    .fillMaxWidth()
+                    .padding(top = 12.dp),
+                horizontalAlignment = Alignment.CenterHorizontally
+            ) {
                 LazyColumn(verticalArrangement = Arrangement.spacedBy(4.dp)) {
                     items(items = exercises) {
                         Exercise(
@@ -93,7 +104,9 @@ fun HistoryInfoContent(
                         )
                     }
                 }
-                Button(modifier = Modifier.width(240.dp).padding(top = 8.dp), onClick = onClick) {
+                Button(modifier = Modifier
+                    .width(240.dp)
+                    .padding(top = 8.dp), onClick = onClick) {
                     Text(text = stringResource(R.string.perform_again))
                 }
             }
@@ -105,14 +118,25 @@ fun HistoryInfoContent(
 fun Exercise(
     exerciseName: String,
     sets: List<String>,
-    oneRepMaxes: List<String>) {
+    oneRepMaxes: List<String>,
+) {
     Row(
         modifier = Modifier.fillMaxWidth(),
         horizontalArrangement = Arrangement.SpaceBetween,
         verticalAlignment = Alignment.CenterVertically
     ) {
-        Text(text = exerciseName, style = MaterialTheme.typography.bodyLarge, fontWeight = FontWeight.Bold, color = MaterialTheme.colorScheme.onSecondaryContainer)
-        Text(text = stringResource(R.string.one_rep_max_text),  style = MaterialTheme.typography.bodyLarge, fontWeight = FontWeight.Bold, color = MaterialTheme.colorScheme.onSecondaryContainer)
+        Text(
+            text = exerciseName,
+            style = MaterialTheme.typography.bodyLarge,
+            fontWeight = FontWeight.Bold,
+            color = MaterialTheme.colorScheme.onSecondaryContainer
+        )
+        Text(
+            text = stringResource(R.string.one_rep_max_text),
+            style = MaterialTheme.typography.bodyLarge,
+            fontWeight = FontWeight.Bold,
+            color = MaterialTheme.colorScheme.onSecondaryContainer
+        )
     }
     for (i in sets.indices) {
         ExerciseWithSets(sets[i], oneRepMaxes[i])

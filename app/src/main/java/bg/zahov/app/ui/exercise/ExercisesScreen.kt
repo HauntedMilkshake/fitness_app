@@ -45,10 +45,17 @@ import bg.zahov.fitness.app.R
 
 @Composable
 fun ExercisesScreen(
+    args: String?,
     viewModel: ExerciseViewModel = viewModel(),
     navigateInfo: () -> Unit,
-    navigateBack: () -> Unit
+    navigateBack: () -> Unit,
 ) {
+    args?.let {
+        LaunchedEffect(args) {
+            viewModel.updateFlag(it)
+        }
+    }
+
     val uiState by viewModel.exerciseData.collectAsStateWithLifecycle()
     ExercisesContent(
         showLoading = uiState.loading,
@@ -124,7 +131,7 @@ fun ExercisesContent(
 @Composable
 fun ConfirmButton(
     modifier: Modifier = Modifier,
-    onConfirm: () -> Unit
+    onConfirm: () -> Unit,
 ) {
     Box(
         modifier = modifier
@@ -157,7 +164,7 @@ fun ConfirmButton(
 fun ExerciseCards(
     modifier: Modifier = Modifier,
     exercise: ExerciseData,
-    onClick: (ExerciseData) -> Unit
+    onClick: (ExerciseData) -> Unit,
 ) {
     Card(
         modifier = modifier
@@ -217,7 +224,7 @@ fun ExerciseCards(
 fun FilterCard(
     modifier: Modifier = Modifier,
     filter: FilterItem,
-    onClick: (FilterItem) -> Unit
+    onClick: (FilterItem) -> Unit,
 ) {
     Card(modifier = modifier.padding(horizontal = 8.dp), colors = CardColors(
         contentColor = MaterialTheme.colorScheme.primary,
