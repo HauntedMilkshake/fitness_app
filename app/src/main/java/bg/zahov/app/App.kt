@@ -10,8 +10,6 @@ import androidx.compose.material3.Icon
 import androidx.compose.material3.IconButton
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Scaffold
-import androidx.compose.material3.Text
-import androidx.compose.material3.TopAppBar
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.getValue
@@ -25,10 +23,9 @@ import androidx.compose.ui.unit.dp
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import androidx.navigation.compose.rememberNavController
 import bg.zahov.app.ui.BottomBar
+import bg.zahov.app.ui.TopBar
 import bg.zahov.app.ui.theme.FitnessTheme
-import bg.zahov.fitness.app.R
 
-@OptIn(ExperimentalMaterial3Api::class)
 @Composable
 fun App(workoutManagerViewModel: WorkoutManagerViewModel) {
     val navController = rememberNavController()
@@ -41,25 +38,7 @@ fun App(workoutManagerViewModel: WorkoutManagerViewModel) {
     FitnessTheme {
         Scaffold(
             topBar = {
-                TopAppBar(
-                    modifier = Modifier,
-                    title = {
-                        Text(
-                            text = stringResource(R.string.one_rep_max_title_text),
-                            maxLines = 1,
-                            overflow = TextOverflow.Ellipsis,
-                            style = MaterialTheme.typography.titleLarge
-                        )
-                    },
-                    actions = {
-                        IconButton(onClick = { }) {
-                            Icon(
-                                painter = painterResource(R.drawable.ic_settings),
-                                contentDescription = stringResource(R.string.menu)
-                            )
-                        }
-                    }
-                )
+                TopBar(navController = navController)
             },
             bottomBar = {
                 Column {
