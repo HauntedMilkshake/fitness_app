@@ -21,6 +21,9 @@ object Home
 object Settings
 
 @Serializable
+object EditProfile
+
+@Serializable
 object History
 
 @Serializable

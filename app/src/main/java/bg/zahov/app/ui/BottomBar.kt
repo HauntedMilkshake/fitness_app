@@ -59,7 +59,7 @@ fun BottomBar(
     )
     val navBackStackEntry by navController.currentBackStackEntryAsState()
     val currentDestination = navBackStackEntry?.destination
-    if (screens.any {screen->
+    if (screens.any { screen ->
             currentDestination?.hierarchy?.any {
                 it.hasRoute(route = screen.route::class)
             } == true
