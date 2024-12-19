@@ -4,6 +4,6 @@
     <style name="Theme.Fitness_app" parent="Theme.MaterialComponents.Light.NoActionBar">
         <item name="android:statusBarColor">@color/background</item>
         <item name="android:windowBackground">@color/background</item>
+        <item name="android:windowSplashScreenAnimatedIcon">@drawable/ic_launcher</item>
     </style>
-
 </resources>

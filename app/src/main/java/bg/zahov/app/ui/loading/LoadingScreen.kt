@@ -7,8 +7,6 @@ import androidx.compose.foundation.Image
 import androidx.compose.foundation.background
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.fillMaxSize
-import androidx.compose.foundation.layout.offset
-import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.layout.wrapContentSize
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.runtime.Composable
@@ -24,7 +22,6 @@ import androidx.compose.ui.graphics.ColorFilter
 import androidx.compose.ui.graphics.graphicsLayer
 import androidx.compose.ui.layout.ContentScale
 import androidx.compose.ui.res.painterResource
-import androidx.compose.ui.unit.dp
 import androidx.lifecycle.viewmodel.compose.viewModel
 import bg.zahov.fitness.app.R
 import kotlinx.coroutines.delay
@@ -35,13 +32,13 @@ fun LoadingScreen(
     navigateWelcome: () -> Unit,
     navigateHome: () -> Unit
 ) {
+    LoadingScreenContent()
     LaunchedEffect(Unit) {
         viewModel.loading(
             pass = { navigateHome() },
             failed = { navigateWelcome() }
         )
     }
-    LoadingScreenContent()
 }
 
 @Composable
@@ -49,49 +46,36 @@ fun LoadingScreenContent(modifier: Modifier = Modifier) {
     Box(
         modifier = modifier
             .fillMaxSize()
-            .background(color = MaterialTheme.colorScheme.primaryContainer)
+            .background(color = MaterialTheme.colorScheme.outline.copy(alpha = 0.2f))
     ) {
         Image(
             painter = painterResource(R.drawable.ic_launcher),
             contentDescription = null,
-            colorFilter = ColorFilter.tint(MaterialTheme.colorScheme.onPrimaryContainer),
+            colorFilter = ColorFilter.tint(MaterialTheme.colorScheme.onBackground),
             contentScale = ContentScale.Inside,
             modifier = Modifier
                 .align(Alignment.Center)
                 .wrapContentSize()
-                .size(160.dp)
         )
 
         AnimatedImage(
             resource = R.drawable.ic_bottom_left,
-            modifier = Modifier
-                .size(200.dp)
-                .offset((-50).dp, (80).dp)
-                .align(Alignment.BottomStart),
+            modifier = Modifier.align(Alignment.BottomStart),
         )
 
         AnimatedImage(
             resource = R.drawable.ic_bottom_right,
-            modifier = Modifier
-                .size(200.dp)
-                .offset((80).dp, (90).dp)
-                .align(Alignment.BottomEnd),
+            modifier = Modifier.align(Alignment.BottomEnd),
         )
 
         AnimatedImage(
             resource = R.drawable.ic_top_left,
-            modifier = Modifier
-                .size(200.dp)
-                .offset((-80).dp, (-90).dp)
-                .align(Alignment.TopStart),
+            modifier = Modifier.align(Alignment.TopStart),
         )
 
         AnimatedImage(
             resource = R.drawable.ic_top_right,
-            modifier = Modifier
-                .size(200.dp)
-                .offset((50).dp, (-80).dp)
-                .align(Alignment.TopEnd),
+            modifier = Modifier.align(Alignment.TopEnd),
         )
     }
 }
