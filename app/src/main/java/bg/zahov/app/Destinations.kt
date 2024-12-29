@@ -39,13 +39,16 @@ data object Workout
 data class Exercises(val state: String? = null)
 
 @Serializable
-object ExerciseInfo
+data object ExerciseInfo
 
 @Serializable
-object Measure
+data object Measure
 
 @Serializable
-object MeasureInfo
+data object MeasureInfo
 
 @Serializable
-object HistoryInfo
+data object HistoryInfo
+
+@Serializable
+data object Calendar

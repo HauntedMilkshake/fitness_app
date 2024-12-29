@@ -78,7 +78,6 @@ private val weights = arrayOf(1f, 1f, 2f, 2f)
 
 @Composable
 fun AddTemplateWorkoutScreen(
-    workoutId: String? = null,
     addTemplateViewModel: AddTemplateWorkoutViewModel = viewModel(),
     onAddExercise: () -> Unit,
     onReplaceExercise: () -> Unit,
@@ -90,12 +89,6 @@ fun AddTemplateWorkoutScreen(
      * pre-defined weight values to ensure consistency
      */
     val state by addTemplateViewModel.uiState.collectAsStateWithLifecycle()
-
-    workoutId?.let {
-        LaunchedEffect(workoutId) {
-            addTemplateViewModel.initEditWorkoutId(true , it)
-        }
-    }
 
     if (state.isAdded) {
         LaunchedEffect(Unit) {

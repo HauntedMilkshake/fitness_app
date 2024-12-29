@@ -1,5 +1,6 @@
 package bg.zahov.app.ui.exercise
 
+import android.util.Log
 import androidx.compose.foundation.Image
 import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.Arrangement
@@ -30,33 +31,36 @@ import androidx.compose.runtime.getValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.layout.ContentScale
+import androidx.compose.ui.platform.LocalSavedStateRegistryOwner
 import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.text.style.TextOverflow
 import androidx.compose.ui.unit.dp
+import androidx.lifecycle.SavedStateViewModelFactory
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import androidx.lifecycle.viewmodel.compose.viewModel
+import androidx.navigation.NavBackStackEntry
+import androidx.navigation.toRoute
+import bg.zahov.app.Exercises
 import bg.zahov.app.data.model.FilterItem
 import bg.zahov.app.data.model.state.ExerciseData
 import bg.zahov.app.data.model.state.ExerciseFlag
 import bg.zahov.app.ui.exercise.filter.FilterDialog
+import bg.zahov.app.ui.factory.ArgumentViewModelFactory
 import bg.zahov.app.ui.theme.FitnessTheme
 import bg.zahov.fitness.app.R
 
 @Composable
 fun ExercisesScreen(
-    args: String?,
-    viewModel: ExerciseViewModel = viewModel(),
+//    viewModel: ExerciseViewModel = viewModel(factory = SavedStateViewModelFactory()),
+    viewModel: ExerciseViewModel = viewModel(factory = ExerciseViewModel.Factory),
     navigateInfo: () -> Unit,
     navigateBack: () -> Unit,
 ) {
-    args?.let {
-        LaunchedEffect(args) {
-            viewModel.updateFlag(it)
-        }
-    }
-
     val uiState by viewModel.exerciseData.collectAsStateWithLifecycle()
+    Log.d("SavedStateRegistryOwner", LocalSavedStateRegistryOwner.current.toString())
+
+
     ExercisesContent(
         showLoading = uiState.loading,
         filterItems = uiState.filters,

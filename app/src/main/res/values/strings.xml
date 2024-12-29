@@ -206,6 +206,7 @@
     <string name="back_button">Go Back</string>
     <string name="menu">Menu</string>
     <!-- Strings used for top app bar-->
+    <string name="calendar">Calendar</string>
     <!-- Strings used for adding a template workout-->
     <string name = "no_workout_name_toast">Cannot add a workout without a name!</string>
     <!-- Strings used for StartWorkout -->
@@ -220,4 +221,5 @@
     <string name="cardio_category_text">Cardio</string>
     <string name="timed_category_text">Timed</string>
     <string name="muslce_part_description">Icon depicting</string>
+
 </resources>

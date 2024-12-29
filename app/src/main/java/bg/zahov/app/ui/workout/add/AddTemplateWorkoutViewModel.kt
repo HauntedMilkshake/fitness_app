@@ -1,7 +1,11 @@
 package bg.zahov.app.ui.workout.add
 
+import android.util.Log
+import androidx.lifecycle.SavedStateHandle
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
+import androidx.navigation.toRoute
+import bg.zahov.app.AddTemplateWorkout
 import bg.zahov.app.Inject
 import bg.zahov.app.data.interfaces.WorkoutProvider
 import bg.zahov.app.data.model.Category
@@ -57,6 +61,8 @@ class AddTemplateWorkoutViewModel(
     private val toastManager: ToastManager = ToastManager,
 ) : ViewModel() {
 
+    private val workoutId = SavedStateHandle().toRoute<AddTemplateWorkout>().workoutId
+
     /**
      * The backing [MutableStateFlow] for the UI state, initialized with default values.
      * Provides a reactive data source for observing UI changes.
@@ -102,6 +108,8 @@ class AddTemplateWorkoutViewModel(
     private var templateExercises = listOf<Exercise>()
 
     init {
+        Log.d("init", workoutId.toString())
+        initEditWorkoutId(workoutId = workoutId)
         viewModelScope.launch {
             observeTemplateExercises()
             observeTemplateWorkouts()
@@ -184,10 +192,10 @@ class AddTemplateWorkoutViewModel(
      * @param editFlag Indicates whether the workout is being edited.
      * @param workoutId The ID of the workout to edit.
      */
-    fun initEditWorkoutId(editFlag: Boolean, workoutId: String) {
-        if (workoutIdToEdit.isEmpty()) {
+    fun initEditWorkoutId(editFlag: Boolean = true, workoutId: String?) {
+        if (workoutIdToEdit.isNotEmpty()) {
             edit = editFlag
-            workoutIdToEdit = workoutId
+            workoutIdToEdit = workoutId ?: ""
 
             viewModelScope.launch {
                 workoutProvider.getTemplateWorkouts().first().let { workouts ->

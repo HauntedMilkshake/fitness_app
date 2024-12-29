@@ -1,7 +1,14 @@
 package bg.zahov.app.ui.exercise
 
+import androidx.lifecycle.SavedStateHandle
 import androidx.lifecycle.ViewModel
+import androidx.lifecycle.ViewModelProvider
+import androidx.lifecycle.createSavedStateHandle
 import androidx.lifecycle.viewModelScope
+import androidx.lifecycle.viewmodel.initializer
+import androidx.lifecycle.viewmodel.viewModelFactory
+import androidx.navigation.toRoute
+import bg.zahov.app.Exercises
 import bg.zahov.app.Inject
 import bg.zahov.app.data.exception.CriticalDataNullException
 import bg.zahov.app.data.interfaces.ServiceErrorHandler
@@ -34,13 +41,27 @@ import kotlinx.coroutines.launch
  * @property serviceError Handles service-related errors.
  */
 class ExerciseViewModel(
+    private val savedStateHandle: SavedStateHandle,
     private val repo: WorkoutProvider = Inject.workoutProvider,
     private val selectableExerciseProvider: SelectableExerciseProvider = Inject.selectedExerciseProvider,
     private val replaceableExerciseProvider: ReplaceableExerciseProvider = Inject.replaceableExerciseProvider,
     private val addExerciseToWorkoutProvider: AddExerciseToWorkoutProvider = Inject.workoutAddedExerciseProvider,
     private val filterProvider: FilterProvider = Inject.filterProvider,
-    private val serviceError: ServiceErrorHandler = Inject.serviceErrorHandler
+    private val serviceError: ServiceErrorHandler = Inject.serviceErrorHandler,
 ) : ViewModel() {
+
+    companion object {
+        val Factory: ViewModelProvider.Factory = viewModelFactory {
+            initializer {
+                ExerciseViewModel(
+                    savedStateHandle = createSavedStateHandle(),
+                )
+            }
+        }
+    }
+
+    private val exerciseState = savedStateHandle.toRoute<Exercises>().state
+
     /**
      * Internal mutable state flow representing the current state of the exercise screen.
      * Used to hold and update the UI state data including filters, exercises, loading status, etc.
@@ -55,6 +76,8 @@ class ExerciseViewModel(
 
 
     init {
+        updateFlag(exerciseState)
+
         viewModelScope.launch {
             launch {
                 filterProvider.filters.collect { filters ->
@@ -167,7 +190,7 @@ class ExerciseViewModel(
      */
     private fun matchesSearch(
         exercise: ExerciseData,
-        searchString: String = _exerciseData.value.search
+        searchString: String = _exerciseData.value.search,
     ): Boolean {
         return searchString.isBlank() || exercise.name.contains(searchString, ignoreCase = true)
     }
@@ -184,7 +207,7 @@ class ExerciseViewModel(
      */
     private fun matchesAnyFilter(
         exercise: ExerciseData,
-        filterList: List<FilterItem> = _exerciseData.value.filters
+        filterList: List<FilterItem> = _exerciseData.value.filters,
     ): Boolean {
         val categoryFilters = filterList.filter { it.filter is Filter.CategoryFilter }
         val bodyPartFilters = filterList.filter { it.filter is Filter.BodyPartFilter }
