@@ -221,5 +221,7 @@
     <string name="cardio_category_text">Cardio</string>
     <string name="timed_category_text">Timed</string>
     <string name="muslce_part_description">Icon depicting</string>
+    <!-- Strings used for test tags   -->
+    <string name="login_button_test_tag">Login test tag</string>
 
 </resources>

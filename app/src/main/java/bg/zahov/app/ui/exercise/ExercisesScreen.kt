@@ -46,7 +46,6 @@ import bg.zahov.app.data.model.FilterItem
 import bg.zahov.app.data.model.state.ExerciseData
 import bg.zahov.app.data.model.state.ExerciseFlag
 import bg.zahov.app.ui.exercise.filter.FilterDialog
-import bg.zahov.app.ui.factory.ArgumentViewModelFactory
 import bg.zahov.app.ui.theme.FitnessTheme
 import bg.zahov.fitness.app.R
 

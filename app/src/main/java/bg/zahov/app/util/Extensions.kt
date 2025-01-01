@@ -128,7 +128,7 @@ fun String.parseTimeStringToLong(): Long {
         throw IllegalArgumentException("Invalid time string format")
     }
 
-    val hours = parts[0].toLong()
+    val hours = if (parts[0].isEmpty()) 0L else parts[0].toLong()
     val minutes = if (parts.size >= 2) parts[1].toLong() else 0
     val seconds = if (parts.size == 3) parts[2].toLong() else 0
 
@@ -141,6 +141,7 @@ fun Exercise.toExerciseData() =
         bodyPart = this.bodyPart,
         category = this.category
     )
+
 fun Exercise.toExerciseAdapterWrapper() =
     ExerciseAdapterWrapper(
         name = this.name,
@@ -208,7 +209,10 @@ fun LocalDateTime.toRealmString(): String {
 }
 
 fun String.toLocalDateTimeRlm(): LocalDateTime {
-    return LocalDateTime.parse(this, DateTimeFormatter.ofPattern(RealmTimePattern.REALM_TIME_PATTERN))
+    return LocalDateTime.parse(
+        this,
+        DateTimeFormatter.ofPattern(RealmTimePattern.REALM_TIME_PATTERN)
+    )
 }
 
 fun String.filterIntegerInput(): Int {
