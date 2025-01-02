@@ -1,3 +1,4 @@
+import org.gradle.kotlin.dsl.support.kotlinCompilerOptions
 
 plugins {
     id("com.android.application")
@@ -11,12 +12,12 @@ plugins {
 
 android {
     namespace = "bg.zahov.fitness.app"
-    compileSdk = 35
+    compileSdk = 34
 
     defaultConfig {
         applicationId = "bg.zahov.app"
         minSdk = 31
-        targetSdk = 35
+        targetSdk = 34
         versionCode = 1
         versionName = "1.0"
         versionName = "1.0"
