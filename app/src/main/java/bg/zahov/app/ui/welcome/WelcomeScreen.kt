@@ -24,7 +24,11 @@ import bg.zahov.fitness.app.R
 @Composable
 fun WelcomeScreen(onSignup: () -> Unit, onLogin: () -> Unit) {
     FitnessTheme {
-        Column(modifier = Modifier.fillMaxSize(), verticalArrangement = Arrangement.SpaceEvenly, horizontalAlignment = Alignment.CenterHorizontally) {
+        Column(
+            modifier = Modifier.fillMaxSize(),
+            verticalArrangement = Arrangement.SpaceEvenly,
+            horizontalAlignment = Alignment.CenterHorizontally
+        ) {
             Column(horizontalAlignment = Alignment.CenterHorizontally) {
                 Icon(
                     modifier = Modifier.padding(bottom = 24.dp),
@@ -54,7 +58,7 @@ fun WelcomeScreen(onSignup: () -> Unit, onLogin: () -> Unit) {
                     onClick = onSignup
                 )
                 WelcomeButton(
-                    modifier = Modifier.testTag(stringResource(R.string.login_button_test_tag)),
+                    modifier = Modifier.testTag("to_login_screen"),
                     label = stringResource(R.string.login),
                     onClick = onLogin
                 )

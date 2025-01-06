@@ -41,7 +41,7 @@ import bg.zahov.app.util.isEmail
 fun LoginScreen(
     loginViewModel: LoginViewModel = viewModel(),
     onAuthenticate: () -> Unit,
-    onNavigateToSignUp: () -> Unit
+    onNavigateToSignUp: () -> Unit,
 ) {
     val uiState by loginViewModel.uiState.collectAsStateWithLifecycle()
     val context = LocalContext.current
@@ -80,7 +80,7 @@ fun LoginContent(
     onPasswordVisibilityChange: () -> Unit,
     navigateSignUp: () -> Unit,
     logIn: () -> Unit,
-    resetPassword: () -> Unit
+    resetPassword: () -> Unit,
 ) {
     val interactionSource = remember { MutableInteractionSource() }
     Column(
@@ -133,7 +133,7 @@ fun LoginContent(
                 modifier = Modifier
                     .padding(top = 16.dp)
                     .fillMaxWidth()
-                    .testTag(stringResource(R.string.login_button_test_tag)),
+                    .testTag("to_home_screen"),
                 colors = ButtonColors(
                     containerColor = colorResource(R.color.text),
                     contentColor = colorResource(R.color.white),
