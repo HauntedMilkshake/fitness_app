@@ -1,6 +1,5 @@
 package bg.zahov.app.data.interfaces
 
-import bg.zahov.app.data.local.RealmWorkoutState
 import bg.zahov.app.data.model.Exercise
 import bg.zahov.app.data.model.Workout
 import io.realm.kotlin.notifications.ObjectChange
@@ -21,8 +20,6 @@ interface WorkoutRepository {
     suspend fun getWorkoutByName(name: String): Flow<Workout>
     suspend fun updateExercises(exercises: List<Exercise>)
     suspend fun getPastWorkoutById(id: String): Workout
-    suspend fun getPastWorkoutState(): RealmWorkoutState?
-    suspend fun addWorkoutState(realmWorkoutState: RealmWorkoutState)
     suspend fun updateTemplateWorkout(workoutId: String, date: LocalDateTime, newExercise: List<Exercise>)
     suspend fun clearWorkoutState()
 }

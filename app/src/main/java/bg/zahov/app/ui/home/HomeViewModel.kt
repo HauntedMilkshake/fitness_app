@@ -9,21 +9,14 @@ import bg.zahov.app.data.interfaces.ServiceErrorHandler
 import bg.zahov.app.data.interfaces.UserProvider
 import bg.zahov.app.data.interfaces.WorkoutActions
 import bg.zahov.app.data.interfaces.WorkoutProvider
-import bg.zahov.app.data.local.RealmDefaultSetting.DEFAULT_SETTING
-import bg.zahov.app.data.local.RealmWorkoutState
 import bg.zahov.app.data.model.Workout
-import bg.zahov.app.util.toExercise
-import bg.zahov.app.util.toLocalDateTimeRlm
 import com.github.mikephil.charting.data.BarEntry
-import kotlinx.coroutines.async
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.StateFlow
 import kotlinx.coroutines.flow.update
 import kotlinx.coroutines.launch
 import java.time.DayOfWeek
-import java.time.Duration
 import java.time.LocalDate
-import java.time.LocalDateTime
 import java.time.format.DateTimeFormatter
 import java.time.temporal.TemporalAdjusters
 
@@ -38,7 +31,7 @@ data class HomeUiState(
     val username: String = "",
     val numberOfWorkouts: String = "",
     val data: ChartData = ChartData(),
-    val isChartLoading: Boolean = true
+    val isChartLoading: Boolean = true,
 )
 
 /**
@@ -57,7 +50,7 @@ data class ChartData(
     val yMin: Float = 0f,
     val yMax: Float = 0f,
     val chartData: List<BarEntry> = listOf(),
-    val weekRanges: List<String> = listOf()
+    val weekRanges: List<String> = listOf(),
 )
 
 /**
@@ -71,7 +64,7 @@ class HomeViewModel(
     private val workoutRepo: WorkoutProvider = Inject.workoutProvider,
     private val workoutStateManager: WorkoutActions = Inject.workoutState,
     private val workoutRestManager: RestProvider = Inject.restTimerProvider,
-    private val serviceErrorHandler: ServiceErrorHandler = Inject.serviceErrorHandler
+    private val serviceErrorHandler: ServiceErrorHandler = Inject.serviceErrorHandler,
 ) : ViewModel() {
 
     /**
@@ -91,7 +84,6 @@ class HomeViewModel(
      * check if we stopped the app during a workout
      */
     init {
-        checkWorkoutState()
         viewModelScope.launch {
             launch {
                 try {
@@ -132,7 +124,7 @@ class HomeViewModel(
                                 )
                             }
 
-                    }
+                        }
                 } catch (e: CriticalDataNullException) {
                     serviceErrorHandler.initiateCountdown()
                 }
@@ -183,54 +175,5 @@ class HomeViewModel(
         }
 
         return weekRanges
-    }
-
-    /**
-     * if stored isn't default the means we must resume a workout
-     */
-    private suspend fun checkPreviousState(previousState: RealmWorkoutState) {
-        if (previousState.id != DEFAULT_SETTING) {
-            val lastTime =
-                Duration.between(LocalDateTime.now(), previousState.date.toLocalDateTimeRlm())
-            if (previousState.restTimerStart.isNotEmpty() && previousState.restTimerEnd.isNotEmpty() && !LocalDateTime.now()
-                    .isAfter(previousState.restTimerEnd.toLocalDateTimeRlm())
-            ) {
-                val restDuration = Duration.between(
-                    previousState.restTimerStart.toLocalDateTimeRlm(),
-                    previousState.restTimerEnd.toLocalDateTimeRlm()
-                ).seconds * 1000
-                val elapsedTime = Duration.between(
-                    previousState.restTimerStart.toLocalDateTimeRlm(),
-                    LocalDateTime.now()
-                ).seconds * 1000
-                workoutRestManager.startRest(restDuration, elapsedTime)
-            }
-
-            workoutStateManager.startWorkout(
-                Workout(
-                    id = previousState.id,
-                    name = previousState.name,
-                    duration = previousState.duration,
-                    volume = previousState.volume,
-                    date = previousState.date.toLocalDateTimeRlm(),
-                    isTemplate = false,
-                    exercises = previousState.exercises.mapNotNull { it.toExercise() },
-                    note = previousState.note,
-                    personalRecords = previousState.personalRecords
-                ),
-                kotlin.math.abs(lastTime.seconds) * 1000,
-                true
-            )
-        }
-    }
-
-    /**
-     * making sure we don't need to resume a workout before clearing it
-     */
-    private fun checkWorkoutState() {
-        viewModelScope.launch {
-            async { workoutRepo.getPreviousWorkoutState()?.let { checkPreviousState(it) } }.await()
-            workoutRepo.clearWorkoutState()
-        }
     }
 }

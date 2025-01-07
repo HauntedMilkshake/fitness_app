@@ -15,6 +15,7 @@ import bg.zahov.app.ui.home.HomeScreen
 import bg.zahov.app.ui.loading.LoadingScreen
 import bg.zahov.app.ui.measures.MeasuresScreen
 import bg.zahov.app.ui.measures.info.MeasurementInfoScreen
+import bg.zahov.app.ui.settings.SettingsScreen
 import bg.zahov.app.ui.welcome.WelcomeScreen
 import bg.zahov.app.ui.workout.WorkoutScreen
 
@@ -116,6 +117,12 @@ fun MainNavGraph(
         }
         composable<MeasureInfo> {
             MeasurementInfoScreen()
+        }
+        composable<Settings> {
+            SettingsScreen(
+                navigateBack = { navController.navigateUp() },
+                navigateEditProfile = { navController.navigate(EditProfile) }
+            )
         }
     }
 }

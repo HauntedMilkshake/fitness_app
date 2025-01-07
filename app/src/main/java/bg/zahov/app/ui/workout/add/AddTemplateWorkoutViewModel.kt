@@ -10,13 +10,10 @@ import bg.zahov.app.data.exception.CriticalDataNullException
 import bg.zahov.app.data.model.Exercise
 import bg.zahov.app.data.model.SetType
 import bg.zahov.app.data.model.Sets
-import bg.zahov.app.data.model.Units
-import bg.zahov.app.data.model.Units.METRIC
 import bg.zahov.app.data.model.Workout
 import bg.zahov.app.getReplaceableExerciseProvider
 import bg.zahov.app.getSelectableExerciseProvider
 import bg.zahov.app.getServiceErrorProvider
-import bg.zahov.app.getSettingsProvider
 import bg.zahov.app.getWorkoutProvider
 import bg.zahov.app.util.filterIntegerInput
 import bg.zahov.app.util.generateRandomId
@@ -25,7 +22,6 @@ import bg.zahov.app.util.toExerciseSetAdapterSetWrapper
 import bg.zahov.app.util.toExerciseSetAdapterWrapper
 import bg.zahov.fitness.app.R
 import kotlinx.coroutines.launch
-import java.lang.Exception
 import java.time.LocalDateTime
 
 class AddTemplateWorkoutViewModel(application: Application) : AndroidViewModel(application) {
@@ -39,10 +35,6 @@ class AddTemplateWorkoutViewModel(application: Application) : AndroidViewModel(a
 
     private val replaceableExerciseProvider by lazy {
         application.getReplaceableExerciseProvider()
-    }
-
-    private val settingsProvider by lazy {
-        application.getSettingsProvider()
     }
 
     private val serviceError by lazy {
@@ -64,7 +56,6 @@ class AddTemplateWorkoutViewModel(application: Application) : AndroidViewModel(a
     private lateinit var templates: List<Workout>
     private var edit = false
     private lateinit var workoutIdToEdit: String
-    private lateinit var settings: bg.zahov.app.data.local.Settings
     private var templateExercises = listOf<Exercise>()
 
     init {
@@ -76,17 +67,6 @@ class AddTemplateWorkoutViewModel(application: Application) : AndroidViewModel(a
                     }
                 } catch (e: CriticalDataNullException) {
                     serviceError.initiateCountdown()
-                }
-            }
-            launch {
-                try {
-                    settingsProvider.getSettings().collect { settingsObject ->
-                        settingsObject.obj?.let { collectedSettings ->
-                            settings = collectedSettings
-                        }
-                    }
-                } catch (e: Exception) {
-//                    serviceError.initiateCountdown()
                 }
             }
             launch {
@@ -113,9 +93,7 @@ class AddTemplateWorkoutViewModel(application: Application) : AndroidViewModel(a
                 replaceableExerciseProvider.exerciseToReplace.collect {
                     it?.let { replaced ->
                         val replacedEntry = ExerciseEntry(
-                            replaced.toExerciseSetAdapterWrapper(
-                                Units.entries.find { it.key == settings.units } ?: METRIC
-                            )
+                            replaced.toExerciseSetAdapterWrapper()
                         )
                         exerciseToReplaceIndex?.let { indexToReplace ->
                             if (_currExercises.value?.get(indexToReplace) != replacedEntry) {

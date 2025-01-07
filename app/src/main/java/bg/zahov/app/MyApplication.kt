@@ -93,6 +93,7 @@ class MyApplication : Application() {
 }
 
 fun Application.getUserProvider() = (this as MyApplication).userProvider
+
 fun Application.getSettingsProvider() = (this as MyApplication).settingsProvider
 fun Application.getWorkoutProvider() = (this as MyApplication).workoutProvider
 fun Application.getWorkoutStateManager() = (this as MyApplication).workoutState
