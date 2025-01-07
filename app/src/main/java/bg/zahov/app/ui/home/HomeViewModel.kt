@@ -11,6 +11,7 @@ import bg.zahov.app.data.interfaces.WorkoutActions
 import bg.zahov.app.data.interfaces.WorkoutProvider
 import bg.zahov.app.data.model.Workout
 import com.github.mikephil.charting.data.BarEntry
+import kotlinx.coroutines.async
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.StateFlow
 import kotlinx.coroutines.flow.update
@@ -84,6 +85,7 @@ class HomeViewModel(
      * check if we stopped the app during a workout
      */
     init {
+        checkWorkoutState()
         viewModelScope.launch {
             launch {
                 try {
@@ -175,5 +177,27 @@ class HomeViewModel(
         }
 
         return weekRanges
+    }
+
+
+    /**
+     * if stored isn't default the means we must resume a workout
+     */
+    private suspend fun checkPreviousState(previousState: String = "") {
+        workoutStateManager.startWorkout(
+            Workout()
+//                kotlin.math.abs(lastTime.seconds) * 1000,
+//                true
+        )
+    }
+
+    /**
+     * making sure we don't need to resume a workout before clearing it
+     */
+    private fun checkWorkoutState() {
+        viewModelScope.launch {
+//            async { workoutRepo.getPreviousWorkoutState()?.let { checkPreviousState(it) } }.await()
+            workoutRepo.clearWorkoutState()
+        }
     }
 }

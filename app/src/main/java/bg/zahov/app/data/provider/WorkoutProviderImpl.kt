@@ -146,6 +146,9 @@ class WorkoutProviderImpl : WorkoutProvider {
     override suspend fun getClickedTemplateExercise() = clickedExercise.mapNotNull { it }
 
     override suspend fun getExerciseHistory(): Flow<List<ExerciseHistoryInfo>> = exerciseHistory
+    override suspend fun <T> getPreviousWorkoutState(): T? = null
+
+    override suspend fun <T> addWorkoutState(realmWorkoutState: T) { /* TODO() */ }
 
     override suspend fun updateTemplateWorkout(
         workoutId: String,

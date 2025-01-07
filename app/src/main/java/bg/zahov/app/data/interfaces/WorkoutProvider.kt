@@ -34,6 +34,8 @@ interface WorkoutProvider {
     suspend fun setClickedTemplateExercise(item: ExerciseData)
     suspend fun getClickedTemplateExercise(): Flow<Exercise>
     suspend fun getExerciseHistory(): Flow<List<ExerciseHistoryInfo>>
+    suspend fun <T>getPreviousWorkoutState(): T?
+    suspend fun <T>addWorkoutState(realmWorkoutState: T)
     suspend fun updateTemplateWorkout(
         workoutId: String,
         date: LocalDateTime,
