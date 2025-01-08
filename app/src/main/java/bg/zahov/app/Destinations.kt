@@ -33,6 +33,9 @@ object Workout
 object Exercises
 
 @Serializable
+object AddExercise
+
+@Serializable
 object ExerciseInfo
 
 @Serializable

@@ -2,6 +2,7 @@ package bg.zahov.app
 
 import androidx.compose.runtime.Composable
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.text.font.FontVariation
 import androidx.navigation.NavGraph.Companion.findStartDestination
 import androidx.navigation.NavHostController
 import androidx.navigation.compose.NavHost
@@ -9,12 +10,15 @@ import androidx.navigation.compose.composable
 import bg.zahov.app.ui.authentication.login.LoginScreen
 import bg.zahov.app.ui.authentication.signup.SignupScreen
 import bg.zahov.app.ui.exercise.ExercisesScreen
+import bg.zahov.app.ui.exercise.add.AddExerciseScreen
 import bg.zahov.app.ui.exercise.info.ExerciseInfoScreen
 import bg.zahov.app.ui.history.HistoryScreen
 import bg.zahov.app.ui.home.HomeScreen
 import bg.zahov.app.ui.loading.LoadingScreen
 import bg.zahov.app.ui.measures.MeasuresScreen
 import bg.zahov.app.ui.measures.info.MeasurementInfoScreen
+import bg.zahov.app.ui.settings.SettingsScreen
+import bg.zahov.app.ui.settings.profile.EditProfileScreen
 import bg.zahov.app.ui.welcome.WelcomeScreen
 import bg.zahov.app.ui.workout.WorkoutScreen
 
@@ -88,6 +92,17 @@ fun MainNavGraph(
             HomeScreen()
         }
 
+        composable<Settings>{
+            SettingsScreen(
+                navigateBack = {navController.popBackStack()},
+                navigateEditProfile = {navController.navigate(EditProfile)}
+            )
+        }
+
+        composable<EditProfile>{
+            EditProfileScreen()
+        }
+
         composable<Workout> {
             WorkoutScreen(
                 onCancel = {},
@@ -101,6 +116,12 @@ fun MainNavGraph(
             ExercisesScreen(
                 navigateInfo = { navController.navigate(ExerciseInfo) },
                 navigateBack = { navController.navigateUp() })
+        }
+
+        composable<AddExercise> {
+            AddExerciseScreen(
+                navigate = { navController.popBackStack() }
+            )
         }
 
         composable<ExerciseInfo> {
