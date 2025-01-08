@@ -271,7 +271,7 @@
     </fragment>
     <fragment
         android:id="@+id/measurement_input"
-        android:name="bg.zahov.app.ui.measures.info.input.MeasurementInputFragment"
+        android:name="bg.zahov.app.ui.measures.info.add.MeasurementInputFragment"
         tools:layout="@layout/dialog_fragment_measurement_input">
         <action
             android:id="@+id/measurement_input_to_measurement_info"

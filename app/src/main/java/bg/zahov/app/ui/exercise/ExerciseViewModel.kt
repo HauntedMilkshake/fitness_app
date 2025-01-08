@@ -25,8 +25,10 @@ import bg.zahov.app.data.provider.SelectableExerciseProvider
 import bg.zahov.app.ui.exercise.ExercisesFragment.Companion.ADD_EXERCISE_ARG
 import bg.zahov.app.ui.exercise.ExercisesFragment.Companion.REPLACE_EXERCISE_ARG
 import bg.zahov.app.ui.exercise.ExercisesFragment.Companion.SELECT_EXERCISE_ARG
+import bg.zahov.app.ui.exercise.topbar.ExerciseTopBarManager
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.StateFlow
+import kotlinx.coroutines.flow.collect
 import kotlinx.coroutines.flow.update
 import kotlinx.coroutines.launch
 
@@ -48,6 +50,7 @@ class ExerciseViewModel(
     private val addExerciseToWorkoutProvider: AddExerciseToWorkoutProvider = Inject.workoutAddedExerciseProvider,
     private val filterProvider: FilterProvider = Inject.filterProvider,
     private val serviceError: ServiceErrorHandler = Inject.serviceErrorHandler,
+    private val exerciseTopBarManager: ExerciseTopBarManager = Inject.exerciseTopAppHandler
 ) : ViewModel() {
 
     companion object {
@@ -74,7 +77,6 @@ class ExerciseViewModel(
      */
     val exerciseData: StateFlow<ExerciseScreenData> = _exerciseData
 
-
     init {
         updateFlag(exerciseState)
 
@@ -99,6 +101,19 @@ class ExerciseViewModel(
                     }
                 } catch (e: CriticalDataNullException) {
                     serviceError.stopApplication()
+                }
+            }
+            launch {
+                exerciseTopBarManager.openDialog.collect {
+                    _exerciseData.update { old -> old.copy(showDialog = it) }
+                }
+            }
+            launch {
+                exerciseTopBarManager.search.collect {
+                    _exerciseData.update { old ->
+                        old.copy(search = it)
+                    }
+                    getFiltered()
                 }
             }
         }
@@ -190,7 +205,7 @@ class ExerciseViewModel(
      */
     private fun matchesSearch(
         exercise: ExerciseData,
-        searchString: String = _exerciseData.value.search,
+        searchString: String = _exerciseData.value.search
     ): Boolean {
         return searchString.isBlank() || exercise.name.contains(searchString, ignoreCase = true)
     }
@@ -207,7 +222,7 @@ class ExerciseViewModel(
      */
     private fun matchesAnyFilter(
         exercise: ExerciseData,
-        filterList: List<FilterItem> = _exerciseData.value.filters,
+        filterList: List<FilterItem> = _exerciseData.value.filters
     ): Boolean {
         val categoryFilters = filterList.filter { it.filter is Filter.CategoryFilter }
         val bodyPartFilters = filterList.filter { it.filter is Filter.BodyPartFilter }
@@ -347,12 +362,14 @@ class ExerciseViewModel(
     }
 
     /**
-     * Updates the visibility of the dialog.
+     * Updates the visibility value of the dialog in the exerciseTopBarManager .
      *
      * @param showDialog Indicates whether to show the dialog.
      */
     fun updateShowDialog(showDialog: Boolean) {
-        _exerciseData.update { old -> old.copy(showDialog = showDialog) }
+        viewModelScope.launch {
+            exerciseTopBarManager.changeOpenDialog(showDialog)
+        }
     }
 
     /**

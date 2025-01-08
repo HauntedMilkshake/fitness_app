@@ -42,6 +42,9 @@ data class Exercises(val state: String? = null)
 data object ExerciseInfo
 
 @Serializable
+object ExerciseAdd
+
+@Serializable
 data object Measure
 
 @Serializable

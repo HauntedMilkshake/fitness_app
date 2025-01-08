@@ -36,23 +36,17 @@ import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.text.style.TextOverflow
 import androidx.compose.ui.unit.dp
-import androidx.lifecycle.SavedStateViewModelFactory
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import androidx.lifecycle.viewmodel.compose.viewModel
-import androidx.navigation.NavBackStackEntry
-import androidx.navigation.toRoute
-import bg.zahov.app.Exercises
 import bg.zahov.app.data.model.FilterItem
 import bg.zahov.app.data.model.state.ExerciseData
 import bg.zahov.app.data.model.state.ExerciseFlag
 import bg.zahov.app.ui.exercise.filter.FilterDialog
-import bg.zahov.app.ui.factory.ArgumentViewModelFactory
 import bg.zahov.app.ui.theme.FitnessTheme
 import bg.zahov.fitness.app.R
 
 @Composable
 fun ExercisesScreen(
-//    viewModel: ExerciseViewModel = viewModel(factory = SavedStateViewModelFactory()),
     viewModel: ExerciseViewModel = viewModel(factory = ExerciseViewModel.Factory),
     navigateInfo: () -> Unit,
     navigateBack: () -> Unit,
