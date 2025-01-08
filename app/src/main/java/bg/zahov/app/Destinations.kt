@@ -46,6 +46,3 @@ object Measure
 
 @Serializable
 object MeasureInfo
-
-@Serializable
-object MeasureAdd
