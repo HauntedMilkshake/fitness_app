@@ -30,6 +30,9 @@ object History
 object HistoryInfo
 
 @Serializable
+object Calendar
+
+@Serializable
 object Workout
 
 @Serializable

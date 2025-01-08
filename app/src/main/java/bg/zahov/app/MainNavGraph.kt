@@ -12,6 +12,7 @@ import bg.zahov.app.ui.exercise.ExercisesScreen
 import bg.zahov.app.ui.exercise.add.AddExerciseScreen
 import bg.zahov.app.ui.exercise.info.ExerciseInfoScreen
 import bg.zahov.app.ui.history.HistoryScreen
+import bg.zahov.app.ui.history.calendar.CalendarScreen
 import bg.zahov.app.ui.history.info.HistoryInfoScreen
 import bg.zahov.app.ui.home.HomeScreen
 import bg.zahov.app.ui.loading.LoadingScreen
@@ -126,6 +127,9 @@ fun MainNavGraph(
         }
         composable<HistoryInfo> {
             HistoryInfoScreen(onDelete = { navController.popBackStack() })
+        }
+        composable<Calendar>{
+            CalendarScreen()
         }
         composable<Measure> {
             MeasuresScreen(
