@@ -27,13 +27,16 @@ object EditProfile
 object History
 
 @Serializable
+object HistoryInfo
+
+@Serializable
 object Workout
 
 @Serializable
 object Exercises
 
 @Serializable
-object AddExercise
+object ExerciseAdd
 
 @Serializable
 object ExerciseInfo
@@ -43,3 +46,6 @@ object Measure
 
 @Serializable
 object MeasureInfo
+
+@Serializable
+object MeasureAdd

@@ -2,7 +2,6 @@ package bg.zahov.app
 
 import androidx.compose.runtime.Composable
 import androidx.compose.ui.Modifier
-import androidx.compose.ui.text.font.FontVariation
 import androidx.navigation.NavGraph.Companion.findStartDestination
 import androidx.navigation.NavHostController
 import androidx.navigation.compose.NavHost
@@ -13,6 +12,7 @@ import bg.zahov.app.ui.exercise.ExercisesScreen
 import bg.zahov.app.ui.exercise.add.AddExerciseScreen
 import bg.zahov.app.ui.exercise.info.ExerciseInfoScreen
 import bg.zahov.app.ui.history.HistoryScreen
+import bg.zahov.app.ui.history.info.HistoryInfoScreen
 import bg.zahov.app.ui.home.HomeScreen
 import bg.zahov.app.ui.loading.LoadingScreen
 import bg.zahov.app.ui.measures.MeasuresScreen
@@ -91,18 +91,15 @@ fun MainNavGraph(
         composable<Home> {
             HomeScreen()
         }
-
-        composable<Settings>{
+        composable<Settings> {
             SettingsScreen(
-                navigateBack = {navController.popBackStack()},
-                navigateEditProfile = {navController.navigate(EditProfile)}
+                navigateBack = { navController.popBackStack() },
+                navigateEditProfile = { navController.navigate(EditProfile) }
             )
         }
-
-        composable<EditProfile>{
+        composable<EditProfile> {
             EditProfileScreen()
         }
-
         composable<Workout> {
             WorkoutScreen(
                 onCancel = {},
@@ -111,24 +108,24 @@ fun MainNavGraph(
                 onReplaceExercise = {}
             )
         }
-
         composable<Exercises> {
             ExercisesScreen(
                 navigateInfo = { navController.navigate(ExerciseInfo) },
                 navigateBack = { navController.navigateUp() })
         }
-
-        composable<AddExercise> {
+        composable<ExerciseAdd> {
             AddExerciseScreen(
                 navigate = { navController.popBackStack() }
             )
         }
-
         composable<ExerciseInfo> {
             ExerciseInfoScreen()
         }
         composable<History> {
-            HistoryScreen(onItemClick = {})
+            HistoryScreen(onItemClick = { navController.navigate(HistoryInfo)})
+        }
+        composable<HistoryInfo> {
+            HistoryInfoScreen(onDelete = { navController.popBackStack() })
         }
         composable<Measure> {
             MeasuresScreen(
