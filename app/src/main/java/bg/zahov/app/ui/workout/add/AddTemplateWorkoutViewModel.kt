@@ -3,7 +3,11 @@ package bg.zahov.app.ui.workout.add
 import android.util.Log
 import androidx.lifecycle.SavedStateHandle
 import androidx.lifecycle.ViewModel
+import androidx.lifecycle.ViewModelProvider
+import androidx.lifecycle.createSavedStateHandle
 import androidx.lifecycle.viewModelScope
+import androidx.lifecycle.viewmodel.initializer
+import androidx.lifecycle.viewmodel.viewModelFactory
 import androidx.navigation.toRoute
 import bg.zahov.app.AddTemplateWorkout
 import bg.zahov.app.Inject
@@ -55,13 +59,24 @@ data class AddTemplateWorkoutUiState(
  * @property toastManager Manages toast notifications to provide feedback to the user.
  */
 class AddTemplateWorkoutViewModel(
+    private val savedStateHandle: SavedStateHandle,
     private val workoutProvider: WorkoutProvider = Inject.workoutProvider,
     private val selectableExerciseProvider: AddExerciseToWorkoutProvider = Inject.workoutAddedExerciseProvider,
     private val replaceableExerciseProvider: ReplaceableExerciseProvider = Inject.replaceableExerciseProvider,
     private val toastManager: ToastManager = ToastManager,
 ) : ViewModel() {
 
-    private val workoutId = SavedStateHandle().toRoute<AddTemplateWorkout>().workoutId
+    companion object {
+        val Factory: ViewModelProvider.Factory = viewModelFactory {
+            initializer {
+                AddTemplateWorkoutViewModel(
+                    savedStateHandle = createSavedStateHandle(),
+                )
+            }
+        }
+    }
+
+    private val workoutId = savedStateHandle.toRoute<AddTemplateWorkout>().workoutId
 
     /**
      * The backing [MutableStateFlow] for the UI state, initialized with default values.
