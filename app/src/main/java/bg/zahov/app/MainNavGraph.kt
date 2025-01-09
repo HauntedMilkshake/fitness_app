@@ -9,12 +9,16 @@ import androidx.navigation.compose.composable
 import bg.zahov.app.ui.authentication.login.LoginScreen
 import bg.zahov.app.ui.authentication.signup.SignupScreen
 import bg.zahov.app.ui.exercise.ExercisesScreen
+import bg.zahov.app.ui.exercise.add.AddExerciseScreen
 import bg.zahov.app.ui.exercise.info.ExerciseInfoScreen
 import bg.zahov.app.ui.history.HistoryScreen
+import bg.zahov.app.ui.history.info.HistoryInfoScreen
 import bg.zahov.app.ui.home.HomeScreen
 import bg.zahov.app.ui.loading.LoadingScreen
 import bg.zahov.app.ui.measures.MeasuresScreen
 import bg.zahov.app.ui.measures.info.MeasurementInfoScreen
+import bg.zahov.app.ui.settings.SettingsScreen
+import bg.zahov.app.ui.settings.profile.EditProfileScreen
 import bg.zahov.app.ui.settings.SettingsScreen
 import bg.zahov.app.ui.welcome.WelcomeScreen
 import bg.zahov.app.ui.workout.WorkoutScreen
@@ -88,7 +92,15 @@ fun MainNavGraph(
         composable<Home> {
             HomeScreen()
         }
-
+        composable<Settings> {
+            SettingsScreen(
+                navigateBack = { navController.popBackStack() },
+                navigateEditProfile = { navController.navigate(EditProfile) }
+            )
+        }
+        composable<EditProfile> {
+            EditProfileScreen()
+        }
         composable<Workout> {
             WorkoutScreen(
                 onCancel = {},
@@ -104,11 +116,20 @@ fun MainNavGraph(
                 navigateBack = { navController.navigateUp() })
         }
 
+        composable<ExerciseAdd> {
+            AddExerciseScreen(
+                navigate = { navController.popBackStack() }
+            )
+        }
+
         composable<ExerciseInfo> {
             ExerciseInfoScreen()
         }
         composable<History> {
-            HistoryScreen(onItemClick = {})
+            HistoryScreen(onItemClick = { navController.navigate(HistoryInfo)})
+        }
+        composable<HistoryInfo> {
+            HistoryInfoScreen(onDelete = { navController.popBackStack() })
         }
         composable<Measure> {
             MeasuresScreen(

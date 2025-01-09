@@ -6,7 +6,9 @@ import androidx.compose.ui.Modifier
 import androidx.navigation.NavController
 import androidx.navigation.NavDestination.Companion.hasRoute
 import androidx.navigation.compose.currentBackStackEntryAsState
+import bg.zahov.app.ExerciseAdd
 import bg.zahov.app.EditProfile
+import bg.zahov.app.Exercises
 import bg.zahov.app.History
 import bg.zahov.app.Home
 import bg.zahov.app.Measure
@@ -14,6 +16,7 @@ import bg.zahov.app.MeasureInfo
 import bg.zahov.app.Settings
 import bg.zahov.app.Workout
 import bg.zahov.app.ui.custom.CommonTopBar
+import bg.zahov.app.ui.exercise.topbar.TopBarExercise
 import bg.zahov.fitness.app.R
 
 @Composable
@@ -58,10 +61,18 @@ fun TopBar(modifier: Modifier = Modifier, navController: NavController) {
             onBackClick = { navController.popBackStack() }
         )
 
+        currentDestination?.hasRoute(ExerciseAdd::class)== true->TopBarState(
+            titleId = R.string.add_exercise,
+            onBackClick = { navController.popBackStack() }
+        )
+
         else -> null
     }
     topBarState?.let {
         CommonTopBar(topBarState = it, modifier = modifier)
+    }
+    if (currentDestination?.hasRoute(Exercises::class) == true) {
+        TopBarExercise({ navController.navigate(ExerciseAdd) })
     }
 }
 

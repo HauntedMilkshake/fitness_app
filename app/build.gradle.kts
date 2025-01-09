@@ -65,6 +65,7 @@ android {
 dependencies {
     implementation("androidx.compose.ui:ui-test-junit4-android:1.7.5")
     implementation("junit:junit:4.12")
+    implementation("androidx.compose.foundation:foundation-layout-android:1.7.3")
     val composeBom = platform("androidx.compose:compose-bom:2024.09.03")
     implementation(composeBom)
     androidTestImplementation(composeBom)

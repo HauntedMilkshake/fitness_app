@@ -18,8 +18,10 @@ import bg.zahov.app.data.provider.SelectableExerciseProvider
 import bg.zahov.app.ui.exercise.ExercisesFragment.Companion.ADD_EXERCISE_ARG
 import bg.zahov.app.ui.exercise.ExercisesFragment.Companion.REPLACE_EXERCISE_ARG
 import bg.zahov.app.ui.exercise.ExercisesFragment.Companion.SELECT_EXERCISE_ARG
+import bg.zahov.app.ui.exercise.topbar.ExerciseTopBarManager
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.StateFlow
+import kotlinx.coroutines.flow.collect
 import kotlinx.coroutines.flow.update
 import kotlinx.coroutines.launch
 
@@ -39,7 +41,8 @@ class ExerciseViewModel(
     private val replaceableExerciseProvider: ReplaceableExerciseProvider = Inject.replaceableExerciseProvider,
     private val addExerciseToWorkoutProvider: AddExerciseToWorkoutProvider = Inject.workoutAddedExerciseProvider,
     private val filterProvider: FilterProvider = Inject.filterProvider,
-    private val serviceError: ServiceErrorHandler = Inject.serviceErrorHandler
+    private val serviceError: ServiceErrorHandler = Inject.serviceErrorHandler,
+    private val exerciseTopBarManager: ExerciseTopBarManager = Inject.exerciseTopAppHandler
 ) : ViewModel() {
     /**
      * Internal mutable state flow representing the current state of the exercise screen.
@@ -52,7 +55,6 @@ class ExerciseViewModel(
      * Exposes the UI state data as a read-only flow for UI components.
      */
     val exerciseData: StateFlow<ExerciseScreenData> = _exerciseData
-
 
     init {
         viewModelScope.launch {
@@ -76,6 +78,19 @@ class ExerciseViewModel(
                     }
                 } catch (e: CriticalDataNullException) {
                     serviceError.stopApplication()
+                }
+            }
+            launch {
+                exerciseTopBarManager.openDialog.collect {
+                    _exerciseData.update { old -> old.copy(showDialog = it) }
+                }
+            }
+            launch {
+                exerciseTopBarManager.search.collect {
+                    _exerciseData.update { old ->
+                        old.copy(search = it)
+                    }
+                    getFiltered()
                 }
             }
         }
@@ -294,18 +309,6 @@ class ExerciseViewModel(
     }
 
     /**
-     * Updates the search query and filters the exercise list accordingly.
-     *
-     * @param search The new search query.
-     */
-    fun onSearchChange(search: String) {
-        _exerciseData.update { old ->
-            old.copy(search = search, loading = true)
-        }
-        getFiltered()
-    }
-
-    /**
      * Updates the exercise action flag based on the provided parameter.
      *
      * @param state A string mapped to a state.
@@ -324,12 +327,14 @@ class ExerciseViewModel(
     }
 
     /**
-     * Updates the visibility of the dialog.
+     * Updates the visibility value of the dialog in the exerciseTopBarManager .
      *
      * @param showDialog Indicates whether to show the dialog.
      */
     fun updateShowDialog(showDialog: Boolean) {
-        _exerciseData.update { old -> old.copy(showDialog = showDialog) }
+        viewModelScope.launch {
+            exerciseTopBarManager.changeOpenDialog(showDialog)
+        }
     }
 
     /**
