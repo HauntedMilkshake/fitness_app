@@ -3,9 +3,7 @@ package bg.zahov.app.ui.workout
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
 import bg.zahov.app.Inject
-import bg.zahov.app.data.interfaces.SettingsProvider
 import bg.zahov.app.data.interfaces.WorkoutProvider
-import bg.zahov.app.data.local.RealmWorkoutState
 import bg.zahov.app.data.model.BodyPart
 import bg.zahov.app.data.model.Category
 import bg.zahov.app.data.model.Exercise
@@ -14,7 +12,6 @@ import bg.zahov.app.data.model.SetType
 import bg.zahov.app.data.model.Sets
 import bg.zahov.app.data.model.ToastManager
 import bg.zahov.app.data.model.Units
-import bg.zahov.app.data.model.Units.METRIC
 import bg.zahov.app.data.model.Workout
 import bg.zahov.app.data.provider.AddExerciseToWorkoutProvider
 import bg.zahov.app.data.provider.RestTimerProvider
@@ -22,10 +19,7 @@ import bg.zahov.app.data.provider.WorkoutStateManager
 import bg.zahov.app.util.generateRandomId
 import bg.zahov.app.util.hashString
 import bg.zahov.app.util.parseTimeStringToLong
-import bg.zahov.app.util.toRealmExercise
-import bg.zahov.app.util.toRealmString
 import bg.zahov.fitness.app.R
-import io.realm.kotlin.ext.toRealmList
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.StateFlow
 import kotlinx.coroutines.flow.update
@@ -39,7 +33,6 @@ import java.util.Random
  *
  * @property workoutName The name of the workout.
  * @property workoutPrefix The time of day prefix for the workout, determined by the current hour
- * and mapped to [TimeOfDay].
  * @property exercises A list of workout entries, which can be either exercises or sets.
  * @property note Additional notes for the workout session.
  * @property timer A timer value for tracking the workout session.
@@ -135,7 +128,6 @@ class WorkoutViewModel(
     private val repo: WorkoutProvider = Inject.workoutProvider,
     private val addExerciseToWorkoutProvider: AddExerciseToWorkoutProvider = Inject.workoutAddedExerciseProvider,
     private val restTimerProvider: RestTimerProvider = Inject.restTimerProvider,
-    private val settingsProvider: SettingsProvider = Inject.settingsProvider,
     private val toastManager: ToastManager = ToastManager,
 ) : ViewModel() {
 
@@ -181,8 +173,6 @@ class WorkoutViewModel(
      */
 
     init {
-        triggerWorkoutSave()
-        getUnits()
         checkForTemplateWorkout()
         observeTimer()
         observeRestTimer()
@@ -209,35 +199,6 @@ class WorkoutViewModel(
             in 12..16 -> TimeOfDay.NOON
             in 17..20 -> TimeOfDay.AFTERNOON
             else -> TimeOfDay.NIGHT
-        }
-    }
-
-
-    /**
-     * Triggers the saving of the current workout state whenever the app enters a minimized state.
-     *
-     * This function observes the `shouldSave` flow from `workoutStateManager` and calls `saveWorkoutState()` when the flag is set.
-     */
-    private fun triggerWorkoutSave() {
-        viewModelScope.launch {
-            workoutStateManager.shouldSave.collect {
-                if (it) {
-                    saveWorkoutState()
-                }
-            }
-        }
-    }
-
-    /**
-     * Retrieves the user's unit settings (e.g., [Units.METRIC] or [Units.BANANA]) from the `settingsProvider`.
-     */
-    private fun getUnits() {
-        viewModelScope.launch {
-            settingsProvider.getSettings().collect { objectChange ->
-                objectChange.obj?.units?.let { key ->
-                    units = Units.entries.find { it.key == key } ?: METRIC
-                }
-            }
         }
     }
 
@@ -816,180 +777,126 @@ class WorkoutViewModel(
     }
 
     /**
-     * Saves the current workout state, including exercises, personal records (PRs), and volume, to the repository.
-     * will execute if user minimizes or stops app without stopping the workout
+     * Converts an [Exercise] to a list of [WorkoutEntry] objects, including the exercise entry and its associated sets.
      *
-     * This function performs the following tasks:
-     * 1. Retrieves the current exercise data and computes personal records (PRs) and total workout volume.
-     * 2. Constructs a `Workout` object containing the workout details, including exercises, duration, and PRs.
-     * 3. Saves the workout state to the repository as a `RealmWorkoutState` object, which includes the workout details
-     *    and additional information such as rest timer data (if applicable).
-     * 4. If the rest timer is active, it stops the rest timer at the end of the operation.
+     * This function maps an [Exercise] object to a list of [WorkoutEntry] objects, which include an [WorkoutEntry.ExerciseEntry] for
+     * the exercise details and [WorkoutEntry.SetEntry] objects for each set associated with the exercise. If a matching template exercise
+     * is found in the provided [templateExercise] list, the previous results for each set are filled in.
      *
-     * @see getExerciseArrayAndPRs for how exercises are processed and volume/PRs are calculated.
-     *
+     * @param templateExercise A list of [Exercise] objects that are used as a template to populate previous results for
+     *                         sets if a matching exercise name is found.
+     * @return A list of [WorkoutEntry] objects, including the exercise details and sets.
      */
-    private suspend fun saveWorkoutState() {
-        val exerciseSummary = getExerciseArrayAndPRs(_uiState.value.exercises, false)
-        val exercises = exerciseSummary.exercises.values.toList()
-        val prs = exerciseSummary.prs
-        val volume = exerciseSummary.volume
-
-        val workout = Workout(
-            id = workoutId ?: hashString("${Random().nextInt(Int.MAX_VALUE)}"),
-            name = _uiState.value.workoutName,
-            date = workoutDate,
-            exercises = exercises,
-            note = _uiState.value.note,
-            duration = _uiState.value.timer.parseTimeStringToLong(),
-            isTemplate = false,
-            personalRecords = prs,
-            volume = volume
+    fun Exercise.toWorkoutEntry(
+        templateExercise: List<Exercise>,
+    ): List<WorkoutEntry> {
+        val foundExercise = templateExercise.find { it.name == this.name }
+        val entries = mutableListOf<WorkoutEntry>(
+            WorkoutEntry.ExerciseEntry(
+                name = this.name,
+                firstInputColumnVisibility = category != Category.None,
+                note = this.note ?: "",
+                bodyPart = this.bodyPart,
+                category = this.category
+            )
         )
-
-        repo.addWorkoutState(RealmWorkoutState().apply {
-            id = workout.id
-            name = workout.name
-            this.duration = workout.duration ?: 0L
-            this.volume = workout.volume ?: 0.0
-            date = workout.date.toRealmString()
-            isTemplate = false
-            this.exercises = workout.exercises.map { it.toRealmExercise() }.toRealmList()
-            note = _uiState.value.note
-            personalRecords = prs
-            restTimerStart =
-                if (restTimerProvider.isRestActive()) restTimerProvider.getRestStartDate()
-                    .toRealmString() else ""
-            restTimerEnd = if (restTimerProvider.isRestActive()) restTimerProvider.getEndOfRest()
-                .toRealmString() else ""
-            timeOfStop = LocalDateTime.now().toRealmString()
+        entries.addAll(this.sets.mapIndexed { i, set ->
+            set.toSetEntry(
+                this.category,
+                i,
+                if (foundExercise != null && i < foundExercise.sets.size) "${foundExercise.sets[i].secondMetric} x ${foundExercise.sets[i].firstMetric}" else "-/-"
+            )
         })
-        if (restTimerProvider.isRestActive()) restTimerProvider.stopRest()
-
+        return entries
     }
-}
 
-
-/**
- * Converts an [Exercise] to a list of [WorkoutEntry] objects, including the exercise entry and its associated sets.
- *
- * This function maps an [Exercise] object to a list of [WorkoutEntry] objects, which include an [WorkoutEntry.ExerciseEntry] for
- * the exercise details and [WorkoutEntry.SetEntry] objects for each set associated with the exercise. If a matching template exercise
- * is found in the provided [templateExercise] list, the previous results for each set are filled in.
- *
- * @param templateExercise A list of [Exercise] objects that are used as a template to populate previous results for
- *                         sets if a matching exercise name is found.
- * @return A list of [WorkoutEntry] objects, including the exercise details and sets.
- */
-fun Exercise.toWorkoutEntry(
-    templateExercise: List<Exercise>,
-): List<WorkoutEntry> {
-    val foundExercise = templateExercise.find { it.name == this.name }
-    val entries = mutableListOf<WorkoutEntry>(
-        WorkoutEntry.ExerciseEntry(
-            name = this.name,
-            firstInputColumnVisibility = category != Category.None,
-            note = this.note ?: "",
-            bodyPart = this.bodyPart,
-            category = this.category
+    /**
+     * Converts a [Sets] object to a [WorkoutEntry.SetEntry] object, including set details and previous results.
+     *
+     * This function converts a [Sets] object into a [WorkoutEntry.SetEntry], which includes the set type, input field
+     * visibility based on the exercise category, set number, and previous results (if provided).
+     *
+     * @param exerciseCategory The category of the exercise, which is used to determine the visibility of the input field.
+     * @param setNumber The index of the set, used to determine the set number in the output.
+     * @param previousResults A string representing previous results for the set. Defaults to an empty string.
+     * @return A [WorkoutEntry.SetEntry] object containing the set details.
+     */
+    fun Sets.toSetEntry(
+        exerciseCategory: Category,
+        setNumber: Int,
+        previousResults: String = "",
+    ): WorkoutEntry.SetEntry {
+        return WorkoutEntry.SetEntry(
+            setType = this.type,
+            firstInputFieldVisibility = exerciseCategory != Category.None,
+            setNumber = (setNumber + 1).toString(),
+            previousResults = previousResults,
+            set = Sets(type = this.type, firstMetric = null, secondMetric = null),
+            setCompleted = false
         )
+    }
+
+    /**
+     * Converts a list of [Exercise] objects into a list of [WorkoutEntry] objects.
+     *
+     * This function maps each [Exercise] in the list to a list of [WorkoutEntry] objects using [toWorkoutEntry].
+     *
+     * @param templateExercises A list of [Exercise] objects used as templates for filling in previous results in each set.
+     * @return A list of [WorkoutEntry] objects corresponding to the exercises in the input list.
+     */
+    fun List<Exercise>.toWorkoutEntryList(
+        templateExercises: List<Exercise>,
+    ): List<WorkoutEntry> {
+        return this.flatMap { it.toWorkoutEntry(templateExercises) }
+    }
+
+    /**
+     * Converts a time duration in milliseconds (Long) to a formatted string representing hours, minutes, and seconds.
+     *
+     * This function takes a duration in milliseconds and converts it into a time string formatted as "hh:mm:ss".
+     *
+     * @return A formatted string representing the duration as hours, minutes, and seconds.
+     */
+    fun Long.toRestTime(): String = String.format(
+        Locale.getDefault(),
+        "%02d:%02d:%02d",
+        (this / (1000 * 60 * 60)) % 24,
+        (this / (1000 * 60)) % 60,
+        (this / 1000) % 60
     )
-    entries.addAll(this.sets.mapIndexed { i, set ->
-        set.toSetEntry(
-            this.category,
-            i,
-            if (foundExercise != null && i < foundExercise.sets.size) "${foundExercise.sets[i].secondMetric} x ${foundExercise.sets[i].firstMetric}" else "-/-"
-        )
-    })
-    return entries
-}
 
-/**
- * Converts a [Sets] object to a [WorkoutEntry.SetEntry] object, including set details and previous results.
- *
- * This function converts a [Sets] object into a [WorkoutEntry.SetEntry], which includes the set type, input field
- * visibility based on the exercise category, set number, and previous results (if provided).
- *
- * @param exerciseCategory The category of the exercise, which is used to determine the visibility of the input field.
- * @param setNumber The index of the set, used to determine the set number in the output.
- * @param previousResults A string representing previous results for the set. Defaults to an empty string.
- * @return A [WorkoutEntry.SetEntry] object containing the set details.
- */
-fun Sets.toSetEntry(
-    exerciseCategory: Category,
-    setNumber: Int,
-    previousResults: String = "",
-): WorkoutEntry.SetEntry {
-    return WorkoutEntry.SetEntry(
-        setType = this.type,
-        firstInputFieldVisibility = exerciseCategory != Category.None,
-        setNumber = (setNumber + 1).toString(),
-        previousResults = previousResults,
-        set = Sets(type = this.type, firstMetric = null, secondMetric = null),
-        setCompleted = false
-    )
-}
-
-/**
- * Converts a list of [Exercise] objects into a list of [WorkoutEntry] objects.
- *
- * This function maps each [Exercise] in the list to a list of [WorkoutEntry] objects using [toWorkoutEntry].
- *
- * @param templateExercises A list of [Exercise] objects used as templates for filling in previous results in each set.
- * @return A list of [WorkoutEntry] objects corresponding to the exercises in the input list.
- */
-fun List<Exercise>.toWorkoutEntryList(
-    templateExercises: List<Exercise>,
-): List<WorkoutEntry> {
-    return this.flatMap { it.toWorkoutEntry(templateExercises) }
-}
-
-/**
- * Converts a time duration in milliseconds (Long) to a formatted string representing hours, minutes, and seconds.
- *
- * This function takes a duration in milliseconds and converts it into a time string formatted as "hh:mm:ss".
- *
- * @return A formatted string representing the duration as hours, minutes, and seconds.
- */
-fun Long.toRestTime(): String = String.format(
-    Locale.getDefault(),
-    "%02d:%02d:%02d",
-    (this / (1000 * 60 * 60)) % 24,
-    (this / (1000 * 60)) % 60,
-    (this / 1000) % 60
-)
-
-/**
- * Filters a string to remove any non-numeric characters and returns the resulting integer.
- *
- * This function removes leading zeros, commas, and other invalid characters from a string and converts the cleaned
- * string to an integer. If the string cannot be converted, it defaults to 0.
- *
- * @return The integer value extracted from the string, or 0 if conversion fails.
- */
-fun String.filterIntegerInput(): Int {
-    if (this.startsWith('0') && this.length > 1) {
-        this.dropWhile { it == '0' }
+    /**
+     * Filters a string to remove any non-numeric characters and returns the resulting integer.
+     *
+     * This function removes leading zeros, commas, and other invalid characters from a string and converts the cleaned
+     * string to an integer. If the string cannot be converted, it defaults to 0.
+     *
+     * @return The integer value extracted from the string, or 0 if conversion fails.
+     */
+    fun String.filterIntegerInput(): Int {
+        if (this.startsWith('0') && this.length > 1) {
+            this.dropWhile { it == '0' }
+        }
+        if (this.contains(",")) {
+            this.drop(this.length - this.indexOf(","))
+        }
+        return this.toIntOrNull() ?: 0
     }
-    if (this.contains(",")) {
-        this.drop(this.length - this.indexOf(","))
-    }
-    return this.toIntOrNull() ?: 0
-}
 
-/**
- * Filters a string to remove any non-numeric characters and returns the resulting double.
- *
- * This function removes leading zeros, commas, and other invalid characters from a string and converts the cleaned
- * string to a double. If the string cannot be converted, it defaults to 0.0.
- *
- * @return The double value extracted from the string, or 0.0 if conversion fails.
- */
-fun String.filterDoubleInput(): Double {
-    if (this.startsWith('0') || this.startsWith(',') && this.length > 1) {
-        this.dropWhile { it == '0' || it == ',' }
+    /**
+     * Filters a string to remove any non-numeric characters and returns the resulting double.
+     *
+     * This function removes leading zeros, commas, and other invalid characters from a string and converts the cleaned
+     * string to a double. If the string cannot be converted, it defaults to 0.0.
+     *
+     * @return The double value extracted from the string, or 0.0 if conversion fails.
+     */
+    fun String.filterDoubleInput(): Double {
+        if (this.startsWith('0') || this.startsWith(',') && this.length > 1) {
+            this.dropWhile { it == '0' || it == ',' }
+        }
+        return this.toDoubleOrNull() ?: 0.0
     }
-    return this.toDoubleOrNull() ?: 0.0
 }
 
 /**

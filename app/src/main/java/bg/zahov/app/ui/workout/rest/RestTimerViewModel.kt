@@ -7,16 +7,11 @@ import androidx.lifecycle.MutableLiveData
 import androidx.lifecycle.viewModelScope
 import bg.zahov.app.data.model.RestState
 import bg.zahov.app.getRestTimerProvider
-import bg.zahov.app.getSettingsProvider
 import bg.zahov.app.util.parseTimeStringToLong
 import kotlinx.coroutines.launch
 import java.lang.IllegalArgumentException
 
 class RestTimerViewModel(application: Application) : AndroidViewModel(application) {
-    private val settingsProvider by lazy {
-        application.getSettingsProvider()
-    }
-
     private val restManager by lazy {
         application.getRestTimerProvider()
     }
@@ -38,12 +33,6 @@ class RestTimerViewModel(application: Application) : AndroidViewModel(applicatio
 
     init {
         viewModelScope.launch {
-            launch {
-                settingsProvider.getSettings().collect {
-                    _increment.postValue("${(it.obj?.restTimer ?: 30)} s")
-                    timerDelta = (it.obj?.restTimer ?: 30).toLong() * 1000
-                }
-            }
             launch {
                 restManager.restTimer.collect {
                     if (!(it.elapsedTime.isNullOrEmpty()) && !(it.fullRest.isNullOrEmpty())) {

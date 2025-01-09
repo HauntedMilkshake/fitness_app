@@ -81,7 +81,6 @@ class MyApplication : Application() {
     }
 }
 
-fun Application.getSettingsProvider() = (this as MyApplication).settingsProvider
 fun Application.getWorkoutProvider() = (this as MyApplication).workoutProvider
 fun Application.getSelectableExerciseProvider() = (this as MyApplication).selectedExerciseProvider
 fun Application.getReplaceableExerciseProvider() =

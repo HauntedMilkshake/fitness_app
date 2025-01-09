@@ -4,7 +4,6 @@ plugins {
     id("com.android.application")
     id("org.jetbrains.kotlin.android")
     id("com.google.gms.google-services")
-    id("io.realm.kotlin")
 //    kotlin("jvm") version "2.1.0"
     kotlin("plugin.serialization") version "2.1.0"
     id("org.jetbrains.kotlin.plugin.compose") version "2.0.0"
@@ -83,7 +82,6 @@ dependencies {
     implementation("androidx.activity:activity-compose:1.9.3")
     implementation("androidx.lifecycle:lifecycle-viewmodel-compose:2.8.6")
     implementation("com.google.firebase:firebase-functions-ktx:21.0.0")
-    implementation("io.realm:realm-android-kotlin-extensions:10.10.0")
     implementation("com.google.firebase:firebase-auth-ktx:23.1.0")
     implementation("androidx.core:core-ktx:1.13.1")
     implementation("androidx.appcompat:appcompat:1.7.0")
@@ -98,8 +96,6 @@ dependencies {
     implementation("com.mikhaellopez:circularprogressbar:3.1.0")
     androidTestImplementation("androidx.test.ext:junit:1.2.1")
     androidTestImplementation("androidx.test.espresso:espresso-core:3.6.1")
-    implementation("io.realm.kotlin:library-base:2.0.0")
-    implementation("io.realm.kotlin:library-sync:2.0.0")
     implementation("org.jetbrains.kotlinx:kotlinx-coroutines-android:1.7.3")
     implementation("androidx.lifecycle:lifecycle-livedata-ktx:2.8.6")
     implementation("com.google.android.flexbox:flexbox:3.0.0")

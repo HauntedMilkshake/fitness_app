@@ -108,21 +108,24 @@ fun MainNavGraph(
                 onReplaceExercise = {}
             )
         }
+
         composable<Exercises> {
             ExercisesScreen(
                 navigateInfo = { navController.navigate(ExerciseInfo) },
                 navigateBack = { navController.navigateUp() })
         }
+
         composable<ExerciseAdd> {
             AddExerciseScreen(
                 navigate = { navController.popBackStack() }
             )
         }
+
         composable<ExerciseInfo> {
             ExerciseInfoScreen()
         }
         composable<History> {
-            HistoryScreen(onItemClick = { navController.navigate(HistoryInfo)})
+            HistoryScreen(onItemClick = { navController.navigate(HistoryInfo) })
         }
         composable<HistoryInfo> {
             HistoryInfoScreen(onDelete = { navController.popBackStack() })

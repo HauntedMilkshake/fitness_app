@@ -1,6 +1,5 @@
 package bg.zahov.app.data.interfaces
 
-import bg.zahov.app.data.local.RealmWorkoutState
 import bg.zahov.app.data.model.Exercise
 import bg.zahov.app.data.model.Workout
 import bg.zahov.app.data.model.state.ExerciseData
@@ -35,8 +34,8 @@ interface WorkoutProvider {
     suspend fun setClickedTemplateExercise(item: ExerciseData)
     suspend fun getClickedTemplateExercise(): Flow<Exercise>
     suspend fun getExerciseHistory(): Flow<List<ExerciseHistoryInfo>>
-    suspend fun getPreviousWorkoutState(): RealmWorkoutState?
-    suspend fun addWorkoutState(realmWorkoutState: RealmWorkoutState)
+    suspend fun <T>getPreviousWorkoutState(): T?
+    suspend fun <T>addWorkoutState(realmWorkoutState: T)
     suspend fun updateTemplateWorkout(
         workoutId: String,
         date: LocalDateTime,
