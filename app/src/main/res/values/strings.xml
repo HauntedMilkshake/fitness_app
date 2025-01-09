@@ -208,7 +208,7 @@
     <!-- Strings used for top app bar-->
     <string name="calendar">Calendar</string>
     <!-- Strings used for adding a template workout-->
-    <string name = "no_workout_name_toast">Cannot add a workout without a name!</string>
+    <string name="no_workout_name_toast">Cannot add a workout without a name!</string>
     <!-- Strings used for StartWorkout -->
     <string name="barbell_category_text">Barbell</string>
     <string name="dumbbell_category_text">Dumbbell</string>
@@ -221,7 +221,4 @@
     <string name="cardio_category_text">Cardio</string>
     <string name="timed_category_text">Timed</string>
     <string name="muslce_part_description">Icon depicting</string>
-    <!-- Strings used for test tags   -->
-    <string name="login_button_test_tag">Login test tag</string>
-
 </resources>

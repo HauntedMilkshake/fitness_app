@@ -12,12 +12,12 @@ import bg.zahov.app.MainActivity
 import bg.zahov.fitness.app.R
 import org.junit.Rule
 import org.junit.Test
-import kotlin.math.log
 
 class MainActivityE2EWorkoutTests {
 
     @get:Rule
     val composeTestRule = createAndroidComposeRule<MainActivity>()
+
     private lateinit var context: Context
 
     fun goToLoginScreen() {
@@ -40,6 +40,7 @@ class MainActivityE2EWorkoutTests {
         composeTestRule.waitUntil(5000) {
             composeTestRule.onNodeWithText(context.getString(R.string.dashboard)).isDisplayed()
         }
+
         composeTestRule.onNodeWithText(context.getString(R.string.dashboard)).assertIsDisplayed()
     }
 
