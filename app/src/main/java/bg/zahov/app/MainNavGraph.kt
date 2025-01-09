@@ -19,7 +19,6 @@ import bg.zahov.app.ui.measures.MeasuresScreen
 import bg.zahov.app.ui.measures.info.MeasurementInfoScreen
 import bg.zahov.app.ui.settings.SettingsScreen
 import bg.zahov.app.ui.settings.profile.EditProfileScreen
-import bg.zahov.app.ui.settings.SettingsScreen
 import bg.zahov.app.ui.welcome.WelcomeScreen
 import bg.zahov.app.ui.workout.WorkoutScreen
 
@@ -126,7 +125,7 @@ fun MainNavGraph(
             ExerciseInfoScreen()
         }
         composable<History> {
-            HistoryScreen(onItemClick = { navController.navigate(HistoryInfo)})
+            HistoryScreen(onItemClick = { navController.navigate(HistoryInfo) })
         }
         composable<HistoryInfo> {
             HistoryInfoScreen(onDelete = { navController.popBackStack() })
@@ -138,12 +137,6 @@ fun MainNavGraph(
         }
         composable<MeasureInfo> {
             MeasurementInfoScreen()
-        }
-        composable<Settings> {
-            SettingsScreen(
-                navigateBack = { navController.navigateUp() },
-                navigateEditProfile = { navController.navigate(EditProfile) }
-            )
         }
     }
 }

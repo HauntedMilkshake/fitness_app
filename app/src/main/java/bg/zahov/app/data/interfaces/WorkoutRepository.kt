@@ -2,7 +2,6 @@ package bg.zahov.app.data.interfaces
 
 import bg.zahov.app.data.model.Exercise
 import bg.zahov.app.data.model.Workout
-import io.realm.kotlin.notifications.ObjectChange
 import kotlinx.coroutines.flow.Flow
 import java.time.LocalDateTime
 
