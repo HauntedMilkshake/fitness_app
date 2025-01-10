@@ -775,128 +775,128 @@ class WorkoutViewModel(
     private fun clearState() {
         _uiState.value = WorkoutUiState(workoutPrefix = TimeOfDay.EMPTY)
     }
+}
 
-    /**
-     * Converts an [Exercise] to a list of [WorkoutEntry] objects, including the exercise entry and its associated sets.
-     *
-     * This function maps an [Exercise] object to a list of [WorkoutEntry] objects, which include an [WorkoutEntry.ExerciseEntry] for
-     * the exercise details and [WorkoutEntry.SetEntry] objects for each set associated with the exercise. If a matching template exercise
-     * is found in the provided [templateExercise] list, the previous results for each set are filled in.
-     *
-     * @param templateExercise A list of [Exercise] objects that are used as a template to populate previous results for
-     *                         sets if a matching exercise name is found.
-     * @return A list of [WorkoutEntry] objects, including the exercise details and sets.
-     */
-    fun Exercise.toWorkoutEntry(
-        templateExercise: List<Exercise>,
-    ): List<WorkoutEntry> {
-        val foundExercise = templateExercise.find { it.name == this.name }
-        val entries = mutableListOf<WorkoutEntry>(
-            WorkoutEntry.ExerciseEntry(
-                name = this.name,
-                firstInputColumnVisibility = category != Category.None,
-                note = this.note ?: "",
-                bodyPart = this.bodyPart,
-                category = this.category
-            )
+/**
+ * Converts an [Exercise] to a list of [WorkoutEntry] objects, including the exercise entry and its associated sets.
+ *
+ * This function maps an [Exercise] object to a list of [WorkoutEntry] objects, which include an [WorkoutEntry.ExerciseEntry] for
+ * the exercise details and [WorkoutEntry.SetEntry] objects for each set associated with the exercise. If a matching template exercise
+ * is found in the provided [templateExercise] list, the previous results for each set are filled in.
+ *
+ * @param templateExercise A list of [Exercise] objects that are used as a template to populate previous results for
+ *                         sets if a matching exercise name is found.
+ * @return A list of [WorkoutEntry] objects, including the exercise details and sets.
+ */
+fun Exercise.toWorkoutEntry(
+    templateExercise: List<Exercise>,
+): List<WorkoutEntry> {
+    val foundExercise = templateExercise.find { it.name == this.name }
+    val entries = mutableListOf<WorkoutEntry>(
+        WorkoutEntry.ExerciseEntry(
+            name = this.name,
+            firstInputColumnVisibility = category != Category.None,
+            note = this.note ?: "",
+            bodyPart = this.bodyPart,
+            category = this.category
         )
-        entries.addAll(this.sets.mapIndexed { i, set ->
-            set.toSetEntry(
-                this.category,
-                i,
-                if (foundExercise != null && i < foundExercise.sets.size) "${foundExercise.sets[i].secondMetric} x ${foundExercise.sets[i].firstMetric}" else "-/-"
-            )
-        })
-        return entries
-    }
-
-    /**
-     * Converts a [Sets] object to a [WorkoutEntry.SetEntry] object, including set details and previous results.
-     *
-     * This function converts a [Sets] object into a [WorkoutEntry.SetEntry], which includes the set type, input field
-     * visibility based on the exercise category, set number, and previous results (if provided).
-     *
-     * @param exerciseCategory The category of the exercise, which is used to determine the visibility of the input field.
-     * @param setNumber The index of the set, used to determine the set number in the output.
-     * @param previousResults A string representing previous results for the set. Defaults to an empty string.
-     * @return A [WorkoutEntry.SetEntry] object containing the set details.
-     */
-    fun Sets.toSetEntry(
-        exerciseCategory: Category,
-        setNumber: Int,
-        previousResults: String = "",
-    ): WorkoutEntry.SetEntry {
-        return WorkoutEntry.SetEntry(
-            setType = this.type,
-            firstInputFieldVisibility = exerciseCategory != Category.None,
-            setNumber = (setNumber + 1).toString(),
-            previousResults = previousResults,
-            set = Sets(type = this.type, firstMetric = null, secondMetric = null),
-            setCompleted = false
-        )
-    }
-
-    /**
-     * Converts a list of [Exercise] objects into a list of [WorkoutEntry] objects.
-     *
-     * This function maps each [Exercise] in the list to a list of [WorkoutEntry] objects using [toWorkoutEntry].
-     *
-     * @param templateExercises A list of [Exercise] objects used as templates for filling in previous results in each set.
-     * @return A list of [WorkoutEntry] objects corresponding to the exercises in the input list.
-     */
-    fun List<Exercise>.toWorkoutEntryList(
-        templateExercises: List<Exercise>,
-    ): List<WorkoutEntry> {
-        return this.flatMap { it.toWorkoutEntry(templateExercises) }
-    }
-
-    /**
-     * Converts a time duration in milliseconds (Long) to a formatted string representing hours, minutes, and seconds.
-     *
-     * This function takes a duration in milliseconds and converts it into a time string formatted as "hh:mm:ss".
-     *
-     * @return A formatted string representing the duration as hours, minutes, and seconds.
-     */
-    fun Long.toRestTime(): String = String.format(
-        Locale.getDefault(),
-        "%02d:%02d:%02d",
-        (this / (1000 * 60 * 60)) % 24,
-        (this / (1000 * 60)) % 60,
-        (this / 1000) % 60
     )
+    entries.addAll(this.sets.mapIndexed { i, set ->
+        set.toSetEntry(
+            this.category,
+            i,
+            if (foundExercise != null && i < foundExercise.sets.size) "${foundExercise.sets[i].secondMetric} x ${foundExercise.sets[i].firstMetric}" else "-/-"
+        )
+    })
+    return entries
+}
 
-    /**
-     * Filters a string to remove any non-numeric characters and returns the resulting integer.
-     *
-     * This function removes leading zeros, commas, and other invalid characters from a string and converts the cleaned
-     * string to an integer. If the string cannot be converted, it defaults to 0.
-     *
-     * @return The integer value extracted from the string, or 0 if conversion fails.
-     */
-    fun String.filterIntegerInput(): Int {
-        if (this.startsWith('0') && this.length > 1) {
-            this.dropWhile { it == '0' }
-        }
-        if (this.contains(",")) {
-            this.drop(this.length - this.indexOf(","))
-        }
-        return this.toIntOrNull() ?: 0
-    }
+/**
+ * Converts a [Sets] object to a [WorkoutEntry.SetEntry] object, including set details and previous results.
+ *
+ * This function converts a [Sets] object into a [WorkoutEntry.SetEntry], which includes the set type, input field
+ * visibility based on the exercise category, set number, and previous results (if provided).
+ *
+ * @param exerciseCategory The category of the exercise, which is used to determine the visibility of the input field.
+ * @param setNumber The index of the set, used to determine the set number in the output.
+ * @param previousResults A string representing previous results for the set. Defaults to an empty string.
+ * @return A [WorkoutEntry.SetEntry] object containing the set details.
+ */
+fun Sets.toSetEntry(
+    exerciseCategory: Category,
+    setNumber: Int,
+    previousResults: String = "",
+): WorkoutEntry.SetEntry {
+    return WorkoutEntry.SetEntry(
+        setType = this.type,
+        firstInputFieldVisibility = exerciseCategory != Category.None,
+        setNumber = (setNumber + 1).toString(),
+        previousResults = previousResults,
+        set = Sets(type = this.type, firstMetric = null, secondMetric = null),
+        setCompleted = false
+    )
+}
 
-    /**
-     * Filters a string to remove any non-numeric characters and returns the resulting double.
-     *
-     * This function removes leading zeros, commas, and other invalid characters from a string and converts the cleaned
-     * string to a double. If the string cannot be converted, it defaults to 0.0.
-     *
-     * @return The double value extracted from the string, or 0.0 if conversion fails.
-     */
-    fun String.filterDoubleInput(): Double {
-        if (this.startsWith('0') || this.startsWith(',') && this.length > 1) {
-            this.dropWhile { it == '0' || it == ',' }
-        }
-        return this.toDoubleOrNull() ?: 0.0
+/**
+ * Converts a list of [Exercise] objects into a list of [WorkoutEntry] objects.
+ *
+ * This function maps each [Exercise] in the list to a list of [WorkoutEntry] objects using [toWorkoutEntry].
+ *
+ * @param templateExercises A list of [Exercise] objects used as templates for filling in previous results in each set.
+ * @return A list of [WorkoutEntry] objects corresponding to the exercises in the input list.
+ */
+fun List<Exercise>.toWorkoutEntryList(
+    templateExercises: List<Exercise>,
+): List<WorkoutEntry> {
+    return this.flatMap { it.toWorkoutEntry(templateExercises) }
+}
+
+/**
+ * Converts a time duration in milliseconds (Long) to a formatted string representing hours, minutes, and seconds.
+ *
+ * This function takes a duration in milliseconds and converts it into a time string formatted as "hh:mm:ss".
+ *
+ * @return A formatted string representing the duration as hours, minutes, and seconds.
+ */
+fun Long.toRestTime(): String = String.format(
+    Locale.getDefault(),
+    "%02d:%02d:%02d",
+    (this / (1000 * 60 * 60)) % 24,
+    (this / (1000 * 60)) % 60,
+    (this / 1000) % 60
+)
+
+/**
+ * Filters a string to remove any non-numeric characters and returns the resulting integer.
+ *
+ * This function removes leading zeros, commas, and other invalid characters from a string and converts the cleaned
+ * string to an integer. If the string cannot be converted, it defaults to 0.
+ *
+ * @return The integer value extracted from the string, or 0 if conversion fails.
+ */
+fun String.filterIntegerInput(): Int {
+    if (this.startsWith('0') && this.length > 1) {
+        this.dropWhile { it == '0' }
     }
+    if (this.contains(",")) {
+        this.drop(this.length - this.indexOf(","))
+    }
+    return this.toIntOrNull() ?: 0
+}
+
+/**
+ * Filters a string to remove any non-numeric characters and returns the resulting double.
+ *
+ * This function removes leading zeros, commas, and other invalid characters from a string and converts the cleaned
+ * string to a double. If the string cannot be converted, it defaults to 0.0.
+ *
+ * @return The double value extracted from the string, or 0.0 if conversion fails.
+ */
+fun String.filterDoubleInput(): Double {
+    if (this.startsWith('0') || this.startsWith(',') && this.length > 1) {
+        this.dropWhile { it == '0' || it == ',' }
+    }
+    return this.toDoubleOrNull() ?: 0.0
 }
 
 /**

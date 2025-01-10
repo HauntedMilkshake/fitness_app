@@ -85,5 +85,6 @@ fun Application.getWorkoutProvider() = (this as MyApplication).workoutProvider
 fun Application.getSelectableExerciseProvider() = (this as MyApplication).selectedExerciseProvider
 fun Application.getReplaceableExerciseProvider() =
     (this as MyApplication).replaceableExerciseProvider
+
 fun Application.getRestTimerProvider() = (this as MyApplication).restTimerProvider
 fun Application.getServiceErrorProvider() = (this as MyApplication).serviceErrorHandler

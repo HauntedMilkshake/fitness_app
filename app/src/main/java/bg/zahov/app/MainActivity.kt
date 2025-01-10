@@ -29,13 +29,14 @@ class MainActivity : AppCompatActivity() {
                     }
                 }
         }
+
         binding = ActivityMainBinding.inflate(layoutInflater)
         setContentView(binding.root)
 
         val composeView = findViewById<ComposeView>(R.id.parentCompose)
 
         composeView.setContent {
-            App()
+            App(workoutManagerViewModel)
         }
     }
 
