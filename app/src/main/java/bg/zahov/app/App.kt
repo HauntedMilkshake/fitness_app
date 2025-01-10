@@ -5,6 +5,8 @@ import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.wrapContentHeight
+import androidx.compose.foundation.shape.RoundedCornerShape
+import androidx.compose.material3.FabPosition
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Scaffold
 import androidx.compose.material3.Text
@@ -13,6 +15,7 @@ import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.getValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.draw.clip
 import androidx.compose.ui.draw.shadow
 import androidx.compose.ui.unit.dp
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
@@ -35,15 +38,18 @@ fun App(workoutManagerViewModel: WorkoutManagerViewModel) {
             topBar = {
                 TopBar(navController = navController)
             },
+            floatingActionButtonPosition = FabPosition.Center,
+            floatingActionButton = {
+                if (state.trailingWorkoutVisibility) {
+                    TrailingWorkout(
+                        workoutName = state.workoutName,
+                        elapsedTime = state.timer,
+                        onClick = { workoutManagerViewModel.updateStateToActive() }
+                    )
+                }
+            },
             bottomBar = {
                 Column {
-                    if (state.trailingWorkoutVisibility) {
-                        TrailingWorkout(
-                            workoutName = state.workoutName,
-                            elapsedTime = state.timer,
-                            onClick = { workoutManagerViewModel.updateStateToActive() }
-                        )
-                    }
                     BottomBar(navController = navController)
                 }
             }
@@ -62,13 +68,22 @@ fun TrailingWorkout(workoutName: String, elapsedTime: String, onClick: () -> Uni
         modifier = Modifier
             .fillMaxWidth()
             .wrapContentHeight()
+            .clip(RoundedCornerShape(3.dp))
             .shadow(elevation = 4.dp)
             .clickable {
                 onClick()
             },
         horizontalAlignment = Alignment.CenterHorizontally
     ) {
-        Text(text = workoutName, style = MaterialTheme.typography.labelLarge)
-        Text(text = elapsedTime, style = MaterialTheme.typography.labelLarge)
+        Text(
+            modifier = Modifier.padding(4.dp),
+            text = workoutName,
+            style = MaterialTheme.typography.titleMedium
+        )
+        Text(
+            modifier = Modifier.padding(4.dp),
+            text = elapsedTime,
+            style = MaterialTheme.typography.titleMedium
+        )
     }
 }

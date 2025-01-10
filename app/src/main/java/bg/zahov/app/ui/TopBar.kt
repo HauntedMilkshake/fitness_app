@@ -9,7 +9,9 @@ import androidx.navigation.NavDestination.Companion.hasRoute
 import androidx.navigation.compose.currentBackStackEntryAsState
 import bg.zahov.app.AddTemplateWorkout
 import bg.zahov.app.Calendar
+import bg.zahov.app.ExerciseAdd
 import bg.zahov.app.EditProfile
+import bg.zahov.app.Exercises
 import bg.zahov.app.History
 import bg.zahov.app.Home
 import bg.zahov.app.Measure
@@ -17,6 +19,7 @@ import bg.zahov.app.MeasureInfo
 import bg.zahov.app.Settings
 import bg.zahov.app.Workout
 import bg.zahov.app.ui.custom.CommonTopBar
+import bg.zahov.app.ui.exercise.topbar.TopBarExercise
 import bg.zahov.fitness.app.R
 
 @SuppressLint("RestrictedApi")
@@ -54,11 +57,18 @@ fun TopBar(modifier: Modifier = Modifier, navController: NavController) {
         )
 
         currentDestination?.hasRoute(Measure::class) == true -> TopBarState(
-            titleId = R.string.measure
+            titleId = R.string.measure,
+            actionButtonIconId = R.drawable.ic_plus,
+            onActionClick = {}
         )
 
         currentDestination?.hasRoute(MeasureInfo::class) == true -> TopBarState(
             titleId = R.string.history_measurement,
+            onBackClick = { navController.popBackStack() }
+        )
+
+        currentDestination?.hasRoute(ExerciseAdd::class)== true->TopBarState(
+            titleId = R.string.add_exercise,
             onBackClick = { navController.popBackStack() }
         )
 
@@ -80,6 +90,9 @@ fun TopBar(modifier: Modifier = Modifier, navController: NavController) {
     topBarState?.let {
         CommonTopBar(topBarState = it, modifier = modifier)
     }
+    if (currentDestination?.hasRoute(Exercises::class) == true) {
+        TopBarExercise({ navController.navigate(ExerciseAdd) })
+    }
 }
 
 data class TopBarState(
@@ -87,5 +100,5 @@ data class TopBarState(
     val actionButtonIconId: Int = R.drawable.ic_settings,
     val backButtonIconId: Int = R.drawable.ic_back_arrow,
     val onActionClick: (() -> Unit)? = null,
-    val onBackClick: (() -> Unit)? = null,
+    val onBackClick: (() -> Unit)? = null
 )

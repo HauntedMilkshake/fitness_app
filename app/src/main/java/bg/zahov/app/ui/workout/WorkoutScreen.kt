@@ -78,7 +78,7 @@ private val weights = arrayOf(1f, 1f, 2f, 2f)
 
 @Composable
 fun AddTemplateWorkoutScreen(
-    addTemplateViewModel: AddTemplateWorkoutViewModel = viewModel(),
+    addTemplateViewModel: AddTemplateWorkoutViewModel = viewModel(factory = AddTemplateWorkoutViewModel.Factory),
     onAddExercise: () -> Unit,
     onReplaceExercise: () -> Unit,
     onBackPressed: () -> Unit,
@@ -146,7 +146,7 @@ fun WorkoutScreen(
     onAddExercise: () -> Unit,
     onReplaceExercise: () -> Unit,
     onBackPressed: () -> Unit,
-    onCancel: () -> Unit
+    onCancel: () -> Unit,
 ) {
     /**
      * In order to center the items of 2 independent rows we need to have
