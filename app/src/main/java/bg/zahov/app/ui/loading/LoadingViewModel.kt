@@ -1,11 +1,16 @@
 package bg.zahov.app.ui.loading
 
+import android.util.Log
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
 import bg.zahov.app.Inject
 import bg.zahov.app.data.interfaces.ServiceErrorHandler
 import bg.zahov.app.data.interfaces.UserProvider
+import bg.zahov.fitness.app.R
+import kotlinx.coroutines.flow.MutableStateFlow
+import kotlinx.coroutines.flow.StateFlow
 import kotlinx.coroutines.flow.first
+import kotlinx.coroutines.flow.update
 import kotlinx.coroutines.launch
 
 /**
@@ -25,34 +30,26 @@ class LoadingViewModel(
     private val serviceError: ServiceErrorHandler = Inject.serviceErrorHandler
 ) : ViewModel() {
 
-    /**
-     * Executes the startup logic.
-     *
-     * This function is responsible for:
-     * - Checking the user's authentication status.
-     * - Initializing data sources and fetching user data if the user is authenticated.
-     * - Navigating to the home screen if authentication is successful.
-     * - Navigating to the welcome screen if the user is not authenticated or a `NoSuchElementException` occurs.
-     * - Handling unexpected errors by initiating the service error countdown.
-     *
-     * @param pass A lambda function to be executed when loading is successful and the app should
-     *             navigate to the home screen.
-     * @param failed A lambda function to be executed when loading fails or when the app should
-     *               navigate to the welcome screen.
-     */
-    fun loading(pass: () -> Unit, failed: () -> Unit) {
+    private val _loading = MutableStateFlow(R.id.loading_to_welcome)
+
+    val loading: StateFlow<Int> = _loading
+
+    init {
         viewModelScope.launch {
             try {
-                if (userProvider.isAuthenticated()) {
-                    userProvider.initDataSources()
-                    userProvider.getUser().first()
-                    pass()
-                } else {
-                    failed()
+                userProvider.authStateFlow().collect {
+                    Log.d("auth", it.toString())
+                    if (it) {
+                        userProvider.initDataSources()
+                        userProvider.getUser().first()
+                        _loading.update { R.id.loading_to_home}
+                    } else {
+                        _loading.update { R.id.loading_to_welcome }
+                    }
                 }
             } catch (e: Exception) {
                 when (e) {
-                    is NoSuchElementException -> failed()
+                    is NoSuchElementException -> _loading.update { R.id.loading_to_welcome }
                     else -> serviceError.initiateCountdown()
                 }
             }

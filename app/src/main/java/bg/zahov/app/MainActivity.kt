@@ -10,6 +10,7 @@ import androidx.appcompat.app.AppCompatActivity
 import androidx.core.splashscreen.SplashScreen.Companion.installSplashScreen
 import androidx.core.view.MenuProvider
 import androidx.fragment.app.FragmentActivity
+import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import androidx.lifecycle.lifecycleScope
 import androidx.lifecycle.map
 import androidx.navigation.findNavController
@@ -20,11 +21,13 @@ import bg.zahov.app.Inject.serviceErrorHandler
 import bg.zahov.app.data.model.ServiceState
 import bg.zahov.app.data.model.state.ShutDownData
 import bg.zahov.app.data.model.state.WorkoutManagerUiMapper
+import bg.zahov.app.ui.loading.LoadingViewModel
 import bg.zahov.fitness.app.R
 import bg.zahov.fitness.app.databinding.ActivityMainBinding
 import com.google.android.material.appbar.AppBarLayout
 import com.google.android.material.appbar.MaterialToolbar
 import com.google.android.material.bottomnavigation.BottomNavigationView
+import kotlinx.coroutines.flow.collect
 import kotlinx.coroutines.launch
 
 class MainActivity : AppCompatActivity() {
@@ -32,9 +35,10 @@ class MainActivity : AppCompatActivity() {
     private lateinit var appBarConfiguration: AppBarConfiguration
     private lateinit var binding: ActivityMainBinding
     private val workoutManagerViewModel: WorkoutManagerViewModel by viewModels()
+    private val loadingViewModel: LoadingViewModel by viewModels()
 
     override fun onCreate(savedInstanceState: Bundle?) {
-        installSplashScreen()
+
         super.onCreate(savedInstanceState)
         binding = ActivityMainBinding.inflate(layoutInflater)
         setContentView(binding.root)
@@ -48,6 +52,11 @@ class MainActivity : AppCompatActivity() {
         workoutManagerViewModel.state.map { WorkoutManagerUiMapper.map(it) }.observe(this) {
             setWorkoutVisibility(it.trailingWorkoutVisibility)
             if (it.openWorkout) navController.navigate(R.id.to_workout_fragment)
+        }
+        lifecycleScope.launch {
+            loadingViewModel.loading.collect {
+                navController.navigate(it)
+            }
         }
         lifecycleScope.launch {
             serviceErrorHandler.observeServiceState()

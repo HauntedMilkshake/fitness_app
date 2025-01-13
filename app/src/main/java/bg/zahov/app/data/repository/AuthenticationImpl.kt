@@ -29,7 +29,7 @@ class AuthenticationImpl : Authentication {
 
     override suspend fun passwordResetForLoggedUser() = auth.passwordResetForLoggedUser()
 
-    override fun isAuthenticated(): Boolean = auth.isAuthenticated()
+    override fun authStateFlow() = auth.getAuthStateFlow()
 
     override suspend fun initDataSources() = auth.init()
     override suspend fun createDataSources(username: String, userId: String) = auth.create(username, userId)
