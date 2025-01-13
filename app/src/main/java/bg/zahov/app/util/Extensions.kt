@@ -4,24 +4,16 @@ import android.animation.ObjectAnimator
 import android.animation.PropertyValuesHolder
 import android.annotation.SuppressLint
 import android.view.View
-import bg.zahov.app.data.local.RealmDefaultSetting.DEFAULT_SETTING
-import bg.zahov.app.data.local.RealmExercise
-import bg.zahov.app.data.local.RealmSets
-import bg.zahov.app.data.local.RealmTimePattern
-import bg.zahov.app.data.model.BodyPart
 import bg.zahov.app.data.model.Category
 import bg.zahov.app.data.model.Exercise
 import bg.zahov.app.data.model.FirestoreFields
 import bg.zahov.app.data.model.Measurement
 import bg.zahov.app.data.model.SetType
 import bg.zahov.app.data.model.Sets
-import bg.zahov.app.data.model.Units
 import bg.zahov.app.data.model.User
 import bg.zahov.app.data.model.Workout
 import bg.zahov.app.data.model.state.ExerciseData
 import bg.zahov.app.ui.exercise.ExerciseAdapterWrapper
-import bg.zahov.app.ui.workout.add.ExerciseSetAdapterExerciseWrapper
-import bg.zahov.app.ui.workout.add.ExerciseSetAdapterSetWrapper
 import bg.zahov.fitness.app.R
 import com.google.firebase.Timestamp
 import java.time.Instant
@@ -138,81 +130,6 @@ fun String.parseTimeStringToLong(): Long {
     return ((hours * 60 * 60) + (minutes * 60) + seconds) * 1000
 }
 
-fun Exercise.toExerciseSetAdapterWrapper(units: Units = Units.METRIC): ExerciseSetAdapterExerciseWrapper {
-    return ExerciseSetAdapterExerciseWrapper(
-        noteVisibility = if (note.isNullOrEmpty()) View.GONE else View.VISIBLE,
-        note = note,
-        name = this.name,
-        backgroundResource = R.color.background,
-        firstInputColumnVisibility = when (this.category) {
-//            Category.RepsOnly, Category.Cardio, Category.Timed  -> View.GONE
-            else -> View.VISIBLE
-        },
-        firstInputColumnResource = when (this.category) {
-//            Category.AssistedWeight -> {
-//                when (units) {
-//                    Units.METRIC -> R.string.kg_minus
-//                    Units.BANANA -> R.string.lbs_minus
-//                }
-//            }
-
-            else -> {
-                when (units) {
-                    Units.METRIC -> R.string.kg_column_text
-                    Units.BANANA -> R.string.lbs_column_text
-                }
-            }
-
-        },
-        secondInputColumnResource = when (this.category) {
-//            Category.Cardio,  Category.Timed  -> R.string.time
-            else -> {
-                R.string.reps_column_text
-            }
-        },
-        bodyPart = this.bodyPart,
-        category = this.category,
-        isTemplate = this.isTemplate
-    )
-}
-
-fun ExerciseSetAdapterExerciseWrapper.toExercise(): Exercise {
-    return Exercise(
-        name = this.name,
-        bodyPart = this.bodyPart,
-        category = this.category,
-        isTemplate = this.isTemplate,
-        note = this.note,
-        sets = mutableListOf(),
-        bestSet = Sets(SetType.DEFAULT, null, null)
-    )
-}
-
-fun Sets.toExerciseSetAdapterSetWrapper(
-    number: String,
-    category: Category,
-    previousResults: String = "-/-",
-    resumeSet: Sets? = null
-): ExerciseSetAdapterSetWrapper {
-    return ExerciseSetAdapterSetWrapper(
-        setIndicator = when (this.type) {
-            SetType.WARMUP -> R.string.warmup_set_indicator
-            SetType.DROP_SET -> R.string.drop_set_indicator
-            SetType.DEFAULT -> R.string.default_set_indicator
-            SetType.FAILURE -> R.string.failure_set_indicator
-        },
-//        secondInputFieldVisibility = when (category) {
-////            Category.RepsOnly, Category.Cardio, Category.Timed -> View.GONE
-//            else -> View.VISIBLE
-//        }
-        View.VISIBLE,
-        setNumber = number,
-        set = resumeSet ?: Sets(SetType.DEFAULT, 0.0, 0),
-        backgroundResource = R.color.completed_set,
-        previousResults = previousResults,
-    )
-}
-
 fun Exercise.toExerciseData() =
     ExerciseData(
         name = this.name,
@@ -229,65 +146,65 @@ fun Exercise.toExerciseAdapterWrapper() =
     )
 
 
-fun Exercise.toRealmExercise(): RealmExercise {
-    val realmExercise = RealmExercise()
-    realmExercise.name = this.name
-    realmExercise.bodyPart = this.bodyPart.body
-    realmExercise.category = this.category.key
-    realmExercise.isTemplate = this.isTemplate
-    realmExercise.sets.addAll(this.sets.map { it.toRealmSets() })
-    realmExercise.bestSet = this.bestSet.toRealmSets()
-    realmExercise.note = this.note
-    return realmExercise
-}
+//fun Exercise.toRealmExercise(): RealmExercise {
+//    val realmExercise = RealmExercise()
+//    realmExercise.name = this.name
+//    realmExercise.bodyPart = this.bodyPart.body
+//    realmExercise.category = this.category.key
+//    realmExercise.isTemplate = this.isTemplate
+//    realmExercise.sets.addAll(this.sets.map { it.toRealmSets() })
+//    realmExercise.bestSet = this.bestSet.toRealmSets()
+//    realmExercise.note = this.note
+//    return realmExercise
+//}
+//
+//fun Sets.toRealmSets(): RealmSets {
+//    val realmSets = RealmSets()
+//    realmSets.type = this.type.key
+//    realmSets.firstMetric = this.firstMetric ?: 0.0
+//    realmSets.secondMetric = this.secondMetric ?: 0
+//    return realmSets
+//}
+//
+//fun RealmExercise.toExercise(): Exercise? {
+//    val bodyPart = BodyPart.entries.firstOrNull { it.body == this.bodyPart }
+//    val category = Category.entries.firstOrNull { it.key.equals(this.category, true) }
+//
+//    return if (this.name != DEFAULT_SETTING && bodyPart != null && category != null) {
+//        Exercise(
+//            name = this.name,
+//            bodyPart = bodyPart,
+//            category = category,
+//            isTemplate = this.isTemplate,
+//            sets = this.sets.mapNotNull { it.toSets() }.toMutableList(),
+//            note = this.note
+//        )
+//    } else {
+//        null
+//    }
+//}
 
-fun Sets.toRealmSets(): RealmSets {
-    val realmSets = RealmSets()
-    realmSets.type = this.type.key
-    realmSets.firstMetric = this.firstMetric ?: 0.0
-    realmSets.secondMetric = this.secondMetric ?: 0
-    return realmSets
-}
 
-fun RealmExercise.toExercise(): Exercise? {
-    val bodyPart = BodyPart.entries.firstOrNull { it.body == this.bodyPart }
-    val category = Category.entries.firstOrNull { it.key.equals(this.category, true) }
-
-    return if (this.name != DEFAULT_SETTING && bodyPart != null && category != null) {
-        Exercise(
-            name = this.name,
-            bodyPart = bodyPart,
-            category = category,
-            isTemplate = this.isTemplate,
-            sets = this.sets.mapNotNull { it.toSets() }.toMutableList(),
-            note = this.note
-        )
-    } else {
-        null
-    }
-}
-
-
-fun RealmSets.toSets(): Sets? {
-    return SetType.entries.firstOrNull { it.key == this.type }?.let { setType ->
-        Sets(
-            type = setType,
-            firstMetric = this.firstMetric,
-            secondMetric = this.secondMetric
-        )
-    }
-}
+//fun RealmSets.toSets(): Sets? {
+//    return SetType.entries.firstOrNull { it.key == this.type }?.let { setType ->
+//        Sets(
+//            type = setType,
+//            firstMetric = this.firstMetric,
+//            secondMetric = this.secondMetric
+//        )
+//    }
+//}
 
 fun LocalDateTime.toFormattedString(): String =
     this.format(DateTimeFormatter.ofPattern("HH:mm, d MMMM", Locale.ENGLISH))
 
-fun LocalDateTime.toRealmString(): String {
-    return this.format(DateTimeFormatter.ofPattern(RealmTimePattern.REALM_TIME_PATTERN))
-}
-
-fun String.toLocalDateTimeRlm(): LocalDateTime {
-    return LocalDateTime.parse(this, DateTimeFormatter.ofPattern(RealmTimePattern.REALM_TIME_PATTERN))
-}
+//fun LocalDateTime.toRealmString(): String {
+//    return this.format(DateTimeFormatter.ofPattern(RealmTimePattern.REALM_TIME_PATTERN))
+//}
+//
+//fun String.toLocalDateTimeRlm(): LocalDateTime {
+//    return LocalDateTime.parse(this, DateTimeFormatter.ofPattern(RealmTimePattern.REALM_TIME_PATTERN))
+//}
 
 fun String.filterIntegerInput(): Int {
     if (this.startsWith('0') && this.length > 1) {

@@ -1,11 +1,15 @@
 package bg.zahov.app.ui
 
+import android.annotation.SuppressLint
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.getValue
 import androidx.compose.ui.Modifier
 import androidx.navigation.NavController
 import androidx.navigation.NavDestination.Companion.hasRoute
 import androidx.navigation.compose.currentBackStackEntryAsState
+import bg.zahov.app.AddTemplateWorkout
+import bg.zahov.app.Calendar
+import bg.zahov.app.ExerciseAdd
 import bg.zahov.app.Calendar
 import bg.zahov.app.EditProfile
 import bg.zahov.app.ExerciseAdd
@@ -21,6 +25,7 @@ import bg.zahov.app.ui.custom.CommonTopBar
 import bg.zahov.app.ui.exercise.topbar.TopBarExercise
 import bg.zahov.fitness.app.R
 
+@SuppressLint("RestrictedApi")
 @Composable
 fun TopBar(modifier: Modifier = Modifier, navController: NavController) {
     val navBackStackEntry by navController.currentBackStackEntryAsState()
@@ -31,20 +36,23 @@ fun TopBar(modifier: Modifier = Modifier, navController: NavController) {
             titleId = R.string.home,
             onActionClick = { navController.navigate(Settings) }
         )
+
         currentDestination?.hasRoute(Settings::class) == true -> TopBarState(
             titleId = R.string.settings_text,
             actionButtonIconId = R.drawable.ic_profile_circle,
             onActionClick = { navController.navigate(EditProfile) },
             onBackClick = { navController.popBackStack() }
         )
+
         currentDestination?.hasRoute(EditProfile::class) == true -> TopBarState(
             titleId = R.string.edit_profile_text,
             onBackClick = { navController.popBackStack() }
         )
+
         currentDestination?.hasRoute(History::class) == true -> TopBarState(
             titleId = R.string.history,
             actionButtonIconId = R.drawable.ic_calendar,
-            onActionClick = {navController.navigate(Calendar)}
+            onActionClick = { navController.navigate(Calendar) }
         )
         currentDestination?.hasRoute(Calendar::class) == true -> TopBarState(
             titleId = R.string.history,
@@ -64,8 +72,22 @@ fun TopBar(modifier: Modifier = Modifier, navController: NavController) {
             titleId = R.string.add_exercise,
             onBackClick = { navController.popBackStack() }
         )
+
+        currentDestination?.hasRoute(Calendar::class) == true -> TopBarState(
+            titleId = R.string.calendar,
+            onBackClick = { navController.navigateUp() }
+        )
+
+        currentDestination?.hasRoute(AddTemplateWorkout::class) == true -> TopBarState(
+            titleId = R.string.new_workout_template,
+            actionButtonIconId = R.drawable.ic_plus,
+            onActionClick = { /* TODO() */ },
+            onBackClick = { navController.navigateUp() }
+        )
+
         else -> null
     }
+
     topBarState?.let {
         CommonTopBar(topBarState = it, modifier = modifier)
     }

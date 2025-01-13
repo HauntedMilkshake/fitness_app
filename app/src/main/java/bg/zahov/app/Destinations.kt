@@ -3,49 +3,55 @@ package bg.zahov.app
 import kotlinx.serialization.Serializable
 
 @Serializable
-object Welcome
+data object Welcome
 
 @Serializable
-object Login
+data object Login
 
 @Serializable
-object Signup
+data object Signup
 
 @Serializable
-object Loading
+data object Loading
 
 @Serializable
-object Home
+data object Home
 
 @Serializable
-object Settings
+data object Settings
 
 @Serializable
-object EditProfile
+data object EditProfile
 
 @Serializable
-object History
+data object History
 
 @Serializable
-object HistoryInfo
+data object StartWorkout
 
 @Serializable
-object Calendar
+data class AddTemplateWorkout(val workoutId: String? = null)
 
 @Serializable
-object Workout
+data object Workout
 
 @Serializable
-object Exercises
+data class Exercises(val state: String? = null)
+
+@Serializable
+data object ExerciseInfo
 
 @Serializable
 object ExerciseAdd
 
 @Serializable
-object ExerciseInfo
+data object Measure
 
 @Serializable
-object Measure
+data object MeasureInfo
 
 @Serializable
-object MeasureInfo
+data object HistoryInfo
+
+@Serializable
+data object Calendar

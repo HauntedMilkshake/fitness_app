@@ -12,13 +12,13 @@ object ExerciseInfoTestData {
             workoutName = "Bench Press",
             lastPerformed = "Yesterday",
             setsPerformed = "5 sets",
-            oneRepMaxes = "100 kg"
+            oneRepMaxes = listOf()//"100 kg"
         ),
         ExerciseHistoryInfo(
             workoutName = "Deadlift",
             lastPerformed = "2 days ago",
             setsPerformed = "4 sets",
-            oneRepMaxes = "120 kg"
+            oneRepMaxes = listOf()//"120 kg"
         )
     )
     val testOneRepMaxEst =

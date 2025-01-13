@@ -6,9 +6,7 @@ import bg.zahov.app.Inject
 import bg.zahov.app.data.interfaces.SettingsProvider
 import bg.zahov.app.data.interfaces.UserProvider
 import bg.zahov.app.data.interfaces.WorkoutActions
-import bg.zahov.app.data.local.Settings
 import bg.zahov.app.data.model.state.TypeSettings
-import bg.zahov.app.data.provider.SettingsProviderImpl
 import bg.zahov.app.data.provider.UserProviderImpl
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.StateFlow
@@ -30,29 +28,29 @@ import kotlinx.coroutines.launch
 class SettingsViewModel(
     private val repo: SettingsProvider = Inject.settingsProvider,
     private val auth: UserProvider = Inject.userProvider,
-    private val workoutState: WorkoutActions = Inject.workoutState
+    private val workoutState: WorkoutActions = Inject.workoutState,
 ) : ViewModel() {
 
     /**
      * Data class representing the state of the settings UI.
      *
-     * @property data Current settings data, represented as a [Settings] object.
+     * @property data Current settings data, represented as a TODO() object
      * @property navigateBack A Boolean flag indicating whether to navigate back. Defaults to false.
      */
-    data class SettingsData(val data: Settings, val navigateBack: Boolean = false)
+    data class SettingsData(val data: String, val navigateBack: Boolean = false)
 
     // Holds the current UI state, updated whenever settings data changes
-    private val _uiState = MutableStateFlow(SettingsData(data = Settings()))
+    private val _uiState = MutableStateFlow(SettingsData(data = ""))
     val uiState: StateFlow<SettingsData> = _uiState
 
     init {
         // Initializes settings by collecting data from repo
         viewModelScope.launch {
-            repo.getSettings().collect {
-                it.obj?.let { settings ->
-                    _uiState.update { old -> old.copy(data = settings) }
-                }
-            }
+//            repo.getSettings().collect {
+//                it.obj?.let { settings ->
+//                    _uiState.update { old -> old.copy(data = settings) }
+//                }
+//            }
         }
     }
 

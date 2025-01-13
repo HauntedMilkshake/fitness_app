@@ -56,17 +56,8 @@ object Inject {
 }
 
 class MyApplication : Application() {
-    val settingsProvider by lazy {
-        SettingsProviderImpl.getInstance()
-    }
     val workoutProvider by lazy {
         WorkoutProviderImpl.getInstance()
-    }
-    val selectedExerciseProvider by lazy {
-        SelectableExerciseProvider.getInstance()
-    }
-    val replaceableExerciseProvider by lazy {
-        ReplaceableExerciseProvider.getInstance()
     }
     val restTimerProvider by lazy {
         RestTimerProvider.getInstance()
@@ -81,10 +72,4 @@ class MyApplication : Application() {
     }
 }
 
-fun Application.getSettingsProvider() = (this as MyApplication).settingsProvider
-fun Application.getWorkoutProvider() = (this as MyApplication).workoutProvider
-fun Application.getSelectableExerciseProvider() = (this as MyApplication).selectedExerciseProvider
-fun Application.getReplaceableExerciseProvider() =
-    (this as MyApplication).replaceableExerciseProvider
 fun Application.getRestTimerProvider() = (this as MyApplication).restTimerProvider
-fun Application.getServiceErrorProvider() = (this as MyApplication).serviceErrorHandler

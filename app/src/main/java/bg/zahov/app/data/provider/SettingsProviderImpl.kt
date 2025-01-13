@@ -1,11 +1,9 @@
 package bg.zahov.app.data.provider
 
 import bg.zahov.app.data.interfaces.SettingsProvider
-import bg.zahov.app.data.local.Settings
 import bg.zahov.app.data.model.state.TypeSettings
-import bg.zahov.app.data.repository.SettingsRepositoryImpl
-import io.realm.kotlin.notifications.ObjectChange
 import kotlinx.coroutines.flow.Flow
+import kotlinx.coroutines.flow.flowOf
 
 /**
  * Implementation of [SettingsProvider] that manages access to user settings.
@@ -15,9 +13,8 @@ import kotlinx.coroutines.flow.Flow
  * - Add or update specific settings.
  * - Reset settings to their default values.
  *
- * @property settingsRepository Manages the actual data storage and retrieval via [SettingsRepositoryImpl].
  */
-class SettingsProviderImpl: SettingsProvider {
+class SettingsProviderImpl : SettingsProvider {
 
     companion object {
         @Volatile
@@ -34,14 +31,16 @@ class SettingsProviderImpl: SettingsProvider {
         }
     }
 
-    private val settingsRepository = SettingsRepositoryImpl.getInstance()
+//    private val settingsRepository = SettingsRepositoryImpl.getInstance()
 
     /**
      * Retrieves the current settings as a flow, observing changes in real-time.
      *
-     * @return A [Flow] of [ObjectChange] events for [Settings].
      */
-    override suspend fun getSettings(): Flow<ObjectChange<Settings>> = settingsRepository.getSettings()
+    override suspend fun <T> getSettings(): Flow<T> {
+        return flowOf()
+        //TODO()
+    }
 
     /**
      * Adds or updates a setting with the specified title and value.
@@ -49,10 +48,14 @@ class SettingsProviderImpl: SettingsProvider {
      * @param type The type of the setting to be updated.
      * @param value The new value to set.
      */
-    override suspend fun addSetting(type: TypeSettings, value: Any) = settingsRepository.addSetting(type, value)
+    override suspend fun addSetting(
+        type: TypeSettings,
+        value: Any,
+    ) {
+    } //= settingsRepository.addSetting(type, value)
 
     /**
      * Resets all settings to their default values.
      */
-    override suspend fun resetSettings() = settingsRepository.resetSettings()
+    override suspend fun resetSettings() {} // = settingsRepository.resetSettings()
 }
