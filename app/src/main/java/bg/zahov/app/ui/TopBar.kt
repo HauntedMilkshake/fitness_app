@@ -10,9 +10,7 @@ import androidx.navigation.compose.currentBackStackEntryAsState
 import bg.zahov.app.AddTemplateWorkout
 import bg.zahov.app.Calendar
 import bg.zahov.app.ExerciseAdd
-import bg.zahov.app.Calendar
 import bg.zahov.app.EditProfile
-import bg.zahov.app.ExerciseAdd
 import bg.zahov.app.Exercises
 import bg.zahov.app.History
 import bg.zahov.app.HistoryInfo
@@ -36,19 +34,16 @@ fun TopBar(modifier: Modifier = Modifier, navController: NavController) {
             titleId = R.string.home,
             onActionClick = { navController.navigate(Settings) }
         )
-
         currentDestination?.hasRoute(Settings::class) == true -> TopBarState(
             titleId = R.string.settings_text,
             actionButtonIconId = R.drawable.ic_profile_circle,
             onActionClick = { navController.navigate(EditProfile) },
             onBackClick = { navController.popBackStack() }
         )
-
         currentDestination?.hasRoute(EditProfile::class) == true -> TopBarState(
             titleId = R.string.edit_profile_text,
             onBackClick = { navController.popBackStack() }
         )
-
         currentDestination?.hasRoute(History::class) == true -> TopBarState(
             titleId = R.string.history,
             actionButtonIconId = R.drawable.ic_calendar,
@@ -77,14 +72,12 @@ fun TopBar(modifier: Modifier = Modifier, navController: NavController) {
             titleId = R.string.calendar,
             onBackClick = { navController.navigateUp() }
         )
-
         currentDestination?.hasRoute(AddTemplateWorkout::class) == true -> TopBarState(
             titleId = R.string.new_workout_template,
             actionButtonIconId = R.drawable.ic_plus,
             onActionClick = { /* TODO() */ },
             onBackClick = { navController.navigateUp() }
         )
-
         else -> null
     }
 
@@ -95,8 +88,7 @@ fun TopBar(modifier: Modifier = Modifier, navController: NavController) {
         TopBarExercise({ navController.navigate(ExerciseAdd) })
     }
     if (currentDestination?.hasRoute(HistoryInfo::class) == true) {
-        //PLS ADD SPECIAL ONE
-    }
+        /* TODO() */    }
 }
 
 data class TopBarState(
