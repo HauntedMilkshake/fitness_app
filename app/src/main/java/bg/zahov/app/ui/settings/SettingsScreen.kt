@@ -34,7 +34,7 @@ import bg.zahov.fitness.app.R
 fun SettingsScreen(
     viewModel: SettingsViewModel = viewModel(),
     navigateBack: () -> Unit,
-    navigateEditProfile: () -> Unit
+    navigateEditProfile: () -> Unit,
 ) {
     val uiState by viewModel.uiState.collectAsStateWithLifecycle()
 
@@ -44,92 +44,92 @@ fun SettingsScreen(
         }
     }
     SettingsContent(
-        resetTimer = uiState.data.restTimer,
+        resetTimer = 0,
         changeResetTimer = { onDismiss ->
             RadioSettingsDialog(
                 type = TypeSettings.REST_TIMER_SETTING,
                 onDismissRequest = onDismiss,
-                selected = uiState.data.restTimer,
+                selected = 0,
                 setSelected = { type: TypeSettings, value: Any ->
                     viewModel.writeNewSetting(type = type, newValue = value)
                 })
         },
-        sound = uiState.data.soundSettings,
+        sound = "",
         changeSound = { onDismiss ->
             RadioSettingsDialog(
                 type = TypeSettings.SOUND_SETTING,
                 onDismissRequest = onDismiss,
-                selected = uiState.data.soundSettings,
+                selected = "",
                 setSelected = { type: TypeSettings, value: Any ->
                     viewModel.writeNewSetting(type = type, newValue = value)
                 })
         },
-        theme = uiState.data.theme,
+        theme = "",
         changeTheme = { onDismiss ->
             RadioSettingsDialog(
                 type = TypeSettings.THEME_SETTING,
                 onDismissRequest = onDismiss,
-                selected = uiState.data.theme,
+                selected = "",
                 setSelected = { type: TypeSettings, value: Any ->
                     viewModel.writeNewSetting(type = type, newValue = value)
                 })
 
         },
-        units = uiState.data.units,
+        units = "",
         changeUnits = { onDismiss ->
             RadioSettingsDialog(
                 type = TypeSettings.UNIT_SETTING,
                 onDismissRequest = onDismiss,
-                selected = uiState.data.units,
+                selected = "",
                 setSelected = { type: TypeSettings, value: Any ->
                     viewModel.writeNewSetting(type = type, newValue = value)
                 })
 
         },
-        language = uiState.data.language,
+        language = "",
         changeLanguage = { onDismiss ->
             RadioSettingsDialog(
                 type = TypeSettings.LANGUAGE_SETTING,
                 onDismissRequest = onDismiss,
-                selected = uiState.data.language,
+                selected = "",
                 setSelected = { type: TypeSettings, value: Any ->
                     viewModel.writeNewSetting(type = type, newValue = value)
                 })
         },
         navigateEditProfile = { navigateEditProfile() },
-        enableSound = uiState.data.soundEffects,
+        enableSound = false,
         enableSoundChange = {
             viewModel.writeNewSetting(
                 type = TypeSettings.SOUND_EFFECTS_SETTING,
-                newValue = !uiState.data.soundEffects
+                newValue = false
             )
         },
-        enableSync = uiState.data.automaticSync,
+        enableSync = false,
         enableSyncChange = {
             viewModel.writeNewSetting(
                 type = TypeSettings.AUTOMATIC_SYNC_SETTING,
-                newValue = !uiState.data.automaticSync
+                newValue = false
             )
         },
-        enableVibrate = uiState.data.vibration,
+        enableVibrate = false,
         enableVibrateChange = {
             viewModel.writeNewSetting(
                 type = TypeSettings.VIBRATION_SETTING,
-                newValue = !uiState.data.vibration
+                newValue = false
             )
         },
-        showUpdate = uiState.data.updateTemplate,
+        showUpdate = false,
         showUpdateChange = {
             viewModel.writeNewSetting(
                 type = TypeSettings.UPDATE_TEMPLATE_SETTING,
-                newValue = !uiState.data.updateTemplate
+                newValue = false
             )
         },
-        enableWatch = uiState.data.enableWatch,
+        enableWatch = false,
         useWatchChange = {
             viewModel.writeNewSetting(
                 type = TypeSettings.WATCH_SETTINGS,
-                newValue = !uiState.data.enableWatch
+                newValue = false
             )
         },
         github = {
@@ -173,7 +173,7 @@ fun SettingsContent(
     github: @Composable () -> Unit,
     bugReport: @Composable () -> Unit,
     deleteAccount: () -> Unit,
-    logout: () -> Unit
+    logout: () -> Unit,
 ) {
     Column(
         modifier = Modifier
