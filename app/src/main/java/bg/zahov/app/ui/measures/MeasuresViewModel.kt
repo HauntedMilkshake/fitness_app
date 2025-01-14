@@ -22,7 +22,6 @@ class MeasuresViewModel(
     private val measurementProvider: MeasurementProvider = Inject.measurementProvider
 ) : ViewModel() {
 
-
     //A private mutable state flow that holds a list of all measurement names as strings.
     private val _uiState = MutableStateFlow(getAllMeasures())
 
