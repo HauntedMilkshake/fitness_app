@@ -1,19 +1,16 @@
 package bg.zahov.app
 
 import android.os.Bundle
+import androidx.activity.compose.setContent
 import androidx.activity.viewModels
 import androidx.appcompat.app.AppCompatActivity
-import androidx.compose.ui.platform.ComposeView
 import androidx.lifecycle.lifecycleScope
 import bg.zahov.app.Inject.serviceErrorHandler
 import bg.zahov.app.data.model.ServiceState
 import bg.zahov.app.data.model.state.ShutDownData
-import bg.zahov.fitness.app.R
-import bg.zahov.fitness.app.databinding.ActivityMainBinding
 import kotlinx.coroutines.launch
 
 class MainActivity : AppCompatActivity() {
-    private lateinit var binding: ActivityMainBinding
     private val workoutManagerViewModel: WorkoutManagerViewModel by viewModels()
 
     override fun onCreate(savedInstanceState: Bundle?) {
@@ -29,13 +26,7 @@ class MainActivity : AppCompatActivity() {
                     }
                 }
         }
-
-        binding = ActivityMainBinding.inflate(layoutInflater)
-        setContentView(binding.root)
-
-        val composeView = findViewById<ComposeView>(R.id.parentCompose)
-
-        composeView.setContent {
+        setContent {
 //            App(workoutManagerViewModel)
         }
     }
