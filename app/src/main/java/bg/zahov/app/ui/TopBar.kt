@@ -1,103 +1,100 @@
 package bg.zahov.app.ui
 
 import android.annotation.SuppressLint
-import androidx.compose.material3.Icon
-import androidx.compose.material3.MaterialTheme
-import androidx.compose.material3.NavigationBar
-import androidx.compose.material3.NavigationBarItem
-import androidx.compose.material3.NavigationBarItemDefaults
-import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.getValue
 import androidx.compose.ui.Modifier
-import androidx.compose.ui.res.painterResource
-import androidx.compose.ui.res.stringResource
+import androidx.navigation.NavController
 import androidx.navigation.NavDestination.Companion.hasRoute
-import androidx.navigation.NavDestination.Companion.hierarchy
-import androidx.navigation.NavGraph.Companion.findStartDestination
-import androidx.navigation.NavHostController
 import androidx.navigation.compose.currentBackStackEntryAsState
+import bg.zahov.app.AddTemplateWorkout
+import bg.zahov.app.Calendar
+import bg.zahov.app.ExerciseAdd
+import bg.zahov.app.EditProfile
 import bg.zahov.app.Exercises
 import bg.zahov.app.History
+import bg.zahov.app.HistoryInfo
 import bg.zahov.app.Home
 import bg.zahov.app.Measure
-import bg.zahov.app.StartWorkout
+import bg.zahov.app.MeasureInfo
+import bg.zahov.app.Settings
+import bg.zahov.app.Workout
+import bg.zahov.app.ui.custom.CommonTopBar
+import bg.zahov.app.ui.exercise.topbar.TopBarExercise
 import bg.zahov.fitness.app.R
 
 @SuppressLint("RestrictedApi")
 @Composable
-fun BottomBar(
-    navController: NavHostController,
-    modifier: Modifier = Modifier,
-) {
-    val screens = listOf(
-        BottomBarInfo(
-            titleId = R.string.home,
-            iconId = R.drawable.ic_bottom_nav_home,
-            route = Home
-        ),
-        BottomBarInfo(
-            titleId = R.string.history,
-            iconId = R.drawable.ic_clock,
-            route = History
-        ),
-        BottomBarInfo(
-            titleId = R.string.workout,
-            iconId = R.drawable.ic_plus,
-            route = StartWorkout
-        ),
-        BottomBarInfo(
-            titleId = R.string.exercise,
-            iconId = R.drawable.ic_exercise,
-            route = Exercises()
-        ),
-        BottomBarInfo(
-            titleId = R.string.measure,
-            iconId = R.drawable.ic_measures,
-            route = Measure
-        ),
-    )
+fun TopBar(modifier: Modifier = Modifier, navController: NavController) {
     val navBackStackEntry by navController.currentBackStackEntryAsState()
     val currentDestination = navBackStackEntry?.destination
-    if (screens.any { screen ->
-            currentDestination?.hierarchy?.any {
-                it.hasRoute(route = screen.route::class)
-            } == true
-        })
-        NavigationBar(
-            modifier = modifier,
-            containerColor = MaterialTheme.colorScheme.background,
-        ) {
-            screens.forEach { screen ->
-                NavigationBarItem(
-                    label = {
-                        Text(text = stringResource(screen.titleId))
-                    },
-                    icon = {
-                        Icon(painter = painterResource(screen.iconId), contentDescription = null)
-                    },
-                    selected = currentDestination?.hierarchy?.any {
-                        it.hasRoute(route = screen.route::class)
-                    } == true,
-                    onClick = {
-                        navController.navigate(screen.route) {
-                            popUpTo(navController.graph.findStartDestination().id) {
-                                saveState = true
-                            }
-                            launchSingleTop = true
-                            restoreState = true
-                        }
-                    },
-                    colors = NavigationBarItemDefaults.colors(
-                        unselectedTextColor = MaterialTheme.colorScheme.onBackground,
-                        unselectedIconColor = MaterialTheme.colorScheme.onBackground,
-                        selectedTextColor = MaterialTheme.colorScheme.onBackground,
-                        selectedIconColor = MaterialTheme.colorScheme.onSecondary,
-                        indicatorColor = MaterialTheme.colorScheme.secondary
-                    ),
-                )
-            }
-        }
+
+    val topBarState = when {
+        currentDestination?.hasRoute(Home::class) == true -> TopBarState(
+            titleId = R.string.home,
+            onActionClick = { navController.navigate(Settings) }
+        )
+        currentDestination?.hasRoute(Settings::class) == true -> TopBarState(
+            titleId = R.string.settings_text,
+            actionButtonIconId = R.drawable.ic_profile_circle,
+            onActionClick = { navController.navigate(EditProfile) },
+            onBackClick = { navController.popBackStack() }
+        )
+        currentDestination?.hasRoute(EditProfile::class) == true -> TopBarState(
+            titleId = R.string.edit_profile_text,
+            onBackClick = { navController.popBackStack() }
+        )
+        currentDestination?.hasRoute(History::class) == true -> TopBarState(
+            titleId = R.string.history,
+            actionButtonIconId = R.drawable.ic_calendar,
+            onActionClick = { navController.navigate(Calendar) }
+        )
+        currentDestination?.hasRoute(Calendar::class) == true -> TopBarState(
+            titleId = R.string.history,
+            onBackClick = { navController.popBackStack() }
+        )
+        currentDestination?.hasRoute(Workout::class) == true -> TopBarState(
+            titleId = R.string.workout
+        )
+        currentDestination?.hasRoute(Measure::class) == true -> TopBarState(
+            titleId = R.string.measure,
+        )
+        currentDestination?.hasRoute(MeasureInfo::class) == true -> TopBarState(
+            titleId = R.string.history_measurement,
+            onBackClick = { navController.popBackStack() }
+        )
+        currentDestination?.hasRoute(ExerciseAdd::class)== true->TopBarState(
+            titleId = R.string.add_exercise,
+            onBackClick = { navController.popBackStack() }
+        )
+
+        currentDestination?.hasRoute(Calendar::class) == true -> TopBarState(
+            titleId = R.string.calendar,
+            onBackClick = { navController.navigateUp() }
+        )
+        currentDestination?.hasRoute(AddTemplateWorkout::class) == true -> TopBarState(
+            titleId = R.string.new_workout_template,
+            actionButtonIconId = R.drawable.ic_plus,
+            onActionClick = { /* TODO() */ },
+            onBackClick = { navController.navigateUp() }
+        )
+        else -> null
+    }
+
+    topBarState?.let {
+        CommonTopBar(topBarState = it, modifier = modifier)
+    }
+    if (currentDestination?.hasRoute(Exercises::class) == true) {
+        TopBarExercise({ navController.navigate(ExerciseAdd) })
+    }
+    if (currentDestination?.hasRoute(HistoryInfo::class) == true) {
+        /* TODO() */    }
 }
 
-data class BottomBarInfo<T : Any>(val titleId: Int, val iconId: Int, val route: T)
+data class TopBarState(
+    val titleId: Int,
+    val actionButtonIconId: Int = R.drawable.ic_settings,
+    val backButtonIconId: Int = R.drawable.ic_back_arrow,
+    val onActionClick: (() -> Unit)? = null,
+    val onBackClick: (() -> Unit)? = null
+)
