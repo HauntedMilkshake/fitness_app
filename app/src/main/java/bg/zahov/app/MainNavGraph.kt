@@ -57,7 +57,6 @@ fun MainNavGraph(
                 }
             )
         }
-
         composable<Signup> {
             SignupScreen(
                 onAuthenticate = { navController.navigate(Loading) },
@@ -72,7 +71,6 @@ fun MainNavGraph(
                 }
             )
         }
-
         composable<Login> {
             LoginScreen(
                 onAuthenticate = {
@@ -88,7 +86,6 @@ fun MainNavGraph(
                 }
             )
         }
-
         composable<Loading> {
             LoadingScreen(
                 navigateWelcome = {
@@ -105,18 +102,15 @@ fun MainNavGraph(
                 }
             )
         }
-
         composable<Home> {
             HomeScreen()
         }
-
         composable<Settings> {
             SettingsScreen(
                 navigateBack = { navController.popBackStack() },
                 navigateEditProfile = { navController.navigate(EditProfile) }
             )
         }
-
         composable<EditProfile> {
             EditProfileScreen()
         }
@@ -129,31 +123,25 @@ fun MainNavGraph(
                 onReplaceExercise = { navController.navigate(Exercises(ExerciseArgs.REPLACE_EXERCISE_ARG)) }
             )
         }
-
         composable<Exercises> {
             ExercisesScreen(
                 navigateInfo = { navController.navigate(ExerciseInfo) },
                 navigateBack = { navController.navigateUp() })
         }
-
         composable<ExerciseAdd> {
             AddExerciseScreen(
                 navigate = { navController.popBackStack() }
             )
         }
-
         composable<ExerciseInfo> {
             ExerciseInfoScreen()
         }
-
         composable<History> {
             HistoryScreen(onItemClick = { navController.navigate(HistoryInfo) })
         }
-
         composable<HistoryInfo> {
-            HistoryInfoScreen(onDelete = { navController.popBackStack() })
+            HistoryInfoScreen(onDelete = { navController.navigateUp() })
         }
-
         composable<Measure> {
             MeasuresScreen(
                 navigateInfo = { navController.navigate(MeasureInfo) }
@@ -164,24 +152,12 @@ fun MainNavGraph(
             MeasurementInfoScreen()
         }
 
-        composable<Settings> {
-            SettingsScreen(
-                navigateBack = { navController.popBackStack() },
-                navigateEditProfile = { navController.navigate(EditProfile) }
-            )
-        }
-
-        composable<EditProfile> {
-            EditProfileScreen()
-        }
-
         composable<StartWorkout> {
             StartWorkoutScreen(
                 onEditWorkout = { navController.navigate(AddTemplateWorkout(it)) },
                 onAddTemplateWorkout = { navController.navigate(AddTemplateWorkout()) }
             )
         }
-
         composable<AddTemplateWorkout> {
             AddTemplateWorkoutScreen(
                 onAddExercise = { navController.navigate(Exercises(ExerciseArgs.ADD_EXERCISE_ARG)) },
@@ -190,13 +166,6 @@ fun MainNavGraph(
                 onCancel = { navController.navigateUp() }
             )
         }
-
-        composable<HistoryInfo> {
-            HistoryInfoScreen(
-                onDelete = { navController.navigateUp() }
-            )
-        }
-
         composable<Calendar> {
             CalendarScreen()
         }
