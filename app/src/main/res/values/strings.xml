@@ -142,6 +142,7 @@
     <string name="best_set">Best set</string>
     <string name="reset_settings">Reset settings</string>
     <string name="search">Search</string>
+    <string name="close_search">Close Search</string>
     <string name="save">Save</string>
     <string name="timers">Timers</string>
     <string name="save_as_workout_template">Save as workout template</string>
