@@ -1,9 +1,7 @@
-package bg.zahov.app.ui.loading
+package bg.zahov.app
 
-import android.util.Log
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
-import bg.zahov.app.Inject
 import bg.zahov.app.data.interfaces.ServiceErrorHandler
 import bg.zahov.app.data.interfaces.UserProvider
 import bg.zahov.fitness.app.R
@@ -11,7 +9,6 @@ import kotlinx.coroutines.delay
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.StateFlow
 import kotlinx.coroutines.flow.first
-import kotlinx.coroutines.flow.firstOrNull
 import kotlinx.coroutines.flow.update
 import kotlinx.coroutines.launch
 
@@ -31,31 +28,32 @@ class LoadingViewModel(
     private val userProvider: UserProvider = Inject.userProvider,
     private val serviceError: ServiceErrorHandler = Inject.serviceErrorHandler
 ) : ViewModel() {
+    private val _loading = MutableStateFlow(true)
+    val loading: StateFlow<Boolean> = _loading
 
-    private val _loading = MutableStateFlow(R.id.loading_to_welcome)
-
-    val loading: StateFlow<Int> = _loading
+    private val _navigationTarget = MutableStateFlow(R.id.welcome)
+    val navigationTarget: StateFlow<Int> = _navigationTarget
 
     init {
         viewModelScope.launch {
             try {
-                userProvider.authStateFlow().collect {
-                    _loading.update { R.id.loading }
-                    if (it) {
+                userProvider.authStateFlow().collect { isAuthenticated ->
+                    if (isAuthenticated) {
+                        _loading.value = true
                         userProvider.initDataSources()
                         userProvider.getUser().first()
-                        delay(1000)
-                        _loading.update { R.id.loading_to_home}
+                        _navigationTarget.update { R.id.home }
                     } else {
-                        delay(1000)
-                        _loading.update { R.id.loading_to_welcome }
+                        _navigationTarget.update { R.id.welcome }
                     }
+                    _loading.value = false
                 }
             } catch (e: Exception) {
                 when (e) {
-                    is NoSuchElementException -> _loading.update { R.id.loading_to_welcome }
+                    is NoSuchElementException -> _navigationTarget.update { R.id.welcome }
                     else -> serviceError.initiateCountdown()
                 }
+                _loading.value = false
             }
         }
     }

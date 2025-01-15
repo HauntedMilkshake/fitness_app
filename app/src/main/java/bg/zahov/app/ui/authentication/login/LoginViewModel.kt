@@ -33,14 +33,12 @@ class LoginViewModel(
      * @property password The password input from the user.
      * @property message An optional message to be displayed (e.g., errors or success messages).
      * @property passwordVisibility Boolean flag indicating whether the password is visible or hidden.
-     * @property isLoggedInfo Boolean flag indicating whether the user is logged in or not.
      */
     data class LoginData(
         var email: String = "",
         var password: String = "",
         val message: String? = null,
         var passwordVisibility: Boolean = false,
-        var isLoggedInfo: Boolean = false
     )
 
     // Holds the current UI state as a MutableStateFlow to observe and react to changes.
@@ -82,9 +80,6 @@ class LoginViewModel(
         viewModelScope.launch {
             try {
                 auth.login(_uiState.value.email, _uiState.value.password)
-                    .addOnSuccessListener {
-                        _uiState.update { old -> old.copy(isLoggedInfo = true) }
-                    }
                     .addOnFailureListener {
                         it.message?.let { it1 -> notifyChange(it1) }
                     }
