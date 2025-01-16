@@ -27,29 +27,29 @@ import bg.zahov.app.ui.theme.FitnessTheme
 @Composable
 fun App(workoutManagerViewModel: WorkoutManagerViewModel) {
     val navController = rememberNavController()
-//    val state by workoutManagerViewModel.state.collectAsStateWithLifecycle()
+    val state by workoutManagerViewModel.state.collectAsStateWithLifecycle()
 
-//    LaunchedEffect(state.isWorkoutActive) {
-//        if (state.isWorkoutActive) navController.navigate(Workout)
-//    }
+    LaunchedEffect(state.isWorkoutActive) {
+        if (state.isWorkoutActive) navController.navigate(Workout)
+    }
 
     FitnessTheme {
         Scaffold(
             topBar = {
-//                TopBar(navController = navController)
+                TopBar(navController = navController)
             },
             floatingActionButtonPosition = FabPosition.Center,
             floatingActionButton = {
-//                if (state.trailingWorkoutVisibility) {
-//                    TrailingWorkout(
-//                        workoutName = state.workoutName,
-//                        elapsedTime = state.timer,
-//                        onClick = { workoutManagerViewModel.updateStateToActive() }
-//                    )
-//                }
+                if (state.trailingWorkoutVisibility) {
+                    TrailingWorkout(
+                        workoutName = state.workoutName,
+                        elapsedTime = state.timer,
+                        onClick = { workoutManagerViewModel.updateStateToActive() }
+                    )
+                }
             },
             bottomBar = {
-//                BottomBar(navController = navController)
+                BottomBar(navController = navController)
             }
         ) { padding ->
             MainNavGraph(
