@@ -24,6 +24,7 @@ import bg.zahov.app.ui.welcome.WelcomeScreen
 import bg.zahov.app.ui.workout.AddTemplateWorkoutScreen
 import bg.zahov.app.ui.workout.WorkoutScreen
 import bg.zahov.app.ui.workout.start.StartWorkoutScreen
+import bg.zahov.app.data.local.Settings
 
 @Composable
 fun MainNavGraph(
@@ -33,12 +34,12 @@ fun MainNavGraph(
     NavHost(
         modifier = modifier,
         navController = navController,
-        startDestination = Loading
+        startDestination = Destinations.Loading
     ) {
-        composable<Welcome> {
+        composable<Destinations.Welcome> {
             WelcomeScreen(
                 onSignup = {
-                    navController.navigate(Signup) {
+                    navController.navigate(Destinations.Signup) {
                         popUpTo(navController.graph.findStartDestination().id) {
                             saveState = true
                         }
@@ -47,7 +48,7 @@ fun MainNavGraph(
                     }
                 },
                 onLogin = {
-                    navController.navigate(Login) {
+                    navController.navigate(Destinations.Login) {
                         popUpTo(navController.graph.findStartDestination().id) {
                             saveState = true
                         }
@@ -57,11 +58,11 @@ fun MainNavGraph(
                 }
             )
         }
-        composable<Signup> {
+        composable<Destinations.Signup> {
             SignupScreen(
-                onAuthenticate = { navController.navigate(Loading) },
+                onAuthenticate = { navController.navigate(Destinations.Loading) },
                 onNavigateToLogin = {
-                    navController.navigate(Login) {
+                    navController.navigate(Destinations.Login) {
                         popUpTo(navController.graph.findStartDestination().id) {
                             saveState = true
                         }
@@ -71,102 +72,102 @@ fun MainNavGraph(
                 }
             )
         }
-        composable<Login> {
+        composable<Destinations.Login> {
             LoginScreen(
                 onAuthenticate = {
-                    navController.navigate(Loading) {
-                        popUpTo<Login> { inclusive = true }
+                    navController.navigate(Destinations.Loading) {
+                        popUpTo<Destinations.Login> { inclusive = true }
                     }
                 },
                 onNavigateToSignUp = {
-                    navController.navigate(Signup) {
+                    navController.navigate(Destinations.Signup) {
                         launchSingleTop = true
                         restoreState = true
                     }
                 }
             )
         }
-        composable<Loading> {
+        composable<Destinations.Loading> {
             LoadingScreen(
                 navigateWelcome = {
-                    navController.navigate(route = Welcome) {
+                    navController.navigate(route = Destinations.Welcome) {
                         popUpTo(0) { inclusive = true }
                         launchSingleTop = true
                     }
                 },
                 navigateHome = {
-                    navController.navigate(route = Home) {
+                    navController.navigate(route = Destinations.Home) {
                         popUpTo(0) { inclusive = true }
                         launchSingleTop = true
                     }
                 }
             )
         }
-        composable<Home> {
+        composable<Destinations.Home> {
             HomeScreen()
         }
         composable<Settings> {
             SettingsScreen(
                 navigateBack = { navController.popBackStack() },
-                navigateEditProfile = { navController.navigate(EditProfile) }
+                navigateEditProfile = { navController.navigate(Destinations.EditProfile) }
             )
         }
-        composable<EditProfile> {
+        composable<Destinations.EditProfile> {
             EditProfileScreen()
         }
 
-        composable<Workout> {
+        composable<Destinations.Workout> {
             WorkoutScreen(
                 onCancel = { navController.navigateUp() },
-                onAddExercise = { navController.navigate(Exercises(ExerciseArgs.ADD_EXERCISE_ARG)) },
+                onAddExercise = { navController.navigate(Destinations.Exercises(ExerciseArgs.ADD_EXERCISE_ARG)) },
                 onBackPressed = { navController.navigateUp() },
-                onReplaceExercise = { navController.navigate(Exercises(ExerciseArgs.REPLACE_EXERCISE_ARG)) }
+                onReplaceExercise = { navController.navigate(Destinations.Exercises(ExerciseArgs.REPLACE_EXERCISE_ARG)) }
             )
         }
-        composable<Exercises> {
+        composable<Destinations.Exercises> {
             ExercisesScreen(
-                navigateInfo = { navController.navigate(ExerciseInfo) },
+                navigateInfo = { navController.navigate(Destinations.ExerciseInfo) },
                 navigateBack = { navController.navigateUp() })
         }
-        composable<ExerciseAdd> {
+        composable<Destinations.ExerciseAdd> {
             AddExerciseScreen(
                 navigate = { navController.popBackStack() }
             )
         }
-        composable<ExerciseInfo> {
+        composable<Destinations.ExerciseInfo> {
             ExerciseInfoScreen()
         }
-        composable<History> {
-            HistoryScreen(onItemClick = { navController.navigate(HistoryInfo) })
+        composable<Destinations.History> {
+            HistoryScreen(onItemClick = { navController.navigate(Destinations.HistoryInfo) })
         }
-        composable<HistoryInfo> {
+        composable<Destinations.HistoryInfo> {
             HistoryInfoScreen(onDelete = { navController.navigateUp() })
         }
-        composable<Measure> {
+        composable<Destinations.Measure> {
             MeasuresScreen(
-                navigateInfo = { navController.navigate(MeasureInfo) }
+                navigateInfo = { navController.navigate(Destinations.MeasureInfo) }
             )
         }
 
-        composable<MeasureInfo> {
+        composable<Destinations.MeasureInfo> {
             MeasurementInfoScreen()
         }
 
-        composable<StartWorkout> {
+        composable<Destinations.StartWorkout> {
             StartWorkoutScreen(
-                onEditWorkout = { navController.navigate(AddTemplateWorkout(it)) },
-                onAddTemplateWorkout = { navController.navigate(AddTemplateWorkout()) }
+                onEditWorkout = { navController.navigate(Destinations.AddTemplateWorkout(it)) },
+                onAddTemplateWorkout = { navController.navigate(Destinations.AddTemplateWorkout()) }
             )
         }
-        composable<AddTemplateWorkout> {
+        composable<Destinations.AddTemplateWorkout> {
             AddTemplateWorkoutScreen(
-                onAddExercise = { navController.navigate(Exercises(ExerciseArgs.ADD_EXERCISE_ARG)) },
-                onReplaceExercise = { navController.navigate(Exercises(ExerciseArgs.REPLACE_EXERCISE_ARG)) },
+                onAddExercise = { navController.navigate(Destinations.Exercises(ExerciseArgs.ADD_EXERCISE_ARG)) },
+                onReplaceExercise = { navController.navigate(Destinations.Exercises(ExerciseArgs.REPLACE_EXERCISE_ARG)) },
                 onBackPressed = { navController.navigateUp() },
                 onCancel = { navController.navigateUp() }
             )
         }
-        composable<Calendar> {
+        composable<Destinations.Calendar> {
             CalendarScreen()
         }
     }
