@@ -1,59 +1,60 @@
 package bg.zahov.app
 
-import kotlinx.serialization.Serializable
+import android.os.Parcelable
+import kotlinx.parcelize.Parcelize
 
 sealed class Destinations {
-    @Serializable
-    data object Welcome
+    @Parcelize
+    data object Welcome : Parcelable
 
-    @Serializable
-    data object Login
+    @Parcelize
+    data object Login : Parcelable
 
-    @Serializable
-    data object Signup
+    @Parcelize
+    data object Signup : Parcelable
 
-    @Serializable
-    data object Loading
+    @Parcelize
+    data object Loading : Parcelable
 
-    @Serializable
-    data object Home
+    @Parcelize
+    data object Home : Parcelable
 
-    @Serializable
-    data object Settings
+    @Parcelize
+    data object Settings : Parcelable
 
-    @Serializable
-    data object EditProfile
+    @Parcelize
+    data object EditProfile : Parcelable
 
-    @Serializable
-    data object History
+    @Parcelize
+    data object History : Parcelable
 
-    @Serializable
-    data object StartWorkout
+    @Parcelize
+    data object StartWorkout : Parcelable
 
-    @Serializable
-    data class AddTemplateWorkout(val workoutId: String? = null)
+    @Parcelize
+    data class AddTemplateWorkout(val workoutId: String? = null) : Parcelable
 
-    @Serializable
-    data object Workout
+    @Parcelize
+    data object Workout : Parcelable
 
-    @Serializable
-    data class Exercises(val state: String? = null)
+    @Parcelize
+    data class Exercises(val state: String? = null) : Parcelable
 
-    @Serializable
-    data object ExerciseInfo
+    @Parcelize
+    data object ExerciseInfo : Parcelable
 
-    @Serializable
-    object ExerciseAdd
+    @Parcelize
+    object ExerciseAdd : Parcelable
 
-    @Serializable
-    data object Measure
+    @Parcelize
+    data object Measure : Parcelable
 
-    @Serializable
-    data object MeasureInfo
+    @Parcelize
+    data object MeasureInfo : Parcelable
 
-    @Serializable
-    data object HistoryInfo
+    @Parcelize
+    data object HistoryInfo : Parcelable
 
-    @Serializable
-    data object Calendar
+    @Parcelize
+    data object Calendar : Parcelable
 }
