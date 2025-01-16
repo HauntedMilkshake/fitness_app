@@ -1,5 +1,6 @@
 package bg.zahov.app.ui.workout
 
+import androidx.activity.ComponentActivity
 import androidx.activity.compose.BackHandler
 import androidx.compose.animation.core.Spring
 import androidx.compose.animation.core.spring
@@ -55,6 +56,7 @@ import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.graphics.Shape
 import androidx.compose.ui.graphics.SolidColor
+import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.text.TextRange
@@ -76,7 +78,7 @@ private val weights = arrayOf(1f, 1f, 2f, 2f)
 
 @Composable
 fun AddTemplateWorkoutScreen(
-    addTemplateViewModel: AddTemplateWorkoutViewModel = viewModel(),
+    addTemplateViewModel: AddTemplateWorkoutViewModel = viewModel(factory = AddTemplateWorkoutViewModel.Factory),
     onAddExercise: () -> Unit,
     onReplaceExercise: () -> Unit,
     onBackPressed: () -> Unit,
@@ -140,11 +142,11 @@ fun AddTemplateWorkoutScreen(
 
 @Composable
 fun WorkoutScreen(
-    workoutViewModel: WorkoutViewModel = viewModel(),
+    workoutViewModel: WorkoutViewModel = viewModel(LocalContext.current as ComponentActivity),
     onAddExercise: () -> Unit,
     onReplaceExercise: () -> Unit,
     onBackPressed: () -> Unit,
-    onCancel: () -> Unit
+    onCancel: () -> Unit,
 ) {
     /**
      * In order to center the items of 2 independent rows we need to have
@@ -153,6 +155,7 @@ fun WorkoutScreen(
     val state by workoutViewModel.uiState.collectAsStateWithLifecycle()
 
     BackHandler {
+        workoutViewModel.minimize()
         onBackPressed()
     }
 
