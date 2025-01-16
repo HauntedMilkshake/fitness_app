@@ -62,14 +62,14 @@ fun WorkoutTopBarContent(
                 IconButton(onClick = onMinimize, modifier = Modifier.padding(horizontal = 8.dp)) {
                     Icon(
                         painter = painterResource(R.drawable.ic_minimize),
-                        contentDescription = null
+                        contentDescription = stringResource(R.string.minimize_icon_content_description)
                     )
                 }
                 if (elapsedRestTime.isEmpty()) {
                     IconButton(onClick = onRestClick) {
                         Icon(
                             painter = painterResource(R.drawable.ic_rest_timer),
-                            contentDescription = null
+                            contentDescription = stringResource(R.string.rest_icon_content_description)
                         )
                     }
                 } else {
