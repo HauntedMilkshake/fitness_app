@@ -6,11 +6,12 @@ import bg.zahov.app.Inject
 import bg.zahov.app.data.interfaces.SettingsProvider
 import bg.zahov.app.data.interfaces.UserProvider
 import bg.zahov.app.data.interfaces.WorkoutActions
+import bg.zahov.app.data.local.Settings
 import bg.zahov.app.data.model.state.TypeSettings
+import bg.zahov.app.data.provider.SettingsProviderImpl
 import bg.zahov.app.data.provider.UserProviderImpl
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.StateFlow
-import kotlinx.coroutines.flow.update
 import kotlinx.coroutines.launch
 
 /**
@@ -28,24 +29,26 @@ import kotlinx.coroutines.launch
 class SettingsViewModel(
     private val repo: SettingsProvider = Inject.settingsProvider,
     private val auth: UserProvider = Inject.userProvider,
-    private val workoutState: WorkoutActions = Inject.workoutState,
+    private val workoutState: WorkoutActions = Inject.workoutState
 ) : ViewModel() {
 
     /**
      * Data class representing the state of the settings UI.
      *
-     * @property data Current settings data, represented as a TODO() object
-     * @property navigateBack A Boolean flag indicating whether to navigate back. Defaults to false.
+     * @property data Current settings data, represented as a [Settings] object.
      */
-    data class SettingsData(val data: String, val navigateBack: Boolean = false)
+    data class SettingsData(val data: String)
 
     // Holds the current UI state, updated whenever settings data changes
+    /* TODO () */// Settings data shouldn't be string. Its string only so it doesn't brake the app
     private val _uiState = MutableStateFlow(SettingsData(data = ""))
     val uiState: StateFlow<SettingsData> = _uiState
 
     init {
         // Initializes settings by collecting data from repo
         viewModelScope.launch {
+            //Since realm is being removed we need to migrate the settings to firebase (there is a trello for that)
+            /* TODO() */
 //            repo.getSettings().collect {
 //                it.obj?.let { settings ->
 //                    _uiState.update { old -> old.copy(data = settings) }
@@ -82,7 +85,6 @@ class SettingsViewModel(
         viewModelScope.launch {
             auth.logout()
             workoutState.cancel()
-            _uiState.update { old -> old.copy(navigateBack = true) }
         }
     }
 
@@ -93,7 +95,6 @@ class SettingsViewModel(
         viewModelScope.launch {
             workoutState.cancel()
             auth.deleteAccount()
-            _uiState.update { old -> old.copy(navigateBack = true) }
         }
     }
 }
