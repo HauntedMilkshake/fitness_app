@@ -4,21 +4,20 @@ import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
 import bg.zahov.app.Inject
 import bg.zahov.app.data.interfaces.WorkoutProvider
+import bg.zahov.app.data.interfaces.WorkoutTopBarHandler
 import bg.zahov.app.data.model.BodyPart
 import bg.zahov.app.data.model.Category
 import bg.zahov.app.data.model.Exercise
-import bg.zahov.app.data.model.RestState
 import bg.zahov.app.data.model.SetType
 import bg.zahov.app.data.model.Sets
 import bg.zahov.app.data.model.ToastManager
-import bg.zahov.app.data.model.Units
 import bg.zahov.app.data.model.Workout
+import bg.zahov.app.data.model.WorkoutState
 import bg.zahov.app.data.provider.AddExerciseToWorkoutProvider
 import bg.zahov.app.data.provider.RestTimerProvider
 import bg.zahov.app.data.provider.WorkoutStateManager
 import bg.zahov.app.util.generateRandomId
 import bg.zahov.app.util.hashString
-import bg.zahov.app.util.parseTimeStringToLong
 import bg.zahov.fitness.app.R
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.StateFlow
@@ -35,9 +34,6 @@ import java.util.Random
  * @property workoutPrefix The time of day prefix for the workout, determined by the current hour
  * @property exercises A list of workout entries, which can be either exercises or sets.
  * @property note Additional notes for the workout session.
- * @property timer A timer value for tracking the workout session.
- * @property restTimer A timer value for tracking rest periods.
- * @property restState The current state of the rest period.
  * @property isFinished Indicates whether the workout session is complete.
  */
 data class WorkoutUiState(
@@ -45,9 +41,6 @@ data class WorkoutUiState(
     val workoutPrefix: TimeOfDay,
     val exercises: List<WorkoutEntry> = listOf(),
     val note: String = "",
-    val timer: String = "",
-    val restTimer: String = "",
-    val restState: RestState = RestState.Default,
     val isFinished: Boolean = false,
 )
 
@@ -120,7 +113,6 @@ data class ExerciseSummary(
  * @property repo Provides workout data and operations related to workouts.
  * @property addExerciseToWorkoutProvider Handles adding exercises to the current workout session.
  * @property restTimerProvider Manages timers for rest periods during the workout.
- * @property settingsProvider Provides access to user settings, such as units and preferences.
  * @property toastManager Manages the display of toast messages for user feedback.
  */
 class WorkoutViewModel(
@@ -128,6 +120,7 @@ class WorkoutViewModel(
     private val repo: WorkoutProvider = Inject.workoutProvider,
     private val addExerciseToWorkoutProvider: AddExerciseToWorkoutProvider = Inject.workoutAddedExerciseProvider,
     private val restTimerProvider: RestTimerProvider = Inject.restTimerProvider,
+    private val workoutTopBarHandler: WorkoutTopBarHandler = Inject.workoutTopAppHandler,
     private val toastManager: ToastManager = ToastManager,
 ) : ViewModel() {
 
@@ -153,11 +146,6 @@ class WorkoutViewModel(
     private var templateExercises = listOf<Exercise>()
 
     /**
-     * Units used by the user
-     */
-    private lateinit var units: Units
-
-    /**
      * Received by arguments. The id of the template workout of which
      * this workout will be based on
      */
@@ -168,6 +156,8 @@ class WorkoutViewModel(
      */
     private val workoutDate: LocalDateTime = LocalDateTime.now()
 
+    private var elapsedTime: Long = 0L
+
     /**
      * Initializes the `WorkoutViewModel` by setting up multiple asynchronous data flows to manage the UI state
      */
@@ -175,10 +165,25 @@ class WorkoutViewModel(
     init {
         checkForTemplateWorkout()
         observeTimer()
-        observeRestTimer()
         addSelectedExercises()
-        getRestState()
         getTemplateExercises()
+        observeShouldFinish()
+    }
+
+    /**
+     * Observes the workout state from the [workoutStateManager] and performs actions based on the current state.
+     *
+     * - When the state is [WorkoutState.INACTIVE], the workout is finished by calling [finishWorkout].
+     *
+     */
+    private fun observeShouldFinish() {
+        viewModelScope.launch {
+            workoutTopBarHandler.shouldFinish.collect { shouldFinish ->
+                if (shouldFinish) {
+                    finishWorkout()
+                }
+            }
+        }
     }
 
     /**
@@ -236,28 +241,7 @@ class WorkoutViewModel(
     private fun observeTimer() {
         viewModelScope.launch {
             workoutStateManager.timer.collect {
-                _uiState.update { old ->
-                    old.copy(
-                        timer = it.toRestTime()
-                    )
-                }
-            }
-        }
-    }
-
-    /**
-     * Observes the rest timer from `restTimerProvider` and updates the UI state with the elapsed rest time.
-     *
-     * If the elapsed time is null, no updates are made to the state.
-     */
-    private fun observeRestTimer() {
-        viewModelScope.launch {
-            restTimerProvider.restTimer.collect {
-                it.elapsedTime?.let { time ->
-                    _uiState.update { old ->
-                        old.copy(restTimer = time)
-                    }
-                }
+                elapsedTime = it
             }
         }
     }
@@ -277,22 +261,6 @@ class WorkoutViewModel(
                     old.copy(exercises = exercisesToUpdate)
                 }
                 addExerciseToWorkoutProvider.resetSelectedExercises()
-            }
-        }
-    }
-
-    /**
-     * Retrieves the current rest state from `restTimerProvider` and updates the UI state with it.
-     *
-     * The rest state represents information such as whether the timer is active, paused, or completed.
-     * @see [RestState]
-     */
-    private fun getRestState() {
-        viewModelScope.launch {
-            restTimerProvider.restState.collect {
-                _uiState.update { old ->
-                    old.copy(restState = it)
-                }
             }
         }
     }
@@ -585,7 +553,7 @@ class WorkoutViewModel(
                         date = workoutDate,
                         exercises = exercises,
                         note = _uiState.value.note,
-                        duration = _uiState.value.timer.parseTimeStringToLong(),
+                        duration = elapsedTime,
                         isTemplate = false,
                         personalRecords = prs,
                         volume = volume
@@ -593,14 +561,20 @@ class WorkoutViewModel(
                 )
 
                 addExerciseToWorkoutProvider.resetSelectedExercises()
+
                 workoutStateManager.finishWorkout()
                 repo.clearWorkoutState()
-                _uiState.update { old ->
-                    old.copy(isFinished = true)
-                }
                 clearState()
             }
+
+            _uiState.update { old ->
+                old.copy(isFinished = true)
+            }
         }
+    }
+
+    fun resetFinishTrigger() {
+        workoutTopBarHandler.completeFinishAttempt()
     }
 
     /**
