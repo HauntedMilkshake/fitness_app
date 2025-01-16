@@ -156,6 +156,9 @@ class WorkoutViewModel(
      */
     private val workoutDate: LocalDateTime = LocalDateTime.now()
 
+    /**
+     * Time duration of the workout.
+     */
     private var elapsedTime: Long = 0L
 
     /**
