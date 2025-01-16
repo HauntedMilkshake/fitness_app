@@ -186,8 +186,9 @@ class HomeViewModel(
     private suspend fun checkPreviousState(previousState: String = "") {
         workoutStateManager.startWorkout(
             Workout()
-//                kotlin.math.abs(lastTime.seconds) * 1000,
-//                true
+            /* TODO()*/
+//          kotlin.math.abs(lastTime.seconds) * 1000,
+//          true
         )
     }
 
@@ -196,6 +197,7 @@ class HomeViewModel(
      */
     private fun checkWorkoutState() {
         viewModelScope.launch {
+            /* TODO()*/
 //            async { workoutRepo.getPreviousWorkoutState()?.let { checkPreviousState(it) } }.await()
             workoutRepo.clearWorkoutState()
         }
