@@ -1,11 +1,15 @@
-package bg.zahov.app.ui.loading
+package bg.zahov.app
 
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
-import bg.zahov.app.Inject
 import bg.zahov.app.data.interfaces.ServiceErrorHandler
 import bg.zahov.app.data.interfaces.UserProvider
+import bg.zahov.fitness.app.R
+import kotlinx.coroutines.delay
+import kotlinx.coroutines.flow.MutableStateFlow
+import kotlinx.coroutines.flow.StateFlow
 import kotlinx.coroutines.flow.first
+import kotlinx.coroutines.flow.update
 import kotlinx.coroutines.launch
 
 /**
@@ -24,37 +28,32 @@ class LoadingViewModel(
     private val userProvider: UserProvider = Inject.userProvider,
     private val serviceError: ServiceErrorHandler = Inject.serviceErrorHandler
 ) : ViewModel() {
+    private val _loading = MutableStateFlow(true)
+    val loading: StateFlow<Boolean> = _loading
 
-    /**
-     * Executes the startup logic.
-     *
-     * This function is responsible for:
-     * - Checking the user's authentication status.
-     * - Initializing data sources and fetching user data if the user is authenticated.
-     * - Navigating to the home screen if authentication is successful.
-     * - Navigating to the welcome screen if the user is not authenticated or a `NoSuchElementException` occurs.
-     * - Handling unexpected errors by initiating the service error countdown.
-     *
-     * @param pass A lambda function to be executed when loading is successful and the app should
-     *             navigate to the home screen.
-     * @param failed A lambda function to be executed when loading fails or when the app should
-     *               navigate to the welcome screen.
-     */
-    fun loading(pass: () -> Unit, failed: () -> Unit) {
+    private val _navigationTarget = MutableStateFlow(R.id.welcome)
+    val navigationTarget: StateFlow<Int> = _navigationTarget
+
+    init {
         viewModelScope.launch {
             try {
-                if (userProvider.isAuthenticated()) {
-                    userProvider.initDataSources()
-                    userProvider.getUser().first()
-                    pass()
-                } else {
-                    failed()
+                userProvider.authStateFlow().collect { isAuthenticated ->
+                    if (isAuthenticated) {
+                        _loading.value = true
+                        userProvider.initDataSources()
+                        userProvider.getUser().first()
+                        _navigationTarget.update { R.id.home }
+                    } else {
+                        _navigationTarget.update { R.id.welcome }
+                    }
+                    _loading.value = false
                 }
             } catch (e: Exception) {
                 when (e) {
-                    is NoSuchElementException -> failed()
+                    is NoSuchElementException -> _navigationTarget.update { R.id.welcome }
                     else -> serviceError.initiateCountdown()
                 }
+                _loading.value = false
             }
         }
     }

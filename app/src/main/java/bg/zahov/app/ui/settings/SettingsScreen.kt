@@ -33,16 +33,10 @@ import bg.zahov.fitness.app.R
 @Composable
 fun SettingsScreen(
     viewModel: SettingsViewModel = viewModel(),
-    navigateBack: () -> Unit,
     navigateEditProfile: () -> Unit
 ) {
     val uiState by viewModel.uiState.collectAsStateWithLifecycle()
 
-    if (uiState.navigateBack) {
-        LaunchedEffect(Unit) {
-            navigateBack()
-        }
-    }
     SettingsContent(
         resetTimer = uiState.data.restTimer,
         changeResetTimer = { onDismiss ->
