@@ -21,8 +21,8 @@ import androidx.compose.ui.unit.dp
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import androidx.navigation.compose.rememberNavController
 import bg.zahov.app.ui.BottomBar
-import bg.zahov.app.ui.topbar.TopBar
 import bg.zahov.app.ui.theme.FitnessTheme
+import bg.zahov.app.ui.topbar.TopBar
 
 @Composable
 fun App(workoutManagerViewModel: WorkoutManagerViewModel) {
@@ -30,7 +30,7 @@ fun App(workoutManagerViewModel: WorkoutManagerViewModel) {
     val state by workoutManagerViewModel.state.collectAsStateWithLifecycle()
 
     LaunchedEffect(state.isWorkoutActive) {
-        if (state.isWorkoutActive) navController.navigate(Workout)
+        if (state.isWorkoutActive) navController.navigate(Destinations.Workout)
     }
 
     FitnessTheme {

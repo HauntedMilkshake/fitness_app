@@ -27,7 +27,7 @@ class MainActivity : AppCompatActivity() {
                 }
         }
         setContent {
-//            App(workoutManagerViewModel)
+            App(workoutManagerViewModel)
         }
     }
 
