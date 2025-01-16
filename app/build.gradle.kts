@@ -71,7 +71,6 @@ dependencies {
     androidTestImplementation(libs.composeUiTestJunit4)
     androidTestImplementation(libs.androidxTestExtJunit)
     androidTestImplementation(libs.androidxTestRunner)
-    implementation(libs.accompanistSystemUiController)
     implementation(libs.navigationCompose)
     implementation(libs.material)
     implementation(libs.ui)
@@ -91,8 +90,6 @@ dependencies {
     androidTestImplementation(libs.espressoCore)
     implementation(libs.coroutines)
     implementation(libs.lifecycleLiveData)
-    implementation(libs.circularProgressbar)
-    implementation(libs.flexbox)
     implementation(libs.mpChart)
     implementation(libs.calendarCompose)
 }
