@@ -2,7 +2,7 @@ package bg.zahov.app.data.interfaces
 
 import kotlinx.coroutines.flow.StateFlow
 
-interface WorkoutTopBarHandler {
+interface WorkoutActionHandler {
     val shouldFinish: StateFlow<Boolean>
     fun tryToFinish()
     fun completeFinishAttempt()

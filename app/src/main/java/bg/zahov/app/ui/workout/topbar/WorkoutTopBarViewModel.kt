@@ -1,11 +1,12 @@
-package bg.zahov.app.ui.workout
+package bg.zahov.app.ui.workout.topbar
 
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
 import bg.zahov.app.Inject
-import bg.zahov.app.data.interfaces.WorkoutTopBarHandler
+import bg.zahov.app.data.interfaces.WorkoutActionHandler
 import bg.zahov.app.data.provider.RestTimerProvider
 import bg.zahov.app.data.provider.WorkoutStateManager
+import bg.zahov.app.ui.workout.toRestTime
 import bg.zahov.app.util.parseTimeStringToLong
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.StateFlow
@@ -31,7 +32,7 @@ data class WorkoutTopBarData(
  *
  * @property workoutStateManager Manages workout timer state and provides elapsed workout time.
  * @property restStateManager Manages rest timer state and provides elapsed rest time and total rest duration.
- * @property workoutTopBarHandler Handles workout-related actions such as finishing the workout.
+ * @property workoutActionHandler Handles workout-related actions such as finishing the workout.
  *
  * Exposes:
  * - [uiState]: A [StateFlow] containing the UI state ([WorkoutTopBarData]) with elapsed workout time,
@@ -44,7 +45,7 @@ data class WorkoutTopBarData(
 class WorkoutTopBarViewModel(
     private val workoutStateManager: WorkoutStateManager = Inject.workoutState,
     private val restStateManager: RestTimerProvider = Inject.restTimerProvider,
-    private val workoutTopBarHandler: WorkoutTopBarHandler = Inject.workoutTopAppHandler,
+    private val workoutActionHandler: WorkoutActionHandler = Inject.workoutTopAppHandler,
 ) : ViewModel() {
 
     private val _uiState = MutableStateFlow(WorkoutTopBarData())
@@ -116,14 +117,14 @@ class WorkoutTopBarViewModel(
     }
 
     /**
-     * Attempts to finish the workout by invoking the [WorkoutTopBarHandler.tryToFinish] function.
+     * Attempts to finish the workout by invoking the [WorkoutActionHandler.tryToFinish] function.
      *
      * This is typically triggered by the user interacting with the "Finish" button
      * in the Workout Top Bar.
      */
     fun finish() {
         viewModelScope.launch {
-            workoutTopBarHandler.tryToFinish()
+            workoutActionHandler.tryToFinish()
         }
     }
 }

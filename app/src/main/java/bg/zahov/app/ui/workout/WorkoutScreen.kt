@@ -155,10 +155,11 @@ fun WorkoutScreen(
 ) {
 
     val state by workoutViewModel.uiState.collectAsStateWithLifecycle()
-    LaunchedEffect(state.isFinished) {
-        if (state.isFinished) {
-            onFinish()
+
+    if (state.isFinished) {
+        LaunchedEffect(Unit) {
             workoutViewModel.resetFinishTrigger()
+            onFinish()
         }
     }
 

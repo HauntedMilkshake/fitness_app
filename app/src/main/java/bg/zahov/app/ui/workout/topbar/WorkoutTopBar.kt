@@ -1,4 +1,4 @@
-package bg.zahov.app.ui.workout
+package bg.zahov.app.ui.workout.topbar
 
 import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.Arrangement
