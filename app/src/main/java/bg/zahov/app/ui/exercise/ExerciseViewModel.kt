@@ -1,7 +1,14 @@
 package bg.zahov.app.ui.exercise
 
+import androidx.lifecycle.SavedStateHandle
 import androidx.lifecycle.ViewModel
+import androidx.lifecycle.ViewModelProvider
+import androidx.lifecycle.createSavedStateHandle
 import androidx.lifecycle.viewModelScope
+import androidx.lifecycle.viewmodel.initializer
+import androidx.lifecycle.viewmodel.viewModelFactory
+import androidx.navigation.toRoute
+import bg.zahov.app.Exercises
 import bg.zahov.app.Inject
 import bg.zahov.app.data.exception.CriticalDataNullException
 import bg.zahov.app.data.interfaces.ServiceErrorHandler
@@ -18,8 +25,10 @@ import bg.zahov.app.data.provider.SelectableExerciseProvider
 import bg.zahov.app.ui.exercise.ExercisesFragment.Companion.ADD_EXERCISE_ARG
 import bg.zahov.app.ui.exercise.ExercisesFragment.Companion.REPLACE_EXERCISE_ARG
 import bg.zahov.app.ui.exercise.ExercisesFragment.Companion.SELECT_EXERCISE_ARG
+import bg.zahov.app.ui.exercise.topbar.ExerciseTopBarManager
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.StateFlow
+import kotlinx.coroutines.flow.collect
 import kotlinx.coroutines.flow.update
 import kotlinx.coroutines.launch
 
@@ -34,13 +43,28 @@ import kotlinx.coroutines.launch
  * @property serviceError Handles service-related errors.
  */
 class ExerciseViewModel(
+    private val savedStateHandle: SavedStateHandle,
     private val repo: WorkoutProvider = Inject.workoutProvider,
     private val selectableExerciseProvider: SelectableExerciseProvider = Inject.selectedExerciseProvider,
     private val replaceableExerciseProvider: ReplaceableExerciseProvider = Inject.replaceableExerciseProvider,
     private val addExerciseToWorkoutProvider: AddExerciseToWorkoutProvider = Inject.workoutAddedExerciseProvider,
     private val filterProvider: FilterProvider = Inject.filterProvider,
-    private val serviceError: ServiceErrorHandler = Inject.serviceErrorHandler
+    private val serviceError: ServiceErrorHandler = Inject.serviceErrorHandler,
+    private val exerciseTopBarManager: ExerciseTopBarManager = Inject.exerciseTopAppHandler
 ) : ViewModel() {
+
+    companion object {
+        val Factory: ViewModelProvider.Factory = viewModelFactory {
+            initializer {
+                ExerciseViewModel(
+                    savedStateHandle = createSavedStateHandle(),
+                )
+            }
+        }
+    }
+
+    private val exerciseState = savedStateHandle.toRoute<Exercises>().state
+
     /**
      * Internal mutable state flow representing the current state of the exercise screen.
      * Used to hold and update the UI state data including filters, exercises, loading status, etc.
@@ -53,8 +77,9 @@ class ExerciseViewModel(
      */
     val exerciseData: StateFlow<ExerciseScreenData> = _exerciseData
 
-
     init {
+        updateFlag(exerciseState)
+
         viewModelScope.launch {
             launch {
                 filterProvider.filters.collect { filters ->
@@ -76,6 +101,19 @@ class ExerciseViewModel(
                     }
                 } catch (e: CriticalDataNullException) {
                     serviceError.stopApplication()
+                }
+            }
+            launch {
+                exerciseTopBarManager.openDialog.collect {
+                    _exerciseData.update { old -> old.copy(showDialog = it) }
+                }
+            }
+            launch {
+                exerciseTopBarManager.search.collect {
+                    _exerciseData.update { old ->
+                        old.copy(search = it)
+                    }
+                    getFiltered()
                 }
             }
         }
@@ -324,12 +362,14 @@ class ExerciseViewModel(
     }
 
     /**
-     * Updates the visibility of the dialog.
+     * Updates the visibility value of the dialog in the exerciseTopBarManager .
      *
      * @param showDialog Indicates whether to show the dialog.
      */
     fun updateShowDialog(showDialog: Boolean) {
-        _exerciseData.update { old -> old.copy(showDialog = showDialog) }
+        viewModelScope.launch {
+            exerciseTopBarManager.changeOpenDialog(showDialog)
+        }
     }
 
     /**

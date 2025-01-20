@@ -2,8 +2,6 @@ package bg.zahov.app.data.remote
 
 import bg.zahov.app.data.exception.AuthenticationException
 import bg.zahov.app.data.exception.CriticalDataNullException
-import bg.zahov.app.data.exception.DeleteRealmException
-import bg.zahov.app.data.local.RealmManager
 import com.google.android.gms.tasks.Task
 import com.google.android.gms.tasks.Tasks
 import com.google.firebase.auth.EmailAuthProvider
@@ -16,7 +14,6 @@ import kotlinx.coroutines.flow.Flow
 import kotlinx.coroutines.flow.callbackFlow
 import kotlinx.coroutines.flow.distinctUntilChanged
 import kotlinx.coroutines.withContext
-import java.lang.IllegalStateException
 
 class FirebaseAuthentication {
     companion object {
@@ -30,7 +27,6 @@ class FirebaseAuthentication {
 
     private val auth = FirebaseAuth.getInstance()
     private val firestore = FirestoreManager.getInstance()
-    private val realm = RealmManager.getInstance()
 
     suspend fun signup(email: String, password: String) =
         withContext(Dispatchers.IO) { auth.createUserWithEmailAndPassword(email, password) }
@@ -39,16 +35,10 @@ class FirebaseAuthentication {
         withContext(Dispatchers.IO) { auth.signInWithEmailAndPassword(email, password) }
 
     suspend fun logout() {
-        resetResources()
         auth.signOut()
     }
 
-    suspend fun deleteAccount() {
-        try {
-            resetResources()
-        } catch (e: IllegalStateException) {
-            throw DeleteRealmException(e.message)
-        }
+    fun deleteAccount() {
 
         try {
             auth.currentUser?.delete()
@@ -57,10 +47,6 @@ class FirebaseAuthentication {
         } catch (e: FirebaseAuthRecentLoginRequiredException) {
             throw AuthenticationException(e.message)
         }
-    }
-
-    private suspend fun resetResources() {
-        realm.deleteRealm()
     }
 
     suspend fun passwordResetForLoggedUser(): Task<Void> = withContext(Dispatchers.IO) {
@@ -87,16 +73,10 @@ class FirebaseAuthentication {
         auth.currentUser?.uid?.let {
             firestore.initUser(it)
         }
-        if (realm.doesRealmExist()) {
-            realm.addSettings()
-        } else {
-            realm.createRealm()
-        }
     }
 
     suspend fun create(username: String, userId: String) {
         firestore.createFirestore(username, userId)
-        realm.createRealm()
     }
 
     suspend fun updatePassword(newPassword: String): Task<Void> = withContext(Dispatchers.IO) {

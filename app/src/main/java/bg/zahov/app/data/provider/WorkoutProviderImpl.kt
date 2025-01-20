@@ -1,7 +1,6 @@
 package bg.zahov.app.data.provider
 
 import bg.zahov.app.data.interfaces.WorkoutProvider
-import bg.zahov.app.data.local.RealmWorkoutState
 import bg.zahov.app.data.model.Exercise
 import bg.zahov.app.data.model.Workout
 import bg.zahov.app.data.model.state.ExerciseData
@@ -147,14 +146,9 @@ class WorkoutProviderImpl : WorkoutProvider {
     override suspend fun getClickedTemplateExercise() = clickedExercise.mapNotNull { it }
 
     override suspend fun getExerciseHistory(): Flow<List<ExerciseHistoryInfo>> = exerciseHistory
+    override suspend fun <T> getPreviousWorkoutState(): T? = null
 
-
-    override suspend fun getPreviousWorkoutState(): RealmWorkoutState? =
-        workoutRepo.getPastWorkoutState()
-
-    override suspend fun addWorkoutState(realmWorkoutState: RealmWorkoutState) {
-        workoutRepo.addWorkoutState(realmWorkoutState)
-    }
+    override suspend fun <T> addWorkoutState(realmWorkoutState: T) { /* TODO() */ }
 
     override suspend fun updateTemplateWorkout(
         workoutId: String,

@@ -1,19 +1,17 @@
 package bg.zahov.app.data.repository
 
 import bg.zahov.app.data.interfaces.SettingsProvider
-import bg.zahov.app.data.local.RealmManager
-import bg.zahov.app.data.local.Settings
 import bg.zahov.app.data.model.state.TypeSettings
-import io.realm.kotlin.notifications.ObjectChange
 import kotlinx.coroutines.flow.Flow
+import kotlinx.coroutines.flow.flowOf
 
 /**
  * Repository implementation for managing user settings data.
  *
- * This singleton class interacts with the database layer via [RealmManager]
+ * This singleton class interacts with the database layer via TODO()
  * to perform actions such as retrieving, updating, and resetting settings.
  *
- * @property realm Handles database operations related to settings through [RealmManager].
+ * @property realm Handles database operations related to settings through Todo()
  */
 class SettingsRepositoryImpl : SettingsProvider {
 
@@ -32,14 +30,15 @@ class SettingsRepositoryImpl : SettingsProvider {
             }
     }
 
-    private val realm = RealmManager.getInstance()
+//    private val realm = RealmManager.getInstance()
 
     /**
      * Retrieves the current settings as a [Flow], allowing real-time updates.
-     *
-     * @return A [Flow] emitting [ObjectChange] events for [Settings] objects.
      */
-    override suspend fun getSettings(): Flow<ObjectChange<Settings>> = realm.getSettings()
+    override suspend fun <T> getSettings(): Flow<T> {
+        return flowOf()
+//        TODO("Not yet implemented")
+    }
 
     /**
      * Adds or updates a specific setting.
@@ -48,13 +47,11 @@ class SettingsRepositoryImpl : SettingsProvider {
      * @param value The value to be set for the specified setting.
      */
     override suspend fun addSetting(type: TypeSettings, value: Any) {
-        realm.updateSetting(type, value)
     }
 
     /**
      * Resets all settings to their default values.
      */
     override suspend fun resetSettings() {
-        realm.resetSettings()
     }
 }

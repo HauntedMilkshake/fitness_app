@@ -8,7 +8,7 @@ import bg.zahov.app.ui.exercise.info.ExerciseInfoContent
 import org.junit.Rule
 import org.junit.Test
 
-class ExerciseInfoTest {
+class ExercisesInfoTest {
 
     @get:Rule
     val composeTestRule = createComposeRule()

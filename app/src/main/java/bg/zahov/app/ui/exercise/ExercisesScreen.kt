@@ -1,5 +1,6 @@
 package bg.zahov.app.ui.exercise
 
+import android.util.Log
 import androidx.compose.foundation.Image
 import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.Arrangement
@@ -30,6 +31,7 @@ import androidx.compose.runtime.getValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.layout.ContentScale
+import androidx.compose.ui.platform.LocalSavedStateRegistryOwner
 import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.text.style.TextOverflow
@@ -45,11 +47,14 @@ import bg.zahov.fitness.app.R
 
 @Composable
 fun ExercisesScreen(
-    viewModel: ExerciseViewModel = viewModel(),
+    viewModel: ExerciseViewModel = viewModel(factory = ExerciseViewModel.Factory),
     navigateInfo: () -> Unit,
-    navigateBack: () -> Unit
+    navigateBack: () -> Unit,
 ) {
     val uiState by viewModel.exerciseData.collectAsStateWithLifecycle()
+    Log.d("SavedStateRegistryOwner", LocalSavedStateRegistryOwner.current.toString())
+
+
     ExercisesContent(
         showLoading = uiState.loading,
         filterItems = uiState.filters,
@@ -124,7 +129,7 @@ fun ExercisesContent(
 @Composable
 fun ConfirmButton(
     modifier: Modifier = Modifier,
-    onConfirm: () -> Unit
+    onConfirm: () -> Unit,
 ) {
     Box(
         modifier = modifier
@@ -157,7 +162,7 @@ fun ConfirmButton(
 fun ExerciseCards(
     modifier: Modifier = Modifier,
     exercise: ExerciseData,
-    onClick: (ExerciseData) -> Unit
+    onClick: (ExerciseData) -> Unit,
 ) {
     Card(
         modifier = modifier
@@ -217,7 +222,7 @@ fun ExerciseCards(
 fun FilterCard(
     modifier: Modifier = Modifier,
     filter: FilterItem,
-    onClick: (FilterItem) -> Unit
+    onClick: (FilterItem) -> Unit,
 ) {
     Card(modifier = modifier.padding(horizontal = 8.dp), colors = CardColors(
         contentColor = MaterialTheme.colorScheme.primary,

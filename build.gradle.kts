@@ -1,11 +1,14 @@
 buildscript {
     dependencies {
-        classpath("com.google.gms:google-services:4.4.2")
-        classpath("com.android.tools.build:gradle:8.6.1")
+        classpath(libs.google.services)
+        classpath(libs.gradle)
     }
 }
 plugins {
-    id("com.android.application") version "8.6.1" apply false
-    id("org.jetbrains.kotlin.android") version "1.9.10" apply false
-    id("io.realm.kotlin") version "1.12.0" apply false
+    alias(libs.plugins.googleServices) apply false
+    alias(libs.plugins.compose.compiler) apply false
+    alias(libs.plugins.androidApplication) apply false
+    alias(libs.plugins.kotlinAndroid) apply false
+    alias(libs.plugins.kotlinKapt) apply false
+    alias(libs.plugins.kotlinSerialization) apply false
 }

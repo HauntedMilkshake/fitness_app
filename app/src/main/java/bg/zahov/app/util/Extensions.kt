@@ -4,11 +4,6 @@ import android.animation.ObjectAnimator
 import android.animation.PropertyValuesHolder
 import android.annotation.SuppressLint
 import android.view.View
-import bg.zahov.app.data.local.RealmDefaultSetting.DEFAULT_SETTING
-import bg.zahov.app.data.local.RealmExercise
-import bg.zahov.app.data.local.RealmSets
-import bg.zahov.app.data.local.RealmTimePattern
-import bg.zahov.app.data.model.BodyPart
 import bg.zahov.app.data.model.Category
 import bg.zahov.app.data.model.Exercise
 import bg.zahov.app.data.model.FirestoreFields
@@ -151,65 +146,65 @@ fun Exercise.toExerciseAdapterWrapper() =
     )
 
 
-fun Exercise.toRealmExercise(): RealmExercise {
-    val realmExercise = RealmExercise()
-    realmExercise.name = this.name
-    realmExercise.bodyPart = this.bodyPart.body
-    realmExercise.category = this.category.key
-    realmExercise.isTemplate = this.isTemplate
-    realmExercise.sets.addAll(this.sets.map { it.toRealmSets() })
-    realmExercise.bestSet = this.bestSet.toRealmSets()
-    realmExercise.note = this.note
-    return realmExercise
-}
+//fun Exercise.toRealmExercise(): RealmExercise {
+//    val realmExercise = RealmExercise()
+//    realmExercise.name = this.name
+//    realmExercise.bodyPart = this.bodyPart.body
+//    realmExercise.category = this.category.key
+//    realmExercise.isTemplate = this.isTemplate
+//    realmExercise.sets.addAll(this.sets.map { it.toRealmSets() })
+//    realmExercise.bestSet = this.bestSet.toRealmSets()
+//    realmExercise.note = this.note
+//    return realmExercise
+//}
+//
+//fun Sets.toRealmSets(): RealmSets {
+//    val realmSets = RealmSets()
+//    realmSets.type = this.type.key
+//    realmSets.firstMetric = this.firstMetric ?: 0.0
+//    realmSets.secondMetric = this.secondMetric ?: 0
+//    return realmSets
+//}
+//
+//fun RealmExercise.toExercise(): Exercise? {
+//    val bodyPart = BodyPart.entries.firstOrNull { it.body == this.bodyPart }
+//    val category = Category.entries.firstOrNull { it.key.equals(this.category, true) }
+//
+//    return if (this.name != DEFAULT_SETTING && bodyPart != null && category != null) {
+//        Exercise(
+//            name = this.name,
+//            bodyPart = bodyPart,
+//            category = category,
+//            isTemplate = this.isTemplate,
+//            sets = this.sets.mapNotNull { it.toSets() }.toMutableList(),
+//            note = this.note
+//        )
+//    } else {
+//        null
+//    }
+//}
 
-fun Sets.toRealmSets(): RealmSets {
-    val realmSets = RealmSets()
-    realmSets.type = this.type.key
-    realmSets.firstMetric = this.firstMetric ?: 0.0
-    realmSets.secondMetric = this.secondMetric ?: 0
-    return realmSets
-}
 
-fun RealmExercise.toExercise(): Exercise? {
-    val bodyPart = BodyPart.entries.firstOrNull { it.body == this.bodyPart }
-    val category = Category.entries.firstOrNull { it.key.equals(this.category, true) }
-
-    return if (this.name != DEFAULT_SETTING && bodyPart != null && category != null) {
-        Exercise(
-            name = this.name,
-            bodyPart = bodyPart,
-            category = category,
-            isTemplate = this.isTemplate,
-            sets = this.sets.mapNotNull { it.toSets() }.toMutableList(),
-            note = this.note
-        )
-    } else {
-        null
-    }
-}
-
-
-fun RealmSets.toSets(): Sets? {
-    return SetType.entries.firstOrNull { it.key == this.type }?.let { setType ->
-        Sets(
-            type = setType,
-            firstMetric = this.firstMetric,
-            secondMetric = this.secondMetric
-        )
-    }
-}
+//fun RealmSets.toSets(): Sets? {
+//    return SetType.entries.firstOrNull { it.key == this.type }?.let { setType ->
+//        Sets(
+//            type = setType,
+//            firstMetric = this.firstMetric,
+//            secondMetric = this.secondMetric
+//        )
+//    }
+//}
 
 fun LocalDateTime.toFormattedString(): String =
     this.format(DateTimeFormatter.ofPattern("HH:mm, d MMMM", Locale.ENGLISH))
 
-fun LocalDateTime.toRealmString(): String {
-    return this.format(DateTimeFormatter.ofPattern(RealmTimePattern.REALM_TIME_PATTERN))
-}
-
-fun String.toLocalDateTimeRlm(): LocalDateTime {
-    return LocalDateTime.parse(this, DateTimeFormatter.ofPattern(RealmTimePattern.REALM_TIME_PATTERN))
-}
+//fun LocalDateTime.toRealmString(): String {
+//    return this.format(DateTimeFormatter.ofPattern(RealmTimePattern.REALM_TIME_PATTERN))
+//}
+//
+//fun String.toLocalDateTimeRlm(): LocalDateTime {
+//    return LocalDateTime.parse(this, DateTimeFormatter.ofPattern(RealmTimePattern.REALM_TIME_PATTERN))
+//}
 
 fun String.filterIntegerInput(): Int {
     if (this.startsWith('0') && this.length > 1) {

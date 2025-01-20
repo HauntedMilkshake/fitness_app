@@ -13,6 +13,7 @@ import bg.zahov.app.data.provider.SettingsProviderImpl
 import bg.zahov.app.data.provider.UserProviderImpl
 import bg.zahov.app.data.provider.WorkoutProviderImpl
 import bg.zahov.app.data.provider.WorkoutStateManager
+import bg.zahov.app.ui.exercise.topbar.ExerciseTopBarManager
 import com.google.firebase.Firebase
 import com.google.firebase.initialize
 
@@ -56,6 +57,16 @@ object Inject {
 }
 
 class MyApplication : Application() {
+    val workoutProvider by lazy {
+        WorkoutProviderImpl.getInstance()
+    }
+    val restTimerProvider by lazy {
+        RestTimerProvider.getInstance()
+    }
+    val serviceErrorHandler by lazy {
+        ServiceErrorHandlerImpl.getInstance()
+    }
+
     override fun onCreate() {
         super.onCreate()
         Firebase.initialize(this)
