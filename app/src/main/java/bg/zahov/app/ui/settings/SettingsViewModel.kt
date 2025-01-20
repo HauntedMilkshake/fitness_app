@@ -36,7 +36,7 @@ class SettingsViewModel(
      *
      * @property data Current settings data, represented as a [Settings] object.
      */
-    data class SettingsData(val data: Settings)
+    data class SettingsData(val data: String)
 
     // Holds the current UI state, updated whenever settings data changes
     private val _uiState = MutableStateFlow(SettingsData(data = ""))

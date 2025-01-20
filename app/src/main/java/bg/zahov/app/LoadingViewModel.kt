@@ -4,8 +4,6 @@ import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
 import bg.zahov.app.data.interfaces.ServiceErrorHandler
 import bg.zahov.app.data.interfaces.UserProvider
-import bg.zahov.fitness.app.R
-import kotlinx.coroutines.delay
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.StateFlow
 import kotlinx.coroutines.flow.first
@@ -31,8 +29,9 @@ class LoadingViewModel(
     private val _loading = MutableStateFlow(true)
     val loading: StateFlow<Boolean> = _loading
 
-    private val _navigationTarget = MutableStateFlow(R.id.welcome)
-    val navigationTarget: StateFlow<Int> = _navigationTarget
+    private val _navigationTarget: MutableStateFlow<Any> =
+        MutableStateFlow(Welcome)
+    val navigationTarget: StateFlow<Any> = _navigationTarget
 
     init {
         viewModelScope.launch {
@@ -42,15 +41,15 @@ class LoadingViewModel(
                         _loading.value = true
                         userProvider.initDataSources()
                         userProvider.getUser().first()
-                        _navigationTarget.update { R.id.home }
+                        _navigationTarget.update { Home }
                     } else {
-                        _navigationTarget.update { R.id.welcome }
+                        _navigationTarget.update { Welcome }
                     }
                     _loading.value = false
                 }
             } catch (e: Exception) {
                 when (e) {
-                    is NoSuchElementException -> _navigationTarget.update { R.id.welcome }
+                    is NoSuchElementException -> _navigationTarget.update { Welcome }
                     else -> serviceError.initiateCountdown()
                 }
                 _loading.value = false
