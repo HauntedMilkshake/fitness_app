@@ -48,6 +48,7 @@ class MainActivity : AppCompatActivity() {
             setWorkoutVisibility(it.trailingWorkoutVisibility)
             if (it.openWorkout) navController.navigate(R.id.to_workout_fragment)
         }
+
         lifecycleScope.launch {
             serviceErrorHandler.observeServiceState()
                 .collect { serviceState ->
