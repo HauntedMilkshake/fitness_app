@@ -31,7 +31,7 @@ android {
 
     defaultConfig {
         applicationId = "bg.zahov.app"
-        minSdk = 31
+        minSdk = 26
         targetSdk = 35
         versionCode = 1
         versionName = "1.0"
