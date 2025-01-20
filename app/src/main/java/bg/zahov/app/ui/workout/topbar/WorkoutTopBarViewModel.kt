@@ -3,7 +3,7 @@ package bg.zahov.app.ui.workout.topbar
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
 import bg.zahov.app.Inject
-import bg.zahov.app.data.interfaces.WorkoutActionHandler
+import bg.zahov.app.data.interfaces.WorkoutProvider
 import bg.zahov.app.data.provider.RestTimerProvider
 import bg.zahov.app.data.provider.WorkoutStateManager
 import bg.zahov.app.ui.workout.toRestTime
@@ -45,7 +45,7 @@ data class WorkoutTopBarData(
 class WorkoutTopBarViewModel(
     private val workoutStateManager: WorkoutStateManager = Inject.workoutState,
     private val restStateManager: RestTimerProvider = Inject.restTimerProvider,
-    private val workoutActionHandler: WorkoutActionHandler = Inject.workoutTopAppHandler,
+    private val workoutActionHandler: WorkoutProvider = Inject.workoutProvider,
 ) : ViewModel() {
 
     private val _uiState = MutableStateFlow(WorkoutTopBarData())

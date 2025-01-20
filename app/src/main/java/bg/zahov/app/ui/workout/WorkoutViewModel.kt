@@ -3,7 +3,6 @@ package bg.zahov.app.ui.workout
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
 import bg.zahov.app.Inject
-import bg.zahov.app.data.interfaces.WorkoutActionHandler
 import bg.zahov.app.data.interfaces.WorkoutProvider
 import bg.zahov.app.data.model.BodyPart
 import bg.zahov.app.data.model.Category
@@ -120,7 +119,6 @@ class WorkoutViewModel(
     private val repo: WorkoutProvider = Inject.workoutProvider,
     private val addExerciseToWorkoutProvider: AddExerciseToWorkoutProvider = Inject.workoutAddedExerciseProvider,
     private val restTimerProvider: RestTimerProvider = Inject.restTimerProvider,
-    private val workoutActionHandler: WorkoutActionHandler = Inject.workoutTopAppHandler,
     private val toastManager: ToastManager = ToastManager,
 ) : ViewModel() {
 
@@ -181,7 +179,7 @@ class WorkoutViewModel(
      */
     private fun observeShouldFinish() {
         viewModelScope.launch {
-            workoutActionHandler.shouldFinish.collect { shouldFinish ->
+            repo.shouldFinish.collect { shouldFinish ->
                 if (shouldFinish) {
                     finishWorkout()
                 }
@@ -564,7 +562,7 @@ class WorkoutViewModel(
                 )
 
                 addExerciseToWorkoutProvider.resetSelectedExercises()
-
+                resetFinishTrigger()
                 workoutStateManager.finishWorkout()
                 repo.clearWorkoutState()
                 clearState()
@@ -576,8 +574,8 @@ class WorkoutViewModel(
         }
     }
 
-    fun resetFinishTrigger() {
-        workoutActionHandler.completeFinishAttempt()
+    private fun resetFinishTrigger() {
+        repo.completeFinishAttempt()
     }
 
     /**

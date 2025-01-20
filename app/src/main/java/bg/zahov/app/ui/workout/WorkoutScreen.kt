@@ -158,7 +158,6 @@ fun WorkoutScreen(
 
     if (state.isFinished) {
         LaunchedEffect(Unit) {
-            workoutViewModel.resetFinishTrigger()
             onFinish()
         }
     }

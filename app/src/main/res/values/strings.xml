@@ -102,8 +102,8 @@
     <string name="cancel_text">cancel</string>
     <!-- Strings used for start workout screen   -->
     <string name="last_performed">Last performed: %1$s</string>
-    <string name="rest_icon_content_description">Rest icon</string>
-    <string name="minimize_icon_content_description">Minimize icon</string>
+    <string name="rest_icon_content_description">Button that leads to rest screen</string>
+    <string name="minimize_icon_content_description">Button that minimizes the workout screen</string>
     <!-- Strings used for workout fragment    -->
     <string name="afternoon_workout">Afternoon</string>
     <string name="night_workout">Night</string>

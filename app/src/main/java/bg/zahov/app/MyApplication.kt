@@ -12,7 +12,6 @@ import bg.zahov.app.data.provider.SettingsProviderImpl
 import bg.zahov.app.data.provider.UserProviderImpl
 import bg.zahov.app.data.provider.WorkoutProviderImpl
 import bg.zahov.app.data.provider.WorkoutStateManager
-import bg.zahov.app.data.provider.WorkoutActionHandler
 import bg.zahov.app.ui.exercise.topbar.ExerciseTopBarManager
 import com.google.firebase.Firebase
 import com.google.firebase.initialize
@@ -53,9 +52,6 @@ object Inject {
     }
     val exerciseTopAppHandler by lazy {
         ExerciseTopBarManager.getInstance()
-    }
-    val workoutTopAppHandler by lazy {
-        WorkoutActionHandler.getInstance()
     }
 }
 
