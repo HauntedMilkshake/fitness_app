@@ -189,7 +189,7 @@ class WorkoutProviderImpl : WorkoutProvider {
     /**
      * Triggers the "resetSaveAsTemplate" action(sets [_shouldSaveAsTemplate] to false).
      */
-    override fun resetSaveАsTemplate() {
+    override fun resetSaveAsTemplate() {
         _shouldSaveAsTemplate.value = false
     }
 

@@ -64,7 +64,7 @@ interface WorkoutProvider {
     /**
      * Resets the state of the "Save as Template" action.
      */
-    fun resetSaveАsTemplate()
+    fun resetSaveAsTemplate()
 
     /**
      * Resets the state of the "Delete History Workout" action.
