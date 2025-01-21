@@ -55,3 +55,6 @@ data object HistoryInfo
 
 @Serializable
 data object Calendar
+
+@Serializable
+data object Rest
