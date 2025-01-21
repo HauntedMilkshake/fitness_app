@@ -7,11 +7,9 @@ import bg.zahov.app.Inject
 import bg.zahov.app.data.interfaces.ServiceErrorHandler
 import bg.zahov.app.data.interfaces.UserProvider
 import bg.zahov.fitness.app.R
-import kotlinx.coroutines.delay
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.StateFlow
 import kotlinx.coroutines.flow.first
-import kotlinx.coroutines.flow.firstOrNull
 import kotlinx.coroutines.flow.update
 import kotlinx.coroutines.launch
 
@@ -40,14 +38,12 @@ class LoadingViewModel(
         viewModelScope.launch {
             try {
                 userProvider.authStateFlow().collect {
-                    _loading.update { R.id.loading }
+                    Log.d("auth", it.toString())
                     if (it) {
                         userProvider.initDataSources()
                         userProvider.getUser().first()
-                        delay(1000)
                         _loading.update { R.id.loading_to_home}
                     } else {
-                        delay(1000)
                         _loading.update { R.id.loading_to_welcome }
                     }
                 }
