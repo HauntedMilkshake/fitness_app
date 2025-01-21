@@ -82,9 +82,7 @@ class AddTemplateWorkoutViewModel(
      * The backing [MutableStateFlow] for the UI state, initialized with default values.
      * Provides a reactive data source for observing UI changes.
      */
-    private val _uiState = MutableStateFlow<AddTemplateWorkoutUiState>(
-        AddTemplateWorkoutUiState()
-    )
+    private val _uiState = MutableStateFlow(AddTemplateWorkoutUiState())
 
     /**
      * The public [StateFlow] exposing the UI state.

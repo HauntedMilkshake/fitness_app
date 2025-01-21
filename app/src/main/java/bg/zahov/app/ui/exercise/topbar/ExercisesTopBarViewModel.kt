@@ -10,12 +10,12 @@ import kotlinx.coroutines.flow.update
 import kotlinx.coroutines.launch
 
 /**
- * Data class representing the state of the exercise top bar.
+ * Data class representing the state of the exercises top bar.
  *
  * @property isSearchActive Indicates if the search bar is active.
  * @property searchQuery The current search query.
  */
-data class ExerciseTopBarData(
+data class ExercisesTopBarData(
     val searchQuery: String = "",
     val isSearchActive: Boolean = false,
 )
@@ -25,13 +25,13 @@ data class ExerciseTopBarData(
  *
  * @property exerciseTopBarManager Manager for handling top bar operations, injected via [Inject].
  */
-class TopBarExerciseViewModel(
-    private val exerciseTopBarManager: ExercisesTopBarHandler = Inject.exercisesTopAppHandler,
+class ExercisesTopBarViewModel(
+    private val exerciseTopBarManager: ExercisesTopBarHandler = Inject.exercisesTopAppHandler
 ) : ViewModel() {
 
     // Holds the current state of the exercise top bar.
-    private val _exerciseData = MutableStateFlow(ExerciseTopBarData())
-    val exerciseData: StateFlow<ExerciseTopBarData> = _exerciseData
+    private val _exerciseData = MutableStateFlow(ExercisesTopBarData())
+    val exerciseData: StateFlow<ExercisesTopBarData> = _exerciseData
 
     init {
         // Collects changes in the search query from the manager and updates the state.

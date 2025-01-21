@@ -41,17 +41,10 @@ import androidx.compose.ui.unit.sp
 @Composable
 fun SignupScreen(
     signupViewModel: SignupViewModel = viewModel(),
-    onAuthenticate: () -> Unit,
     onNavigateToLogin: () -> Unit
 ) {
     val context = LocalContext.current
     val uiState by signupViewModel.uiState.collectAsStateWithLifecycle()
-
-    if (uiState.isUserAuthenticated) {
-        LaunchedEffect(Unit) {
-            onAuthenticate()
-        }
-    }
 
     uiState.notifyUser?.let {
         LaunchedEffect(Unit) {

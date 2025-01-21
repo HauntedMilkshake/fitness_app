@@ -1,7 +1,13 @@
 <?xml version="1.0" encoding="utf-8"?>
 <resources>
-<!--    <style name="Theme.Fitness_app" parent="Theme.AppCompat.Light.NoActionBar" />-->
-    <style name="Theme.Fitness_app" parent="Theme.MaterialComponents.NoActionBar">
+    <style name="Theme.Fitness_app" parent="Theme.MaterialComponents.Light.NoActionBar">
+        <item name="android:statusBarColor">@color/background</item>
+        <item name="android:windowBackground">@color/background</item>
     </style>
 
+    <style name="Theme.Fitness_app.Splash" parent="Theme.SplashScreen">
+        <item name="windowSplashScreenBackground">@color/background</item>
+        <item name="windowSplashScreenAnimatedIcon">@mipmap/ic_logo</item>
+        <item name="postSplashScreenTheme">@style/Theme.Fitness_app</item>
+    </style>
 </resources>
