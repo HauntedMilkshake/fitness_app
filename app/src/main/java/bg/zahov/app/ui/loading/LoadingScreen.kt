@@ -22,12 +22,23 @@ import androidx.compose.ui.graphics.ColorFilter
 import androidx.compose.ui.graphics.graphicsLayer
 import androidx.compose.ui.layout.ContentScale
 import androidx.compose.ui.res.painterResource
+import androidx.lifecycle.viewmodel.compose.viewModel
 import bg.zahov.fitness.app.R
 import kotlinx.coroutines.delay
 
 @Composable
-fun LoadingScreen() {
+fun LoadingScreen(
+    viewModel: LoadingViewModel = viewModel(),
+    navigateWelcome: () -> Unit,
+    navigateHome: () -> Unit
+) {
     LoadingScreenContent()
+    LaunchedEffect(Unit) {
+        viewModel.loading(
+            pass = { navigateHome() },
+            failed = { navigateWelcome() }
+        )
+    }
 }
 
 @Composable
