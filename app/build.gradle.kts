@@ -5,6 +5,7 @@ plugins {
     id("org.jetbrains.kotlin.android")
     id("com.google.gms.google-services")
     id("io.realm.kotlin")
+    id("kotlin-parcelize")
 }
 
 android {
