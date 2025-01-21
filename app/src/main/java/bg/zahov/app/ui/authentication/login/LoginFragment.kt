@@ -22,6 +22,7 @@ class LoginFragment : Fragment() {
             setViewCompositionStrategy(ViewCompositionStrategy.DisposeOnViewTreeLifecycleDestroyed)
             setContent {
                 LoginScreen(
+                    onAuthenticate = { findNavController().navigate(R.id.login_to_loading) },
                     onNavigateToSignUp = { findNavController().navigate(R.id.login_to_signup) })
             }
         }

@@ -14,11 +14,10 @@
         android:label="@string/app_name"
         android:supportsRtl="true"
         android:theme="@style/Theme.Fitness_app">
-
         <activity
             android:name="bg.zahov.app.MainActivity"
             android:exported="true"
-            android:theme="@style/Theme.Fitness_app.Splash"
+            android:theme="@style/Theme.Fitness_app"
             android:windowSoftInputMode="adjustPan">
             <intent-filter>
                 <action android:name="android.intent.action.MAIN" />

@@ -42,7 +42,7 @@ class UserProviderImpl : UserProvider {
     override suspend fun passwordResetForLoggedUser(): Task<Void> =
         auth.passwordResetForLoggedUser()
 
-    override fun authStateFlow(): Flow<Boolean> = auth.authStateFlow()
+    override fun isAuthenticated(): Boolean = auth.isAuthenticated()
 
     override suspend fun initDataSources() = auth.initDataSources()
     override suspend fun createDataSources(username: String, userId: String) =

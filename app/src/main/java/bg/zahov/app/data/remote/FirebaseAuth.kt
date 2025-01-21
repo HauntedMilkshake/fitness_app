@@ -11,10 +11,6 @@ import com.google.firebase.auth.FirebaseAuth
 import com.google.firebase.auth.FirebaseAuthInvalidUserException
 import com.google.firebase.auth.FirebaseAuthRecentLoginRequiredException
 import kotlinx.coroutines.Dispatchers
-import kotlinx.coroutines.channels.awaitClose
-import kotlinx.coroutines.flow.Flow
-import kotlinx.coroutines.flow.callbackFlow
-import kotlinx.coroutines.flow.distinctUntilChanged
 import kotlinx.coroutines.withContext
 import java.lang.IllegalStateException
 
@@ -71,17 +67,9 @@ class FirebaseAuthentication {
         auth.sendPasswordResetEmail(email)
     }
 
-    fun getAuthStateFlow(): Flow<Boolean> = callbackFlow {
-        trySend(auth.currentUser != null)
-
-        val authStateListener = FirebaseAuth.AuthStateListener { firebaseAuth ->
-            trySend(firebaseAuth.currentUser != null)
-        }
-        auth.addAuthStateListener(authStateListener)
-
-        awaitClose { auth.removeAuthStateListener(authStateListener) }
-    }.distinctUntilChanged()
-
+    fun isAuthenticated(): Boolean {
+        return auth.currentUser != null
+    }
 
     suspend fun init() {
         auth.currentUser?.uid?.let {

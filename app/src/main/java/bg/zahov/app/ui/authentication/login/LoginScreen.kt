@@ -40,10 +40,16 @@ import bg.zahov.app.util.isEmail
 @Composable
 fun LoginScreen(
     loginViewModel: LoginViewModel = viewModel(),
+    onAuthenticate: () -> Unit,
     onNavigateToSignUp: () -> Unit
 ) {
     val uiState by loginViewModel.uiState.collectAsStateWithLifecycle()
     val context = LocalContext.current
+    if (uiState.isLoggedInfo) {
+        LaunchedEffect(Unit) {
+            onAuthenticate()
+        }
+    }
 
     uiState.message?.let { message ->
         LaunchedEffect(Unit) {

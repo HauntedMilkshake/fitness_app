@@ -60,6 +60,9 @@ class SignupViewModel(private val auth: UserProvider = Inject.userProvider) : Vi
             try {
                 auth.signup(_uiState.value.email, _uiState.value.password).user?.uid?.let {
                     auth.createDataSources(_uiState.value.username, it)
+                    _uiState.update { old ->
+                        old.copy(isUserAuthenticated = true)
+                    }
                 } ?: showMessage("There was an error while attempting to log in")
             } catch (e: Exception) {
                 when (e) {
@@ -114,5 +117,6 @@ data class SignupUiState(
     val password: String = "",
     val confirmPassword: String = "",
     val passwordVisibility: Boolean = false,
+    val isUserAuthenticated: Boolean = false,
     val notifyUser: String? = null
 )

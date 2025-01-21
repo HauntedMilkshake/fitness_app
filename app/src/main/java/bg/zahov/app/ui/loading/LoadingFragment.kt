@@ -1,4 +1,4 @@
-package bg.zahov.app.ui.authentication.signup
+package bg.zahov.app.ui.loading
 
 import android.os.Bundle
 import android.view.LayoutInflater
@@ -7,14 +7,11 @@ import android.view.ViewGroup
 import androidx.compose.ui.platform.ComposeView
 import androidx.compose.ui.platform.ViewCompositionStrategy
 import androidx.fragment.app.Fragment
-import androidx.fragment.app.viewModels
 import androidx.navigation.fragment.findNavController
 import bg.zahov.app.hideBottomNav
-import bg.zahov.app.hideTopBar
 import bg.zahov.fitness.app.R
 
-class SignupFragment : Fragment() {
-    private val signupViewModel: SignupViewModel by viewModels()
+class LoadingFragment : Fragment() {
     override fun onCreateView(
         inflater: LayoutInflater,
         container: ViewGroup?,
@@ -23,11 +20,14 @@ class SignupFragment : Fragment() {
         return ComposeView(requireContext()).apply {
             setViewCompositionStrategy(ViewCompositionStrategy.DisposeOnViewTreeLifecycleDestroyed)
             setContent {
-                SignupScreen(signupViewModel,
-                    onNavigateToLogin = {
-                        findNavController().navigate(R.id.signup_to_login)
+                LoadingScreen(
+                    navigateWelcome = {
+                        findNavController().navigate(R.id.loading_to_welcome)
                     },
-                    onAuthenticate = { findNavController().navigate(R.id.signup_to_loading) })
+                    navigateHome = {
+                        findNavController().navigate(R.id.loading_to_home)
+                    }
+                )
             }
         }
     }
@@ -35,6 +35,5 @@ class SignupFragment : Fragment() {
     override fun onStart() {
         super.onStart()
         activity?.hideBottomNav()
-        activity?.hideTopBar()
     }
 }

@@ -37,8 +37,9 @@ class SettingsViewModel(
      * Data class representing the state of the settings UI.
      *
      * @property data Current settings data, represented as a [Settings] object.
+     * @property navigateBack A Boolean flag indicating whether to navigate back. Defaults to false.
      */
-    data class SettingsData(val data: Settings)
+    data class SettingsData(val data: Settings, val navigateBack: Boolean = false)
 
     // Holds the current UI state, updated whenever settings data changes
     private val _uiState = MutableStateFlow(SettingsData(data = Settings()))
@@ -83,6 +84,7 @@ class SettingsViewModel(
         viewModelScope.launch {
             auth.logout()
             workoutState.cancel()
+            _uiState.update { old -> old.copy(navigateBack = true) }
         }
     }
 
@@ -93,6 +95,7 @@ class SettingsViewModel(
         viewModelScope.launch {
             workoutState.cancel()
             auth.deleteAccount()
+            _uiState.update { old -> old.copy(navigateBack = true) }
         }
     }
 }
