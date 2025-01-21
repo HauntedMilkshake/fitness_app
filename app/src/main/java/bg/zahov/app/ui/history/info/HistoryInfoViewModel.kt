@@ -3,7 +3,6 @@ package bg.zahov.app.ui.history.info
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
 import bg.zahov.app.Inject
-import bg.zahov.app.data.interfaces.HistoryInfoActionHandler
 import bg.zahov.app.data.interfaces.WorkoutProvider
 import bg.zahov.app.data.model.ToastManager
 import bg.zahov.app.data.model.Workout
@@ -28,7 +27,6 @@ class HistoryInfoViewModel(
     private val workoutStateProvider: WorkoutStateManager = Inject.workoutState,
     private val workoutProvider: WorkoutProvider = Inject.workoutProvider,
     private val toastManager: ToastManager = ToastManager,
-    private val historyInfoTopBarHandler: HistoryInfoActionHandler = Inject.historyInfoTopAppHandler,
 ) : ViewModel() {
 
     private val _uiState = MutableStateFlow(HistoryInfoWorkout())
@@ -73,14 +71,14 @@ class HistoryInfoViewModel(
                 }
             }
             launch {
-                historyInfoTopBarHandler.shouldSave.collect {
+                workoutProvider.shouldSaveAsTemplate.collect {
                     if (it) {
                         saveAsTemplate()
                     }
                 }
             }
             launch {
-                historyInfoTopBarHandler.shouldDelete.collect {
+                workoutProvider.shouldDeleteHistoryWorkout.collect {
                     if (it) {
                         delete()
                     }
@@ -100,7 +98,7 @@ class HistoryInfoViewModel(
         viewModelScope.launch {
             getCorrespondingWorkout()?.let {
                 workoutProvider.deleteWorkout(it)
-                historyInfoTopBarHandler.resetDelete()
+                workoutProvider.resetDeleteHistoryWorkout()
                 _uiState.update { old ->
                     old.copy(isDeleted = true)
                 }
@@ -127,7 +125,7 @@ class HistoryInfoViewModel(
                     ?.let {
                         workoutProvider.addTemplateWorkout(it)
                     }
-                historyInfoTopBarHandler.resetSave()
+                workoutProvider.resetSaveАsTemplate()
             }
         }
     }
