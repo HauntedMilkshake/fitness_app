@@ -3,7 +3,9 @@ package bg.zahov.app.ui.workout
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
 import bg.zahov.app.Inject
+import bg.zahov.app.data.interfaces.SettingsProvider
 import bg.zahov.app.data.interfaces.WorkoutProvider
+import bg.zahov.app.data.local.RealmWorkoutState
 import bg.zahov.app.data.model.BodyPart
 import bg.zahov.app.data.model.Category
 import bg.zahov.app.data.model.Exercise
@@ -12,6 +14,7 @@ import bg.zahov.app.data.model.SetType
 import bg.zahov.app.data.model.Sets
 import bg.zahov.app.data.model.ToastManager
 import bg.zahov.app.data.model.Units
+import bg.zahov.app.data.model.Units.METRIC
 import bg.zahov.app.data.model.Workout
 import bg.zahov.app.data.provider.AddExerciseToWorkoutProvider
 import bg.zahov.app.data.provider.RestTimerProvider
@@ -19,7 +22,10 @@ import bg.zahov.app.data.provider.WorkoutStateManager
 import bg.zahov.app.util.generateRandomId
 import bg.zahov.app.util.hashString
 import bg.zahov.app.util.parseTimeStringToLong
+import bg.zahov.app.util.toRealmExercise
+import bg.zahov.app.util.toRealmString
 import bg.zahov.fitness.app.R
+import io.realm.kotlin.ext.toRealmList
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.StateFlow
 import kotlinx.coroutines.flow.update
@@ -33,6 +39,7 @@ import java.util.Random
  *
  * @property workoutName The name of the workout.
  * @property workoutPrefix The time of day prefix for the workout, determined by the current hour
+ * and mapped to [TimeOfDay].
  * @property exercises A list of workout entries, which can be either exercises or sets.
  * @property note Additional notes for the workout session.
  * @property timer A timer value for tracking the workout session.
@@ -128,6 +135,7 @@ class WorkoutViewModel(
     private val repo: WorkoutProvider = Inject.workoutProvider,
     private val addExerciseToWorkoutProvider: AddExerciseToWorkoutProvider = Inject.workoutAddedExerciseProvider,
     private val restTimerProvider: RestTimerProvider = Inject.restTimerProvider,
+    private val settingsProvider: SettingsProvider = Inject.settingsProvider,
     private val toastManager: ToastManager = ToastManager,
 ) : ViewModel() {
 
@@ -173,6 +181,8 @@ class WorkoutViewModel(
      */
 
     init {
+        triggerWorkoutSave()
+        getUnits()
         checkForTemplateWorkout()
         observeTimer()
         observeRestTimer()
@@ -199,6 +209,35 @@ class WorkoutViewModel(
             in 12..16 -> TimeOfDay.NOON
             in 17..20 -> TimeOfDay.AFTERNOON
             else -> TimeOfDay.NIGHT
+        }
+    }
+
+
+    /**
+     * Triggers the saving of the current workout state whenever the app enters a minimized state.
+     *
+     * This function observes the `shouldSave` flow from `workoutStateManager` and calls `saveWorkoutState()` when the flag is set.
+     */
+    private fun triggerWorkoutSave() {
+        viewModelScope.launch {
+            workoutStateManager.shouldSave.collect {
+                if (it) {
+                    saveWorkoutState()
+                }
+            }
+        }
+    }
+
+    /**
+     * Retrieves the user's unit settings (e.g., [Units.METRIC] or [Units.BANANA]) from the `settingsProvider`.
+     */
+    private fun getUnits() {
+        viewModelScope.launch {
+            settingsProvider.getSettings().collect { objectChange ->
+                objectChange.obj?.units?.let { key ->
+                    units = Units.entries.find { it.key == key } ?: METRIC
+                }
+            }
         }
     }
 
@@ -775,7 +814,61 @@ class WorkoutViewModel(
     private fun clearState() {
         _uiState.value = WorkoutUiState(workoutPrefix = TimeOfDay.EMPTY)
     }
+
+    /**
+     * Saves the current workout state, including exercises, personal records (PRs), and volume, to the repository.
+     * will execute if user minimizes or stops app without stopping the workout
+     *
+     * This function performs the following tasks:
+     * 1. Retrieves the current exercise data and computes personal records (PRs) and total workout volume.
+     * 2. Constructs a `Workout` object containing the workout details, including exercises, duration, and PRs.
+     * 3. Saves the workout state to the repository as a `RealmWorkoutState` object, which includes the workout details
+     *    and additional information such as rest timer data (if applicable).
+     * 4. If the rest timer is active, it stops the rest timer at the end of the operation.
+     *
+     * @see getExerciseArrayAndPRs for how exercises are processed and volume/PRs are calculated.
+     *
+     */
+    private suspend fun saveWorkoutState() {
+        val exerciseSummary = getExerciseArrayAndPRs(_uiState.value.exercises, false)
+        val exercises = exerciseSummary.exercises.values.toList()
+        val prs = exerciseSummary.prs
+        val volume = exerciseSummary.volume
+
+        val workout = Workout(
+            id = workoutId ?: hashString("${Random().nextInt(Int.MAX_VALUE)}"),
+            name = _uiState.value.workoutName,
+            date = workoutDate,
+            exercises = exercises,
+            note = _uiState.value.note,
+            duration = _uiState.value.timer.parseTimeStringToLong(),
+            isTemplate = false,
+            personalRecords = prs,
+            volume = volume
+        )
+
+        repo.addWorkoutState(RealmWorkoutState().apply {
+            id = workout.id
+            name = workout.name
+            this.duration = workout.duration ?: 0L
+            this.volume = workout.volume ?: 0.0
+            date = workout.date.toRealmString()
+            isTemplate = false
+            this.exercises = workout.exercises.map { it.toRealmExercise() }.toRealmList()
+            note = _uiState.value.note
+            personalRecords = prs
+            restTimerStart =
+                if (restTimerProvider.isRestActive()) restTimerProvider.getRestStartDate()
+                    .toRealmString() else ""
+            restTimerEnd = if (restTimerProvider.isRestActive()) restTimerProvider.getEndOfRest()
+                .toRealmString() else ""
+            timeOfStop = LocalDateTime.now().toRealmString()
+        })
+        if (restTimerProvider.isRestActive()) restTimerProvider.stopRest()
+
+    }
 }
+
 
 /**
  * Converts an [Exercise] to a list of [WorkoutEntry] objects, including the exercise entry and its associated sets.

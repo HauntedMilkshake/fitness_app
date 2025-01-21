@@ -1,16 +1,25 @@
 package bg.zahov.app.ui.workout.rest
 
+import android.app.Application
+import androidx.lifecycle.AndroidViewModel
 import androidx.lifecycle.LiveData
 import androidx.lifecycle.MutableLiveData
-import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
-import bg.zahov.app.Inject
 import bg.zahov.app.data.model.RestState
-import bg.zahov.app.data.provider.RestTimerProvider
+import bg.zahov.app.getRestTimerProvider
+import bg.zahov.app.getSettingsProvider
 import bg.zahov.app.util.parseTimeStringToLong
 import kotlinx.coroutines.launch
+import java.lang.IllegalArgumentException
 
-class RestTimerViewModel(private val restManager: RestTimerProvider = Inject.restTimerProvider) : ViewModel() {
+class RestTimerViewModel(application: Application) : AndroidViewModel(application) {
+    private val settingsProvider by lazy {
+        application.getSettingsProvider()
+    }
+
+    private val restManager by lazy {
+        application.getRestTimerProvider()
+    }
     private val _state = MutableLiveData<State>(State.Default)
     val state: LiveData<State>
         get() = _state
@@ -29,6 +38,12 @@ class RestTimerViewModel(private val restManager: RestTimerProvider = Inject.res
 
     init {
         viewModelScope.launch {
+            launch {
+                settingsProvider.getSettings().collect {
+                    _increment.postValue("${(it.obj?.restTimer ?: 30)} s")
+                    timerDelta = (it.obj?.restTimer ?: 30).toLong() * 1000
+                }
+            }
             launch {
                 restManager.restTimer.collect {
                     if (!(it.elapsedTime.isNullOrEmpty()) && !(it.fullRest.isNullOrEmpty())) {
@@ -112,9 +127,9 @@ class RestTimerViewModel(private val restManager: RestTimerProvider = Inject.res
     }
 
     sealed interface State {
-        data object Default : State
-        data object AddingCustomTimer : State
-        data object OnTimerFinished : State
+        object Default : State
+        object AddingCustomTimer : State
+        object OnTimerFinished : State
         data class CountDown(val timer: String) : State
 
     }

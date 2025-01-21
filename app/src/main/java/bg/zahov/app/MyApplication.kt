@@ -2,7 +2,6 @@ package bg.zahov.app
 
 import android.app.Application
 import bg.zahov.app.data.provider.AddExerciseToWorkoutProvider
-import bg.zahov.app.data.provider.ExercisesTopBarManager
 import bg.zahov.app.data.provider.FilterProvider
 import bg.zahov.app.data.provider.MeasurementProviderImpl
 import bg.zahov.app.data.provider.ReplaceableExerciseProvider
@@ -49,9 +48,6 @@ object Inject {
     }
     val serviceErrorHandler by lazy {
         ServiceErrorHandlerImpl.getInstance()
-    }
-    val exercisesTopAppHandler by lazy {
-        ExercisesTopBarManager.getInstance()
     }
 }
 

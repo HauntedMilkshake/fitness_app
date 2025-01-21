@@ -1,15 +1,7 @@
 package bg.zahov.app.ui.workout.add
 
-import android.util.Log
-import androidx.lifecycle.SavedStateHandle
 import androidx.lifecycle.ViewModel
-import androidx.lifecycle.ViewModelProvider
-import androidx.lifecycle.createSavedStateHandle
 import androidx.lifecycle.viewModelScope
-import androidx.lifecycle.viewmodel.initializer
-import androidx.lifecycle.viewmodel.viewModelFactory
-import androidx.navigation.toRoute
-import bg.zahov.app.AddTemplateWorkout
 import bg.zahov.app.Inject
 import bg.zahov.app.data.interfaces.WorkoutProvider
 import bg.zahov.app.data.model.Category
@@ -59,30 +51,19 @@ data class AddTemplateWorkoutUiState(
  * @property toastManager Manages toast notifications to provide feedback to the user.
  */
 class AddTemplateWorkoutViewModel(
-    private val savedStateHandle: SavedStateHandle,
     private val workoutProvider: WorkoutProvider = Inject.workoutProvider,
     private val selectableExerciseProvider: AddExerciseToWorkoutProvider = Inject.workoutAddedExerciseProvider,
     private val replaceableExerciseProvider: ReplaceableExerciseProvider = Inject.replaceableExerciseProvider,
     private val toastManager: ToastManager = ToastManager,
 ) : ViewModel() {
 
-    companion object {
-        val Factory: ViewModelProvider.Factory = viewModelFactory {
-            initializer {
-                AddTemplateWorkoutViewModel(
-                    savedStateHandle = createSavedStateHandle(),
-                )
-            }
-        }
-    }
-
-    private val workoutId = savedStateHandle.toRoute<AddTemplateWorkout>().workoutId
-
     /**
      * The backing [MutableStateFlow] for the UI state, initialized with default values.
      * Provides a reactive data source for observing UI changes.
      */
-    private val _uiState = MutableStateFlow(AddTemplateWorkoutUiState())
+    private val _uiState = MutableStateFlow<AddTemplateWorkoutUiState>(
+        AddTemplateWorkoutUiState()
+    )
 
     /**
      * The public [StateFlow] exposing the UI state.
@@ -121,8 +102,6 @@ class AddTemplateWorkoutViewModel(
     private var templateExercises = listOf<Exercise>()
 
     init {
-        Log.d("init", workoutId.toString())
-        initEditWorkoutId(workoutId = workoutId)
         viewModelScope.launch {
             observeTemplateExercises()
             observeTemplateWorkouts()
@@ -205,10 +184,10 @@ class AddTemplateWorkoutViewModel(
      * @param editFlag Indicates whether the workout is being edited.
      * @param workoutId The ID of the workout to edit.
      */
-    fun initEditWorkoutId(editFlag: Boolean = true, workoutId: String?) {
-        if (workoutIdToEdit.isNotEmpty()) {
+    fun initEditWorkoutId(editFlag: Boolean, workoutId: String) {
+        if (workoutIdToEdit.isEmpty()) {
             edit = editFlag
-            workoutIdToEdit = workoutId ?: ""
+            workoutIdToEdit = workoutId
 
             viewModelScope.launch {
                 workoutProvider.getTemplateWorkouts().first().let { workouts ->
