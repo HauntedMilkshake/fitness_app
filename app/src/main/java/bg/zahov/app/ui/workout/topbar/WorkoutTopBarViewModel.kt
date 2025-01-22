@@ -117,7 +117,7 @@ class WorkoutTopBarViewModel(
     }
 
     /**
-     * Attempts to finish the workout by invoking the [WorkoutActionHandler.tryToFinish] function.
+     * Attempts to finish the workout by invoking the [bg.zahov.app.data.provider.WorkoutProviderImpl.tryToFinish] function.
      *
      * This is typically triggered by the user interacting with the "Finish" button
      * in the Workout Top Bar.

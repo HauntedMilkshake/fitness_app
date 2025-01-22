@@ -562,7 +562,6 @@ class WorkoutViewModel(
                 )
 
                 addExerciseToWorkoutProvider.resetSelectedExercises()
-                resetFinishTrigger()
                 workoutStateManager.finishWorkout()
                 repo.clearWorkoutState()
                 clearState()
@@ -572,10 +571,6 @@ class WorkoutViewModel(
                 old.copy(isFinished = true)
             }
         }
-    }
-
-    private fun resetFinishTrigger() {
-        repo.completeFinishAttempt()
     }
 
     /**

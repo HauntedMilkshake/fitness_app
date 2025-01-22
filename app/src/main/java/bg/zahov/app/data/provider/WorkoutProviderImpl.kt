@@ -68,13 +68,6 @@ class WorkoutProviderImpl : WorkoutProvider {
         _shouldFinish.value = true
     }
 
-    /**
-     * Completes the finish operation by resetting `_shouldFinish` to `false`.
-     */
-    override fun completeFinishAttempt() {
-        _shouldFinish.value = false
-    }
-
     override suspend fun getTemplateWorkouts(): Flow<List<Workout>> =
         workoutRepo.getTemplateWorkouts()
 
@@ -115,6 +108,7 @@ class WorkoutProviderImpl : WorkoutProvider {
         workoutRepo.addTemplateExercise(newExercise)
 
     override suspend fun addWorkoutToHistory(newWorkout: Workout) {
+        _shouldFinish.value = false
         lastWorkoutPerformed = newWorkout
         workoutRepo.addWorkoutToHistory(newWorkout)
     }
