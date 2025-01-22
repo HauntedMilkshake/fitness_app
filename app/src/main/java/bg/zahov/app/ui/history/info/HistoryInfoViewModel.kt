@@ -98,7 +98,6 @@ class HistoryInfoViewModel(
         viewModelScope.launch {
             getCorrespondingWorkout()?.let {
                 workoutProvider.deleteWorkout(it)
-                workoutProvider.resetDeleteHistoryWorkout()
                 _uiState.update { old ->
                     old.copy(isDeleted = true)
                 }
@@ -125,7 +124,6 @@ class HistoryInfoViewModel(
                     ?.let {
                         workoutProvider.addTemplateWorkout(it)
                     }
-                workoutProvider.resetSaveАsTemplate()
             }
         }
     }

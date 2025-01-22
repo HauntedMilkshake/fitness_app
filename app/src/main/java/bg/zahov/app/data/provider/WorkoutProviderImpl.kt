@@ -76,8 +76,10 @@ class WorkoutProviderImpl : WorkoutProvider {
 
     override suspend fun getPastWorkouts(): Flow<List<Workout>> = workoutRepo.getPastWorkouts()
 
-    override suspend fun addTemplateWorkout(newWorkout: Workout) =
+    override suspend fun addTemplateWorkout(newWorkout: Workout) {
+        _shouldSaveAsTemplate.value = false
         workoutRepo.addTemplateWorkout(newWorkout)
+    }
 
     /**
      * Fetches the list of template exercises from the repository.
@@ -116,6 +118,7 @@ class WorkoutProviderImpl : WorkoutProvider {
     }
 
     override suspend fun deleteTemplateWorkout(workout: Workout) {
+        _shouldDeleteHistoryWorkout.value = false
         workoutRepo.deleteTemplateWorkout(workout)
     }
 
@@ -184,20 +187,6 @@ class WorkoutProviderImpl : WorkoutProvider {
      */
     override fun triggerDeleteHistoryWorkout() {
         _shouldDeleteHistoryWorkout.value = true
-    }
-
-    /**
-     * Triggers the "resetSaveAsTemplate" action(sets [_shouldSaveAsTemplate] to false).
-     */
-    override fun resetSaveAsTemplate() {
-        _shouldSaveAsTemplate.value = false
-    }
-
-    /**
-     * Triggers the "resetSaveAsTemplate" action(sets [_shouldDeleteHistoryWorkout] to false).
-     */
-    override fun resetDeleteHistoryWorkout() {
-        _shouldDeleteHistoryWorkout.value = false
     }
 
     /**

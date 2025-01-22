@@ -45,7 +45,7 @@ fun HistoryInfoTopBarContent(
             IconButton(onClick = onBack) {
                 Icon(
                     painter = painterResource(R.drawable.ic_back_arrow),
-                    contentDescription = ""
+                    contentDescription = stringResource(R.string.minimize_icon_content_description)
                 )
             }
         },
@@ -53,7 +53,7 @@ fun HistoryInfoTopBarContent(
             IconButton(onClick = { expanded = !expanded }) {
                 Icon(
                     painter = painterResource(R.drawable.ic_settings),
-                    contentDescription = ""
+                    contentDescription = stringResource(R.string.settings_wheel_content_description)
                 )
             }
             DropdownMenu(

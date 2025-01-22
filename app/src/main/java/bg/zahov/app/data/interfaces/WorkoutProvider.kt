@@ -16,6 +16,7 @@ interface WorkoutProvider {
      * observable exercise that was clicked in history screen
      */
     val clickedPastWorkout: StateFlow<HistoryInfoWorkout>
+
     /**
      * Tracks whether the "Save as Template" action should be triggered.
      */
@@ -44,13 +45,14 @@ interface WorkoutProvider {
     suspend fun setClickedTemplateExercise(item: ExerciseData)
     suspend fun getClickedTemplateExercise(): Flow<Exercise>
     suspend fun getExerciseHistory(): Flow<List<ExerciseHistoryInfo>>
-    suspend fun <T>getPreviousWorkoutState(): T?
-    suspend fun <T>addWorkoutState(realmWorkoutState: T)
+    suspend fun <T> getPreviousWorkoutState(): T?
+    suspend fun <T> addWorkoutState(realmWorkoutState: T)
     suspend fun updateTemplateWorkout(
         workoutId: String,
         date: LocalDateTime,
         newExercises: List<Exercise>,
     )
+
     /**
      * Triggers the "Save as Template" action.
      */
@@ -60,16 +62,6 @@ interface WorkoutProvider {
      * Triggers the "Delete History Workout" action.
      */
     fun triggerDeleteHistoryWorkout()
-
-    /**
-     * Resets the state of the "Save as Template" action.
-     */
-    fun resetSaveAsTemplate()
-
-    /**
-     * Resets the state of the "Delete History Workout" action.
-     */
-    fun resetDeleteHistoryWorkout()
 
     /**
      * converts the workout to [HistoryInfoWorkout] and workout
