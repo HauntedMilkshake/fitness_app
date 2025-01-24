@@ -30,7 +30,7 @@ fun App(workoutManagerViewModel: WorkoutManagerViewModel) {
     val state by workoutManagerViewModel.state.collectAsStateWithLifecycle()
 
     LaunchedEffect(state.isWorkoutActive) {
-        if (state.isWorkoutActive) navController.navigate(Rest)
+        if (state.isWorkoutActive) navController.navigate(Workout)
     }
     FitnessTheme {
         Scaffold(

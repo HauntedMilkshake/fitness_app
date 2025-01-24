@@ -16,6 +16,7 @@ import bg.zahov.app.HistoryInfo
 import bg.zahov.app.Home
 import bg.zahov.app.Measure
 import bg.zahov.app.MeasureInfo
+import bg.zahov.app.Rest
 import bg.zahov.app.Settings
 import bg.zahov.app.StartWorkout
 import bg.zahov.app.Workout
@@ -110,7 +111,14 @@ fun topAppBarConfiguration(navController: NavController): Map<KClass<*>, TopBarS
             onActionClick = { /* TODO() */ },
             onBackClick = { navController.navigateUp() }
         ),
-        Workout::class to TopBarState.Workout
+
+        Workout::class to TopBarState.Workout,
+
+        Rest::class to TopBarState.TitleWithBack (
+            titleId = R.string.rest_top_bar_title,
+            backButtonIconId = R.drawable.ic_close,
+            onBackClick = { navController.popBackStack() }
+        )
     )
 }
 
@@ -155,7 +163,7 @@ fun TopBar(modifier: Modifier = Modifier, navController: NavController) {
 
             is TopBarState.Workout -> {
                 TopBarWorkout(
-                    onRestClick = { /* navController.navigate(Rest) when it is implemented */ },
+                    onRestClick = { navController.navigate(Rest) },
                 )
             }
         }
