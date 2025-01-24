@@ -58,3 +58,6 @@ data object Calendar
 
 @Serializable
 data object Rest
+
+@Serializable
+data object WorkoutFinish

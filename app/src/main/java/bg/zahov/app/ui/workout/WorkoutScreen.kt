@@ -74,6 +74,10 @@ import bg.zahov.app.ui.workout.add.AddTemplateWorkoutViewModel
 import bg.zahov.fitness.app.R
 import kotlinx.coroutines.delay
 
+/**
+ * In order to center the items of 2 independent rows we need to have
+ * pre-defined weight values to ensure consistency
+ */
 private val weights = arrayOf(1f, 1f, 2f, 2f)
 
 @Composable
@@ -147,12 +151,16 @@ fun WorkoutScreen(
     onReplaceExercise: () -> Unit,
     onBackPressed: () -> Unit,
     onCancel: () -> Unit,
+    onFinish: () -> Unit,
 ) {
-    /**
-     * In order to center the items of 2 independent rows we need to have
-     * pre-defined weight values to ensure consistency
-     */
+
     val state by workoutViewModel.uiState.collectAsStateWithLifecycle()
+
+    if (state.isFinished) {
+        LaunchedEffect(Unit) {
+            onFinish()
+        }
+    }
 
     BackHandler {
         workoutViewModel.minimize()
