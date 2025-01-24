@@ -101,8 +101,3 @@ fun BottomBar(
 }
 
 data class BottomBarInfo<T : Any>(val titleId: Int, val iconId: Int, val route: T)
-
-
-
-
-

@@ -1,7 +1,9 @@
 package bg.zahov.app
 
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.ui.Modifier
+import androidx.lifecycle.viewmodel.compose.viewModel
 import androidx.navigation.NavGraph.Companion.findStartDestination
 import androidx.navigation.NavHostController
 import androidx.navigation.compose.NavHost
@@ -15,7 +17,6 @@ import bg.zahov.app.ui.history.HistoryScreen
 import bg.zahov.app.ui.history.calendar.CalendarScreen
 import bg.zahov.app.ui.history.info.HistoryInfoScreen
 import bg.zahov.app.ui.home.HomeScreen
-import bg.zahov.app.ui.loading.LoadingScreen
 import bg.zahov.app.ui.measures.MeasuresScreen
 import bg.zahov.app.ui.measures.info.MeasurementInfoScreen
 import bg.zahov.app.ui.settings.SettingsScreen
@@ -29,11 +30,18 @@ import bg.zahov.app.ui.workout.start.StartWorkoutScreen
 fun MainNavGraph(
     modifier: Modifier = Modifier,
     navController: NavHostController,
+    loadingViewModel: LoadingViewModel = viewModel()
 ) {
+    LaunchedEffect(Unit) {
+        loadingViewModel.navigationTarget.collect {
+            navController.navigate(it)
+        }
+    }
+
     NavHost(
         modifier = modifier,
         navController = navController,
-        startDestination = Loading
+        startDestination = Welcome
     ) {
         composable<Welcome> {
             WelcomeScreen(
@@ -59,7 +67,6 @@ fun MainNavGraph(
         }
         composable<Signup> {
             SignupScreen(
-                onAuthenticate = { navController.navigate(Loading) },
                 onNavigateToLogin = {
                     navController.navigate(Login) {
                         popUpTo(navController.graph.findStartDestination().id) {
@@ -73,31 +80,10 @@ fun MainNavGraph(
         }
         composable<Login> {
             LoginScreen(
-                onAuthenticate = {
-                    navController.navigate(Loading) {
-                        popUpTo<Login> { inclusive = true }
-                    }
-                },
                 onNavigateToSignUp = {
                     navController.navigate(Signup) {
                         launchSingleTop = true
                         restoreState = true
-                    }
-                }
-            )
-        }
-        composable<Loading> {
-            LoadingScreen(
-                navigateWelcome = {
-                    navController.navigate(route = Welcome) {
-                        popUpTo(0) { inclusive = true }
-                        launchSingleTop = true
-                    }
-                },
-                navigateHome = {
-                    navController.navigate(route = Home) {
-                        popUpTo(0) { inclusive = true }
-                        launchSingleTop = true
                     }
                 }
             )
@@ -107,14 +93,12 @@ fun MainNavGraph(
         }
         composable<Settings> {
             SettingsScreen(
-                navigateBack = { navController.popBackStack() },
                 navigateEditProfile = { navController.navigate(EditProfile) }
             )
         }
         composable<EditProfile> {
             EditProfileScreen()
         }
-
         composable<Workout> {
             WorkoutScreen(
                 onCancel = { navController.navigateUp() },
@@ -147,11 +131,9 @@ fun MainNavGraph(
                 navigateInfo = { navController.navigate(MeasureInfo) }
             )
         }
-
         composable<MeasureInfo> {
             MeasurementInfoScreen()
         }
-
         composable<StartWorkout> {
             StartWorkoutScreen(
                 onEditWorkout = { navController.navigate(AddTemplateWorkout(it)) },

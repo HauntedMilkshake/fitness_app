@@ -11,6 +11,7 @@ import androidx.navigation.toRoute
 import bg.zahov.app.Exercises
 import bg.zahov.app.Inject
 import bg.zahov.app.data.exception.CriticalDataNullException
+import bg.zahov.app.data.interfaces.ExercisesTopBarHandler
 import bg.zahov.app.data.interfaces.ServiceErrorHandler
 import bg.zahov.app.data.interfaces.WorkoutProvider
 import bg.zahov.app.data.model.Filter
@@ -25,10 +26,8 @@ import bg.zahov.app.data.provider.SelectableExerciseProvider
 import bg.zahov.app.ui.exercise.ExercisesFragment.Companion.ADD_EXERCISE_ARG
 import bg.zahov.app.ui.exercise.ExercisesFragment.Companion.REPLACE_EXERCISE_ARG
 import bg.zahov.app.ui.exercise.ExercisesFragment.Companion.SELECT_EXERCISE_ARG
-import bg.zahov.app.ui.exercise.topbar.ExerciseTopBarManager
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.StateFlow
-import kotlinx.coroutines.flow.collect
 import kotlinx.coroutines.flow.update
 import kotlinx.coroutines.launch
 
@@ -50,7 +49,7 @@ class ExerciseViewModel(
     private val addExerciseToWorkoutProvider: AddExerciseToWorkoutProvider = Inject.workoutAddedExerciseProvider,
     private val filterProvider: FilterProvider = Inject.filterProvider,
     private val serviceError: ServiceErrorHandler = Inject.serviceErrorHandler,
-    private val exerciseTopBarManager: ExerciseTopBarManager = Inject.exerciseTopAppHandler
+    private val exerciseTopBarManager: ExercisesTopBarHandler = Inject.exercisesTopAppHandler,
 ) : ViewModel() {
 
     companion object {
@@ -205,7 +204,7 @@ class ExerciseViewModel(
      */
     private fun matchesSearch(
         exercise: ExerciseData,
-        searchString: String = _exerciseData.value.search
+        searchString: String = _exerciseData.value.search,
     ): Boolean {
         return searchString.isBlank() || exercise.name.contains(searchString, ignoreCase = true)
     }
@@ -222,7 +221,7 @@ class ExerciseViewModel(
      */
     private fun matchesAnyFilter(
         exercise: ExerciseData,
-        filterList: List<FilterItem> = _exerciseData.value.filters
+        filterList: List<FilterItem> = _exerciseData.value.filters,
     ): Boolean {
         val categoryFilters = filterList.filter { it.filter is Filter.CategoryFilter }
         val bodyPartFilters = filterList.filter { it.filter is Filter.BodyPartFilter }

@@ -33,16 +33,10 @@ import bg.zahov.fitness.app.R
 @Composable
 fun SettingsScreen(
     viewModel: SettingsViewModel = viewModel(),
-    navigateBack: () -> Unit,
-    navigateEditProfile: () -> Unit,
+    navigateEditProfile: () -> Unit
 ) {
     val uiState by viewModel.uiState.collectAsStateWithLifecycle()
 
-    if (uiState.navigateBack) {
-        LaunchedEffect(Unit) {
-            navigateBack()
-        }
-    }
     SettingsContent(
         resetTimer = 0,
         changeResetTimer = { onDismiss ->
@@ -173,7 +167,7 @@ fun SettingsContent(
     github: @Composable () -> Unit,
     bugReport: @Composable () -> Unit,
     deleteAccount: () -> Unit,
-    logout: () -> Unit,
+    logout: () -> Unit
 ) {
     Column(
         modifier = Modifier
