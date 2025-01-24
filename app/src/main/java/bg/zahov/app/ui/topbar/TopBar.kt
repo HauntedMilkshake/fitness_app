@@ -17,8 +17,10 @@ import bg.zahov.app.Home
 import bg.zahov.app.Measure
 import bg.zahov.app.MeasureInfo
 import bg.zahov.app.Settings
+import bg.zahov.app.StartWorkout
 import bg.zahov.app.Workout
 import bg.zahov.app.ui.exercise.topbar.TopBarExercise
+import bg.zahov.app.ui.workout.topbar.TopBarWorkout
 import bg.zahov.app.ui.history.info.topbar.HistoryInfoTopBar
 import bg.zahov.fitness.app.R
 import kotlin.reflect.KClass
@@ -26,14 +28,14 @@ import kotlin.reflect.KClass
 sealed class TopBarState {
     data class Title(
         val titleId: Int,
-        val modifier: Modifier = Modifier,
+        val modifier: Modifier = Modifier
     ) : TopBarState()
 
     data class TitleWithBack(
         val titleId: Int,
         val backButtonIconId: Int,
         val onBackClick: () -> Unit,
-        val modifier: Modifier = Modifier,
+        val modifier: Modifier = Modifier
     ) : TopBarState()
 
     data class TitleWithAction(
@@ -42,17 +44,22 @@ sealed class TopBarState {
         val onActionClick: () -> Unit,
         val backButtonIconId: Int? = null,
         val onBackClick: (() -> Unit)? = null,
-        val modifier: Modifier = Modifier,
+        val modifier: Modifier = Modifier
     ) : TopBarState()
 
     data object Exercise : TopBarState()
 
     data object HistoryInfo : TopBarState()
+
+    data object Workout : TopBarState()
 }
 
 @Composable
 fun topAppBarConfiguration(navController: NavController): Map<KClass<*>, TopBarState> {
     return mapOf(
+        StartWorkout::class to TopBarState.Title(
+            titleId = R.string.start_workout
+        ),
         Home::class to TopBarState.TitleWithAction(
             titleId = R.string.home,
             actionButtonIconId = R.drawable.ic_settings,
@@ -103,7 +110,8 @@ fun topAppBarConfiguration(navController: NavController): Map<KClass<*>, TopBarS
             actionButtonIconId = R.drawable.ic_plus,
             onActionClick = { /* TODO() */ },
             onBackClick = { navController.navigateUp() }
-        )
+        ),
+        Workout::class to TopBarState.Workout
     )
 }
 
@@ -146,6 +154,12 @@ fun TopBar(modifier: Modifier = Modifier, navController: NavController) {
             TopBarState.HistoryInfo -> {
                 HistoryInfoTopBar(
                     onBack = { navController.navigateUp() }
+                )
+            }
+
+            is TopBarState.Workout -> {
+                TopBarWorkout(
+                    onRestClick = { /* navController.navigate(Rest) when it is implemented */ },
                 )
             }
         }

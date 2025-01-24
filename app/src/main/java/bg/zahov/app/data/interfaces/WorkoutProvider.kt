@@ -18,6 +18,12 @@ interface WorkoutProvider {
     val clickedPastWorkout: StateFlow<HistoryInfoWorkout>
 
     /**
+     * A [StateFlow] indicating whether a finish attempt has been signaled.
+     * The value is `true` when a finish attempt is in progress, and `false` otherwise.
+     */
+    val shouldFinish: StateFlow<Boolean>
+
+    /**
      * Tracks whether the "Save as Template" action should be triggered.
      */
     val shouldSaveAsTemplate: StateFlow<Boolean>
@@ -88,4 +94,9 @@ interface WorkoutProvider {
      * Returns the last performed workout if any
      */
     fun getLastWorkout(): HistoryWorkout?
+
+    /**
+     * Attempts a finish attempt for the workout
+     */
+    fun tryToFinish()
 }

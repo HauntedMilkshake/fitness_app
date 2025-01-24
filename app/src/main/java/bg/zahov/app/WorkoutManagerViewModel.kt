@@ -21,6 +21,7 @@ import kotlinx.coroutines.launch
 data class WorkoutUiState(
     val trailingWorkoutVisibility: Boolean = false,
     val isWorkoutActive: Boolean = false,
+    val workoutState: WorkoutState = WorkoutState.INACTIVE,
     val workoutName: String = "",
     val timer: String = "",
 )
@@ -75,6 +76,14 @@ class WorkoutManagerViewModel(
                 workoutStateManager.timer.collect {
                     _state.update { old ->
                         old.copy(timer = it.timeToString())
+                    }
+                }
+            }
+
+            launch {
+                workoutStateManager.state.collect {
+                    _state.update { old ->
+                        old.copy(workoutState = it)
                     }
                 }
             }
