@@ -24,6 +24,7 @@ import bg.zahov.app.ui.settings.profile.EditProfileScreen
 import bg.zahov.app.ui.welcome.WelcomeScreen
 import bg.zahov.app.ui.workout.AddTemplateWorkoutScreen
 import bg.zahov.app.ui.workout.WorkoutScreen
+import bg.zahov.app.ui.workout.finish.WorkoutFinishScreen
 import bg.zahov.app.ui.workout.start.StartWorkoutScreen
 
 @Composable
@@ -104,7 +105,14 @@ fun MainNavGraph(
                 onCancel = { navController.navigateUp() },
                 onAddExercise = { navController.navigate(Exercises(ExerciseArgs.ADD_EXERCISE_ARG)) },
                 onBackPressed = { navController.navigateUp() },
-                onReplaceExercise = { navController.navigate(Exercises(ExerciseArgs.REPLACE_EXERCISE_ARG)) }
+                onReplaceExercise = { navController.navigate(Exercises(ExerciseArgs.REPLACE_EXERCISE_ARG)) },
+                onFinish = {
+                    navController.navigate(WorkoutFinish) {
+                        popUpTo(Workout) {
+                            inclusive = true
+                        }
+                    }
+                }
             )
         }
         composable<Exercises> {
@@ -150,6 +158,10 @@ fun MainNavGraph(
         }
         composable<Calendar> {
             CalendarScreen()
+        }
+
+        composable<WorkoutFinish> {
+            WorkoutFinishScreen(onClose = { navController.navigateUp() })
         }
     }
 }
