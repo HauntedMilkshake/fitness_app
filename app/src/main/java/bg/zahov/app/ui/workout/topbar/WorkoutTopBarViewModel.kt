@@ -1,5 +1,6 @@
 package bg.zahov.app.ui.workout.topbar
 
+import android.util.Log
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
 import bg.zahov.app.Inject
@@ -67,6 +68,7 @@ class WorkoutTopBarViewModel(
      * Automatically updates the [uiState] whenever the collected data changes.
      */
     init {
+        Log.d("init vm", "init")
         viewModelScope.launch {
             workoutStateManager.timer.collect {
                 _uiState.update { old ->
@@ -77,17 +79,16 @@ class WorkoutTopBarViewModel(
             }
 
             restStateManager.restTimer.collect {
-                if (it.elapsedTime != null && it.fullRest != null) {
-                    _uiState.update { old ->
-                        old.copy(
-                            elapsedRestTime = it.elapsedTime ?: "",
-                            progress = calculateProgress(
-                                fullRest = (it.fullRest?.parseTimeStringToLong()?.toFloat() ?: 0f),
-                                currentRest = (it.elapsedTime?.parseTimeStringToLong()?.toFloat()
-                                    ?: 0f)
-                            )
+                Log.d("collectin rest", it.toString())
+                _uiState.update { old ->
+                    old.copy(
+                        elapsedRestTime = it.elapsedTime ?: "",
+                        progress = calculateProgress(
+                            fullRest = (it.fullRest?.parseTimeStringToLong()?.toFloat() ?: 0f),
+                            currentRest = (it.elapsedTime?.parseTimeStringToLong()?.toFloat()
+                                ?: 0f)
                         )
-                    }
+                    )
                 }
             }
         }

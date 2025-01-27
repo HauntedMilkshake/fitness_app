@@ -160,11 +160,9 @@ fun MainNavGraph(
         composable<Calendar> {
             CalendarScreen()
         }
-
         composable<WorkoutFinish> {
             WorkoutFinishScreen(onClose = { navController.navigateUp() })
         }
-
         composable<Rest> {
             RestScreen(
                 navigate = { navController.navigate(Workout) }

@@ -72,20 +72,18 @@ fun RestScreen(restViewModel: RestTimerViewModel = viewModel(), navigate: () -> 
                     if (!cast.isCustomTimer) {
                         Column {
                             for (i in 0 until 4) {
-                                val stringValue = stringResource((state as Rest.Default).rests[i])
+                                val stringValue = (state as Rest.Default).rests[i]
                                 TimerButton(
                                     text = stringValue,
                                     onClick = { restViewModel.onDefaultTimerClick(stringValue) })
                             }
                         }
                     } else {
-
-                        //<String>
                         ListPicker(
-                            items = cast.rests.map { stringResource(it) }.toList(),
-                            selectedItem = stringResource(cast.rests[0]),
+                            items = cast.rests,
+                            selectedItem = cast.pickerValue,
                             onItemSelected = {
-                                restViewModel.selectCustomTimer(it)
+                                restViewModel.updateNumberPicker(it)
                             }
                         )
                     }

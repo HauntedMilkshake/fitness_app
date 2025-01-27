@@ -114,7 +114,7 @@ fun topAppBarConfiguration(navController: NavController): Map<KClass<*>, TopBarS
 
         Workout::class to TopBarState.Workout,
 
-        Rest::class to TopBarState.TitleWithBack (
+        Rest::class to TopBarState.TitleWithBack(
             titleId = R.string.rest_top_bar_title,
             backButtonIconId = R.drawable.ic_close,
             onBackClick = { navController.popBackStack() }

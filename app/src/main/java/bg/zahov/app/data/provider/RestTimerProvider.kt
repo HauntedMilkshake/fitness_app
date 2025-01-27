@@ -1,6 +1,7 @@
 package bg.zahov.app.data.provider
 
 import android.os.CountDownTimer
+import android.util.Log
 import bg.zahov.app.data.interfaces.RestProvider
 import bg.zahov.app.data.model.RestState
 import bg.zahov.app.util.parseTimeStringToLong
@@ -51,12 +52,11 @@ class RestTimerProvider : RestProvider {
             override fun onTick(p0: Long) {
                 CoroutineScope(Dispatchers.Main).launch {
                     remainingTime = p0
-                    _restTimer.emit(
-                        Rest(
-                            elapsedTime = p0.timeToString(),
-                            fullRest = _restTimer.value.fullRest
-                        )
+                    _restTimer.value = Rest(
+                        elapsedTime = p0.timeToString(),
+                        fullRest = _restTimer.value.fullRest
                     )
+
                 }
             }
 

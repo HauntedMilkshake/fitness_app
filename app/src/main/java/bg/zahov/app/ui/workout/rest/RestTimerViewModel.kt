@@ -1,15 +1,13 @@
 package bg.zahov.app.ui.workout.rest
 
-import android.util.Log
-import bg.zahov.fitness.app.R
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
 import bg.zahov.app.Inject
-import bg.zahov.app.data.interfaces.SettingsProvider
 import bg.zahov.app.data.model.RestState
 import bg.zahov.app.data.model.ToastManager
 import bg.zahov.app.data.provider.RestTimerProvider
 import bg.zahov.app.util.parseTimeStringToLong
+import bg.zahov.fitness.app.R
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.StateFlow
 import kotlinx.coroutines.launch
@@ -33,16 +31,16 @@ sealed interface Rest {
      * @property isCustomTimer A boolean flag indicating whether the user is using a custom timer. Default is `false`.
      */
     data class Default(
-        val rests: Array<Int> = arrayOf(
-            R.string.minute,
-            R.string.minute_and_half,
-            R.string.two_minutes,
-            R.string.two_minutes_and_half
+        val rests: List<String> = listOf(
+            "1:00",
+            "1:30",
+            "2:00",
+            "2:30"
         ),
-        val increment: String = "",
+        val increment: String = "30",
         val isCustomTimer: Boolean = false,
-    ) :
-        Rest
+        val pickerValue: String = rests.first(),
+    ) : Rest
 
     /**
      * Represents an active resting state with a timer.
@@ -53,13 +51,13 @@ sealed interface Rest {
      * @property timer A float value representing the progress of the timer, where `0f` represents no progress.
      */
     data class Resting(
-        val rests: Array<Int> = arrayOf(
-            R.string.minute,
-            R.string.minute_and_half,
-            R.string.two_minutes,
-            R.string.two_minutes
+        val rests: List<String> = listOf(
+            "1:00",
+            "1:30",
+            "2:00",
+            "2:30"
         ),
-        val increment: String = "",
+        val increment: String = "30",
         val startingTime: String = "",
         val remaining: String = "",
         val timer: Float = 0f,
@@ -77,14 +75,11 @@ sealed interface Rest {
  * This ViewModel interacts with the application's settings and manages the rest timer's state
  * using the provided dependencies.
  *
- * @property settingsProvider An instance of [SettingsProvider] used to retrieve and manage user-specific settings,
- * such as timer configurations or preferences.
  * @property restManager An instance of [RestTimerProvider] responsible for controlling the behavior of the rest timer,
  * such as starting, pausing, and tracking progress.
  *
  **/
 class RestTimerViewModel(
-    private val settingsProvider: SettingsProvider = Inject.settingsProvider,
     private val restManager: RestTimerProvider = Inject.restTimerProvider,
     private val toastManager: ToastManager = ToastManager,
 ) : ViewModel() {
@@ -92,13 +87,11 @@ class RestTimerViewModel(
     private val _uiState = MutableStateFlow<Rest>(Rest.Default())
     val uiState: StateFlow<Rest> = _uiState
 
-    private var timerDelta: Long = 0
-    private var lastCustomRest: String = "1:00"
+    private var timerDelta: Long = 30000
 
     init {
-        Log.d("init", "init")
         viewModelScope.launch {
-            launch { /* TODO() */}
+            // launch { TODO(replace settings with something *soon tm*) }
             launch {
                 restManager.restTimer.collect {
                     if (!(it.elapsedTime.isNullOrEmpty()) && !(it.fullRest.isNullOrEmpty())) {
@@ -107,7 +100,7 @@ class RestTimerViewModel(
                             timer = (it.elapsedTime!!.parseTimeStringToLong()
                                 .toFloat() / it.fullRest!!.parseTimeStringToLong()
                                 .toFloat()).coerceIn(0f, 1f),
-                            increment = (timerDelta / 1000).toString()
+                            //increment = (timerDelta / 1000).toString() TODO(no longer need this check because settings were deleted)
                         )
                     }
                 }
@@ -140,16 +133,18 @@ class RestTimerViewModel(
      *              If `null`, the current value is retained.
      **/
     private fun updateStateValues(
-        rests: Array<Int>? = null,
+        rests: List<String>? = null,
         increment: String? = null,
         startingTime: String? = null,
         timer: Float? = null,
+        numberPicker: String? = null,
     ) {
         _uiState.value = when (val currentState = _uiState.value) {
             is Rest.Default -> {
                 currentState.copy(
                     rests = rests ?: currentState.rests,
-                    increment = increment ?: currentState.increment
+                    increment = increment ?: currentState.increment,
+                    pickerValue = numberPicker ?: currentState.pickerValue
                 )
             }
 
@@ -164,15 +159,6 @@ class RestTimerViewModel(
 
             else -> currentState // No-op for other cases
         }
-    }
-
-    /**
-     * Sets the last custom rest timer.
-     *
-     * @param timer The custom timer value in string format.
-     */
-    fun selectCustomTimer(timer: String) {
-        lastCustomRest = timer
     }
 
     /**
@@ -208,7 +194,7 @@ class RestTimerViewModel(
      */
     fun onCustomTimerStart() {
         try {
-            startTimer("00:$lastCustomRest".parseTimeStringToLong())
+            startTimer("00:${(_uiState.value as Rest.Default).pickerValue}".parseTimeStringToLong())
         } catch (_: IllegalArgumentException) {
             toastManager.showToast(R.string.invalid_time_format)
         }
@@ -250,5 +236,13 @@ class RestTimerViewModel(
         viewModelScope.launch {
             restManager.stopRest()
         }
+    }
+
+    /**
+     * Updates the number picker value with a new one from the number picker on each scroll
+     * @param newValue - the new custom rest chosen
+     */
+    fun updateNumberPicker(newValue: String) {
+        updateStateValues(numberPicker = newValue)
     }
 }
