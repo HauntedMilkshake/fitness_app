@@ -46,6 +46,9 @@ class WorkoutProviderImpl : WorkoutProvider {
     override var clickedPastWorkout: StateFlow<HistoryInfoWorkout> =
         MutableStateFlow(HistoryInfoWorkout())
 
+    private val _shouldFinish = MutableStateFlow(false)
+    override val shouldFinish: StateFlow<Boolean>
+        get() = _shouldFinish
 
     private val workoutRepo = WorkoutRepositoryImpl.getInstance()
     private val errorHandler = ServiceErrorHandlerImpl.getInstance()
@@ -56,6 +59,13 @@ class WorkoutProviderImpl : WorkoutProvider {
      */
     override fun getLastWorkout(): HistoryWorkout? {
         return lastWorkoutPerformed?.toHistoryWorkout()
+    }
+
+    /**
+     * Signals the start of a finish operation by setting `_shouldFinish` to `true`.
+     */
+    override fun tryToFinish() {
+        _shouldFinish.value = true
     }
 
     override suspend fun getTemplateWorkouts(): Flow<List<Workout>> =
@@ -98,6 +108,7 @@ class WorkoutProviderImpl : WorkoutProvider {
         workoutRepo.addTemplateExercise(newExercise)
 
     override suspend fun addWorkoutToHistory(newWorkout: Workout) {
+        _shouldFinish.value = false
         lastWorkoutPerformed = newWorkout
         workoutRepo.addWorkoutToHistory(newWorkout)
     }
@@ -148,7 +159,8 @@ class WorkoutProviderImpl : WorkoutProvider {
     override suspend fun getExerciseHistory(): Flow<List<ExerciseHistoryInfo>> = exerciseHistory
     override suspend fun <T> getPreviousWorkoutState(): T? = null
 
-    override suspend fun <T> addWorkoutState(realmWorkoutState: T) { /* TODO() */ }
+    override suspend fun <T> addWorkoutState(realmWorkoutState: T) { /* TODO() */
+    }
 
     override suspend fun updateTemplateWorkout(
         workoutId: String,
@@ -230,7 +242,11 @@ fun Workout.toStartWorkout(): StartWorkout = StartWorkout(
  */
 fun Exercise.toStartWorkoutExercise(): StartWorkoutExercise = StartWorkoutExercise(
     name = this.name,
-    exercise = if (this.sets.isNotEmpty()) { "${this.sets.size} x " } else { "" } + this.name,
+    exercise = if (this.sets.isNotEmpty()) {
+        "${this.sets.size} x "
+    } else {
+        ""
+    } + this.name,
     bodyPart = this.bodyPart,
     category = this.category
 )
