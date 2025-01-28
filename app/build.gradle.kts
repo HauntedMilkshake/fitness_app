@@ -78,7 +78,6 @@ dependencies {
     debugImplementation(libs.uiTooling)
     implementation(libs.uiToolingPreview)
     implementation(libs.material3)
-    implementation(libs.accompanistSystemUiController)
     implementation(libs.activityCompose)
     implementation(libs.lifecycleViewModelCompose)
     implementation(libs.firebaseFunctions)
