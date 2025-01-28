@@ -78,7 +78,6 @@ fun WorkoutTopBarContent(
                 LinearProgressIndicator(
                     progress = { restProgress },
                     modifier = Modifier
-                        .weight(0.5f)
                         .clickable(onClick = onRestClick)
                 )
             }
