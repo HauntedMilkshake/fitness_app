@@ -50,14 +50,11 @@ class RestTimerProvider : RestProvider {
         remainingTime = duration - abs(elapsedTime)
         timer = object : CountDownTimer(duration, 1000) {
             override fun onTick(p0: Long) {
-                CoroutineScope(Dispatchers.Main).launch {
                     remainingTime = p0
                     _restTimer.value = Rest(
                         elapsedTime = p0.timeToString(),
                         fullRest = _restTimer.value.fullRest
                     )
-
-                }
             }
 
             override fun onFinish() {

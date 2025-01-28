@@ -109,12 +109,20 @@ class RestTimerViewModel(
                 restManager.restState.collect {
                     when (it) {
                         RestState.Active -> _uiState.value = Rest.Resting()
-                        RestState.Finished -> _uiState.value = Rest.Finished
+                        RestState.Finished -> {
+                            _uiState.value = Rest.Finished
+                            resetState()
+                        }
+
                         RestState.Default -> _uiState.value = Rest.Default()
                     }
                 }
             }
         }
+    }
+
+    private fun resetState() {
+        _uiState.value = Rest.Default()
     }
 
     /**

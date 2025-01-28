@@ -2,9 +2,7 @@ package bg.zahov.app.ui.workout.topbar
 
 import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.Arrangement
-import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Row
-import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.padding
 import androidx.compose.material3.Icon
@@ -52,54 +50,60 @@ fun WorkoutTopBarContent(
     onRestClick: () -> Unit,
     onFinish: () -> Unit,
 ) {
-    Box(modifier = Modifier.fillMaxWidth()) {
+    Row(
+        modifier = Modifier.fillMaxWidth(),
+        horizontalArrangement = Arrangement.SpaceBetween,
+        verticalAlignment = Alignment.CenterVertically
+    ) {
         Row(
-            modifier = Modifier.fillMaxWidth(),
-            horizontalArrangement = Arrangement.SpaceBetween,
+            modifier = Modifier
+                .weight(1f)
+                .padding(end = 12.dp),
             verticalAlignment = Alignment.CenterVertically
         ) {
-            Row(verticalAlignment = Alignment.CenterVertically) {
-                IconButton(onClick = onMinimize, modifier = Modifier.padding(horizontal = 8.dp)) {
-                    Icon(
-                        painter = painterResource(R.drawable.ic_minimize),
-                        contentDescription = stringResource(R.string.minimize_icon_content_description)
-                    )
-                }
-                if (elapsedRestTime.isEmpty()) {
-                    IconButton(onClick = onRestClick) {
-                        Icon(
-                            painter = painterResource(R.drawable.ic_rest_timer),
-                            contentDescription = stringResource(R.string.rest_icon_content_description)
-                        )
-                    }
-                } else {
-                    LinearProgressIndicator(
-                        progress = { restProgress },
-                        modifier = Modifier
-                            .fillMaxSize(0.25f)
-                            .clickable(onClick = onRestClick)
-                    )
-                }
+            IconButton(onClick = onMinimize, modifier = Modifier.padding(horizontal = 8.dp)) {
+                Icon(
+                    painter = painterResource(R.drawable.ic_minimize),
+                    contentDescription = stringResource(R.string.minimize_icon_content_description)
+                )
             }
-
-
-            TextButton(
-                onClick = onFinish
-            ) {
-                Text(
-                    text = stringResource(R.string.finish_workout),
-                    fontWeight = FontWeight.Bold,
-                    color = MaterialTheme.colorScheme.tertiary,
-                    style = MaterialTheme.typography.titleMedium
+            if (elapsedRestTime.isEmpty() || restProgress == 0f) {
+                IconButton(onClick = onRestClick) {
+                    Icon(
+                        painter = painterResource(R.drawable.ic_rest_timer),
+                        contentDescription = stringResource(R.string.rest_icon_content_description)
+                    )
+                }
+            } else {
+                LinearProgressIndicator(
+                    progress = { restProgress },
+                    modifier = Modifier
+                        .weight(0.5f)
+                        .clickable(onClick = onRestClick)
                 )
             }
         }
+
         Text(
             text = elapsedWorkoutTime,
-            modifier = Modifier.align(alignment = Alignment.Center),
+            modifier = Modifier.align(alignment = Alignment.CenterVertically),
             color = MaterialTheme.colorScheme.onBackground,
             style = MaterialTheme.typography.titleMedium
         )
+
+        TextButton(
+            modifier = Modifier
+                .weight(1f)
+                .padding(start = 8.dp),
+            onClick = onFinish
+        ) {
+            Text(
+                text = stringResource(R.string.finish_workout),
+                fontWeight = FontWeight.Bold,
+                color = MaterialTheme.colorScheme.tertiary,
+                style = MaterialTheme.typography.titleMedium
+            )
+        }
     }
 }
 

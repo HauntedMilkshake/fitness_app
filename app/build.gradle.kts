@@ -94,4 +94,5 @@ dependencies {
     implementation(libs.lifecycleLiveData)
     implementation(libs.mpChart)
     implementation(libs.calendarCompose)
+    implementation(libs.numberPicker)
 }

@@ -68,7 +68,14 @@ class WorkoutTopBarViewModel(
      * Automatically updates the [uiState] whenever the collected data changes.
      */
     init {
-        Log.d("init vm", "init")
+        observeWorkoutTimer()
+        observeRestTimer()
+    }
+
+    /**
+     * Observes the workout timer and updates the UI state with the elapsed workout time.
+     */
+    private fun observeWorkoutTimer() {
         viewModelScope.launch {
             workoutStateManager.timer.collect {
                 _uiState.update { old ->
@@ -77,9 +84,28 @@ class WorkoutTopBarViewModel(
                     )
                 }
             }
+        }
+    }
 
+    /**
+     * Observes the rest timer and updates the UI state with the elapsed rest time and progress.
+     *
+     * The progress is calculated based on the full rest time and the current elapsed rest time.
+     *
+     * @see restStateManager
+     * @see calculateProgress
+     * @see parseTimeStringToLong
+     */
+    private fun observeRestTimer() {
+        viewModelScope.launch {
             restStateManager.restTimer.collect {
-                Log.d("collectin rest", it.toString())
+                Log.d(
+                    "current rest", calculateProgress(
+                        fullRest = (it.fullRest?.parseTimeStringToLong()?.toFloat() ?: 0f),
+                        currentRest = (it.elapsedTime?.parseTimeStringToLong()?.toFloat()
+                            ?: 0f)
+                    ).toString()
+                )
                 _uiState.update { old ->
                     old.copy(
                         elapsedRestTime = it.elapsedTime ?: "",
@@ -102,7 +128,7 @@ class WorkoutTopBarViewModel(
      * @return The calculated progress as a float, constrained between 0 and 1.
      */
     private fun calculateProgress(fullRest: Float, currentRest: Float): Float {
-        return (fullRest / currentRest).coerceIn(0f, 1f)
+        return (currentRest / fullRest).coerceIn(0f, 1f)
     }
 
     /**

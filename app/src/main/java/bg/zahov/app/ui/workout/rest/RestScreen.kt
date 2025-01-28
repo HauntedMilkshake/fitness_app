@@ -25,6 +25,7 @@ import androidx.compose.material3.Button
 import androidx.compose.material3.ButtonDefaults
 import androidx.compose.material3.CircularProgressIndicator
 import androidx.compose.material3.HorizontalDivider
+import androidx.compose.material3.LocalTextStyle
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
@@ -50,6 +51,7 @@ import androidx.lifecycle.viewmodel.compose.viewModel
 import bg.zahov.app.data.model.ToastManager
 import bg.zahov.app.ui.theme.FitnessTheme
 import bg.zahov.fitness.app.R
+import com.chargemap.compose.numberpicker.ListItemPicker
 
 
 @Composable
@@ -64,6 +66,7 @@ fun RestScreen(restViewModel: RestTimerViewModel = viewModel(), navigate: () -> 
                 .show()
         }
     }
+
     when (state) {
         is Rest.Default -> {
             val cast = (state as Rest.Default)
@@ -79,12 +82,12 @@ fun RestScreen(restViewModel: RestTimerViewModel = viewModel(), navigate: () -> 
                             }
                         }
                     } else {
-                        ListPicker(
-                            items = cast.rests,
-                            selectedItem = cast.pickerValue,
-                            onItemSelected = {
-                                restViewModel.updateNumberPicker(it)
-                            }
+                        ListItemPicker(
+                            dividersColor = Color.White,
+                            textStyle = LocalTextStyle.current.copy(color = MaterialTheme.colorScheme.onSecondaryContainer),
+                            value = cast.pickerValue,
+                            onValueChange = { restViewModel.updateNumberPicker(it) },
+                            list = cast.rests
                         )
                     }
                 },

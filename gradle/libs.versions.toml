@@ -24,6 +24,7 @@ androidxTestRunner = "1.5.0"
 material = "1.12.0"
 accompanistSystemUiController = "0.30.1"
 splashscreenVer = "1.0.1"
+numberPickerVer = "1.0.3"
 
 [libraries]
 androidx-ktx = { group = "androidx.core", name = "core-ktx", version.ref = "ktx" }
@@ -60,6 +61,7 @@ firebaseFirestore = { module = "com.google.firebase:firebase-firestore-ktx", ver
 mpChart = { module = "com.github.PhilJay:MPAndroidChart", version.ref = "mpChart" }
 calendarCompose = { module = "com.kizitonwose.calendar:compose", version.ref = "calendarCompose" }
 kotlinSerialization = { module = "org.jetbrains.kotlinx:kotlinx-serialization-json", version.ref = "kotlinSerialization" }
+numberPicker = { module = "com.chargemap.compose:numberpicker", version.ref = "numberPickerVer"}
 
 [plugins]
 googleServices = { id = "com.google.gms.google-services", version.ref = "googleServicesPlugin" }
