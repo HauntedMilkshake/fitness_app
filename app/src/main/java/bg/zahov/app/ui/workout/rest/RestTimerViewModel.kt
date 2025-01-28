@@ -90,32 +90,56 @@ class RestTimerViewModel(
     private var timerDelta: Long = 30000
 
     init {
+        observeRestTimer()
+        observeRestState()
+    }
+
+    /**
+     * Observes the rest timer updates from the `restManager` and updates the state values
+     * based on elapsed time and full rest duration.
+     *
+     * This function ensures the timer's progress is calculated as a ratio of elapsed time
+     * to full rest time and coerces it within the range [0, 1].
+     * @see parseTimeStringToLong
+     * @see updateStateValues
+     */
+    private fun observeRestTimer() {
         viewModelScope.launch {
-            // launch { TODO(replace settings with something *soon tm*) }
-            launch {
-                restManager.restTimer.collect {
-                    if (!(it.elapsedTime.isNullOrEmpty()) && !(it.fullRest.isNullOrEmpty())) {
-                        updateStateValues(
-                            startingTime = it.fullRest,
-                            timer = (it.elapsedTime!!.parseTimeStringToLong()
-                                .toFloat() / it.fullRest!!.parseTimeStringToLong()
-                                .toFloat()).coerceIn(0f, 1f),
-                            //increment = (timerDelta / 1000).toString() TODO(no longer need this check because settings were deleted)
-                        )
-                    }
+            restManager.restTimer.collect {
+                val elapsedTime = it.elapsedTime ?: ""
+                val fullRest = it.fullRest ?: ""
+                if (elapsedTime.isNotEmpty() && fullRest.isNotEmpty()) {
+                    updateStateValues(
+                        startingTime = it.fullRest,
+                        timer = (elapsedTime.parseTimeStringToLong()
+                            .toFloat() / fullRest.parseTimeStringToLong()
+                            .toFloat()).coerceIn(0f, 1f),
+                        //increment = (timerDelta / 1000).toString() TODO(no longer need this check because settings were deleted)
+                    )
                 }
             }
-            launch {
-                restManager.restState.collect {
-                    when (it) {
-                        RestState.Active -> _uiState.value = Rest.Resting()
-                        RestState.Finished -> {
-                            _uiState.value = Rest.Finished
-                            resetState()
-                        }
+        }
+    }
 
-                        RestState.Default -> _uiState.value = Rest.Default()
+    /**
+     * Observes the rest state updates from the `restManager` and updates the UI state accordingly.
+     *
+     * Depending on the current rest state:
+     * - Sets the UI state to `Resting` when active.
+     * - Sets the UI state to `Finished` and resets the state when finished.
+     * - Sets the UI state to `Default` for the default state.
+     */
+    private fun observeRestState() {
+        viewModelScope.launch {
+            restManager.restState.collect {
+                when (it) {
+                    RestState.Active -> _uiState.value = Rest.Resting()
+                    RestState.Finished -> {
+                        _uiState.value = Rest.Finished
+                        resetState()
                     }
+
+                    RestState.Default -> _uiState.value = Rest.Default()
                 }
             }
         }

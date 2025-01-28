@@ -1,7 +1,6 @@
 package bg.zahov.app.data.provider
 
 import android.os.CountDownTimer
-import android.util.Log
 import bg.zahov.app.data.interfaces.RestProvider
 import bg.zahov.app.data.model.RestState
 import bg.zahov.app.util.parseTimeStringToLong
@@ -59,7 +58,7 @@ class RestTimerProvider : RestProvider {
 
             override fun onFinish() {
                 CoroutineScope(Dispatchers.Main).launch {
-                    remainingTime = 0
+                     remainingTime = 0
                     _restState.emit(RestState.Finished)
                 }
             }
