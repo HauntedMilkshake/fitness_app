@@ -1,6 +1,5 @@
 package bg.zahov.app.ui.exercise
 
-import android.util.Log
 import androidx.lifecycle.SavedStateHandle
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.ViewModelProvider
@@ -77,9 +76,6 @@ class ExerciseViewModel(
      */
     val exerciseData: StateFlow<ExerciseScreenData> = _exerciseData
 
-    override fun onCleared() {
-        super.onCleared()
-    }
     init {
         updateFlag(exerciseState)
         viewModelScope.launch {
