@@ -1,5 +1,6 @@
 package bg.zahov.app.ui.exercise
 
+import android.util.Log
 import androidx.lifecycle.SavedStateHandle
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.ViewModelProvider
@@ -76,9 +77,11 @@ class ExerciseViewModel(
      */
     val exerciseData: StateFlow<ExerciseScreenData> = _exerciseData
 
+    override fun onCleared() {
+        super.onCleared()
+    }
     init {
         updateFlag(exerciseState)
-
         viewModelScope.launch {
             launch {
                 filterProvider.filters.collect { filters ->
@@ -139,6 +142,16 @@ class ExerciseViewModel(
         }
     }
 
+    /**
+     * Resets the state after performing the navigation callback so as to prevent
+     * bugs(e.g. when the user goes back into the screen and the state hasn't reset so he gets
+     * instantly navigated away from it)
+     */
+    fun resetNavigationState() {
+        _exerciseData.update { old ->
+            old.copy(navigateInfo = false)
+        }
+    }
     /**
      * Handles the click event on an exercise item, adjusting the selection state based on the current flag.
      *

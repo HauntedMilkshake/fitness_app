@@ -70,6 +70,7 @@ fun ExercisesScreen(
         uiState.navigateInfo ->
             LaunchedEffect(Unit) {
                 navigateInfo()
+                viewModel.resetNavigationState()
             }
 
         uiState.navigateBack ->
