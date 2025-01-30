@@ -31,9 +31,6 @@ import androidx.compose.ui.unit.dp
 import bg.zahov.app.data.model.ToastManager
 import bg.zahov.app.data.provider.model.ExerciseDetails
 
-////    private val historyInfoViewModel: HistoryInfoViewModel by viewModels(
-////        ownerProducer = { requireParentFragment() }
-////    )
 @Composable
 fun HistoryInfoScreen(
     historyInfoViewModel: HistoryInfoViewModel = viewModel(),

@@ -46,6 +46,19 @@ class WorkoutProviderImpl : WorkoutProvider {
     override var clickedPastWorkout: StateFlow<HistoryInfoWorkout> =
         MutableStateFlow(HistoryInfoWorkout())
 
+    private val _shouldSaveAsTemplate = MutableStateFlow(false)
+
+    /**
+     * Manages state for saving as a template
+     */
+    override val shouldSaveAsTemplate: StateFlow<Boolean> = _shouldSaveAsTemplate
+
+    private val _shouldDeleteHistoryWorkout = MutableStateFlow(false)
+
+    /**
+     * Manages state for deleting a past workout
+     */
+    override val shouldDeleteHistoryWorkout: StateFlow<Boolean> = _shouldDeleteHistoryWorkout
     private val _shouldFinish = MutableStateFlow(false)
     override val shouldFinish: StateFlow<Boolean>
         get() = _shouldFinish
@@ -73,8 +86,10 @@ class WorkoutProviderImpl : WorkoutProvider {
 
     override suspend fun getPastWorkouts(): Flow<List<Workout>> = workoutRepo.getPastWorkouts()
 
-    override suspend fun addTemplateWorkout(newWorkout: Workout) =
+    override suspend fun addTemplateWorkout(newWorkout: Workout) {
+        _shouldSaveAsTemplate.value = false
         workoutRepo.addTemplateWorkout(newWorkout)
+    }
 
     /**
      * Fetches the list of template exercises from the repository.
@@ -114,6 +129,7 @@ class WorkoutProviderImpl : WorkoutProvider {
     }
 
     override suspend fun deleteTemplateWorkout(workout: Workout) {
+        _shouldDeleteHistoryWorkout.value = false
         workoutRepo.deleteTemplateWorkout(workout)
     }
 
@@ -159,8 +175,7 @@ class WorkoutProviderImpl : WorkoutProvider {
     override suspend fun getExerciseHistory(): Flow<List<ExerciseHistoryInfo>> = exerciseHistory
     override suspend fun <T> getPreviousWorkoutState(): T? = null
 
-    override suspend fun <T> addWorkoutState(realmWorkoutState: T) { /* TODO() */
-    }
+    override suspend fun <T> addWorkoutState(realmWorkoutState: T) { /* TODO() */ }
 
     override suspend fun updateTemplateWorkout(
         workoutId: String,
@@ -168,6 +183,20 @@ class WorkoutProviderImpl : WorkoutProvider {
         newExercises: List<Exercise>,
     ) {
         workoutRepo.updateTemplateWorkout(workoutId, date, newExercises)
+    }
+
+    /**
+     * Triggers the "Save as Template" action(sets [_shouldSaveAsTemplate] to true).
+     */
+    override fun triggerSaveAsTemplate() {
+        _shouldSaveAsTemplate.value = true
+    }
+
+    /**
+     * Triggers the "Delete history workout" action(sets [_shouldDeleteHistoryWorkout] to true).
+     */
+    override fun triggerDeleteHistoryWorkout() {
+        _shouldDeleteHistoryWorkout.value = true
     }
 
     /**
