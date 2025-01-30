@@ -9,10 +9,15 @@ import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material3.FabPosition
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Scaffold
+import androidx.compose.material3.SnackbarDuration
+import androidx.compose.material3.SnackbarHost
+import androidx.compose.material3.SnackbarHostState
+import androidx.compose.material3.SnackbarResult
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.getValue
+import androidx.compose.runtime.remember
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
@@ -28,6 +33,7 @@ import bg.zahov.app.ui.theme.FitnessTheme
 fun App(workoutManagerViewModel: WorkoutManagerViewModel) {
     val navController = rememberNavController()
     val state by workoutManagerViewModel.state.collectAsStateWithLifecycle()
+    val snackBarHostState = remember { SnackbarHostState() }
 
     LaunchedEffect(state.isWorkoutActive) {
         if (state.isWorkoutActive) navController.navigate(Workout)
@@ -52,10 +58,18 @@ fun App(workoutManagerViewModel: WorkoutManagerViewModel) {
                 Column {
                     BottomBar(navController = navController)
                 }
-            }
+            },
+            snackbarHost = { SnackbarHost(snackBarHostState) }
         ) { padding ->
             MainNavGraph(
                 modifier = Modifier.padding(padding),
+                onShowSnackbar = { message, action ->
+                    snackBarHostState.showSnackbar(
+                        message = message,
+                        actionLabel = action,
+                        duration = SnackbarDuration.Short,
+                    ) == SnackbarResult.ActionPerformed
+                },
                 navController = navController,
             )
         }
