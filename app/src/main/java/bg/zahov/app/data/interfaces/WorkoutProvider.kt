@@ -16,6 +16,12 @@ interface WorkoutProvider {
      * observable exercise that was clicked in history screen
      */
     val clickedPastWorkout: StateFlow<HistoryInfoWorkout>
+
+    /**
+     * A [StateFlow] indicating whether a finish attempt has been signaled.
+     * The value is `true` when a finish attempt is in progress, and `false` otherwise.
+     */
+    val shouldFinish: StateFlow<Boolean>
     suspend fun getTemplateWorkouts(): Flow<List<Workout>>
     suspend fun getPastWorkouts(): Flow<List<Workout>>
     suspend fun addTemplateWorkout(newWorkout: Workout)
@@ -34,8 +40,8 @@ interface WorkoutProvider {
     suspend fun setClickedTemplateExercise(item: ExerciseData)
     suspend fun getClickedTemplateExercise(): Flow<Exercise>
     suspend fun getExerciseHistory(): Flow<List<ExerciseHistoryInfo>>
-    suspend fun <T>getPreviousWorkoutState(): T?
-    suspend fun <T>addWorkoutState(realmWorkoutState: T)
+    suspend fun <T> getPreviousWorkoutState(): T?
+    suspend fun <T> addWorkoutState(realmWorkoutState: T)
     suspend fun updateTemplateWorkout(
         workoutId: String,
         date: LocalDateTime,
@@ -67,4 +73,9 @@ interface WorkoutProvider {
      * Returns the last performed workout if any
      */
     fun getLastWorkout(): HistoryWorkout?
+
+    /**
+     * Attempts a finish attempt for the workout
+     */
+    fun tryToFinish()
 }
