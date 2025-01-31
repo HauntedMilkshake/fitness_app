@@ -12,7 +12,6 @@ android {
     compileSdk = 35
 
     buildFeatures {
-        viewBinding = true
         compose = true
     }
 
