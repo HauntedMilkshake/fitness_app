@@ -5,6 +5,8 @@ import androidx.lifecycle.viewModelScope
 import bg.zahov.app.Inject
 import bg.zahov.app.data.interfaces.ServiceErrorHandler
 import bg.zahov.app.data.interfaces.UserProvider
+import com.google.firebase.auth.FirebaseAuthInvalidCredentialsException
+import com.google.firebase.auth.FirebaseAuthInvalidUserException
 import kotlinx.coroutines.launch
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.StateFlow
@@ -24,7 +26,7 @@ import java.lang.IllegalArgumentException
  */
 class LoginViewModel(
     private val auth: UserProvider = Inject.userProvider,
-    private val serviceError: ServiceErrorHandler = Inject.serviceErrorHandler
+    private val serviceError: ServiceErrorHandler = Inject.serviceErrorHandler,
 ) : ViewModel() {
     /**
      * Data class that represents the UI state for the login screen.
@@ -80,11 +82,16 @@ class LoginViewModel(
         viewModelScope.launch {
             try {
                 auth.login(_uiState.value.email, _uiState.value.password)
-                    .addOnFailureListener {
-                        it.message?.let { it1 -> notifyChange(it1) }
+            } catch (e: Exception) {
+                when (e) {
+                    is FirebaseAuthInvalidUserException -> {
+                        _uiState.update { old -> old.copy(message = e.message) }
                     }
-            } catch (e: IllegalArgumentException) {
-                serviceError.initiateCountdown()
+
+                    is FirebaseAuthInvalidCredentialsException -> {
+                        _uiState.update { old -> old.copy(message = e.message) }
+                    }
+                }
             }
         }
     }

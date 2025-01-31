@@ -1,5 +1,6 @@
 package bg.zahov.app.data.remote
 
+import android.util.Log
 import bg.zahov.app.data.exception.AuthenticationException
 import bg.zahov.app.data.exception.CriticalDataNullException
 import com.google.android.gms.tasks.Task
@@ -13,6 +14,7 @@ import kotlinx.coroutines.channels.awaitClose
 import kotlinx.coroutines.flow.Flow
 import kotlinx.coroutines.flow.callbackFlow
 import kotlinx.coroutines.flow.distinctUntilChanged
+import kotlinx.coroutines.tasks.await
 import kotlinx.coroutines.withContext
 
 class FirebaseAuthentication {
@@ -28,18 +30,21 @@ class FirebaseAuthentication {
     private val auth = FirebaseAuth.getInstance()
     private val firestore = FirestoreManager.getInstance()
 
-    suspend fun signup(email: String, password: String) =
-        withContext(Dispatchers.IO) { auth.createUserWithEmailAndPassword(email, password) }
+    suspend fun signup(email: String, password: String) {
+        auth.createUserWithEmailAndPassword(email, password).await()
+        init()
+    }
 
-    suspend fun login(email: String, password: String) =
-        withContext(Dispatchers.IO) { auth.signInWithEmailAndPassword(email, password) }
+    suspend fun login(email: String, password: String) {
+        auth.signInWithEmailAndPassword(email, password).await()
+        init()
+    }
 
-    suspend fun logout() {
+    fun logout() {
         auth.signOut()
     }
 
     fun deleteAccount() {
-
         try {
             auth.currentUser?.delete()
         } catch (e: FirebaseAuthInvalidUserException) {
@@ -65,12 +70,15 @@ class FirebaseAuthentication {
         }
         auth.addAuthStateListener(authStateListener)
 
-        awaitClose { auth.removeAuthStateListener(authStateListener) }
+        awaitClose {
+            auth.removeAuthStateListener(authStateListener)
+        }
     }.distinctUntilChanged()
 
 
-    suspend fun init() {
+    private fun init() {
         auth.currentUser?.uid?.let {
+            Log.d("init", "init")
             firestore.initUser(it)
         }
     }

@@ -17,13 +17,11 @@ class AuthenticationImpl : Authentication {
 
     override suspend fun login(email: String, password: String) = auth.login(email, password)
 
-    override suspend fun signup(email: String, password: String) =
-        auth.signup(email, password)
+    override suspend fun signup(email: String, password: String) = auth.signup(email, password)
 
     override suspend fun logout() = auth.logout()
 
     override suspend fun deleteAccount() = auth.deleteAccount()
-
 
     override suspend fun passwordResetByEmail(email: String) = auth.passwordResetByEmail(email)
 
@@ -31,8 +29,10 @@ class AuthenticationImpl : Authentication {
 
     override fun authStateFlow() = auth.getAuthStateFlow()
 
-    override suspend fun initDataSources() = auth.init()
-    override suspend fun createDataSources(username: String, userId: String) = auth.create(username, userId)
+    override suspend fun initDataSources() { /* TODO() */ }
+
+    override suspend fun createDataSources(username: String, userId: String) =
+        auth.create(username, userId)
 
     override suspend fun updatePassword(newPassword: String) = auth.updatePassword(newPassword)
 

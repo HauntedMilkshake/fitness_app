@@ -6,7 +6,6 @@ import bg.zahov.app.data.interfaces.ServiceErrorHandler
 import bg.zahov.app.data.interfaces.UserProvider
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.StateFlow
-import kotlinx.coroutines.flow.first
 import kotlinx.coroutines.flow.update
 import kotlinx.coroutines.launch
 
@@ -24,7 +23,7 @@ import kotlinx.coroutines.launch
  */
 class LoadingViewModel(
     private val userProvider: UserProvider = Inject.userProvider,
-    private val serviceError: ServiceErrorHandler = Inject.serviceErrorHandler
+    private val serviceError: ServiceErrorHandler = Inject.serviceErrorHandler,
 ) : ViewModel() {
     private val _loading = MutableStateFlow(true)
     val loading: StateFlow<Boolean> = _loading
@@ -39,8 +38,6 @@ class LoadingViewModel(
                 userProvider.authStateFlow().collect { isAuthenticated ->
                     if (isAuthenticated) {
                         _loading.value = true
-                        userProvider.initDataSources()
-                        userProvider.getUser().first()
                         _navigationTarget.update { Home }
                     } else {
                         _navigationTarget.update { Welcome }

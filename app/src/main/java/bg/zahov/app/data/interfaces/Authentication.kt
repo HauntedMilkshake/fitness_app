@@ -6,8 +6,8 @@ import kotlinx.coroutines.flow.Flow
 
 
 interface Authentication {
-    suspend fun signup(email: String, password: String) : Task<AuthResult>
-    suspend fun login(email: String, password: String) : Task<AuthResult>
+    suspend fun signup(email: String, password: String)
+    suspend fun login(email: String, password: String)
     suspend fun logout()
     suspend fun deleteAccount()
     suspend fun passwordResetByEmail(email: String): Task<Void>

@@ -2,14 +2,13 @@ package bg.zahov.app.data.interfaces
 
 import bg.zahov.app.data.model.User
 import com.google.android.gms.tasks.Task
-import com.google.firebase.auth.AuthResult
 import kotlinx.coroutines.flow.Flow
 
 interface UserProvider {
     suspend fun getUser(): Flow<User>
     suspend fun changeUserName(newUsername: String): Task<Void>
-    suspend fun signup(email: String, password: String): AuthResult
-    suspend fun login(email: String, password: String): Task<AuthResult>
+    suspend fun signup(email: String, password: String)
+    suspend fun login(email: String, password: String)
     suspend fun logout()
     suspend fun deleteAccount()
     suspend fun passwordResetByEmail(email: String): Task<Void>
