@@ -78,7 +78,6 @@ class FirebaseAuthentication {
 
     private fun init() {
         auth.currentUser?.uid?.let {
-            Log.d("init", "init")
             firestore.initUser(it)
         }
     }
