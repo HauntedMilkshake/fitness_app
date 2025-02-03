@@ -14,6 +14,7 @@ import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.platform.testTag
 import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.window.Dialog
@@ -24,11 +25,13 @@ fun RadioSettingsDialog(
     type: TypeSettings,
     selected: Any,
     onDismissRequest: () -> Unit,
-    setSelected: (type: TypeSettings, selected: Any) -> Unit
+    setSelected: (type: TypeSettings, selected: Any) -> Unit,
+    modifier: Modifier = Modifier
 ) {
     Dialog(onDismissRequest = onDismissRequest ) {
         Card(
-            modifier = Modifier
+            modifier = modifier
+                .testTag("RadioSettings")
                 .fillMaxWidth()
                 .padding(16.dp),
             shape = RoundedCornerShape(16.dp),

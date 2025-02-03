@@ -36,6 +36,7 @@ import bg.zahov.app.util.isEmail
 import bg.zahov.fitness.app.R
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.remember
+import androidx.compose.ui.platform.testTag
 import androidx.compose.ui.unit.sp
 
 @Composable
@@ -142,6 +143,7 @@ fun SignupContent(
 
         Button(
             modifier = Modifier
+                .testTag("Sign Up")
                 .padding(top = 20.dp)
                 .width(240.dp),
             colors = ButtonColors(

@@ -23,6 +23,7 @@ import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.platform.LocalContext
+import androidx.compose.ui.platform.testTag
 import androidx.compose.ui.res.colorResource
 import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.res.stringResource
@@ -125,6 +126,7 @@ fun LoginContent(
             TextButton(
                 onClick = { logIn() },
                 modifier = Modifier
+                    .testTag("Login")
                     .padding(top = 16.dp)
                     .fillMaxWidth(),
                 colors = ButtonColors(
