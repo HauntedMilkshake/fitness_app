@@ -31,7 +31,7 @@ import bg.zahov.app.ui.workout.start.StartWorkoutScreen
 fun MainNavGraph(
     modifier: Modifier = Modifier,
     navController: NavHostController,
-    onShowSnackbar: suspend (String, String?) -> Boolean,
+    onShowSnackBar: (String, String?) -> Unit,
     loadingViewModel: LoadingViewModel = viewModel()
 ) {
     LaunchedEffect(Unit) {

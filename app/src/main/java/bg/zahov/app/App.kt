@@ -18,6 +18,7 @@ import androidx.compose.runtime.Composable
 import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.remember
+import androidx.compose.runtime.rememberCoroutineScope
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
@@ -28,12 +29,15 @@ import androidx.navigation.compose.rememberNavController
 import bg.zahov.app.ui.BottomBar
 import bg.zahov.app.ui.theme.FitnessTheme
 import bg.zahov.app.ui.topbar.TopBar
+import kotlinx.coroutines.launch
 
 @Composable
 fun App(workoutManagerViewModel: WorkoutManagerViewModel) {
     val navController = rememberNavController()
     val state by workoutManagerViewModel.state.collectAsStateWithLifecycle()
     val snackBarHostState = remember { SnackbarHostState() }
+
+    val snackScope = rememberCoroutineScope()
 
     LaunchedEffect(state.isWorkoutActive) {
         if (state.isWorkoutActive) navController.navigate(Workout)
@@ -62,12 +66,14 @@ fun App(workoutManagerViewModel: WorkoutManagerViewModel) {
         ) { padding ->
             MainNavGraph(
                 modifier = Modifier.padding(padding),
-                onShowSnackbar = { message, action ->
-                    snackBarHostState.showSnackbar(
-                        message = message,
-                        actionLabel = action,
-                        duration = SnackbarDuration.Short,
-                    ) == SnackbarResult.ActionPerformed
+                onShowSnackBar = { message, action ->
+                    snackScope.launch {
+                        snackBarHostState.showSnackbar(
+                            message = message,
+                            actionLabel = action,
+                            duration = SnackbarDuration.Short
+                            )
+                    }
                 },
                 navController = navController,
             )
