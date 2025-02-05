@@ -22,6 +22,17 @@ interface WorkoutProvider {
      * The value is `true` when a finish attempt is in progress, and `false` otherwise.
      */
     val shouldFinish: StateFlow<Boolean>
+
+    /**
+     * Tracks whether the "Save as Template" action should be triggered.
+     */
+    val shouldSaveAsTemplate: StateFlow<Boolean>
+
+    /**
+     * Tracks whether the "Delete History Workout" action should be triggered.
+     */
+    val shouldDeleteHistoryWorkout: StateFlow<Boolean>
+
     suspend fun getTemplateWorkouts(): Flow<List<Workout>>
     suspend fun getPastWorkouts(): Flow<List<Workout>>
     suspend fun addTemplateWorkout(newWorkout: Workout)
@@ -47,6 +58,16 @@ interface WorkoutProvider {
         date: LocalDateTime,
         newExercises: List<Exercise>,
     )
+
+    /**
+     * Triggers the "Save as Template" action.
+     */
+    fun triggerSaveAsTemplate()
+
+    /**
+     * Triggers the "Delete History Workout" action.
+     */
+    fun triggerDeleteHistoryWorkout()
 
     /**
      * converts the workout to [HistoryInfoWorkout] and workout

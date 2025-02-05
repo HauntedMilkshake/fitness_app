@@ -43,31 +43,84 @@ class HistoryInfoViewModel(
      * and the selected workout from history.
      */
     init {
+        observeTemplateWorkouts()
+        observerHistoryWorkouts()
+        observerClickedWorkout()
+        observerSaveTrigger()
+        observerSaveTrigger()
+        observerDeleteTrigger()
+    }
+
+    /**
+     * Observes template workouts and updates the `templates` list when changes occur.
+     * @see workoutProvider
+     */
+    private fun observeTemplateWorkouts() {
         viewModelScope.launch {
-            launch {
-                workoutProvider.getTemplateWorkouts().collect {
-                    templates = it
+            workoutProvider.getTemplateWorkouts().collect {
+                templates = it
+            }
+        }
+    }
+
+    /**
+     * Observes historical workouts and updates the `pastWorkouts` list when changes occur.
+     * @see workoutProvider
+     */
+    private fun observerHistoryWorkouts() {
+        viewModelScope.launch {
+            workoutProvider.getPastWorkouts().collect {
+                pastWorkouts = it
+            }
+        }
+    }
+
+    /**
+     * Observes the clicked workout and updates the UI state with its details.
+     * @see workoutProvider
+     */
+    private fun observerClickedWorkout() {
+        viewModelScope.launch {
+            workoutProvider.clickedPastWorkout.collect {
+                _uiState.update { old ->
+                    old.copy(
+                        id = it.id,
+                        workoutName = it.workoutName,
+                        workoutDate = it.workoutDate,
+                        duration = it.duration,
+                        volume = it.volume,
+                        prs = it.prs,
+                        exercisesInfo = it.exercisesInfo,
+                        isDeleted = false
+                    )
                 }
             }
-            launch {
-                workoutProvider.getPastWorkouts().collect {
-                    pastWorkouts = it
+        }
+    }
+
+    /**
+     * Observes the save trigger and saves the current workout as a template if triggered.
+     * @see workoutProvider
+     */
+    private fun observerSaveTrigger() {
+        viewModelScope.launch {
+            workoutProvider.shouldSaveAsTemplate.collect {
+                if (it) {
+                    saveAsTemplate()
                 }
             }
-            launch {
-                workoutProvider.clickedPastWorkout.collect {
-                    _uiState.update { old ->
-                        old.copy(
-                            id = it.id,
-                            workoutName = it.workoutName,
-                            workoutDate = it.workoutDate,
-                            duration = it.duration,
-                            volume = it.volume,
-                            prs = it.prs,
-                            exercisesInfo = it.exercisesInfo,
-                            isDeleted = false
-                        )
-                    }
+        }
+    }
+
+    /**
+     * Observes the delete trigger and deletes the current workout from history if triggered.
+     * @see workoutProvider
+     */
+    private fun observerDeleteTrigger() {
+        viewModelScope.launch {
+            workoutProvider.shouldDeleteHistoryWorkout.collect {
+                if (it) {
+                    delete()
                 }
             }
         }
@@ -96,7 +149,7 @@ class HistoryInfoViewModel(
      * Saves the current workout as a template, if it does not already exist in the templates.
      * Displays a toast notification if the workout already exists as a template.
      */
-    fun saveAsTemplate() {
+    private fun saveAsTemplate() {
         viewModelScope.launch {
             if (templates.any { it.id == getCorrespondingWorkout()?.id }) {
                 toastManager.showToast(R.string.workout_exists_toast)

@@ -23,7 +23,6 @@ googleServicesPlugin = "4.4.2"
 androidxTestExtJunit = "1.1.5"
 androidxTestRunner = "1.5.0"
 material = "1.12.0"
-accompanistSystemUiController = "0.30.1"
 splashscreenVer = "1.0.1"
 navigationTesting = "2.8.6"
 
