@@ -38,6 +38,7 @@ class LoadingViewModel(
                 userProvider.authStateFlow().collect { isAuthenticated ->
                     if (isAuthenticated) {
                         _loading.value = true
+                        userProvider.initDataSources()
                         _navigationTarget.update { Home }
                     } else {
                         _navigationTarget.update { Welcome }

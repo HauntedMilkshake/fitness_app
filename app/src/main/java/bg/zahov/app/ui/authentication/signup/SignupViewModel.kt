@@ -3,6 +3,7 @@ package bg.zahov.app.ui.authentication.signup
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
 import bg.zahov.app.Inject
+import bg.zahov.app.data.interfaces.AuthResponse
 import bg.zahov.app.data.interfaces.UserProvider
 import com.google.firebase.auth.FirebaseAuthInvalidCredentialsException
 import com.google.firebase.auth.FirebaseAuthUserCollisionException
@@ -60,7 +61,12 @@ class SignupViewModel(private val auth: UserProvider = Inject.userProvider) : Vi
     fun signUp() {
         viewModelScope.launch {
             try {
-                auth.signup(_uiState.value.email, _uiState.value.password)
+                (auth.signup(
+                    _uiState.value.email,
+                    _uiState.value.password
+                ) as? AuthResponse.Success)?.let {
+                    auth.createDataSources(_uiState.value.username, it.userId)
+                }
             } catch (e: Exception) {
                 when (e) {
                     is FirebaseAuthUserCollisionException -> {
@@ -81,7 +87,10 @@ class SignupViewModel(private val auth: UserProvider = Inject.userProvider) : Vi
                         )
                     }
 
-                    is CancellationException -> throw e
+                    is CancellationException -> showMessage(
+                        e.message ?: "There was some error with authentication"
+                    )
+
                     else -> showMessage("Something went wrong")
 
                 }

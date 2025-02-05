@@ -9,12 +9,8 @@ import kotlinx.coroutines.flow.Flow
 
 class UserProviderImpl : UserProvider {
     companion object {
-        @Volatile
         private var instance: UserProviderImpl? = null
-        fun getInstance() =
-            instance ?: synchronized(this) {
-                instance ?: UserProviderImpl().also { instance = it }
-            }
+        fun getInstance() = instance ?: UserProviderImpl().also { instance = it }
     }
 
     private val userRepo = UserRepositoryImpl.getInstance()

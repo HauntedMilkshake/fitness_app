@@ -5,6 +5,7 @@ import bg.zahov.app.data.exception.AuthenticationException
 import bg.zahov.app.data.exception.CriticalDataNullException
 import com.google.android.gms.tasks.Task
 import com.google.android.gms.tasks.Tasks
+import com.google.firebase.auth.AuthResult
 import com.google.firebase.auth.EmailAuthProvider
 import com.google.firebase.auth.FirebaseAuth
 import com.google.firebase.auth.FirebaseAuthInvalidUserException
@@ -16,29 +17,39 @@ import kotlinx.coroutines.flow.callbackFlow
 import kotlinx.coroutines.flow.distinctUntilChanged
 import kotlinx.coroutines.tasks.await
 import kotlinx.coroutines.withContext
+import kotlinx.coroutines.withTimeout
 
 class FirebaseAuthentication {
     companion object {
-        @Volatile
         private var instance: FirebaseAuthentication? = null
-        fun getInstance() =
-            instance ?: synchronized(this) {
-                instance ?: FirebaseAuthentication().also { instance = it }
-            }
+        fun getInstance() = instance ?: FirebaseAuthentication().also { instance = it }
+
     }
 
     private val auth = FirebaseAuth.getInstance()
     private val firestore = FirestoreManager.getInstance()
 
-    suspend fun signup(email: String, password: String) {
+    /**
+     * Registers a new user with the given email and password.
+     * @param email User's email.
+     * @param password User's password.
+     * @return [AuthResult] of the sign-up process.
+     */
+    suspend fun signup(email: String, password: String): AuthResult = withTimeout(5000) {
         auth.createUserWithEmailAndPassword(email, password).await()
-        init()
     }
 
-    suspend fun login(email: String, password: String) {
+
+    /**
+     * Authenticates a user with the given email and password.
+     * @param email User's email.
+     * @param password User's password.
+     * @return [AuthResult] of the login process.
+     */
+    suspend fun login(email: String, password: String): AuthResult = withTimeout(5000) {
         auth.signInWithEmailAndPassword(email, password).await()
-        init()
     }
+
 
     fun logout() {
         auth.signOut()
@@ -75,8 +86,7 @@ class FirebaseAuthentication {
         }
     }.distinctUntilChanged()
 
-
-    private fun init() {
+    fun initFirestoreUser() {
         auth.currentUser?.uid?.let {
             firestore.initUser(it)
         }

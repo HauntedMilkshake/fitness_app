@@ -7,8 +7,8 @@ import kotlinx.coroutines.flow.Flow
 interface UserProvider {
     suspend fun getUser(): Flow<User>
     suspend fun changeUserName(newUsername: String): Task<Void>
-    suspend fun signup(email: String, password: String)
-    suspend fun login(email: String, password: String)
+    suspend fun signup(email: String, password: String): AuthResponse
+    suspend fun login(email: String, password: String): AuthResponse
     suspend fun logout()
     suspend fun deleteAccount()
     suspend fun passwordResetByEmail(email: String): Task<Void>
