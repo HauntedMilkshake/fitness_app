@@ -57,7 +57,7 @@ fun RestScreen(restViewModel: RestTimerViewModel = viewModel(), navigate: () -> 
                 insideProgressContent = {
                     if (!cast.isCustomTimer) {
                         Column {
-                            for (i in 0 until 4) {
+                            for (i in 0 until cast.rests.size) {
                                 val stringValue = (state as Rest.Default).rests[i]
                                 TimerButton(
                                     text = stringValue,

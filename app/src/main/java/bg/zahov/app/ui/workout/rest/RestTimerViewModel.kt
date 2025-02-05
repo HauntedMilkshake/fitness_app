@@ -29,15 +29,12 @@ sealed interface Rest {
      * @property rests An array of predefined rest durations, expressed as strings. Defaults to ["1:00", "1:30", "2:00", "2:30"].
      * @property increment A string representing the increment value for increasing rest duration (if applicable). Default is an empty string.
      * @property isCustomTimer A boolean flag indicating whether the user is using a custom timer. Default is `false`.
+     *
+     * @see [RestInfo]
      */
     data class Default(
-        val rests: List<String> = listOf(
-            "1:00",
-            "1:30",
-            "2:00",
-            "2:30"
-        ),
-        val increment: String = "30",
+        val rests: List<String> = RestInfo().rests,
+        val increment: String = RestInfo().increment,
         val isCustomTimer: Boolean = false,
         val pickerValue: String = rests.first(),
     ) : Rest
@@ -49,14 +46,11 @@ sealed interface Rest {
      * @property increment A string representing the increment value for increasing rest duration.
      * @property startingTime A string indicating the starting time of the rest period.
      * @property timer A float value representing the progress of the timer, where `0f` represents no progress.
+     *
+     * @see [RestInfo]
      */
     data class Resting(
-        val rests: List<String> = listOf(
-            "1:00",
-            "1:30",
-            "2:00",
-            "2:30"
-        ),
+        val rests: List<String> = RestInfo().rests,
         val increment: String = "30",
         val startingTime: String = "",
         val remaining: String = "",
@@ -68,6 +62,19 @@ sealed interface Rest {
      */
     data object Finished : Rest
 }
+
+/**
+ * Sharing rests and increment
+ */
+data class RestInfo(
+    val rests: List<String> = listOf(
+        "1:00",
+        "1:30",
+        "2:00",
+        "2:30"
+    ),
+    val increment: String = "30",
+)
 
 /**
  * ViewModel responsible for managing the state and logic of a rest timer in the application.
@@ -114,7 +121,6 @@ class RestTimerViewModel(
                         timer = (elapsedTime.parseTimeStringToLong()
                             .toFloat() / fullRest.parseTimeStringToLong()
                             .toFloat()).coerceIn(0f, 1f),
-                        //increment = (timerDelta / 1000).toString() TODO(no longer need this check because settings were deleted)
                     )
                 }
             }

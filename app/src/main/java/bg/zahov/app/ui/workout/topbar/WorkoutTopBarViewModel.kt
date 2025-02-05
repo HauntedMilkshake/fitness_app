@@ -1,17 +1,14 @@
 package bg.zahov.app.ui.workout.topbar
 
-import android.util.Log
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
 import bg.zahov.app.Inject
 import bg.zahov.app.data.interfaces.WorkoutProvider
 import bg.zahov.app.data.provider.RestTimerProvider
+import bg.zahov.app.data.provider.RestTimerProvider.Rest
 import bg.zahov.app.data.provider.WorkoutStateManager
-import bg.zahov.app.ui.workout.toRestTime
-import bg.zahov.app.util.parseTimeStringToLong
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.StateFlow
-import kotlinx.coroutines.flow.update
 import kotlinx.coroutines.launch
 
 
@@ -50,6 +47,8 @@ class WorkoutTopBarViewModel(
 ) : ViewModel() {
 
     private val _uiState = MutableStateFlow(WorkoutTopBarData())
+    val workoutTimer: StateFlow<Long> = workoutStateManager.timer
+    val restTimer: StateFlow<Rest> = restStateManager.restTimer
 
     /**
      * The observable state of the Workout Top Bar UI, exposed as a [StateFlow].
@@ -61,73 +60,13 @@ class WorkoutTopBarViewModel(
     val uiState: StateFlow<WorkoutTopBarData> = _uiState
 
     /**
-     * Initializes the [WorkoutTopBarViewModel] by collecting:
-     * - Workout timer updates from [WorkoutStateManager.timer] to update the elapsed workout time.
-     * - Rest timer updates from [RestTimerProvider.restTimer] to update elapsed rest time and progress.
-     *
-     * Automatically updates the [uiState] whenever the collected data changes.
-     */
-    init {
-        observeWorkoutTimer()
-        observeRestTimer()
-    }
-
-    /**
-     * Observes the workout timer and updates the UI state with the elapsed workout time.
-     */
-    private fun observeWorkoutTimer() {
-        viewModelScope.launch {
-            workoutStateManager.timer.collect {
-                _uiState.update { old ->
-                    old.copy(
-                        elapsedWorkoutTime = it.toRestTime()
-                    )
-                }
-            }
-        }
-    }
-
-    /**
-     * Observes the rest timer and updates the UI state with the elapsed rest time and progress.
-     *
-     * The progress is calculated based on the full rest time and the current elapsed rest time.
-     *
-     * @see restStateManager
-     * @see calculateProgress
-     * @see parseTimeStringToLong
-     */
-    private fun observeRestTimer() {
-        viewModelScope.launch {
-            restStateManager.restTimer.collect {
-                Log.d(
-                    "current rest", calculateProgress(
-                        fullRest = (it.fullRest?.parseTimeStringToLong()?.toFloat() ?: 0f),
-                        currentRest = (it.elapsedTime?.parseTimeStringToLong()?.toFloat()
-                            ?: 0f)
-                    ).toString()
-                )
-                _uiState.update { old ->
-                    old.copy(
-                        elapsedRestTime = it.elapsedTime ?: "",
-                        progress = calculateProgress(
-                            fullRest = (it.fullRest?.parseTimeStringToLong()?.toFloat() ?: 0f),
-                            currentRest = (it.elapsedTime?.parseTimeStringToLong()?.toFloat()
-                                ?: 0f)
-                        )
-                    )
-                }
-            }
-        }
-    }
-
-    /**
      * Calculates the progress of the rest timer as a value between 0 and 1.
      *
      * @param fullRest Total rest time in milliseconds.
      * @param currentRest Current elapsed rest time in milliseconds.
      * @return The calculated progress as a float, constrained between 0 and 1.
      */
-    private fun calculateProgress(fullRest: Float, currentRest: Float): Float {
+    fun calculateProgress(fullRest: Float, currentRest: Float): Float {
         return (currentRest / fullRest).coerceIn(0f, 1f)
     }
 

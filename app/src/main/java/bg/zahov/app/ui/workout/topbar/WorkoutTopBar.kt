@@ -22,20 +22,35 @@ import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import androidx.lifecycle.viewmodel.compose.viewModel
+import bg.zahov.app.ui.workout.toRestTime
+import bg.zahov.app.util.parseTimeStringToLong
 import bg.zahov.fitness.app.R
+import kotlinx.coroutines.flow.map
+import kotlinx.coroutines.flow.mapNotNull
+
 
 @Composable
 fun TopBarWorkout(
     viewModel: WorkoutTopBarViewModel = viewModel(),
     onRestClick: () -> Unit,
 ) {
-    val state by viewModel.uiState.collectAsStateWithLifecycle()
+    val workoutTime: String by viewModel.workoutTimer.map { it.toRestTime() }
+        .collectAsStateWithLifecycle("")
+    val elapsedRestTime: String by viewModel.restTimer.mapNotNull { it.elapsedTime }
+        .collectAsStateWithLifecycle("")
+    val restProgress: Float by viewModel.restTimer.mapNotNull {
+        viewModel.calculateProgress(
+            fullRest = (it.fullRest?.parseTimeStringToLong()?.toFloat() ?: 0f),
+            currentRest = (it.elapsedTime?.parseTimeStringToLong()?.toFloat()
+                ?: 0f)
+        )
+    }.collectAsStateWithLifecycle(1f)
     WorkoutTopBarContent(
-        elapsedWorkoutTime = state.elapsedWorkoutTime,
-        elapsedRestTime = state.elapsedRestTime,
+        elapsedWorkoutTime = workoutTime,
+        elapsedRestTime = elapsedRestTime,
         onMinimize = { viewModel.minimize() },
         onRestClick = onRestClick,
-        restProgress = state.progress,
+        restProgress = restProgress,
         onFinish = { viewModel.finish() }
     )
 
