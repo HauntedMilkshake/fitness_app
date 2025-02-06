@@ -232,7 +232,9 @@ class RestTimerViewModel(
      */
     fun onCustomTimerStart() {
         try {
-            startTimer("00:${(_uiState.value as Rest.Default).pickerValue}".parseTimeStringToLong())
+            startTimer(
+                (_uiState.value as? Rest.Default)?.pickerValue?.parseMinuteTimeToMillis() ?: 0
+            )
         } catch (_: IllegalArgumentException) {
             toastManager.showToast(R.string.invalid_time_format)
         }
@@ -283,4 +285,17 @@ class RestTimerViewModel(
     fun updateNumberPicker(newValue: String) {
         updateStateValues(numberPicker = newValue)
     }
+}
+
+fun String.parseMinuteTimeToMillis(): Long {
+    val parts = this.split(":")
+
+    if (parts.size !in 1..2) {
+        throw IllegalArgumentException("Invalid time string format")
+    }
+
+    val minutes = parts[0].toLong()
+    val seconds = parts[1].toLong()
+
+    return ((minutes * 60) + seconds) * 1000
 }
