@@ -33,8 +33,8 @@ sealed interface Rest {
      * @see [RestInfo]
      */
     data class Default(
-        val rests: List<String> = RestInfo().rests,
-        val increment: String = RestInfo().increment,
+        val rests: List<String> = RestInfo.rests,
+        val increment: String = RestInfo.INCREMENT,
         val isCustomTimer: Boolean = false,
         val pickerValue: String = rests.first(),
     ) : Rest
@@ -50,7 +50,7 @@ sealed interface Rest {
      * @see [RestInfo]
      */
     data class Resting(
-        val rests: List<String> = RestInfo().rests,
+        val rests: List<String> = RestInfo.rests,
         val increment: String = "30",
         val startingTime: String = "",
         val remaining: String = "",
@@ -66,15 +66,15 @@ sealed interface Rest {
 /**
  * Sharing rests and increment
  */
-data class RestInfo(
+object RestInfo {
     val rests: List<String> = listOf(
         "1:00",
         "1:30",
         "2:00",
         "2:30"
-    ),
-    val increment: String = "30",
-)
+    )
+    const val INCREMENT: String = "30"
+}
 
 /**
  * ViewModel responsible for managing the state and logic of a rest timer in the application.
