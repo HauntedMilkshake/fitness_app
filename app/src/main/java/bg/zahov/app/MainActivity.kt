@@ -6,13 +6,14 @@ import androidx.activity.enableEdgeToEdge
 import androidx.activity.viewModels
 import androidx.appcompat.app.AppCompatActivity
 import androidx.core.splashscreen.SplashScreen.Companion.installSplashScreen
-import androidx.core.view.WindowCompat
 import androidx.lifecycle.lifecycleScope
 import bg.zahov.app.Inject.serviceErrorHandler
 import bg.zahov.app.data.model.ServiceState
 import bg.zahov.app.data.model.state.ShutDownData
+import dagger.hilt.android.AndroidEntryPoint
 import kotlinx.coroutines.launch
 
+@AndroidEntryPoint
 class MainActivity : AppCompatActivity() {
     private val workoutManagerViewModel: WorkoutManagerViewModel by viewModels()
     private val loadingViewModel: LoadingViewModel by viewModels()

@@ -15,6 +15,7 @@ import bg.zahov.app.data.provider.WorkoutProviderImpl
 import bg.zahov.app.data.provider.WorkoutStateManager
 import com.google.firebase.Firebase
 import com.google.firebase.initialize
+import dagger.hilt.android.HiltAndroidApp
 
 object Inject {
     val userProvider by lazy {
@@ -55,10 +56,12 @@ object Inject {
     }
 }
 
+@HiltAndroidApp
 class MyApplication : Application() {
 
     override fun onCreate() {
         super.onCreate()
         Firebase.initialize(this)
+
     }
 }
