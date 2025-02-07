@@ -8,6 +8,9 @@ import androidx.lifecycle.viewModelScope
 import androidx.lifecycle.viewmodel.initializer
 import androidx.lifecycle.viewmodel.viewModelFactory
 import androidx.navigation.toRoute
+import bg.zahov.app.ExerciseArgs.ADD_EXERCISE_ARG
+import bg.zahov.app.ExerciseArgs.REPLACE_EXERCISE_ARG
+import bg.zahov.app.ExerciseArgs.SELECT_EXERCISE_ARG
 import bg.zahov.app.Exercises
 import bg.zahov.app.Inject
 import bg.zahov.app.data.exception.CriticalDataNullException
@@ -23,9 +26,6 @@ import bg.zahov.app.data.provider.AddExerciseToWorkoutProvider
 import bg.zahov.app.data.provider.FilterProvider
 import bg.zahov.app.data.provider.ReplaceableExerciseProvider
 import bg.zahov.app.data.provider.SelectableExerciseProvider
-import bg.zahov.app.ui.exercise.ExercisesFragment.Companion.ADD_EXERCISE_ARG
-import bg.zahov.app.ui.exercise.ExercisesFragment.Companion.REPLACE_EXERCISE_ARG
-import bg.zahov.app.ui.exercise.ExercisesFragment.Companion.SELECT_EXERCISE_ARG
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.StateFlow
 import kotlinx.coroutines.flow.update
@@ -78,7 +78,6 @@ class ExerciseViewModel(
 
     init {
         updateFlag(exerciseState)
-
         viewModelScope.launch {
             launch {
                 filterProvider.filters.collect { filters ->
@@ -139,6 +138,16 @@ class ExerciseViewModel(
         }
     }
 
+    /**
+     * Resets the state after performing the navigation callback so as to prevent
+     * bugs(e.g. when the user goes back into the screen and the state hasn't reset so he gets
+     * instantly navigated away from it)
+     */
+    fun resetNavigationState() {
+        _exerciseData.update { old ->
+            old.copy(navigateInfo = false)
+        }
+    }
     /**
      * Handles the click event on an exercise item, adjusting the selection state based on the current flag.
      *

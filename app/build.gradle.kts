@@ -5,6 +5,7 @@ plugins {
     alias(libs.plugins.androidApplication)
     alias(libs.plugins.kotlinAndroid)
     alias(libs.plugins.kotlinKapt)
+    alias(libs.plugins.hilt)
 }
 
 android {
@@ -12,7 +13,6 @@ android {
     compileSdk = 35
 
     buildFeatures {
-        viewBinding = true
         compose = true
     }
 
@@ -78,7 +78,6 @@ dependencies {
     debugImplementation(libs.uiTooling)
     implementation(libs.uiToolingPreview)
     implementation(libs.material3)
-    implementation(libs.accompanistSystemUiController)
     implementation(libs.activityCompose)
     implementation(libs.lifecycleViewModelCompose)
     implementation(libs.firebaseFunctions)
@@ -94,4 +93,7 @@ dependencies {
     implementation(libs.lifecycleLiveData)
     implementation(libs.mpChart)
     implementation(libs.calendarCompose)
+    implementation(libs.hiltAndroid)
+    implementation(libs.hiltNavigation)
+    kapt(libs.hiltCompiler)
 }
