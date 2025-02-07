@@ -24,6 +24,7 @@ import bg.zahov.app.ui.settings.profile.EditProfileScreen
 import bg.zahov.app.ui.welcome.WelcomeScreen
 import bg.zahov.app.ui.workout.AddTemplateWorkoutScreen
 import bg.zahov.app.ui.workout.WorkoutScreen
+import bg.zahov.app.ui.workout.rest.RestScreen
 import bg.zahov.app.ui.workout.finish.WorkoutFinishScreen
 import bg.zahov.app.ui.workout.start.StartWorkoutScreen
 
@@ -166,9 +167,13 @@ fun MainNavGraph(
         composable<Calendar> {
             CalendarScreen()
         }
-
         composable<WorkoutFinish> {
             WorkoutFinishScreen(onClose = { navController.navigateUp() })
+        }
+        composable<Rest> {
+            RestScreen(
+                navigate = { navController.navigate(Workout) }
+            )
         }
     }
 }
