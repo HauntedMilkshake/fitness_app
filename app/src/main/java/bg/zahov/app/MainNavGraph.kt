@@ -31,11 +31,17 @@ import bg.zahov.app.ui.workout.start.StartWorkoutScreen
 fun MainNavGraph(
     modifier: Modifier = Modifier,
     navController: NavHostController,
-    loadingViewModel: LoadingViewModel = viewModel()
+    loadingViewModel: LoadingViewModel = viewModel(),
 ) {
     LaunchedEffect(Unit) {
         loadingViewModel.navigationTarget.collect {
-            navController.navigate(it)
+            navController.navigate(it) {
+                popUpTo(navController.graph.findStartDestination().id) {
+                    saveState = true
+                }
+                launchSingleTop = true
+                restoreState = true
+            }
         }
     }
 
