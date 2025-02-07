@@ -11,6 +11,7 @@ import androidx.compose.material3.TopAppBar
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.getValue
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.platform.testTag
 import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.res.stringResource
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
@@ -70,12 +71,15 @@ fun TopBarExerciseContent(
                     }
                 )
             } else {
-                Text(text = stringResource(R.string.exercise))
+                Text(modifier = Modifier.testTag("Title"), text = stringResource(R.string.exercise))
             }
         },
         actions = {
             if (isSearchActive.not()) {
-                IconButton(onClick = { onChangeIsSearchActive(true) }) {
+                IconButton(
+                    modifier = Modifier.testTag("Search"),
+                    onClick = { onChangeIsSearchActive(true) }
+                ) {
                     Icon(
                         painter = painterResource(R.drawable.ic_search),
                         contentDescription = stringResource(R.string.search)
@@ -83,6 +87,7 @@ fun TopBarExerciseContent(
                 }
             }
             IconButton(
+                modifier = Modifier.testTag("Filter"),
                 onClick = onChangeIsDialogOpen,
             ) {
                 Icon(
@@ -90,7 +95,10 @@ fun TopBarExerciseContent(
                     contentDescription = stringResource(R.string.select_filter)
                 )
             }
-            IconButton(onClick = onAddClick) {
+            IconButton(
+                modifier = Modifier.testTag("Add"),
+                onClick = onAddClick
+            ) {
                 Icon(
                     painter = painterResource(R.drawable.ic_plus),
                     contentDescription = stringResource(R.string.add_exercise)

@@ -30,6 +30,7 @@ import androidx.compose.runtime.getValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.layout.ContentScale
+import androidx.compose.ui.platform.testTag
 import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.text.style.TextOverflow
@@ -139,7 +140,8 @@ fun ConfirmButton(
             modifier = Modifier
                 .align(Alignment.BottomEnd)
                 .padding(16.dp)
-                .wrapContentSize(),
+                .wrapContentSize()
+                .testTag(stringResource(R.string.language_text)),
             colors = ButtonColors(
                 containerColor = MaterialTheme.colorScheme.primaryContainer,
                 contentColor = MaterialTheme.colorScheme.onPrimaryContainer,

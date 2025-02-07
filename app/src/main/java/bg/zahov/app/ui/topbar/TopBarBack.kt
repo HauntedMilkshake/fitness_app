@@ -31,7 +31,9 @@ fun TopBarBack(
             )
         },
         navigationIcon = {
-            IconButton(onClick = topBarState.onBackClick) {
+            IconButton(
+                modifier = modifier.testTag("Back"),
+                onClick = topBarState.onBackClick) {
                 Icon(
                     painter = painterResource(topBarState.backButtonIconId),
                     contentDescription = null

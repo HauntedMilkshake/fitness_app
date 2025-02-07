@@ -32,7 +32,9 @@ fun TopBarAction(
         },
         navigationIcon = {
             topBarState.onBackClick?.let {
-                IconButton(onClick = it) {
+                IconButton(
+                    modifier = modifier.testTag("Back"),
+                    onClick = it) {
                     topBarState.backButtonIconId?.let { icon ->
                         Icon(
                             painter = painterResource(icon),
@@ -43,7 +45,10 @@ fun TopBarAction(
             }
         },
         actions = {
-            IconButton(onClick = topBarState.onActionClick) {
+            IconButton(
+                modifier = modifier.testTag("Action"),
+                onClick = topBarState.onActionClick
+            ) {
                 Icon(
                     painter = painterResource(topBarState.actionButtonIconId),
                     contentDescription = "Top Bar Action"
