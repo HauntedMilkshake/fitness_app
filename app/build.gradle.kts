@@ -5,6 +5,7 @@ plugins {
     alias(libs.plugins.androidApplication)
     alias(libs.plugins.kotlinAndroid)
     alias(libs.plugins.kotlinKapt)
+    alias(libs.plugins.hilt)
 }
 
 android {
@@ -12,7 +13,6 @@ android {
     compileSdk = 35
 
     buildFeatures {
-        viewBinding = true
         compose = true
     }
 
@@ -96,4 +96,7 @@ dependencies {
     implementation(libs.lifecycleLiveData)
     implementation(libs.mpChart)
     implementation(libs.calendarCompose)
+    implementation(libs.hiltAndroid)
+    implementation(libs.hiltNavigation)
+    kapt(libs.hiltCompiler)
 }
