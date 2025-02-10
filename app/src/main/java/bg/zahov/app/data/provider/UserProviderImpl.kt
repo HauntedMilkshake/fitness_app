@@ -5,18 +5,12 @@ import bg.zahov.app.data.model.User
 import bg.zahov.app.data.repository.AuthenticationImpl
 import bg.zahov.app.data.repository.UserRepositoryImpl
 import com.google.android.gms.tasks.Task
-import com.google.firebase.auth.AuthResult
 import kotlinx.coroutines.flow.Flow
-import kotlinx.coroutines.tasks.await
 
 class UserProviderImpl : UserProvider {
     companion object {
-        @Volatile
         private var instance: UserProviderImpl? = null
-        fun getInstance() =
-            instance ?: synchronized(this) {
-                instance ?: UserProviderImpl().also { instance = it }
-            }
+        fun getInstance() = instance ?: UserProviderImpl().also { instance = it }
     }
 
     private val userRepo = UserRepositoryImpl.getInstance()
@@ -26,12 +20,9 @@ class UserProviderImpl : UserProvider {
 
     override suspend fun changeUserName(newUsername: String) = userRepo.changeUserName(newUsername)
 
-    override suspend fun signup(
-        email: String, password: String,
-    ): AuthResult = auth.signup(email, password).await()
+    override suspend fun signup(email: String, password: String) = auth.signup(email, password)
 
-    override suspend fun login(email: String, password: String): Task<AuthResult> =
-        auth.login(email, password)
+    override suspend fun login(email: String, password: String) = auth.login(email, password)
 
     override suspend fun logout() = auth.logout()
 

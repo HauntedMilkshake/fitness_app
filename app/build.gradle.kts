@@ -13,7 +13,6 @@ android {
     compileSdk = 35
 
     buildFeatures {
-        viewBinding = true
         compose = true
     }
 
@@ -94,6 +93,7 @@ dependencies {
     implementation(libs.lifecycleLiveData)
     implementation(libs.mpChart)
     implementation(libs.calendarCompose)
+    implementation(libs.numberPicker)
     implementation(libs.hiltAndroid)
     implementation(libs.hiltNavigation)
     kapt(libs.hiltCompiler)

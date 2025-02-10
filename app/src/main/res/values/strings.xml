@@ -226,5 +226,10 @@
     <string name="cardio_category_text">Cardio</string>
     <string name="timed_category_text">Timed</string>
     <string name="muslce_part_description">Icon depicting</string>
+    <!-- Strings used for rest fragment   -->
+    <string name="add_to_rest_time" >+ %1$s S</string>
+    <string name="remove_from_rest_time">- %1$s S</string>
+    <string name="invalid_time_format">Invalid time format</string>
+    <string name="rest_top_bar_title">Rest</string>
 
 </resources>
