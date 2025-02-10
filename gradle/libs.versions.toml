@@ -23,6 +23,7 @@ androidxTestExtJunit = "1.1.5"
 androidxTestRunner = "1.5.0"
 material = "1.12.0"
 splashscreenVer = "1.0.1"
+numberPickerVer = "1.0.3"
 hiltVer = "2.51.1"
 hiltNavigationVer = "1.2.0"
 kspVer = "2.0.21-1.0.27"
@@ -65,6 +66,7 @@ firebaseFirestore = { module = "com.google.firebase:firebase-firestore-ktx", ver
 mpChart = { module = "com.github.PhilJay:MPAndroidChart", version.ref = "mpChart" }
 calendarCompose = { module = "com.kizitonwose.calendar:compose", version.ref = "calendarCompose" }
 kotlinSerialization = { module = "org.jetbrains.kotlinx:kotlinx-serialization-json", version.ref = "kotlinSerialization" }
+numberPicker = { module = "com.chargemap.compose:numberpicker", version.ref = "numberPickerVer"}
 
 [plugins]
 googleServices = { id = "com.google.gms.google-services", version.ref = "googleServicesPlugin" }
