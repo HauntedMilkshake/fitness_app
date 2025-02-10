@@ -6,8 +6,9 @@ import bg.zahov.app.data.model.Filter
 import bg.zahov.app.data.model.FilterItem
 import kotlinx.coroutines.flow.MutableSharedFlow
 import kotlinx.coroutines.flow.SharedFlow
+import javax.inject.Inject
 
-class FilterProvider {
+class FilterProvider @Inject constructor() {
     companion object {
         @Volatile
         private var instance: FilterProvider? = null
