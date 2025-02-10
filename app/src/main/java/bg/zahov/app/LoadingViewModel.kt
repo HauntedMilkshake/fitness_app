@@ -4,10 +4,12 @@ import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
 import bg.zahov.app.data.interfaces.ServiceErrorHandler
 import bg.zahov.app.data.interfaces.UserProvider
+import dagger.hilt.android.lifecycle.HiltViewModel
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.StateFlow
 import kotlinx.coroutines.flow.update
 import kotlinx.coroutines.launch
+import javax.inject.Inject
 
 /**
  * ViewModel responsible for managing the app's loading process at startup.
@@ -21,9 +23,10 @@ import kotlinx.coroutines.launch
  * @property serviceError A handler for managing errors and service-related issues during the startup
  *                        process. Injected by default via `Inject.serviceErrorHandler`.
  */
-class LoadingViewModel(
-    private val userProvider: UserProvider = Inject.userProvider,
-    private val serviceError: ServiceErrorHandler = Inject.serviceErrorHandler,
+@HiltViewModel
+class LoadingViewModel @Inject constructor(
+    private val userProvider: UserProvider,
+    private val serviceError: ServiceErrorHandler,
 ) : ViewModel() {
     private val _loading = MutableStateFlow(true)
     val loading: StateFlow<Boolean> = _loading
