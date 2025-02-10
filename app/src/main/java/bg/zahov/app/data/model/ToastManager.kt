@@ -5,6 +5,7 @@ import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.StateFlow
 import kotlinx.coroutines.flow.asStateFlow
 import kotlinx.coroutines.flow.update
+import javax.inject.Inject
 
 /**
  * Data class representing a toast message, storing a string resource ID.
@@ -14,13 +15,13 @@ import kotlinx.coroutines.flow.update
 data class Message(@StringRes val messageResId: Int)
 
 /**
- * Singleton object responsible for managing toast messages within the app.
+ * Class responsible for managing toast messages within the app.
  *
  * `ToastManager` allows the app to display toast messages with a single point of control.
  * The messages are managed using a [StateFlow] that emits a [Message] instance whenever a
  * new message is added.
  */
-object ToastManager {
+class ToastManager @Inject constructor()  {
 
     // Backing property for the toast message flow
     private val _messages: MutableStateFlow<Message?> = MutableStateFlow(null)

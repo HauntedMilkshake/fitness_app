@@ -8,6 +8,7 @@ import bg.zahov.app.data.interfaces.SettingsProvider
 import bg.zahov.app.data.interfaces.UserProvider
 import bg.zahov.app.data.interfaces.WorkoutActions
 import bg.zahov.app.data.interfaces.WorkoutProvider
+import bg.zahov.app.data.model.ToastManager
 import bg.zahov.app.data.provider.AddExerciseToWorkoutProvider
 import bg.zahov.app.data.provider.ExercisesTopBarManager
 import bg.zahov.app.data.provider.FilterProvider
@@ -47,6 +48,10 @@ abstract class ActivityModule {
     @Binds
     @Singleton
     abstract fun provideExercisesTopAppHandler(exerciseTopBarManager: ExercisesTopBarManager): ExercisesTopBarHandler
+
+    @Binds
+    @Singleton
+    abstract fun ToastManager(toastManager: ToastManager) : ToastManager
 }
 
 @Module
@@ -85,4 +90,8 @@ object ApplicationModule {
     @Singleton
     fun provideFilterProvider(): FilterProvider =
         FilterProvider()
+
+    @Singleton
+    fun toastManagerProvider(): ToastManager =
+        ToastManager()
 }
