@@ -66,6 +66,7 @@ import androidx.compose.ui.text.input.TextFieldValue
 import androidx.compose.ui.text.input.VisualTransformation
 import androidx.compose.ui.text.style.TextOverflow
 import androidx.compose.ui.unit.dp
+import androidx.hilt.navigation.compose.hiltViewModel
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import androidx.lifecycle.viewmodel.compose.viewModel
 import bg.zahov.app.data.model.SetType
@@ -146,7 +147,7 @@ fun AddTemplateWorkoutScreen(
 
 @Composable
 fun WorkoutScreen(
-    workoutViewModel: WorkoutViewModel = viewModel(LocalContext.current as ComponentActivity),
+    workoutViewModel: WorkoutViewModel = hiltViewModel(LocalContext.current as ComponentActivity),
     onAddExercise: () -> Unit,
     onReplaceExercise: () -> Unit,
     onBackPressed: () -> Unit,
