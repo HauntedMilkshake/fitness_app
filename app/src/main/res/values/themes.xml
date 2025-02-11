@@ -1,6 +1,6 @@
 <?xml version="1.0" encoding="utf-8"?>
 <resources>
-    <style name="Theme.Fitness_app" parent="Theme.MaterialComponents.Light.NoActionBar">
+    <style name="Theme.Fitness_app" parent="Theme.MaterialComponents.NoActionBar">
         <item name="android:statusBarColor">@color/background</item>
         <item name="android:windowBackground">@color/background</item>
     </style>
@@ -9,5 +9,7 @@
         <item name="windowSplashScreenBackground">@color/background</item>
         <item name="windowSplashScreenAnimatedIcon">@mipmap/ic_logo</item>
         <item name="postSplashScreenTheme">@style/Theme.Fitness_app</item>
+        <item name="android:windowActionBar">false</item>
+        <item name="android:windowNoTitle">true</item>
     </style>
 </resources>
