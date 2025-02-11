@@ -26,21 +26,20 @@ import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.res.colorResource
 import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.res.stringResource
-import androidx.compose.ui.text.TextStyle
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
-import bg.zahov.fitness.app.R
 import androidx.lifecycle.viewmodel.compose.viewModel
 import bg.zahov.app.ui.custom.CommonPasswordField
 import bg.zahov.app.ui.custom.CommonTextField
 import bg.zahov.app.util.isEmail
+import bg.zahov.fitness.app.R
 
 @Composable
 fun LoginScreen(
     loginViewModel: LoginViewModel = viewModel(),
-    onNavigateToSignUp: () -> Unit
+    onNavigateToSignUp: () -> Unit,
 ) {
     val uiState by loginViewModel.uiState.collectAsStateWithLifecycle()
     val context = LocalContext.current
@@ -74,7 +73,7 @@ fun LoginContent(
     onPasswordVisibilityChange: () -> Unit,
     navigateSignUp: () -> Unit,
     logIn: () -> Unit,
-    resetPassword: () -> Unit
+    resetPassword: () -> Unit,
 ) {
     val interactionSource = remember { MutableInteractionSource() }
     Column(

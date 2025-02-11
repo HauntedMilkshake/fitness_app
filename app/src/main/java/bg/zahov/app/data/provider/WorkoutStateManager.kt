@@ -13,8 +13,9 @@ import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.SharedFlow
 import kotlinx.coroutines.flow.StateFlow
 import kotlinx.coroutines.launch
+import javax.inject.Inject
 
-class WorkoutStateManager : WorkoutActions {
+class WorkoutStateManager @Inject constructor() : WorkoutActions {
     companion object {
 
         @Volatile
