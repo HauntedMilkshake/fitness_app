@@ -11,9 +11,10 @@ import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.StateFlow
 import kotlinx.coroutines.launch
 import java.time.LocalDateTime
+import javax.inject.Inject
 import kotlin.math.abs
 
-class RestTimerProvider : RestProvider {
+class RestTimerProvider @Inject constructor() : RestProvider {
     companion object {
         @Volatile
         private var instance: RestTimerProvider? = null
