@@ -36,7 +36,7 @@ data class CalendarUiState(
     val firstDayOfWeek: DayOfWeek = firstDayOfWeekFromLocale(),
     val daysOfWeek: List<DayOfWeek> = daysOfWeek(firstDayOfWeek),
     val dayToHasUserWorkedOut: Map<LocalDate, Boolean> = mapOf(),
-    val numberOfWorkoutsPerMonth: Map<Month, String> = mapOf()
+    val numberOfWorkoutsPerMonth: Map<Month, String> = mapOf(),
 )
 
 /**
@@ -46,10 +46,11 @@ data class CalendarUiState(
  */
 class CalendarViewModel @Inject constructor(
     private val workoutProvider: WorkoutProvider,
-    private val serviceError: ServiceErrorHandler
+    private val serviceError: ServiceErrorHandler,
 ) : ViewModel() {
 
     private val _uiState = MutableStateFlow<CalendarUiState>(CalendarUiState())
+
     /**
      * The current UI state of the calendar, exposed as a StateFlow for observing changes.
      */
