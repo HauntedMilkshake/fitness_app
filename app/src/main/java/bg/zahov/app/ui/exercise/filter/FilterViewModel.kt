@@ -48,7 +48,6 @@ class FilterViewModel @Inject constructor(private val filterManager: FilterProvi
      * accordingly using [toggleFilter].
      */
     init {
-        Log.d("updating filter", filterManager.toString())
         viewModelScope.launch {
             filterManager.reset()
             filterManager.filters.collectLatest { item ->
