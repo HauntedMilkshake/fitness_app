@@ -704,7 +704,7 @@ fun WorkoutSetRow(
 
         ItemBox(modifier = Modifier.weight(floatArrangement[2])) {
             SetInputField(
-                modifier = Modifier.testTag("Value")
+                modifier = Modifier.testTag("Weight value")
                     .fillMaxHeight()
                     .width(width = 64.dp),
                 value = weight,
@@ -714,7 +714,7 @@ fun WorkoutSetRow(
 
         ItemBox(modifier = Modifier.weight(floatArrangement[3])) {
             SetInputField(
-                modifier = Modifier.testTag("Value")
+                modifier = Modifier.testTag("Reps value")
                     .fillMaxHeight()
                     .width(width = 64.dp),
                 value = reps,

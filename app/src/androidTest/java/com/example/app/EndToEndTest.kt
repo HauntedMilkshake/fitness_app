@@ -97,11 +97,10 @@ class EndToEndTest {
         composeTestRule.onNodeWithContentDescription(context.getString(R.string.confirm)).performClick()
         composeTestRule.onNodeWithText(exerciseName).assertIsDisplayed()
         composeTestRule.onNodeWithText("add set").performClick()
-        composeTestRule.onAllNodesWithTag("Value")[0].performTextInput("6")
-        composeTestRule.onAllNodesWithTag("Value")[1].performTextInput("6")
+        composeTestRule.onAllNodesWithTag("Reps value")[0].performTextInput("6")
+        composeTestRule.onAllNodesWithTag("Weight value")[0].performTextInput("6")
         composeTestRule.onNodeWithText("Finish").performClick()
         Espresso.pressBack()
-
 //      History Screen
         composeTestRule.onNodeWithTag("History").performClick()
 //      Testing calendar functions
