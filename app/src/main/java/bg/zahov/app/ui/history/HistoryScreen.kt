@@ -33,8 +33,8 @@ import androidx.compose.ui.text.TextStyle
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.style.TextOverflow
 import androidx.compose.ui.unit.dp
+import androidx.hilt.navigation.compose.hiltViewModel
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
-import androidx.lifecycle.viewmodel.compose.viewModel
 import bg.zahov.app.data.provider.model.HistoryWorkout
 import bg.zahov.app.ui.custom.ExerciseWithSets
 import bg.zahov.app.ui.custom.WorkoutStats
@@ -43,7 +43,7 @@ import bg.zahov.fitness.app.R
 
 
 @Composable
-fun HistoryScreen(historyViewModel: HistoryViewModel = viewModel(), onItemClick: () -> Unit) {
+fun HistoryScreen(historyViewModel: HistoryViewModel = hiltViewModel(), onItemClick: () -> Unit) {
     val uiState by historyViewModel.uiState.collectAsStateWithLifecycle()
     HistoryContent(uiState.workouts, onItemClick = {
         historyViewModel.setClickedWorkout(it)
@@ -54,7 +54,7 @@ fun HistoryScreen(historyViewModel: HistoryViewModel = viewModel(), onItemClick:
 @Composable
 fun HistoryContent(
     workouts: List<HistoryWorkout>,
-    onItemClick: (String) -> Unit
+    onItemClick: (String) -> Unit,
 ) {
     val animationDuration = integerResource(R.integer.animation_duration_medium)
     FitnessTheme {
@@ -190,7 +190,7 @@ fun TextWithLeadingIcon(
     textOverflow: TextOverflow = TextOverflow.Ellipsis,
     iconModifier: Modifier = Modifier,
     iconColor: Color? = null,
-    contentDescription: String? = null
+    contentDescription: String? = null,
 ) {
     Icon(
         modifier = iconModifier,
