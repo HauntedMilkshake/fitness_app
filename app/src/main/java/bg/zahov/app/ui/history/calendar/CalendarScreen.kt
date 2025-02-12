@@ -26,6 +26,7 @@ import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.unit.dp
+import androidx.hilt.navigation.compose.hiltViewModel
 import com.kizitonwose.calendar.compose.HorizontalCalendar
 import com.kizitonwose.calendar.compose.rememberCalendarState
 import com.kizitonwose.calendar.core.CalendarDay
@@ -37,7 +38,7 @@ import java.time.LocalDate
 import java.time.Month
 
 @Composable
-fun CalendarScreen(calendarViewModel: CalendarViewModel = viewModel()) {
+fun CalendarScreen(calendarViewModel: CalendarViewModel = hiltViewModel()) {
     val uiState by calendarViewModel.uiState.collectAsStateWithLifecycle()
     val calendarState = rememberCalendarState(
         startMonth = uiState.startMonth,
