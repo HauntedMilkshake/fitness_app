@@ -2,23 +2,25 @@ package bg.zahov.app.ui.exercise.info
 
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
-import bg.zahov.app.Inject
 import bg.zahov.app.data.interfaces.WorkoutProvider
 import bg.zahov.app.data.model.LineChartData
 import bg.zahov.app.data.model.state.ExerciseHistoryData
 import bg.zahov.app.data.model.state.ExerciseHistoryInfo
 import com.github.mikephil.charting.data.Entry
+import dagger.hilt.android.lifecycle.HiltViewModel
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.StateFlow
 import kotlinx.coroutines.flow.update
 import kotlinx.coroutines.launch
+import javax.inject.Inject
 
 /**
  * ViewModel class for managing the UI state and business logic of the Exercise Info screen.
  *
  * @property workoutProvider The provider that fetches exercise history data. By default, it uses the injected instance from [Inject.workoutProvider].
  */
-class ExerciseInfoViewModel(private val workoutProvider: WorkoutProvider = Inject.workoutProvider) :
+@HiltViewModel
+class ExerciseInfoViewModel @Inject constructor(private val workoutProvider: WorkoutProvider) :
     ViewModel() {
     //Internal state flow for managing UI data updates.
     private val _uiState = MutableStateFlow(ExerciseHistoryData())
