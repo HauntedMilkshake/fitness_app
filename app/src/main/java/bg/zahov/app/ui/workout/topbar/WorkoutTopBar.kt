@@ -85,7 +85,7 @@ fun WorkoutTopBarContent(
 
 
             TextButton(
-                modifier = Modifier.testTag("Action"),
+                modifier = Modifier.testTag("Finish"),
                 onClick = onFinish
             ) {
                 Text(

@@ -12,6 +12,7 @@ import androidx.compose.ui.platform.testTag
 import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.text.style.TextOverflow
+import bg.zahov.fitness.app.R
 
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
@@ -32,26 +33,21 @@ fun TopBarAction(
         },
         navigationIcon = {
             topBarState.onBackClick?.let {
-                IconButton(
-                    modifier = modifier.testTag("Back"),
-                    onClick = it) {
+                IconButton(onClick = it) {
                     topBarState.backButtonIconId?.let { icon ->
                         Icon(
                             painter = painterResource(icon),
-                            contentDescription = "Back"
+                            contentDescription = stringResource(R.string.back_button)
                         )
                     }
                 }
             }
         },
         actions = {
-            IconButton(
-                modifier = modifier.testTag("Action"),
-                onClick = topBarState.onActionClick
-            ) {
+            IconButton(onClick = topBarState.onActionClick) {
                 Icon(
                     painter = painterResource(topBarState.actionButtonIconId),
-                    contentDescription = "Top Bar Action"
+                    contentDescription = stringResource(R.string.top_bar_action)
                 )
             }
         }

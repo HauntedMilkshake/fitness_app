@@ -12,6 +12,7 @@ import androidx.compose.ui.platform.testTag
 import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.text.style.TextOverflow
+import bg.zahov.fitness.app.R
 
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
@@ -31,12 +32,10 @@ fun TopBarBack(
             )
         },
         navigationIcon = {
-            IconButton(
-                modifier = modifier.testTag("Back"),
-                onClick = topBarState.onBackClick) {
+            IconButton(onClick = topBarState.onBackClick) {
                 Icon(
                     painter = painterResource(topBarState.backButtonIconId),
-                    contentDescription = null
+                    contentDescription = stringResource(R.string.back_button)
                 )
             }
         }

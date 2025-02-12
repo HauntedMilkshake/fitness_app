@@ -140,8 +140,7 @@ fun ConfirmButton(
             modifier = Modifier
                 .align(Alignment.BottomEnd)
                 .padding(16.dp)
-                .wrapContentSize()
-                .testTag(stringResource(R.string.language_text)),
+                .wrapContentSize(),
             colors = ButtonColors(
                 containerColor = MaterialTheme.colorScheme.primaryContainer,
                 contentColor = MaterialTheme.colorScheme.onPrimaryContainer,

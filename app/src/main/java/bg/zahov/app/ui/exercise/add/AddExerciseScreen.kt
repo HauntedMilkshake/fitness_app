@@ -162,7 +162,6 @@ fun ConfirmButton(
     ) {
         Button(
             modifier = Modifier
-                .testTag(stringResource(R.string.confirm))
                 .size(56.dp)
                 .align(Alignment.BottomEnd),
             shape = CircleShape,

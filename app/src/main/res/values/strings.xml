@@ -226,5 +226,6 @@
     <string name="cardio_category_text">Cardio</string>
     <string name="timed_category_text">Timed</string>
     <string name="muslce_part_description">Icon depicting</string>
-
+    <string name="show_password">Show password</string>
+    <string name="top_bar_action">Top Bar Action</string>
 </resources>

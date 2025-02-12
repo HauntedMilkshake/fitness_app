@@ -73,7 +73,7 @@ fun CommonPasswordField(
             }) {
                 Icon(
                     painterResource(if (passwordVisible) R.drawable.ic_password_hidden else R.drawable.ic_password_visible),
-                    "show password"
+                    contentDescription = stringResource(R.string.show_password)
                 )
             }
         },

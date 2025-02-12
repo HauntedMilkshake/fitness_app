@@ -76,29 +76,20 @@ fun TopBarExerciseContent(
         },
         actions = {
             if (isSearchActive.not()) {
-                IconButton(
-                    modifier = Modifier.testTag("Search"),
-                    onClick = { onChangeIsSearchActive(true) }
-                ) {
+                IconButton(onClick = { onChangeIsSearchActive(true) }) {
                     Icon(
                         painter = painterResource(R.drawable.ic_search),
                         contentDescription = stringResource(R.string.search)
                     )
                 }
             }
-            IconButton(
-                modifier = Modifier.testTag("Filter"),
-                onClick = onChangeIsDialogOpen,
-            ) {
+            IconButton(onClick = onChangeIsDialogOpen,) {
                 Icon(
                     painter = painterResource(R.drawable.ic_filters),
                     contentDescription = stringResource(R.string.select_filter)
                 )
             }
-            IconButton(
-                modifier = Modifier.testTag("Add"),
-                onClick = onAddClick
-            ) {
+            IconButton(onClick = onAddClick) {
                 Icon(
                     painter = painterResource(R.drawable.ic_plus),
                     contentDescription = stringResource(R.string.add_exercise)
