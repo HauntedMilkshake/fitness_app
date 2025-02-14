@@ -7,6 +7,7 @@ import bg.zahov.app.data.interfaces.ServiceErrorHandler
 import bg.zahov.app.data.interfaces.WorkoutProvider
 import com.kizitonwose.calendar.core.daysOfWeek
 import com.kizitonwose.calendar.core.firstDayOfWeekFromLocale
+import dagger.hilt.android.lifecycle.HiltViewModel
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.StateFlow
 import kotlinx.coroutines.flow.update
@@ -44,6 +45,7 @@ data class CalendarUiState(
  * @property workoutProvider A provider for fetching workout data. Defaults to the injected workout provider.
  * @property serviceError A handler for managing service errors. Defaults to the injected error handler.
  */
+@HiltViewModel
 class CalendarViewModel @Inject constructor(
     private val workoutProvider: WorkoutProvider,
     private val serviceError: ServiceErrorHandler,
