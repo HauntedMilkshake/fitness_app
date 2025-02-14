@@ -26,7 +26,6 @@ splashscreenVer = "1.0.1"
 numberPickerVer = "1.0.3"
 hiltVer = "2.51.1"
 hiltNavigationVer = "1.2.0"
-kspVer = "2.0.21-1.0.27"
 
 [libraries]
 androidx-ktx = { group = "androidx.core", name = "core-ktx", version.ref = "ktx" }
@@ -73,6 +72,6 @@ googleServices = { id = "com.google.gms.google-services", version.ref = "googleS
 compose-compiler = { id = "org.jetbrains.kotlin.plugin.compose", version.ref = "kotlin" }
 androidApplication = { id = "com.android.application", version.ref = "androidPlugin" }
 kotlinAndroid = { id = "org.jetbrains.kotlin.android", version.ref = "kotlin" }
+kotlinKapt = { id = "org.jetbrains.kotlin.kapt", version.ref = "kotlin" }
 kotlinSerialization = { id = "org.jetbrains.kotlin.plugin.serialization", version.ref = "serialization" }
 hilt = { id = "com.google.dagger.hilt.android", version.ref = "hiltVer" }
-ksp = { id = "com.google.devtools.ksp", version.ref = "kspVer" }

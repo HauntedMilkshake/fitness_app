@@ -3,9 +3,8 @@ package bg.zahov.app.data.provider
 import bg.zahov.app.data.model.Exercise
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.StateFlow
-import javax.inject.Inject
 
-class ReplaceableExerciseProvider @Inject constructor(){
+class ReplaceableExerciseProvider {
     companion object {
         @Volatile
         private var instance: ReplaceableExerciseProvider? = null
