@@ -2,13 +2,13 @@ package bg.zahov.app.ui.measures
 
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
-import bg.zahov.app.Inject
 import bg.zahov.app.data.interfaces.MeasurementProvider
 import bg.zahov.app.data.model.MeasurementType
-import bg.zahov.app.ui.home.HomeUiState
+import dagger.hilt.android.lifecycle.HiltViewModel
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.StateFlow
 import kotlinx.coroutines.launch
+import javax.inject.Inject
 
 /**
  * ViewModel for managing and providing UI state related to body measurements.
@@ -16,10 +16,11 @@ import kotlinx.coroutines.launch
  * with different measurement types.
  *
  * @property measurementProvider Provides measurement-related functionality.
- * Default is injected via [Inject.measurementProvider].
  */
-class MeasuresViewModel(
-    private val measurementProvider: MeasurementProvider = Inject.measurementProvider
+
+@HiltViewModel
+class MeasuresViewModel @Inject constructor(
+    private val measurementProvider: MeasurementProvider
 ) : ViewModel() {
 
 
