@@ -112,7 +112,6 @@ data class ExerciseSummary(
  * @property repo Provides workout data and operations related to workouts.
  * @property addExerciseToWorkoutProvider Handles adding exercises to the current workout session.
  * @property restTimerProvider Manages timers for rest periods during the workout.
- * @property toastManager Manages the display of toast messages for user feedback.
  */
 @HiltViewModel
 class WorkoutViewModel @Inject constructor(
