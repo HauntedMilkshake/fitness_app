@@ -21,7 +21,7 @@ import bg.zahov.app.Settings
 import bg.zahov.app.StartWorkout
 import bg.zahov.app.Workout
 import bg.zahov.app.ui.exercise.topbar.TopBarExercise
-import bg.zahov.app.ui.workout.topbar.TopBarWorkout
+import bg.zahov.app.ui.topbar.workout.TopBarWorkout
 import bg.zahov.app.ui.history.info.topbar.HistoryInfoTopBar
 import bg.zahov.fitness.app.R
 import kotlin.reflect.KClass
