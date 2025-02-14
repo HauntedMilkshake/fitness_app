@@ -2,17 +2,18 @@ package bg.zahov.app.ui.settings.profile
 
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
-import bg.zahov.app.Inject
 import bg.zahov.app.data.exception.CriticalDataNullException
 import bg.zahov.app.data.interfaces.ServiceErrorHandler
 import bg.zahov.app.data.interfaces.UserProvider
-import bg.zahov.app.data.model.state.EditProfileData
 import bg.zahov.app.data.model.ToastManager
+import bg.zahov.app.data.model.state.EditProfileData
 import bg.zahov.fitness.app.R
+import dagger.hilt.android.lifecycle.HiltViewModel
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.StateFlow
 import kotlinx.coroutines.flow.update
 import kotlinx.coroutines.launch
+import javax.inject.Inject
 
 /**
  * ViewModel responsible for handling user profile editing logic.
@@ -20,9 +21,11 @@ import kotlinx.coroutines.launch
  * @property repo The user provider for accessing and updating user information.
  * @property errorHandler Handles service errors, particularly critical data null exceptions.
  */
-class EditProfileViewModel(
-    private val repo: UserProvider = Inject.userProvider,
-    private val errorHandler: ServiceErrorHandler = Inject.serviceErrorHandler,
+
+@HiltViewModel
+class EditProfileViewModel @Inject constructor(
+    private val repo: UserProvider,
+    private val errorHandler: ServiceErrorHandler,
     private val toastManager: ToastManager = ToastManager
 ) : ViewModel() {
     private val _state = MutableStateFlow(EditProfileData())
