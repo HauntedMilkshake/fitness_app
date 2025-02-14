@@ -56,7 +56,7 @@ import bg.zahov.app.ui.theme.FitnessTheme
 import bg.zahov.fitness.app.R
 
 @Composable
-fun ExerciseInfoScreen(viewModel: ExerciseInfoViewModel = hiltViewModel()) {
+fun ExerciseInfoScreen(viewModel: ExerciseInfoViewModel = viewModel()) {
     val uiState by viewModel.uiState.collectAsStateWithLifecycle()
     ExerciseInfoContent(
         oneRepMaxEst = uiState.oneRepMaxEst,

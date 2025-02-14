@@ -2,25 +2,23 @@ package bg.zahov.app.ui.exercise.info
 
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
+import bg.zahov.app.Inject
 import bg.zahov.app.data.interfaces.WorkoutProvider
 import bg.zahov.app.data.model.LineChartData
 import bg.zahov.app.data.model.state.ExerciseHistoryData
 import bg.zahov.app.data.model.state.ExerciseHistoryInfo
 import com.github.mikephil.charting.data.Entry
-import dagger.hilt.android.lifecycle.HiltViewModel
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.StateFlow
 import kotlinx.coroutines.flow.update
 import kotlinx.coroutines.launch
-import javax.inject.Inject
 
 /**
  * ViewModel class for managing the UI state and business logic of the Exercise Info screen.
  *
  * @property workoutProvider The provider that fetches exercise history data. By default, it uses the injected instance from [Inject.workoutProvider].
  */
-@HiltViewModel
-class ExerciseInfoViewModel @Inject constructor(private val workoutProvider: WorkoutProvider) :
+class ExerciseInfoViewModel(private val workoutProvider: WorkoutProvider = Inject.workoutProvider) :
     ViewModel() {
     //Internal state flow for managing UI data updates.
     private val _uiState = MutableStateFlow(ExerciseHistoryData())
@@ -52,7 +50,10 @@ class ExerciseInfoViewModel @Inject constructor(private val workoutProvider: Wor
      * @param data The exercise history data.
      * @return An updated state for max volume.
      */
-    private fun processMaxVolume(currentState: LineChartData, data: List<ExerciseHistoryInfo>): LineChartData {
+    private fun processMaxVolume(
+        currentState: LineChartData,
+        data: List<ExerciseHistoryInfo>,
+    ): LineChartData {
         val maxVolume = data.flatMap { sets ->
             sets.sets.map {
                 Entry(
@@ -75,7 +76,10 @@ class ExerciseInfoViewModel @Inject constructor(private val workoutProvider: Wor
      * @param data The exercise history data.
      * @return An updated state for one-rep max.
      */
-    private fun processOneRepMax(currentState: LineChartData, data: List<ExerciseHistoryInfo>): LineChartData {
+    private fun processOneRepMax(
+        currentState: LineChartData,
+        data: List<ExerciseHistoryInfo>,
+    ): LineChartData {
         val oneRepMax = data.flatMap { sets ->
             sets.oneRepMaxes.map {
                 Entry(
@@ -98,7 +102,10 @@ class ExerciseInfoViewModel @Inject constructor(private val workoutProvider: Wor
      * @param data The exercise history data.
      * @return An updated state for max repetitions.
      */
-    private fun processMaxRep(currentState: LineChartData, data: List<ExerciseHistoryInfo>): LineChartData {
+    private fun processMaxRep(
+        currentState: LineChartData,
+        data: List<ExerciseHistoryInfo>,
+    ): LineChartData {
         val maxRep = data.flatMap { sets ->
             sets.sets.map {
                 Entry(
