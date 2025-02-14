@@ -85,4 +85,8 @@ object ApplicationModule {
     @Singleton
     fun provideFilterProvider(): FilterProvider =
         FilterProvider()
+
+    @Provides
+    @Singleton
+    fun provideWorkoutStateProvider(): WorkoutActions = WorkoutStateManager.getInstance()
 }
