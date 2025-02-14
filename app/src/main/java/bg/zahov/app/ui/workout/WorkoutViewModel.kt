@@ -8,7 +8,6 @@ import bg.zahov.app.data.model.Category
 import bg.zahov.app.data.model.Exercise
 import bg.zahov.app.data.model.SetType
 import bg.zahov.app.data.model.Sets
-import bg.zahov.app.data.model.ToastManager
 import bg.zahov.app.data.model.Workout
 import bg.zahov.app.data.model.WorkoutState
 import bg.zahov.app.data.provider.AddExerciseToWorkoutProvider
@@ -121,14 +120,13 @@ class WorkoutViewModel @Inject constructor(
     private val repo: WorkoutProvider,
     private val addExerciseToWorkoutProvider: AddExerciseToWorkoutProvider,
     private val restTimerProvider: RestTimerProvider,
-    private val toastManager: ToastManager = ToastManager,
 ) : ViewModel() {
 
     /**
      * A private mutable state flow that represents the UI state of the workout.
      */
     private val _uiState =
-        MutableStateFlow<WorkoutUiState>(WorkoutUiState(workoutPrefix = calculateWorkoutPrefix()))
+        MutableStateFlow(WorkoutUiState(workoutPrefix = calculateWorkoutPrefix()))
 
     /**
      * A public read-only state flow exposing the current workout UI state to observers.
@@ -527,14 +525,6 @@ class WorkoutViewModel @Inject constructor(
     }
 
     /**
-     * clears the message so we can
-     * show it again if needed
-     */
-    fun clearToast() {
-        toastManager.clearToast()
-    }
-
-    /**
      * finishes the workout by ensuring we have no empty data
      * adds it to the database
      */
@@ -580,18 +570,18 @@ class WorkoutViewModel @Inject constructor(
      */
     private fun canFinish(): Boolean {
         if (_uiState.value.exercises.isEmpty()) {
-            toastManager.showToast(R.string.no_exercises)
+            /* TODO( add snackbar with R.string.no_exercises ) */
             return false
         }
         if (_uiState.value.exercises.all { entry -> entry is WorkoutEntry.ExerciseEntry }) {
-            toastManager.showToast(R.string.no_sets)
+            /* TODO( add snackbar with R.string.no_sets ) */
             return false
         }
         if (_uiState.value.exercises.filterIsInstance<WorkoutEntry.SetEntry>().all {
                 (it.set.secondMetric ?: 0) == 0 || (it.set.firstMetric
                     ?: 0.0) == 0.0
             }) {
-            toastManager.showToast(R.string.empty_sets)
+            /* TODO( add snackbar with R.string.empty_sets ) */
             return false
         }
         return true
