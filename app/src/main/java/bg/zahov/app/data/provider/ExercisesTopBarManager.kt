@@ -3,13 +3,12 @@ package bg.zahov.app.data.provider
 import bg.zahov.app.data.interfaces.ExercisesTopBarHandler
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.StateFlow
-import javax.inject.Inject
 
 /**
  * Manager class for handling the state and actions of the exercise top bar.
  * This is implemented as a singleton to ensure a single instance is used across the app.
  */
-class ExercisesTopBarManager @Inject constructor() : ExercisesTopBarHandler {
+class ExercisesTopBarManager : ExercisesTopBarHandler {
     companion object {
         @Volatile
         private var instance: ExercisesTopBarManager? = null
