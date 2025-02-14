@@ -26,7 +26,6 @@ import javax.inject.Inject
 class EditProfileViewModel @Inject constructor(
     private val repo: UserProvider,
     private val errorHandler: ServiceErrorHandler,
-    private val toastManager: ToastManager = ToastManager
 ) : ViewModel() {
     private val _state = MutableStateFlow(EditProfileData())
     val state: StateFlow<EditProfileData> = _state
@@ -95,9 +94,9 @@ class EditProfileViewModel @Inject constructor(
                     _state.update { old ->
                         old.copy(username = newUsername)
                     }
-                    toastManager.showToast(R.string.update_username_success)
+                    /* TODO( add snackbar with R.string.update_username_success ) */
                 }
-                .addOnFailureListener { toastManager.showToast(R.string.update_username_fail) }
+                .addOnFailureListener {/* TODO( add snackbar with R.string.update_username_fail ) */}
         }
     }
 
@@ -113,9 +112,9 @@ class EditProfileViewModel @Inject constructor(
                     _state.update { old ->
                         old.copy(authenticated = true)
                     }
-                    toastManager.showToast(R.string.re_authenticate_success)
+                    /* TODO( add snackbar with R.string.re_authenticate_success ) */
                 }
-                .addOnFailureListener { toastManager.showToast(R.string.re_authenticate_fail) }
+                .addOnFailureListener { /* TODO( add snackbar with R.string.re_authenticate_fail ) */ }
         }
     }
 
@@ -125,8 +124,8 @@ class EditProfileViewModel @Inject constructor(
     fun sendPasswordResetLink() {
         viewModelScope.launch {
             repo.passwordResetForLoggedUser()
-                .addOnSuccessListener { toastManager.showToast(R.string.reset_password_success) }
-                .addOnFailureListener { toastManager.showToast(R.string.reset_password_fail) }
+                .addOnSuccessListener { /* TODO( add snackbar with R.string.reset_password_success ) */ }
+                .addOnFailureListener { /* TODO( add snackbar with R.string.reset_password_fail ) */ }
         }
     }
 
@@ -137,8 +136,8 @@ class EditProfileViewModel @Inject constructor(
         val newPassword = _state.value.password
         viewModelScope.launch {
             repo.updatePassword(newPassword)
-                .addOnSuccessListener { toastManager.showToast(R.string.update_password_success) }
-                .addOnFailureListener { toastManager.showToast(R.string.update_password_fail) }
+                .addOnSuccessListener { /* TODO( add snackbar with R.string.update_password_success ) */ }
+                .addOnFailureListener { /* TODO( add snackbar with R.string.update_password_fail ) */ }
         }
     }
 }
