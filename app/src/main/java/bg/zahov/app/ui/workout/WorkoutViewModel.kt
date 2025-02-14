@@ -2,7 +2,6 @@ package bg.zahov.app.ui.workout
 
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
-import bg.zahov.app.Inject
 import bg.zahov.app.data.interfaces.WorkoutProvider
 import bg.zahov.app.data.model.BodyPart
 import bg.zahov.app.data.model.Category
@@ -18,6 +17,7 @@ import bg.zahov.app.data.provider.WorkoutStateManager
 import bg.zahov.app.util.generateRandomId
 import bg.zahov.app.util.hashString
 import bg.zahov.fitness.app.R
+import dagger.hilt.android.lifecycle.HiltViewModel
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.StateFlow
 import kotlinx.coroutines.flow.update
@@ -25,6 +25,7 @@ import kotlinx.coroutines.launch
 import java.time.LocalDateTime
 import java.util.Locale
 import java.util.Random
+import javax.inject.Inject
 
 /**
  * Represents the UI state of a workout session.
@@ -114,11 +115,12 @@ data class ExerciseSummary(
  * @property restTimerProvider Manages timers for rest periods during the workout.
  * @property toastManager Manages the display of toast messages for user feedback.
  */
-class WorkoutViewModel(
-    private val workoutStateManager: WorkoutStateManager = Inject.workoutState,
-    private val repo: WorkoutProvider = Inject.workoutProvider,
-    private val addExerciseToWorkoutProvider: AddExerciseToWorkoutProvider = Inject.workoutAddedExerciseProvider,
-    private val restTimerProvider: RestTimerProvider = Inject.restTimerProvider,
+@HiltViewModel
+class WorkoutViewModel @Inject constructor(
+    private val workoutStateManager: WorkoutStateManager,
+    private val repo: WorkoutProvider,
+    private val addExerciseToWorkoutProvider: AddExerciseToWorkoutProvider,
+    private val restTimerProvider: RestTimerProvider,
     private val toastManager: ToastManager = ToastManager,
 ) : ViewModel() {
 
