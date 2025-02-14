@@ -7,10 +7,11 @@ import bg.zahov.app.data.interfaces.ServiceErrorHandler
 import bg.zahov.app.data.interfaces.UserProvider
 import com.google.firebase.auth.FirebaseAuthInvalidCredentialsException
 import com.google.firebase.auth.FirebaseAuthInvalidUserException
+import kotlinx.coroutines.launch
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.StateFlow
 import kotlinx.coroutines.flow.update
-import kotlinx.coroutines.launch
+import java.lang.IllegalArgumentException
 
 /**
  * ViewModel for the Login screen that handles user input, validation, and interaction with the

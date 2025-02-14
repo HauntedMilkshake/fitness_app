@@ -4,8 +4,8 @@ plugins {
     alias(libs.plugins.compose.compiler)
     alias(libs.plugins.androidApplication)
     alias(libs.plugins.kotlinAndroid)
+    alias(libs.plugins.kotlinKapt)
     alias(libs.plugins.hilt)
-    alias(libs.plugins.ksp)
 }
 
 android {
@@ -96,5 +96,5 @@ dependencies {
     implementation(libs.numberPicker)
     implementation(libs.hiltAndroid)
     implementation(libs.hiltNavigation)
-    ksp(libs.hiltCompiler)
+    kapt(libs.hiltCompiler)
 }
