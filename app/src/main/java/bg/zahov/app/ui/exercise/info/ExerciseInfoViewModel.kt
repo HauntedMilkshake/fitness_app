@@ -52,7 +52,10 @@ class ExerciseInfoViewModel @Inject constructor(private val workoutProvider: Wor
      * @param data The exercise history data.
      * @return An updated state for max volume.
      */
-    private fun processMaxVolume(currentState: LineChartData, data: List<ExerciseHistoryInfo>): LineChartData {
+    private fun processMaxVolume(
+        currentState: LineChartData,
+        data: List<ExerciseHistoryInfo>,
+    ): LineChartData {
         val maxVolume = data.flatMap { sets ->
             sets.sets.map {
                 Entry(
@@ -75,7 +78,10 @@ class ExerciseInfoViewModel @Inject constructor(private val workoutProvider: Wor
      * @param data The exercise history data.
      * @return An updated state for one-rep max.
      */
-    private fun processOneRepMax(currentState: LineChartData, data: List<ExerciseHistoryInfo>): LineChartData {
+    private fun processOneRepMax(
+        currentState: LineChartData,
+        data: List<ExerciseHistoryInfo>,
+    ): LineChartData {
         val oneRepMax = data.flatMap { sets ->
             sets.oneRepMaxes.map {
                 Entry(
@@ -98,7 +104,10 @@ class ExerciseInfoViewModel @Inject constructor(private val workoutProvider: Wor
      * @param data The exercise history data.
      * @return An updated state for max repetitions.
      */
-    private fun processMaxRep(currentState: LineChartData, data: List<ExerciseHistoryInfo>): LineChartData {
+    private fun processMaxRep(
+        currentState: LineChartData,
+        data: List<ExerciseHistoryInfo>,
+    ): LineChartData {
         val maxRep = data.flatMap { sets ->
             sets.sets.map {
                 Entry(
