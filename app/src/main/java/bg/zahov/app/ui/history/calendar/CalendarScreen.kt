@@ -15,7 +15,6 @@ import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
-import androidx.lifecycle.viewmodel.compose.viewModel
 import androidx.compose.runtime.getValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
@@ -26,6 +25,7 @@ import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.unit.dp
+import androidx.hilt.navigation.compose.hiltViewModel
 import com.kizitonwose.calendar.compose.HorizontalCalendar
 import com.kizitonwose.calendar.compose.rememberCalendarState
 import com.kizitonwose.calendar.core.CalendarDay
@@ -37,7 +37,7 @@ import java.time.LocalDate
 import java.time.Month
 
 @Composable
-fun CalendarScreen(calendarViewModel: CalendarViewModel = viewModel()) {
+fun CalendarScreen(calendarViewModel: CalendarViewModel = hiltViewModel()) {
     val uiState by calendarViewModel.uiState.collectAsStateWithLifecycle()
     val calendarState = rememberCalendarState(
         startMonth = uiState.startMonth,
