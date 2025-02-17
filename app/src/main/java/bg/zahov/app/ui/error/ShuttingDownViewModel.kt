@@ -2,13 +2,14 @@ package bg.zahov.app.ui.error
 
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
-import bg.zahov.app.Inject
 import bg.zahov.app.data.interfaces.ServiceErrorHandler
+import dagger.hilt.android.lifecycle.HiltViewModel
 import kotlinx.coroutines.delay
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.StateFlow
 import kotlinx.coroutines.flow.update
 import kotlinx.coroutines.launch
+import javax.inject.Inject
 
 /**
  * ViewModel responsible for managing the countdown state during application shutdown.
@@ -16,7 +17,8 @@ import kotlinx.coroutines.launch
  *
  * @property serviceErrorHandler ServiceErrorHandler used to stop the application when countdown ends.
  */
-class ShuttingDownViewModel(private val serviceErrorHandler: ServiceErrorHandler = Inject.serviceErrorHandler) :
+@HiltViewModel
+class ShuttingDownViewModel @Inject constructor(private val serviceErrorHandler: ServiceErrorHandler) :
     ViewModel() {
     //The current countdown state, which starts at 5 seconds.
     private val _state = MutableStateFlow<Int>(5)
