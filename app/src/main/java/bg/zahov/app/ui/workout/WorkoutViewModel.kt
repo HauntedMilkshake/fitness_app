@@ -121,7 +121,6 @@ class WorkoutViewModel @Inject constructor(
     private val repo: WorkoutProvider,
     private val addExerciseToWorkoutProvider: AddExerciseToWorkoutProvider,
     private val restTimerProvider: RestTimerProvider,
-    private val toastManager: ToastManager = ToastManager,
 ) : ViewModel() {
 
     /**
