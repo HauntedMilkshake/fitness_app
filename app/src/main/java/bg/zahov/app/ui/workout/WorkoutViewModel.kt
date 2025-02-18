@@ -2,14 +2,12 @@ package bg.zahov.app.ui.workout
 
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
-import bg.zahov.app.Inject
 import bg.zahov.app.data.interfaces.WorkoutProvider
 import bg.zahov.app.data.model.BodyPart
 import bg.zahov.app.data.model.Category
 import bg.zahov.app.data.model.Exercise
 import bg.zahov.app.data.model.SetType
 import bg.zahov.app.data.model.Sets
-import bg.zahov.app.data.model.ToastManager
 import bg.zahov.app.data.model.Workout
 import bg.zahov.app.data.model.WorkoutState
 import bg.zahov.app.data.provider.AddExerciseToWorkoutProvider
@@ -18,6 +16,7 @@ import bg.zahov.app.data.provider.WorkoutStateManager
 import bg.zahov.app.util.generateRandomId
 import bg.zahov.app.util.hashString
 import bg.zahov.fitness.app.R
+import dagger.hilt.android.lifecycle.HiltViewModel
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.StateFlow
 import kotlinx.coroutines.flow.update
@@ -25,6 +24,7 @@ import kotlinx.coroutines.launch
 import java.time.LocalDateTime
 import java.util.Locale
 import java.util.Random
+import javax.inject.Inject
 
 /**
  * Represents the UI state of a workout session.
@@ -112,21 +112,20 @@ data class ExerciseSummary(
  * @property repo Provides workout data and operations related to workouts.
  * @property addExerciseToWorkoutProvider Handles adding exercises to the current workout session.
  * @property restTimerProvider Manages timers for rest periods during the workout.
- * @property toastManager Manages the display of toast messages for user feedback.
  */
-class WorkoutViewModel(
-    private val workoutStateManager: WorkoutStateManager = Inject.workoutState,
-    private val repo: WorkoutProvider = Inject.workoutProvider,
-    private val addExerciseToWorkoutProvider: AddExerciseToWorkoutProvider = Inject.workoutAddedExerciseProvider,
-    private val restTimerProvider: RestTimerProvider = Inject.restTimerProvider,
-    private val toastManager: ToastManager = ToastManager,
+@HiltViewModel
+class WorkoutViewModel @Inject constructor(
+    private val workoutStateManager: WorkoutStateManager,
+    private val repo: WorkoutProvider,
+    private val addExerciseToWorkoutProvider: AddExerciseToWorkoutProvider,
+    private val restTimerProvider: RestTimerProvider,
 ) : ViewModel() {
 
     /**
      * A private mutable state flow that represents the UI state of the workout.
      */
     private val _uiState =
-        MutableStateFlow<WorkoutUiState>(WorkoutUiState(workoutPrefix = calculateWorkoutPrefix()))
+        MutableStateFlow(WorkoutUiState(workoutPrefix = calculateWorkoutPrefix()))
 
     /**
      * A public read-only state flow exposing the current workout UI state to observers.
@@ -525,14 +524,6 @@ class WorkoutViewModel(
     }
 
     /**
-     * clears the message so we can
-     * show it again if needed
-     */
-    fun clearToast() {
-        toastManager.clearToast()
-    }
-
-    /**
      * finishes the workout by ensuring we have no empty data
      * adds it to the database
      */
@@ -578,18 +569,18 @@ class WorkoutViewModel(
      */
     private fun canFinish(): Boolean {
         if (_uiState.value.exercises.isEmpty()) {
-            toastManager.showToast(R.string.no_exercises)
+            /* TODO( add snackbar with R.string.no_exercises ) */
             return false
         }
         if (_uiState.value.exercises.all { entry -> entry is WorkoutEntry.ExerciseEntry }) {
-            toastManager.showToast(R.string.no_sets)
+            /* TODO( add snackbar with R.string.no_sets ) */
             return false
         }
         if (_uiState.value.exercises.filterIsInstance<WorkoutEntry.SetEntry>().all {
                 (it.set.secondMetric ?: 0) == 0 || (it.set.firstMetric
                     ?: 0.0) == 0.0
             }) {
-            toastManager.showToast(R.string.empty_sets)
+            /* TODO( add snackbar with R.string.empty_sets ) */
             return false
         }
         return true

@@ -147,7 +147,7 @@ fun AddTemplateWorkoutScreen(
 
 @Composable
 fun WorkoutScreen(
-    workoutViewModel: WorkoutViewModel = viewModel(LocalContext.current as ComponentActivity),
+    workoutViewModel: WorkoutViewModel = hiltViewModel(LocalContext.current as ComponentActivity),
     onAddExercise: () -> Unit,
     onReplaceExercise: () -> Unit,
     onBackPressed: () -> Unit,
