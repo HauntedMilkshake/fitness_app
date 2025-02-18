@@ -4,8 +4,6 @@ import bg.zahov.app.data.interfaces.AuthResponse
 import bg.zahov.app.data.interfaces.Authentication
 import bg.zahov.app.data.remote.FirebaseAuthentication
 import com.google.firebase.auth.AuthResult
-import kotlinx.coroutines.CancellationException
-import javax.inject.Inject
 
 class AuthenticationImpl : Authentication {
     companion object {
@@ -84,6 +82,7 @@ object AuthResponseMapper {
             }
 
         }
+
         else -> {
             AuthResponse.Failure(Exception("Unable to authenticate"))
         }
