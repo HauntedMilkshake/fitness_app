@@ -2,17 +2,18 @@ package bg.zahov.app.ui.settings.profile
 
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
-import bg.zahov.app.Inject
 import bg.zahov.app.data.exception.CriticalDataNullException
 import bg.zahov.app.data.interfaces.ServiceErrorHandler
 import bg.zahov.app.data.interfaces.UserProvider
-import bg.zahov.app.data.model.state.EditProfileData
 import bg.zahov.app.data.model.ToastManager
+import bg.zahov.app.data.model.state.EditProfileData
 import bg.zahov.fitness.app.R
+import dagger.hilt.android.lifecycle.HiltViewModel
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.StateFlow
 import kotlinx.coroutines.flow.update
 import kotlinx.coroutines.launch
+import javax.inject.Inject
 
 /**
  * ViewModel responsible for handling user profile editing logic.
@@ -20,10 +21,11 @@ import kotlinx.coroutines.launch
  * @property repo The user provider for accessing and updating user information.
  * @property errorHandler Handles service errors, particularly critical data null exceptions.
  */
-class EditProfileViewModel(
-    private val repo: UserProvider = Inject.userProvider,
-    private val errorHandler: ServiceErrorHandler = Inject.serviceErrorHandler,
-    private val toastManager: ToastManager = ToastManager
+
+@HiltViewModel
+class EditProfileViewModel @Inject constructor(
+    private val repo: UserProvider,
+    private val errorHandler: ServiceErrorHandler,
 ) : ViewModel() {
     private val _state = MutableStateFlow(EditProfileData())
     val state: StateFlow<EditProfileData> = _state
@@ -92,9 +94,9 @@ class EditProfileViewModel(
                     _state.update { old ->
                         old.copy(username = newUsername)
                     }
-                    toastManager.showToast(R.string.update_username_success)
+                    /* TODO( add snackbar with R.string.update_username_success ) */
                 }
-                .addOnFailureListener { toastManager.showToast(R.string.update_username_fail) }
+                .addOnFailureListener {/* TODO( add snackbar with R.string.update_username_fail ) */}
         }
     }
 
@@ -110,9 +112,9 @@ class EditProfileViewModel(
                     _state.update { old ->
                         old.copy(authenticated = true)
                     }
-                    toastManager.showToast(R.string.re_authenticate_success)
+                    /* TODO( add snackbar with R.string.re_authenticate_success ) */
                 }
-                .addOnFailureListener { toastManager.showToast(R.string.re_authenticate_fail) }
+                .addOnFailureListener { /* TODO( add snackbar with R.string.re_authenticate_fail ) */ }
         }
     }
 
@@ -122,8 +124,8 @@ class EditProfileViewModel(
     fun sendPasswordResetLink() {
         viewModelScope.launch {
             repo.passwordResetForLoggedUser()
-                .addOnSuccessListener { toastManager.showToast(R.string.reset_password_success) }
-                .addOnFailureListener { toastManager.showToast(R.string.reset_password_fail) }
+                .addOnSuccessListener { /* TODO( add snackbar with R.string.reset_password_success ) */ }
+                .addOnFailureListener { /* TODO( add snackbar with R.string.reset_password_fail ) */ }
         }
     }
 
@@ -134,8 +136,8 @@ class EditProfileViewModel(
         val newPassword = _state.value.password
         viewModelScope.launch {
             repo.updatePassword(newPassword)
-                .addOnSuccessListener { toastManager.showToast(R.string.update_password_success) }
-                .addOnFailureListener { toastManager.showToast(R.string.update_password_fail) }
+                .addOnSuccessListener { /* TODO( add snackbar with R.string.update_password_success ) */ }
+                .addOnFailureListener { /* TODO( add snackbar with R.string.update_password_fail ) */ }
         }
     }
 }
