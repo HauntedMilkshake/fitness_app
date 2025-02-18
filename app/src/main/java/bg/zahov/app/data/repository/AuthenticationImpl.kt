@@ -7,7 +7,7 @@ import com.google.firebase.auth.AuthResult
 import kotlinx.coroutines.CancellationException
 import javax.inject.Inject
 
-class AuthenticationImpl @Inject constructor() : Authentication {
+class AuthenticationImpl : Authentication {
     companion object {
         private var instance: AuthenticationImpl? = null
         fun getInstance() = instance ?: AuthenticationImpl().also { instance = it }

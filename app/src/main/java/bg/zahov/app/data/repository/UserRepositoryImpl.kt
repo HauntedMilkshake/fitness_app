@@ -8,7 +8,7 @@ import bg.zahov.app.data.remote.FirestoreManager
 import kotlinx.coroutines.flow.Flow
 import javax.inject.Inject
 
-class UserRepositoryImpl @Inject constructor() : UserRepository {
+class UserRepositoryImpl : UserRepository {
     companion object {
         @Volatile
         private var instance: UserRepositoryImpl? = null
