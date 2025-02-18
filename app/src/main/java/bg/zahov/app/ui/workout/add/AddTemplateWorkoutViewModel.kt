@@ -3,20 +3,14 @@ package bg.zahov.app.ui.workout.add
 import android.util.Log
 import androidx.lifecycle.SavedStateHandle
 import androidx.lifecycle.ViewModel
-import androidx.lifecycle.ViewModelProvider
-import androidx.lifecycle.createSavedStateHandle
 import androidx.lifecycle.viewModelScope
-import androidx.lifecycle.viewmodel.initializer
-import androidx.lifecycle.viewmodel.viewModelFactory
 import androidx.navigation.toRoute
 import bg.zahov.app.AddTemplateWorkout
-import bg.zahov.app.Inject
 import bg.zahov.app.data.interfaces.WorkoutProvider
 import bg.zahov.app.data.model.Category
 import bg.zahov.app.data.model.Exercise
 import bg.zahov.app.data.model.SetType
 import bg.zahov.app.data.model.Sets
-import bg.zahov.app.data.model.ToastManager
 import bg.zahov.app.data.model.Workout
 import bg.zahov.app.data.provider.AddExerciseToWorkoutProvider
 import bg.zahov.app.data.provider.ReplaceableExerciseProvider
@@ -27,13 +21,14 @@ import bg.zahov.app.ui.workout.toWorkoutEntry
 import bg.zahov.app.ui.workout.toWorkoutEntryList
 import bg.zahov.app.util.filterIntegerInput
 import bg.zahov.app.util.generateRandomId
-import bg.zahov.fitness.app.R
+import dagger.hilt.android.lifecycle.HiltViewModel
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.StateFlow
 import kotlinx.coroutines.flow.first
 import kotlinx.coroutines.flow.update
 import kotlinx.coroutines.launch
 import java.time.LocalDateTime
+import javax.inject.Inject
 
 /**
  * Represents the UI state for adding a template workout in the application.
@@ -56,25 +51,14 @@ data class AddTemplateWorkoutUiState(
  * @property workoutProvider Provides access to workout-related data and operations.
  * @property selectableExerciseProvider Handles operations for selecting exercises to add to the workout.
  * @property replaceableExerciseProvider Manages the replacement of existing exercises in the workout.
- * @property toastManager Manages toast notifications to provide feedback to the user.
  */
-class AddTemplateWorkoutViewModel(
-    private val savedStateHandle: SavedStateHandle,
-    private val workoutProvider: WorkoutProvider = Inject.workoutProvider,
-    private val selectableExerciseProvider: AddExerciseToWorkoutProvider = Inject.workoutAddedExerciseProvider,
-    private val replaceableExerciseProvider: ReplaceableExerciseProvider = Inject.replaceableExerciseProvider,
-    private val toastManager: ToastManager = ToastManager,
+@HiltViewModel
+class AddTemplateWorkoutViewModel @Inject constructor(
+    savedStateHandle: SavedStateHandle,
+    private val workoutProvider: WorkoutProvider,
+    private val selectableExerciseProvider: AddExerciseToWorkoutProvider,
+    private val replaceableExerciseProvider: ReplaceableExerciseProvider,
 ) : ViewModel() {
-
-    companion object {
-        val Factory: ViewModelProvider.Factory = viewModelFactory {
-            initializer {
-                AddTemplateWorkoutViewModel(
-                    savedStateHandle = createSavedStateHandle(),
-                )
-            }
-        }
-    }
 
     private val workoutId = savedStateHandle.toRoute<AddTemplateWorkout>().workoutId
 
@@ -226,13 +210,6 @@ class AddTemplateWorkoutViewModel(
     }
 
     /**
-     * Clears any active toast messages by invoking the toast manager's clear function.
-     */
-    fun clearToast() {
-        toastManager.clearToast()
-    }
-
-    /**
      * Resets the list of selected exercises by invoking the selectable exercise provider's reset function.
      */
     fun resetSelectedExercises() {
@@ -257,11 +234,11 @@ class AddTemplateWorkoutViewModel(
      */
     private fun canAdd(): Boolean {
         if (_uiState.value.exercises.isEmpty()) {
-            toastManager.showToast(R.string.no_exercises)
+            /* TODO( add snackbar with R.string.no_exercises ) */
             return false
         }
         if (_uiState.value.workoutName.isEmpty()) {
-            toastManager.showToast(R.string.no_workout_name_toast)
+            /* TODO( add snackbar with R.string.no_workout_name_toast ) */
             return false
         }
         return true
