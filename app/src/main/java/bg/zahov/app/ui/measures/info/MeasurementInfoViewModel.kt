@@ -2,30 +2,29 @@ package bg.zahov.app.ui.measures.info
 
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
-import bg.zahov.app.Inject
 import bg.zahov.app.data.interfaces.MeasurementProvider
-import bg.zahov.app.data.interfaces.ServiceErrorHandler
 import bg.zahov.app.data.model.LineChartData
 import bg.zahov.app.data.model.Measurement
 import bg.zahov.app.data.model.MeasurementType
 import bg.zahov.app.data.model.state.MeasurementInfoData
 import com.github.mikephil.charting.data.Entry
+import dagger.hilt.android.lifecycle.HiltViewModel
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.StateFlow
 import kotlinx.coroutines.flow.update
 import kotlinx.coroutines.launch
 import java.time.LocalDateTime
+import javax.inject.Inject
 
 /**
  * ViewModel that handles the logic and state for displaying and updating measurement data in the app.
  * This includes managing chart data, user input, and state transitions (e.g., loading, error handling).
  *
  * @property measurementProvider The provider responsible for retrieving and updating measurement data.
- * @property serviceError The service responsible for handling errors, including critical data errors.
  */
-class MeasurementInfoViewModel(
-    private val measurementProvider: MeasurementProvider = Inject.measurementProvider,
-    private val serviceError: ServiceErrorHandler = Inject.serviceErrorHandler
+@HiltViewModel
+class MeasurementInfoViewModel @Inject constructor(
+    private val measurementProvider: MeasurementProvider,
 ) : ViewModel() {
 
     private val _uiState = MutableStateFlow(MeasurementInfoData())

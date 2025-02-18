@@ -3,6 +3,7 @@ package bg.zahov.app
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.ui.Modifier
+import androidx.hilt.navigation.compose.hiltViewModel
 import androidx.lifecycle.viewmodel.compose.viewModel
 import androidx.navigation.NavGraph.Companion.findStartDestination
 import androidx.navigation.NavHostController
@@ -33,7 +34,7 @@ fun MainNavGraph(
     modifier: Modifier = Modifier,
     navController: NavHostController,
     onShowSnackBar: (String, String?) -> Unit,
-    loadingViewModel: LoadingViewModel = viewModel()
+    loadingViewModel: LoadingViewModel = hiltViewModel()
 ) {
     LaunchedEffect(Unit) {
         loadingViewModel.navigationTarget.collect {

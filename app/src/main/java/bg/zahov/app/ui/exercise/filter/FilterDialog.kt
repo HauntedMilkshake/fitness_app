@@ -21,13 +21,14 @@ import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.window.Dialog
+import androidx.hilt.navigation.compose.hiltViewModel
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import androidx.lifecycle.viewmodel.compose.viewModel
 import bg.zahov.app.data.model.Filter
 import bg.zahov.fitness.app.R
 
 @Composable
-fun FilterDialog(filterViewModel: FilterViewModel = viewModel(), onDismiss: () -> Unit) {
+fun FilterDialog(filterViewModel: FilterViewModel = hiltViewModel(), onDismiss: () -> Unit) {
     val uiState by filterViewModel.filterData.collectAsStateWithLifecycle()
     val interactionSource = remember { MutableInteractionSource() }
 

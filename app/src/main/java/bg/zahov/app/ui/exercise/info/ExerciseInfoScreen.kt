@@ -44,6 +44,7 @@ import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.style.TextOverflow
 import androidx.compose.ui.unit.dp
+import androidx.hilt.navigation.compose.hiltViewModel
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import androidx.lifecycle.viewmodel.compose.viewModel
 import bg.zahov.app.data.model.LineChartData
@@ -55,7 +56,7 @@ import bg.zahov.app.ui.theme.FitnessTheme
 import bg.zahov.fitness.app.R
 
 @Composable
-fun ExerciseInfoScreen(viewModel: ExerciseInfoViewModel = viewModel()) {
+fun ExerciseInfoScreen(viewModel: ExerciseInfoViewModel = hiltViewModel()) {
     val uiState by viewModel.uiState.collectAsStateWithLifecycle()
     ExerciseInfoContent(
         oneRepMaxEst = uiState.oneRepMaxEst,
@@ -71,7 +72,7 @@ fun ExerciseInfoContent(
     oneRepMaxEst: LineChartData,
     maxVolume: LineChartData,
     maxRep: LineChartData,
-    history: List<ExerciseHistoryInfo>
+    history: List<ExerciseHistoryInfo>,
 ) {
     var selectedChart by remember { mutableStateOf<LineChartData?>(null) }
     FitnessTheme {
@@ -134,7 +135,7 @@ fun ExerciseInfoContent(
 fun SharedTransitionScope.ChartDetails(
     data: LineChartData?,
     onConfirmClick: () -> Unit,
-    modifier: Modifier = Modifier
+    modifier: Modifier = Modifier,
 ) {
     AnimatedContent(
         modifier = modifier.animateContentSize(),
@@ -278,7 +279,7 @@ fun SharedTransitionScope.ExerciseChartInfo(
 @Composable
 fun ExerciseHistoryCard(
     data: ExerciseHistoryInfo,
-    modifier: Modifier = Modifier
+    modifier: Modifier = Modifier,
 ) {
     Column(
         modifier = modifier
