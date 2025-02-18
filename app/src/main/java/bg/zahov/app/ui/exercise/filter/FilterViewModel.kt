@@ -1,15 +1,17 @@
 package bg.zahov.app.ui.exercise.filter
 
+import android.util.Log
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
-import bg.zahov.app.Inject
 import bg.zahov.app.data.model.FilterItem
 import bg.zahov.app.data.provider.FilterProvider
+import dagger.hilt.android.lifecycle.HiltViewModel
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.StateFlow
 import kotlinx.coroutines.flow.collectLatest
 import kotlinx.coroutines.flow.update
 import kotlinx.coroutines.launch
+import javax.inject.Inject
 
 /**
  * ViewModel responsible for managing and updating filter selections for exercises.
@@ -19,7 +21,8 @@ import kotlinx.coroutines.launch
  *
  * @property filterManager The provider that supplies filter data and manages filter states.
  */
-class FilterViewModel(private val filterManager: FilterProvider = Inject.filterProvider) :
+@HiltViewModel
+class FilterViewModel @Inject constructor(private val filterManager: FilterProvider) :
     ViewModel() {
 
     // Backing property for the UI state flow

@@ -2,17 +2,18 @@ package bg.zahov.app.ui.exercise.add
 
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
-import bg.zahov.app.Inject
 import bg.zahov.app.data.interfaces.WorkoutProvider
 import bg.zahov.app.data.model.Exercise
 import bg.zahov.app.data.model.Filter
 import bg.zahov.app.data.model.FilterItem
 import bg.zahov.app.data.model.state.AddDialogExerciseData
 import bg.zahov.app.data.model.state.AddExerciseData
+import dagger.hilt.android.lifecycle.HiltViewModel
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.StateFlow
 import kotlinx.coroutines.flow.update
 import kotlinx.coroutines.launch
+import javax.inject.Inject
 
 /**
  * ViewModel for the Add Exercise screen. Handles the UI state, user interactions, and business logic
@@ -20,8 +21,9 @@ import kotlinx.coroutines.launch
  *
  * @property repo The `WorkoutProvider` repository used to manage workout-related data.
  */
-class AddExerciseViewModel(
-    private val repo: WorkoutProvider = Inject.workoutProvider,
+@HiltViewModel
+class AddExerciseViewModel @Inject constructor(
+    private val repo: WorkoutProvider,
 ) : ViewModel() {
     //A private mutable state flow that holds the current UI state for adding an exercise.
     private val _addExerciseData = MutableStateFlow(AddExerciseData())
@@ -145,7 +147,7 @@ class AddExerciseViewModel(
      */
     private fun updateSelection(
         selectedFilter: FilterItem,
-        filters: List<FilterItem>
+        filters: List<FilterItem>,
     ): List<FilterItem> {
         return filters.map { item ->
             item.copy(selected = (item.name == selectedFilter.name))

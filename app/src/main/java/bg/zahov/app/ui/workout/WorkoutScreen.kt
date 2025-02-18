@@ -83,7 +83,7 @@ private val weights = arrayOf(1f, 1f, 2f, 2f)
 
 @Composable
 fun AddTemplateWorkoutScreen(
-    addTemplateViewModel: AddTemplateWorkoutViewModel = viewModel(factory = AddTemplateWorkoutViewModel.Factory),
+    addTemplateViewModel: AddTemplateWorkoutViewModel = hiltViewModel(),
     onAddExercise: () -> Unit,
     onReplaceExercise: () -> Unit,
     onBackPressed: () -> Unit,

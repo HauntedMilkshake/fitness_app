@@ -2,16 +2,16 @@ package bg.zahov.app.ui.workout.rest
 
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
-import bg.zahov.app.Inject
 import bg.zahov.app.data.model.RestState
-import bg.zahov.app.data.model.ToastManager
 import bg.zahov.app.data.provider.RestTimerProvider
 import bg.zahov.app.util.parseTimeStringToLong
 import bg.zahov.fitness.app.R
+import dagger.hilt.android.lifecycle.HiltViewModel
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.StateFlow
 import kotlinx.coroutines.launch
 import java.lang.IllegalArgumentException
+import javax.inject.Inject
 
 /**
  * A sealed interface that represents the different states of a rest timer.
@@ -86,9 +86,9 @@ object RestInfo {
  * such as starting, pausing, and tracking progress.
  *
  **/
-class RestTimerViewModel(
-    private val restManager: RestTimerProvider = Inject.restTimerProvider,
-    private val toastManager: ToastManager = ToastManager,
+@HiltViewModel
+class RestTimerViewModel @Inject constructor(
+    private val restManager: RestTimerProvider,
 ) : ViewModel() {
 
     private val _uiState = MutableStateFlow<Rest>(Rest.Default())
@@ -236,7 +236,7 @@ class RestTimerViewModel(
                 (_uiState.value as? Rest.Default)?.pickerValue?.parseMinuteTimeToMillis() ?: 0
             )
         } catch (_: IllegalArgumentException) {
-            toastManager.showToast(R.string.invalid_time_format)
+            /* TODO( add snackbar with R.string.invalid_time_format ) */
         }
     }
 

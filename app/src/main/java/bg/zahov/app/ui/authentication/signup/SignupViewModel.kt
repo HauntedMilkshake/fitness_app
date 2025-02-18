@@ -2,24 +2,26 @@ package bg.zahov.app.ui.authentication.signup
 
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
-import bg.zahov.app.Inject
 import bg.zahov.app.data.interfaces.AuthResponse
 import bg.zahov.app.data.interfaces.UserProvider
 import com.google.firebase.auth.FirebaseAuthInvalidCredentialsException
 import com.google.firebase.auth.FirebaseAuthUserCollisionException
 import com.google.firebase.auth.FirebaseAuthWeakPasswordException
+import dagger.hilt.android.lifecycle.HiltViewModel
 import kotlinx.coroutines.CancellationException
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.StateFlow
 import kotlinx.coroutines.flow.update
 import kotlinx.coroutines.launch
+import javax.inject.Inject
 
 /**
  * ViewModel for the signup screen
  *
  * @param auth gives access to firebase authentication
  */
-class SignupViewModel(private val auth: UserProvider = Inject.userProvider) : ViewModel() {
+@HiltViewModel
+class SignupViewModel @Inject constructor(private val auth: UserProvider) : ViewModel() {
     private val _uiState = MutableStateFlow(SignupUiState())
 
     val uiState: StateFlow<SignupUiState> = _uiState
