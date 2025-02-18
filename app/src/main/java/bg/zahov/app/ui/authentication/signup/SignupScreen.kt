@@ -29,7 +29,6 @@ import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.unit.dp
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
-import androidx.lifecycle.viewmodel.compose.viewModel
 import bg.zahov.app.ui.custom.CommonPasswordField
 import bg.zahov.app.ui.custom.CommonTextField
 import bg.zahov.app.util.isEmail
@@ -37,10 +36,11 @@ import bg.zahov.fitness.app.R
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.remember
 import androidx.compose.ui.unit.sp
+import androidx.hilt.navigation.compose.hiltViewModel
 
 @Composable
 fun SignupScreen(
-    signupViewModel: SignupViewModel = viewModel(),
+    signupViewModel: SignupViewModel = hiltViewModel(),
     onNavigateToLogin: () -> Unit
 ) {
     val context = LocalContext.current

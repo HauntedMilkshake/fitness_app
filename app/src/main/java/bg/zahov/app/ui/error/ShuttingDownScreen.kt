@@ -17,13 +17,14 @@ import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.text.style.TextOverflow
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
+import androidx.hilt.navigation.compose.hiltViewModel
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import androidx.lifecycle.viewmodel.compose.viewModel
 import bg.zahov.app.ui.theme.FitnessTheme
 import bg.zahov.fitness.app.R
 
 @Composable
-fun ShuttingDownScreen(viewModel: ShuttingDownViewModel = viewModel()) {
+fun ShuttingDownScreen(viewModel: ShuttingDownViewModel = hiltViewModel()) {
     val uiState = viewModel.state.collectAsStateWithLifecycle()
 
     ShuttingDownContent(timer = uiState.value)

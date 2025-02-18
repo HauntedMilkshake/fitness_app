@@ -2,13 +2,14 @@ package bg.zahov.app.ui.workout.finish
 
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
-import bg.zahov.app.Inject
 import bg.zahov.app.data.interfaces.WorkoutProvider
 import bg.zahov.app.data.provider.model.HistoryWorkout
+import dagger.hilt.android.lifecycle.HiltViewModel
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.StateFlow
 import kotlinx.coroutines.flow.update
 import kotlinx.coroutines.launch
+import javax.inject.Inject
 
 /**
  * Represents the UI state for the workout finish screen.
@@ -25,8 +26,9 @@ data class WorkoutFinishUiState(
  * @property workoutProvider A provider that supplies workout data, including the last workout
  * and the history of past workouts.
  */
-class WorkoutFinishViewModel(
-    private val workoutProvider: WorkoutProvider = Inject.workoutProvider
+@HiltViewModel
+class WorkoutFinishViewModel @Inject constructor(
+    private val workoutProvider: WorkoutProvider
 ) : ViewModel() {
 
     private val _uiState = MutableStateFlow(WorkoutFinishUiState())
