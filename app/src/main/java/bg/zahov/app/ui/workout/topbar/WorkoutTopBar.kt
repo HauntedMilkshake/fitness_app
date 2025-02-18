@@ -2,9 +2,7 @@ package bg.zahov.app.ui.workout.topbar
 
 import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.Arrangement
-import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Row
-import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.padding
 import androidx.compose.material3.Icon
@@ -25,20 +23,35 @@ import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import androidx.lifecycle.viewmodel.compose.viewModel
+import bg.zahov.app.ui.workout.toRestTime
+import bg.zahov.app.util.parseTimeStringToLong
 import bg.zahov.fitness.app.R
+import kotlinx.coroutines.flow.map
+import kotlinx.coroutines.flow.mapNotNull
+
 
 @Composable
 fun TopBarWorkout(
     viewModel: WorkoutTopBarViewModel = viewModel(),
     onRestClick: () -> Unit,
 ) {
-    val state by viewModel.uiState.collectAsStateWithLifecycle()
+    val workoutTime: String by viewModel.workoutTimer.map { it.toRestTime() }
+        .collectAsStateWithLifecycle("")
+    val elapsedRestTime: String by viewModel.restTimer.mapNotNull { it.elapsedTime }
+        .collectAsStateWithLifecycle("")
+    val restProgress: Float by viewModel.restTimer.mapNotNull {
+        viewModel.calculateProgress(
+            fullRest = (it.fullRest?.parseTimeStringToLong()?.toFloat() ?: 0f),
+            currentRest = (it.elapsedTime?.parseTimeStringToLong()?.toFloat()
+                ?: 0f)
+        )
+    }.collectAsStateWithLifecycle(1f)
     WorkoutTopBarContent(
-        elapsedWorkoutTime = state.elapsedWorkoutTime,
-        elapsedRestTime = state.elapsedRestTime,
+        elapsedWorkoutTime = workoutTime,
+        elapsedRestTime = elapsedRestTime,
         onMinimize = { viewModel.minimize() },
         onRestClick = onRestClick,
-        restProgress = state.progress,
+        restProgress = restProgress,
         onFinish = { viewModel.finish() }
     )
 
@@ -53,55 +66,60 @@ fun WorkoutTopBarContent(
     onRestClick: () -> Unit,
     onFinish: () -> Unit,
 ) {
-    Box(modifier = Modifier.fillMaxWidth()) {
+    Row(
+        modifier = Modifier.fillMaxWidth(),
+        horizontalArrangement = Arrangement.SpaceBetween,
+        verticalAlignment = Alignment.CenterVertically
+    ) {
         Row(
-            modifier = Modifier.fillMaxWidth(),
-            horizontalArrangement = Arrangement.SpaceBetween,
+            modifier = Modifier
+                .weight(1f)
+                .padding(end = 12.dp),
             verticalAlignment = Alignment.CenterVertically
         ) {
-            Row(verticalAlignment = Alignment.CenterVertically) {
-                IconButton(onClick = onMinimize, modifier = Modifier.padding(horizontal = 8.dp)) {
-                    Icon(
-                        painter = painterResource(R.drawable.ic_minimize),
-                        contentDescription = stringResource(R.string.minimize_icon_content_description)
-                    )
-                }
-                if (elapsedRestTime.isEmpty()) {
-                    IconButton(onClick = onRestClick) {
-                        Icon(
-                            painter = painterResource(R.drawable.ic_rest_timer),
-                            contentDescription = stringResource(R.string.rest_icon_content_description)
-                        )
-                    }
-                } else {
-                    LinearProgressIndicator(
-                        progress = { restProgress },
-                        modifier = Modifier
-                            .fillMaxSize(0.25f)
-                            .clickable(onClick = onRestClick)
-                    )
-                }
+            IconButton(onClick = onMinimize, modifier = Modifier.padding(horizontal = 8.dp)) {
+                Icon(
+                    painter = painterResource(R.drawable.ic_minimize),
+                    contentDescription = stringResource(R.string.minimize_icon_content_description)
+                )
             }
-
-
-            TextButton(
-                modifier = Modifier.testTag("Finish"),
-                onClick = onFinish
-            ) {
-                Text(
-                    text = stringResource(R.string.finish_workout),
-                    fontWeight = FontWeight.Bold,
-                    color = MaterialTheme.colorScheme.tertiary,
-                    style = MaterialTheme.typography.titleMedium
+            if (elapsedRestTime.isEmpty() || restProgress == 0f) {
+                IconButton(onClick = onRestClick) {
+                    Icon(
+                        painter = painterResource(R.drawable.ic_rest_timer),
+                        contentDescription = stringResource(R.string.rest_icon_content_description)
+                    )
+                }
+            } else {
+                LinearProgressIndicator(
+                    progress = { restProgress },
+                    modifier = Modifier
+                        .clickable(onClick = onRestClick)
                 )
             }
         }
+
         Text(
             text = elapsedWorkoutTime,
-            modifier = Modifier.align(alignment = Alignment.Center),
+            modifier = Modifier.align(alignment = Alignment.CenterVertically),
             color = MaterialTheme.colorScheme.onBackground,
             style = MaterialTheme.typography.titleMedium
         )
+
+        TextButton(
+            modifier = Modifier
+                .testTag("Finish")
+                .weight(1f)
+                .padding(start = 8.dp),
+            onClick = onFinish
+        ) {
+            Text(
+                text = stringResource(R.string.finish_workout),
+                fontWeight = FontWeight.Bold,
+                color = MaterialTheme.colorScheme.tertiary,
+                style = MaterialTheme.typography.titleMedium
+            )
+        }
     }
 }
 

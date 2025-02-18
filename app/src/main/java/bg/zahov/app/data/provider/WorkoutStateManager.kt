@@ -35,8 +35,8 @@ class WorkoutStateManager : WorkoutActions {
     val template: StateFlow<Workout?>
         get() = _template
 
-    private val _timer = MutableSharedFlow<Long>()
-    val timer: SharedFlow<Long>
+    private val _timer = MutableStateFlow<Long>(0)
+    val timer: StateFlow<Long>
         get() = _timer
 
     private var job: Job? = null
