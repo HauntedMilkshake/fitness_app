@@ -5,8 +5,9 @@ import bg.zahov.app.data.interfaces.Authentication
 import bg.zahov.app.data.remote.FirebaseAuthentication
 import com.google.firebase.auth.AuthResult
 import kotlinx.coroutines.CancellationException
+import javax.inject.Inject
 
-class AuthenticationImpl : Authentication {
+class AuthenticationImpl @Inject constructor() : Authentication {
     companion object {
         private var instance: AuthenticationImpl? = null
         fun getInstance() = instance ?: AuthenticationImpl().also { instance = it }

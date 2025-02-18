@@ -6,8 +6,9 @@ import bg.zahov.app.data.model.Workout
 import bg.zahov.app.data.remote.FirestoreManager
 import kotlinx.coroutines.flow.Flow
 import java.time.LocalDateTime
+import javax.inject.Inject
 
-class WorkoutRepositoryImpl : WorkoutRepository {
+class WorkoutRepositoryImpl @Inject constructor() : WorkoutRepository {
     companion object {
         @Volatile
         private var instance: WorkoutRepositoryImpl? = null
