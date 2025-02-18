@@ -8,9 +8,11 @@ import androidx.compose.material3.Text
 import androidx.compose.material3.TopAppBar
 import androidx.compose.runtime.Composable
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.platform.testTag
 import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.text.style.TextOverflow
+import bg.zahov.fitness.app.R
 
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
@@ -22,6 +24,7 @@ fun TopBarAction(
         modifier = modifier,
         title = {
             Text(
+                modifier = Modifier.testTag("Title"),
                 text = stringResource(topBarState.titleId),
                 maxLines = 1,
                 overflow = TextOverflow.Ellipsis,
@@ -34,7 +37,7 @@ fun TopBarAction(
                     topBarState.backButtonIconId?.let { icon ->
                         Icon(
                             painter = painterResource(icon),
-                            contentDescription = null
+                            contentDescription = stringResource(R.string.back_button)
                         )
                     }
                 }
@@ -44,7 +47,7 @@ fun TopBarAction(
             IconButton(onClick = topBarState.onActionClick) {
                 Icon(
                     painter = painterResource(topBarState.actionButtonIconId),
-                    contentDescription = null
+                    contentDescription = stringResource(R.string.top_bar_action)
                 )
             }
         }

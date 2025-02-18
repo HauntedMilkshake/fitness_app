@@ -16,6 +16,7 @@ import androidx.compose.runtime.setValue
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.graphics.Shape
+import androidx.compose.ui.platform.testTag
 import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.text.input.PasswordVisualTransformation
@@ -27,8 +28,9 @@ import kotlinx.coroutines.delay
 
 @Composable
 fun CommonPasswordField(
-    modifier: Modifier = Modifier,
     password: String,
+    onPasswordChange: (String) -> Unit,
+    onPasswordVisibilityChange: (Boolean) -> Unit,
     passwordVisible: Boolean = false,
     label: @Composable (() -> Unit)? = null,
     singleLine: Boolean = true,
@@ -44,15 +46,12 @@ fun CommonPasswordField(
         unfocusedIndicatorColor = Color.Transparent,
         errorIndicatorColor = Color.Transparent
     ),
-    onPasswordChange: (String) -> Unit,
-    onPasswordVisibilityChange: (Boolean) -> Unit,
     enabled: Boolean = true
 ) {
     var isError by remember { mutableStateOf(false) }
     var isActive by remember { mutableStateOf(false) }
 
     TextField(
-        modifier = modifier,
         value = password,
         onValueChange = {
             onPasswordChange(it)
@@ -74,7 +73,7 @@ fun CommonPasswordField(
             }) {
                 Icon(
                     painterResource(if (passwordVisible) R.drawable.ic_password_hidden else R.drawable.ic_password_visible),
-                    ""
+                    contentDescription = stringResource(R.string.show_password)
                 )
             }
         },

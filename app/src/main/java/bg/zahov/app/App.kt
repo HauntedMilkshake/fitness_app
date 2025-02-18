@@ -25,6 +25,8 @@ import androidx.compose.ui.draw.clip
 import androidx.compose.ui.draw.shadow
 import androidx.compose.ui.unit.dp
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
+import androidx.lifecycle.viewmodel.compose.viewModel
+import androidx.navigation.NavHostController
 import androidx.navigation.compose.rememberNavController
 import bg.zahov.app.ui.BottomBar
 import bg.zahov.app.ui.theme.FitnessTheme
@@ -32,8 +34,10 @@ import bg.zahov.app.ui.topbar.TopBar
 import kotlinx.coroutines.launch
 
 @Composable
-fun App(workoutManagerViewModel: WorkoutManagerViewModel) {
-    val navController = rememberNavController()
+fun App(
+    workoutManagerViewModel: WorkoutManagerViewModel = viewModel(),
+    navController: NavHostController = rememberNavController()
+) {
     val state by workoutManagerViewModel.state.collectAsStateWithLifecycle()
     val snackBarHostState = remember { SnackbarHostState() }
 

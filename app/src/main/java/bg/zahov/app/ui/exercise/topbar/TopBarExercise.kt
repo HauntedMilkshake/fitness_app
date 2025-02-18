@@ -11,6 +11,7 @@ import androidx.compose.material3.TopAppBar
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.getValue
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.platform.testTag
 import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.res.stringResource
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
@@ -70,7 +71,7 @@ fun TopBarExerciseContent(
                     }
                 )
             } else {
-                Text(text = stringResource(R.string.exercise))
+                Text(modifier = Modifier.testTag("Title"), text = stringResource(R.string.exercise))
             }
         },
         actions = {
@@ -82,9 +83,7 @@ fun TopBarExerciseContent(
                     )
                 }
             }
-            IconButton(
-                onClick = onChangeIsDialogOpen,
-            ) {
+            IconButton(onClick = onChangeIsDialogOpen,) {
                 Icon(
                     painter = painterResource(R.drawable.ic_filters),
                     contentDescription = stringResource(R.string.select_filter)

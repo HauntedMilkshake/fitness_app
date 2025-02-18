@@ -23,7 +23,7 @@
     <string name="no_account_text">No account? Sign up here!</string>
     <!-- String used for signup fragment   -->
     <string name="already_have_account_text">Already have an account? Log in here!</string>
-    <string name="confirm_password_text">Confirm <Password></Password></string>
+    <string name="confirm_password_text">Confirm</string>
     <string name="no_empty_fields">Don\'t leave empty fields</string>
     <string name="wrong_password">Passwords must be at least 6 characters long</string>
     <string name="wrong_email">Email address must be in the format: user@example.com.</string>
@@ -226,6 +226,8 @@
     <string name="cardio_category_text">Cardio</string>
     <string name="timed_category_text">Timed</string>
     <string name="muslce_part_description">Icon depicting</string>
+    <string name="show_password">Show password</string>
+    <string name="top_bar_action">Top Bar Action</string>
     <!-- Strings used for rest fragment   -->
     <string name="add_to_rest_time" >+ %1$s S</string>
     <string name="remove_from_rest_time">- %1$s S</string>
