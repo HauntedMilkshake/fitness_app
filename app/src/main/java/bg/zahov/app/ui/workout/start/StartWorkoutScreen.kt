@@ -40,8 +40,8 @@ import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.style.TextOverflow
 import androidx.compose.ui.unit.dp
+import androidx.hilt.navigation.compose.hiltViewModel
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
-import androidx.lifecycle.viewmodel.compose.viewModel
 import bg.zahov.app.data.model.BodyPart
 import bg.zahov.app.data.model.Category
 import bg.zahov.app.data.model.ToastManager
@@ -52,7 +52,7 @@ import bg.zahov.fitness.app.R
 
 @Composable
 fun StartWorkoutScreen(
-    startWorkoutViewModel: StartWorkoutViewModel = viewModel(),
+    startWorkoutViewModel: StartWorkoutViewModel = hiltViewModel(),
     onEditWorkout: (String) -> Unit,
     onAddTemplateWorkout: () -> Unit,
 ) {
@@ -385,9 +385,14 @@ fun Exercise(exerciseName: String, bodyPart: BodyPart, category: Category) {
                     BodyPart.Shoulders -> R.drawable.ic_shoulders
                     else -> R.drawable.ic_olympic
                 }
-            ), contentDescription = stringResource(R.string.muslce_part_description), tint = Color.Unspecified
+            ),
+            contentDescription = stringResource(R.string.muslce_part_description),
+            tint = Color.Unspecified
         )
-        Column(modifier = Modifier.padding(start = 8.dp), verticalArrangement = Arrangement.Center) {
+        Column(
+            modifier = Modifier.padding(start = 8.dp),
+            verticalArrangement = Arrangement.Center
+        ) {
             Text(
                 text = exerciseName,
                 fontWeight = FontWeight.Bold,

@@ -1,5 +1,6 @@
 package bg.zahov.app.data.provider
 
+import android.util.Log
 import bg.zahov.app.data.interfaces.WorkoutActions
 import bg.zahov.app.data.model.Workout
 import bg.zahov.app.data.model.WorkoutState
@@ -8,13 +9,13 @@ import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.Job
 import kotlinx.coroutines.delay
 import kotlinx.coroutines.flow.Flow
-import kotlinx.coroutines.flow.MutableSharedFlow
 import kotlinx.coroutines.flow.MutableStateFlow
-import kotlinx.coroutines.flow.SharedFlow
 import kotlinx.coroutines.flow.StateFlow
 import kotlinx.coroutines.launch
 import javax.inject.Inject
+import javax.inject.Singleton
 
+@Singleton
 class WorkoutStateManager @Inject constructor() : WorkoutActions {
     companion object {
 
@@ -23,6 +24,10 @@ class WorkoutStateManager @Inject constructor() : WorkoutActions {
         fun getInstance() = instance ?: synchronized(this) {
             instance ?: WorkoutStateManager().also { instance = it }
         }
+    }
+
+    init {
+        Log.d("gg", "gg")
     }
 
     private val _shouldSave = MutableStateFlow(false)
