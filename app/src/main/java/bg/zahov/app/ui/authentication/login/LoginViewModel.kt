@@ -2,9 +2,9 @@ package bg.zahov.app.ui.authentication.login
 
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
-import bg.zahov.app.Inject
 import bg.zahov.app.data.interfaces.ServiceErrorHandler
 import bg.zahov.app.data.interfaces.UserProvider
+import bg.zahov.app.ui.authentication.login.LoginViewModel.LoginData
 import com.google.firebase.auth.FirebaseAuthInvalidCredentialsException
 import com.google.firebase.auth.FirebaseAuthInvalidUserException
 import kotlinx.coroutines.flow.MutableStateFlow
@@ -24,8 +24,8 @@ import kotlinx.coroutines.launch
  * @param serviceError Injected error handler that manages errors and starts the error-handling countdown.
  */
 class LoginViewModel(
-    private val auth: UserProvider = Inject.userProvider,
-    private val serviceError: ServiceErrorHandler = Inject.serviceErrorHandler,
+    private val auth: UserProvider,
+    private val serviceError: ServiceErrorHandler,
 ) : ViewModel() {
     /**
      * Data class that represents the UI state for the login screen.

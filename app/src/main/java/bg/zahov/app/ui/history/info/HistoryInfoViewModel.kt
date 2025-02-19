@@ -2,7 +2,6 @@ package bg.zahov.app.ui.history.info
 
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
-import bg.zahov.app.Inject
 import bg.zahov.app.data.interfaces.WorkoutProvider
 import bg.zahov.app.data.model.ToastManager
 import bg.zahov.app.data.model.Workout
@@ -24,8 +23,8 @@ import kotlinx.coroutines.launch
  * @property toastManager Manages the display of toast notifications.
  */
 class HistoryInfoViewModel(
-    private val workoutStateProvider: WorkoutStateManager = Inject.workoutState,
-    private val workoutProvider: WorkoutProvider = Inject.workoutProvider,
+    private val workoutStateProvider: WorkoutStateManager,
+    private val workoutProvider: WorkoutProvider,
     private val toastManager: ToastManager = ToastManager,
 ) : ViewModel() {
 

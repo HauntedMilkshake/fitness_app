@@ -1,7 +1,6 @@
 package bg.zahov.app.ui.history.info.topbar
 
 import androidx.lifecycle.ViewModel
-import bg.zahov.app.Inject
 import bg.zahov.app.data.interfaces.WorkoutProvider
 
 /**
@@ -9,7 +8,7 @@ import bg.zahov.app.data.interfaces.WorkoutProvider
  *
  * @property historyInfoTopBarHandler defines the actions to be performed when interacting with the top bar
  */
-class HistoryInfoTopBarViewModel(private val historyInfoTopBarHandler: WorkoutProvider = Inject.workoutProvider) :
+class HistoryInfoTopBarViewModel(private val historyInfoTopBarHandler: WorkoutProvider) :
     ViewModel() {
 
     /**
