@@ -1,6 +1,5 @@
 package bg.zahov.app.ui.workout.start
 
-import android.widget.Toast
 import androidx.compose.animation.AnimatedContent
 import androidx.compose.animation.AnimatedVisibilityScope
 import androidx.compose.animation.ExperimentalSharedTransitionApi
@@ -26,7 +25,6 @@ import androidx.compose.material3.IconButton
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
-import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.saveable.rememberSaveable
@@ -44,7 +42,6 @@ import androidx.hilt.navigation.compose.hiltViewModel
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import bg.zahov.app.data.model.BodyPart
 import bg.zahov.app.data.model.Category
-import bg.zahov.app.data.model.ToastManager
 import bg.zahov.app.data.provider.toFormattedString
 import bg.zahov.app.ui.theme.FitnessTheme
 import bg.zahov.fitness.app.R
@@ -57,15 +54,7 @@ fun StartWorkoutScreen(
     onAddTemplateWorkout: () -> Unit,
 ) {
     val uiState by startWorkoutViewModel.uiState.collectAsStateWithLifecycle()
-    val toast by ToastManager.messages.collectAsStateWithLifecycle()
     val context = LocalContext.current
-
-    LaunchedEffect(toast) {
-        toast?.let { message ->
-            Toast.makeText(context, context.getString(message.messageResId), Toast.LENGTH_SHORT)
-                .show()
-        }
-    }
 
     StartWorkoutContent(workouts = uiState.workouts,
         onWorkoutStart = { startWorkoutViewModel.startWorkout(it) },
