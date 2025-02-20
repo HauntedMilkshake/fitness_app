@@ -1,19 +1,14 @@
 package bg.zahov.app.data.provider
 
+import android.util.Log
 import bg.zahov.app.data.model.Exercise
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.StateFlow
 import javax.inject.Inject
+import javax.inject.Singleton
 
+@Singleton
 class AddExerciseToWorkoutProvider @Inject constructor() {
-    companion object {
-        @Volatile
-        private var instance: AddExerciseToWorkoutProvider? = null
-
-        fun getInstance() = instance ?: synchronized(this) {
-            instance ?: AddExerciseToWorkoutProvider().also { instance = it }
-        }
-    }
 
     private val _selectedExercises = MutableStateFlow<List<Exercise>>(mutableListOf())
     val selectedExercises: StateFlow<List<Exercise>>

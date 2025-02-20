@@ -92,6 +92,7 @@
     <string name="template_name_placeholder">Example</string>
     <string name="new_workout_template_hint">Workout template name</string>
     <string name="duplicate_workout_template">duplicate</string>
+    <string name="add_template_button_content_description">Add workout to templates</string>
     <!-- Strings used for exercise template creation   -->
     <string name="set_column_text">Set</string>
     <string name="previous_column_text">Previous</string>

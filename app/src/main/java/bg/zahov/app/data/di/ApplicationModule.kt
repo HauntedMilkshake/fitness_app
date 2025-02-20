@@ -55,12 +55,11 @@ object ApplicationModule {
         ReplaceableExerciseProvider.getInstance()
 
     @Singleton
-    fun provideWorkoutAddedExerciseProvider(): AddExerciseToWorkoutProvider =
-        AddExerciseToWorkoutProvider.getInstance()
+    fun provideWorkoutAddedExerciseProvider(): AddExerciseToWorkoutProvider = AddExerciseToWorkoutProvider()
 
     @Singleton
     fun provideFilterProvider(): FilterProvider =
-        FilterProvider.getInstance()
+        FilterProvider()
 
     @Provides
     @Singleton

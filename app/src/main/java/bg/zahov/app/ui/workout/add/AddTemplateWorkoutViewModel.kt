@@ -1,6 +1,5 @@
 package bg.zahov.app.ui.workout.add
 
-import android.util.Log
 import androidx.lifecycle.SavedStateHandle
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
@@ -105,7 +104,6 @@ class AddTemplateWorkoutViewModel @Inject constructor(
     private var templateExercises = listOf<Exercise>()
 
     init {
-        Log.d("init", workoutId.toString())
         initEditWorkoutId(workoutId = workoutId)
         viewModelScope.launch {
             observeTemplateExercises()

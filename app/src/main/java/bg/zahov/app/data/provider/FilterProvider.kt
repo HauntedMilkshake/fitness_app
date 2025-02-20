@@ -7,16 +7,10 @@ import bg.zahov.app.data.model.FilterItem
 import kotlinx.coroutines.flow.MutableSharedFlow
 import kotlinx.coroutines.flow.SharedFlow
 import javax.inject.Inject
+import javax.inject.Singleton
 
+@Singleton
 class FilterProvider @Inject constructor() {
-    companion object {
-        @Volatile
-        private var instance: FilterProvider? = null
-
-        fun getInstance() = instance ?: synchronized(this) {
-            instance ?: FilterProvider().also { instance = it }
-        }
-    }
 
     private val _filters = MutableSharedFlow<List<FilterItem>>()
     val filters: SharedFlow<List<FilterItem>> = _filters

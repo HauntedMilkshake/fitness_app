@@ -53,6 +53,8 @@ sealed class TopBarState {
     data object HistoryInfo : TopBarState()
 
     data object Workout : TopBarState()
+
+    data object AddTemplateWorkout: TopBarState()
 }
 
 @Composable
@@ -106,12 +108,12 @@ fun topAppBarConfiguration(navController: NavController): Map<KClass<*>, TopBarS
             backButtonIconId = R.drawable.ic_back_arrow,
             onBackClick = { navController.popBackStack() }
         ),
-        AddTemplateWorkout::class to TopBarState.TitleWithAction(
-            titleId = R.string.new_workout_template,
-            actionButtonIconId = R.drawable.ic_plus,
-            onActionClick = { /* TODO() */ },
-            onBackClick = { navController.navigateUp() }
-        ),
+//        AddTemplateWorkout::class to TopBarState.TitleWithAction(
+//            titleId = R.string.new_workout_template,
+//            actionButtonIconId = R.drawable.ic_plus,
+//            onActionClick = { /* TODO() */ },
+//            onBackClick = { navController.navigateUp() }
+//        ),
 
         Workout::class to TopBarState.Workout,
 
@@ -169,6 +171,10 @@ fun TopBar(modifier: Modifier = Modifier, navController: NavController) {
                 TopBarWorkout(
                     onRestClick = { navController.navigate(Rest) },
                 )
+            }
+
+            is TopBarState.AddTemplateWorkout -> {
+
             }
         }
     }
