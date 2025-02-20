@@ -2,18 +2,18 @@ package bg.zahov.app.ui.history.info
 
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
-import bg.zahov.app.Inject
+import bg.zahov.app.data.interfaces.WorkoutActions
 import bg.zahov.app.data.interfaces.WorkoutProvider
-import bg.zahov.app.data.model.ToastManager
 import bg.zahov.app.data.model.Workout
 import bg.zahov.app.data.model.WorkoutState
 import bg.zahov.app.data.provider.WorkoutStateManager
 import bg.zahov.app.data.provider.model.HistoryInfoWorkout
-import bg.zahov.fitness.app.R
+import dagger.hilt.android.lifecycle.HiltViewModel
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.StateFlow
 import kotlinx.coroutines.flow.update
 import kotlinx.coroutines.launch
+import javax.inject.Inject
 
 /**
  * ViewModel for managing the state and actions related to workout history details.
@@ -21,12 +21,11 @@ import kotlinx.coroutines.launch
  * @constructor Creates a HistoryInfoViewModel with the required dependencies.
  * @property workoutStateProvider Provides the current workout state.
  * @property workoutProvider Handles operations related to workouts, such as retrieving and modifying them.
- * @property toastManager Manages the display of toast notifications.
  */
-class HistoryInfoViewModel(
-    private val workoutStateProvider: WorkoutStateManager = Inject.workoutState,
-    private val workoutProvider: WorkoutProvider = Inject.workoutProvider,
-    private val toastManager: ToastManager = ToastManager,
+@HiltViewModel
+class HistoryInfoViewModel @Inject constructor(
+    private val workoutStateProvider: WorkoutActions,
+    private val workoutProvider: WorkoutProvider,
 ) : ViewModel() {
 
     private val _uiState = MutableStateFlow(HistoryInfoWorkout())
@@ -36,7 +35,7 @@ class HistoryInfoViewModel(
 
     private var pastWorkouts: List<Workout> = listOf()
 
-    private val currentWorkoutState: WorkoutState? = null
+    private var currentWorkoutState: WorkoutState? = null
 
     /**
      * Initializes the ViewModel by collecting template workouts, the current workout state,
@@ -49,6 +48,19 @@ class HistoryInfoViewModel(
         observerSaveTrigger()
         observerSaveTrigger()
         observerDeleteTrigger()
+        observeWorkoutState()
+    }
+
+    /**
+     * Observes the state of the workout
+     * @see workoutStateProvider
+     */
+    private fun observeWorkoutState() {
+        viewModelScope.launch {
+            workoutStateProvider.state.collect {
+                currentWorkoutState = it
+            }
+        }
     }
 
     /**
@@ -140,7 +152,7 @@ class HistoryInfoViewModel(
                 _uiState.update { old ->
                     old.copy(isDeleted = true)
                 }
-            } ?: run { toastManager.showToast(R.string.failed_to_delete_workout_toast) }
+            } ?: run { /* TODO() */ }
         }
     }
 
@@ -152,7 +164,7 @@ class HistoryInfoViewModel(
     private fun saveAsTemplate() {
         viewModelScope.launch {
             if (templates.any { it.id == getCorrespondingWorkout()?.id }) {
-                toastManager.showToast(R.string.workout_exists_toast)
+                /* TODO() */
             } else {
                 getCorrespondingWorkout()?.copy(
                     isTemplate = true,
@@ -175,10 +187,13 @@ class HistoryInfoViewModel(
         viewModelScope.launch {
             when (currentWorkoutState) {
                 WorkoutState.MINIMIZED, WorkoutState.ACTIVE -> {
-                    toastManager.showToast(R.string.toast_couldnt_start_workout)
+                    /* TODO() */
                 }
 
-                WorkoutState.INACTIVE -> workoutStateProvider.startWorkout(getCorrespondingWorkout())
+                WorkoutState.INACTIVE -> {
+                    workoutStateProvider.startWorkout(getCorrespondingWorkout())
+                }
+
                 null -> { /* no-op */
                 }
             }

@@ -27,9 +27,7 @@ object Inject {
     val workoutProvider by lazy {
         WorkoutProviderImpl.getInstance()
     }
-    val workoutState by lazy {
-        WorkoutStateManager.getInstance()
-    }
+
     val selectedExerciseProvider by lazy {
         SelectableExerciseProvider.getInstance()
     }

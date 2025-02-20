@@ -38,10 +38,6 @@ object ApplicationModule {
 
     @Provides
     @Singleton
-    fun provideSettingsProvider(): SettingsProvider = SettingsProviderImpl.getInstance()
-
-    @Provides
-    @Singleton
     fun provideWorkoutProvider(): WorkoutProvider = WorkoutProviderImpl.getInstance()
 
     @Provides
@@ -68,7 +64,7 @@ object ApplicationModule {
 
     @Provides
     @Singleton
-    fun provideWorkoutStateProvider(): WorkoutActions = WorkoutStateManager.getInstance()
+    fun provideWorkoutStateProvider(): WorkoutActions = WorkoutStateManager()
 
     @Provides
     @Singleton

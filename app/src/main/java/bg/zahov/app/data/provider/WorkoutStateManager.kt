@@ -1,6 +1,5 @@
 package bg.zahov.app.data.provider
 
-import android.util.Log
 import bg.zahov.app.data.interfaces.WorkoutActions
 import bg.zahov.app.data.model.Workout
 import bg.zahov.app.data.model.WorkoutState
@@ -17,32 +16,20 @@ import javax.inject.Singleton
 
 @Singleton
 class WorkoutStateManager @Inject constructor() : WorkoutActions {
-    companion object {
-
-        @Volatile
-        private var instance: WorkoutStateManager? = null
-        fun getInstance() = instance ?: synchronized(this) {
-            instance ?: WorkoutStateManager().also { instance = it }
-        }
-    }
-
-    init {
-        Log.d("gg", "gg")
-    }
 
     private val _shouldSave = MutableStateFlow(false)
-    val shouldSave: Flow<Boolean> = _shouldSave
+    override val shouldSave: Flow<Boolean> = _shouldSave
 
     private val _state = MutableStateFlow(WorkoutState.INACTIVE)
-    val state: StateFlow<WorkoutState>
+    override val state: StateFlow<WorkoutState>
         get() = _state
 
     private val _template = MutableStateFlow<Workout?>(null)
-    val template: StateFlow<Workout?>
+    override val template: StateFlow<Workout?>
         get() = _template
 
     private val _timer = MutableStateFlow<Long>(0)
-    val timer: StateFlow<Long>
+    override val timer: StateFlow<Long>
         get() = _timer
 
     private var job: Job? = null
@@ -63,7 +50,7 @@ class WorkoutStateManager @Inject constructor() : WorkoutActions {
 
     private var lastTime: Long = 0L
 
-    suspend fun saveWorkout() {
+    override suspend fun saveWorkout() {
         _shouldSave.emit(true)
     }
 

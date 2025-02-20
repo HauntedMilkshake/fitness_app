@@ -2,6 +2,7 @@ package bg.zahov.app
 
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
+import bg.zahov.app.data.interfaces.WorkoutActions
 import bg.zahov.app.data.model.WorkoutState
 import bg.zahov.app.data.provider.WorkoutStateManager
 import bg.zahov.app.util.timeToString
@@ -38,7 +39,7 @@ data class WorkoutUiState(
  */
 @HiltViewModel
 class WorkoutManagerViewModel @Inject constructor(
-    private val workoutStateManager: WorkoutStateManager,
+    private val workoutStateManager: WorkoutActions,
 ) : ViewModel() {
 
     private val _state = MutableStateFlow(WorkoutUiState())
