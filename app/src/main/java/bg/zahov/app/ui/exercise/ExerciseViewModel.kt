@@ -2,17 +2,12 @@ package bg.zahov.app.ui.exercise
 
 import androidx.lifecycle.SavedStateHandle
 import androidx.lifecycle.ViewModel
-import androidx.lifecycle.ViewModelProvider
-import androidx.lifecycle.createSavedStateHandle
 import androidx.lifecycle.viewModelScope
-import androidx.lifecycle.viewmodel.initializer
-import androidx.lifecycle.viewmodel.viewModelFactory
 import androidx.navigation.toRoute
 import bg.zahov.app.ExerciseArgs.ADD_EXERCISE_ARG
 import bg.zahov.app.ExerciseArgs.REPLACE_EXERCISE_ARG
 import bg.zahov.app.ExerciseArgs.SELECT_EXERCISE_ARG
 import bg.zahov.app.Exercises
-import bg.zahov.app.Inject
 import bg.zahov.app.data.exception.CriticalDataNullException
 import bg.zahov.app.data.interfaces.ExercisesTopBarHandler
 import bg.zahov.app.data.interfaces.ServiceErrorHandler
@@ -26,10 +21,12 @@ import bg.zahov.app.data.provider.AddExerciseToWorkoutProvider
 import bg.zahov.app.data.provider.FilterProvider
 import bg.zahov.app.data.provider.ReplaceableExerciseProvider
 import bg.zahov.app.data.provider.SelectableExerciseProvider
+import dagger.hilt.android.lifecycle.HiltViewModel
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.StateFlow
 import kotlinx.coroutines.flow.update
 import kotlinx.coroutines.launch
+import javax.inject.Inject
 
 /**
  * ViewModel class that manages the state for exercise-related operations.
@@ -41,26 +38,17 @@ import kotlinx.coroutines.launch
  * @property filterProvider Provides access to filter data.
  * @property serviceError Handles service-related errors.
  */
-class ExerciseViewModel(
+@HiltViewModel
+class ExerciseViewModel @Inject constructor(
     private val savedStateHandle: SavedStateHandle,
-    private val repo: WorkoutProvider = Inject.workoutProvider,
-    private val selectableExerciseProvider: SelectableExerciseProvider = Inject.selectedExerciseProvider,
-    private val replaceableExerciseProvider: ReplaceableExerciseProvider = Inject.replaceableExerciseProvider,
-    private val addExerciseToWorkoutProvider: AddExerciseToWorkoutProvider = Inject.workoutAddedExerciseProvider,
-    private val filterProvider: FilterProvider = Inject.filterProvider,
-    private val serviceError: ServiceErrorHandler = Inject.serviceErrorHandler,
-    private val exerciseTopBarManager: ExercisesTopBarHandler = Inject.exercisesTopAppHandler,
+    private val repo: WorkoutProvider,
+    private val selectableExerciseProvider: SelectableExerciseProvider,
+    private val replaceableExerciseProvider: ReplaceableExerciseProvider,
+    private val addExerciseToWorkoutProvider: AddExerciseToWorkoutProvider,
+    private val filterProvider: FilterProvider,
+    private val serviceError: ServiceErrorHandler,
+    private val exerciseTopBarManager: ExercisesTopBarHandler,
 ) : ViewModel() {
-
-    companion object {
-        val Factory: ViewModelProvider.Factory = viewModelFactory {
-            initializer {
-                ExerciseViewModel(
-                    savedStateHandle = createSavedStateHandle(),
-                )
-            }
-        }
-    }
 
     private val exerciseState = savedStateHandle.toRoute<Exercises>().state
 
@@ -148,6 +136,7 @@ class ExerciseViewModel(
             old.copy(navigateInfo = false)
         }
     }
+
     /**
      * Handles the click event on an exercise item, adjusting the selection state based on the current flag.
      *
