@@ -35,7 +35,6 @@ fun SettingsScreen(
     viewModel: SettingsViewModel = hiltViewModel(),
     navigateEditProfile: () -> Unit,
 ) {
-    val uiState by viewModel.uiState.collectAsStateWithLifecycle()
 
     SettingsContent(
         resetTimer = 0,

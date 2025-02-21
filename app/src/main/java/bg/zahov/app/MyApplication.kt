@@ -12,7 +12,6 @@ import bg.zahov.app.data.provider.ServiceErrorHandlerImpl
 import bg.zahov.app.data.provider.SettingsProviderImpl
 import bg.zahov.app.data.provider.UserProviderImpl
 import bg.zahov.app.data.provider.WorkoutProviderImpl
-import bg.zahov.app.data.provider.WorkoutStateManager
 import com.google.firebase.Firebase
 import com.google.firebase.initialize
 import dagger.hilt.android.HiltAndroidApp

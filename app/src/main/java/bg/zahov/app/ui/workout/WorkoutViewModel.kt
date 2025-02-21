@@ -2,6 +2,7 @@ package bg.zahov.app.ui.workout
 
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
+import bg.zahov.app.data.interfaces.WorkoutActions
 import bg.zahov.app.data.interfaces.WorkoutProvider
 import bg.zahov.app.data.model.BodyPart
 import bg.zahov.app.data.model.Category
@@ -12,7 +13,6 @@ import bg.zahov.app.data.model.Workout
 import bg.zahov.app.data.model.WorkoutState
 import bg.zahov.app.data.provider.AddExerciseToWorkoutProvider
 import bg.zahov.app.data.provider.RestTimerProvider
-import bg.zahov.app.data.provider.WorkoutStateManager
 import bg.zahov.app.util.generateRandomId
 import bg.zahov.app.util.hashString
 import bg.zahov.fitness.app.R
@@ -115,7 +115,7 @@ data class ExerciseSummary(
  */
 @HiltViewModel
 class WorkoutViewModel @Inject constructor(
-    private val workoutStateManager: WorkoutStateManager,
+    private val workoutStateManager: WorkoutActions,
     private val repo: WorkoutProvider,
     private val addExerciseToWorkoutProvider: AddExerciseToWorkoutProvider,
     private val restTimerProvider: RestTimerProvider,

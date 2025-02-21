@@ -18,7 +18,7 @@ interface WorkoutActions {
     /**
      * Represents the current state of the workout session.
      */
-    val state: StateFlow<WorkoutState>
+    val state: Flow<WorkoutState>
 
     /**
      * Holds the active workout template, if available.

@@ -6,7 +6,6 @@ import bg.zahov.app.data.interfaces.WorkoutActions
 import bg.zahov.app.data.interfaces.WorkoutProvider
 import bg.zahov.app.data.model.Workout
 import bg.zahov.app.data.model.WorkoutState
-import bg.zahov.app.data.provider.WorkoutStateManager
 import bg.zahov.app.data.provider.model.HistoryInfoWorkout
 import dagger.hilt.android.lifecycle.HiltViewModel
 import kotlinx.coroutines.flow.MutableStateFlow

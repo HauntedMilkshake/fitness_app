@@ -12,9 +12,7 @@ import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.StateFlow
 import kotlinx.coroutines.launch
 import javax.inject.Inject
-import javax.inject.Singleton
 
-@Singleton
 class WorkoutStateManager @Inject constructor() : WorkoutActions {
 
     private val _shouldSave = MutableStateFlow(false)
