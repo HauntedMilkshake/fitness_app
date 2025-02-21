@@ -155,7 +155,6 @@ class HistoryInfoViewModel @Inject constructor(
         }
     }
 
-
     /**
      * Saves the current workout as a template, if it does not already exist in the templates.
      * Displays a toast notification if the workout already exists as a template.
@@ -163,7 +162,7 @@ class HistoryInfoViewModel @Inject constructor(
     private fun saveAsTemplate() {
         viewModelScope.launch {
             if (templates.any { it.id == getCorrespondingWorkout()?.id }) {
-                /* TODO() */
+                /*TODO(change to snackbar  ( R.string.workout_exists_toast ) ) */
             } else {
                 getCorrespondingWorkout()?.copy(
                     isTemplate = true,
@@ -186,12 +185,12 @@ class HistoryInfoViewModel @Inject constructor(
         viewModelScope.launch {
             when (currentWorkoutState) {
                 WorkoutState.MINIMIZED, WorkoutState.ACTIVE -> {
-                    /* TODO() */
+                    /*TODO(change to snackbar  ( R.string.toast_couldnt_start_workout ) ) */
                 }
 
-                WorkoutState.INACTIVE -> {
-                    workoutStateProvider.startWorkout(getCorrespondingWorkout())
-                }
+                WorkoutState.INACTIVE -> workoutStateProvider.startWorkout(
+                    getCorrespondingWorkout()
+                )
 
                 null -> { /* no-op */
                 }
