@@ -2,17 +2,17 @@ package bg.zahov.app.ui.history.info
 
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
-import bg.zahov.app.Inject
 import bg.zahov.app.data.interfaces.WorkoutProvider
 import bg.zahov.app.data.model.Workout
 import bg.zahov.app.data.model.WorkoutState
 import bg.zahov.app.data.provider.WorkoutStateManager
 import bg.zahov.app.data.provider.model.HistoryInfoWorkout
-import bg.zahov.fitness.app.R
+import dagger.hilt.android.lifecycle.HiltViewModel
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.StateFlow
 import kotlinx.coroutines.flow.update
 import kotlinx.coroutines.launch
+import javax.inject.Inject
 
 /**
  * ViewModel for managing the state and actions related to workout history details.
@@ -21,9 +21,10 @@ import kotlinx.coroutines.launch
  * @property workoutStateProvider Provides the current workout state.
  * @property workoutProvider Handles operations related to workouts, such as retrieving and modifying them.
  */
-class HistoryInfoViewModel(
-    private val workoutStateProvider: WorkoutStateManager = Inject.workoutState,
-    private val workoutProvider: WorkoutProvider = Inject.workoutProvider,
+@HiltViewModel
+class HistoryInfoViewModel @Inject constructor(
+    private val workoutStateProvider: WorkoutStateManager,
+    private val workoutProvider: WorkoutProvider,
 ) : ViewModel() {
 
     private val _uiState = MutableStateFlow(HistoryInfoWorkout())

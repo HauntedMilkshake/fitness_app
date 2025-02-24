@@ -6,16 +6,9 @@ import bg.zahov.app.data.model.Workout
 import bg.zahov.app.data.remote.FirestoreManager
 import kotlinx.coroutines.flow.Flow
 import java.time.LocalDateTime
+import javax.inject.Inject
 
-class WorkoutRepositoryImpl : WorkoutRepository {
-    companion object {
-        @Volatile
-        private var instance: WorkoutRepositoryImpl? = null
-        fun getInstance() =
-            instance ?: synchronized(this) {
-                instance ?: WorkoutRepositoryImpl().also { instance = it }
-            }
-    }
+class WorkoutRepositoryImpl @Inject constructor() : WorkoutRepository {
 
     private val firestore = FirestoreManager.getInstance()
 

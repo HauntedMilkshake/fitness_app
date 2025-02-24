@@ -1,12 +1,16 @@
 package bg.zahov.app.data.di
 
+import bg.zahov.app.data.interfaces.Authentication
 import bg.zahov.app.data.interfaces.ExercisesTopBarHandler
 import bg.zahov.app.data.interfaces.MeasurementProvider
+import bg.zahov.app.data.interfaces.MeasurementRepository
 import bg.zahov.app.data.interfaces.RestProvider
 import bg.zahov.app.data.interfaces.ServiceErrorHandler
 import bg.zahov.app.data.interfaces.UserProvider
+import bg.zahov.app.data.interfaces.UserRepository
 import bg.zahov.app.data.interfaces.WorkoutActions
 import bg.zahov.app.data.interfaces.WorkoutProvider
+import bg.zahov.app.data.interfaces.WorkoutRepository
 import bg.zahov.app.data.provider.AddExerciseToWorkoutProvider
 import bg.zahov.app.data.provider.ExercisesTopBarManager
 import bg.zahov.app.data.provider.FilterProvider
@@ -29,16 +33,16 @@ import javax.inject.Singleton
 object ApplicationModule {
     @Provides
     @Singleton
-    fun provideUserProvider(): UserProvider = UserProviderImpl.getInstance()
+    fun provideUserProvider(userRepo: UserRepository, auth: Authentication): UserProvider = UserProviderImpl(userRepo, auth)
 
     @Provides
     @Singleton
-    fun provideWorkoutProvider(): WorkoutProvider = WorkoutProviderImpl.getInstance()
+    fun provideWorkoutProvider(workoutRepo: WorkoutRepository): WorkoutProvider = WorkoutProviderImpl(workoutRepo)
 
     @Provides
     @Singleton
-    fun provideMeasurementProvider(): MeasurementProvider =
-        MeasurementProviderImpl.getInstance()
+    fun provideMeasurementProvider(measurementRepo: MeasurementRepository): MeasurementProvider =
+        MeasurementProviderImpl(measurementRepo)
 
     @Singleton
     fun provideSelectableExerciseProvider(): SelectableExerciseProvider =

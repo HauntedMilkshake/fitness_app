@@ -18,15 +18,6 @@ import com.google.firebase.initialize
 import dagger.hilt.android.HiltAndroidApp
 
 object Inject {
-    val userProvider by lazy {
-        UserProviderImpl.getInstance()
-    }
-    val settingsProvider by lazy {
-        SettingsProviderImpl.getInstance()
-    }
-    val workoutProvider by lazy {
-        WorkoutProviderImpl.getInstance()
-    }
     val workoutState by lazy {
         WorkoutStateManager.getInstance()
     }
@@ -44,9 +35,6 @@ object Inject {
     }
     val filterProvider by lazy {
         FilterProvider.getInstance()
-    }
-    val measurementProvider by lazy {
-        MeasurementProviderImpl.getInstance()
     }
     val serviceErrorHandler by lazy {
         ServiceErrorHandlerImpl.getInstance()

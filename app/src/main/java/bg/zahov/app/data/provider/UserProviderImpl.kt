@@ -1,20 +1,17 @@
 package bg.zahov.app.data.provider
 
+import bg.zahov.app.data.interfaces.Authentication
 import bg.zahov.app.data.interfaces.UserProvider
+import bg.zahov.app.data.interfaces.UserRepository
 import bg.zahov.app.data.model.User
-import bg.zahov.app.data.repository.AuthenticationImpl
-import bg.zahov.app.data.repository.UserRepositoryImpl
 import com.google.android.gms.tasks.Task
 import kotlinx.coroutines.flow.Flow
+import javax.inject.Inject
 
-class UserProviderImpl : UserProvider {
-    companion object {
-        private var instance: UserProviderImpl? = null
-        fun getInstance() = instance ?: UserProviderImpl().also { instance = it }
-    }
-
-    private val userRepo = UserRepositoryImpl.getInstance()
-    private val auth = AuthenticationImpl.getInstance()
+class UserProviderImpl @Inject constructor(
+    private val userRepo: UserRepository,
+    private val auth: Authentication,
+) : UserProvider {
 
     override suspend fun getUser(): Flow<User> = userRepo.getUser()
 
