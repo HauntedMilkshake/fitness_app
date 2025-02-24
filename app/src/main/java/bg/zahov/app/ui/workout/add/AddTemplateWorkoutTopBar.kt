@@ -2,6 +2,7 @@ package bg.zahov.app.ui.workout.add
 
 import androidx.compose.foundation.Image
 import androidx.compose.material3.ExperimentalMaterial3Api
+import androidx.compose.material3.Icon
 import androidx.compose.material3.IconButton
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Text
@@ -14,15 +15,16 @@ import androidx.hilt.navigation.compose.hiltViewModel
 import bg.zahov.fitness.app.R
 
 @Composable
-fun AddTemplateWorkoutTopBar(topBarViewModel: AddTemplateWorkoutTopBarViewModel = hiltViewModel()) {
+fun AddTemplateWorkoutTopBar(topBarViewModel: AddTemplateWorkoutTopBarViewModel = hiltViewModel(), onBack: () -> Unit) {
     AddTemplateWorkoutTopBarContent(
+        onBack = onBack,
         onSave = { topBarViewModel.onSave() }
     )
 }
 
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
-fun AddTemplateWorkoutTopBarContent(onSave: () -> Unit = {}) {
+fun AddTemplateWorkoutTopBarContent(onBack: () -> Unit, onSave: () -> Unit) {
     TopAppBar(
         title = {
             Text(
@@ -35,9 +37,20 @@ fun AddTemplateWorkoutTopBarContent(onSave: () -> Unit = {}) {
         },
         actions = {
             IconButton(onClick = onSave) {
-                Image(
+                Icon(
                     painter = painterResource(R.drawable.ic_plus),
                     contentDescription = stringResource(R.string.add_template_button_content_description),
+                    tint = MaterialTheme.colorScheme.tertiary
+                )
+            }
+        },
+        navigationIcon = {
+            IconButton(onClick = onBack) {
+                Icon(
+                    painter = painterResource(R.drawable.ic_back_arrow),
+                    contentDescription = stringResource(R.string.back_button),
+                    tint = MaterialTheme.colorScheme.tertiary
+
                 )
             }
         }

@@ -168,7 +168,9 @@ fun TopBar(modifier: Modifier = Modifier, navController: NavController) {
             }
 
             is TopBarState.AddTemplateWorkout -> {
-                AddTemplateWorkoutTopBar()
+                AddTemplateWorkoutTopBar(
+                    onBack = { navController.popBackStack() }
+                )
             }
         }
     }
