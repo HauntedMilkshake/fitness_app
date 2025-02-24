@@ -13,6 +13,9 @@ import java.time.LocalDateTime
 
 interface WorkoutProvider {
 
+    /**
+     * A [StateFlow] that represents whether or not to save the current template
+     */
     val shouldAddTemplate: Flow<Boolean>
 
     /**
@@ -103,5 +106,8 @@ interface WorkoutProvider {
      */
     fun tryToFinish()
 
+    /**
+     *  Signals to add the template using [shouldAddTemplate]
+     */
     fun triggerAddTemplate()
 }
