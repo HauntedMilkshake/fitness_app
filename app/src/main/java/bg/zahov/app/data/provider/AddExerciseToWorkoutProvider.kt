@@ -1,13 +1,10 @@
 package bg.zahov.app.data.provider
 
-import android.util.Log
 import bg.zahov.app.data.model.Exercise
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.StateFlow
 import javax.inject.Inject
-import javax.inject.Singleton
 
-@Singleton
 class AddExerciseToWorkoutProvider @Inject constructor() {
 
     private val _selectedExercises = MutableStateFlow<List<Exercise>>(mutableListOf())

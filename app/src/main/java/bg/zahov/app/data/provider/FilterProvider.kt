@@ -7,9 +7,7 @@ import bg.zahov.app.data.model.FilterItem
 import kotlinx.coroutines.flow.MutableSharedFlow
 import kotlinx.coroutines.flow.SharedFlow
 import javax.inject.Inject
-import javax.inject.Singleton
 
-@Singleton
 class FilterProvider @Inject constructor() {
 
     private val _filters = MutableSharedFlow<List<FilterItem>>()

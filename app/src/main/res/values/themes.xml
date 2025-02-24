@@ -5,7 +5,7 @@
         <item name="android:windowBackground">@color/background</item>
     </style>
 
-    <style name="Theme.Fitness_app.Splash" parent="Theme.SplashScreen.Common">
+    <style name="Theme.Fitness_app.Splash" parent="Theme.SplashScreen">
         <item name="windowSplashScreenBackground">@color/background</item>
         <item name="windowSplashScreenAnimatedIcon">@mipmap/ic_logo</item>
         <item name="postSplashScreenTheme">@style/Theme.Fitness_app</item>

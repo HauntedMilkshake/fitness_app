@@ -85,6 +85,9 @@ class WorkoutProviderImpl : WorkoutProvider {
         _shouldFinish.value = true
     }
 
+    /**
+     * Sets [shouldAddTemplate] to true
+     */
     override fun triggerAddTemplate() {
         _shouldAddTemplate.value = true
     }
