@@ -105,11 +105,27 @@ class AddTemplateWorkoutViewModel @Inject constructor(
 
     init {
         initEditWorkoutId(workoutId = workoutId)
+        observeAddTrigger()
+        observeTemplateExercises()
+        observeTemplateWorkouts()
+        observeSelectedExercises()
+        observeExerciseToReplace()
+    }
+
+
+    /**
+     * Observes shouldAddTemplate to track a click from the top bar of the screen
+     * @see AddTemplateWorkoutTopBar
+     * @see AddTemplateWorkoutViewModel
+     * @see WorkoutProvider
+     */
+    private fun observeAddTrigger() {
         viewModelScope.launch {
-            observeTemplateExercises()
-            observeTemplateWorkouts()
-            observeSelectedExercises()
-            observeExerciseToReplace()
+            workoutProvider.shouldAddTemplate.collect {
+                if (it) {
+                    addTemplateWorkout()
+                }
+            }
         }
     }
 
@@ -249,7 +265,7 @@ class AddTemplateWorkoutViewModel @Inject constructor(
      * with the UI state's details and invokes the workout provider to add it as a template workout.
      * The UI state is then updated to reflect the addition, and the temporary state is cleared.
      */
-    fun addTemplateWorkout() {
+    private fun addTemplateWorkout() {
         if (canAdd()) {
             viewModelScope.launch {
                 workoutProvider.addTemplateWorkout(

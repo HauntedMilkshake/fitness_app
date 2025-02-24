@@ -12,6 +12,9 @@ import kotlinx.coroutines.flow.StateFlow
 import java.time.LocalDateTime
 
 interface WorkoutProvider {
+
+    val shouldAddTemplate: Flow<Boolean>
+
     /**
      * observable exercise that was clicked in history screen
      */
@@ -99,4 +102,6 @@ interface WorkoutProvider {
      * Attempts a finish attempt for the workout
      */
     fun tryToFinish()
+
+    fun triggerAddTemplate()
 }

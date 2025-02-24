@@ -21,22 +21,23 @@ import bg.zahov.app.Settings
 import bg.zahov.app.StartWorkout
 import bg.zahov.app.Workout
 import bg.zahov.app.ui.exercise.topbar.TopBarExercise
-import bg.zahov.app.ui.topbar.workout.TopBarWorkout
 import bg.zahov.app.ui.history.info.topbar.HistoryInfoTopBar
+import bg.zahov.app.ui.topbar.workout.TopBarWorkout
+import bg.zahov.app.ui.workout.add.AddTemplateWorkoutTopBar
 import bg.zahov.fitness.app.R
 import kotlin.reflect.KClass
 
 sealed class TopBarState {
     data class Title(
         val titleId: Int,
-        val modifier: Modifier = Modifier
+        val modifier: Modifier = Modifier,
     ) : TopBarState()
 
     data class TitleWithBack(
         val titleId: Int,
         val backButtonIconId: Int,
         val onBackClick: () -> Unit,
-        val modifier: Modifier = Modifier
+        val modifier: Modifier = Modifier,
     ) : TopBarState()
 
     data class TitleWithAction(
@@ -45,7 +46,7 @@ sealed class TopBarState {
         val onActionClick: () -> Unit,
         val backButtonIconId: Int? = null,
         val onBackClick: (() -> Unit)? = null,
-        val modifier: Modifier = Modifier
+        val modifier: Modifier = Modifier,
     ) : TopBarState()
 
     data object Exercise : TopBarState()
@@ -54,7 +55,7 @@ sealed class TopBarState {
 
     data object Workout : TopBarState()
 
-    data object AddTemplateWorkout: TopBarState()
+    data object AddTemplateWorkout : TopBarState()
 }
 
 @Composable
@@ -108,15 +109,8 @@ fun topAppBarConfiguration(navController: NavController): Map<KClass<*>, TopBarS
             backButtonIconId = R.drawable.ic_back_arrow,
             onBackClick = { navController.popBackStack() }
         ),
-//        AddTemplateWorkout::class to TopBarState.TitleWithAction(
-//            titleId = R.string.new_workout_template,
-//            actionButtonIconId = R.drawable.ic_plus,
-//            onActionClick = { /* TODO() */ },
-//            onBackClick = { navController.navigateUp() }
-//        ),
-
         Workout::class to TopBarState.Workout,
-
+        AddTemplateWorkout::class to TopBarState.AddTemplateWorkout,
         Rest::class to TopBarState.TitleWithBack(
             titleId = R.string.rest_top_bar_title,
             backButtonIconId = R.drawable.ic_close,
@@ -174,7 +168,7 @@ fun TopBar(modifier: Modifier = Modifier, navController: NavController) {
             }
 
             is TopBarState.AddTemplateWorkout -> {
-
+                AddTemplateWorkoutTopBar()
             }
         }
     }
