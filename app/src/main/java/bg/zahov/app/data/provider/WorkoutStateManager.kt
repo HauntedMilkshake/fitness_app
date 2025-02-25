@@ -1,6 +1,5 @@
 package bg.zahov.app.data.provider
 
-import android.util.Log
 import bg.zahov.app.data.interfaces.WorkoutActions
 import bg.zahov.app.data.model.Workout
 import bg.zahov.app.data.model.WorkoutState
@@ -17,19 +16,6 @@ import javax.inject.Singleton
 
 @Singleton
 class WorkoutStateManager @Inject constructor() : WorkoutActions {
-    companion object {
-
-        @Volatile
-        private var instance: WorkoutStateManager? = null
-        fun getInstance() = instance ?: synchronized(this) {
-            instance ?: WorkoutStateManager().also { instance = it }
-        }
-    }
-
-    init {
-        Log.d("gg", "gg")
-    }
-
     private val _shouldSave = MutableStateFlow(false)
     val shouldSave: Flow<Boolean> = _shouldSave
 

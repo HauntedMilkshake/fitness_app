@@ -45,7 +45,7 @@ import bg.zahov.fitness.app.R
 
 @Composable
 fun ExercisesScreen(
-    viewModel: ExerciseViewModel = viewModel(factory = ExerciseViewModel.Factory),
+    viewModel: ExerciseViewModel = viewModel(),
     navigateInfo: () -> Unit,
     navigateBack: () -> Unit,
 ) {
