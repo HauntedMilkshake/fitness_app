@@ -1,6 +1,5 @@
 package bg.zahov.app.ui.history.info
 
-import android.widget.Toast
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.Row
@@ -15,37 +14,26 @@ import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.LaunchedEffect
+import androidx.compose.runtime.getValue
+import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.res.stringResource
+import androidx.compose.ui.text.font.FontWeight
+import androidx.compose.ui.unit.dp
+import androidx.hilt.navigation.compose.hiltViewModel
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
-import androidx.lifecycle.viewmodel.compose.viewModel
-import bg.zahov.fitness.app.R
+import bg.zahov.app.data.provider.model.ExerciseDetails
 import bg.zahov.app.ui.custom.ExerciseWithSets
 import bg.zahov.app.ui.custom.WorkoutStats
 import bg.zahov.app.ui.theme.FitnessTheme
-import androidx.compose.runtime.getValue
-import androidx.compose.ui.Alignment
-import androidx.compose.ui.platform.LocalContext
-import androidx.compose.ui.text.font.FontWeight
-import androidx.compose.ui.unit.dp
-import bg.zahov.app.data.model.ToastManager
-import bg.zahov.app.data.provider.model.ExerciseDetails
+import bg.zahov.fitness.app.R
 
 @Composable
 fun HistoryInfoScreen(
-    historyInfoViewModel: HistoryInfoViewModel = viewModel(),
+    historyInfoViewModel: HistoryInfoViewModel = hiltViewModel(),
     onDelete: () -> Unit,
 ) {
     val state by historyInfoViewModel.uiState.collectAsStateWithLifecycle()
-    val toast by ToastManager.messages.collectAsStateWithLifecycle()
-    val context = LocalContext.current
-
-    LaunchedEffect(toast) {
-        toast?.let { message ->
-            Toast.makeText(context, context.getString(message.messageResId), Toast.LENGTH_SHORT)
-                .show()
-        }
-    }
 
     if (state.isDeleted) {
         LaunchedEffect(Unit) {
@@ -72,9 +60,11 @@ fun HistoryInfoContent(
     onClick: () -> Unit,
 ) {
     FitnessTheme {
-        Column(modifier = Modifier
-            .fillMaxSize()
-            .padding(8.dp)) {
+        Column(
+            modifier = Modifier
+                .fillMaxSize()
+                .padding(8.dp)
+        ) {
             Text(
                 text = date,
                 style = MaterialTheme.typography.bodyLarge,
@@ -101,9 +91,11 @@ fun HistoryInfoContent(
                         )
                     }
                 }
-                Button(modifier = Modifier
-                    .width(240.dp)
-                    .padding(top = 8.dp), onClick = onClick) {
+                Button(
+                    modifier = Modifier
+                        .width(240.dp)
+                        .padding(top = 8.dp), onClick = onClick
+                ) {
                     Text(text = stringResource(R.string.perform_again))
                 }
             }

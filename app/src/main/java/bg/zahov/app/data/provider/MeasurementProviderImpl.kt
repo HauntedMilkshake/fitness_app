@@ -20,21 +20,6 @@ import kotlinx.coroutines.flow.update
  * the underlying repository to fetch and update measurements.
  */
 class MeasurementProviderImpl : MeasurementProvider {
-
-    companion object {
-        @Volatile
-        private var instance: MeasurementProviderImpl? = null
-
-        /**
-         * Returns the singleton instance of [MeasurementProviderImpl].
-         * This ensures that only one instance of the provider exists throughout the application.
-         */
-        fun getInstance() =
-            instance ?: synchronized(this) {
-                instance ?: MeasurementProviderImpl().also { instance = it }
-            }
-    }
-
     private val measurementRepo = MeasurementRepositoryImpl.getInstance()
     private val _selectedMeasurement = MutableStateFlow(Measurements())
     private val selectedMeasurement: StateFlow<Measurements> = _selectedMeasurement
