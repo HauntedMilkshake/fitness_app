@@ -169,8 +169,7 @@ class WorkoutProviderImpl @Inject constructor(private val workoutRepo: WorkoutRe
     override suspend fun getExerciseHistory(): Flow<List<ExerciseHistoryInfo>> = exerciseHistory
     override suspend fun <T> getPreviousWorkoutState(): T? = null
 
-    override suspend fun <T> addWorkoutState(realmWorkoutState: T) { /* TODO() */
-    }
+    override suspend fun <T> addWorkoutState(realmWorkoutState: T) { /* TODO() */ }
 
     override suspend fun updateTemplateWorkout(
         workoutId: String,

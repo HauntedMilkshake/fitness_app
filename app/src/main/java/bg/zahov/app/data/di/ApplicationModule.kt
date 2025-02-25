@@ -46,35 +46,32 @@ object ApplicationModule {
 
     @Singleton
     fun provideSelectableExerciseProvider(): SelectableExerciseProvider =
-        SelectableExerciseProvider.getInstance()
-
+        SelectableExerciseProvider()
 
     @Singleton
     fun provideReplaceableExerciseProvider(): ReplaceableExerciseProvider =
-        ReplaceableExerciseProvider.getInstance()
+        ReplaceableExerciseProvider()
 
     @Singleton
     fun provideWorkoutAddedExerciseProvider(): AddExerciseToWorkoutProvider =
-        AddExerciseToWorkoutProvider.getInstance()
+        AddExerciseToWorkoutProvider()
 
     @Singleton
-    fun provideFilterProvider(): FilterProvider =
-        FilterProvider.getInstance()
-
-    @Provides
-    @Singleton
-    fun provideWorkoutStateProvider(): WorkoutActions = WorkoutStateManager.getInstance()
+    fun provideFilterProvider(): FilterProvider = FilterProvider()
 
     @Provides
     @Singleton
-    fun provideRestTimerProvider(): RestProvider = RestTimerProvider.getInstance()
+    fun provideWorkoutStateProvider(): WorkoutActions = WorkoutStateManager()
 
     @Provides
     @Singleton
-    fun provideServiceErrorHandler(): ServiceErrorHandler = ServiceErrorHandlerImpl.getInstance()
+    fun provideRestTimerProvider(): RestProvider = RestTimerProvider()
 
     @Provides
     @Singleton
-    fun provideExercisesTopAppHandler(): ExercisesTopBarHandler =
-        ExercisesTopBarManager.getInstance()
+    fun provideServiceErrorHandler(): ServiceErrorHandler = ServiceErrorHandlerImpl()
+
+    @Provides
+    @Singleton
+    fun provideExercisesTopAppHandler(): ExercisesTopBarHandler = ExercisesTopBarManager()
 }
