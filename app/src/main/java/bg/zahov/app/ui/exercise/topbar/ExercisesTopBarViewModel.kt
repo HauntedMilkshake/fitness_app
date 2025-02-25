@@ -2,7 +2,6 @@ package bg.zahov.app.ui.exercise.topbar
 
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
-import bg.zahov.app.Inject
 import bg.zahov.app.data.interfaces.ExercisesTopBarHandler
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.StateFlow
@@ -26,7 +25,7 @@ data class ExercisesTopBarData(
  * @property exerciseTopBarManager Manager for handling top bar operations, injected via [Inject].
  */
 class ExercisesTopBarViewModel(
-    private val exerciseTopBarManager: ExercisesTopBarHandler = Inject.exercisesTopAppHandler
+    private val exerciseTopBarManager: ExercisesTopBarHandler
 ) : ViewModel() {
 
     // Holds the current state of the exercise top bar.

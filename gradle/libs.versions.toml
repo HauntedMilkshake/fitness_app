@@ -24,9 +24,9 @@ androidxTestRunner = "1.5.0"
 material = "1.12.0"
 splashscreenVer = "1.0.1"
 numberPickerVer = "1.0.3"
-hiltVer = "2.51.1"
+hiltVer = "2.55"
 hiltNavigationVer = "1.2.0"
-kspVer = "2.0.21-1.0.27"
+kspVer = "2.1.0-1.0.28"
 
 [libraries]
 androidx-ktx = { group = "androidx.core", name = "core-ktx", version.ref = "ktx" }

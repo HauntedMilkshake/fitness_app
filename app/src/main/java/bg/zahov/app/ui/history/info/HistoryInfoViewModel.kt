@@ -151,7 +151,9 @@ class HistoryInfoViewModel @Inject constructor(
                 _uiState.update { old ->
                     old.copy(isDeleted = true)
                 }
-            } ?: run { /* TODO() */ }
+            } ?: run {
+                /*TODO(change to snackbar  ( R.string.failed_to_delete_workout_toast ) ) */
+            }
         }
     }
 

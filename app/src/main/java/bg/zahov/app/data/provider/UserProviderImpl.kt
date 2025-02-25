@@ -8,11 +8,6 @@ import com.google.android.gms.tasks.Task
 import kotlinx.coroutines.flow.Flow
 
 class UserProviderImpl : UserProvider {
-    companion object {
-        private var instance: UserProviderImpl? = null
-        fun getInstance() = instance ?: UserProviderImpl().also { instance = it }
-    }
-
     private val userRepo = UserRepositoryImpl.getInstance()
     private val auth = AuthenticationImpl.getInstance()
 

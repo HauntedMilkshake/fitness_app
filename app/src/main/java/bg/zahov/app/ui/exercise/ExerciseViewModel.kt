@@ -12,7 +12,6 @@ import bg.zahov.app.ExerciseArgs.ADD_EXERCISE_ARG
 import bg.zahov.app.ExerciseArgs.REPLACE_EXERCISE_ARG
 import bg.zahov.app.ExerciseArgs.SELECT_EXERCISE_ARG
 import bg.zahov.app.Exercises
-import bg.zahov.app.Inject
 import bg.zahov.app.data.exception.CriticalDataNullException
 import bg.zahov.app.data.interfaces.ExercisesTopBarHandler
 import bg.zahov.app.data.interfaces.ServiceErrorHandler
@@ -43,25 +42,14 @@ import kotlinx.coroutines.launch
  */
 class ExerciseViewModel(
     private val savedStateHandle: SavedStateHandle,
-    private val repo: WorkoutProvider = Inject.workoutProvider,
-    private val selectableExerciseProvider: SelectableExerciseProvider = Inject.selectedExerciseProvider,
-    private val replaceableExerciseProvider: ReplaceableExerciseProvider = Inject.replaceableExerciseProvider,
-    private val addExerciseToWorkoutProvider: AddExerciseToWorkoutProvider = Inject.workoutAddedExerciseProvider,
-    private val filterProvider: FilterProvider = Inject.filterProvider,
-    private val serviceError: ServiceErrorHandler = Inject.serviceErrorHandler,
-    private val exerciseTopBarManager: ExercisesTopBarHandler = Inject.exercisesTopAppHandler,
+    private val repo: WorkoutProvider,
+    private val selectableExerciseProvider: SelectableExerciseProvider,
+    private val replaceableExerciseProvider: ReplaceableExerciseProvider,
+    private val addExerciseToWorkoutProvider: AddExerciseToWorkoutProvider,
+    private val filterProvider: FilterProvider,
+    private val serviceError: ServiceErrorHandler,
+    private val exerciseTopBarManager: ExercisesTopBarHandler,
 ) : ViewModel() {
-
-    companion object {
-        val Factory: ViewModelProvider.Factory = viewModelFactory {
-            initializer {
-                ExerciseViewModel(
-                    savedStateHandle = createSavedStateHandle(),
-                )
-            }
-        }
-    }
-
     private val exerciseState = savedStateHandle.toRoute<Exercises>().state
 
     /**

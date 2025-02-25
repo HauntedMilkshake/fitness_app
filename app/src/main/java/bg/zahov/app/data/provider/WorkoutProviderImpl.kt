@@ -24,15 +24,9 @@ import java.time.LocalDate
 import java.time.LocalDateTime
 import java.time.format.DateTimeFormatter
 import java.util.Locale
+import javax.inject.Inject
 
 class WorkoutProviderImpl : WorkoutProvider {
-
-    companion object {
-
-        private var instance: WorkoutProviderImpl? = null
-        fun getInstance() = instance ?: WorkoutProviderImpl().also { instance = it }
-    }
-
     private var lastWorkoutPerformed: Workout? = null
 
     private val _clickedExercise = MutableStateFlow<Exercise?>(null)
@@ -64,7 +58,9 @@ class WorkoutProviderImpl : WorkoutProvider {
         get() = _shouldFinish
 
     private val workoutRepo = WorkoutRepositoryImpl.getInstance()
-    private val errorHandler = ServiceErrorHandlerImpl.getInstance()
+
+    @Inject
+    lateinit var errorHandler: ServiceErrorHandlerImpl
 
     /**
      * Returns the last performed workout of the user [lastWorkoutPerformed] if any that is
