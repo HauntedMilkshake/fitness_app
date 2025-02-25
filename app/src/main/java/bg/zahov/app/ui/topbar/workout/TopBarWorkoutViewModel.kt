@@ -2,6 +2,7 @@ package bg.zahov.app.ui.topbar.workout
 
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
+import bg.zahov.app.data.interfaces.WorkoutActions
 import bg.zahov.app.data.interfaces.WorkoutProvider
 import bg.zahov.app.data.provider.RestTimerProvider
 import bg.zahov.app.data.provider.RestTimerProvider.Rest
@@ -41,8 +42,8 @@ data class TopBarWorkoutData(
  * - Rest timer updates from [restStateManager], calculating progress for the rest timer.
  */
 @HiltViewModel
-class TopBarWorkoutViewModel @Inject constructor (
-    private val workoutStateManager: WorkoutStateManager,
+class TopBarWorkoutViewModel @Inject constructor(
+    private val workoutStateManager: WorkoutActions,
     private val restStateManager: RestTimerProvider,
     private val workoutActionHandler: WorkoutProvider,
 ) : ViewModel() {

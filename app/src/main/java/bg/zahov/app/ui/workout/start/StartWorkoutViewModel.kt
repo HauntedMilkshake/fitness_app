@@ -2,15 +2,14 @@ package bg.zahov.app.ui.workout.start
 
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
+import bg.zahov.app.data.interfaces.WorkoutActions
 import bg.zahov.app.data.interfaces.WorkoutProvider
 import bg.zahov.app.data.model.BodyPart
 import bg.zahov.app.data.model.Category
 import bg.zahov.app.data.model.Exercise
 import bg.zahov.app.data.model.Workout
 import bg.zahov.app.data.model.WorkoutState
-import bg.zahov.app.data.provider.WorkoutStateManager
 import bg.zahov.app.util.generateRandomId
-import bg.zahov.fitness.app.R
 import dagger.hilt.android.lifecycle.HiltViewModel
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.StateFlow
@@ -72,7 +71,7 @@ data class StartWorkoutExercise(
 @HiltViewModel
 class StartWorkoutViewModel @Inject constructor(
     private val repo: WorkoutProvider,
-    private val workoutState: WorkoutStateManager,
+    private val workoutState: WorkoutActions,
 ) : ViewModel() {
 
     /**
@@ -84,7 +83,7 @@ class StartWorkoutViewModel @Inject constructor(
     /**
      * The current state of the workout [WorkoutState.ACTIVE] or [WorkoutState.INACTIVE] or [WorkoutState.MINIMIZED] .
      */
-    private var currentWorkoutState: WorkoutState = WorkoutState.ACTIVE
+    private var currentWorkoutState: WorkoutState = WorkoutState.INACTIVE
 
     /**
      * collect template workouts, state and exercises which are to be used for mapping

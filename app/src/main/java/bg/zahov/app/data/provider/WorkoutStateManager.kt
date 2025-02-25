@@ -12,23 +12,22 @@ import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.StateFlow
 import kotlinx.coroutines.launch
 import javax.inject.Inject
-import javax.inject.Singleton
 
-@Singleton
 class WorkoutStateManager @Inject constructor() : WorkoutActions {
+
     private val _shouldSave = MutableStateFlow(false)
-    val shouldSave: Flow<Boolean> = _shouldSave
+    override val shouldSave: Flow<Boolean> = _shouldSave
 
     private val _state = MutableStateFlow(WorkoutState.INACTIVE)
-    val state: StateFlow<WorkoutState>
+    override val state: StateFlow<WorkoutState>
         get() = _state
 
     private val _template = MutableStateFlow<Workout?>(null)
-    val template: StateFlow<Workout?>
+    override val template: StateFlow<Workout?>
         get() = _template
 
     private val _timer = MutableStateFlow<Long>(0)
-    val timer: StateFlow<Long>
+    override val timer: StateFlow<Long>
         get() = _timer
 
     private var job: Job? = null
@@ -49,7 +48,7 @@ class WorkoutStateManager @Inject constructor() : WorkoutActions {
 
     private var lastTime: Long = 0L
 
-    suspend fun saveWorkout() {
+    override suspend fun saveWorkout() {
         _shouldSave.emit(true)
     }
 

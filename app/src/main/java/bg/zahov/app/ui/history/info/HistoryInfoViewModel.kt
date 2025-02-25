@@ -2,10 +2,10 @@ package bg.zahov.app.ui.history.info
 
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
+import bg.zahov.app.data.interfaces.WorkoutActions
 import bg.zahov.app.data.interfaces.WorkoutProvider
 import bg.zahov.app.data.model.Workout
 import bg.zahov.app.data.model.WorkoutState
-import bg.zahov.app.data.provider.WorkoutStateManager
 import bg.zahov.app.data.provider.model.HistoryInfoWorkout
 import dagger.hilt.android.lifecycle.HiltViewModel
 import kotlinx.coroutines.flow.MutableStateFlow
@@ -34,7 +34,7 @@ class HistoryInfoViewModel @Inject constructor(
 
     private var pastWorkouts: List<Workout> = listOf()
 
-    private val currentWorkoutState: WorkoutState? = null
+    private var currentWorkoutState: WorkoutState? = null
 
     /**
      * Initializes the ViewModel by collecting template workouts, the current workout state,
@@ -47,6 +47,19 @@ class HistoryInfoViewModel @Inject constructor(
         observerSaveTrigger()
         observerSaveTrigger()
         observerDeleteTrigger()
+        observeWorkoutState()
+    }
+
+    /**
+     * Observes the state of the workout
+     * @see workoutStateProvider
+     */
+    private fun observeWorkoutState() {
+        viewModelScope.launch {
+            workoutStateProvider.state.collect {
+                currentWorkoutState = it
+            }
+        }
     }
 
     /**

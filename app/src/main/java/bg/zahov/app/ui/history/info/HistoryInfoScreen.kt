@@ -22,7 +22,6 @@ import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.dp
 import androidx.hilt.navigation.compose.hiltViewModel
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
-import androidx.lifecycle.viewmodel.compose.viewModel
 import bg.zahov.app.data.provider.model.ExerciseDetails
 import bg.zahov.app.ui.custom.ExerciseWithSets
 import bg.zahov.app.ui.custom.WorkoutStats
@@ -61,9 +60,11 @@ fun HistoryInfoContent(
     onClick: () -> Unit,
 ) {
     FitnessTheme {
-        Column(modifier = Modifier
-            .fillMaxSize()
-            .padding(8.dp)) {
+        Column(
+            modifier = Modifier
+                .fillMaxSize()
+                .padding(8.dp)
+        ) {
             Text(
                 text = date,
                 style = MaterialTheme.typography.bodyLarge,
@@ -90,9 +91,11 @@ fun HistoryInfoContent(
                         )
                     }
                 }
-                Button(modifier = Modifier
-                    .width(240.dp)
-                    .padding(top = 8.dp), onClick = onClick) {
+                Button(
+                    modifier = Modifier
+                        .width(240.dp)
+                        .padding(top = 8.dp), onClick = onClick
+                ) {
                     Text(text = stringResource(R.string.perform_again))
                 }
             }
