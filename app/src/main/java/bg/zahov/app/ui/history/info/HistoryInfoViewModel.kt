@@ -23,7 +23,7 @@ import javax.inject.Inject
  */
 @HiltViewModel
 class HistoryInfoViewModel @Inject constructor(
-    private val workoutStateProvider: WorkoutStateManager,
+    private val workoutStateProvider: WorkoutActions,
     private val workoutProvider: WorkoutProvider,
 ) : ViewModel() {
 
