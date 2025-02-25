@@ -26,13 +26,6 @@ import java.time.format.DateTimeFormatter
 import java.util.Locale
 
 class WorkoutProviderImpl : WorkoutProvider {
-
-    companion object {
-
-        private var instance: WorkoutProviderImpl? = null
-        fun getInstance() = instance ?: WorkoutProviderImpl().also { instance = it }
-    }
-
     private var lastWorkoutPerformed: Workout? = null
 
     private val _clickedExercise = MutableStateFlow<Exercise?>(null)

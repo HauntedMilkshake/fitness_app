@@ -4,11 +4,9 @@ import bg.zahov.app.data.interfaces.ExercisesTopBarHandler
 import bg.zahov.app.data.interfaces.MeasurementProvider
 import bg.zahov.app.data.interfaces.RestProvider
 import bg.zahov.app.data.interfaces.ServiceErrorHandler
-import bg.zahov.app.data.interfaces.SettingsProvider
 import bg.zahov.app.data.interfaces.UserProvider
 import bg.zahov.app.data.interfaces.WorkoutActions
 import bg.zahov.app.data.interfaces.WorkoutProvider
-import bg.zahov.app.data.model.WorkoutState
 import bg.zahov.app.data.provider.AddExerciseToWorkoutProvider
 import bg.zahov.app.data.provider.ExercisesTopBarManager
 import bg.zahov.app.data.provider.FilterProvider
@@ -17,15 +15,12 @@ import bg.zahov.app.data.provider.ReplaceableExerciseProvider
 import bg.zahov.app.data.provider.RestTimerProvider
 import bg.zahov.app.data.provider.SelectableExerciseProvider
 import bg.zahov.app.data.provider.ServiceErrorHandlerImpl
-import bg.zahov.app.data.provider.SettingsProviderImpl
 import bg.zahov.app.data.provider.UserProviderImpl
 import bg.zahov.app.data.provider.WorkoutProviderImpl
 import bg.zahov.app.data.provider.WorkoutStateManager
-import dagger.Binds
 import dagger.Module
 import dagger.Provides
 import dagger.hilt.InstallIn
-import dagger.hilt.android.components.ActivityRetainedComponent
 import dagger.hilt.components.SingletonComponent
 import javax.inject.Singleton
 
@@ -34,48 +29,44 @@ import javax.inject.Singleton
 object ApplicationModule {
     @Provides
     @Singleton
-    fun provideUserProvider(): UserProvider = UserProviderImpl.getInstance()
+    fun provideUserProvider(): UserProvider = UserProviderImpl()
 
     @Provides
     @Singleton
-    fun provideWorkoutProvider(): WorkoutProvider = WorkoutProviderImpl.getInstance()
+    fun provideWorkoutProvider(): WorkoutProvider = WorkoutProviderImpl()
 
     @Provides
     @Singleton
-    fun provideMeasurementProvider(): MeasurementProvider =
-        MeasurementProviderImpl.getInstance()
+    fun provideMeasurementProvider(): MeasurementProvider = MeasurementProviderImpl()
 
     @Singleton
     fun provideSelectableExerciseProvider(): SelectableExerciseProvider =
-        SelectableExerciseProvider.getInstance()
-
+        SelectableExerciseProvider()
 
     @Singleton
     fun provideReplaceableExerciseProvider(): ReplaceableExerciseProvider =
-        ReplaceableExerciseProvider.getInstance()
+        ReplaceableExerciseProvider()
 
     @Singleton
     fun provideWorkoutAddedExerciseProvider(): AddExerciseToWorkoutProvider =
-        AddExerciseToWorkoutProvider.getInstance()
+        AddExerciseToWorkoutProvider()
 
     @Singleton
-    fun provideFilterProvider(): FilterProvider =
-        FilterProvider.getInstance()
-
-    @Provides
-    @Singleton
-    fun provideWorkoutStateProvider(): WorkoutActions = WorkoutStateManager.getInstance()
+    fun provideFilterProvider(): FilterProvider = FilterProvider()
 
     @Provides
     @Singleton
-    fun provideRestTimerProvider(): RestProvider = RestTimerProvider.getInstance()
+    fun provideWorkoutStateProvider(): WorkoutActions = WorkoutStateManager()
 
     @Provides
     @Singleton
-    fun provideServiceErrorHandler(): ServiceErrorHandler = ServiceErrorHandlerImpl.getInstance()
+    fun provideRestTimerProvider(): RestProvider = RestTimerProvider()
 
     @Provides
     @Singleton
-    fun provideExercisesTopAppHandler(): ExercisesTopBarHandler =
-        ExercisesTopBarManager.getInstance()
+    fun provideServiceErrorHandler(): ServiceErrorHandler = ServiceErrorHandlerImpl()
+
+    @Provides
+    @Singleton
+    fun provideExercisesTopAppHandler(): ExercisesTopBarHandler = ExercisesTopBarManager()
 }

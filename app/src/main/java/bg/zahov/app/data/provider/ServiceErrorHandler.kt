@@ -7,15 +7,6 @@ import kotlinx.coroutines.flow.MutableStateFlow
 import javax.inject.Inject
 
 class ServiceErrorHandlerImpl @Inject constructor() : ServiceErrorHandler {
-    companion object {
-        @Volatile
-        private var instance: ServiceErrorHandlerImpl? = null
-
-        fun getInstance() = instance ?: synchronized(this) {
-            instance ?: ServiceErrorHandlerImpl().also { instance = it }
-        }
-    }
-
     private val _state = MutableStateFlow(ServiceState.Available)
     private val state: Flow<ServiceState>
         get() = _state

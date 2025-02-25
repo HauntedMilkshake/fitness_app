@@ -1,6 +1,5 @@
 package bg.zahov.app.ui.settings.profile
 
-import android.widget.Toast
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.fillMaxSize
@@ -9,21 +8,18 @@ import androidx.compose.material3.ButtonColors
 import androidx.compose.material3.Icon
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
-import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
 import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
-import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.res.colorResource
 import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.unit.dp
 import androidx.hilt.navigation.compose.hiltViewModel
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
-import bg.zahov.app.data.model.ToastManager
 import bg.zahov.app.ui.custom.CommonPasswordField
 import bg.zahov.app.ui.custom.CommonTextField
 import bg.zahov.fitness.app.R
@@ -31,15 +27,6 @@ import bg.zahov.fitness.app.R
 @Composable
 fun EditProfileScreen(viewModel: EditProfileViewModel = hiltViewModel()) {
     val uiState by viewModel.state.collectAsStateWithLifecycle()
-    val context = LocalContext.current
-
-    val toastMessage by ToastManager.messages.collectAsStateWithLifecycle()
-    LaunchedEffect(toastMessage) {
-        toastMessage?.let { message ->
-            Toast.makeText(context, context.getString(message.messageResId), Toast.LENGTH_SHORT)
-                .show()
-        }
-    }
 
     EditProfileContent(
         authenticated = uiState.authenticated,

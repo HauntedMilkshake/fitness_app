@@ -6,15 +6,6 @@ import kotlinx.coroutines.flow.StateFlow
 import javax.inject.Inject
 
 class AddExerciseToWorkoutProvider @Inject constructor() {
-    companion object {
-        @Volatile
-        private var instance: AddExerciseToWorkoutProvider? = null
-
-        fun getInstance() = instance ?: synchronized(this) {
-            instance ?: AddExerciseToWorkoutProvider().also { instance = it }
-        }
-    }
-
     private val _selectedExercises = MutableStateFlow<List<Exercise>>(mutableListOf())
     val selectedExercises: StateFlow<List<Exercise>>
         get() = _selectedExercises

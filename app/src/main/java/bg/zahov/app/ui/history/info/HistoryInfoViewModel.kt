@@ -3,7 +3,6 @@ package bg.zahov.app.ui.history.info
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
 import bg.zahov.app.data.interfaces.WorkoutProvider
-import bg.zahov.app.data.model.ToastManager
 import bg.zahov.app.data.model.Workout
 import bg.zahov.app.data.model.WorkoutState
 import bg.zahov.app.data.provider.WorkoutStateManager
@@ -20,12 +19,10 @@ import kotlinx.coroutines.launch
  * @constructor Creates a HistoryInfoViewModel with the required dependencies.
  * @property workoutStateProvider Provides the current workout state.
  * @property workoutProvider Handles operations related to workouts, such as retrieving and modifying them.
- * @property toastManager Manages the display of toast notifications.
  */
 class HistoryInfoViewModel(
     private val workoutStateProvider: WorkoutStateManager,
     private val workoutProvider: WorkoutProvider,
-    private val toastManager: ToastManager = ToastManager,
 ) : ViewModel() {
 
     private val _uiState = MutableStateFlow(HistoryInfoWorkout())
@@ -139,10 +136,11 @@ class HistoryInfoViewModel(
                 _uiState.update { old ->
                     old.copy(isDeleted = true)
                 }
-            } ?: run { toastManager.showToast(R.string.failed_to_delete_workout_toast) }
+            } ?: run {
+                /*TODO(change to snackbar  ( R.string.failed_to_delete_workout_toast ) ) */
+            }
         }
     }
-
 
     /**
      * Saves the current workout as a template, if it does not already exist in the templates.
@@ -151,7 +149,7 @@ class HistoryInfoViewModel(
     private fun saveAsTemplate() {
         viewModelScope.launch {
             if (templates.any { it.id == getCorrespondingWorkout()?.id }) {
-                toastManager.showToast(R.string.workout_exists_toast)
+                /*TODO(change to snackbar  ( R.string.workout_exists_toast ) ) */
             } else {
                 getCorrespondingWorkout()?.copy(
                     isTemplate = true,
@@ -174,10 +172,13 @@ class HistoryInfoViewModel(
         viewModelScope.launch {
             when (currentWorkoutState) {
                 WorkoutState.MINIMIZED, WorkoutState.ACTIVE -> {
-                    toastManager.showToast(R.string.toast_couldnt_start_workout)
+                    /*TODO(change to snackbar  ( R.string.toast_couldnt_start_workout ) ) */
                 }
 
-                WorkoutState.INACTIVE -> workoutStateProvider.startWorkout(getCorrespondingWorkout())
+                WorkoutState.INACTIVE -> workoutStateProvider.startWorkout(
+                    getCorrespondingWorkout()
+                )
+
                 null -> { /* no-op */
                 }
             }

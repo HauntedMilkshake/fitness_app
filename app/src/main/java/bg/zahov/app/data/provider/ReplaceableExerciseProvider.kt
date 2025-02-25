@@ -6,14 +6,6 @@ import kotlinx.coroutines.flow.StateFlow
 import javax.inject.Inject
 
 class ReplaceableExerciseProvider @Inject constructor(){
-    companion object {
-        @Volatile
-        private var instance: ReplaceableExerciseProvider? = null
-
-        fun getInstance() = instance ?: synchronized(this) {
-            instance ?: ReplaceableExerciseProvider().also { instance = it }
-        }
-    }
     private val _exerciseToReplace = MutableStateFlow<Exercise?>(null)
 
     val exerciseToReplace: StateFlow<Exercise?>

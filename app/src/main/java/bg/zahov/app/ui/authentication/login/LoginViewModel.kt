@@ -7,10 +7,12 @@ import bg.zahov.app.data.interfaces.UserProvider
 import bg.zahov.app.ui.authentication.login.LoginViewModel.LoginData
 import com.google.firebase.auth.FirebaseAuthInvalidCredentialsException
 import com.google.firebase.auth.FirebaseAuthInvalidUserException
+import dagger.hilt.android.lifecycle.HiltViewModel
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.StateFlow
 import kotlinx.coroutines.flow.update
 import kotlinx.coroutines.launch
+import javax.inject.Inject
 
 /**
  * ViewModel for the Login screen that handles user input, validation, and interaction with the
@@ -23,7 +25,8 @@ import kotlinx.coroutines.launch
  * @param auth Injected user authentication provider that handles login and password reset logic.
  * @param serviceError Injected error handler that manages errors and starts the error-handling countdown.
  */
-class LoginViewModel(
+@HiltViewModel
+class LoginViewModel @Inject constructor(
     private val auth: UserProvider,
     private val serviceError: ServiceErrorHandler,
 ) : ViewModel() {
