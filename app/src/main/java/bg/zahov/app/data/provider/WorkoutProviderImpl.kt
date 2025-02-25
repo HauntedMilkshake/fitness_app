@@ -24,6 +24,7 @@ import java.time.LocalDate
 import java.time.LocalDateTime
 import java.time.format.DateTimeFormatter
 import java.util.Locale
+import javax.inject.Inject
 
 class WorkoutProviderImpl : WorkoutProvider {
     private var lastWorkoutPerformed: Workout? = null
@@ -57,7 +58,9 @@ class WorkoutProviderImpl : WorkoutProvider {
         get() = _shouldFinish
 
     private val workoutRepo = WorkoutRepositoryImpl.getInstance()
-    private val errorHandler = ServiceErrorHandlerImpl.getInstance()
+
+    @Inject
+    lateinit var errorHandler: ServiceErrorHandlerImpl
 
     /**
      * Returns the last performed workout of the user [lastWorkoutPerformed] if any that is
