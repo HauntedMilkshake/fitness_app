@@ -14,13 +14,13 @@ import androidx.compose.runtime.saveable.rememberSaveable
 import androidx.compose.runtime.setValue
 import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.res.stringResource
-import androidx.lifecycle.viewmodel.compose.viewModel
+import androidx.hilt.navigation.compose.hiltViewModel
 import bg.zahov.fitness.app.R
 
 
 @Composable
 fun HistoryInfoTopBar(
-    viewModel: HistoryInfoTopBarViewModel = viewModel(),
+    viewModel: HistoryInfoTopBarViewModel = hiltViewModel(),
     onBack: () -> Unit,
 ) {
     HistoryInfoTopBarContent(
