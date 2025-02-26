@@ -39,6 +39,7 @@ object ApplicationModule {
     @Singleton
     fun provideMeasurementProvider(): MeasurementProvider = MeasurementProviderImpl()
 
+    @Provides
     @Singleton
     fun provideSelectableExerciseProvider(): SelectableExerciseProvider =
         SelectableExerciseProvider()
@@ -47,12 +48,15 @@ object ApplicationModule {
     fun provideReplaceableExerciseProvider(): ReplaceableExerciseProvider =
         ReplaceableExerciseProvider()
 
+    @Provides
     @Singleton
     fun provideWorkoutAddedExerciseProvider(): AddExerciseToWorkoutProvider =
         AddExerciseToWorkoutProvider()
 
+    @Provides
     @Singleton
-    fun provideFilterProvider(): FilterProvider = FilterProvider()
+    fun provideFilterProvider(): FilterProvider =
+        FilterProvider()
 
     @Provides
     @Singleton

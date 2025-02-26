@@ -37,6 +37,10 @@ class WorkoutProviderImpl : WorkoutProvider {
     private val exerciseHistory: Flow<List<ExerciseHistoryInfo>>
         get() = _exerciseHistory
 
+    private val _shouldAddTemplate = MutableStateFlow<Boolean>(false)
+    override val shouldAddTemplate: Flow<Boolean>
+        get() = _shouldAddTemplate
+
     override var clickedPastWorkout: StateFlow<HistoryInfoWorkout> =
         MutableStateFlow(HistoryInfoWorkout())
 
@@ -77,6 +81,13 @@ class WorkoutProviderImpl : WorkoutProvider {
         _shouldFinish.value = true
     }
 
+    /**
+     * Sets [shouldAddTemplate] to true
+     */
+    override fun triggerAddTemplate() {
+        _shouldAddTemplate.value = true
+    }
+
     override suspend fun getTemplateWorkouts(): Flow<List<Workout>> =
         workoutRepo.getTemplateWorkouts()
 
@@ -84,6 +95,7 @@ class WorkoutProviderImpl : WorkoutProvider {
 
     override suspend fun addTemplateWorkout(newWorkout: Workout) {
         _shouldSaveAsTemplate.value = false
+        _shouldAddTemplate.value = false
         workoutRepo.addTemplateWorkout(newWorkout)
     }
 
@@ -171,7 +183,8 @@ class WorkoutProviderImpl : WorkoutProvider {
     override suspend fun getExerciseHistory(): Flow<List<ExerciseHistoryInfo>> = exerciseHistory
     override suspend fun <T> getPreviousWorkoutState(): T? = null
 
-    override suspend fun <T> addWorkoutState(realmWorkoutState: T) { /* TODO() */ }
+    override suspend fun <T> addWorkoutState(realmWorkoutState: T) { /* TODO() */
+    }
 
     override suspend fun updateTemplateWorkout(
         workoutId: String,

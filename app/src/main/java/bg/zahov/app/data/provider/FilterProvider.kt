@@ -9,6 +9,7 @@ import kotlinx.coroutines.flow.SharedFlow
 import javax.inject.Inject
 
 class FilterProvider @Inject constructor() {
+
     private val _filters = MutableSharedFlow<List<FilterItem>>()
     val filters: SharedFlow<List<FilterItem>> = _filters
 

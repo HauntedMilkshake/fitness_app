@@ -12,6 +12,12 @@ import kotlinx.coroutines.flow.StateFlow
 import java.time.LocalDateTime
 
 interface WorkoutProvider {
+
+    /**
+     * A [StateFlow] that represents whether or not to save the current template
+     */
+    val shouldAddTemplate: Flow<Boolean>
+
     /**
      * observable exercise that was clicked in history screen
      */
@@ -99,4 +105,9 @@ interface WorkoutProvider {
      * Attempts a finish attempt for the workout
      */
     fun tryToFinish()
+
+    /**
+     *  Signals to add the template using [shouldAddTemplate]
+     */
+    fun triggerAddTemplate()
 }

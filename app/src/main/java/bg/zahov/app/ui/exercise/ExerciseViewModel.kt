@@ -2,11 +2,7 @@ package bg.zahov.app.ui.exercise
 
 import androidx.lifecycle.SavedStateHandle
 import androidx.lifecycle.ViewModel
-import androidx.lifecycle.ViewModelProvider
-import androidx.lifecycle.createSavedStateHandle
 import androidx.lifecycle.viewModelScope
-import androidx.lifecycle.viewmodel.initializer
-import androidx.lifecycle.viewmodel.viewModelFactory
 import androidx.navigation.toRoute
 import bg.zahov.app.ExerciseArgs.ADD_EXERCISE_ARG
 import bg.zahov.app.ExerciseArgs.REPLACE_EXERCISE_ARG
@@ -25,10 +21,12 @@ import bg.zahov.app.data.provider.AddExerciseToWorkoutProvider
 import bg.zahov.app.data.provider.FilterProvider
 import bg.zahov.app.data.provider.ReplaceableExerciseProvider
 import bg.zahov.app.data.provider.SelectableExerciseProvider
+import dagger.hilt.android.lifecycle.HiltViewModel
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.StateFlow
 import kotlinx.coroutines.flow.update
 import kotlinx.coroutines.launch
+import javax.inject.Inject
 
 /**
  * ViewModel class that manages the state for exercise-related operations.
@@ -40,7 +38,8 @@ import kotlinx.coroutines.launch
  * @property filterProvider Provides access to filter data.
  * @property serviceError Handles service-related errors.
  */
-class ExerciseViewModel(
+@HiltViewModel
+class ExerciseViewModel @Inject constructor(
     private val savedStateHandle: SavedStateHandle,
     private val repo: WorkoutProvider,
     private val selectableExerciseProvider: SelectableExerciseProvider,
@@ -50,6 +49,7 @@ class ExerciseViewModel(
     private val serviceError: ServiceErrorHandler,
     private val exerciseTopBarManager: ExercisesTopBarHandler,
 ) : ViewModel() {
+
     private val exerciseState = savedStateHandle.toRoute<Exercises>().state
 
     /**
@@ -136,6 +136,7 @@ class ExerciseViewModel(
             old.copy(navigateInfo = false)
         }
     }
+
     /**
      * Handles the click event on an exercise item, adjusting the selection state based on the current flag.
      *
