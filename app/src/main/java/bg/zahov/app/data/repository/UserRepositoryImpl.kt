@@ -9,16 +9,6 @@ import kotlinx.coroutines.flow.Flow
 import javax.inject.Inject
 
 class UserRepositoryImpl @Inject constructor() : UserRepository {
-    companion object {
-        @Volatile
-        private var instance: UserRepositoryImpl? = null
-
-        fun getInstance() =
-            instance ?: synchronized(this) {
-                instance ?: UserRepositoryImpl().also { instance = it }
-            }
-    }
-
     private val firestore = FirestoreManager.getInstance()
 
     override suspend fun getUser(): Flow<User> = firestore.getUser()

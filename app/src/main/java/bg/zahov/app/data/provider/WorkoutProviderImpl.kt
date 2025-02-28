@@ -58,8 +58,6 @@ class WorkoutProviderImpl @Inject constructor(private val workoutRepo: WorkoutRe
     override val shouldFinish: StateFlow<Boolean>
         get() = _shouldFinish
 
-//    private val workoutRepo = WorkoutRepositoryImpl.getInstance()
-
     /**
      * Returns the last performed workout of the user [lastWorkoutPerformed] if any that is
      * initialized in [addWorkoutToHistory]
