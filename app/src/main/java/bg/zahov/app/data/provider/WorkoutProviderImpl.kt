@@ -1,6 +1,7 @@
 package bg.zahov.app.data.provider
 
 import bg.zahov.app.data.interfaces.WorkoutProvider
+import bg.zahov.app.data.interfaces.WorkoutRepository
 import bg.zahov.app.data.model.Exercise
 import bg.zahov.app.data.model.Workout
 import bg.zahov.app.data.model.state.ExerciseData
@@ -8,7 +9,6 @@ import bg.zahov.app.data.model.state.ExerciseHistoryInfo
 import bg.zahov.app.data.provider.model.ExerciseDetails
 import bg.zahov.app.data.provider.model.HistoryInfoWorkout
 import bg.zahov.app.data.provider.model.HistoryWorkout
-import bg.zahov.app.data.repository.WorkoutRepositoryImpl
 import bg.zahov.app.ui.workout.start.StartWorkout
 import bg.zahov.app.ui.workout.start.StartWorkoutExercise
 import bg.zahov.app.util.timeToString
@@ -26,7 +26,8 @@ import java.time.format.DateTimeFormatter
 import java.util.Locale
 import javax.inject.Inject
 
-class WorkoutProviderImpl : WorkoutProvider {
+class WorkoutProviderImpl @Inject constructor(private val workoutRepo: WorkoutRepository) :
+    WorkoutProvider {
     private var lastWorkoutPerformed: Workout? = null
 
     private val _clickedExercise = MutableStateFlow<Exercise?>(null)
@@ -60,11 +61,6 @@ class WorkoutProviderImpl : WorkoutProvider {
     private val _shouldFinish = MutableStateFlow(false)
     override val shouldFinish: StateFlow<Boolean>
         get() = _shouldFinish
-
-    private val workoutRepo = WorkoutRepositoryImpl.getInstance()
-
-    @Inject
-    lateinit var errorHandler: ServiceErrorHandlerImpl
 
     /**
      * Returns the last performed workout of the user [lastWorkoutPerformed] if any that is

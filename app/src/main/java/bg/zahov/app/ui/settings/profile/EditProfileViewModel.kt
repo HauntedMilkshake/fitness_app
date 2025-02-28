@@ -4,9 +4,8 @@ import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
 import bg.zahov.app.data.exception.CriticalDataNullException
 import bg.zahov.app.data.interfaces.ServiceErrorHandler
-import bg.zahov.app.data.interfaces.UserProvider
 import bg.zahov.app.data.model.state.EditProfileData
-import bg.zahov.fitness.app.R
+import bg.zahov.app.data.provider.UserProviderImpl
 import dagger.hilt.android.lifecycle.HiltViewModel
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.StateFlow
@@ -23,7 +22,7 @@ import javax.inject.Inject
 
 @HiltViewModel
 class EditProfileViewModel @Inject constructor(
-    private val repo: UserProvider,
+    private val repo: UserProviderImpl,
     private val errorHandler: ServiceErrorHandler,
 ) : ViewModel() {
     private val _state = MutableStateFlow(EditProfileData())
@@ -95,7 +94,7 @@ class EditProfileViewModel @Inject constructor(
                     }
                     /* TODO( add snackbar with R.string.update_username_success ) */
                 }
-                .addOnFailureListener {/* TODO( add snackbar with R.string.update_username_fail ) */}
+                .addOnFailureListener {/* TODO( add snackbar with R.string.update_username_fail ) */ }
         }
     }
 

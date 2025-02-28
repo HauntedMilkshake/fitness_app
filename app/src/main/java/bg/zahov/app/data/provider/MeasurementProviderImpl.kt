@@ -1,16 +1,14 @@
 package bg.zahov.app.data.provider
 
-import android.util.Log
 import bg.zahov.app.data.interfaces.MeasurementProvider
+import bg.zahov.app.data.interfaces.MeasurementRepository
 import bg.zahov.app.data.model.Measurement
 import bg.zahov.app.data.model.MeasurementType
 import bg.zahov.app.data.model.Measurements
-import bg.zahov.app.data.repository.MeasurementRepositoryImpl
 import kotlinx.coroutines.flow.Flow
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.StateFlow
-import kotlinx.coroutines.flow.collect
-import kotlinx.coroutines.flow.update
+import javax.inject.Inject
 
 /**
  * Implementation of the [MeasurementProvider] interface that provides measurement data retrieval,
@@ -19,8 +17,9 @@ import kotlinx.coroutines.flow.update
  * This class is responsible for managing and storing selected measurements and interacting with
  * the underlying repository to fetch and update measurements.
  */
-class MeasurementProviderImpl : MeasurementProvider {
-    private val measurementRepo = MeasurementRepositoryImpl.getInstance()
+class MeasurementProviderImpl @Inject constructor(private val measurementRepo: MeasurementRepository) :
+    MeasurementProvider {
+
     private val _selectedMeasurement = MutableStateFlow(Measurements())
     private val selectedMeasurement: StateFlow<Measurements> = _selectedMeasurement
     private var selectedMeasurementValue = Measurements()

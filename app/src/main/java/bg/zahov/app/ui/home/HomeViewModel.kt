@@ -5,10 +5,10 @@ import androidx.lifecycle.viewModelScope
 import bg.zahov.app.data.exception.CriticalDataNullException
 import bg.zahov.app.data.interfaces.RestProvider
 import bg.zahov.app.data.interfaces.ServiceErrorHandler
-import bg.zahov.app.data.interfaces.UserProvider
 import bg.zahov.app.data.interfaces.WorkoutActions
 import bg.zahov.app.data.interfaces.WorkoutProvider
 import bg.zahov.app.data.model.Workout
+import bg.zahov.app.data.provider.UserProviderImpl
 import com.github.mikephil.charting.data.BarEntry
 import dagger.hilt.android.lifecycle.HiltViewModel
 import kotlinx.coroutines.flow.MutableStateFlow
@@ -62,7 +62,7 @@ data class ChartData(
  */
 @HiltViewModel
 class HomeViewModel @Inject constructor(
-    private val userRepo: UserProvider,
+    private val userRepo: UserProviderImpl,
     private val workoutRepo: WorkoutProvider,
     private val workoutStateManager: WorkoutActions,
     private val workoutRestManager: RestProvider,
