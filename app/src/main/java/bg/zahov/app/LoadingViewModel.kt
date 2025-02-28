@@ -3,7 +3,7 @@ package bg.zahov.app
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
 import bg.zahov.app.data.interfaces.ServiceErrorHandler
-import bg.zahov.app.data.interfaces.UserProvider
+import bg.zahov.app.data.provider.UserProviderImpl
 import dagger.hilt.android.lifecycle.HiltViewModel
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.StateFlow
@@ -25,7 +25,7 @@ import javax.inject.Inject
  */
 @HiltViewModel
 class LoadingViewModel @Inject constructor(
-    private val userProvider: UserProvider,
+    private val userProvider: UserProviderImpl,
     private val serviceError: ServiceErrorHandler,
 ) : ViewModel() {
     private val _loading = MutableStateFlow(true)

@@ -3,9 +3,9 @@ package bg.zahov.app.ui.settings
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
 import bg.zahov.app.data.interfaces.SettingsProvider
-import bg.zahov.app.data.interfaces.UserProvider
 import bg.zahov.app.data.interfaces.WorkoutActions
 import bg.zahov.app.data.model.state.TypeSettings
+import bg.zahov.app.data.provider.UserProviderImpl
 import dagger.hilt.android.lifecycle.HiltViewModel
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.StateFlow
@@ -27,7 +27,7 @@ import javax.inject.Inject
 @HiltViewModel
 class SettingsViewModel @Inject constructor(
     private val repo: SettingsProvider,
-    private val auth: UserProvider,
+    private val auth: UserProviderImpl,
     private val workoutState: WorkoutActions,
 ) : ViewModel() {
 
