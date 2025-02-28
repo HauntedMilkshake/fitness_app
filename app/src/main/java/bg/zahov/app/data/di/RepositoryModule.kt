@@ -13,29 +13,16 @@ import javax.inject.Singleton
 
 @Module
 @InstallIn(SingletonComponent::class)
-object InternalRepositoryModule {
+object RepositoryModule {
     @Provides
     @Singleton
-    fun provideInternalFirebaseAuthentication(
+    fun provideFirebaseAuthentication(
         auth: FirebaseAuth,
         firestore: FirestoreManager,
     ): FirebaseAuthentication = FirebaseAuthentication(auth, firestore)
 
     @Provides
     @Singleton
-    fun provideInternalFirestore(firestore: FirebaseFirestore): FirestoreManager =
+    fun provideFirestoreManager(firestore: FirebaseFirestore): FirestoreManager =
         FirestoreManager(firestore)
-}
-
-@Module
-@InstallIn(SingletonComponent::class)
-object ExternalDependenciesModule {
-    @Provides
-    @Singleton
-    fun provideFirebaseAuth(): FirebaseAuth = FirebaseAuth.getInstance()
-
-    @Provides
-    @Singleton
-    fun provideFirestore(): FirebaseFirestore = FirebaseFirestore.getInstance()
-
 }
