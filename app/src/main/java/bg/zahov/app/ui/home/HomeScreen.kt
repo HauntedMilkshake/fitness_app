@@ -19,7 +19,6 @@ import androidx.compose.runtime.remember
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
-import androidx.compose.ui.platform.testTag
 import androidx.compose.ui.res.colorResource
 import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.res.stringResource
@@ -41,10 +40,9 @@ fun HomeScreen(homeViewModel: HomeViewModel = hiltViewModel()) {
         IndexAxisValueFormatter(uiState.data.weekRanges.toTypedArray())
     }
     HomeScreenContent(
-        modifier = Modifier.testTag("Home"),
-        username = uiState.username,
-        numberOfWorkouts = uiState.numberOfWorkouts,
-        chartData = uiState.data,
+        uiState.username,
+        uiState.numberOfWorkouts,
+        uiState.data,
         isChartLoading = uiState.isChartLoading,
         valueFormatter = chartFormatter,
     )
