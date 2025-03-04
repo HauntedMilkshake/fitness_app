@@ -16,4 +16,4 @@ dependencyResolutionManagement {
 
 rootProject.name = "fitness_app"
 include(":app")
- 
+include(":app:baselineprofile")
