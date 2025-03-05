@@ -31,13 +31,27 @@ class HistoryJourney {
     @get:Rule
     val benchmarkRule = MacrobenchmarkRule()
 
+    /**
+     * Benchmark test to measure performance without any compilation optimizations.
+     * This test does not utilize any compilation mode and runs the benchmark without pre-compilation.
+     */
     @Test
     fun historyJourneyNoCompilation() = benchmark(CompilationMode.None())
 
+    /**
+     * Benchmark test to measure performance with partial compilation and baseline profiles enabled.
+     * This test ensures that the app utilizes baseline profiles, and only the methods defined in the baseline profiles
+     * are compiled to improve performance.
+     */
     @Test
     fun historyJourneyPartialWithBaselineProfiles() =
         benchmark(CompilationMode.Partial(baselineProfileMode = BaselineProfileMode.Require))
 
+    /**
+     * Benchmark test to measure performance with partial compilation but baseline profiles disabled.
+     * This test runs with partial compilation, but does not make use of baseline profiles to speed up the compilation process.
+     * It also performs 3 warmup iterations before measuring the performance to ensure the app is in a steady state.
+     */
     @Test
     fun historyJourneyPartialCompilation() = benchmark(
         CompilationMode.Partial(
@@ -46,6 +60,12 @@ class HistoryJourney {
         )
     )
 
+    /**
+     * Helper function to simulate user login in the app.
+     * The login function clicks on the "Login" button, fills in the login form with a test email and password,
+     * waits for the login button to become clickable, and then clicks the button to log in.
+     * This function is used as a precondition for tests that require a logged-in state.
+     */
     private fun MacrobenchmarkScope.login() {
         device.getObject(By.text("Login")).click()
         device.getObject(By.res("EmailField")).text = "spas@gmail.com"
@@ -55,6 +75,12 @@ class HistoryJourney {
         loginButton.click()
     }
 
+    /**
+     * Helper function to simulate navigating and interacting with the "History" section of the app.
+     * This function clicks on the "History" tab, waits for the history section to load,
+     * scrolls through the list of history items, clicks a random item, then navigates back.
+     * It also interacts with other elements like the top action bar and calendar.
+     */
     private fun MacrobenchmarkScope.historyJourney() {
         device.wait(Until.hasObject(By.res("History")), 1000)
         val historyBottomBar = device.getObject(By.res("History"))
@@ -68,7 +94,6 @@ class HistoryJourney {
         lazyColumn.fling(Direction.DOWN)
 
         lazyColumn.children.random().click()
-//        device.getObject(By.res("Workout")).click()
 
         device.getObject(By.res("HistoryBack")).click()
 
@@ -91,6 +116,7 @@ class HistoryJourney {
 
             includeInStartupProfile = true
         ) {
+            device.clearData(this)
             pressHome()
             startActivityAndWait()
             login()
@@ -107,6 +133,7 @@ class HistoryJourney {
             startupMode = StartupMode.COLD,
             iterations = 10,
             setupBlock = {
+                device.clearData(this)
                 pressHome()
             },
             measureBlock = {
@@ -119,5 +146,18 @@ class HistoryJourney {
 
 }
 
+/**
+ * Clears the application data for the package specified in the [MacrobenchmarkScope].
+ * @param scope The [MacrobenchmarkScope] providing information about the benchmark,
+ * including the package name of the app under test.
+ */
+fun UiDevice.clearData(scope: MacrobenchmarkScope) {
+    val command = "pm clear ${scope.packageName}"
+    executeShellCommand(command)
+}
+
+/**
+ * Wrapper for findObject so that we don't get NullPointerException
+ */
 fun UiDevice.getObject(selector: BySelector): UiObject2 =
     findObject(selector) ?: error("Object not found for: $selector")

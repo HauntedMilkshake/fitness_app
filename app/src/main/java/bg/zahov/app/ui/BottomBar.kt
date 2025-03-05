@@ -80,7 +80,7 @@ fun BottomBar(
                         .semantics {
                             testTagsAsResourceId = true
                         }
-                        .testTag(if (screen.titleId == R.string.history) "History" else ""),
+                        .testTag(stringResource(screen.titleId)),
                     label = {
                         Text(text = stringResource(screen.titleId))
                     },
