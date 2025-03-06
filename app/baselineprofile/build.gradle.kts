@@ -22,7 +22,6 @@ android {
     defaultConfig {
         minSdk = 28
         targetSdk = 35
-        testInstrumentationRunnerArguments["androidx.benchmark.dryRunMode.enable"] = "true"
 
         testInstrumentationRunner = "androidx.test.runner.AndroidJUnitRunner"
     }
