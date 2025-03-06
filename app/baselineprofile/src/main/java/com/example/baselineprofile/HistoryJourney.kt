@@ -31,21 +31,21 @@ class HistoryJourney {
     @get:Rule
     val benchmarkRule = MacrobenchmarkRule()
 
-    /**
-     * Benchmark test to measure performance without any compilation optimizations.
-     * This test does not utilize any compilation mode and runs the benchmark without pre-compilation.
-     */
-    @Test
-    fun historyJourneyNoCompilation() = benchmark(CompilationMode.None())
+//    /**
+//     * Benchmark test to measure performance without any compilation optimizations.
+//     * This test does not utilize any compilation mode and runs the benchmark without pre-compilation.
+//     */
+//    @Test
+//    fun historyJourneyNoCompilation() = benchmark(CompilationMode.None())
 
-    /**
-     * Benchmark test to measure performance with partial compilation and baseline profiles enabled.
-     * This test ensures that the app utilizes baseline profiles, and only the methods defined in the baseline profiles
-     * are compiled to improve performance.
-     */
-    @Test
-    fun historyJourneyPartialWithBaselineProfiles() =
-        benchmark(CompilationMode.Partial(baselineProfileMode = BaselineProfileMode.Require))
+//    /**
+//     * Benchmark test to measure performance with partial compilation and baseline profiles enabled.
+//     * This test ensures that the app utilizes baseline profiles, and only the methods defined in the baseline profiles
+//     * are compiled to improve performance.
+//     */
+//    @Test
+//    fun historyJourneyPartialWithBaselineProfiles() =
+//        benchmark(CompilationMode.Partial(baselineProfileMode = BaselineProfileMode.Require))
 
     /**
      * Benchmark test to measure performance with partial compilation but baseline profiles disabled.
@@ -108,21 +108,33 @@ class HistoryJourney {
         }
     }
 
-    @Test
-    fun generate() {
-        rule.collect(
-            packageName = InstrumentationRegistry.getArguments().getString("targetAppId")
-                ?: throw Exception("targetAppId not passed as instrumentation runner arg"),
-
-            includeInStartupProfile = true
-        ) {
-            device.clearData(this)
-            pressHome()
-            startActivityAndWait()
-            login()
-            historyJourney()
-        }
+    private fun MacrobenchmarkScope.logout() {
+        device.getObject(By.res("BackButton")).click()
+        device.getObject(By.res("Home")).click()
+        device.wait(Until.hasObject(By.res("TopBarAction")), 1000)
+        device.getObject(By.res("TopBarAction")).click()
+        device.wait(Until.hasObject(By.res("SettingsColumn")), 1000)
+        device.getObject(By.res("SettingsColumn")).fling(Direction.DOWN)
+        device.getObject(By.text("Sign out")).click()
+        device.wait(Until.hasObject(By.text("Welcome")), 1000)
+        device.waitForIdle()
+        device.pressHome()
     }
+
+//    @Test
+//    fun generate() {
+//        rule.collect(
+//            packageName = InstrumentationRegistry.getArguments().getString("targetAppId")
+//                ?: throw Exception("targetAppId not passed as instrumentation runner arg"),
+//
+//            includeInStartupProfile = true
+//        ) {
+//            device.clearData(this)
+//            pressHome()
+//            startActivityAndWait()
+//            historyJourney()
+//        }
+//    }
 
     private fun benchmark(compilationMode: CompilationMode) {
         benchmarkRule.measureRepeated(
@@ -132,14 +144,12 @@ class HistoryJourney {
             compilationMode = compilationMode,
             startupMode = StartupMode.COLD,
             iterations = 10,
-            setupBlock = {
-                device.clearData(this)
-                pressHome()
-            },
+            setupBlock = {},
             measureBlock = {
                 startActivityAndWait()
-                login()
+//                login()
                 historyJourney()
+//                logout()
             }
         )
     }
