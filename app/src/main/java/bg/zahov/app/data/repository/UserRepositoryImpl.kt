@@ -8,8 +8,8 @@ import bg.zahov.app.data.remote.FirestoreManager
 import kotlinx.coroutines.flow.Flow
 import javax.inject.Inject
 
-class UserRepositoryImpl @Inject constructor() : UserRepository {
-    private val firestore = FirestoreManager.getInstance()
+class UserRepositoryImpl @Inject constructor(private val firestore: FirestoreManager) :
+    UserRepository {
 
     override suspend fun getUser(): Flow<User> = firestore.getUser()
 

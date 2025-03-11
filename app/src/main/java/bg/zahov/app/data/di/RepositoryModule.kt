@@ -5,6 +5,8 @@ import bg.zahov.app.data.interfaces.MeasurementRepository
 import bg.zahov.app.data.interfaces.SettingsProvider
 import bg.zahov.app.data.interfaces.UserRepository
 import bg.zahov.app.data.interfaces.WorkoutRepository
+import bg.zahov.app.data.remote.FirebaseAuthentication
+import bg.zahov.app.data.remote.FirestoreManager
 import bg.zahov.app.data.repository.AuthenticationImpl
 import bg.zahov.app.data.repository.MeasurementRepositoryImpl
 import bg.zahov.app.data.repository.SettingsRepositoryImpl
@@ -18,14 +20,16 @@ import javax.inject.Singleton
 
 @Module
 @InstallIn(SingletonComponent::class)
-object ProviderModule {
+object RepositoryModule {
     @Provides
     @Singleton
-    fun provideWorkoutRepository(): WorkoutRepository = WorkoutRepositoryImpl()
+    fun provideWorkoutRepository(firestore: FirestoreManager): WorkoutRepository =
+        WorkoutRepositoryImpl(firestore)
 
     @Provides
     @Singleton
-    fun provideUserRepository(): UserRepository = UserRepositoryImpl()
+    fun provideUserRepository(firestore: FirestoreManager): UserRepository =
+        UserRepositoryImpl(firestore)
 
     @Provides
     @Singleton
@@ -33,9 +37,11 @@ object ProviderModule {
 
     @Provides
     @Singleton
-    fun provideAuthenticationRepository(): Authentication = AuthenticationImpl()
+    fun provideAuthenticationRepository(auth: FirebaseAuthentication): Authentication =
+        AuthenticationImpl(auth)
 
     @Provides
     @Singleton
-    fun provideMeasurementRepository(): MeasurementRepository = MeasurementRepositoryImpl()
+    fun provideMeasurementRepository(firestore: FirestoreManager): MeasurementRepository =
+        MeasurementRepositoryImpl(firestore)
 }
