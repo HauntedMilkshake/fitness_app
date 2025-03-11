@@ -20,29 +20,18 @@ import kotlinx.coroutines.launch
 import kotlinx.coroutines.tasks.await
 import kotlinx.coroutines.withContext
 import java.time.LocalDateTime
+import javax.inject.Inject
 
-class FirestoreManager {
+class FirestoreManager @Inject constructor(private val firestore: FirebaseFirestore) {
     companion object {
         const val USERS_COLLECTION = FirestoreFields.USERS
         const val TEMPLATE_EXERCISES = FirestoreFields.USER_TEMPLATE_EXERCISES
         const val WORKOUTS_SUB_COLLECTION = FirestoreFields.USER_WORKOUTS
         const val TEMPLATE_WORKOUTS_SUB_COLLECTION = FirestoreFields.USER_TEMPLATE_WORKOUTS
         const val MEASUREMENTS_COLLECTION = FirestoreFields.MEASUREMENTS_COLLECTION
-
-        @Volatile
-        private var instance: FirestoreManager? = null
-        fun getInstance() = instance ?: synchronized(this) {
-            instance ?: FirestoreManager().also { instance = it }
-        }
     }
 
     private lateinit var userId: String
-
-    private val firestore = FirebaseFirestore.getInstance()
-
-//    private val listenerOptions =
-//        SnapshotListenOptions.Builder().setMetadataChanges(MetadataChanges.INCLUDE)
-//            .setSource(ListenSource.CACHE).build()
 
     fun initUser(id: String) {
         userId = id
@@ -61,27 +50,8 @@ class FirestoreManager {
         return mapper(snapshot.data)
     }
 
-//    private suspend fun <T> getNonObservableCollectionData(
-//        reference: CollectionReference,
-//        mapper: (Map<String, Any>?) -> T,
-//    ): List<T> = withContext(Dispatchers.IO) {
-//        try {
-//            val snapshots = reference.get().await()
-//
-//            val results = snapshots.documents.map {
-//                async {
-//                    getNonObservableDocData(it.reference, mapper)
-//                }
-//            }.awaitAll()
-//
-//            results
-//        } catch (e: CancellationException) {
-//            throw e
-//        }
-//    }
-
     //papa bless callbackFlow :) 🤲
-    private suspend fun <T> observeCollection(
+    private fun <T> observeCollection(
         reference: CollectionReference,
         mapper: (Map<String, Any>?) -> T,
     ): Flow<List<T>> = callbackFlow {
@@ -96,7 +66,7 @@ class FirestoreManager {
         awaitClose { listener.remove() }
     }
 
-    private suspend fun <T> observeDocument(
+    private fun <T> observeDocument(
         reference: DocumentReference,
         mapper: (Map<String, Any>?) -> T,
     ): Flow<T> = callbackFlow {
@@ -113,25 +83,25 @@ class FirestoreManager {
         awaitClose { listener.remove() }
     }
 
-    suspend fun getUser(): Flow<User> =
+    fun getUser(): Flow<User> =
         observeDocument(firestore.collection(USERS_COLLECTION).document(userId)) { info ->
             User.fromFirestoreMap(info)
         }
 
-    suspend fun getWorkouts(): Flow<List<Workout>> = observeCollection(
+    fun getWorkouts(): Flow<List<Workout>> = observeCollection(
         firestore.collection(USERS_COLLECTION).document(userId).collection(WORKOUTS_SUB_COLLECTION)
     ) { info ->
         Workout.fromFirestoreMap(info)
     }
 
-    suspend fun getTemplateWorkouts(): Flow<List<Workout>> = observeCollection(
+    fun getTemplateWorkouts(): Flow<List<Workout>> = observeCollection(
         firestore.collection(USERS_COLLECTION).document(userId)
             .collection(TEMPLATE_WORKOUTS_SUB_COLLECTION)
     ) { info ->
         Workout.fromFirestoreMap(info)
     }
 
-    suspend fun getWorkoutById(id: String) = observeDocument(
+    fun getWorkoutById(id: String) = observeDocument(
         firestore.collection(
             USERS_COLLECTION
         ).document(userId).collection(WORKOUTS_SUB_COLLECTION).document(id)
@@ -139,7 +109,7 @@ class FirestoreManager {
         Workout.fromFirestoreMap(info)
     }
 
-    suspend fun getTemplateWorkoutByName(name: String) = observeDocument(
+    fun getTemplateWorkoutByName(name: String) = observeDocument(
         firestore.collection(USERS_COLLECTION).document(userId).collection(
             TEMPLATE_WORKOUTS_SUB_COLLECTION
         ).document(name)
@@ -147,7 +117,7 @@ class FirestoreManager {
         Workout.fromFirestoreMap(it)
     }
 
-    suspend fun getTemplateExercises(): Flow<List<Exercise>> = observeCollection(
+    fun getTemplateExercises(): Flow<List<Exercise>> = observeCollection(
         firestore.collection(USERS_COLLECTION).document(userId).collection(TEMPLATE_EXERCISES)
     ) {
         Exercise.fromFirestoreMap(it)

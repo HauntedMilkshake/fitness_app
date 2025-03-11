@@ -1,6 +1,5 @@
 package bg.zahov.app.data.remote
 
-import android.util.Log
 import bg.zahov.app.data.exception.AuthenticationException
 import bg.zahov.app.data.exception.CriticalDataNullException
 import com.google.android.gms.tasks.Task
@@ -18,16 +17,13 @@ import kotlinx.coroutines.flow.distinctUntilChanged
 import kotlinx.coroutines.tasks.await
 import kotlinx.coroutines.withContext
 import kotlinx.coroutines.withTimeout
+import javax.inject.Inject
 
-class FirebaseAuthentication {
-    companion object {
-        private var instance: FirebaseAuthentication? = null
-        fun getInstance() = instance ?: FirebaseAuthentication().also { instance = it }
 
-    }
-
-    private val auth = FirebaseAuth.getInstance()
-    private val firestore = FirestoreManager.getInstance()
+class FirebaseAuthentication @Inject constructor(
+    private val auth: FirebaseAuth,
+    private val firestore: FirestoreManager,
+) {
 
     /**
      * Registers a new user with the given email and password.
