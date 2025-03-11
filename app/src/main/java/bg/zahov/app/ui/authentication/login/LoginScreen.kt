@@ -20,12 +20,16 @@ import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.remember
 import androidx.compose.ui.Alignment
+import androidx.compose.ui.ExperimentalComposeUiApi
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.res.colorResource
 import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.res.stringResource
+import androidx.compose.ui.semantics.semantics
+import androidx.compose.ui.semantics.testTag
+import androidx.compose.ui.semantics.testTagsAsResourceId
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
@@ -63,6 +67,7 @@ fun LoginScreen(
     )
 }
 
+@OptIn(ExperimentalComposeUiApi::class)
 @Composable
 fun LoginContent(
     email: String,
@@ -100,7 +105,9 @@ fun LoginContent(
                 leadingIcon = { Icon(painterResource(R.drawable.ic_profile), "Username") },
                 label = { Text(stringResource(R.string.email_text_field_hint)) },
                 onTextChange = { onEmailChange(it) },
-                isEmail = true
+                isEmail = true,
+                testTag = "EmailField"
+
             )
 
             CommonPasswordField(
@@ -108,7 +115,9 @@ fun LoginContent(
                 passwordVisible = passwordVisibility,
                 label = { Text(stringResource(R.string.password_text_field_hint)) },
                 onPasswordChange = { onPasswordChange(it) },
-                onPasswordVisibilityChange = { onPasswordVisibilityChange() })
+                onPasswordVisibilityChange = { onPasswordVisibilityChange() },
+                testTag = "PasswordField"
+            )
 
             Text(
                 text = stringResource(R.string.forgot_password),
@@ -125,7 +134,11 @@ fun LoginContent(
                 onClick = { logIn() },
                 modifier = Modifier
                     .padding(top = 16.dp)
-                    .fillMaxWidth(),
+                    .fillMaxWidth()
+                    .semantics {
+                        testTagsAsResourceId = true
+                        testTag = "LoginButton"
+                    },
                 colors = ButtonColors(
                     containerColor = colorResource(R.color.text),
                     contentColor = colorResource(R.color.white),
