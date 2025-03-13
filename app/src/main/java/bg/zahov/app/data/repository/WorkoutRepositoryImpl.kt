@@ -8,9 +8,8 @@ import kotlinx.coroutines.flow.Flow
 import java.time.LocalDateTime
 import javax.inject.Inject
 
-class WorkoutRepositoryImpl @Inject constructor() : WorkoutRepository {
-
-    private val firestore = FirestoreManager.getInstance()
+class WorkoutRepositoryImpl @Inject constructor(private val firestore: FirestoreManager) :
+    WorkoutRepository {
 
     override suspend fun getTemplateWorkouts(): Flow<List<Workout>> =
         firestore.getTemplateWorkouts()
