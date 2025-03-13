@@ -19,6 +19,7 @@ import javax.inject.Singleton
 @Module
 @InstallIn(SingletonComponent::class)
 object ProviderModule {
+
     @Provides
     @Singleton
     fun provideWorkoutRepository(): WorkoutRepository = WorkoutRepositoryImpl()

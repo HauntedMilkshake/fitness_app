@@ -51,6 +51,7 @@ android {
                 getDefaultProguardFile("proguard-android-optimize.txt"),
                 "proguard-rules.pro"
             )
+            signingConfig = signingConfigs.getByName("debug")
         }
     }
 
@@ -100,4 +101,5 @@ dependencies {
     implementation(libs.hiltAndroid)
     implementation(libs.hiltNavigation)
     ksp(libs.hiltCompiler)
+    implementation(libs.hiltTesting)
 }

@@ -4,6 +4,7 @@ plugins {
     alias(libs.plugins.android.test)
     alias(libs.plugins.kotlinAndroid)
     alias(libs.plugins.baselineprofile)
+    alias(libs.plugins.ksp)
 }
 
 android {
@@ -24,6 +25,7 @@ android {
         targetSdk = 35
 
         testInstrumentationRunner = "androidx.test.runner.AndroidJUnitRunner"
+        testInstrumentationRunnerArguments["androidx.benchmark.suppressErrors"] = "LOW-BATTERY"
     }
 
     targetProjectPath = ":app"

@@ -4,7 +4,6 @@ import android.annotation.SuppressLint
 import androidx.benchmark.macro.BaselineProfileMode
 import androidx.benchmark.macro.CompilationMode
 import androidx.benchmark.macro.ExperimentalMetricApi
-import androidx.benchmark.macro.FrameTimingMetric
 import androidx.benchmark.macro.MacrobenchmarkScope
 import androidx.benchmark.macro.StartupMode
 import androidx.benchmark.macro.StartupTimingMetric
@@ -95,23 +94,36 @@ class HistoryJourney {
         benchmarkRule.measureRepeated(
             packageName = InstrumentationRegistry.getArguments().getString("targetAppId")
                 ?: throw Exception("targetAppId not passed as instrumentation runner arg"),
-            metrics = listOf(
-                StartupTimingMetric(),
-                FrameTimingMetric()
-            ),
+            metrics = listOf(StartupTimingMetric()),
             compilationMode = compilationMode,
             startupMode = StartupMode.COLD,
-            iterations = 5,
+            iterations = 15,
             setupBlock = {
+                device.clearData(this)
                 pressHome()
             },
             measureBlock = {
                 startActivityAndWait()
+                login()
                 historyJourney()
             }
         )
     }
+}
 
+/**
+ * Helper function to simulate user login in the app.
+ * The login function clicks on the "Login" button, fills in the login form with a test email and password,
+ * waits for the login button to become clickable, and then clicks the button to log in.
+ * This function is used as a precondition for tests that require a logged-in state.
+ */
+private fun MacrobenchmarkScope.login() {
+    device.getObject(By.text("Login")).click()
+    device.getObject(By.res("EmailField")).text = "spas@gmail.com"
+    device.getObject(By.res("PasswordField")).text = "123456"
+    val loginButton = device.getObject(By.res("LoginButton"))
+    loginButton.wait(Until.clickable(loginButton.isClickable), 1000)
+    loginButton.click()
 }
 
 /**

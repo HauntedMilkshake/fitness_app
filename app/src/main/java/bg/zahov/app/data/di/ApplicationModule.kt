@@ -29,7 +29,7 @@ import javax.inject.Singleton
 
 @Module
 @InstallIn(SingletonComponent::class)
-object ApplicationModule {
+    object ApplicationModule {
     @Provides
     @Singleton
     fun provideUserProvider(userRepo: UserRepository, auth: Authentication): UserProviderImpl =

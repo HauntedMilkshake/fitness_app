@@ -31,6 +31,10 @@ uiautomator = "2.3.0"
 benchmarkMacroJunit4 = "1.3.3"
 baselineprofile = "1.3.3"
 profileinstaller = "1.4.1"
+playServicesWearable = "18.0.0"
+composeMaterial = "1.2.1"
+composeFoundation = "1.2.1"
+wearToolingPreview = "1.0.0"
 
 [libraries]
 androidx-ktx = { group = "androidx.core", name = "core-ktx", version.ref = "ktx" }
@@ -40,6 +44,7 @@ gradle = { module = "com.android.tools.build:gradle", version.ref = "gradle" }
 hiltAndroid = { module = "com.google.dagger:hilt-android", version.ref = "hiltVer" }
 hiltCompiler = { module = "com.google.dagger:hilt-android-compiler", version.ref = "hiltVer" }
 hiltNavigation = { module = "androidx.hilt:hilt-navigation-compose", version.ref = "hiltNavigationVer" }
+hiltTesting = { module = "com.google.dagger:hilt-android-testing", version.ref = "hiltVer" }
 
 lifeCycleRuntime = { module = "androidx.lifecycle:lifecycle-runtime-ktx", version.ref = "lifecycle" }
 lifecycleLiveData = { module = "androidx.lifecycle:lifecycle-livedata-ktx", version.ref = "lifecycle" }
@@ -70,10 +75,16 @@ firebaseFirestore = { module = "com.google.firebase:firebase-firestore-ktx", ver
 mpChart = { module = "com.github.PhilJay:MPAndroidChart", version.ref = "mpChart" }
 calendarCompose = { module = "com.kizitonwose.calendar:compose", version.ref = "calendarCompose" }
 kotlinSerialization = { module = "org.jetbrains.kotlinx:kotlinx-serialization-json", version.ref = "kotlinSerialization" }
-numberPicker = { module = "com.chargemap.compose:numberpicker", version.ref = "numberPickerVer"}
+numberPicker = { module = "com.chargemap.compose:numberpicker", version.ref = "numberPickerVer" }
 androidx-uiautomator = { group = "androidx.test.uiautomator", name = "uiautomator", version.ref = "uiautomator" }
 androidx-benchmark-macro-junit4 = { group = "androidx.benchmark", name = "benchmark-macro-junit4", version.ref = "benchmarkMacroJunit4" }
 androidx-profileinstaller = { group = "androidx.profileinstaller", name = "profileinstaller", version.ref = "profileinstaller" }
+play-services-wearable = { group = "com.google.android.gms", name = "play-services-wearable", version.ref = "playServicesWearable" }
+androidx-ui-graphics = { group = "androidx.compose.ui", name = "ui-graphics" }
+androidx-ui-test-manifest = { group = "androidx.compose.ui", name = "ui-test-manifest" }
+androidx-compose-material = { group = "androidx.wear.compose", name = "compose-material", version.ref = "composeMaterial" }
+androidx-compose-foundation = { group = "androidx.wear.compose", name = "compose-foundation", version.ref = "composeFoundation" }
+androidx-wear-tooling-preview = { group = "androidx.wear", name = "wear-tooling-preview", version.ref = "wearToolingPreview" }
 
 [plugins]
 googleServices = { id = "com.google.gms.google-services", version.ref = "googleServicesPlugin" }
@@ -85,3 +96,4 @@ hilt = { id = "com.google.dagger.hilt.android", version.ref = "hiltVer" }
 ksp = { id = "com.google.devtools.ksp", version.ref = "kspVer" }
 android-test = { id = "com.android.test", version.ref = "androidPlugin" }
 baselineprofile = { id = "androidx.baselineprofile", version.ref = "baselineprofile" }
+android-library = { id = "com.android.library", version.ref = "androidPlugin" }
