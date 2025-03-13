@@ -63,6 +63,7 @@ android {
 
 dependencies {
     implementation(libs.androidx.profileinstaller)
+    implementation(libs.hilt.android.testing)
     "baselineProfile"(project(":app:baselineprofile"))
     val composeBom = platform(libs.composeBom)
     implementation(composeBom)
@@ -99,5 +100,6 @@ dependencies {
     implementation(libs.numberPicker)
     implementation(libs.hiltAndroid)
     implementation(libs.hiltNavigation)
+    androidTestImplementation(libs.hilt.android.testing)
     ksp(libs.hiltCompiler)
 }
