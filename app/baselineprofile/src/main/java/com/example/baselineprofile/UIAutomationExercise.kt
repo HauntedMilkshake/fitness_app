@@ -38,7 +38,6 @@ class UIAutomationExercise {
 
     private fun MacrobenchmarkScope.exerciseJourney() {
         device.findObject(UiSelector().text("Exercise")).clickAndWaitForNewWindow()
-
         device.findObject(UiSelector().description("Add exercise")).clickAndWaitForNewWindow()
         device.findObject(UiSelector().text("Category:")).click()
         device.findObject(UiSelector().text("Barbell")).click()
@@ -46,7 +45,7 @@ class UIAutomationExercise {
         device.findObject(UiSelector().text("Body part:")).click()
         device.findObject(UiSelector().text("Core")).click()
         device.pressBack()
-        device.findObject(UiSelector().text("Add name")).setText("Deadlift")
+        device.findObject(UiSelector().resourceId("Add Name")).setText("Deadlift")
         device.findObject(UiSelector().description("confirm")).click()
     }
 

@@ -49,7 +49,7 @@ class MockFirestoreManagerImp @Inject constructor() : FirestoreManager {
 
     override fun getTemplateExercises(): Flow<List<Exercise>> = flowOf(listOf(mockExercise))
 
-    override suspend fun addTemplateExercise(newExercise: Exercise): Unit {
+    override suspend fun addTemplateExercise(newExercise: Exercise) {
         // Mock the addition of a new exercise, no-op
     }
 
@@ -59,7 +59,7 @@ class MockFirestoreManagerImp @Inject constructor() : FirestoreManager {
 
     override suspend fun getMeasurement(type: MeasurementType): Measurements = mockMeasurements
 
-    override suspend fun addTemplateWorkout(newWorkoutTemplate: Workout): Unit {
+    override suspend fun addTemplateWorkout(newWorkoutTemplate: Workout) {
         // Mock the addition of a new workout template, no-op
     }
 
