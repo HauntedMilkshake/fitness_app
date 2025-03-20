@@ -19,8 +19,13 @@ import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.remember
 import androidx.compose.runtime.setValue
+import androidx.compose.ui.ExperimentalComposeUiApi
+import androidx.compose.ui.platform.testTag
+import androidx.compose.ui.semantics.semantics
+import androidx.compose.ui.semantics.testTagsAsResourceId
 import kotlinx.coroutines.delay
 
+@OptIn(ExperimentalComposeUiApi::class)
 @Composable
 fun CommonTextField(
     text: String,
@@ -37,12 +42,13 @@ fun CommonTextField(
     modifier: Modifier = Modifier,
     isEmail: Boolean = false,
     enabled: Boolean = true,
+    testTag: String = ""
 ) {
     var isError by remember { mutableStateOf(false) }
     var isActive by remember { mutableStateOf(false) }
 
     TextField(
-        modifier = modifier,
+        modifier = modifier.semantics { testTagsAsResourceId = true }.testTag(testTag),
         value = text,
         onValueChange = { text ->
             onTextChange(text)

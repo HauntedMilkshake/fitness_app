@@ -52,6 +52,7 @@ import androidx.compose.runtime.remember
 import androidx.compose.runtime.saveable.rememberSaveable
 import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
+import androidx.compose.ui.ExperimentalComposeUiApi
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.graphics.Shape
@@ -59,6 +60,9 @@ import androidx.compose.ui.graphics.SolidColor
 import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.res.stringResource
+import androidx.compose.ui.semantics.semantics
+import androidx.compose.ui.semantics.testTag
+import androidx.compose.ui.semantics.testTagsAsResourceId
 import androidx.compose.ui.text.TextRange
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.input.KeyboardType
@@ -238,7 +242,7 @@ fun WorkoutTitleField(
     )
 }
 
-@OptIn(ExperimentalFoundationApi::class)
+@OptIn(ExperimentalFoundationApi::class, ExperimentalComposeUiApi::class)
 @Composable
 fun ScreenContent(
     note: String,
@@ -339,7 +343,10 @@ fun ScreenContent(
                     }
                 }
                 Column(modifier = Modifier.padding(bottom = 16.dp)) {
-                    WorkoutButton(onClick = onAddExercise) {
+                    WorkoutButton(modifier = Modifier.semantics {
+                        testTagsAsResourceId = true
+                        testTag = "AddExercise"
+                    }, onClick = onAddExercise) {
                         Text(
                             text = stringResource(R.string.add_exercise),
                             maxLines = 1,
@@ -431,6 +438,7 @@ fun ItemBox(modifier: Modifier = Modifier, content: @Composable () -> Unit) {
     }
 }
 
+@OptIn(ExperimentalComposeUiApi::class)
 @Composable
 fun Exercise(
     modifier: Modifier = Modifier,
@@ -492,7 +500,10 @@ fun Exercise(
 
         Button(
             onClick = onAddSet,
-            modifier = Modifier.fillMaxWidth(),
+            modifier = Modifier.fillMaxWidth().semantics {
+                testTagsAsResourceId = true
+                testTag = "AddSet"
+            },
             shape = RoundedCornerShape(4.dp),
             elevation = ButtonDefaults.buttonElevation(defaultElevation = 8.dp)
         ) {
@@ -546,19 +557,23 @@ fun Exercise(
  * allows for customization of the inner padding while still somewhat
  * behaving like the regular text field
  */
-@OptIn(ExperimentalMaterial3Api::class)
+@OptIn(ExperimentalMaterial3Api::class, ExperimentalComposeUiApi::class)
 @Composable
 fun SetInputField(
     modifier: Modifier = Modifier,
     value: String,
     onValueChanged: (String) -> Unit,
+    tag: String = ""
 ) {
     val customTextSelectionColors =
         TextSelectionColors(handleColor = Color.Transparent, backgroundColor = Color.Transparent)
     val interactionSource = remember { MutableInteractionSource() }
     CompositionLocalProvider(LocalTextSelectionColors provides customTextSelectionColors) {
         BasicTextField(
-            modifier = modifier.fillMaxHeight(),
+            modifier = modifier.fillMaxHeight().semantics {
+                testTagsAsResourceId = true
+                testTag = tag
+            },
             value = value,
             singleLine = true,
             enabled = true,
@@ -707,7 +722,8 @@ fun WorkoutSetRow(
                     .fillMaxHeight()
                     .width(width = 64.dp),
                 value = weight,
-                onValueChanged = { onInputFieldChanged(it, SetField.WEIGHT) }
+                onValueChanged = { onInputFieldChanged(it, SetField.WEIGHT) },
+                tag = "WeightInputField"
             )
         }
 
@@ -717,7 +733,8 @@ fun WorkoutSetRow(
                     .fillMaxHeight()
                     .width(width = 64.dp),
                 value = reps,
-                onValueChanged = { onInputFieldChanged(it, SetField.REPETITIONS) }
+                onValueChanged = { onInputFieldChanged(it, SetField.REPETITIONS) },
+                tag = "RepsInputField"
             )
         }
     }

@@ -305,10 +305,15 @@ class ExerciseViewModel @Inject constructor(
      * @param selectedExercises A list of exercises selected by the user.
      */
     private fun addSelectedExercises(selectedExercises: List<ExerciseData>) {
+
         viewModelScope.launch {
+
             repo.getExercisesByNames(selectedExercises.map { it.name }).collect {
+
                 addExerciseToWorkoutProvider.addExercises(it)
-                _exerciseData.update { old -> old.copy(navigateBack = true) }
+                _exerciseData.update { old ->
+                    old.copy(navigateBack = true)
+                }
             }
         }
     }

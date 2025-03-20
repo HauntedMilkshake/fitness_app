@@ -28,10 +28,14 @@ import androidx.compose.runtime.Composable
 import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.getValue
 import androidx.compose.ui.Alignment
+import androidx.compose.ui.ExperimentalComposeUiApi
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.layout.ContentScale
 import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.res.stringResource
+import androidx.compose.ui.semantics.semantics
+import androidx.compose.ui.semantics.testTag
+import androidx.compose.ui.semantics.testTagsAsResourceId
 import androidx.compose.ui.text.style.TextOverflow
 import androidx.compose.ui.unit.dp
 import androidx.hilt.navigation.compose.hiltViewModel
@@ -51,18 +55,6 @@ fun ExercisesScreen(
 ) {
     val uiState by viewModel.exerciseData.collectAsStateWithLifecycle()
 
-
-    ExercisesContent(
-        showLoading = uiState.loading,
-        filterItems = uiState.filters,
-        exerciseItems = uiState.exercisesToShow,
-        showButton = uiState.flag != ExerciseFlag.Default,
-        removeFilter = { viewModel.removeFilter(it) },
-        clickExercise = { viewModel.onExerciseClicked(it) },
-        onConfirm = {
-            viewModel.confirmSelectedExercises()
-        })
-
     when {
         uiState.navigateInfo ->
             LaunchedEffect(Unit) {
@@ -75,15 +67,26 @@ fun ExercisesScreen(
                 navigateBack()
             }
 
-        uiState.showDialog ->
+        uiState . showDialog ->
             FilterDialog(onDismiss = {
                 viewModel.updateShowDialog(false)
             })
     }
+
+    ExercisesContent(
+        showLoading = uiState.loading,
+        filterItems = uiState.filters,
+        exerciseItems = uiState.exercisesToShow,
+        showButton = uiState.flag != ExerciseFlag.Default,
+        removeFilter = { viewModel.removeFilter(it) },
+        clickExercise = { viewModel.onExerciseClicked(it) },
+        onConfirm = {
+            viewModel.confirmSelectedExercises()
+        })
 }
 
 
-@OptIn(ExperimentalLayoutApi::class)
+@OptIn(ExperimentalLayoutApi::class, ExperimentalComposeUiApi::class)
 @Composable
 fun ExercisesContent(
     showLoading: Boolean,
@@ -111,7 +114,12 @@ fun ExercisesContent(
                     ) { removeFilter(it) }
                 }
             }
-            LazyColumn(modifier = Modifier.fillMaxWidth()) {
+            LazyColumn(modifier = Modifier
+                .fillMaxWidth()
+                .semantics {
+                    testTagsAsResourceId = true
+                    testTag = "Exercises"
+                }) {
                 items(exerciseItems) { exercise ->
                     ExerciseCards(exercise = exercise.value) { clickExercise(exercise.index) }
                 }
@@ -124,6 +132,7 @@ fun ExercisesContent(
     }
 }
 
+@OptIn(ExperimentalComposeUiApi::class)
 @Composable
 fun ConfirmButton(
     modifier: Modifier = Modifier,
@@ -139,7 +148,11 @@ fun ConfirmButton(
             modifier = Modifier
                 .align(Alignment.BottomEnd)
                 .padding(16.dp)
-                .wrapContentSize(),
+                .wrapContentSize()
+                .semantics {
+                    testTagsAsResourceId = true
+                    testTag = "Confirm"
+                },
             colors = ButtonColors(
                 containerColor = MaterialTheme.colorScheme.primaryContainer,
                 contentColor = MaterialTheme.colorScheme.onPrimaryContainer,
@@ -156,6 +169,7 @@ fun ConfirmButton(
     }
 }
 
+@OptIn(ExperimentalComposeUiApi::class)
 @Composable
 fun ExerciseCards(
     modifier: Modifier = Modifier,
@@ -165,7 +179,11 @@ fun ExerciseCards(
     Card(
         modifier = modifier
             .padding(8.dp)
-            .clickable { onClick(exercise) },
+            .clickable { onClick(exercise) }
+            .semantics {
+                testTagsAsResourceId = true
+                testTag = "Exercise"
+            },
         shape = RoundedCornerShape(16.dp),
         colors = CardColors(
             containerColor = if (exercise.selected) MaterialTheme.colorScheme.primaryContainer else MaterialTheme.colorScheme.secondaryContainer,
