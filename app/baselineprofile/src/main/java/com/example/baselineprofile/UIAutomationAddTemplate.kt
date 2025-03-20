@@ -14,7 +14,7 @@ import org.junit.Test
 import org.junit.runner.RunWith
 
 @RunWith(AndroidJUnit4::class)
-class UIAutomationExercise {
+class UIAutomationAddTemplate {
 
     @get:Rule
     val rule = BaselineProfileRule()
@@ -36,17 +36,17 @@ class UIAutomationExercise {
         )
     )
 
-    private fun MacrobenchmarkScope.exerciseJourney() {
-        device.findObject(UiSelector().text("Exercise")).clickAndWaitForNewWindow()
-        device.findObject(UiSelector().description("Add exercise")).clickAndWaitForNewWindow()
-        device.findObject(UiSelector().text("Category:")).click()
-        device.findObject(UiSelector().text("Barbell")).click()
-        device.pressBack()
-        device.findObject(UiSelector().text("Body part:")).click()
-        device.findObject(UiSelector().text("Core")).click()
-        device.pressBack()
-        device.findObject(UiSelector().resourceId("Add Name")).setText("Deadlift")
-        device.findObject(UiSelector().description("confirm")).click()
+    private fun MacrobenchmarkScope.addTemplateJourney() {
+        device.findObject(UiSelector().text("Workout")).clickAndWaitForNewWindow()
+        device.findObject(UiSelector().description("Add template")).clickAndWaitForNewWindow()
+        device.findObject(UiSelector().resourceId("Add name")).setText("Test template")
+        device.findObject(UiSelector().text("Add exercise")).clickAndWaitForNewWindow()
+        device.findObject(UiSelector().resourceId("Exercises"))
+            .getChild(UiSelector().index(0)).click()
+        device.findObject(UiSelector().description("confirm")).clickAndWaitForNewWindow()
+        device.findObject(UiSelector().text("Test Workout")).exists()
+        device.findObject(UiSelector().description("action")).clickAndWaitForNewWindow()
+        device.findObject(UiSelector().text("Test template")).exists()
     }
 
     fun generate() {
@@ -59,7 +59,7 @@ class UIAutomationExercise {
             device.executeShellCommand("pm clear $packageName")
             pressHome()
             startActivityAndWait()
-            exerciseJourney()
+            addTemplateJourney()
         }
     }
 
@@ -69,14 +69,14 @@ class UIAutomationExercise {
                 ?: throw Exception("targetAppId not passed as instrumentation runner arg"),
             metrics = listOf(StartupTimingMetric()),
             compilationMode = compilationMode,
-            iterations = 1,
+            iterations = 3,
             setupBlock = {
                 device.executeShellCommand("pm clear $packageName")
                 pressHome()
             },
             measureBlock = {
                 startActivityAndWait()
-                exerciseJourney()
+                addTemplateJourney()
             })
     }
 }

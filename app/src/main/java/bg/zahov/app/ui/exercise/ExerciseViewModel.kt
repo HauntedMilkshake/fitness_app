@@ -1,5 +1,6 @@
 package bg.zahov.app.ui.exercise
 
+import android.util.Log
 import androidx.lifecycle.SavedStateHandle
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
@@ -309,6 +310,7 @@ class ExerciseViewModel @Inject constructor(
             repo.getExercisesByNames(selectedExercises.map { it.name }).collect {
                 addExerciseToWorkoutProvider.addExercises(it)
                 _exerciseData.update { old -> old.copy(navigateBack = true) }
+                Log.d("test", _exerciseData.value.navigateBack.toString())
             }
         }
     }

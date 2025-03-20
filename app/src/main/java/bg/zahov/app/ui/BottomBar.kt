@@ -74,7 +74,7 @@ fun BottomBar(
                         Text(text = stringResource(screen.titleId))
                     },
                     icon = {
-                        Icon(painter = painterResource(screen.iconId), contentDescription = null)
+                        Icon(painter = painterResource(screen.iconId), contentDescription = stringResource(screen.titleId))
                     },
                     selected = currentDestination?.hierarchy?.any {
                         it.hasRoute(route = screen.route::class)

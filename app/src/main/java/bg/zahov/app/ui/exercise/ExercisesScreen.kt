@@ -1,5 +1,6 @@
 package bg.zahov.app.ui.exercise
 
+import android.util.Log
 import androidx.compose.foundation.Image
 import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.Arrangement
@@ -26,12 +27,17 @@ import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.LaunchedEffect
+import androidx.compose.runtime.collectAsState
 import androidx.compose.runtime.getValue
 import androidx.compose.ui.Alignment
+import androidx.compose.ui.ExperimentalComposeUiApi
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.layout.ContentScale
 import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.res.stringResource
+import androidx.compose.ui.semantics.semantics
+import androidx.compose.ui.semantics.testTag
+import androidx.compose.ui.semantics.testTagsAsResourceId
 import androidx.compose.ui.text.style.TextOverflow
 import androidx.compose.ui.unit.dp
 import androidx.hilt.navigation.compose.hiltViewModel
@@ -51,7 +57,6 @@ fun ExercisesScreen(
 ) {
     val uiState by viewModel.exerciseData.collectAsStateWithLifecycle()
 
-
     ExercisesContent(
         showLoading = uiState.loading,
         filterItems = uiState.filters,
@@ -63,6 +68,7 @@ fun ExercisesScreen(
             viewModel.confirmSelectedExercises()
         })
 
+    Log.d("test2", uiState.navigateBack.toString())
     when {
         uiState.navigateInfo ->
             LaunchedEffect(Unit) {
@@ -83,7 +89,7 @@ fun ExercisesScreen(
 }
 
 
-@OptIn(ExperimentalLayoutApi::class)
+@OptIn(ExperimentalLayoutApi::class, ExperimentalComposeUiApi::class)
 @Composable
 fun ExercisesContent(
     showLoading: Boolean,
@@ -111,7 +117,13 @@ fun ExercisesContent(
                     ) { removeFilter(it) }
                 }
             }
-            LazyColumn(modifier = Modifier.fillMaxWidth()) {
+            LazyColumn(
+                modifier = Modifier
+                    .fillMaxWidth()
+                    .semantics {
+                        testTagsAsResourceId = true
+                        testTag = "Exercises"
+                    }) {
                 items(exerciseItems) { exercise ->
                     ExerciseCards(exercise = exercise.value) { clickExercise(exercise.index) }
                 }

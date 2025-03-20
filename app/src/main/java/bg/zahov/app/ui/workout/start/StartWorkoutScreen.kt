@@ -120,7 +120,7 @@ fun StartWorkoutContent(
                     Icon(
                         painter = painterResource(R.drawable.ic_plus),
                         tint = Color.Unspecified,
-                        contentDescription = ""
+                        contentDescription = "Add template"
                     )
                 }
             }
