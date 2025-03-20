@@ -83,7 +83,7 @@ class LoginViewModel @Inject constructor(
     fun login() {
         viewModelScope.launch {
             try {
-                val res = auth.login(_uiState.value.email, _uiState.value.password)
+                auth.login(_uiState.value.email, _uiState.value.password)
             } catch (e: Exception) {
                 when (e) {
                     is FirebaseAuthInvalidUserException -> {
