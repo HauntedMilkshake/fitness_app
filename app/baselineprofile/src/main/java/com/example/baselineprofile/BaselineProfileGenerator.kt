@@ -40,7 +40,6 @@ class BaselineProfileGenerator {
 
     @Test
     fun generate() {
-        var isFirst = true
         rule.collect(
             packageName = InstrumentationRegistry.getArguments().getString("targetAppId")
                 ?: throw Exception("targetAppId not passed as instrumentation runner arg"),
@@ -49,10 +48,6 @@ class BaselineProfileGenerator {
         ) {
             pressHome()
             startActivityAndWait()
-            if (isFirst) {
-                login()
-                isFirst = false
-            }
             historyJourney()
         }
     }

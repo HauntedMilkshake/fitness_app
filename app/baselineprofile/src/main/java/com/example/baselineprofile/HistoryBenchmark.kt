@@ -54,12 +54,10 @@ class HistoryBenchmark {
             startupMode = StartupMode.COLD,
             iterations = 20,
             setupBlock = {
-                device.clearData(this)
                 pressHome()
             },
             measureBlock = {
                 startActivityAndWait()
-                login()
                 historyJourney()
             }
         )
