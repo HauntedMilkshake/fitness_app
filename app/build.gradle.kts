@@ -1,3 +1,5 @@
+import com.android.build.api.dsl.ManagedVirtualDevice
+
 plugins {
     alias(libs.plugins.googleServices)
     alias(libs.plugins.kotlinSerialization)

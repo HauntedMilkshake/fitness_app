@@ -13,6 +13,7 @@ import androidx.test.uiautomator.Until
 import org.junit.Rule
 import org.junit.Test
 import org.junit.runner.RunWith
+import kotlin.math.log
 
 /**
  * This test class benchmarks the speed of app startup.
@@ -42,11 +43,11 @@ class StartupBenchmarks {
     val rule = MacrobenchmarkRule()
 
     @Test
-    fun startupCompilationNone() =
+    fun historyJourneyCompilationNone() =
         benchmark(CompilationMode.None())
 
     @Test
-    fun startupCompilationBaselineProfiles() =
+    fun historyJourneyCompilationBaselineProfiles() =
         benchmark(CompilationMode.Partial(BaselineProfileMode.Require))
 
     private fun benchmark(compilationMode: CompilationMode) {
@@ -56,13 +57,14 @@ class StartupBenchmarks {
             metrics = listOf(StartupTimingMetric()),
             compilationMode = compilationMode,
             startupMode = StartupMode.COLD,
-            iterations = 10,
+            iterations = 15,
             setupBlock = {
                 pressHome()
             },
             measureBlock = {
                 startActivityAndWait()
-                device.findObject(By.text("Login")).click()
+                login()
+                historyJourney()
             }
         )
     }

@@ -12,7 +12,7 @@ import kotlin.collections.mutableMapOf
 class MockAuthentication @Inject constructor() : Authentication {
 
     private val users = mutableMapOf<String, String>("spas@gmail.com" to "123456")
-    private val authStateFlow = MutableStateFlow(false)
+    private val authStateFlow = MutableStateFlow(true)
     override suspend fun signup(
         email: String,
         password: String,

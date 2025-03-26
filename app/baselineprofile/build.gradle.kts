@@ -46,7 +46,7 @@ android {
 // You can specify to run the generators on a managed devices or connected devices.
 baselineProfile {
     managedDevices += "mediumphoneApi35"
-    useConnectedDevices = false
+    useConnectedDevices = true
 }
 
 dependencies {
