@@ -2,7 +2,10 @@ package com.example.baselineprofile
 
 import androidx.benchmark.macro.MacrobenchmarkScope
 import androidx.test.uiautomator.By
+import androidx.test.uiautomator.BySelector
 import androidx.test.uiautomator.Direction
+import androidx.test.uiautomator.UiDevice
+import androidx.test.uiautomator.UiObject2
 import androidx.test.uiautomator.Until
 
 /**
@@ -41,3 +44,6 @@ fun MacrobenchmarkScope.login() {
     loginButton.wait(Until.clickable(loginButton.isClickable), 1000)
     loginButton.click()
 }
+
+fun UiDevice.getObject(selector: BySelector): UiObject2 =
+    findObject(selector) ?: error("Object not found for: $selector")
