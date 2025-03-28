@@ -60,8 +60,6 @@ class StartupBenchmarks {
             },
             measureBlock = {
                 startActivityAndWait()
-                login()
-                historyJourney()
             }
         )
     }
