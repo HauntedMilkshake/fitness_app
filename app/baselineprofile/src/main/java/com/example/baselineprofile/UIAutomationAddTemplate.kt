@@ -30,10 +30,10 @@ class UIAutomationAddTemplate {
 
     private fun benchmark(compilationMode: CompilationMode) {
         benchmarkRule.measureRepeated(
-            packageName = "bg.zahov.fitness.app.mock.benchmark",
+            packageName = "bg.zahov.fitness.app.mock",
             metrics = listOf(StartupTimingMetric()),
             compilationMode = compilationMode,
-            iterations = 1,
+            iterations = 10,
             setupBlock = {
                 device.executeShellCommand("pm clear $packageName")
                 pressHome()

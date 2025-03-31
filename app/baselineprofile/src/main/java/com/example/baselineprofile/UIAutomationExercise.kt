@@ -36,40 +36,12 @@ class UIAutomationExercise {
         )
     )
 
-    private fun MacrobenchmarkScope.exerciseJourney() {
-        device.findObject(UiSelector().text("Exercise")).clickAndWaitForNewWindow()
-        device.findObject(UiSelector().description("Add exercise")).clickAndWaitForNewWindow()
-        device.findObject(UiSelector().text("Category:")).click()
-        device.findObject(UiSelector().text("Barbell")).click()
-        device.pressBack()
-        device.findObject(UiSelector().text("Body part:")).click()
-        device.findObject(UiSelector().text("Core")).click()
-        device.pressBack()
-        device.findObject(UiSelector().resourceId("Add Name")).setText("Deadlift")
-        device.findObject(UiSelector().description("confirm")).click()
-    }
-
-    fun generate() {
-        rule.collect(
-            packageName = InstrumentationRegistry.getArguments().getString("targetAppId")
-                ?: throw Exception("targetAppId not passed as instrumentation runner arg"),
-
-            includeInStartupProfile = true,
-        ) {
-            device.executeShellCommand("pm clear $packageName")
-            pressHome()
-            startActivityAndWait()
-            exerciseJourney()
-        }
-    }
-
     private fun benchmark(compilationMode: CompilationMode) {
         benchmarkRule.measureRepeated(
-            packageName = InstrumentationRegistry.getArguments().getString("targetAppId")
-                ?: throw Exception("targetAppId not passed as instrumentation runner arg"),
+            packageName = "bg.zahov.fitness.app.mock",
             metrics = listOf(StartupTimingMetric()),
             compilationMode = compilationMode,
-            iterations = 1,
+            iterations = 10,
             setupBlock = {
                 device.executeShellCommand("pm clear $packageName")
                 pressHome()
@@ -79,4 +51,17 @@ class UIAutomationExercise {
                 exerciseJourney()
             })
     }
+}
+
+fun MacrobenchmarkScope.exerciseJourney() {
+    device.findObject(UiSelector().text("Exercise")).clickAndWaitForNewWindow()
+    device.findObject(UiSelector().description("Add exercise")).clickAndWaitForNewWindow()
+    device.findObject(UiSelector().text("Category:")).click()
+    device.findObject(UiSelector().text("Barbell")).click()
+    device.pressBack()
+    device.findObject(UiSelector().text("Body part:")).click()
+    device.findObject(UiSelector().text("Core")).click()
+    device.pressBack()
+    device.findObject(UiSelector().resourceId("Add Name")).setText("Deadlift")
+    device.findObject(UiSelector().description("confirm")).click()
 }

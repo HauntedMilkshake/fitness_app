@@ -50,7 +50,7 @@ class StartupBenchmarks {
 
     private fun benchmark(compilationMode: CompilationMode) {
         rule.measureRepeated(
-            packageName = "bg.zahov.fitness.app.mock.benchmark",
+            packageName = "bg.zahov.fitness.app.mock",
             metrics = listOf(StartupTimingMetric()),
             compilationMode = compilationMode,
             startupMode = StartupMode.COLD,

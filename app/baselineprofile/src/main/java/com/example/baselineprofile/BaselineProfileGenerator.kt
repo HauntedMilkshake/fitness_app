@@ -41,7 +41,7 @@ class BaselineProfileGenerator {
     @Test
     fun generate() {
         rule.collect(
-            packageName = "bg.zahov.fitness.app.mock.benchmark",
+            packageName = "bg.zahov.fitness.app.mock",
             includeInStartupProfile = true,
             maxIterations = 1
         ) {

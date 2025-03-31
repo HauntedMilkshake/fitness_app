@@ -1,6 +1,6 @@
 [versions]
 googleServices = "4.4.2"
-gradle = "8.9.1"
+gradle = "8.8.2"
 hiltAndroidTesting = "2.51.1"
 kotlin = "2.1.0"
 ktx = "1.15.0"
