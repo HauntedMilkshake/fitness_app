@@ -1,4 +1,4 @@
-## fitness_app
+git## fitness_app
 Fitness app for tracking exercise progress.
 
 #Resources

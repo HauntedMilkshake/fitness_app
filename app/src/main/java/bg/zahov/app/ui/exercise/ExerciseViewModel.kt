@@ -1,6 +1,5 @@
 package bg.zahov.app.ui.exercise
 
-import android.util.Log
 import androidx.lifecycle.SavedStateHandle
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
@@ -23,8 +22,10 @@ import bg.zahov.app.data.provider.FilterProvider
 import bg.zahov.app.data.provider.ReplaceableExerciseProvider
 import bg.zahov.app.data.provider.SelectableExerciseProvider
 import dagger.hilt.android.lifecycle.HiltViewModel
+import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.StateFlow
+import kotlinx.coroutines.flow.flowOn
 import kotlinx.coroutines.flow.update
 import kotlinx.coroutines.launch
 import javax.inject.Inject
@@ -41,7 +42,7 @@ import javax.inject.Inject
  */
 @HiltViewModel
 class ExerciseViewModel @Inject constructor(
-    private val savedStateHandle: SavedStateHandle,
+    savedStateHandle: SavedStateHandle,
     private val repo: WorkoutProvider,
     private val selectableExerciseProvider: SelectableExerciseProvider,
     private val replaceableExerciseProvider: ReplaceableExerciseProvider,
@@ -307,11 +308,14 @@ class ExerciseViewModel @Inject constructor(
      */
     private fun addSelectedExercises(selectedExercises: List<ExerciseData>) {
         viewModelScope.launch {
-            repo.getExercisesByNames(selectedExercises.map { it.name }).collect {
-                addExerciseToWorkoutProvider.addExercises(it)
-                _exerciseData.update { old -> old.copy(navigateBack = true) }
-                Log.d("test", _exerciseData.value.navigateBack.toString())
-            }
+            repo.getExercisesByNames(selectedExercises.map { it.name })
+                .flowOn(Dispatchers.IO)
+                .collect {
+                    addExerciseToWorkoutProvider.addExercises(it)
+                    _exerciseData.update { old ->
+                        old.copy(navigateBack = true)
+                    }
+                }
         }
     }
 
@@ -319,7 +323,7 @@ class ExerciseViewModel @Inject constructor(
      * Resets the current exercise selection state by updating the exercise flag
      * to default and clearing any selected exercises.
      */
-    fun resetExerciseSelection() {
+    private fun resetExerciseSelection() {
         _exerciseData.update {
             it.copy(
                 flag = ExerciseFlag.Default,
@@ -331,23 +335,11 @@ class ExerciseViewModel @Inject constructor(
     }
 
     /**
-     * Updates the search query and filters the exercise list accordingly.
-     *
-     * @param search The new search query.
-     */
-    fun onSearchChange(search: String) {
-        _exerciseData.update { old ->
-            old.copy(search = search, loading = true)
-        }
-        getFiltered()
-    }
-
-    /**
      * Updates the exercise action flag based on the provided parameter.
      *
      * @param state A string mapped to a state.
      */
-    fun updateFlag(state: String?) {
+    private fun updateFlag(state: String?) {
         _exerciseData.update { old ->
             old.copy(
                 flag = when (state) {

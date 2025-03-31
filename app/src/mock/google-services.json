@@ -1,0 +1,48 @@
+{
+  "project_info": {
+    "project_number": "93354619873",
+    "project_id": "fitness-application-dd579",
+    "storage_bucket": "fitness-application-dd579.firebasestorage.app"
+  },
+  "client": [
+    {
+      "client_info": {
+        "mobilesdk_app_id": "1:93354619873:android:685a5fd05265dac60d58a0",
+        "android_client_info": {
+          "package_name": "bg.zahov.app"
+        }
+      },
+      "oauth_client": [],
+      "api_key": [
+        {
+          "current_key": "AIzaSyAu7LdxDk9KfB4eJjMhx1HfIlgIO4JWlqA"
+        }
+      ],
+      "services": {
+        "appinvite_service": {
+          "other_platform_oauth_client": []
+        }
+      }
+    },
+    {
+      "client_info": {
+        "mobilesdk_app_id": "1:93354619873:android:9c5ee3ea68ebe8820d58a0",
+        "android_client_info": {
+          "package_name": "bg.zahov.fitness.app.mock"
+        }
+      },
+      "oauth_client": [],
+      "api_key": [
+        {
+          "current_key": "AIzaSyAu7LdxDk9KfB4eJjMhx1HfIlgIO4JWlqA"
+        }
+      ],
+      "services": {
+        "appinvite_service": {
+          "other_platform_oauth_client": []
+        }
+      }
+    }
+  ],
+  "configuration_version": "1"
+}

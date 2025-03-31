@@ -12,9 +12,38 @@ plugins {
 android {
     namespace = "bg.zahov.fitness.app"
     compileSdk = 35
+    flavorDimensions += "default"
 
     buildFeatures {
         compose = true
+        buildConfig = true
+    }
+
+    productFlavors {
+        create("mock") {
+            dimension = "default"
+            applicationId = "bg.zahov.fitness.app"
+            applicationIdSuffix = ".mock"
+            versionName = "-mock"
+            buildConfigField("boolean", "USE_MOCK_DATA", "true")
+        }
+        create("production") {
+            dimension = "default"
+            applicationId = "bg.zahov.fitness.app"
+            applicationIdSuffix = ".production"
+            versionName = "-production"
+            buildConfigField("boolean", "USE_MOCK_DATA", "false")
+        }
+    }
+
+    buildTypes {
+        val release by getting {
+            isMinifyEnabled = true
+            proguardFiles(
+                getDefaultProguardFile("proguard-android-optimize.txt"),
+                "proguard-rules.pro"
+            )
+        }
     }
 
     compileOptions {
@@ -31,7 +60,7 @@ android {
     }
 
     defaultConfig {
-        applicationId = "bg.zahov.app"
+        applicationId = "bg.zahov.fitness.app"
         minSdk = 26
         targetSdk = 35
         versionCode = 1
@@ -41,16 +70,6 @@ android {
         testInstrumentationRunner = "androidx.test.runner.AndroidJUnitRunner"
         vectorDrawables {
             useSupportLibrary = true
-        }
-    }
-
-    buildTypes {
-        release {
-            isMinifyEnabled = false
-            proguardFiles(
-                getDefaultProguardFile("proguard-android-optimize.txt"),
-                "proguard-rules.pro"
-            )
         }
     }
 
