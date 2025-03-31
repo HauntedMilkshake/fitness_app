@@ -107,7 +107,6 @@ fun LoginContent(
                 onTextChange = { onEmailChange(it) },
                 isEmail = true,
                 testTag = "EmailField"
-
             )
 
             CommonPasswordField(
@@ -116,8 +115,7 @@ fun LoginContent(
                 label = { Text(stringResource(R.string.password_text_field_hint)) },
                 onPasswordChange = { onPasswordChange(it) },
                 onPasswordVisibilityChange = { onPasswordVisibilityChange() },
-                testTag = "PasswordField"
-            )
+                testTag = "PasswordField")
 
             Text(
                 text = stringResource(R.string.forgot_password),
@@ -134,11 +132,8 @@ fun LoginContent(
                 onClick = { logIn() },
                 modifier = Modifier
                     .padding(top = 16.dp)
-                    .fillMaxWidth()
-                    .semantics {
-                        testTagsAsResourceId = true
-                        testTag = "LoginButton"
-                    },
+                    .fillMaxWidth().semantics { testTagsAsResourceId = true
+                                              testTag = "LoginButton"},
                 colors = ButtonColors(
                     containerColor = colorResource(R.color.text),
                     contentColor = colorResource(R.color.white),

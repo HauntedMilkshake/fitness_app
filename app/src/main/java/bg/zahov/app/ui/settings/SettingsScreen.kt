@@ -19,10 +19,14 @@ import androidx.compose.runtime.Composable
 import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.getValue
 import androidx.compose.ui.Alignment
+import androidx.compose.ui.ExperimentalComposeUiApi
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.res.stringResource
+import androidx.compose.ui.semantics.semantics
+import androidx.compose.ui.semantics.testTag
+import androidx.compose.ui.semantics.testTagsAsResourceId
 import androidx.compose.ui.unit.dp
 import androidx.hilt.navigation.compose.hiltViewModel
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
@@ -140,6 +144,7 @@ fun SettingsScreen(
     )
 }
 
+@OptIn(ExperimentalComposeUiApi::class)
 @Composable
 fun SettingsContent(
     sound: String,
@@ -172,7 +177,11 @@ fun SettingsContent(
         modifier = Modifier
             .verticalScroll(rememberScrollState())
             .fillMaxSize()
-            .fillMaxWidth(),
+            .fillMaxWidth()
+            .semantics {
+                testTagsAsResourceId = true
+                testTag =  "SettingsColumn"
+            },
         verticalArrangement = Arrangement.spacedBy(16.dp)
     ) {
         SettingsText(stringResource(R.string.profile))
@@ -236,7 +245,11 @@ fun SettingsContent(
             Button(
                 modifier = Modifier
                     .width(240.dp)
-                    .align(Alignment.CenterHorizontally),
+                    .align(Alignment.CenterHorizontally)
+                    .semantics {
+                        testTagsAsResourceId = true
+                        testTag = "Sign out"
+                    },
                 onClick = { logout() },
                 colors = ButtonColors(
                     Color.Red, Color.White, Color.Red, Color.White

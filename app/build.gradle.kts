@@ -1,3 +1,5 @@
+import com.android.build.api.dsl.ManagedVirtualDevice
+
 plugins {
     alias(libs.plugins.googleServices)
     alias(libs.plugins.kotlinSerialization)
@@ -46,11 +48,12 @@ android {
 
     buildTypes {
         release {
-            isMinifyEnabled = false
+            isMinifyEnabled = true
             proguardFiles(
                 getDefaultProguardFile("proguard-android-optimize.txt"),
                 "proguard-rules.pro"
             )
+            signingConfig = signingConfigs.getByName("debug")
         }
     }
 
@@ -102,4 +105,5 @@ dependencies {
     implementation(libs.hiltNavigation)
     androidTestImplementation(libs.hilt.android.testing)
     ksp(libs.hiltCompiler)
+    implementation(libs.hiltTesting)
 }

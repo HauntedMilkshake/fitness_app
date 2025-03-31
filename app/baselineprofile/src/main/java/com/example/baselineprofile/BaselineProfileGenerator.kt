@@ -48,6 +48,7 @@ class BaselineProfileGenerator {
         ) {
             pressHome()
             startActivityAndWait()
+            historyJourney()
         }
     }
 }
