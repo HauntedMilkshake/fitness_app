@@ -1,5 +1,6 @@
 package bg.zahov.app.ui.workout
 
+import android.util.Log
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
 import bg.zahov.app.data.interfaces.WorkoutActions
@@ -17,8 +18,10 @@ import bg.zahov.app.util.generateRandomId
 import bg.zahov.app.util.hashString
 import bg.zahov.fitness.app.R
 import dagger.hilt.android.lifecycle.HiltViewModel
+import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.StateFlow
+import kotlinx.coroutines.flow.flowOn
 import kotlinx.coroutines.flow.update
 import kotlinx.coroutines.launch
 import java.time.LocalDateTime
@@ -529,7 +532,7 @@ class WorkoutViewModel @Inject constructor(
      */
     fun finishWorkout() {
         if (canFinish()) {
-            viewModelScope.launch {
+            viewModelScope.launch(Dispatchers.IO) {
                 val exerciseSummary = getExerciseArrayAndPRs(_uiState.value.exercises)
                 val exercises = exerciseSummary.exercises.values.toList()
                 val prs = exerciseSummary.prs
@@ -556,10 +559,9 @@ class WorkoutViewModel @Inject constructor(
                 workoutStateManager.finishWorkout()
                 repo.clearWorkoutState()
                 clearState()
-            }
-
-            _uiState.update { old ->
-                old.copy(isFinished = true)
+                _uiState.update { old ->
+                    old.copy(isFinished = true)
+                }
             }
         }
     }

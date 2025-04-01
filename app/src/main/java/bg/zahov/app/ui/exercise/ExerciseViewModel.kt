@@ -22,8 +22,10 @@ import bg.zahov.app.data.provider.FilterProvider
 import bg.zahov.app.data.provider.ReplaceableExerciseProvider
 import bg.zahov.app.data.provider.SelectableExerciseProvider
 import dagger.hilt.android.lifecycle.HiltViewModel
+import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.StateFlow
+import kotlinx.coroutines.flow.flowOn
 import kotlinx.coroutines.flow.update
 import kotlinx.coroutines.launch
 import javax.inject.Inject
@@ -306,15 +308,16 @@ class ExerciseViewModel @Inject constructor(
      */
     private fun addSelectedExercises(selectedExercises: List<ExerciseData>) {
 
-        viewModelScope.launch {
+        viewModelScope.launch(Dispatchers.IO) {
 
-            repo.getExercisesByNames(selectedExercises.map { it.name }).collect {
+            repo.getExercisesByNames(selectedExercises.map { it.name })
+                .collect {
 
-                addExerciseToWorkoutProvider.addExercises(it)
-                _exerciseData.update { old ->
-                    old.copy(navigateBack = true)
+                    addExerciseToWorkoutProvider.addExercises(it)
+                    _exerciseData.update { old ->
+                        old.copy(navigateBack = true)
+                    }
                 }
-            }
         }
     }
 

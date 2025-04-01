@@ -1,5 +1,6 @@
 package bg.zahov.app.ui.workout
 
+import android.util.Log
 import androidx.activity.ComponentActivity
 import androidx.activity.compose.BackHandler
 import androidx.compose.animation.core.Spring
@@ -159,7 +160,7 @@ fun WorkoutScreen(
 ) {
 
     val state by workoutViewModel.uiState.collectAsStateWithLifecycle()
-
+    Log.d("is finished compose", state.isFinished.toString())
     if (state.isFinished) {
         LaunchedEffect(Unit) {
             onFinish()
