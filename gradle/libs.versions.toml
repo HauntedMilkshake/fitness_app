@@ -42,7 +42,6 @@ hilt-android-testing = { module = "com.google.dagger:hilt-android-testing", vers
 hiltAndroid = { module = "com.google.dagger:hilt-android", version.ref = "hiltVer" }
 hiltCompiler = { module = "com.google.dagger:hilt-android-compiler", version.ref = "hiltVer" }
 hiltNavigation = { module = "androidx.hilt:hilt-navigation-compose", version.ref = "hiltNavigationVer" }
-hiltTesting = { module = "com.google.dagger:hilt-android-testing", version.ref = "hiltVer" }
 
 lifeCycleRuntime = { module = "androidx.lifecycle:lifecycle-runtime-ktx", version.ref = "lifecycle" }
 lifecycleLiveData = { module = "androidx.lifecycle:lifecycle-livedata-ktx", version.ref = "lifecycle" }
@@ -73,7 +72,7 @@ firebaseFirestore = { module = "com.google.firebase:firebase-firestore-ktx", ver
 mpChart = { module = "com.github.PhilJay:MPAndroidChart", version.ref = "mpChart" }
 calendarCompose = { module = "com.kizitonwose.calendar:compose", version.ref = "calendarCompose" }
 kotlinSerialization = { module = "org.jetbrains.kotlinx:kotlinx-serialization-json", version.ref = "kotlinSerialization" }
-numberPicker = { module = "com.chargemap.compose:numberpicker", version.ref = "numberPickerVer" }
+numberPicker = { module = "com.chargemap.compose:numberpicker", version.ref = "numberPickerVer"}
 androidx-uiautomator = { group = "androidx.test.uiautomator", name = "uiautomator", version.ref = "uiautomator" }
 androidx-benchmark-macro-junit4 = { group = "androidx.benchmark", name = "benchmark-macro-junit4", version.ref = "benchmarkMacroJunit4" }
 androidx-profileinstaller = { group = "androidx.profileinstaller", name = "profileinstaller", version.ref = "profileinstaller" }
@@ -88,4 +87,3 @@ hilt = { id = "com.google.dagger.hilt.android", version.ref = "hiltVer" }
 ksp = { id = "com.google.devtools.ksp", version.ref = "kspVer" }
 android-test = { id = "com.android.test", version.ref = "androidPlugin" }
 baselineprofile = { id = "androidx.baselineprofile", version.ref = "baselineprofile" }
-android-library = { id = "com.android.library", version.ref = "androidPlugin" }
