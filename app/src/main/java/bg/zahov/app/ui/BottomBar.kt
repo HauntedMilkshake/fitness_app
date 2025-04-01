@@ -76,9 +76,6 @@ fun BottomBar(
             screens.forEach { screen ->
                 NavigationBarItem(
                     modifier = Modifier
-                        .semantics {
-                            testTagsAsResourceId = true
-                        }
                         .testTag(stringResource(screen.titleId)),
                     label = {
                         Text(text = stringResource(screen.titleId))
