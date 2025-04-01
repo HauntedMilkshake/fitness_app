@@ -12,8 +12,13 @@ import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.saveable.rememberSaveable
 import androidx.compose.runtime.setValue
+import androidx.compose.ui.ExperimentalComposeUiApi
+import androidx.compose.ui.Modifier
 import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.res.stringResource
+import androidx.compose.ui.semantics.semantics
+import androidx.compose.ui.semantics.testTag
+import androidx.compose.ui.semantics.testTagsAsResourceId
 import androidx.hilt.navigation.compose.hiltViewModel
 import bg.zahov.fitness.app.R
 
@@ -30,7 +35,7 @@ fun HistoryInfoTopBar(
     )
 }
 
-@OptIn(ExperimentalMaterial3Api::class)
+@OptIn(ExperimentalMaterial3Api::class, ExperimentalComposeUiApi::class)
 @Composable
 fun HistoryInfoTopBarContent(
     onBack: () -> Unit,
@@ -42,7 +47,10 @@ fun HistoryInfoTopBarContent(
     TopAppBar(
         title = {},
         navigationIcon = {
-            IconButton(onClick = onBack) {
+            IconButton(onClick = onBack, modifier = Modifier.semantics {
+                testTagsAsResourceId = true
+                testTag = "HistoryBack"
+            }) {
                 Icon(
                     painter = painterResource(R.drawable.ic_back_arrow),
                     contentDescription = stringResource(R.string.minimize_icon_content_description)
