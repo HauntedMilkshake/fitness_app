@@ -9,6 +9,7 @@ import androidx.test.ext.junit.runners.AndroidJUnit4
 import androidx.test.filters.LargeTest
 import androidx.test.platform.app.InstrumentationRegistry
 import androidx.test.uiautomator.By
+import androidx.test.uiautomator.Until
 import org.junit.Rule
 import org.junit.Test
 import org.junit.runner.RunWith
@@ -55,13 +56,12 @@ class StartupBenchmarks {
             metrics = listOf(StartupTimingMetric()),
             compilationMode = compilationMode,
             startupMode = StartupMode.COLD,
-            iterations = 1,
+            iterations = 10,
             setupBlock = {
                 pressHome()
             },
             measureBlock = {
                 startActivityAndWait()
-                finishWorkoutJourney()
             }
         )
     }

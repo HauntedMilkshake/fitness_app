@@ -34,6 +34,8 @@ android {
         applicationId = "bg.zahov.app"
         minSdk = 26
         targetSdk = 35
+        versionCode = 1
+        versionName = "1.0"
         versionName = "1.0"
 
         testInstrumentationRunner = "androidx.test.runner.AndroidJUnitRunner"
@@ -44,12 +46,12 @@ android {
 
     buildTypes {
         release {
-            isMinifyEnabled = false
-            isShrinkResources = false
+            isMinifyEnabled = true
             proguardFiles(
                 getDefaultProguardFile("proguard-android-optimize.txt"),
                 "proguard-rules.pro"
             )
+            signingConfig = signingConfigs.getByName("debug")
         }
     }
 
@@ -99,4 +101,5 @@ dependencies {
     implementation(libs.hiltAndroid)
     implementation(libs.hiltNavigation)
     ksp(libs.hiltCompiler)
+    implementation(libs.hiltTesting)
 }
