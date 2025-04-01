@@ -41,13 +41,12 @@ class BaselineProfileGenerator {
     @Test
     fun generate() {
         rule.collect(
-            packageName = InstrumentationRegistry.getArguments().getString("targetAppId")
-                ?: throw Exception("targetAppId not passed as instrumentation runner arg"),
-
+            packageName = "bg.zahov.fitness.app.mock",
             includeInStartupProfile = true
         ) {
             pressHome()
             startActivityAndWait()
+            addTemplateJourney()
         }
     }
 }

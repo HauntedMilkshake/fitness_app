@@ -44,11 +44,9 @@ class HistoryBenchmark {
      * workouts
      */
     @SuppressLint("NewApi")
-    @OptIn(ExperimentalMetricApi::class)
     private fun benchmark(compilationMode: CompilationMode) {
         benchmarkRule.measureRepeated(
-            packageName = InstrumentationRegistry.getArguments().getString("targetAppId")
-                ?: throw Exception("targetAppId not passed as instrumentation runner arg"),
+            packageName = "bg.zahov.fitness.app.mock",
             metrics = listOf(StartupTimingMetric(), ),
             compilationMode = compilationMode,
             startupMode = StartupMode.COLD,

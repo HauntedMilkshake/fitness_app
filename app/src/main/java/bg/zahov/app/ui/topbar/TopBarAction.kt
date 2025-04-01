@@ -7,16 +7,14 @@ import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Text
 import androidx.compose.material3.TopAppBar
 import androidx.compose.runtime.Composable
-import androidx.compose.ui.ExperimentalComposeUiApi
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.semantics.semantics
 import androidx.compose.ui.semantics.testTag
-import androidx.compose.ui.semantics.testTagsAsResourceId
 import androidx.compose.ui.text.style.TextOverflow
 
-@OptIn(ExperimentalMaterial3Api::class, ExperimentalComposeUiApi::class)
+@OptIn(ExperimentalMaterial3Api::class)
 @Composable
 fun TopBarAction(
     topBarState: TopBarState.TitleWithAction,
@@ -45,10 +43,10 @@ fun TopBarAction(
             }
         },
         actions = {
-            IconButton(onClick = topBarState.onActionClick, modifier = Modifier.semantics {
-                testTagsAsResourceId = true
-                testTag = "TopBarAction"
-            }) {
+            IconButton(
+                onClick = topBarState.onActionClick,
+                modifier = Modifier.semantics { testTag = "TopBarAction" }
+            ) {
                 Icon(
                     painter = painterResource(topBarState.actionButtonIconId),
                     contentDescription = null

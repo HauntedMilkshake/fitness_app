@@ -12,6 +12,6 @@ fun MacrobenchmarkScope.addTemplateJourney() {
         .getChild(UiSelector().index(0)).click()
     device.findObject(UiSelector().description("confirm")).clickAndWaitForNewWindow()
     device.findObject(UiSelector().text("Test Workout")).exists()
-    device.findObject(UiSelector().description("action")).clickAndWaitForNewWindow()
+    device.findObject(UiSelector().resourceId("TopBarAction")).clickAndWaitForNewWindow()
     device.findObject(UiSelector().text("Test template")).exists()
 }
