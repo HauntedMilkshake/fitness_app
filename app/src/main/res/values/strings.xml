@@ -232,5 +232,5 @@
     <string name="remove_from_rest_time">- %1$s S</string>
     <string name="invalid_time_format">Invalid time format</string>
     <string name="rest_top_bar_title">Rest</string>
-
+    <string name="add_template">"Add template"</string>
 </resources>
