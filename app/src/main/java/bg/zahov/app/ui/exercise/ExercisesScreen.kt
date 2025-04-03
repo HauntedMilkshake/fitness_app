@@ -31,11 +31,9 @@ import androidx.compose.ui.Alignment
 import androidx.compose.ui.ExperimentalComposeUiApi
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.layout.ContentScale
+import androidx.compose.ui.platform.testTag
 import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.res.stringResource
-import androidx.compose.ui.semantics.semantics
-import androidx.compose.ui.semantics.testTag
-import androidx.compose.ui.semantics.testTagsAsResourceId
 import androidx.compose.ui.text.style.TextOverflow
 import androidx.compose.ui.unit.dp
 import androidx.hilt.navigation.compose.hiltViewModel
@@ -67,7 +65,7 @@ fun ExercisesScreen(
                 navigateBack()
             }
 
-        uiState . showDialog ->
+        uiState.showDialog ->
             FilterDialog(onDismiss = {
                 viewModel.updateShowDialog(false)
             })
@@ -114,12 +112,11 @@ fun ExercisesContent(
                     ) { removeFilter(it) }
                 }
             }
-            LazyColumn(modifier = Modifier
-                .fillMaxWidth()
-                .semantics {
-                    testTagsAsResourceId = true
-                    testTag = "Exercises"
-                }) {
+            LazyColumn(
+                modifier = Modifier
+                    .testTag("Exercises")
+                    .fillMaxWidth()
+            ) {
                 items(exerciseItems) { exercise ->
                     ExerciseCards(exercise = exercise.value) { clickExercise(exercise.index) }
                 }
@@ -149,10 +146,7 @@ fun ConfirmButton(
                 .align(Alignment.BottomEnd)
                 .padding(16.dp)
                 .wrapContentSize()
-                .semantics {
-                    testTagsAsResourceId = true
-                    testTag = "Confirm"
-                },
+                .testTag("Confirm"),
             colors = ButtonColors(
                 containerColor = MaterialTheme.colorScheme.primaryContainer,
                 contentColor = MaterialTheme.colorScheme.onPrimaryContainer,
@@ -179,11 +173,7 @@ fun ExerciseCards(
     Card(
         modifier = modifier
             .padding(8.dp)
-            .clickable { onClick(exercise) }
-            .semantics {
-                testTagsAsResourceId = true
-                testTag = "Exercise"
-            },
+            .clickable { onClick(exercise) },
         shape = RoundedCornerShape(16.dp),
         colors = CardColors(
             containerColor = if (exercise.selected) MaterialTheme.colorScheme.primaryContainer else MaterialTheme.colorScheme.secondaryContainer,

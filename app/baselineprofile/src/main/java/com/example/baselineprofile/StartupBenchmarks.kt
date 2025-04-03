@@ -41,10 +41,19 @@ class StartupBenchmarks {
     @get:Rule
     val rule = MacrobenchmarkRule()
 
+    /**
+     * Benchmark test to measure performance without any compilation optimizations.
+     * This test does not utilize any compilation mode and runs the benchmark without pre-compilation.
+     */
     @Test
     fun startupCompilationNone() =
         benchmark(CompilationMode.None())
 
+    /**
+     * Benchmark test to measure performance with partial compilation and baseline profiles enabled.
+     * This test ensures that the app utilizes baseline profiles, and only the methods defined in the baseline profiles
+     * are compiled to improve performance.
+     */
     @Test
     fun startupCompilationBaselineProfiles() =
         benchmark(CompilationMode.Partial(BaselineProfileMode.Require))
