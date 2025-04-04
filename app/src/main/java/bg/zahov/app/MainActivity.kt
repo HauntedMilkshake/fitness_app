@@ -22,7 +22,7 @@ class MainActivity : AppCompatActivity() {
     @Inject lateinit var serviceError: ServiceErrorHandler
 
     override fun onCreate(savedInstanceState: Bundle?) {
-//        enableEdgeToEdge()
+        enableEdgeToEdge()
         val splashScreen = installSplashScreen()
         super.onCreate(savedInstanceState)
 
