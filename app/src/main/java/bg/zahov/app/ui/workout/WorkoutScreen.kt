@@ -1,5 +1,6 @@
 package bg.zahov.app.ui.workout
 
+import android.util.Log
 import androidx.activity.ComponentActivity
 import androidx.activity.compose.BackHandler
 import androidx.compose.animation.core.Spring
@@ -52,11 +53,13 @@ import androidx.compose.runtime.remember
 import androidx.compose.runtime.saveable.rememberSaveable
 import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
+import androidx.compose.ui.ExperimentalComposeUiApi
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.graphics.Shape
 import androidx.compose.ui.graphics.SolidColor
 import androidx.compose.ui.platform.LocalContext
+import androidx.compose.ui.platform.testTag
 import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.text.TextRange
@@ -155,7 +158,7 @@ fun WorkoutScreen(
 ) {
 
     val state by workoutViewModel.uiState.collectAsStateWithLifecycle()
-
+    Log.d("is finished compose", state.isFinished.toString())
     if (state.isFinished) {
         LaunchedEffect(Unit) {
             onFinish()
@@ -238,7 +241,7 @@ fun WorkoutTitleField(
     )
 }
 
-@OptIn(ExperimentalFoundationApi::class)
+@OptIn(ExperimentalFoundationApi::class, ExperimentalComposeUiApi::class)
 @Composable
 fun ScreenContent(
     note: String,
@@ -339,7 +342,10 @@ fun ScreenContent(
                     }
                 }
                 Column(modifier = Modifier.padding(bottom = 16.dp)) {
-                    WorkoutButton(onClick = onAddExercise) {
+                    WorkoutButton(
+                        modifier = Modifier.testTag("AddExercise"),
+                        onClick = onAddExercise
+                    ) {
                         Text(
                             text = stringResource(R.string.add_exercise),
                             maxLines = 1,
@@ -431,6 +437,7 @@ fun ItemBox(modifier: Modifier = Modifier, content: @Composable () -> Unit) {
     }
 }
 
+@OptIn(ExperimentalComposeUiApi::class)
 @Composable
 fun Exercise(
     modifier: Modifier = Modifier,
@@ -492,7 +499,9 @@ fun Exercise(
 
         Button(
             onClick = onAddSet,
-            modifier = Modifier.fillMaxWidth(),
+            modifier = Modifier
+                .fillMaxWidth()
+                .testTag("AddSet"),
             shape = RoundedCornerShape(4.dp),
             elevation = ButtonDefaults.buttonElevation(defaultElevation = 8.dp)
         ) {
@@ -546,19 +555,22 @@ fun Exercise(
  * allows for customization of the inner padding while still somewhat
  * behaving like the regular text field
  */
-@OptIn(ExperimentalMaterial3Api::class)
+@OptIn(ExperimentalMaterial3Api::class, ExperimentalComposeUiApi::class)
 @Composable
 fun SetInputField(
     modifier: Modifier = Modifier,
     value: String,
     onValueChanged: (String) -> Unit,
+    tag: String = "",
 ) {
     val customTextSelectionColors =
         TextSelectionColors(handleColor = Color.Transparent, backgroundColor = Color.Transparent)
     val interactionSource = remember { MutableInteractionSource() }
     CompositionLocalProvider(LocalTextSelectionColors provides customTextSelectionColors) {
         BasicTextField(
-            modifier = modifier.fillMaxHeight(),
+            modifier = modifier
+                .fillMaxHeight()
+                .testTag(tag),
             value = value,
             singleLine = true,
             enabled = true,
@@ -707,7 +719,8 @@ fun WorkoutSetRow(
                     .fillMaxHeight()
                     .width(width = 64.dp),
                 value = weight,
-                onValueChanged = { onInputFieldChanged(it, SetField.WEIGHT) }
+                onValueChanged = { onInputFieldChanged(it, SetField.WEIGHT) },
+                tag = "WeightInputField"
             )
         }
 
@@ -717,7 +730,8 @@ fun WorkoutSetRow(
                     .fillMaxHeight()
                     .width(width = 64.dp),
                 value = reps,
-                onValueChanged = { onInputFieldChanged(it, SetField.REPETITIONS) }
+                onValueChanged = { onInputFieldChanged(it, SetField.REPETITIONS) },
+                tag = "RepsInputField"
             )
         }
     }

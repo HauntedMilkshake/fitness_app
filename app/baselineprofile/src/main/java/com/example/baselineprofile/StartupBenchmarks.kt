@@ -8,6 +8,8 @@ import androidx.benchmark.macro.junit4.MacrobenchmarkRule
 import androidx.test.ext.junit.runners.AndroidJUnit4
 import androidx.test.filters.LargeTest
 import androidx.test.platform.app.InstrumentationRegistry
+import androidx.test.uiautomator.By
+import androidx.test.uiautomator.Until
 import org.junit.Rule
 import org.junit.Test
 import org.junit.runner.RunWith
@@ -39,12 +41,21 @@ class StartupBenchmarks {
     @get:Rule
     val rule = MacrobenchmarkRule()
 
+    /**
+     * Benchmark test to measure performance without any compilation optimizations.
+     * This test does not utilize any compilation mode and runs the benchmark without pre-compilation.
+     */
     @Test
-    fun historyJourneyCompilationNone() =
+    fun startupCompilationNone() =
         benchmark(CompilationMode.None())
 
+    /**
+     * Benchmark test to measure performance with partial compilation and baseline profiles enabled.
+     * This test ensures that the app utilizes baseline profiles, and only the methods defined in the baseline profiles
+     * are compiled to improve performance.
+     */
     @Test
-    fun historyJourneyCompilationBaselineProfiles() =
+    fun startupCompilationBaselineProfiles() =
         benchmark(CompilationMode.Partial(BaselineProfileMode.Require))
 
     private fun benchmark(compilationMode: CompilationMode) {
@@ -54,7 +65,7 @@ class StartupBenchmarks {
             metrics = listOf(StartupTimingMetric()),
             compilationMode = compilationMode,
             startupMode = StartupMode.COLD,
-            iterations = 15,
+            iterations = 10,
             setupBlock = {
                 pressHome()
             },
@@ -64,4 +75,3 @@ class StartupBenchmarks {
         )
     }
 }
-

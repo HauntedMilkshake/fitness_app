@@ -4,6 +4,9 @@ import androidx.benchmark.macro.junit4.BaselineProfileRule
 import androidx.test.ext.junit.runners.AndroidJUnit4
 import androidx.test.filters.LargeTest
 import androidx.test.platform.app.InstrumentationRegistry
+import androidx.test.uiautomator.BySelector
+import androidx.test.uiautomator.UiDevice
+import androidx.test.uiautomator.UiObject2
 import org.junit.Rule
 import org.junit.Test
 import org.junit.runner.RunWith
@@ -48,7 +51,17 @@ class BaselineProfileGenerator {
         ) {
             pressHome()
             startActivityAndWait()
-            historyJourney()
+            finishWorkoutJourney()
         }
     }
 }
+
+/**
+ * Retrieves a UI object using the specified selector, or throws an error if not found.
+ *
+ * @param selector The selector used to find the UI object.
+ * @return The found [UiObject2] if successful.
+ * @throws IllegalStateException If the object is not found.
+ */
+fun UiDevice.getObject(selector: BySelector): UiObject2 =
+    findObject(selector) ?: error("Object not found for: $selector")
