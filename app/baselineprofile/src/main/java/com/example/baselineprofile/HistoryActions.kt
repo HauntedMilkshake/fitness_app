@@ -44,6 +44,3 @@ fun MacrobenchmarkScope.login() {
     loginButton.wait(Until.clickable(loginButton.isClickable), 1000)
     loginButton.click()
 }
-
-fun UiDevice.getObject(selector: BySelector): UiObject2 =
-    findObject(selector) ?: error("Object not found for: $selector")

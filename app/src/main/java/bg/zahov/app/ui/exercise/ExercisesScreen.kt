@@ -28,8 +28,10 @@ import androidx.compose.runtime.Composable
 import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.getValue
 import androidx.compose.ui.Alignment
+import androidx.compose.ui.ExperimentalComposeUiApi
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.layout.ContentScale
+import androidx.compose.ui.platform.testTag
 import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.semantics.semantics
@@ -53,17 +55,6 @@ fun ExercisesScreen(
 ) {
     val uiState by viewModel.exerciseData.collectAsStateWithLifecycle()
 
-    ExercisesContent(
-        showLoading = uiState.loading,
-        filterItems = uiState.filters,
-        exerciseItems = uiState.exercisesToShow,
-        showButton = uiState.flag != ExerciseFlag.Default,
-        removeFilter = { viewModel.removeFilter(it) },
-        clickExercise = { viewModel.onExerciseClicked(it) },
-        onConfirm = {
-            viewModel.confirmSelectedExercises()
-        })
-
     when {
         uiState.navigateInfo ->
             LaunchedEffect(Unit) {
@@ -81,10 +72,21 @@ fun ExercisesScreen(
                 viewModel.updateShowDialog(false)
             })
     }
+
+    ExercisesContent(
+        showLoading = uiState.loading,
+        filterItems = uiState.filters,
+        exerciseItems = uiState.exercisesToShow,
+        showButton = uiState.flag != ExerciseFlag.Default,
+        removeFilter = { viewModel.removeFilter(it) },
+        clickExercise = { viewModel.onExerciseClicked(it) },
+        onConfirm = {
+            viewModel.confirmSelectedExercises()
+        })
 }
 
 
-@OptIn(ExperimentalLayoutApi::class)
+@OptIn(ExperimentalLayoutApi::class, ExperimentalComposeUiApi::class)
 @Composable
 fun ExercisesContent(
     showLoading: Boolean,
@@ -129,6 +131,7 @@ fun ExercisesContent(
     }
 }
 
+@OptIn(ExperimentalComposeUiApi::class)
 @Composable
 fun ConfirmButton(
     modifier: Modifier = Modifier,
@@ -144,7 +147,8 @@ fun ConfirmButton(
             modifier = Modifier
                 .align(Alignment.BottomEnd)
                 .padding(16.dp)
-                .wrapContentSize(),
+                .wrapContentSize()
+                .testTag("Confirm"),
             colors = ButtonColors(
                 containerColor = MaterialTheme.colorScheme.primaryContainer,
                 contentColor = MaterialTheme.colorScheme.onPrimaryContainer,
@@ -161,6 +165,7 @@ fun ConfirmButton(
     }
 }
 
+@OptIn(ExperimentalComposeUiApi::class)
 @Composable
 fun ExerciseCards(
     modifier: Modifier = Modifier,

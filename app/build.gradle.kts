@@ -7,43 +7,17 @@ plugins {
     alias(libs.plugins.hilt)
     alias(libs.plugins.ksp)
     alias(libs.plugins.baselineprofile)
+    alias(libs.plugins.screenshot)
+    alias(libs.plugins.roborazzi)
 }
 
 android {
     namespace = "bg.zahov.fitness.app"
     compileSdk = 35
-    flavorDimensions += "default"
+    experimentalProperties["android.experimental.enableScreenshotTest"] = true
 
     buildFeatures {
         compose = true
-        buildConfig = true
-    }
-
-    productFlavors {
-        create("mock") {
-            dimension = "default"
-            applicationId = "bg.zahov.fitness.app"
-            applicationIdSuffix = ".mock"
-            versionName = "-mock"
-            buildConfigField("boolean", "USE_MOCK_DATA", "true")
-        }
-        create("production") {
-            dimension = "default"
-            applicationId = "bg.zahov.fitness.app"
-            applicationIdSuffix = ".production"
-            versionName = "-production"
-            buildConfigField("boolean", "USE_MOCK_DATA", "false")
-        }
-    }
-
-    buildTypes {
-        val release by getting {
-            isMinifyEnabled = true
-            proguardFiles(
-                getDefaultProguardFile("proguard-android-optimize.txt"),
-                "proguard-rules.pro"
-            )
-        }
     }
 
     compileOptions {
@@ -60,7 +34,7 @@ android {
     }
 
     defaultConfig {
-        applicationId = "bg.zahov.fitness.app"
+        applicationId = "bg.zahov.app"
         minSdk = 26
         targetSdk = 35
         versionCode = 1
@@ -73,16 +47,33 @@ android {
         }
     }
 
+    buildTypes {
+        release {
+            isMinifyEnabled = true
+            proguardFiles(
+                getDefaultProguardFile("proguard-android-optimize.txt"),
+                "proguard-rules.pro"
+            )
+            signingConfig = signingConfigs.getByName("debug")
+        }
+    }
+
     packaging {
         resources {
             excludes += "/META-INF/{AL2.0,LGPL2.1}"
+        }
+        packagingOptions.resources.excludes.add("META-INF/versions/9/OSGI-INF/MANIFEST.MF")
+    }
+
+    testOptions {
+        unitTests {
+            isIncludeAndroidResources = true
         }
     }
 }
 
 dependencies {
     implementation(libs.androidx.profileinstaller)
-    implementation(libs.hilt.android.testing)
     "baselineProfile"(project(":app:baselineprofile"))
     val composeBom = platform(libs.composeBom)
     implementation(composeBom)
@@ -121,4 +112,8 @@ dependencies {
     implementation(libs.hiltNavigation)
     androidTestImplementation(libs.hilt.android.testing)
     ksp(libs.hiltCompiler)
+    implementation(libs.roboelectric)
+    screenshotTestImplementation(libs.uiTooling)
+    testImplementation(libs.roborazzi)
+    testImplementation(libs.roborazziCompose)
 }
