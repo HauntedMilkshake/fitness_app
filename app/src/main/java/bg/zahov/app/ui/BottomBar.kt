@@ -15,7 +15,6 @@ import androidx.compose.ui.platform.testTag
 import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.semantics.semantics
-import androidx.compose.ui.semantics.testTag
 import androidx.compose.ui.semantics.testTagsAsResourceId
 import androidx.navigation.NavDestination.Companion.hasRoute
 import androidx.navigation.NavDestination.Companion.hierarchy
@@ -77,9 +76,6 @@ fun BottomBar(
             screens.forEach { screen ->
                 NavigationBarItem(
                     modifier = Modifier
-                        .semantics {
-                            testTagsAsResourceId = true
-                        }
                         .testTag(stringResource(screen.titleId)),
                     label = {
                         Text(text = stringResource(screen.titleId))

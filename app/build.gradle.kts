@@ -1,5 +1,3 @@
-import com.android.build.api.dsl.ManagedVirtualDevice
-
 plugins {
     alias(libs.plugins.googleServices)
     alias(libs.plugins.kotlinSerialization)
@@ -9,11 +7,14 @@ plugins {
     alias(libs.plugins.hilt)
     alias(libs.plugins.ksp)
     alias(libs.plugins.baselineprofile)
+    alias(libs.plugins.screenshot)
+    alias(libs.plugins.roborazzi)
 }
 
 android {
     namespace = "bg.zahov.fitness.app"
     compileSdk = 35
+    experimentalProperties["android.experimental.enableScreenshotTest"] = true
 
     buildFeatures {
         compose = true
@@ -61,6 +62,13 @@ android {
         resources {
             excludes += "/META-INF/{AL2.0,LGPL2.1}"
         }
+        packagingOptions.resources.excludes.add("META-INF/versions/9/OSGI-INF/MANIFEST.MF")
+    }
+
+    testOptions {
+        unitTests {
+            isIncludeAndroidResources = true
+        }
     }
 }
 
@@ -82,7 +90,6 @@ dependencies {
     implementation(libs.navigationCompose)
     implementation(libs.material)
     implementation(libs.ui)
-    debugImplementation(libs.uiTooling)
     implementation(libs.uiToolingPreview)
     implementation(libs.material3)
     implementation(libs.activityCompose)
@@ -106,4 +113,8 @@ dependencies {
     androidTestImplementation(libs.hilt.android.testing)
     ksp(libs.hiltCompiler)
     implementation(libs.hiltTesting)
+    implementation(libs.roboelectric)
+    screenshotTestImplementation(libs.uiTooling)
+    testImplementation(libs.roborazzi)
+    testImplementation(libs.roborazziCompose)
 }
