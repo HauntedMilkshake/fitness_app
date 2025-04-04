@@ -12,10 +12,6 @@ import bg.zahov.app.data.repository.MeasurementRepositoryImpl
 import bg.zahov.app.data.repository.SettingsRepositoryImpl
 import bg.zahov.app.data.repository.UserRepositoryImpl
 import bg.zahov.app.data.repository.WorkoutRepositoryImpl
-import bg.zahov.app.data.repository.mock.MockAuthentication
-import bg.zahov.app.data.repository.mock.MockMeasurementRepository
-import bg.zahov.app.data.repository.mock.MockUserRepository
-import bg.zahov.app.data.repository.mock.MockWorkoutRepository
 import dagger.Module
 import dagger.Provides
 import dagger.hilt.InstallIn
@@ -28,14 +24,12 @@ object RepositoryModule {
     @Provides
     @Singleton
     fun provideWorkoutRepository(firestore: FirestoreManager): WorkoutRepository =
-//        WorkoutRepositoryImpl(firestore)
-        MockWorkoutRepository()
+        WorkoutRepositoryImpl(firestore)
 
     @Provides
     @Singleton
     fun provideUserRepository(firestore: FirestoreManager): UserRepository =
-//        UserRepositoryImpl(firestore)
-        MockUserRepository()
+        UserRepositoryImpl(firestore)
 
     @Provides
     @Singleton
@@ -44,12 +38,10 @@ object RepositoryModule {
     @Provides
     @Singleton
     fun provideAuthenticationRepository(auth: FirebaseAuthentication): Authentication =
-//        AuthenticationImpl(auth)
-        MockAuthentication()
+        AuthenticationImpl(auth)
 
     @Provides
     @Singleton
     fun provideMeasurementRepository(firestore: FirestoreManager): MeasurementRepository =
-//        MeasurementRepositoryImpl(firestore)
-        MockMeasurementRepository()
+        MeasurementRepositoryImpl(firestore)
 }
