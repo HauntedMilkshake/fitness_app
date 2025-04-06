@@ -7,12 +7,15 @@ plugins {
     alias(libs.plugins.hilt)
     alias(libs.plugins.ksp)
     alias(libs.plugins.baselineprofile)
+    alias(libs.plugins.screenshot)
+    alias(libs.plugins.roborazzi)
 }
 
 android {
     namespace = "bg.zahov.fitness.app"
     compileSdk = 35
     flavorDimensions += "default"
+    experimentalProperties["android.experimental.enableScreenshotTest"] = true
 
     buildFeatures {
         compose = true
@@ -73,9 +76,27 @@ android {
         }
     }
 
+    buildTypes {
+        release {
+            isMinifyEnabled = true
+            proguardFiles(
+                getDefaultProguardFile("proguard-android-optimize.txt"),
+                "proguard-rules.pro"
+            )
+            signingConfig = signingConfigs.getByName("debug")
+        }
+    }
+
     packaging {
         resources {
             excludes += "/META-INF/{AL2.0,LGPL2.1}"
+        }
+        packagingOptions.resources.excludes.add("META-INF/versions/9/OSGI-INF/MANIFEST.MF")
+    }
+
+    testOptions {
+        unitTests {
+            isIncludeAndroidResources = true
         }
     }
 }
@@ -98,7 +119,6 @@ dependencies {
     implementation(libs.navigationCompose)
     implementation(libs.material)
     implementation(libs.ui)
-    debugImplementation(libs.uiTooling)
     implementation(libs.uiToolingPreview)
     implementation(libs.material3)
     implementation(libs.activityCompose)
@@ -121,4 +141,8 @@ dependencies {
     implementation(libs.hiltNavigation)
     androidTestImplementation(libs.hilt.android.testing)
     ksp(libs.hiltCompiler)
+    implementation(libs.roboelectric)
+    screenshotTestImplementation(libs.uiTooling)
+    testImplementation(libs.roborazzi)
+    testImplementation(libs.roborazziCompose)
 }
