@@ -1,6 +1,5 @@
 package bg.zahov.app.data.repository
 
-import bg.zahov.app.data.interfaces.FirestoreManager
 import bg.zahov.app.data.interfaces.MeasurementRepository
 import bg.zahov.app.data.model.Measurement
 import bg.zahov.app.data.model.MeasurementType

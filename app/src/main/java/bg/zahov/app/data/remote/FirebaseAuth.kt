@@ -2,8 +2,6 @@ package bg.zahov.app.data.remote
 
 import bg.zahov.app.data.exception.AuthenticationException
 import bg.zahov.app.data.exception.CriticalDataNullException
-import bg.zahov.app.data.interfaces.FirebaseAuthentication
-import bg.zahov.app.data.interfaces.FirestoreManager
 import com.google.android.gms.tasks.Task
 import com.google.android.gms.tasks.Tasks
 import com.google.firebase.auth.AuthResult
@@ -21,10 +19,10 @@ import kotlinx.coroutines.withContext
 import kotlinx.coroutines.withTimeout
 import javax.inject.Inject
 
-class FirebaseAuthenticationImp @Inject constructor(
+open class FirebaseAuthentication @Inject constructor(
     private val auth: FirebaseAuth,
     private val firestore: FirestoreManager,
-) : FirebaseAuthentication {
+) {
 
     /**
      * Registers a new user with the given email and password.
@@ -32,7 +30,7 @@ class FirebaseAuthenticationImp @Inject constructor(
      * @param password User's password.
      * @return [AuthResult] of the sign-up process.
      */
-    override suspend fun signup(email: String, password: String): AuthResult = withTimeout(5000) {
+     open suspend fun signup(email: String, password: String): AuthResult = withTimeout(5000) {
         auth.createUserWithEmailAndPassword(email, password).await()
     }
 
@@ -42,15 +40,15 @@ class FirebaseAuthenticationImp @Inject constructor(
      * @param password User's password.
      * @return [AuthResult] of the login process.
      */
-    override suspend fun login(email: String, password: String): AuthResult = withTimeout(5000) {
+     open suspend fun login(email: String, password: String): AuthResult = withTimeout(5000) {
         auth.signInWithEmailAndPassword(email, password).await()
     }
 
-    override fun logout() {
+     open fun logout() {
         auth.signOut()
     }
 
-    override fun deleteAccount() {
+     open fun deleteAccount() {
         try {
             auth.currentUser?.delete()
         } catch (e: FirebaseAuthInvalidUserException) {
@@ -60,15 +58,15 @@ class FirebaseAuthenticationImp @Inject constructor(
         }
     }
 
-    override suspend fun passwordResetForLoggedUser(): Task<Void> = withContext(Dispatchers.IO) {
+     open suspend fun passwordResetForLoggedUser(): Task<Void> = withContext(Dispatchers.IO) {
         auth.uid?.let { auth.sendPasswordResetEmail(it) } ?: Tasks.forResult(null)
     }
 
-    override suspend fun passwordResetByEmail(email: String) = withContext(Dispatchers.IO) {
+     open suspend fun passwordResetByEmail(email: String) = withContext(Dispatchers.IO) {
         auth.sendPasswordResetEmail(email)
     }
 
-    override fun getAuthStateFlow(): Flow<Boolean> = callbackFlow {
+     open fun getAuthStateFlow(): Flow<Boolean> = callbackFlow {
         trySend(auth.currentUser != null)
 
         val authStateListener = FirebaseAuth.AuthStateListener { firebaseAuth ->
@@ -81,29 +79,29 @@ class FirebaseAuthenticationImp @Inject constructor(
         }
     }.distinctUntilChanged()
 
-    override fun initFirestoreUser() {
+     open fun initFirestoreUser() {
         auth.currentUser?.uid?.let {
             firestore.initUser(it)
         }
     }
 
-    override suspend fun create(username: String, userId: String) {
+     open suspend fun create(username: String, userId: String) {
         firestore.createFirestore(username, userId)
     }
 
-    override suspend fun updatePassword(newPassword: String): Task<Void> =
+     open suspend fun updatePassword(newPassword: String): Task<Void> =
         withContext(Dispatchers.IO) {
             auth.currentUser?.updatePassword(newPassword) ?: Tasks.forResult(null)
         }
 
-    override suspend fun reauthenticate(password: String): Task<Void> =
+     open suspend fun reauthenticate(password: String): Task<Void> =
         withContext(Dispatchers.IO) {
             auth.currentUser?.email?.let {
                 auth.currentUser?.reauthenticate(EmailAuthProvider.getCredential(it, password))
             } ?: Tasks.forResult(null)
         }
 
-    override suspend fun getEmail() = withContext(Dispatchers.IO) {
+     open suspend fun getEmail() = withContext(Dispatchers.IO) {
         auth.currentUser?.email ?: throw CriticalDataNullException("NO EMAIL FOUND")
     }
 }

@@ -1,6 +1,5 @@
 package bg.zahov.app.data.repository
 
-import bg.zahov.app.data.interfaces.FirestoreManager
 import bg.zahov.app.data.interfaces.WorkoutRepository
 import bg.zahov.app.data.model.Exercise
 import bg.zahov.app.data.model.Workout
