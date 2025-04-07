@@ -1,6 +1,7 @@
 [versions]
 googleServices = "4.4.2"
 gradle = "8.7.3"
+hiltAndroidTesting = "2.51.1"
 kotlin = "2.1.0"
 ktx = "1.15.0"
 composeBom = "2024.12.01"
@@ -41,6 +42,7 @@ androidx-ktx = { group = "androidx.core", name = "core-ktx", version.ref = "ktx"
 google-services = { module = "com.google.gms:google-services", version.ref = "googleServices" }
 gradle = { module = "com.android.tools.build:gradle", version.ref = "gradle" }
 
+hilt-android-testing = { module = "com.google.dagger:hilt-android-testing", version.ref = "hiltAndroidTesting" }
 hiltAndroid = { module = "com.google.dagger:hilt-android", version.ref = "hiltVer" }
 hiltCompiler = { module = "com.google.dagger:hilt-android-compiler", version.ref = "hiltVer" }
 hiltNavigation = { module = "androidx.hilt:hilt-navigation-compose", version.ref = "hiltNavigationVer" }

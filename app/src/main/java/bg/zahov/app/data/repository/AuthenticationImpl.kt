@@ -2,12 +2,14 @@ package bg.zahov.app.data.repository
 
 import bg.zahov.app.data.interfaces.AuthResponse
 import bg.zahov.app.data.interfaces.Authentication
-import bg.zahov.app.data.remote.FirebaseAuthentication
+import bg.zahov.app.data.interfaces.FirebaseAuthentication
 import com.google.firebase.auth.AuthResult
 import javax.inject.Inject
 
-class AuthenticationImpl @Inject constructor(private val auth: FirebaseAuthentication) :
-    Authentication {
+class AuthenticationImpl
+@Inject constructor(
+    private val auth: FirebaseAuthentication
+) : Authentication {
     /**
      * Authenticates a user with the given email and password.
      * Maps the result to a standardized AuthResponse format.
