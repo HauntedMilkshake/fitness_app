@@ -110,7 +110,7 @@ dependencies {
     implementation(libs.numberPicker)
     implementation(libs.hiltAndroid)
     implementation(libs.hiltNavigation)
-    androidTestImplementation(libs.hilt.android.testing)
+    androidTestImplementation(libs.hiltTesting)
     ksp(libs.hiltCompiler)
     implementation(libs.roboelectric)
     screenshotTestImplementation(libs.uiTooling)
