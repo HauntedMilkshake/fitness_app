@@ -2,8 +2,6 @@ package bg.zahov.app.data.di
 
 import bg.zahov.app.data.interfaces.FirebaseAuthentication
 import bg.zahov.app.data.interfaces.FirestoreManager
-import bg.zahov.app.data.mock.MockFirebaseAuthImp
-import bg.zahov.app.data.mock.MockFirestoreManagerImp
 import bg.zahov.app.data.remote.FirebaseAuthenticationImp
 import bg.zahov.app.data.remote.FirestoreManagerImp
 import com.google.firebase.auth.FirebaseAuth
@@ -28,13 +26,4 @@ object DataSourceModule {
     @Singleton
     fun provideFirestoreManager(firestore: FirebaseFirestore): FirestoreManager =
         FirestoreManagerImp(firestore)
-
-// MOCK DATA FOR BASELINE PROFILE
-//    @Provides
-//    @Singleton
-//    fun provideFirebaseAuthentication(): FirebaseAuthentication = MockFirebaseAuthImp()
-//
-//    @Provides
-//    @Singleton
-//    fun provideFirestoreManager(): FirestoreManager = MockFirestoreManagerImp()
 }
