@@ -34,6 +34,7 @@ profileinstaller = "1.4.1"
 roboelectric = "4.14"
 screenshot = "0.0.1-alpha09"
 roborazzi = "1.44.0-alpha01"
+paparazzi = "1.3.5"
 
 [libraries]
 androidx-ktx = { group = "androidx.core", name = "core-ktx", version.ref = "ktx" }
@@ -81,6 +82,8 @@ numberPicker = { module = "com.chargemap.compose:numberpicker", version.ref = "n
 androidx-uiautomator = { group = "androidx.test.uiautomator", name = "uiautomator", version.ref = "uiautomator" }
 androidx-benchmark-macro-junit4 = { group = "androidx.benchmark", name = "benchmark-macro-junit4", version.ref = "benchmarkMacroJunit4" }
 androidx-profileinstaller = { group = "androidx.profileinstaller", name = "profileinstaller", version.ref = "profileinstaller" }
+paparazzi = { group = "app.cash.paparazzi",name = "paparazzi", version.ref = "paparazzi" }
+
 
 [plugins]
 googleServices = { id = "com.google.gms.google-services", version.ref = "googleServicesPlugin" }
@@ -95,3 +98,4 @@ baselineprofile = { id = "androidx.baselineprofile", version.ref = "baselineprof
 android-library = { id = "com.android.library", version.ref = "androidPlugin" }
 screenshot = { id = "com.android.compose.screenshot", version.ref = "screenshot" }
 roborazzi = { id = "io.github.takahirom.roborazzi", version.ref = "roborazzi" }
+paparazzi = { id = "app.cash.paparazzi", version.ref = "paparazzi" }

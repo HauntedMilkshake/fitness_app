@@ -9,6 +9,7 @@ plugins {
     alias(libs.plugins.baselineprofile)
     alias(libs.plugins.screenshot)
     alias(libs.plugins.roborazzi)
+    alias(libs.plugins.paparazzi)
 }
 
 android {
@@ -116,4 +117,5 @@ dependencies {
     screenshotTestImplementation(libs.uiTooling)
     testImplementation(libs.roborazzi)
     testImplementation(libs.roborazziCompose)
+    testImplementation(libs.paparazzi)
 }
