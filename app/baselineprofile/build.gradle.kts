@@ -2,6 +2,7 @@ plugins {
     alias(libs.plugins.android.test)
     alias(libs.plugins.kotlinAndroid)
     alias(libs.plugins.baselineprofile)
+    alias(libs.plugins.ksp)
 }
 
 android {
