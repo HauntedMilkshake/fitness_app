@@ -34,7 +34,7 @@ android {
     }
 
     defaultConfig {
-        applicationId = "bg.zahov.app"
+        applicationId = "bg.zahov.fitness.app"
         minSdk = 26
         targetSdk = 35
         versionCode = 1
