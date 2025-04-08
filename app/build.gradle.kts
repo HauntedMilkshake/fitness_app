@@ -9,6 +9,7 @@ plugins {
     alias(libs.plugins.baselineprofile)
     alias(libs.plugins.screenshot)
     alias(libs.plugins.roborazzi)
+    alias(libs.plugins.paparazzi)
 }
 
 android {
@@ -103,7 +104,6 @@ android {
 
 dependencies {
     implementation(libs.androidx.profileinstaller)
-    implementation(libs.hilt.android.testing)
     "baselineProfile"(project(":app:baselineprofile"))
     val composeBom = platform(libs.composeBom)
     implementation(composeBom)
@@ -119,6 +119,7 @@ dependencies {
     implementation(libs.navigationCompose)
     implementation(libs.material)
     implementation(libs.ui)
+    debugImplementation(libs.uiTooling)
     implementation(libs.uiToolingPreview)
     implementation(libs.material3)
     implementation(libs.activityCompose)
@@ -139,10 +140,10 @@ dependencies {
     implementation(libs.numberPicker)
     implementation(libs.hiltAndroid)
     implementation(libs.hiltNavigation)
-    androidTestImplementation(libs.hilt.android.testing)
     ksp(libs.hiltCompiler)
     implementation(libs.roboelectric)
     screenshotTestImplementation(libs.uiTooling)
     testImplementation(libs.roborazzi)
     testImplementation(libs.roborazziCompose)
+    testImplementation(libs.paparazzi)
 }

@@ -243,7 +243,6 @@ fun WorkoutTitleField(
     )
 }
 
-@OptIn(ExperimentalFoundationApi::class, ExperimentalComposeUiApi::class)
 @Composable
 fun ScreenContent(
     note: String,

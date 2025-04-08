@@ -3,6 +3,7 @@ package com.example.baselineprofile
 import androidx.benchmark.macro.junit4.BaselineProfileRule
 import androidx.test.ext.junit.runners.AndroidJUnit4
 import androidx.test.filters.LargeTest
+import androidx.test.platform.app.InstrumentationRegistry
 import androidx.test.uiautomator.BySelector
 import androidx.test.uiautomator.UiDevice
 import androidx.test.uiautomator.UiObject2
@@ -48,7 +49,6 @@ class BaselineProfileGenerator {
         ) {
             pressHome()
             startActivityAndWait()
-            historyJourney()
         }
     }
 }

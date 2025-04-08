@@ -1,23 +1,26 @@
 package bg.zahov.app.data.mock
 
 import android.os.Parcel
-import bg.zahov.app.data.interfaces.FirebaseAuthentication
+import bg.zahov.app.data.remote.FirebaseAuthentication
+import bg.zahov.app.data.remote.FirestoreManager
 import com.google.android.gms.tasks.Task
 import com.google.android.gms.tasks.Tasks
 import com.google.firebase.auth.AuthResult
+import com.google.firebase.auth.FirebaseAuth
 import com.google.firebase.functions.dagger.Module
 import kotlinx.coroutines.flow.Flow
 import kotlinx.coroutines.flow.flow
 import javax.inject.Inject
 
 @Module
-class MockFirebaseAuthImp @Inject constructor(
-) : FirebaseAuthentication {
+class MockFirebaseAuth @Inject constructor(
+    auth: FirebaseAuth, firestore: FirestoreManager
+) : FirebaseAuthentication(auth, firestore) {
 
     private var isLoggedIn = true
     private var userEmail: String = "test@example.com"
 
-    override suspend fun signup(email: String, password: String): AuthResult {
+     override suspend fun signup(email: String, password: String): AuthResult {
         return mockAuthResult()
     }
 

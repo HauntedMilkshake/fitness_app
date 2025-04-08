@@ -1,14 +1,9 @@
 package bg.zahov.app.data.di
 
-import bg.zahov.app.data.interfaces.FirebaseAuthentication
-import bg.zahov.app.data.interfaces.FirestoreManager
-import bg.zahov.app.data.remote.FirebaseAuthenticationImp
-import bg.zahov.app.data.remote.FirestoreManagerImp
+import bg.zahov.app.data.remote.FirebaseAuthentication
+import bg.zahov.app.data.remote.FirestoreManager
 import com.google.firebase.auth.FirebaseAuth
 import com.google.firebase.firestore.FirebaseFirestore
-import bg.zahov.app.data.mock.MockFirebaseAuthImp
-import bg.zahov.app.data.mock.MockFirestoreManagerImp
-import bg.zahov.fitness.app.BuildConfig
 import dagger.Module
 import dagger.Provides
 import dagger.hilt.InstallIn
@@ -18,27 +13,16 @@ import javax.inject.Singleton
 @Module
 @InstallIn(SingletonComponent::class)
 object DataSourceModule {
-
     @Provides
     @Singleton
     fun provideFirebaseAuthentication(
         auth: FirebaseAuth,
         firestore: FirestoreManager
-    ): FirebaseAuthentication {
-        return if (BuildConfig.USE_MOCK_DATA) {
-            MockFirebaseAuthImp()
-        } else {
-            FirebaseAuthenticationImp(auth, firestore)
-        }
-    }
+    ): FirebaseAuthentication = FirebaseAuthentication(auth, firestore)
 
     @Provides
     @Singleton
-    fun provideFirestoreManager(firestore: FirebaseFirestore): FirestoreManager {
-        return if (BuildConfig.USE_MOCK_DATA) {
-            MockFirestoreManagerImp()
-        } else {
-            FirestoreManagerImp(firestore)
-        }
-    }
+    fun provideFirestoreManager(
+        firestore: FirebaseFirestore
+    ): FirestoreManager = FirestoreManager(firestore)
 }
