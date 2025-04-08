@@ -35,7 +35,7 @@ android {
     }
 
     defaultConfig {
-        applicationId = "bg.zahov.app"
+        applicationId = "bg.zahov.fitness.app"
         minSdk = 26
         targetSdk = 35
         versionCode = 1
@@ -75,7 +75,6 @@ android {
 
 dependencies {
     implementation(libs.androidx.profileinstaller)
-    implementation(libs.hilt.android.testing)
     "baselineProfile"(project(":app:baselineprofile"))
     val composeBom = platform(libs.composeBom)
     implementation(composeBom)
@@ -91,6 +90,7 @@ dependencies {
     implementation(libs.navigationCompose)
     implementation(libs.material)
     implementation(libs.ui)
+    debugImplementation(libs.uiTooling)
     implementation(libs.uiToolingPreview)
     implementation(libs.material3)
     implementation(libs.activityCompose)
@@ -111,7 +111,6 @@ dependencies {
     implementation(libs.numberPicker)
     implementation(libs.hiltAndroid)
     implementation(libs.hiltNavigation)
-    androidTestImplementation(libs.hilt.android.testing)
     ksp(libs.hiltCompiler)
     implementation(libs.hiltTesting)
     implementation(libs.roboelectric)

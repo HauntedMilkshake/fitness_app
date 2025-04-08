@@ -1,9 +1,7 @@
 package bg.zahov.app.data.di
 
-import bg.zahov.app.data.interfaces.FirebaseAuthentication
-import bg.zahov.app.data.interfaces.FirestoreManager
-import bg.zahov.app.data.remote.FirebaseAuthenticationImp
-import bg.zahov.app.data.remote.FirestoreManagerImp
+import bg.zahov.app.data.remote.FirebaseAuthentication
+import bg.zahov.app.data.remote.FirestoreManager
 import com.google.firebase.auth.FirebaseAuth
 import com.google.firebase.firestore.FirebaseFirestore
 import dagger.Module
@@ -19,11 +17,12 @@ object DataSourceModule {
     @Singleton
     fun provideFirebaseAuthentication(
         auth: FirebaseAuth,
-        firestore: FirestoreManager,
-    ): FirebaseAuthentication = FirebaseAuthenticationImp(auth, firestore)
+        firestore: FirestoreManager
+    ): FirebaseAuthentication = FirebaseAuthentication(auth, firestore)
 
     @Provides
     @Singleton
-    fun provideFirestoreManager(firestore: FirebaseFirestore): FirestoreManager =
-        FirestoreManagerImp(firestore)
+    fun provideFirestoreManager(
+        firestore: FirebaseFirestore
+    ): FirestoreManager = FirestoreManager(firestore)
 }

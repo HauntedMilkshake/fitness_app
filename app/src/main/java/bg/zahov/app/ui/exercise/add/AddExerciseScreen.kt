@@ -100,7 +100,7 @@ fun AddExerciseContent(
                     )
                 },
                 onTextChange = { onNameChange(it) },
-                testTag = "Add Name"
+                testTagString = "Add Name"
             )
             Row(
                 modifier = Modifier

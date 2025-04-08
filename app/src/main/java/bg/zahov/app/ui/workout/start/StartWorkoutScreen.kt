@@ -37,6 +37,8 @@ import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.platform.testTag
 import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.res.stringResource
+import androidx.compose.ui.semantics.contentDescription
+import androidx.compose.ui.semantics.semantics
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.style.TextOverflow
 import androidx.compose.ui.unit.dp
@@ -58,7 +60,8 @@ fun StartWorkoutScreen(
     val uiState by startWorkoutViewModel.uiState.collectAsStateWithLifecycle()
     val context = LocalContext.current
 
-    StartWorkoutContent(workouts = uiState.workouts,
+    StartWorkoutContent(
+        workouts = uiState.workouts,
         onWorkoutStart = { startWorkoutViewModel.startWorkout(it) },
         onAddTemplateWorkout = onAddTemplateWorkout,
         onStartEmptyWorkout = { startWorkoutViewModel.startWorkout() },
@@ -119,12 +122,15 @@ fun StartWorkoutContent(
                     style = MaterialTheme.typography.labelSmall,
                     color = MaterialTheme.colorScheme.onBackground
                 )
-
-                IconButton(onClick = onAddTemplateWorkout) {
+                val iconButtonString = stringResource(R.string.add_template)
+                IconButton(
+                    modifier = Modifier.semantics { contentDescription = iconButtonString },
+                    onClick = onAddTemplateWorkout
+                ) {
                     Icon(
                         painter = painterResource(R.drawable.ic_plus),
                         tint = Color.Unspecified,
-                        contentDescription = ""
+                        contentDescription = null
                     )
                 }
             }
@@ -447,14 +453,15 @@ fun DropDown(
             onDismissRequest = onClose
         ) {
             MenuItem.entries.toList().forEachIndexed { index, item ->
-                DropdownMenuItem(text = {
-                    Text(
-                        text = stringResource(item.stringResource),
-                        maxLines = 1,
-                        overflow = TextOverflow.Ellipsis,
-                        style = MaterialTheme.typography.labelLarge
-                    )
-                },
+                DropdownMenuItem(
+                    text = {
+                        Text(
+                            text = stringResource(item.stringResource),
+                            maxLines = 1,
+                            overflow = TextOverflow.Ellipsis,
+                            style = MaterialTheme.typography.labelLarge
+                        )
+                    },
                     onClick = {
                         when (item) {
                             MenuItem.EDIT -> onEdit()

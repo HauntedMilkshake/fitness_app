@@ -1,6 +1,5 @@
 package bg.zahov.app.ui.workout
 
-import android.util.Log
 import androidx.activity.ComponentActivity
 import androidx.activity.compose.BackHandler
 import androidx.compose.animation.core.Spring
@@ -62,6 +61,8 @@ import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.platform.testTag
 import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.res.stringResource
+import androidx.compose.ui.semantics.semantics
+import androidx.compose.ui.semantics.testTag
 import androidx.compose.ui.text.TextRange
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.input.KeyboardType
@@ -158,7 +159,7 @@ fun WorkoutScreen(
 ) {
 
     val state by workoutViewModel.uiState.collectAsStateWithLifecycle()
-    Log.d("is finished compose", state.isFinished.toString())
+
     if (state.isFinished) {
         LaunchedEffect(Unit) {
             onFinish()
@@ -228,7 +229,8 @@ fun WorkoutTitleField(
     WorkoutScreenInputField(
         modifier = modifier
             .fillMaxWidth()
-            .padding(12.dp),
+            .padding(12.dp)
+            .semantics { testTag = "Add name" },
         value = name,
         label = {
             Text(
@@ -241,7 +243,6 @@ fun WorkoutTitleField(
     )
 }
 
-@OptIn(ExperimentalFoundationApi::class, ExperimentalComposeUiApi::class)
 @Composable
 fun ScreenContent(
     note: String,
@@ -266,7 +267,6 @@ fun ScreenContent(
                 .padding(top = 16.dp)
         ) {
             content()
-
 
             WorkoutScreenInputField(
                 modifier = Modifier
@@ -791,14 +791,15 @@ fun DropDown(
             when (itemType) {
                 ItemType.EXERCISE -> {
                     ExerciseMenuItem.entries.toList().forEachIndexed { index, item ->
-                        DropdownMenuItem(text = {
-                            Text(
-                                text = stringResource(item.stringResource),
-                                maxLines = 1,
-                                overflow = TextOverflow.Ellipsis,
-                                style = MaterialTheme.typography.labelLarge
-                            )
-                        },
+                        DropdownMenuItem(
+                            text = {
+                                Text(
+                                    text = stringResource(item.stringResource),
+                                    maxLines = 1,
+                                    overflow = TextOverflow.Ellipsis,
+                                    style = MaterialTheme.typography.labelLarge
+                                )
+                            },
                             onClick = {
                                 when (item) {
                                     ExerciseMenuItem.ADD_NOTE -> onFirstOption()
@@ -812,14 +813,15 @@ fun DropDown(
 
                 ItemType.SET -> {
                     SetMenuItem.entries.toList().forEachIndexed { index, item ->
-                        DropdownMenuItem(text = {
-                            Text(
-                                text = stringResource(item.stringResource),
-                                maxLines = 1,
-                                overflow = TextOverflow.Ellipsis,
-                                style = MaterialTheme.typography.labelLarge
-                            )
-                        },
+                        DropdownMenuItem(
+                            text = {
+                                Text(
+                                    text = stringResource(item.stringResource),
+                                    maxLines = 1,
+                                    overflow = TextOverflow.Ellipsis,
+                                    style = MaterialTheme.typography.labelLarge
+                                )
+                            },
                             onClick = {
                                 when (item) {
                                     SetMenuItem.WARMUP -> onFirstOption()

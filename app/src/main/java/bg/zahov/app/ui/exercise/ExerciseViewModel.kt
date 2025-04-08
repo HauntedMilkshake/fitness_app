@@ -42,7 +42,7 @@ import javax.inject.Inject
  */
 @HiltViewModel
 class ExerciseViewModel @Inject constructor(
-    private val savedStateHandle: SavedStateHandle,
+    savedStateHandle: SavedStateHandle,
     private val repo: WorkoutProvider,
     private val selectableExerciseProvider: SelectableExerciseProvider,
     private val replaceableExerciseProvider: ReplaceableExerciseProvider,
@@ -307,12 +307,10 @@ class ExerciseViewModel @Inject constructor(
      * @param selectedExercises A list of exercises selected by the user.
      */
     private fun addSelectedExercises(selectedExercises: List<ExerciseData>) {
-
-        viewModelScope.launch(Dispatchers.IO) {
-
+        viewModelScope.launch {
             repo.getExercisesByNames(selectedExercises.map { it.name })
+                .flowOn(Dispatchers.IO)
                 .collect {
-
                     addExerciseToWorkoutProvider.addExercises(it)
                     _exerciseData.update { old ->
                         old.copy(navigateBack = true)
@@ -325,7 +323,7 @@ class ExerciseViewModel @Inject constructor(
      * Resets the current exercise selection state by updating the exercise flag
      * to default and clearing any selected exercises.
      */
-    fun resetExerciseSelection() {
+    private fun resetExerciseSelection() {
         _exerciseData.update {
             it.copy(
                 flag = ExerciseFlag.Default,
@@ -337,23 +335,11 @@ class ExerciseViewModel @Inject constructor(
     }
 
     /**
-     * Updates the search query and filters the exercise list accordingly.
-     *
-     * @param search The new search query.
-     */
-    fun onSearchChange(search: String) {
-        _exerciseData.update { old ->
-            old.copy(search = search, loading = true)
-        }
-        getFiltered()
-    }
-
-    /**
      * Updates the exercise action flag based on the provided parameter.
      *
      * @param state A string mapped to a state.
      */
-    fun updateFlag(state: String?) {
+    private fun updateFlag(state: String?) {
         _exerciseData.update { old ->
             old.copy(
                 flag = when (state) {

@@ -1,6 +1,5 @@
 package bg.zahov.app.data.remote
 
-import bg.zahov.app.data.interfaces.FirestoreManager
 import bg.zahov.app.data.model.Exercise
 import bg.zahov.app.data.model.FirestoreFields
 import bg.zahov.app.data.model.Measurement
@@ -23,8 +22,7 @@ import kotlinx.coroutines.withContext
 import java.time.LocalDateTime
 import javax.inject.Inject
 
-class FirestoreManagerImp @Inject constructor(private val firestore: FirebaseFirestore) :
-    FirestoreManager {
+open class FirestoreManager @Inject constructor(private val firestore: FirebaseFirestore) {
     companion object {
         const val USERS_COLLECTION = FirestoreFields.USERS
         const val TEMPLATE_EXERCISES = FirestoreFields.USER_TEMPLATE_EXERCISES
@@ -35,11 +33,11 @@ class FirestoreManagerImp @Inject constructor(private val firestore: FirebaseFir
 
     private lateinit var userId: String
 
-    override fun initUser(id: String) {
+     open fun initUser(id: String) {
         userId = id
     }
 
-    override suspend fun createFirestore(username: String, userId: String) =
+     open suspend fun createFirestore(username: String, userId: String) =
         withContext(Dispatchers.IO) {
             firestore.collection(USERS_COLLECTION).document(userId)
                 .set(User(username).toFirestoreMap())
@@ -87,25 +85,25 @@ class FirestoreManagerImp @Inject constructor(private val firestore: FirebaseFir
         awaitClose { listener.remove() }
     }
 
-    override fun getUser(): Flow<User> =
+     open fun getUser(): Flow<User> =
         observeDocument(firestore.collection(USERS_COLLECTION).document(userId)) { info ->
             User.fromFirestoreMap(info)
         }
 
-    override fun getWorkouts(): Flow<List<Workout>> = observeCollection(
+     open fun getWorkouts(): Flow<List<Workout>> = observeCollection(
         firestore.collection(USERS_COLLECTION).document(userId).collection(WORKOUTS_SUB_COLLECTION)
     ) { info ->
         Workout.fromFirestoreMap(info)
     }
 
-    override fun getTemplateWorkouts(): Flow<List<Workout>> = observeCollection(
+     open fun getTemplateWorkouts(): Flow<List<Workout>> = observeCollection(
         firestore.collection(USERS_COLLECTION).document(userId)
             .collection(TEMPLATE_WORKOUTS_SUB_COLLECTION)
     ) { info ->
         Workout.fromFirestoreMap(info)
     }
 
-    override fun getWorkoutById(id: String) = observeDocument(
+     open fun getWorkoutById(id: String) = observeDocument(
         firestore.collection(
             USERS_COLLECTION
         ).document(userId).collection(WORKOUTS_SUB_COLLECTION).document(id)
@@ -113,7 +111,7 @@ class FirestoreManagerImp @Inject constructor(private val firestore: FirebaseFir
         Workout.fromFirestoreMap(info)
     }
 
-    override fun getTemplateWorkoutByName(name: String) = observeDocument(
+     open fun getTemplateWorkoutByName(name: String) = observeDocument(
         firestore.collection(USERS_COLLECTION).document(userId).collection(
             TEMPLATE_WORKOUTS_SUB_COLLECTION
         ).document(name)
@@ -121,20 +119,20 @@ class FirestoreManagerImp @Inject constructor(private val firestore: FirebaseFir
         Workout.fromFirestoreMap(it)
     }
 
-    override fun getTemplateExercises(): Flow<List<Exercise>> = observeCollection(
+     open fun getTemplateExercises(): Flow<List<Exercise>> = observeCollection(
         firestore.collection(USERS_COLLECTION).document(userId).collection(TEMPLATE_EXERCISES)
     ) {
         Exercise.fromFirestoreMap(it)
     }
 
-    override suspend fun addTemplateExercise(newExercise: Exercise): Unit =
+     open suspend fun addTemplateExercise(newExercise: Exercise): Unit =
         withContext(Dispatchers.IO) {
             firestore.collection(USERS_COLLECTION).document(userId)
                 .collection(TEMPLATE_EXERCISES).document(newExercise.name)
                 .set(newExercise.toFirestoreMap())
         }
 
-    override suspend fun upsertMeasurement(type: MeasurementType, measurement: Measurement) {
+     open suspend fun upsertMeasurement(type: MeasurementType, measurement: Measurement) {
         withContext(Dispatchers.IO) {
             val newMap = getLatestMeasurementsByType(type)
             val newList = newMap.measurements[type].orEmpty().toMutableList()
@@ -157,7 +155,7 @@ class FirestoreManagerImp @Inject constructor(private val firestore: FirebaseFir
     }
 
 
-    override suspend fun getMeasurement(type: MeasurementType): Measurements =
+     open suspend fun getMeasurement(type: MeasurementType): Measurements =
         getNonObservableDocData(
             firestore.collection(
                 USERS_COLLECTION
@@ -166,14 +164,14 @@ class FirestoreManagerImp @Inject constructor(private val firestore: FirebaseFir
             Measurements.fromFirestoreMap(it, type)
         }
 
-    override suspend fun addTemplateWorkout(newWorkoutTemplate: Workout): Unit =
+     open suspend fun addTemplateWorkout(newWorkoutTemplate: Workout): Unit =
         withContext(Dispatchers.IO) {
             firestore.collection(USERS_COLLECTION).document(userId)
                 .collection(TEMPLATE_WORKOUTS_SUB_COLLECTION)
                 .document(newWorkoutTemplate.id).set(newWorkoutTemplate.toFirestoreMap())
         }
 
-    override suspend fun getPastWorkoutById(id: String): Workout = getNonObservableDocData(
+     open suspend fun getPastWorkoutById(id: String): Workout = getNonObservableDocData(
         firestore.collection(USERS_COLLECTION).document(userId).collection(WORKOUTS_SUB_COLLECTION)
             .document(id)
     ) {
@@ -197,20 +195,20 @@ class FirestoreManagerImp @Inject constructor(private val firestore: FirebaseFir
         Workout.fromFirestoreMap(it)
     }
 
-    override suspend fun updateUsername(newUsername: String) =
+     open suspend fun updateUsername(newUsername: String) =
         withContext(Dispatchers.IO) {
             firestore.collection(USERS_COLLECTION).document(userId)
                 .update(FirestoreFields.USER_NAME, newUsername)
         }
 
-    override suspend fun addWorkoutToHistory(newWorkout: Workout): Unit =
+     open suspend fun addWorkoutToHistory(newWorkout: Workout): Unit =
         withContext(Dispatchers.IO) {
             firestore.collection(USERS_COLLECTION).document(userId)
                 .collection(WORKOUTS_SUB_COLLECTION).document(newWorkout.id)
                 .set(newWorkout.toFirestoreMap())
         }
 
-    override suspend fun updateExerciseInBatch(exercises: List<Exercise>) {
+     open suspend fun updateExerciseInBatch(exercises: List<Exercise>) {
         withContext(Dispatchers.IO) {
             val batch = firestore.batch()
             exercises.forEach {
@@ -224,14 +222,14 @@ class FirestoreManagerImp @Inject constructor(private val firestore: FirebaseFir
         }
     }
 
-    override suspend fun deleteTemplateWorkouts(workout: Workout) {
+     open suspend fun deleteTemplateWorkouts(workout: Workout) {
         withContext(Dispatchers.IO) {
             firestore.collection(USERS_COLLECTION).document(userId)
                 .collection(TEMPLATE_WORKOUTS_SUB_COLLECTION).document(workout.id).delete()
         }
     }
 
-    override suspend fun updateTemplateWorkout(
+     open suspend fun updateTemplateWorkout(
         workoutId: String,
         newDate: LocalDateTime,
         newExercises: List<Exercise>,
@@ -251,7 +249,7 @@ class FirestoreManagerImp @Inject constructor(private val firestore: FirebaseFir
         }
     }
 
-    override suspend fun deleteWorkout(workout: Workout): Unit = withContext(Dispatchers.IO) {
+     open suspend fun deleteWorkout(workout: Workout): Unit = withContext(Dispatchers.IO) {
         firestore.collection(USERS_COLLECTION).document(userId).collection(WORKOUTS_SUB_COLLECTION)
             .document(workout.id).delete()
     }

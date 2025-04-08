@@ -51,7 +51,6 @@ class BaselineProfileGenerator {
         ) {
             pressHome()
             startActivityAndWait()
-            finishWorkoutJourney()
         }
     }
 }

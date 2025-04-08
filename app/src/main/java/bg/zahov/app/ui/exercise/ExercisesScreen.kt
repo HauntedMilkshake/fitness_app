@@ -34,6 +34,8 @@ import androidx.compose.ui.layout.ContentScale
 import androidx.compose.ui.platform.testTag
 import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.res.stringResource
+import androidx.compose.ui.semantics.semantics
+import androidx.compose.ui.semantics.testTag
 import androidx.compose.ui.text.style.TextOverflow
 import androidx.compose.ui.unit.dp
 import androidx.hilt.navigation.compose.hiltViewModel
@@ -114,8 +116,8 @@ fun ExercisesContent(
             }
             LazyColumn(
                 modifier = Modifier
-                    .testTag("Exercises")
                     .fillMaxWidth()
+                    .semantics { testTag = "Exercises" }
             ) {
                 items(exerciseItems) { exercise ->
                     ExerciseCards(exercise = exercise.value) { clickExercise(exercise.index) }
@@ -230,12 +232,13 @@ fun FilterCard(
     filter: FilterItem,
     onClick: (FilterItem) -> Unit,
 ) {
-    Card(modifier = modifier.padding(horizontal = 8.dp), colors = CardColors(
-        contentColor = MaterialTheme.colorScheme.primary,
-        containerColor = MaterialTheme.colorScheme.onPrimary,
-        disabledContentColor = MaterialTheme.colorScheme.secondary,
-        disabledContainerColor = MaterialTheme.colorScheme.onSecondary
-    ), onClick = { onClick(filter) }) {
+    Card(
+        modifier = modifier.padding(horizontal = 8.dp), colors = CardColors(
+            contentColor = MaterialTheme.colorScheme.primary,
+            containerColor = MaterialTheme.colorScheme.onPrimary,
+            disabledContentColor = MaterialTheme.colorScheme.secondary,
+            disabledContainerColor = MaterialTheme.colorScheme.onSecondary
+        ), onClick = { onClick(filter) }) {
         Row(
             verticalAlignment = Alignment.CenterVertically, modifier = Modifier.padding(8.dp)
         ) {
