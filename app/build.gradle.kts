@@ -15,10 +15,32 @@ plugins {
 android {
     namespace = "bg.zahov.fitness.app"
     compileSdk = 35
+    flavorDimensions += "default"
     experimentalProperties["android.experimental.enableScreenshotTest"] = true
 
     buildFeatures {
         compose = true
+    }
+
+    productFlavors {
+        create("mock") {
+            dimension = "default"
+            applicationId = "bg.zahov.fitness.app"
+            applicationIdSuffix = ".mock"
+            versionName = "-mock"
+        }
+        create("production") {
+            dimension = "default"
+            applicationId = "bg.zahov.fitness.app"
+            applicationIdSuffix = ".production"
+            versionName = "-production"
+        }
+    }
+
+    sourceSets {
+        getByName("production") {
+            java.srcDirs("src/production")
+        }
     }
 
     compileOptions {
@@ -55,7 +77,6 @@ android {
                 getDefaultProguardFile("proguard-android-optimize.txt"),
                 "proguard-rules.pro"
             )
-            signingConfig = signingConfigs.getByName("debug")
         }
     }
 
@@ -112,7 +133,6 @@ dependencies {
     implementation(libs.hiltAndroid)
     implementation(libs.hiltNavigation)
     ksp(libs.hiltCompiler)
-    implementation(libs.hiltTesting)
     implementation(libs.roboelectric)
     screenshotTestImplementation(libs.uiTooling)
     testImplementation(libs.roborazzi)

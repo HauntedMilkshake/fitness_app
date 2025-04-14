@@ -85,7 +85,6 @@ fun ExercisesScreen(
         })
 }
 
-
 @OptIn(ExperimentalLayoutApi::class, ExperimentalComposeUiApi::class)
 @Composable
 fun ExercisesContent(

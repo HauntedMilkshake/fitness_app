@@ -44,9 +44,7 @@ class BaselineProfileGenerator {
     @Test
     fun generate() {
         rule.collect(
-            packageName = InstrumentationRegistry.getArguments().getString("targetAppId")
-                ?: throw Exception("targetAppId not passed as instrumentation runner arg"),
-
+            packageName = PACKAGE_NAME,
             includeInStartupProfile = true
         ) {
             pressHome()
@@ -64,3 +62,5 @@ class BaselineProfileGenerator {
  */
 fun UiDevice.getObject(selector: BySelector): UiObject2 =
     findObject(selector) ?: error("Object not found for: $selector")
+
+const val PACKAGE_NAME = "bg.zahov.fitness.app.mock"
