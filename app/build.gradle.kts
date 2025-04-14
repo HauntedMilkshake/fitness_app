@@ -20,7 +20,6 @@ android {
 
     buildFeatures {
         compose = true
-        buildConfig = true
     }
 
     productFlavors {
@@ -29,24 +28,18 @@ android {
             applicationId = "bg.zahov.fitness.app"
             applicationIdSuffix = ".mock"
             versionName = "-mock"
-            buildConfigField("boolean", "USE_MOCK_DATA", "true")
         }
         create("production") {
             dimension = "default"
             applicationId = "bg.zahov.fitness.app"
             applicationIdSuffix = ".production"
             versionName = "-production"
-            buildConfigField("boolean", "USE_MOCK_DATA", "false")
         }
     }
 
-    buildTypes {
-        val release by getting {
-            isMinifyEnabled = true
-            proguardFiles(
-                getDefaultProguardFile("proguard-android-optimize.txt"),
-                "proguard-rules.pro"
-            )
+    sourceSets {
+        getByName("production") {
+            java.srcDirs("src/production")
         }
     }
 
@@ -84,7 +77,6 @@ android {
                 getDefaultProguardFile("proguard-android-optimize.txt"),
                 "proguard-rules.pro"
             )
-            signingConfig = signingConfigs.getByName("debug")
         }
     }
 

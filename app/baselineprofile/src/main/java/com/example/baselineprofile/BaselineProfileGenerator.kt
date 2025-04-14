@@ -44,7 +44,7 @@ class BaselineProfileGenerator {
     @Test
     fun generate() {
         rule.collect(
-            packageName = "bg.zahov.fitness.app.mock",
+            packageName = PACKAGE_NAME,
             includeInStartupProfile = true
         ) {
             pressHome()
@@ -62,3 +62,5 @@ class BaselineProfileGenerator {
  */
 fun UiDevice.getObject(selector: BySelector): UiObject2 =
     findObject(selector) ?: error("Object not found for: $selector")
+
+const val PACKAGE_NAME = "bg.zahov.fitness.app.mock"
