@@ -1,63 +1,99 @@
 package bg.zahov.app.ui.home
 
-import android.app.Application
-import androidx.lifecycle.AndroidViewModel
-import androidx.lifecycle.LiveData
-import androidx.lifecycle.MutableLiveData
+import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
 import bg.zahov.app.data.exception.CriticalDataNullException
-import bg.zahov.app.data.local.RealmWorkoutState
+import bg.zahov.app.data.interfaces.RestProvider
+import bg.zahov.app.data.interfaces.ServiceErrorHandler
+import bg.zahov.app.data.interfaces.WorkoutActions
+import bg.zahov.app.data.interfaces.WorkoutProvider
 import bg.zahov.app.data.model.Workout
-import bg.zahov.app.getRestTimerProvider
-import bg.zahov.app.getServiceErrorProvider
-import bg.zahov.app.getUserProvider
-import bg.zahov.app.getWorkoutProvider
-import bg.zahov.app.getWorkoutStateManager
-import bg.zahov.app.util.toExercise
-import bg.zahov.app.util.toLocalDateTimeRlm
+import bg.zahov.app.data.provider.UserProviderImpl
 import com.github.mikephil.charting.data.BarEntry
-import kotlinx.coroutines.async
+import dagger.hilt.android.lifecycle.HiltViewModel
+import kotlinx.coroutines.flow.MutableStateFlow
+import kotlinx.coroutines.flow.StateFlow
+import kotlinx.coroutines.flow.update
 import kotlinx.coroutines.launch
 import java.time.DayOfWeek
-import java.time.Duration
 import java.time.LocalDate
-import java.time.LocalDateTime
 import java.time.format.DateTimeFormatter
 import java.time.temporal.TemporalAdjusters
+import javax.inject.Inject
 
-class HomeViewModel(application: Application) : AndroidViewModel(application) {
-    private val userRepo by lazy {
-        application.getUserProvider()
-    }
+/**
+ * Represents the UI state for the Home screen.
+ *
+ * @property numberOfWorkouts The count of workouts completed.
+ * @property data Data for the bar chart visualization.
+ * @property isChartLoading Indicates whether the bar chart data is still loading.
+ */
+data class HomeUiState(
+    val username: String = "",
+    val numberOfWorkouts: String = "",
+    val data: ChartData = ChartData(),
+    val isChartLoading: Boolean = true,
+)
 
-    private val workoutRepo by lazy {
-        application.getWorkoutProvider()
-    }
-    private val workoutStateManager by lazy {
-        application.getWorkoutStateManager()
-    }
-    private val workoutRestManager by lazy {
-        application.getRestTimerProvider()
-    }
-    private val serviceErrorHandler by lazy {
-        application.getServiceErrorProvider()
-    }
-    private val _userName = MutableLiveData<String>()
-    val userName: LiveData<String>
-        get() = _userName
+/**
+ * Represents the data for the bar chart visualization.
+ *
+ * @property xMin Minimum value on the X-axis(not very useful in our case where we show week ranges but still required).
+ * @property xMax Maximum value on the X-axis.
+ * @property yMin Minimum value on the Y-axis(lowest number of workouts per week).
+ * @property yMax Maximum value on the Y-axis(highest number of workouts per week).
+ * @property chartData The list of bar entries for the chart(BarEntry - a double (x,y) where x is where we have to place it on the x-axis and y is the value.
+ * @property weekRanges The range of weeks for the X-axis labels(for example for 10/24 they would look like 7-13, 14-20 and etc.)
+ */
+data class ChartData(
+    val xMin: Float = 0f,
+    val xMax: Float = 0f,
+    val yMin: Float = 0f,
+    val yMax: Float = 0f,
+    val chartData: List<BarEntry> = listOf(),
+    val weekRanges: List<String> = listOf(),
+)
 
-    private val _state = MutableLiveData<State>(State.Default)
-    val state: LiveData<State>
-        get() = _state
+/**
+ * @param userRepo - access to everything related to the user ( in here we only use the username)
+ * @param workoutRepo - access to history of previous workouts
+ * @param workoutStateManager - check local db(realm) if a workout is stored in it(whenever the user clears the app and reopens it) and starts it again
+ * @param workoutRestManager - makes sure to resume previous rest if the app has been opened and it would still need to be running
+ */
+@HiltViewModel
+class HomeViewModel @Inject constructor(
+    private val userRepo: UserProviderImpl,
+    private val workoutRepo: WorkoutProvider,
+    private val workoutStateManager: WorkoutActions,
+    private val workoutRestManager: RestProvider,
+    private val serviceErrorHandler: ServiceErrorHandler,
+) : ViewModel() {
 
+    /**
+     * @property uiState
+     * Holds the UI state for the Home screen.
+     *
+     * @property _uiState
+     * This property uses a MutableStateFlow to manage and emit changes
+     * to the HomeUiState, which can be observed by UI components.
+     */
+    private val _uiState = MutableStateFlow<HomeUiState>(HomeUiState())
+    val uiState: StateFlow<HomeUiState> = _uiState
 
+    /**
+     * fetch data asap
+     * convert past workouts to appropriate chart information
+     * check if we stopped the app during a workout
+     */
     init {
         checkWorkoutState()
         viewModelScope.launch {
             launch {
                 try {
-                    userRepo.getUser().collect {
-                        _userName.postValue(it.name)
+                    userRepo.getUser().collect { user ->
+                        _uiState.update { old ->
+                            old.copy(username = user.name)
+                        }
                     }
                 } catch (e: CriticalDataNullException) {
                     serviceErrorHandler.initiateCountdown()
@@ -65,26 +101,33 @@ class HomeViewModel(application: Application) : AndroidViewModel(application) {
             }
             launch {
                 try {
-                    workoutRepo.getPastWorkouts().collect { pastWorkouts ->
-                        val workoutPerWeekMap = getWorkoutsPerWeek(pastWorkouts)
-                        val barData = workoutPerWeekMap.map {
-                            BarEntry(
-                                it.key.toFloat(),
-                                it.value.toFloat()
-                            )
+                    workoutRepo.getCurrentMonthWorkouts()
+                        .collect { pastWorkouts ->
+                            val workoutPerWeekMap =
+                                getWorkoutsPerWeek(pastWorkouts)
+                            val barData = workoutPerWeekMap.map {
+                                BarEntry(
+                                    it.key.toFloat(),
+                                    it.value.toFloat()
+                                )
+                            }
+
+                            _uiState.update { old ->
+                                old.copy(
+                                    numberOfWorkouts = pastWorkouts.size.toString(),
+                                    data = ChartData(
+                                        xMax = workoutPerWeekMap.keys.size.toFloat(),
+                                        xMin = workoutPerWeekMap.keys.min().toFloat(),
+                                        yMax = workoutPerWeekMap.values.max().toFloat(),
+                                        yMin = workoutPerWeekMap.values.min().toFloat(),
+                                        chartData = barData,
+                                        weekRanges = getWeekRangesForCurrentMonth()
+                                    ),
+                                    isChartLoading = false
+                                )
+                            }
+
                         }
-                        _state.postValue(
-                            State.BarData(
-                                chartData = barData,
-                                numberOfWorkouts = pastWorkouts.size,
-                                xMin = workoutPerWeekMap.keys.min().toFloat(),
-                                xMax = workoutPerWeekMap.keys.max().toFloat(),
-                                yMin = workoutPerWeekMap.values.min().toFloat(),
-                                yMax = workoutPerWeekMap.values.max().toFloat(),
-                                getWeekRangesForCurrentMonth()
-                            )
-                        )
-                    }
                 } catch (e: CriticalDataNullException) {
                     serviceErrorHandler.initiateCountdown()
                 }
@@ -111,7 +154,9 @@ class HomeViewModel(application: Application) : AndroidViewModel(application) {
         return workoutsPerWeek
     }
 
-
+    /**
+     * we only want to show information for the current month, and we also need to provide them for the x axis of the barChart
+     */
     private fun getWeekRangesForCurrentMonth(): List<String> {
         val today = LocalDate.now()
         val firstDayOfMonth = today.withDayOfMonth(1)
@@ -135,59 +180,25 @@ class HomeViewModel(application: Application) : AndroidViewModel(application) {
         return weekRanges
     }
 
-    private suspend fun checkPreviousState(previousState: RealmWorkoutState) {
-        if (previousState.id != "default") {
-            val lastTime =
-                Duration.between(LocalDateTime.now(), previousState.date.toLocalDateTimeRlm())
-            if (previousState.restTimerStart.isNotEmpty() && previousState.restTimerEnd.isNotEmpty() && !LocalDateTime.now()
-                    .isAfter(previousState.restTimerEnd.toLocalDateTimeRlm())
-            ) {
-                val restDuration = Duration.between(
-                    previousState.restTimerStart.toLocalDateTimeRlm(),
-                    previousState.restTimerEnd.toLocalDateTimeRlm()
-                ).seconds * 1000
-                val elapsedTime = Duration.between(
-                    previousState.restTimerStart.toLocalDateTimeRlm(),
-                    LocalDateTime.now()
-                ).seconds * 1000
-                workoutRestManager.startRest(restDuration, elapsedTime)
-            }
 
-            workoutStateManager.startWorkout(
-                Workout(
-                    id = previousState.id,
-                    name = previousState.name,
-                    duration = previousState.duration,
-                    volume = previousState.volume,
-                    date = previousState.date.toLocalDateTimeRlm(),
-                    isTemplate = false,
-                    exercises = previousState.exercises.mapNotNull { it.toExercise() },
-                    note = previousState.note,
-                    personalRecords = previousState.personalRecords
-                ),
-                kotlin.math.abs(lastTime.seconds) * 1000,
-                true
-            )
-        }
+    /**
+     * if stored isn't default the means we must resume a workout
+     */
+    private suspend fun checkPreviousState(previousState: String = "") {
+        workoutStateManager.startWorkout(
+            Workout()
+//                kotlin.math.abs(lastTime.seconds) * 1000,
+//                true
+        )
     }
 
+    /**
+     * making sure we don't need to resume a workout before clearing it
+     */
     private fun checkWorkoutState() {
         viewModelScope.launch {
-            async { workoutRepo.getPreviousWorkoutState()?.let { checkPreviousState(it) } }.await()
+//            async { workoutRepo.getPreviousWorkoutState()?.let { checkPreviousState(it) } }.await()
             workoutRepo.clearWorkoutState()
         }
-    }
-
-    sealed interface State {
-        object Default : State
-        data class BarData(
-            val chartData: List<BarEntry>,
-            val numberOfWorkouts: Int,
-            val xMin: Float,
-            val xMax: Float,
-            val yMin: Float,
-            val yMax: Float,
-            val weekRanges: List<String>,
-        ) : State
     }
 }

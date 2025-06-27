@@ -1,28 +1,15 @@
 package bg.zahov.app.data.repository
 
-import android.util.Log
+import bg.zahov.app.data.interfaces.WorkoutRepository
 import bg.zahov.app.data.model.Exercise
 import bg.zahov.app.data.model.Workout
-import bg.zahov.app.data.interfaces.WorkoutRepository
-import bg.zahov.app.data.local.RealmManager
-import bg.zahov.app.data.local.RealmWorkoutState
 import bg.zahov.app.data.remote.FirestoreManager
-import io.realm.kotlin.notifications.ObjectChange
 import kotlinx.coroutines.flow.Flow
 import java.time.LocalDateTime
+import javax.inject.Inject
 
-class WorkoutRepositoryImpl : WorkoutRepository {
-    companion object {
-        @Volatile
-        private var instance: WorkoutRepositoryImpl? = null
-        fun getInstance() =
-            instance ?: synchronized(this) {
-                instance ?: WorkoutRepositoryImpl().also { instance = it }
-            }
-    }
-
-    private val firestore = FirestoreManager.getInstance()
-    private val realm = RealmManager.getInstance()
+class WorkoutRepositoryImpl @Inject constructor(private val firestore: FirestoreManager) :
+    WorkoutRepository {
 
     override suspend fun getTemplateWorkouts(): Flow<List<Workout>> =
         firestore.getTemplateWorkouts()
@@ -61,11 +48,6 @@ class WorkoutRepositoryImpl : WorkoutRepository {
     }
 
     override suspend fun getPastWorkoutById(id: String): Workout = firestore.getPastWorkoutById(id)
-    override suspend fun getPastWorkoutState(): RealmWorkoutState? = realm.getWorkoutState()
-
-    override suspend fun addWorkoutState(realmWorkoutState: RealmWorkoutState) {
-        realm.addWorkoutState(realmWorkoutState)
-    }
 
     override suspend fun updateTemplateWorkout(
         workoutId: String,
@@ -76,7 +58,6 @@ class WorkoutRepositoryImpl : WorkoutRepository {
     }
 
     override suspend fun clearWorkoutState() {
-        realm.clearWorkoutState()
+        //
     }
-
 }

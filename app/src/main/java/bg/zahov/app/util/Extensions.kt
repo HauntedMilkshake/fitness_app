@@ -1,30 +1,17 @@
 package bg.zahov.app.util
 
-import android.animation.ObjectAnimator
-import android.animation.PropertyValuesHolder
-import android.view.View
-import bg.zahov.app.data.local.RealmExercise
-import bg.zahov.app.data.local.RealmSets
-import bg.zahov.app.data.local.RealmTimePattern
-import bg.zahov.app.data.model.BodyPart
-import bg.zahov.app.data.model.Category
+import android.annotation.SuppressLint
 import bg.zahov.app.data.model.Exercise
 import bg.zahov.app.data.model.FirestoreFields
 import bg.zahov.app.data.model.Measurement
-import bg.zahov.app.data.model.SetType
 import bg.zahov.app.data.model.Sets
-import bg.zahov.app.data.model.Units
 import bg.zahov.app.data.model.User
 import bg.zahov.app.data.model.Workout
-import bg.zahov.app.ui.exercise.ExerciseAdapterWrapper
-import bg.zahov.app.ui.workout.add.ExerciseSetAdapterExerciseWrapper
-import bg.zahov.app.ui.workout.add.ExerciseSetAdapterSetWrapper
-import bg.zahov.fitness.app.R
-import com.google.common.hash.Hashing
+import bg.zahov.app.data.model.state.ExerciseData
 import com.google.firebase.Timestamp
-import java.nio.charset.StandardCharsets
 import java.time.Instant
 import java.time.LocalDateTime
+import java.time.ZoneId
 import java.time.ZoneOffset
 import java.time.format.DateTimeFormatter
 import java.util.Date
@@ -87,7 +74,7 @@ fun Measurement.toFirestoreMap(): Map<String, Any?> {
 fun Timestamp.toLocalDateTime(): LocalDateTime {
     return LocalDateTime.ofInstant(
         Instant.ofEpochSecond(this.seconds, this.nanoseconds.toLong()),
-        ZoneOffset.UTC
+        ZoneId.systemDefault()
     )
 }
 
@@ -97,24 +84,12 @@ fun LocalDateTime.toTimestamp(): Timestamp {
 
 fun String.isEmail() = Regex("^\\S+@\\S+\\.\\S+$").matches(this)
 
-fun View.applyScaleAnimation() {
-    val scaleAnimation = ObjectAnimator.ofPropertyValuesHolder(
-        this,
-        PropertyValuesHolder.ofFloat("scaleX", 1.4f),
-        PropertyValuesHolder.ofFloat("scaleY", 1.4f)
-    )
-    scaleAnimation.duration = 140
-    scaleAnimation.repeatCount = 1
-    scaleAnimation.repeatMode = ObjectAnimator.REVERSE
-
-    scaleAnimation.start()
-}
-
-fun hashString(input: String) =
-    Hashing.sha256().hashString(input, StandardCharsets.UTF_8).toString()
+fun hashString(input: String) = input
+//    Hashing.sha256().hashString(input, StandardCharsets.UTF_8).toString()
 
 fun generateRandomId(): String = UUID.randomUUID().toString().take(16)
 
+@SuppressLint("DefaultLocale")
 fun Long.timeToString(): String = String.format(
     "%02d:%02d:%02d",
     (this / (1000 * 60 * 60)) % 24,
@@ -135,171 +110,15 @@ fun String.parseTimeStringToLong(): Long {
     return ((hours * 60 * 60) + (minutes * 60) + seconds) * 1000
 }
 
-fun Exercise.toExerciseSetAdapterWrapper(units: Units = Units.METRIC): ExerciseSetAdapterExerciseWrapper {
-    return ExerciseSetAdapterExerciseWrapper(
-        noteVisibility = if(note.isNullOrEmpty()) View.GONE else View.VISIBLE,
-        note =  note,
-        name = this.name,
-        backgroundResource = R.color.background,
-        firstInputColumnVisibility = when (this.category) {
-//            Category.RepsOnly, Category.Cardio, Category.Timed  -> View.GONE
-            else -> View.VISIBLE
-        },
-        firstInputColumnResource = when (this.category) {
-//            Category.AssistedWeight -> {
-//                when (units) {
-//                    Units.METRIC -> R.string.kg_minus
-//                    Units.BANANA -> R.string.lbs_minus
-//                }
-//            }
-
-            else -> {
-                when (units) {
-                    Units.METRIC -> R.string.kg_column_text
-                    Units.BANANA -> R.string.lbs_column_text
-                }
-            }
-
-        },
-        secondInputColumnResource = when (this.category) {
-//            Category.Cardio,  Category.Timed  -> R.string.time
-            else -> {
-                R.string.reps_column_text
-            }
-        },
-        bodyPart = this.bodyPart,
-        category = this.category,
-        isTemplate = this.isTemplate
-    )
-}
-
-fun ExerciseSetAdapterExerciseWrapper.toExercise(): Exercise {
-    return Exercise(
+fun Exercise.toExerciseData() =
+    ExerciseData(
         name = this.name,
         bodyPart = this.bodyPart,
-        category = this.category,
-        isTemplate = this.isTemplate,
-        note = this.note,
-        sets = mutableListOf(),
-        bestSet = Sets(SetType.DEFAULT, null, null)
+        category = this.category
     )
-}
-
-fun Sets.toExerciseSetAdapterSetWrapper(
-    number: String,
-    category: Category,
-    previousResults: String = "-/-",
-    resumeSet: Sets? = null
-): ExerciseSetAdapterSetWrapper {
-    return ExerciseSetAdapterSetWrapper(
-        setIndicator = when (this.type) {
-            SetType.WARMUP -> R.string.warmup_set_indicator
-            SetType.DROP_SET -> R.string.drop_set_indicator
-            SetType.DEFAULT -> R.string.default_set_indicator
-            SetType.FAILURE -> R.string.failure_set_indicator
-        },
-//        secondInputFieldVisibility = when (category) {
-////            Category.RepsOnly, Category.Cardio, Category.Timed -> View.GONE
-//            else -> View.VISIBLE
-//        }
-        View.VISIBLE,
-        setNumber = number,
-        set = resumeSet ?: Sets(SetType.DEFAULT, 0.0, 0),
-        backgroundResource = R.color.completed_set,
-        previousResults = previousResults,
-    )
-}
-
-fun Exercise.toExerciseAdapterWrapper(): ExerciseAdapterWrapper {
-    return ExerciseAdapterWrapper(
-        name = this.name,
-        bodyPart = this.bodyPart.key,
-        category = this.category.key,
-        imageResource = when (this.bodyPart) {
-            BodyPart.Core -> R.drawable.ic_abs
-            BodyPart.Arms -> R.drawable.ic_arms
-            BodyPart.Back -> R.drawable.ic_back
-            BodyPart.Chest -> R.drawable.ic_chest
-            BodyPart.Legs -> R.drawable.ic_legs
-            BodyPart.Shoulders -> R.drawable.ic_shoulders
-            else -> R.drawable.ic_olympic
-        },
-        backgroundResource = R.color.background
-    )
-}
-
-fun Exercise.toRealmExercise(): RealmExercise {
-    val realmExercise = RealmExercise()
-    realmExercise.name = this.name
-    realmExercise.bodyPart = this.bodyPart.key
-    realmExercise.category = this.category.key
-    realmExercise.isTemplate = this.isTemplate
-    realmExercise.sets.addAll(this.sets.map { it.toRealmSets() })
-    realmExercise.bestSet = this.bestSet.toRealmSets()
-    realmExercise.note = this.note
-    return realmExercise
-}
-
-fun Sets.toRealmSets(): RealmSets {
-    val realmSets = RealmSets()
-    realmSets.type = this.type.key
-    realmSets.firstMetric = this.firstMetric ?: 0.0
-    realmSets.secondMetric = this.secondMetric ?: 0
-    return realmSets
-}
-
-fun RealmExercise.toExercise(): Exercise? {
-    return if (this.name != "default" && BodyPart.fromKey(this.bodyPart) != null && Category.fromKey(
-            this.category
-        ) != null
-    ) {
-        Exercise(
-            name = this.name,
-            bodyPart = BodyPart.fromKey(this.bodyPart)!!,
-            category = Category.fromKey(this.category)!!,
-            isTemplate = this.isTemplate,
-            sets = this.sets.mapNotNull { it.toSets() }.toMutableList(),
-            note = this.note
-        )
-    } else {
-        null
-    }
-}
-
-fun RealmSets.toSets(): Sets? {
-    return if (SetType.fromKey(this.type) != null) {
-        Sets(
-            type = SetType.fromKey(this.type)!!,
-            firstMetric = this.firstMetric,
-            secondMetric = this.secondMetric
-        )
-    } else {
-        null
-    }
-}
 
 fun LocalDateTime.toFormattedString(): String =
     this.format(DateTimeFormatter.ofPattern("HH:mm, d MMMM", Locale.ENGLISH))
-
-fun getOneRepEstimate(weight: Double, reps: Int): String =
-    (weight * (1 + (0.0333 * reps))).toInt().toString()
-
-fun Exercise.getOneRepMaxes(): List<String> = this.sets.map {
-    when (this.category) {
-//        Category.RepsOnly, Category.Cardio, Category.Timed -> " "
-        else -> {
-            getOneRepEstimate(it.firstMetric ?: 1.0, it.secondMetric ?: 1)
-        }
-    }
-}
-
-fun LocalDateTime.toRealmString(): String {
-    return this.format(DateTimeFormatter.ofPattern(RealmTimePattern.realmTimePattern))
-}
-
-fun String.toLocalDateTimeRlm(): LocalDateTime {
-    return LocalDateTime.parse(this, DateTimeFormatter.ofPattern(RealmTimePattern.realmTimePattern))
-}
 
 fun String.filterIntegerInput(): Int {
     if (this.startsWith('0') && this.length > 1) {

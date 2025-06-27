@@ -1,52 +1,54 @@
 package bg.zahov.app.data.remote
 
-import android.util.Log
 import bg.zahov.app.data.exception.AuthenticationException
 import bg.zahov.app.data.exception.CriticalDataNullException
-import bg.zahov.app.data.exception.DeleteRealmException
-import bg.zahov.app.data.local.RealmManager
 import com.google.android.gms.tasks.Task
 import com.google.android.gms.tasks.Tasks
+import com.google.firebase.auth.AuthResult
 import com.google.firebase.auth.EmailAuthProvider
 import com.google.firebase.auth.FirebaseAuth
 import com.google.firebase.auth.FirebaseAuthInvalidUserException
 import com.google.firebase.auth.FirebaseAuthRecentLoginRequiredException
 import kotlinx.coroutines.Dispatchers
+import kotlinx.coroutines.channels.awaitClose
+import kotlinx.coroutines.flow.Flow
+import kotlinx.coroutines.flow.callbackFlow
+import kotlinx.coroutines.flow.distinctUntilChanged
+import kotlinx.coroutines.tasks.await
 import kotlinx.coroutines.withContext
-import java.lang.IllegalStateException
+import kotlinx.coroutines.withTimeout
+import javax.inject.Inject
 
-class FirebaseAuthentication {
-    companion object {
-        @Volatile
-        private var instance: FirebaseAuthentication? = null
-        fun getInstance() =
-            instance ?: synchronized(this) {
-                instance ?: FirebaseAuthentication().also { instance = it }
-            }
+open class FirebaseAuthentication @Inject constructor(
+    private val auth: FirebaseAuth,
+    private val firestore: FirestoreManager,
+) {
+
+    /**
+     * Registers a new user with the given email and password.
+     * @param email User's email.
+     * @param password User's password.
+     * @return [AuthResult] of the sign-up process.
+     */
+     open suspend fun signup(email: String, password: String): AuthResult = withTimeout(5000) {
+        auth.createUserWithEmailAndPassword(email, password).await()
     }
 
-    private val auth = FirebaseAuth.getInstance()
-    private val firestore = FirestoreManager.getInstance()
-    private val realm = RealmManager.getInstance()
+    /**
+     * Authenticates a user with the given email and password.
+     * @param email User's email.
+     * @param password User's password.
+     * @return [AuthResult] of the login process.
+     */
+     open suspend fun login(email: String, password: String): AuthResult = withTimeout(5000) {
+        auth.signInWithEmailAndPassword(email, password).await()
+    }
 
-    suspend fun signup(email: String, password: String) =
-        withContext(Dispatchers.IO) { auth.createUserWithEmailAndPassword(email, password) }
-
-    suspend fun login(email: String, password: String) =
-        withContext(Dispatchers.IO) { auth.signInWithEmailAndPassword(email, password) }
-
-    suspend fun logout() {
-        resetResources()
+     open fun logout() {
         auth.signOut()
     }
 
-    suspend fun deleteAccount() {
-        try {
-            resetResources()
-        } catch (e: IllegalStateException) {
-            throw DeleteRealmException(e.message)
-        }
-
+     open fun deleteAccount() {
         try {
             auth.currentUser?.delete()
         } catch (e: FirebaseAuthInvalidUserException) {
@@ -56,49 +58,50 @@ class FirebaseAuthentication {
         }
     }
 
-    private suspend fun resetResources() {
-        realm.deleteRealm()
-    }
-
-    suspend fun passwordResetForLoggedUser(): Task<Void> = withContext(Dispatchers.IO) {
+     open suspend fun passwordResetForLoggedUser(): Task<Void> = withContext(Dispatchers.IO) {
         auth.uid?.let { auth.sendPasswordResetEmail(it) } ?: Tasks.forResult(null)
     }
 
-    suspend fun passwordResetByEmail(email: String) = withContext(Dispatchers.IO) {
+     open suspend fun passwordResetByEmail(email: String) = withContext(Dispatchers.IO) {
         auth.sendPasswordResetEmail(email)
     }
 
-    fun isAuthenticated(): Boolean {
-        return auth.currentUser != null
-    }
+     open fun getAuthStateFlow(): Flow<Boolean> = callbackFlow {
+        trySend(auth.currentUser != null)
 
-    suspend fun init() {
+        val authStateListener = FirebaseAuth.AuthStateListener { firebaseAuth ->
+            trySend(firebaseAuth.currentUser != null)
+        }
+        auth.addAuthStateListener(authStateListener)
+
+        awaitClose {
+            auth.removeAuthStateListener(authStateListener)
+        }
+    }.distinctUntilChanged()
+
+     open fun initFirestoreUser() {
         auth.currentUser?.uid?.let {
             firestore.initUser(it)
         }
-        if (realm.doesRealmExist()) {
-            realm.addSettings()
-        } else {
-            realm.createRealm()
-        }
     }
 
-    suspend fun create(username: String, userId: String) {
+     open suspend fun create(username: String, userId: String) {
         firestore.createFirestore(username, userId)
-        realm.createRealm()
     }
 
-    suspend fun updatePassword(newPassword: String): Task<Void> = withContext(Dispatchers.IO) {
-        auth.currentUser?.updatePassword(newPassword) ?: Tasks.forResult(null)
-    }
+     open suspend fun updatePassword(newPassword: String): Task<Void> =
+        withContext(Dispatchers.IO) {
+            auth.currentUser?.updatePassword(newPassword) ?: Tasks.forResult(null)
+        }
 
-    suspend fun reauthenticate(password: String): Task<Void> = withContext(Dispatchers.IO) {
-        auth.currentUser?.email?.let {
-            auth.currentUser?.reauthenticate(EmailAuthProvider.getCredential(it, password))
-        } ?: Tasks.forResult(null)
-    }
+     open suspend fun reauthenticate(password: String): Task<Void> =
+        withContext(Dispatchers.IO) {
+            auth.currentUser?.email?.let {
+                auth.currentUser?.reauthenticate(EmailAuthProvider.getCredential(it, password))
+            } ?: Tasks.forResult(null)
+        }
 
-    suspend fun getEmail() = withContext(Dispatchers.IO) {
+     open suspend fun getEmail() = withContext(Dispatchers.IO) {
         auth.currentUser?.email ?: throw CriticalDataNullException("NO EMAIL FOUND")
     }
 }

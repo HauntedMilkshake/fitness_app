@@ -1,106 +1,82 @@
 package bg.zahov.app.ui.exercise.filter
 
-import android.os.Bundle
-import android.view.LayoutInflater
-import android.view.View
-import android.view.ViewGroup
-import androidx.fragment.app.DialogFragment
-import androidx.fragment.app.viewModels
-import androidx.recyclerview.widget.RecyclerView
-import bg.zahov.app.data.model.BodyPart
-import bg.zahov.app.data.model.Category
-import bg.zahov.app.util.SpacingItemDecoration
-import bg.zahov.app.util.applyScaleAnimation
+import androidx.compose.foundation.Image
+import androidx.compose.foundation.clickable
+import androidx.compose.foundation.interaction.MutableInteractionSource
+import androidx.compose.foundation.layout.Column
+import androidx.compose.foundation.layout.Row
+import androidx.compose.foundation.layout.fillMaxWidth
+import androidx.compose.foundation.layout.padding
+import androidx.compose.foundation.layout.size
+import androidx.compose.foundation.shape.RoundedCornerShape
+import androidx.compose.material3.MaterialTheme
+import androidx.compose.material3.Surface
+import androidx.compose.material3.Text
+import androidx.compose.runtime.Composable
+import androidx.compose.runtime.getValue
+import androidx.compose.runtime.remember
+import androidx.compose.ui.Modifier
+import androidx.compose.ui.res.colorResource
+import androidx.compose.ui.res.painterResource
+import androidx.compose.ui.res.stringResource
+import androidx.compose.ui.unit.dp
+import androidx.compose.ui.window.Dialog
+import androidx.hilt.navigation.compose.hiltViewModel
+import androidx.lifecycle.compose.collectAsStateWithLifecycle
+import androidx.lifecycle.viewmodel.compose.viewModel
+import bg.zahov.app.data.model.Filter
 import bg.zahov.fitness.app.R
-import bg.zahov.fitness.app.databinding.DialogFragmentFiltersBinding
-import com.google.android.flexbox.FlexDirection
-import com.google.android.flexbox.FlexboxLayoutManager
-import com.google.android.flexbox.JustifyContent
 
-class FilterDialog : DialogFragment() {
-    private var _binding: DialogFragmentFiltersBinding? = null
-    private val binding
-        get() = requireNotNull(_binding)
+@Composable
+fun FilterDialog(filterViewModel: FilterViewModel = hiltViewModel(), onDismiss: () -> Unit) {
+    val uiState by filterViewModel.filterData.collectAsStateWithLifecycle()
+    val interactionSource = remember { MutableInteractionSource() }
 
-    private val filterViewModel: FilterViewModel by viewModels()
-
-    override fun onCreateView(
-        inflater: LayoutInflater,
-        container: ViewGroup?,
-        savedInstanceState: Bundle?,
-    ): View {
-        _binding = DialogFragmentFiltersBinding.inflate(inflater, container, false)
-        return binding.root
-    }
-
-    override fun onStart() {
-        super.onStart()
-        dialog?.window?.setLayout(
-            ViewGroup.LayoutParams.MATCH_PARENT,
-            ViewGroup.LayoutParams.MATCH_PARENT
-        )
-    }
-
-    override fun onViewCreated(view: View, savedInstanceState: Bundle?) {
-        super.onViewCreated(view, savedInstanceState)
-        binding.apply {
-            back.setOnClickListener {
-                it.applyScaleAnimation()
-                dismiss()
-            }
-            val bodyPartAdapter = configureFilterRecyclerView(
-                bodyPartRecyclerView,
-                enumValues<BodyPart>().map { FilterWrapper(it.name) })
-            filterViewModel.bodyPartFilters.observe(viewLifecycleOwner) {
-                bodyPartAdapter.updateItems(it)
-            }
-
-            val categoryAdapter = configureFilterRecyclerView(
-                categoryRecyclerView,
-                enumValues<Category>().map { FilterWrapper(it.name) })
-            filterViewModel.categoryFilters.observe(viewLifecycleOwner) {
-                categoryAdapter.updateItems(it)
-            }
-        }
-    }
-
-    private fun configureFilterRecyclerView(
-        recyclerView: RecyclerView,
-        items: List<FilterWrapper>,
-    ): FilterAdapter {
-        val filterAdapter = FilterAdapter(View.GONE).apply {
-            itemClickListener = object : FilterAdapter.ItemClickListener<FilterWrapper> {
-                override fun onItemClicked(item: FilterWrapper, clickedView: View) {
-                    filterViewModel.onFilterClicked(item)
+    Dialog(onDismissRequest = onDismiss) {
+        Surface(
+            shape = RoundedCornerShape(16.dp),
+            color = colorResource(R.color.background),
+            modifier = Modifier
+                .padding(16.dp)
+                .fillMaxWidth(),
+        ) {
+            Column(modifier = Modifier.padding(16.dp)) {
+                Row {
+                    Image(
+                        modifier = Modifier
+                            .size(40.dp)
+                            .clickable(
+                                interactionSource = interactionSource,
+                                indication = null
+                            ) { onDismiss() },
+                        painter = painterResource(R.drawable.ic_back_arrow),
+                        contentDescription = stringResource(R.string.dismiss)
+                    )
+                    Text(
+                        text = stringResource(R.string.select_filter),
+                        style = MaterialTheme.typography.headlineLarge,
+                        modifier = Modifier.padding(bottom = 8.dp),
+                        color = colorResource(R.color.white)
+                    )
                 }
-            }
-            updateItems(items)
-        }
 
-        recyclerView.apply {
-            layoutManager = FlexboxLayoutManager(requireContext()).apply {
-                flexDirection = FlexDirection.ROW
-                justifyContent = JustifyContent.FLEX_START
-            }
-            adapter = filterAdapter
-            addItemDecoration(
-                SpacingItemDecoration(
-                    resources.getDimensionPixelSize(R.dimen.item_spacing_right),
-                    resources.getDimensionPixelSize(R.dimen.item_spacing_right),
-                    resources.getDimensionPixelSize(R.dimen.item_spacing_bottom),
-                    resources.getDimensionPixelSize(R.dimen.item_spacing_bottom)
+                Text(
+                    text = stringResource(R.string.body_part),
+                    style = MaterialTheme.typography.headlineMedium,
+                    color = colorResource(R.color.white)
                 )
-            )
+                FilterItem(
+                    list = uiState.list.filter { it.filter is Filter.BodyPartFilter },
+                    onItemSelected = { filterViewModel.onFilterClicked(it) })
+                Text(
+                    text = stringResource(R.string.category),
+                    style = MaterialTheme.typography.headlineMedium,
+                    color = colorResource(R.color.white)
+                )
+                FilterItem(
+                    list = uiState.list.filter { it.filter is Filter.CategoryFilter },
+                    onItemSelected = { filterViewModel.onFilterClicked(it) })
+            }
         }
-        return filterAdapter
-    }
-
-    override fun onDestroyView() {
-        super.onDestroyView()
-        _binding = null
-    }
-
-    companion object {
-        const val TAG = "FilterExercisesSearch"
     }
 }

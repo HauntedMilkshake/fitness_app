@@ -1,35 +1,39 @@
 package bg.zahov.app.data.model
 
-class CategoryKeys {
-    companion object {
-        const val BARBELL = "Barbell"
-        const val DUMBBELL = "Dumbbell"
-        const val MACHINE = "Machine"
-        const val ADDITIONAL_WEIGHT = "AdditionalWeight"
-        const val NONE = "None"
-        const val CABLE = "Cable"
-
-        //reps only, cardio, and timed are soonTM
-//        const val ASSISTED_WEIGHT = "AssistedWeight"
-//        const val REPS_ONLY = "RepsOnly"
-//        const val CARDIO = "Cardio"
-//        const val TIMED = "Timed"
-    }
-}
-
+/**
+ * Enum class representing different categories of exercise equipment or exercise types.
+ *
+ * @property key A string identifier for each category.
+ */
 enum class Category(val key: String) {
-    Barbell(CategoryKeys.BARBELL),
-    Dumbbell(CategoryKeys.DUMBBELL),
-    Machine(CategoryKeys.MACHINE),
-    AdditionalWeight(CategoryKeys.ADDITIONAL_WEIGHT),
-    Cable(CategoryKeys.CABLE),
-    None(CategoryKeys.NONE);
-    //    AssistedWeight(CategoryKeys.ASSISTED_WEIGHT),
-//    RepsOnly(CategoryKeys.REPS_ONLY),
-//    Cardio(CategoryKeys.CARDIO),
-//    Timed(CategoryKeys.TIMED),
 
-    companion object {
-        fun fromKey(key: String) = values().firstOrNull { it.key.equals(key, true) }
-    }
+    /** Barbell category, typically used for exercises involving a barbell. */
+    Barbell("Barbell"),
+
+    /** Dumbbell category, for exercises using dumbbells. */
+    Dumbbell("Dumbbell"),
+
+    /** Machine category, for exercises performed on weight machines. */
+    Machine("Machine"),
+
+    /** AdditionalWeight category, for exercises requiring extra weights beyond typical equipment. */
+    AdditionalWeight("AdditionalWeight"),
+
+    /** Cable category, for exercises using cable machines. */
+    Cable("Cable"),
+
+    /** None category, for exercises that do not require equipment. */
+    None("None"),
+
+    /** AssistedWeight category, for exercises involving assisted weight (e.g., assisted pull-ups). */
+    AssistedWeight("AssistedWeight"),
+
+    /** RepsOnly category, for exercises based solely on repetitions. */
+    RepsOnly("RepsOnly"),
+
+    /** Cardio category, for exercises aimed at cardiovascular endurance. */
+    Cardio("Cardio"),
+
+    /** Timed category, for exercises measured by time duration rather than reps or weight. */
+    Timed("Timed");
 }

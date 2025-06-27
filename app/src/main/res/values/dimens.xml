@@ -10,4 +10,8 @@
     <dimen name="popup_min_height">40dp</dimen>
     <dimen name="item_spacing_bottom">10dp</dimen>
     <dimen name="item_spacing_right">5dp</dimen>
+    <integer name="animation_duration_short">500</integer>
+    <integer name="animation_duration_medium">1000</integer>
+    <integer name="animation_duration_long">2000</integer>
+
 </resources>

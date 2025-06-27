@@ -1,540 +1,878 @@
 package bg.zahov.app.ui.workout
 
-import android.app.Application
 import android.util.Log
-import android.view.View
-import androidx.lifecycle.AndroidViewModel
-import androidx.lifecycle.LiveData
-import androidx.lifecycle.MutableLiveData
+import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
-import bg.zahov.app.data.local.RealmWorkoutState
+import bg.zahov.app.data.interfaces.WorkoutActions
+import bg.zahov.app.data.interfaces.WorkoutProvider
+import bg.zahov.app.data.model.BodyPart
+import bg.zahov.app.data.model.Category
 import bg.zahov.app.data.model.Exercise
-import bg.zahov.app.data.model.RestState
 import bg.zahov.app.data.model.SetType
 import bg.zahov.app.data.model.Sets
-import bg.zahov.app.data.model.Units
 import bg.zahov.app.data.model.Workout
-import bg.zahov.app.getAddExerciseToWorkoutProvider
-import bg.zahov.app.getRestTimerProvider
-import bg.zahov.app.getSettingsProvider
-import bg.zahov.app.getWorkoutProvider
-import bg.zahov.app.getWorkoutStateManager
-import bg.zahov.app.ui.workout.add.ExerciseEntry
-import bg.zahov.app.ui.workout.add.ExerciseSetAdapterSetWrapper
-import bg.zahov.app.ui.workout.add.SetEntry
-import bg.zahov.app.ui.workout.add.WorkoutEntry
-import bg.zahov.app.util.filterIntegerInput
+import bg.zahov.app.data.model.WorkoutState
+import bg.zahov.app.data.provider.AddExerciseToWorkoutProvider
+import bg.zahov.app.data.provider.RestTimerProvider
+import bg.zahov.app.util.generateRandomId
 import bg.zahov.app.util.hashString
-import bg.zahov.app.util.parseTimeStringToLong
-import bg.zahov.app.util.toExerciseSetAdapterSetWrapper
-import bg.zahov.app.util.toExerciseSetAdapterWrapper
-import bg.zahov.app.util.toRealmExercise
-import bg.zahov.app.util.toRealmString
 import bg.zahov.fitness.app.R
-import io.realm.kotlin.ext.toRealmList
+import dagger.hilt.android.lifecycle.HiltViewModel
+import kotlinx.coroutines.Dispatchers
+import kotlinx.coroutines.flow.MutableStateFlow
+import kotlinx.coroutines.flow.StateFlow
+import kotlinx.coroutines.flow.flowOn
+import kotlinx.coroutines.flow.update
 import kotlinx.coroutines.launch
 import java.time.LocalDateTime
+import java.util.Locale
 import java.util.Random
+import javax.inject.Inject
 
-class WorkoutViewModel(application: Application) : AndroidViewModel(application) {
-    private val workoutStateManager by lazy {
-        application.getWorkoutStateManager()
-    }
+/**
+ * Represents the UI state of a workout session.
+ *
+ * @property workoutName The name of the workout.
+ * @property workoutPrefix The time of day prefix for the workout, determined by the current hour
+ * @property exercises A list of workout entries, which can be either exercises or sets.
+ * @property note Additional notes for the workout session.
+ * @property isFinished Indicates whether the workout session is complete.
+ */
+data class WorkoutUiState(
+    val workoutName: String = "",
+    val workoutPrefix: TimeOfDay,
+    val exercises: List<WorkoutEntry> = listOf(),
+    val note: String = "",
+    val isFinished: Boolean = false,
+)
 
-    private val repo by lazy {
-        application.getWorkoutProvider()
-    }
+/**
+ * A sealed class representing a workout entry, which can be either an exercise or a set
+ *
+ * A list of workoutEntry would look something like:
+ * List<WorkoutEntry> { Exercise1, Set1ForExercise1, Set2ForExercise1, Exercise2, ... etc }
+ * where the arrangement of items is important
+ */
+sealed class WorkoutEntry {
 
-    private val addExerciseToWorkoutProvider by lazy {
-        application.getAddExerciseToWorkoutProvider()
-    }
+    /**
+     * A data class representing an exercise in the workout.
+     *
+     * @property id A unique identifier for the exercise entry, default is generated using [generateRandomId].
+     * @property name The name of the exercise.
+     * @property firstInputColumnVisibility Determines whether the first input column for the exercise is visible. Default is true.
+     * As of now it is not used however for future purposes I decided to leave it here
+     * @property note An optional note related to the exercise. Default is an empty string.
+     * @property bodyPart The body part targeted by the exercise.
+     * @property category The category of the exercise (e.g., strength, endurance, etc.).
+     */
+    data class ExerciseEntry(
+        val id: String = generateRandomId(),
+        val name: String,
+        val firstInputColumnVisibility: Boolean = true,
+        val note: String = "",
+        val bodyPart: BodyPart,
+        val category: Category,
+    ) : WorkoutEntry()
 
-    private val restTimerProvider by lazy {
-        application.getRestTimerProvider()
-    }
+    /**
+     * A data class representing a set in the exercise.
+     *
+     * @property id A unique identifier for the set entry, default is generated using [generateRandomId].
+     * @property setType The type of set (e.g., default, warm-up, etc.). Default is [SetType.DEFAULT].
+     * @property firstInputFieldVisibility Determines whether the first input field for the set is visible. Default is true.
+     * @property setNumber The number of the set (e.g., 1, 2, 3...).
+     * @property previousResults The results from the previous set, default is "-//-" indicating no prior results.
+     * @property set The specific set details (e.g., weight, repetitions, etc.).
+     * @property setCompleted Indicates whether the set has been completed. Default is false.
+     */
+    data class SetEntry(
+        val id: String = generateRandomId(),
+        val setType: SetType = SetType.DEFAULT,
+        val firstInputFieldVisibility: Boolean = true,
+        val setNumber: String,
+        val previousResults: String = "-//-",
+        val set: Sets,
+        val setCompleted: Boolean = false,
+    ) : WorkoutEntry()
+}
 
-    private val workoutProvider by lazy {
-        application.getWorkoutProvider()
-    }
+/**
+ * @property exercises a map of the exercises from the current session and their names as keys
+ * @property volume amount of weight lifted during the current session
+ * @property prs amount of personal records made during the current session
+ */
+data class ExerciseSummary(
+    val exercises: LinkedHashMap<String, Exercise>,
+    val volume: Double,
+    val prs: Int,
+)
 
-    private val settingsProvider by lazy {
-        application.getSettingsProvider()
-    }
-    private val _navigate = MutableLiveData<Int?>()
-    val navigate: LiveData<Int?>
-        get() = _navigate
-    private val _exercises = MutableLiveData<List<WorkoutEntry>>()
-    val exercises: LiveData<List<WorkoutEntry>>
-        get() = _exercises
+/**
+ * ViewModel responsible for managing the state and logic of a workout session.
+ *
+ * @property workoutStateManager Manages the state of the workout session.
+ * @property repo Provides workout data and operations related to workouts.
+ * @property addExerciseToWorkoutProvider Handles adding exercises to the current workout session.
+ * @property restTimerProvider Manages timers for rest periods during the workout.
+ */
+@HiltViewModel
+class WorkoutViewModel @Inject constructor(
+    private val workoutStateManager: WorkoutActions,
+    private val repo: WorkoutProvider,
+    private val addExerciseToWorkoutProvider: AddExerciseToWorkoutProvider,
+    private val restTimerProvider: RestTimerProvider,
+) : ViewModel() {
 
-    private val _name = MutableLiveData("New workout")
-    val name: LiveData<String>
-        get() = _name
+    /**
+     * A private mutable state flow that represents the UI state of the workout.
+     */
+    private val _uiState =
+        MutableStateFlow(WorkoutUiState(workoutPrefix = calculateWorkoutPrefix()))
 
-    private val _timer = MutableLiveData<String>()
-    val timer: LiveData<String>
-        get() = _timer
+    /**
+     * A public read-only state flow exposing the current workout UI state to observers.
+     */
+    val uiState: StateFlow<WorkoutUiState> = _uiState
 
-    private val _restTimerState = MutableLiveData<State>(State.Default(false))
-    val restTimer: LiveData<State>
-        get() = _restTimerState
-
-    private val _note = MutableLiveData<String>()
-    val note: LiveData<String>
-        get() = _note
-    private val _notify = MutableLiveData<String?>()
-    val notify: LiveData<String?>
-        get() = _notify
-
+    /**
+     * The index of the exercise to replace in the current workout, if applicable.
+     */
     private var exerciseToReplaceIndex: Int? = null
+
+    /**
+     * A list of template exercises used to lookup previous results
+     */
     private var templateExercises = listOf<Exercise>()
-    private lateinit var units: Units
+
+    /**
+     * Received by arguments. The id of the template workout of which
+     * this workout will be based on
+     */
     private var workoutId: String? = null
+
+    /**
+     * The date and time when the workout session was created.
+     */
     private val workoutDate: LocalDateTime = LocalDateTime.now()
 
+    /**
+     * Time duration of the workout.
+     */
+    private var elapsedTime: Long = 0L
+
+    /**
+     * Initializes the `WorkoutViewModel` by setting up multiple asynchronous data flows to manage the UI state
+     */
+
     init {
+        checkForTemplateWorkout()
+        observeTimer()
+        addSelectedExercises()
+        getTemplateExercises()
+        observeShouldFinish()
+    }
+
+    /**
+     * Observes the workout state from the [workoutStateManager] and performs actions based on the current state.
+     *
+     * - When the state is [WorkoutState.INACTIVE], the workout is finished by calling [finishWorkout].
+     *
+     */
+    private fun observeShouldFinish() {
         viewModelScope.launch {
-            launch {
-                workoutStateManager.shouldSave.collect {
-                    if (it) {
-                        saveWorkoutState()
-                    }
+            repo.shouldFinish.collect { shouldFinish ->
+                if (shouldFinish) {
+                    finishWorkout()
                 }
             }
-            launch {
-                settingsProvider.getSettings().collect { objectChange ->
-                    objectChange.obj?.units?.let {
-                        units = Units.valueOf(it)
-                    }
-                }
-            }
-            launch {
-                workoutStateManager.template.collect {
-                    it?.let { workout ->
-                        val exercisesToAdd =
-                            createWorkoutEntryArray(workout.exercises, workoutStateManager.resuming)
-                        val exercises = _exercises.value.orEmpty().toMutableList()
-                        if (exercisesToAdd.isNotEmpty()) {
-                            exercises.addAll(exercisesToAdd)
-                            _exercises.postValue(exercises)
-                        }
-                        _name.postValue(workout.name)
-                        _note.postValue(workout.note ?: "")
-                        workoutId = workout.id
-                    }
-                }
-            }
-            launch {
-                workoutStateManager.timer.collect {
-                    _timer.postValue(
-                        String.format(
-                            "%02d:%02d:%02d",
-                            (it / (1000 * 60 * 60)) % 24,
-                            (it / (1000 * 60)) % 60,
-                            (it / 1000) % 60
+        }
+    }
+
+    /**
+     * Determines the current time of day and returns the corresponding [TimeOfDay] value.
+     *
+     * The function evaluates the current hour using [LocalDateTime.now] and maps it
+     * to a specific time of day:
+     * - 4 AM to 11 AM -> [TimeOfDay.MORNING]
+     * - 12 PM to 4 PM -> [TimeOfDay.NOON]
+     * - 5 PM to 8 PM -> [TimeOfDay.AFTERNOON]
+     * - Any other hour -> [TimeOfDay.NIGHT]
+     *
+     * @return The appropriate [TimeOfDay] based on the current hour.
+     */
+    private fun calculateWorkoutPrefix(): TimeOfDay {
+        return when (LocalDateTime.now().hour) {
+            in 4..11 -> TimeOfDay.MORNING
+            in 12..16 -> TimeOfDay.NOON
+            in 17..20 -> TimeOfDay.AFTERNOON
+            else -> TimeOfDay.NIGHT
+        }
+    }
+
+    /**
+     * Checks for a template workout and updates the UI state with its details if available.
+     */
+    private fun checkForTemplateWorkout() {
+        viewModelScope.launch {
+            workoutStateManager.template.collect {
+                it?.let { workout ->
+                    _uiState.update { old ->
+                        val exercises = _uiState.value.exercises.toMutableList()
+                        exercises.addAll(
+                            workout.exercises.toWorkoutEntryList(
+                                templateExercises
+                            )
                         )
-                    )
-                }
-            }
-            launch {
-                addExerciseToWorkoutProvider.selectedExercises.collect {
-                    if (it.isNotEmpty()) {
-                        val exercisesToUpdate = _exercises.value.orEmpty().toMutableList()
-                        exercisesToUpdate.addAll(createWorkoutEntryArray(it, false))
-                        _exercises.postValue(exercisesToUpdate)
-                        addExerciseToWorkoutProvider.resetSelectedExercises()
+
+                        old.copy(
+                            workoutName = workout.name,
+                            exercises = exercises,
+                            note = workout.note ?: ""
+                        )
                     }
-                }
-            }
-            launch {
-                restTimerProvider.restTimer.collect {
-                    it.elapsedTime?.let { time ->
-                        _restTimerState.postValue(State.Rest(time))
-                    }
-                }
-            }
-            launch {
-                restTimerProvider.restState.collect {
-                    _restTimerState.postValue(
-                        when (it) {
-                            RestState.Active -> State.Default(true)
-                            else -> State.Default(false)
-                        }
-                    )
-                }
-            }
-            launch {
-                workoutProvider.getTemplateExercises().collect {
-                    templateExercises = it
                 }
             }
         }
     }
 
-    private fun createWorkoutEntryArray(
-        exercises: List<Exercise>,
-        resuming: Boolean,
-    ): List<WorkoutEntry> {
-        val workoutEntries = mutableListOf<WorkoutEntry>()
-        exercises.forEach { exercise ->
-            workoutEntries.add(ExerciseEntry(exercise.toExerciseSetAdapterWrapper(if (::units.isInitialized) units else Units.METRIC)))
-            val previousExercise = templateExercises.find { it.name == exercise.name }
-            exercise.sets.forEachIndexed { index, set ->
-                val setCopy = Sets(set.type, set.firstMetric, set.secondMetric)
-                val setEntry = set.toExerciseSetAdapterSetWrapper(
-                    (index + 1).toString(),
-                    exercise.category,
-                    previousResults = if (previousExercise != null && index < previousExercise.sets.size) "${previousExercise.sets[index].secondMetric} x ${previousExercise.sets[index].firstMetric}" else "-/-",
-                    resumeSet = if (resuming) setCopy else Sets(SetType.DEFAULT, 0.0, 0)
-                )
-                workoutEntries.add(SetEntry(setEntry))
+    /**
+     * Observes the workout timer from `workoutStateManager` and updates the UI state with the current timer value.
+     *
+     * The timer value is converted to rest time format before updating the state.
+     */
+    private fun observeTimer() {
+        viewModelScope.launch {
+            workoutStateManager.timer.collect {
+                elapsedTime = it
             }
         }
-        return workoutEntries
     }
 
+    /**
+     * Adds exercises selected from `addExerciseToWorkoutProvider` to the current workout's exercises.
+     *
+     * This function observes the selected exercises flow, appends them to the UI state's exercise list,
+     * and resets the selected exercises in the provider.
+     */
+    private fun addSelectedExercises() {
+        viewModelScope.launch {
+            addExerciseToWorkoutProvider.selectedExercises.collect {
+                _uiState.update { old ->
+                    val exercisesToUpdate = _uiState.value.exercises.toMutableList()
+                    exercisesToUpdate.addAll(it.toWorkoutEntryList(templateExercises))
+                    old.copy(exercises = exercisesToUpdate)
+                }
+                addExerciseToWorkoutProvider.resetSelectedExercises()
+            }
+        }
+    }
 
-    fun onExerciseReplace(itemPosition: Int) {
+    /**
+     * Fetches template exercises from the repository and updates the `templateExercises` property.
+     */
+    private fun getTemplateExercises() {
+        viewModelScope.launch {
+            repo.getTemplateExercises().collect {
+                templateExercises = it
+            }
+        }
+    }
+
+    /**
+     * A way to know which exercise to replace once we come back
+     * with a selected exercise to replace
+     *
+     * @param itemPosition The index of the exercise to replace
+     */
+    fun replaceExercise(itemPosition: Int) {
         exerciseToReplaceIndex = itemPosition
     }
 
-    fun toggleExerciseNoteField(position: Int) {
-        val captured = _exercises.value.orEmpty()
-        (captured[position] as? ExerciseEntry)?.exerciseEntry?.noteVisibility =
-            if ((captured[position] as? ExerciseEntry)?.exerciseEntry?.noteVisibility == View.GONE) View.VISIBLE else View.GONE
-        _exercises.value = captured
-    }
-
+    /**
+     * Removes the exercise for the current position
+     * then iterates to remove its sets if there are any
+     *
+     * @param position The index of the exercise to remove
+     */
     fun removeExercise(position: Int) {
-        val captured = _exercises.value.orEmpty().toMutableList()
-        captured.removeAt(position)
-        while (position < captured.size && captured[position] is SetEntry) {
-            captured.removeAt(position)
-        }
-        _exercises.value = captured
-    }
+        _uiState.update { old ->
+            val newExercises = old.exercises.toMutableList()
 
-    fun addSet(position: Int) {
-        var edgeCaseFlag = false
-        val exercises = _exercises.value.orEmpty().toMutableList()
-        val templateExercise =
-            templateExercises.find { it.name == (exercises[position] as? ExerciseEntry)?.exerciseEntry?.name }
-        if (exercises.size == 1 || position == exercises.size - 1) {
-            insertSetAtIndex(exercises, position + 1, position, templateExercise)
-            edgeCaseFlag = true
-        }
+            newExercises.removeAt(position)
 
-        if (!edgeCaseFlag) {
-            var index = position + 1
-            while (index < exercises.size && exercises[index] !is ExerciseEntry) {
-                index++
+            while (position < newExercises.size && newExercises[position] is WorkoutEntry.SetEntry) {
+                newExercises.removeAt(position)
             }
 
-            insertSetAtIndex(exercises, index, position, templateExercise)
+            old.copy(exercises = newExercises)
         }
-
-        _exercises.value = exercises
     }
 
+    /**
+     * Adds a new set to the workout at the specified position.
+     *
+     * @param position The index of the exercise in the workout list to which the set should be added.
+     *
+     * This function determines the correct position to insert the new set based on the workout structure
+     * and ensures that the set is associated with the appropriate exercise. It handles edge cases, such as when
+     * the exercise is the last entry in the list or when there is only one exercise in the workout. The new set
+     * is configured using data from the corresponding template exercise if available.
+     */
+    fun addSet(position: Int) {
+        _uiState.update { old ->
+
+            var isFirstSet = false
+            val exercises = old.exercises.toMutableList()
+            val templateExercise =
+                templateExercises.find { it.name == (exercises[position] as? WorkoutEntry.ExerciseEntry)?.name }
+
+            if (exercises.size == 1 || position == exercises.size - 1) {
+                insertSetAtIndex(
+                    exercises,
+                    position + 1,
+                    position,
+                    templateExercise?.category ?: Category.Barbell,
+                    templateExercise
+                )
+                isFirstSet = true
+            }
+
+            if (!isFirstSet) {
+                var index = position + 1
+
+                while (index < exercises.size && exercises[index] !is WorkoutEntry.ExerciseEntry) {
+                    index++
+                }
+
+                insertSetAtIndex(
+                    exercises,
+                    index,
+                    position,
+                    templateExercise?.category ?: Category.Barbell,
+                    templateExercise
+                )
+            }
+
+            old.copy(exercises = exercises)
+        }
+    }
+
+    /**
+     * Inserts a set entry into the list of workout exercises at a specific index.
+     *
+     * @param exercises The mutable list of workout entries (exercises and sets) to be updated.
+     * @param insertIndex The index at which the new set entry should be inserted.
+     * @param exercisePosition The position of the exercise to which the new set is associated.
+     * @param exerciseCategory The category of the exercise (e.g., Barbell, Dumbbell).
+     * @param templateExercise The template exercise used to prepopulate the set details, if available.
+     *
+     * This function creates a new set entry. If a corresponding template exercise exists and contains predefined sets,
+     * it uses the template data to populate the set. Otherwise, it creates a default set entry.
+     */
     private fun insertSetAtIndex(
         exercises: MutableList<WorkoutEntry>,
         insertIndex: Int,
         exercisePosition: Int,
+        exerciseCategory: Category,
         templateExercise: Exercise?,
     ) {
         val setNumber = insertIndex - exercisePosition
+
         val setEntry = if (templateExercise != null && setNumber < templateExercise.sets.size) {
-            SetEntry(
-                templateExercise.sets[setNumber].toExerciseSetAdapterSetWrapper(
-                    setNumber.toString(),
-                    templateExercise.category,
-                    "${templateExercise.sets[setNumber].secondMetric} x ${templateExercise.sets[setNumber].secondMetric}"
-                )
+            templateExercise.sets[setNumber].toSetEntry(
+                exerciseCategory = templateExercise.category,
+                setNumber = setNumber - 1,
+                previousResults = "${templateExercise.sets[setNumber].secondMetric} x ${templateExercise.sets[setNumber].secondMetric}"
             )
         } else {
-            SetEntry(
-                ExerciseSetAdapterSetWrapper(
-                    secondInputFieldVisibility = when (templateExercise?.category) {
-//                        Category.RepsOnly, Category.Cardio, Category.Timed -> View.GONE
-                        else -> View.VISIBLE
-                    },
-                    setNumber = if (setNumber == 0) 1.toString() else setNumber.toString(),
-                    previousResults = "-/-",
-                    set = Sets(SetType.DEFAULT, 0.0, 0)
-                )
+            WorkoutEntry.SetEntry(
+                firstInputFieldVisibility = exerciseCategory != Category.None,
+                setNumber = setNumber.toString(),
+                set = Sets(type = SetType.DEFAULT, firstMetric = 0.0, secondMetric = 0),
+                previousResults = "-/-"
             )
         }
+
         exercises.add(insertIndex, setEntry)
     }
 
-    fun removeSet(position: Int) {
-        val exercises = _exercises.value.orEmpty().toMutableList()
-        exercises.removeAt(position)
-        var index = position
-        while (index < exercises.size && exercises[index] is SetEntry) {
-            (exercises[index] as SetEntry).setEntry.setNumber =
-                ((exercises[index] as SetEntry).setEntry.setNumber.toInt() - 1).toString()
-            index++
+    /**
+     * Changes the note for the workout
+     *
+     * @param note The new note for the workout
+     */
+    fun changeNote(note: String) {
+        _uiState.update { old ->
+            old.copy(note = note)
         }
-        _exercises.value = exercises
     }
 
-    fun onInputFieldChanged(
+    /**
+     * Removes the set in the specified position
+     * and renumbers sets above/below it if needed
+     *
+     * @param position The index of the set to remove
+     */
+    fun removeSet(position: Int) {
+        _uiState.update { old ->
+            val exercises = old.exercises.toMutableList()
+            exercises.removeAt(position)
+            var index = position
+            while (index < exercises.size && exercises[index] is WorkoutEntry.SetEntry) {
+                (exercises[index] as? WorkoutEntry.SetEntry)?.let { setEntry ->
+                    exercises[index] = setEntry.copy(
+                        setNumber = (setEntry.setNumber.toInt() - 1).toString()
+                    )
+                }
+                index++
+            }
+            old.copy(exercises = exercises)
+        }
+    }
+
+    /**
+     * Updates the weight of the appropriate set
+     *
+     * @param position The index of the set for whom we want to change the value
+     * @param metric The value we want to update
+     */
+    fun onWeightChange(
         position: Int,
         metric: String,
-        viewId: Int,
     ) {
-
-        if (position >= 0 && position < (_exercises.value?.size ?: 0)) {
-            when (viewId) {
-                R.id.first_input_field_text -> {
-                    (_exercises.value?.get(position) as? SetEntry)?.setEntry?.set?.let { currentSet ->
-                        val newMetric = "%.2f".format(metric.toDoubleOrNull() ?: 0.0).toDouble()
-                        if (currentSet.firstMetric != newMetric) {
-                            currentSet.firstMetric = newMetric
-                        }
-                    }
-                }
-
-                R.id.second_input_field_text -> {
-                    (_exercises.value?.get(position) as? SetEntry)?.setEntry?.set?.let { currentSet ->
-                        val newMetric = metric.filterIntegerInput()
-                        if (currentSet.secondMetric != newMetric) {
-                            currentSet.secondMetric = newMetric
-                        }
-                    }
+        _uiState.update { old ->
+            val newEntries = old.exercises.toMutableList()
+            if (position >= 0 && position < (old.exercises.size)) {
+                (newEntries[position] as? WorkoutEntry.SetEntry)?.let { setEntry ->
+                    val newSet = Sets(
+                        type = setEntry.set.type,
+                        firstMetric = metric.filterDoubleInput(),
+                        secondMetric = setEntry.set.secondMetric
+                    )
+                    newEntries[position] = setEntry.copy(set = newSet)
                 }
             }
+            old.copy(exercises = newEntries)
         }
 
     }
 
+    /**
+     * Updates the weight of the appropriate set
+     *
+     * @param position The index of the set for whom we want to change the value
+     * @param metric The value we want to update
+     */
+    fun onRepsChange(
+        position: Int,
+        metric: String,
+    ) {
+        _uiState.update { old ->
+            val newEntries = old.exercises.toMutableList()
+            if (position >= 0 && position < (old.exercises.size)) {
+                (newEntries[position] as? WorkoutEntry.SetEntry)?.let { setEntry ->
+                    val newSet = Sets(
+                        type = setEntry.set.type,
+                        firstMetric = setEntry.set.firstMetric,
+                        secondMetric = metric.filterIntegerInput()
+                    )
+                    newEntries[position] = setEntry.copy(set = newSet)
+                }
+            }
+            old.copy(exercises = newEntries)
+        }
 
+    }
+
+    /**
+     * changes the set type for the specified set
+     *
+     * @param itemPosition Index for the set
+     * @param setType The new [SetType]
+     */
     fun onSetTypeChanged(itemPosition: Int, setType: SetType) {
-        val captured = _exercises.value.orEmpty()
-        (captured[itemPosition] as? SetEntry)?.setEntry?.apply {
-            setIndicator = when (setType) {
-                SetType.WARMUP -> R.string.warmup_set_indicator
-                SetType.DROP_SET -> R.string.drop_set_indicator
-                SetType.DEFAULT -> R.string.default_set_indicator
-                SetType.FAILURE -> R.string.failure_set_indicator
+        _uiState.update { old ->
+            val newEntries = old.exercises.toMutableList()
+
+            (newEntries[itemPosition] as? WorkoutEntry.SetEntry)?.let { setEntry ->
+                newEntries[itemPosition] =
+                    setEntry.copy(setType = if (setType == setEntry.setType) SetType.DEFAULT else setType)
             }
-            Log.d("set type", setType.toString())
-            set.type = setType
+
+            old.copy(exercises = newEntries)
         }
-        _exercises.value = captured
     }
 
+    /**
+     * minimizes workout by removing the fragment
+     * and toggling the visibility of a view defined in the activity xml
+     */
     fun minimize() {
         viewModelScope.launch {
             workoutStateManager.minimizeWorkout()
         }
     }
 
+    /**
+     * simply cancels the workout
+     */
     fun cancel() {
         viewModelScope.launch {
-            _name.postValue("")
-            _exercises.postValue(listOf())
             restTimerProvider.stopRest()
-            workoutProvider.clearWorkoutState()
+            repo.clearWorkoutState()
+            clearState()
             workoutStateManager.cancel()
         }
     }
 
+    /**
+     * finishes the workout by ensuring we have no empty data
+     * adds it to the database
+     */
     fun finishWorkout() {
-        if (_exercises.value.isNullOrEmpty()) {
-            _restTimerState.value = State.Error("Cannot finish a workout without any exercises!")
-            return
-        }
-        if (_exercises.value.orEmpty().all { entry -> entry is ExerciseEntry }) {
-            _restTimerState.value = State.Error("Cannot finish a workout without any sets!")
-            return
-        }
-        if (_exercises.value.orEmpty().filterIsInstance<SetEntry>().all {
-                (it.setEntry.set.secondMetric ?: 0) == 0 && (it.setEntry.set.firstMetric
-                    ?: 0.0) == 0.0
-            }) {
-            _restTimerState.value = State.Error("Cannot finish a workout with empty sets!")
-            return
-        }
-        viewModelScope.launch {
-            val (exercises, prs, volume) = getExerciseArrayAndPRs(_exercises.value.orEmpty())
-            workoutId?.let {
-                repo.updateTemplateWorkout(it, workoutDate, exercises)
-            }
-            repo.addWorkoutToHistory(
-                Workout(
-                    id = workoutId ?: hashString("${Random().nextInt(Int.MAX_VALUE)}"),
-                    name = "${getTimePeriodAsString()} ${_name.value}",
-                    date = workoutDate,
-                    exercises = exercises,
-                    note = _note.value,
-                    duration = _timer.value?.parseTimeStringToLong() ?: 0L,
-                    isTemplate = false,
-                    personalRecords = prs,
-                    volume = volume
+        if (canFinish()) {
+            viewModelScope.launch(Dispatchers.IO) {
+                val exerciseSummary = getExerciseArrayAndPRs(_uiState.value.exercises)
+                val exercises = exerciseSummary.exercises.values.toList()
+                val prs = exerciseSummary.prs
+                val volume = exerciseSummary.volume
+
+                workoutId?.let {
+                    repo.updateTemplateWorkout(it, workoutDate, exercises)
+                }
+                repo.addWorkoutToHistory(
+                    Workout(
+                        id = workoutId ?: hashString("${Random().nextInt(Int.MAX_VALUE)}"),
+                        name = _uiState.value.workoutName,
+                        date = workoutDate,
+                        exercises = exercises,
+                        note = _uiState.value.note,
+                        duration = elapsedTime,
+                        isTemplate = false,
+                        personalRecords = prs,
+                        volume = volume
+                    )
                 )
-            )
-            _navigate.postValue(R.id.workout_to_finish_workout)
-            addExerciseToWorkoutProvider.resetSelectedExercises()
-            workoutStateManager.finishWorkout()
-            workoutProvider.clearWorkoutState()
-            _name.postValue("")
+
+                addExerciseToWorkoutProvider.resetSelectedExercises()
+                workoutStateManager.finishWorkout()
+                repo.clearWorkoutState()
+                clearState()
+                _uiState.update { old ->
+                    old.copy(isFinished = true)
+                }
+            }
         }
     }
 
-    private suspend fun getExerciseArrayAndPRs(
+    /**
+     * under some rules decides if the workout is eligible to be finished
+     */
+    private fun canFinish(): Boolean {
+        if (_uiState.value.exercises.isEmpty()) {
+            /* TODO( add snackbar with R.string.no_exercises ) */
+            return false
+        }
+        if (_uiState.value.exercises.all { entry -> entry is WorkoutEntry.ExerciseEntry }) {
+            /* TODO( add snackbar with R.string.no_sets ) */
+            return false
+        }
+        if (_uiState.value.exercises.filterIsInstance<WorkoutEntry.SetEntry>().all {
+                (it.set.secondMetric ?: 0) == 0 || (it.set.firstMetric
+                    ?: 0.0) == 0.0
+            }) {
+            /* TODO( add snackbar with R.string.empty_sets ) */
+            return false
+        }
+        return true
+    }
+
+
+    /**
+     * Processes a list of `WorkoutEntry` objects to organize exercises and calculate the total workout volume.
+     *
+     * This function separates the workout data into exercises and their respective sets, while maintaining the order
+     * of insertion. It also calculates the total volume of the workout based on the sets' weight and repetitions.
+     *
+     * @param entries A list of `WorkoutEntry` objects representing exercises and sets in the workout.
+     * @return [ExerciseSummary]
+     *
+     * ## Details:
+     * - `WorkoutEntry.ExerciseEntry`: Initializes a new `Exercise` or retrieves an existing one by name. The exercise is stored in the map.
+     * - `WorkoutEntry.SetEntry`: Adds the set to the most recently added exercise and updates the total volume.
+     *   - If the set has valid weight and reps, it contributes to the workout volume (`volume += weight * reps`).
+     *   - For `SetType.DEFAULT` or `SetType.FAILURE`, the best set is updated if the weight exceeds the current best.
+     *
+     * ### Constraints:
+     * - The function assumes that sets (`WorkoutEntry.SetEntry`) are always added after an exercise (`WorkoutEntry.ExerciseEntry`).
+     * - If the same exercise appears multiple times, its sets are grouped under the same `Exercise` object.
+     *
+     */
+    private fun getExercisesFiltered(
         entries: List<WorkoutEntry>,
-        removeEmpty: Boolean = true,
-    ): Triple<List<Exercise>, Int, Double> {
-        val exercises = linkedMapOf<String, Exercise>()
-        var prs = 0
+    ): ExerciseSummary {
+        val exercises =
+            LinkedHashMap<String, Exercise>()
         var volume = 0.0
-        entries.forEach { entry ->
+        entries.map { entry ->
             when (entry) {
-                is ExerciseEntry -> {
-                    exercises.getOrPut(entry.exerciseEntry.name) {
+                is WorkoutEntry.ExerciseEntry -> {
+                    // Adds a new exercise or retrieves the existing one by name.
+                    exercises.getOrPut(entry.name) {
                         Exercise(
-                            name = entry.exerciseEntry.name,
-                            bodyPart = entry.exerciseEntry.bodyPart,
-                            category = entry.exerciseEntry.category,
+                            name = entry.name,
+                            bodyPart = entry.bodyPart,
+                            category = entry.category,
                             isTemplate = false,
-                            note = entry.exerciseEntry.note
+                            note = entry.note
                         )
                     }
                 }
 
-                is SetEntry -> {
-                    exercises.entries.last().value.apply {
-                        val reps = entry.setEntry.set.secondMetric
-                        val weight = entry.setEntry.set.firstMetric
-                        if (weight != null && weight != 0.0 && reps != null && reps != 0) {
-                            sets.add(entry.setEntry.set)
+                is WorkoutEntry.SetEntry -> {
+                    // Adds the set to the most recent exercise and calculates its contribution to volume.
+                    //when adding them in a list we eliminate the problem where if the user has performed an exercise twice
+                    val reps = entry.set.secondMetric
+                    val weight = entry.set.firstMetric
+                    if (weight != null && weight != 0.0 && reps != null && reps != 0) {
+
+                        exercises.entries.last().value.apply {
+                            sets.add(entry.set)
 
                             volume += weight * reps
-                            if (entry.setEntry.set.type == SetType.DEFAULT || entry.setEntry.set.type == SetType.FAILURE) {
-                                when (category) {
-                                    //reps only, cardio, and timed are soonTM
-//                                    Category.RepsOnly -> {
-//                                        if ((entry.setEntry.set.secondMetric
-//                                                ?: 0) > (bestSet.secondMetric ?: 0)
-//                                        ) {
-//                                            bestSet = entry.setEntry.set
-//                                        }
-//                                    }
-//
-//                                    Category.AssistedWeight -> {
-//                                        if ((bestSet.firstMetric
-//                                                ?: 0.0) < (entry.setEntry.set.firstMetric ?: 0.0)
-//                                        ) {
-//                                            bestSet = entry.setEntry.set
-//                                        }
-//                                    }
-                                    else -> if (weight > (bestSet.firstMetric ?: 0.0)) bestSet =
-                                        entry.setEntry.set
-                                }
+                            // Updates the best set if the current set is better for specific set types.
+                            if (entry.set.type == SetType.DEFAULT || entry.set.type == SetType.FAILURE) {
+                                if (weight > (bestSet.firstMetric ?: 0.0)) bestSet = entry.set
                             }
                         }
+                    } else {
+
                     }
                 }
             }
         }
-        if (removeEmpty) exercises.entries.removeIf { it.value.sets.isEmpty() || it.value.sets.any { set -> set.firstMetric == null || set.firstMetric == 0.0 || set.secondMetric == null || set.secondMetric == 0 } }
+        return ExerciseSummary(exercises = exercises, volume = volume, prs = 0)
+    }
 
-        val temp = exercises.values.map { it.copy() }.toMutableList()
-        if (removeEmpty) {
-            //no need to update exercises when saving state
-            temp.forEach { currExercise ->
-                templateExercises.find { it.name == currExercise.name }?.let { template ->
-                    when (currExercise.category) {
-                        //unfortunately due to time constraints special sets were dropped as an idea
-//                    Category.RepsOnly -> {
-//                        if ((currExercise.bestSet.secondMetric
-//                                ?: 0) <= (template.bestSet.secondMetric ?: 0)
-//                        ) {
-//                            currExercise.bestSet = template.bestSet
-//                        } else {
-//                            prs++
-//                        }
-//                    }
-                        else -> {
-                            val currentBestSetResult = (currExercise.bestSet.firstMetric
-                                ?: 0.0) * (currExercise.bestSet.secondMetric ?: 0)
-                            val previousBestSetResult =
-                                (template.bestSet.firstMetric
-                                    ?: 0.0) * (template.bestSet.secondMetric
-                                    ?: 0)
+    /**
+     * Processes a list of `WorkoutEntry` objects to extract exercises, calculate volume, and track personal records (PRs).
+     *
+     * This function organizes the workout data into exercises, calculates the workout volume, and optionally updates
+     * the exercise data in the repository. It also compares the best sets of current exercises with template exercises
+     * to determine if a new personal record (PR) is achieved.
+     *
+     * @param entries A list of `WorkoutEntry` objects representing exercises and sets in the workout.
+     * @param updateExercises A boolean flag indicating whether to update the exercises in the repository.
+     * If we save it to realm there is no need to update them in the firestore repository
+     * @return [ExerciseSummary]:
+     * ## Details:
+     * 1. **Extract and Calculate**:
+     *    - Calls `getExercisesFiltered` to extract exercises and calculate the total volume.
+     * 2. **PR Comparison** (if `updateExercises` is `true`):
+     *    - Compares the best set of each current exercise to its corresponding template exercise (if any).
+     *    - Updates the `Exercise.bestSet` to retain the higher-performing set.
+     *    - Increments the PR count (`prs`) if the current best set outperforms the template best set.
+     *    - Marks template exercises as such (`isTemplate = true`).
+     * 3. **Repository Update**:
+     *    - Updates the exercise repository with the modified exercises.
+     */
+    private suspend fun getExerciseArrayAndPRs(
+        entries: List<WorkoutEntry>,
+        updateExercises: Boolean = true,
+    ): ExerciseSummary {
+        val filtered = getExercisesFiltered(entries)
+        val exercises = filtered.exercises
+        val volume = filtered.volume
+        var prs = 0
 
-                            if (currentBestSetResult <= previousBestSetResult) {
-                                currExercise.bestSet = template.bestSet
-                            } else {
-                                prs++
-                            }
-                        }
+        if (updateExercises) {
+
+            templateExercises.forEach { previous ->
+                val curr = exercises[previous.name]
+                curr?.let { current ->
+                    val currentBestSetResult = (current.bestSet.firstMetric
+                        ?: 0.0) * (current.bestSet.secondMetric ?: 0)
+                    val previousBestSetResult =
+                        (previous.bestSet.firstMetric
+                            ?: 0.0) * (previous.bestSet.secondMetric
+                            ?: 0)
+
+                    if (currentBestSetResult <= previousBestSetResult) {
+                        exercises[previous.name]?.copy(bestSet = previous.bestSet)
+                    } else {
+                        prs++ // Increment PR count if the current best set surpasses the template best set.
                     }
-                    currExercise.isTemplate = true
+
+                    exercises[previous.name]?.copy(isTemplate = true)
                 }
             }
-            workoutProvider.updateExercises(exercises.values.toList())
+
+            repo.updateExercises(exercises.values.toList())
         }
-        return Triple(exercises.values.toList(), prs, volume)
+        return ExerciseSummary(exercises = exercises, prs = prs, volume = volume)
     }
 
-    private fun getTimePeriodAsString() = when (workoutDate.hour) {
-        in 6..11 -> "Morning"
-        in 12..16 -> "Noon"
-        in 17..20 -> "Afternoon"
-        else -> "Night"
+    /**
+     * Updates the note for the corresponding exercise
+     *
+     * @param itemPosition The index for the exercise
+     * @param text The new note
+     */
+    fun changeExerciseNote(itemPosition: Int, text: String) {
+        _uiState.update { old ->
+            val newExercises = old.exercises.toMutableList()
+
+            (newExercises[itemPosition] as? WorkoutEntry.ExerciseEntry)?.copy(note = text)?.let {
+                newExercises[itemPosition] = it
+            }
+
+            old.copy(exercises = newExercises)
+        }
     }
 
-    fun changeNote(itemPosition: Int, text: String) {
-        (_exercises.value?.get(itemPosition) as? ExerciseEntry)?.exerciseEntry?.note = text
+    /**
+     * Manually clearing the state because
+     * the vm is tied to the activity's scope
+     */
+    private fun clearState() {
+        _uiState.value = WorkoutUiState(workoutPrefix = TimeOfDay.EMPTY)
     }
+}
 
-    private suspend fun saveWorkoutState() {
-        val prefixes = setOf("Morning", "Noon", "Afternoon", "Night")
-        val (exercises, prs, volume) = getExerciseArrayAndPRs(_exercises.value.orEmpty(), false)
-
-        val workout = Workout(
-            id = workoutId ?: hashString("${Random().nextInt(Int.MAX_VALUE)}"),
-            name = if (_name.value.isNullOrEmpty() || !(prefixes.any {
-                    (_name.value ?: "").contains(
-                        it
-                    )
-                })) "${getTimePeriodAsString()} ${_name.value}" else _name.value ?: "",
-            date = workoutDate,
-            exercises = exercises,
-            note = _note.value,
-            duration = _timer.value?.parseTimeStringToLong() ?: 0L,
-            isTemplate = false,
-            personalRecords = prs,
-            volume = volume
+/**
+ * Converts an [Exercise] to a list of [WorkoutEntry] objects, including the exercise entry and its associated sets.
+ *
+ * This function maps an [Exercise] object to a list of [WorkoutEntry] objects, which include an [WorkoutEntry.ExerciseEntry] for
+ * the exercise details and [WorkoutEntry.SetEntry] objects for each set associated with the exercise. If a matching template exercise
+ * is found in the provided [templateExercise] list, the previous results for each set are filled in.
+ *
+ * @param templateExercise A list of [Exercise] objects that are used as a template to populate previous results for
+ *                         sets if a matching exercise name is found.
+ * @return A list of [WorkoutEntry] objects, including the exercise details and sets.
+ */
+fun Exercise.toWorkoutEntry(
+    templateExercise: List<Exercise>,
+): List<WorkoutEntry> {
+    val foundExercise = templateExercise.find { it.name == this.name }
+    val entries = mutableListOf<WorkoutEntry>(
+        WorkoutEntry.ExerciseEntry(
+            name = this.name,
+            firstInputColumnVisibility = category != Category.None,
+            note = this.note ?: "",
+            bodyPart = this.bodyPart,
+            category = this.category
         )
-        workoutProvider.addWorkoutState(RealmWorkoutState().apply {
-            id = workout.id
-            name = workout.name
-            this.duration = workout.duration ?: 0L
-            this.volume = workout.volume ?: 0.0
-            date = workout.date.toRealmString()
-            isTemplate = false
-            this.exercises = workout.exercises.map { it.toRealmExercise() }.toRealmList()
-            note = _note.value
-            personalRecords = prs
-            restTimerStart =
-                if (restTimerProvider.isRestActive()) restTimerProvider.getRestStartDate()
-                    .toRealmString() else ""
-            restTimerEnd = if (restTimerProvider.isRestActive()) restTimerProvider.getEndOfRest()
-                .toRealmString() else ""
-            timeOfStop = LocalDateTime.now().toRealmString()
-        })
-        if (restTimerProvider.isRestActive()) restTimerProvider.stopRest()
+    )
+    entries.addAll(this.sets.mapIndexed { i, set ->
+        set.toSetEntry(
+            this.category,
+            i,
+            if (foundExercise != null && i < foundExercise.sets.size) "${foundExercise.sets[i].secondMetric} x ${foundExercise.sets[i].firstMetric}" else "-/-"
+        )
+    })
+    return entries
+}
 
-    }
+/**
+ * Converts a [Sets] object to a [WorkoutEntry.SetEntry] object, including set details and previous results.
+ *
+ * This function converts a [Sets] object into a [WorkoutEntry.SetEntry], which includes the set type, input field
+ * visibility based on the exercise category, set number, and previous results (if provided).
+ *
+ * @param exerciseCategory The category of the exercise, which is used to determine the visibility of the input field.
+ * @param setNumber The index of the set, used to determine the set number in the output.
+ * @param previousResults A string representing previous results for the set. Defaults to an empty string.
+ * @return A [WorkoutEntry.SetEntry] object containing the set details.
+ */
+fun Sets.toSetEntry(
+    exerciseCategory: Category,
+    setNumber: Int,
+    previousResults: String = "",
+): WorkoutEntry.SetEntry {
+    return WorkoutEntry.SetEntry(
+        setType = this.type,
+        firstInputFieldVisibility = exerciseCategory != Category.None,
+        setNumber = (setNumber + 1).toString(),
+        previousResults = previousResults,
+        set = Sets(type = this.type, firstMetric = null, secondMetric = null),
+        setCompleted = false
+    )
+}
 
-    //
-    sealed interface State {
-        data class Default(val restState: Boolean) : State
-        data class Rest(val time: String) : State
-        data class Error(val message: String?) : State
+/**
+ * Converts a list of [Exercise] objects into a list of [WorkoutEntry] objects.
+ *
+ * This function maps each [Exercise] in the list to a list of [WorkoutEntry] objects using [toWorkoutEntry].
+ *
+ * @param templateExercises A list of [Exercise] objects used as templates for filling in previous results in each set.
+ * @return A list of [WorkoutEntry] objects corresponding to the exercises in the input list.
+ */
+fun List<Exercise>.toWorkoutEntryList(
+    templateExercises: List<Exercise>,
+): List<WorkoutEntry> {
+    return this.flatMap { it.toWorkoutEntry(templateExercises) }
+}
+
+/**
+ * Converts a time duration in milliseconds (Long) to a formatted string representing hours, minutes, and seconds.
+ *
+ * This function takes a duration in milliseconds and converts it into a time string formatted as "hh:mm:ss".
+ *
+ * @return A formatted string representing the duration as hours, minutes, and seconds.
+ */
+fun Long.toRestTime(): String = String.format(
+    Locale.getDefault(),
+    "%02d:%02d:%02d",
+    (this / (1000 * 60 * 60)) % 24,
+    (this / (1000 * 60)) % 60,
+    (this / 1000) % 60
+)
+
+/**
+ * Filters a string to remove any non-numeric characters and returns the resulting integer.
+ *
+ * This function removes leading zeros, commas, and other invalid characters from a string and converts the cleaned
+ * string to an integer. If the string cannot be converted, it defaults to 0.
+ *
+ * @return The integer value extracted from the string, or 0 if conversion fails.
+ */
+fun String.filterIntegerInput(): Int {
+    if (this.startsWith('0') && this.length > 1) {
+        this.dropWhile { it == '0' }
     }
+    if (this.contains(",")) {
+        this.drop(this.length - this.indexOf(","))
+    }
+    return this.toIntOrNull() ?: 0
+}
+
+/**
+ * Filters a string to remove any non-numeric characters and returns the resulting double.
+ *
+ * This function removes leading zeros, commas, and other invalid characters from a string and converts the cleaned
+ * string to a double. If the string cannot be converted, it defaults to 0.0.
+ *
+ * @return The double value extracted from the string, or 0.0 if conversion fails.
+ */
+fun String.filterDoubleInput(): Double {
+    if (this.startsWith('0') || this.startsWith(',') && this.length > 1) {
+        this.dropWhile { it == '0' || it == ',' }
+    }
+    return this.toDoubleOrNull() ?: 0.0
+}
+
+/**
+ * Enum representing different times of the day, used for categorizing workouts based on the time they occur.
+ *
+ * Each enum value corresponds to a specific time of day (e.g., morning, afternoon, etc.) and has an associated
+ * string resource for display purposes.
+ *
+ * @param stringResource The string resource representing the time of day.
+ */
+enum class TimeOfDay(val stringResource: Int) {
+    MORNING(R.string.morning_workout), NOON(R.string.noon_workout), AFTERNOON(R.string.afternoon_workout), NIGHT(
+        R.string.night_workout
+    ),
+    EMPTY(0)
 }

@@ -1,6 +1,7 @@
 package bg.zahov.app.data.model
 
 import bg.zahov.app.data.exception.CriticalDataNullException
+import bg.zahov.app.util.generateRandomId
 import bg.zahov.app.util.toLocalDateTime
 import com.google.firebase.Timestamp
 import java.time.LocalDateTime
@@ -70,15 +71,22 @@ data class User(
         } ?: throw CriticalDataNullException("No user found")
     }
 }
+
 data class Measurements(
     val measurements: Map<MeasurementType, List<Measurement>> = mapOf()
 ) {
     companion object {
-        fun fromFirestoreMap(data: Map<String, Any>?, measurementType: MeasurementType): Measurements {
+        fun fromFirestoreMap(
+            data: Map<String, Any>?,
+            measurementType: MeasurementType
+        ): Measurements {
             val measurementsMap = mutableMapOf<MeasurementType, List<Measurement>>()
             data?.let {
-            val measurements = (it[FirestoreFields.MEASUREMENTS_COLLECTION] as? List<Map<String, Any>>)?.mapNotNull { values -> Measurement.fromFirestoreMap(values) }.orEmpty()
-            measurementsMap[measurementType] = measurements
+                val measurements =
+                    (it[FirestoreFields.MEASUREMENTS_COLLECTION] as? List<Map<String, Any>>)?.mapNotNull { values ->
+                        Measurement.fromFirestoreMap(values)
+                    }.orEmpty()
+                measurementsMap[measurementType] = measurements
             }
             return Measurements(measurementsMap)
         }
@@ -86,57 +94,58 @@ data class Measurements(
 }
 
 data class Workout(
-    var id: String,
-    var name: String,
-    var duration: Long?,
-    var volume: Double?,
-    var date: LocalDateTime,
-    var isTemplate: Boolean,
-    var exercises: List<Exercise>,
+    var id: String = generateRandomId(),
+    var name: String = "",
+    var duration: Long? = null,
+    var volume: Double? = null,
+    var date: LocalDateTime = LocalDateTime.now(),
+    var isTemplate: Boolean = false,
+    var exercises: List<Exercise> = listOf(),
     val note: String? = null,
     var personalRecords: Int = 0,
 ) {
     companion object {
-        fun fromFirestoreMap(data: Map<String, Any>?) = data?.let {
+        fun fromFirestoreMap(data: Map<String, Any>?): Workout = data?.let {
             Workout(
                 id = it[FirestoreFields.WORKOUT_ID] as? String
-                    ?: throw CriticalDataNullException(""),
+                    ?: generateRandomId(),
                 name = it[FirestoreFields.WORKOUT_NAME] as? String
-                    ?: throw CriticalDataNullException(""),
+                    ?: "",
                 duration = it[FirestoreFields.WORKOUT_DURATION] as? Long,
                 volume = it[FirestoreFields.WORKOUT_VOLUME] as? Double,
                 date = (it[FirestoreFields.WORKOUT_DATE] as? Timestamp)?.toLocalDateTime()
-                    ?: throw CriticalDataNullException(""),
-                personalRecords = (it[FirestoreFields.WORKOUT_PERSONAL_RECORD] as? Long)?.toInt() ?: 0,
-                isTemplate = it[FirestoreFields.WORKOUT_IS_TEMPLATE] as? Boolean ?: false,
+                    ?: LocalDateTime.now(),
+                personalRecords = (it[FirestoreFields.WORKOUT_PERSONAL_RECORD] as? Long)?.toInt()
+                    ?: 0,
+                isTemplate = it[FirestoreFields.WORKOUT_IS_TEMPLATE] as? Boolean == true,
                 exercises = (it[FirestoreFields.WORKOUT_EXERCISES] as List<Map<String, Any>?>)
                     .mapNotNull { map ->
                         Exercise.fromFirestoreMap(map)
                     },
                 note = it[FirestoreFields.WORKOUT_NOTE] as? String
             )
-        } ?: throw CriticalDataNullException("No firestore data found")
+        } ?: Workout()
     }
 }
 
 data class Exercise(
-    var name: String,
-    var bodyPart: BodyPart,
-    var category: Category,
-    var isTemplate: Boolean,
+    var name: String = "",
+    var bodyPart: BodyPart = BodyPart.Other,
+    var category: Category = Category.None,
+    var isTemplate: Boolean = false,
     var sets: MutableList<Sets> = mutableListOf(),
     var bestSet: Sets = Sets(SetType.DEFAULT, null, null),
     var note: String? = null,
 ) {
     companion object {
-        fun fromFirestoreMap(data: Map<String, Any>?) = data?.let {
+        fun fromFirestoreMap(data: Map<String, Any>?): Exercise = data?.let {
             Exercise(
                 name = it[FirestoreFields.EXERCISE_NAME] as? String ?: throw CriticalDataNullException("No name for exercise"),
                 bodyPart = it[FirestoreFields.EXERCISE_BODY_PART].toString()
                     .let { string -> BodyPart.valueOf(string) },
                 category = it[FirestoreFields.EXERCISE_CATEGORY].toString()
                     .let { string -> Category.valueOf(string) },
-                isTemplate = it[FirestoreFields.EXERCISE_IS_TEMPLATE] as Boolean,
+                isTemplate = it[FirestoreFields.EXERCISE_IS_TEMPLATE] as? Boolean == true,
                 sets = (it[FirestoreFields.EXERCISE_SETS] as List<Map<String, Any>>).mapNotNull { map ->
                     Sets.fromFirestoreMap(
                         map
@@ -147,27 +156,25 @@ data class Exercise(
                     Sets.fromFirestoreMap(map)
                 } ?: Sets(SetType.DEFAULT, null, null)
             )
-        } ?: throw CriticalDataNullException("No exercise found")
+        } ?: Exercise()
     }
 }
 
 data class Sets(
-    var type: SetType,
-    var firstMetric: Double?,
-    var secondMetric: Int?,
+    var type: SetType = SetType.DEFAULT,
+    var firstMetric: Double? = null,
+    var secondMetric: Int? = null,
 ) {
     companion object {
-        fun fromFirestoreMap(data: Map<String, Any>?) = data?.let {
+        fun fromFirestoreMap(data: Map<String, Any>?): Sets = data?.let { map ->
             Sets(
-                type = (it[FirestoreFields.SETS_TYPE] as? String)?.let { string ->
-                    SetType.fromKey(
-                        string
-                    )
+                type = (map[FirestoreFields.SETS_TYPE] as? String)?.let { string ->
+                    SetType.entries.firstOrNull { it.key == string }
                 } ?: SetType.DEFAULT,
-                firstMetric = it[FirestoreFields.SETS_FIRST_METRIC] as? Double,
-                secondMetric = (it[FirestoreFields.SETS_SECOND_METRIC] as? Long)?.toInt()
+                firstMetric = map[FirestoreFields.SETS_FIRST_METRIC] as? Double,
+                secondMetric = (map[FirestoreFields.SETS_SECOND_METRIC] as? Long)?.toInt()
             )
-        }
+        } ?: Sets()
     }
 }
 

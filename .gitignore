@@ -28,3 +28,5 @@ render.experimental.xml
 
 # Android Profiling
 *.hprof
+
+.kotlin

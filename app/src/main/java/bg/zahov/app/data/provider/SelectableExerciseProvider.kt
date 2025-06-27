@@ -3,17 +3,9 @@ package bg.zahov.app.data.provider
 import bg.zahov.app.data.model.Exercise
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.StateFlow
+import javax.inject.Inject
 
-class SelectableExerciseProvider {
-    companion object {
-        @Volatile
-        private var instance: SelectableExerciseProvider? = null
-
-        fun getInstance() = instance ?: synchronized(this) {
-            instance ?: SelectableExerciseProvider().also { instance = it }
-        }
-    }
-
+class SelectableExerciseProvider @Inject constructor() {
     private val _selectedExercises = MutableStateFlow<List<Exercise>>(mutableListOf())
     val selectedExercises: StateFlow<List<Exercise>>
         get() = _selectedExercises

@@ -14,7 +14,7 @@
     <string name="email_text_field_hint">Email</string>
     <string name="password_text_field_hint">Password</string>
     <string name="forgot_password">Forgot password?</string>
-    <string name="password_helper_text">Use a password with numbers</string>
+    <string name="password_helper_text">Passwords must be at least 6 characters long and matching</string>
     <string name="username_text">Username</string>
     <!-- Strings used for welcome fragment-->
     <string name="welcome_text">Disciplined</string>
@@ -23,11 +23,16 @@
     <string name="no_account_text">No account? Sign up here!</string>
     <!-- String used for signup fragment   -->
     <string name="already_have_account_text">Already have an account? Log in here!</string>
-    <string name="confirm_password_text">Confirm <Password></Password></string>
+    <string name="confirm_password_text">Confirm</string>
+    <string name="no_empty_fields">Don\'t leave empty fields</string>
+    <string name="wrong_password">Passwords must be at least 6 characters long</string>
+    <string name="wrong_email">Email address must be in the format: user@example.com.</string>
     <!-- Strings used for profile fragment   -->
     <string name="workout_text">%d workouts</string>
     <string name="top_bar_text">Profile</string>
     <string name="dashboard">Dashboard</string>
+    <string name="weekly_workouts">Weekly workouts</string>
+    <string name="home_accessibility_text">"Username: %1$s, number of workouts: %2$s"</string>
     <!-- Strings used for history fragment   -->
     <string name="history_top_bar_text">History</string>
     <!-- Strings used for workout fragment   -->
@@ -63,7 +68,7 @@
     <string name="advanced_settings_text">Advanced settings</string>
     <string name="popup_exampel_title">Popup title</string>
     <string name="new_password">New password</string>
-    <string name="cancel">cancel</string>
+    <string name="cancel">Cancel</string>
     <string name="confirm">confirm</string>
     <!--  Strings used for create exercise fragment    -->
     <string name="new_exercise_placeholder_text">new exercise</string>
@@ -73,25 +78,37 @@
     <string name="create_exercise">Create exercise</string>
     <string name="edit_profile_text"> Edit profile</string>
     <string name="reset_password_text">Reset password</string>
-    <string name="confirm_changes">Confirm changes</string>
+    <string name="update_username">Update Username</string>
+    <string name="update_password">Update Password</string>
+    <string name="confirm_authentication">Confirm Identity</string>
     <!-- Strings used for edit profile fragment   -->
     <string name="filter">Filter</string>
-    <string name="body_part">Body part</string>
-    <string name="category">Category</string>
+    <string name="body_part">Body part:</string>
+    <string name="category">Category:</string>
+    <string name="select_filter">Select Filters</string>
     <!-- Strings used for create workout template -->
     <string name="new_workout_template">New workout template</string>
     <string name="add_exercise">Add exercise</string>
     <string name="template_name_placeholder">Example</string>
     <string name="new_workout_template_hint">Workout template name</string>
+    <string name="duplicate_workout_template">duplicate</string>
+    <string name="add_template_button_content_description">Add workout to templates</string>
     <!-- Strings used for exercise template creation   -->
     <string name="set_column_text">Set</string>
     <string name="previous_column_text">Previous</string>
     <string name="kg_column_text">(+kg)</string>
     <string name="lbs_column_text">(+lbs)</string>
-    <string name="reps_column_text">reps</string>
+    <string name="reps_column_text">Reps</string>
     <string name="add_set">add set</string>
     <string name="cancel_text">cancel</string>
+    <!-- Strings used for start workout screen   -->
+    <string name="last_performed">Last performed: %1$s</string>
+    <string name="rest_icon_content_description">Go to rest screen</string>
     <!-- Strings used for workout fragment    -->
+    <string name="afternoon_workout">Afternoon</string>
+    <string name="night_workout">Night</string>
+    <string name="morning_workout">Morning</string>
+    <string name="noon_workout">Noon</string>
     <string name="finish_workout"><font color="#3D8BC9">Finish</font></string>
     <string name="cancel_workout">cancel workout</string>
     <string name="edit_workout">Edit</string>
@@ -127,10 +144,12 @@
     <string name="best_set">Best set</string>
     <string name="reset_settings">Reset settings</string>
     <string name="search">Search</string>
+    <string name="close_search">Close Search</string>
     <string name="save">Save</string>
     <string name="timers">Timers</string>
     <string name="save_as_workout_template">Save as workout template</string>
     <string name="one_rep_max_text">1RM</string>
+    <string name="one_rep_max_title_text">One Rep Max</string>
     <string name="perform_again">perform again</string>
     <string name="charts">Charts</string>
     <string name="records">records</string>
@@ -141,5 +160,79 @@
     <string name="max_volume">Max volume</string>
     <string name="max_weight">Max weight</string>
     <string name="history_measurement">HISTORY</string>
-    <string name="application_warning_text">Due to service errors we will be closing\nthe application in exactly:</string>
+    <string name="application_warning_text">Due to service errors we will be closing the application in exactly:</string>
+    <string name="workouts_for_month">%1$s workouts</string>
+    <string name="sync_option_text">Automatic between device sync</string>
+    <string name="sync_option_explain">Activate to use your account on another device</string>
+    <string name="show_update_template_explain">Prompt when a workout is finished</string>
+    <string name="use_watch_option">Use samsung watch during workout</string>
+    <string name="link_error">An error occurred while trying to open the link</string>
+    <string name="no_application">No application found to open the link</string>
+    <string name="volume_for_history_workouts">%1$s kg</string>
+    <!-- String used for finish workout   -->
+    <string name="this_is_your_workout_number">This is your workout number %1$s</string>
+    <string name="close_icon_description">Icon used for closing the screen</string>
+    <string name="animated_star_icon_description">Animated icon of a star</string>
+    <string name="new_workout">New workout</string>
+    <!-- Strings used for toast messages    -->
+    <string name="update_password_success">"Successfully updated password</string>
+    <string name="update_password_fail">Failed to update password</string>
+    <string name="reset_password_success">Successfully updated password</string>
+    <string name="reset_password_fail">Failed to send password reset link</string>
+    <string name="re_authenticate_success">"Successfully re-authenticated!"</string>
+    <string name="re_authenticate_fail">"Failed to re-authenticate!"</string>
+    <string name="update_username_success">"Successfully updated username</string>
+    <string name="update_username_fail">Failed to update username</string>
+    <string name="no_exercises">Cannot finish a workout without any exercises!</string>
+    <string name="no_sets">Cannot finish a workout without any sets!</string>
+    <string name="empty_sets">Cannot finish a workout with empty sets!</string>
+    <string name="add_history">Add to history</string>
+    <string name="toast_couldnt_start_workout">Cannot start workout</string>
+    <!-- Strings used for line chart    -->
+    <string name="results">Results</string>
+    <string name="weight_unit">kg</string>
+    <string name="body_fat_percentage_unit" translatable="false">%</string>
+    <string name="caloric_intake_unit">kcal</string>
+    <string name="default_unit">sm</string>
+    <!-- Strings used for line chart    -->
+    <!-- Strings used for exercise screen -->
+    <string name="remove_filter">Removes filter</string>
+    <string name="dismiss">Dismiss</string>
+    <!-- Strings used for exercise screen -->
+    <!-- Strings used for history info   -->
+    <string name="workout_exists_toast">Such a workout already exists!</string>
+    <string name="failed_to_delete_workout_toast">Failed to delete the workout</string>
+    <string name="minimize_icon_content_description">Minimize history screen</string>
+    <string name="settings_wheel_content_description">Open settings drawer</string>
+    <!-- Strings used for content description -->
+    <string name="launcher_icon_description">Flexed arm</string>
+    <!-- Strings used for content description -->
+    <!-- Strings used for top app bar-->
+    <string name="back_button">Go Back</string>
+    <string name="menu">Menu</string>
+    <!-- Strings used for top app bar-->
+    <!-- Strings used for adding a template workout-->
+    <string name = "no_workout_name_toast">Cannot add a workout without a name!</string>
+    <string name="calendar">Calendar</string>
+    <!-- Strings used for adding a template workout-->
+    <!-- Strings used for StartWorkout -->
+    <string name="barbell_category_text">Barbell</string>
+    <string name="dumbbell_category_text">Dumbbell</string>
+    <string name="machine_category_text">Machine</string>
+    <string name="additional_weight_category_text">Additional Weight</string>
+    <string name="cable_category_text">Cable</string>
+    <string name="none_category_text">None</string>
+    <string name="assisted_weight_category_text">Assisted Weight</string>
+    <string name="reps_only_category_text">Reps Only</string>
+    <string name="cardio_category_text">Cardio</string>
+    <string name="timed_category_text">Timed</string>
+    <string name="muslce_part_description">Icon depicting</string>
+    <string name="show_password">Show password</string>
+    <string name="top_bar_action">Top Bar Action</string>
+    <!-- Strings used for rest fragment   -->
+    <string name="add_to_rest_time" >+ %1$s S</string>
+    <string name="remove_from_rest_time">- %1$s S</string>
+    <string name="invalid_time_format">Invalid time format</string>
+    <string name="rest_top_bar_title">Rest</string>
+    <string name="add_template">Add template</string>
 </resources>
