@@ -41,7 +41,7 @@ Hilt is used for dependency injection to reduce boilerplate, manage dependency l
 
 > Dependencies are provided to Android components like Activities and ViewModels using annotations like @AndroidEntryPoint and @HiltViewModel
 
-> Custom Hilt Modules (@Module) are used to provide instances of dependencies like Retrofit or database handlers.
+> Custom Hilt Modules (@Module) are used to provide instances of dependencies
 
 
 ## Guiding Principles: [SOLID](https://www.baeldung.com/solid-principles)
