@@ -20,14 +20,14 @@ import androidx.compose.ui.res.colorResource
 import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.unit.dp
+import androidx.hilt.navigation.compose.hiltViewModel
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
-import androidx.lifecycle.viewmodel.compose.viewModel
 import bg.zahov.app.data.model.LineChartData
 import bg.zahov.app.ui.custom.CommonLineChart
 import bg.zahov.fitness.app.R
 
 @Composable
-fun MeasurementInfoScreen(viewModel: MeasurementInfoViewModel = viewModel()) {
+fun MeasurementInfoScreen(viewModel: MeasurementInfoViewModel = hiltViewModel()) {
     val uiState by viewModel.uiState.collectAsStateWithLifecycle()
     val inputState by viewModel.dialogState.collectAsStateWithLifecycle()
 
@@ -54,7 +54,7 @@ fun MeasurementInfoScreen(viewModel: MeasurementInfoViewModel = viewModel()) {
 fun MeasurementInfoContent(
     modifier: Modifier = Modifier,
     data: LineChartData,
-    onAddHistoryClick: () -> Unit
+    onAddHistoryClick: () -> Unit,
 ) {
     val interactionSource = remember { MutableInteractionSource() }
 

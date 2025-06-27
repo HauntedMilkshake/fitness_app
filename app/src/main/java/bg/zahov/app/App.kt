@@ -20,10 +20,15 @@ import androidx.compose.runtime.getValue
 import androidx.compose.runtime.remember
 import androidx.compose.runtime.rememberCoroutineScope
 import androidx.compose.ui.Alignment
+import androidx.compose.ui.ExperimentalComposeUiApi
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
 import androidx.compose.ui.draw.shadow
+import androidx.compose.ui.platform.testTag
+import androidx.compose.ui.semantics.semantics
+import androidx.compose.ui.semantics.testTagsAsResourceId
 import androidx.compose.ui.unit.dp
+import androidx.hilt.navigation.compose.hiltViewModel
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import androidx.lifecycle.viewmodel.compose.viewModel
 import androidx.navigation.NavHostController
@@ -33,6 +38,7 @@ import bg.zahov.app.ui.theme.FitnessTheme
 import bg.zahov.app.ui.topbar.TopBar
 import kotlinx.coroutines.launch
 
+@OptIn(ExperimentalComposeUiApi::class)
 @Composable
 fun App(
     workoutManagerViewModel: WorkoutManagerViewModel = viewModel(),
@@ -48,6 +54,9 @@ fun App(
     }
     FitnessTheme {
         Scaffold(
+            modifier = Modifier
+                .testTag("scaffold")
+                .semantics { testTagsAsResourceId = true },
             topBar = {
                 TopBar(navController = navController)
             },
@@ -76,7 +85,7 @@ fun App(
                             message = message,
                             actionLabel = action,
                             duration = SnackbarDuration.Short
-                            )
+                        )
                     }
                 },
                 navController = navController,

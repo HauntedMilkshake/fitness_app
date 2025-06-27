@@ -52,6 +52,7 @@ import androidx.compose.runtime.remember
 import androidx.compose.runtime.saveable.rememberSaveable
 import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
+import androidx.compose.ui.ExperimentalComposeUiApi
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.graphics.Shape
@@ -60,6 +61,8 @@ import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.platform.testTag
 import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.res.stringResource
+import androidx.compose.ui.semantics.semantics
+import androidx.compose.ui.semantics.testTag
 import androidx.compose.ui.text.TextRange
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.input.KeyboardType
@@ -67,8 +70,8 @@ import androidx.compose.ui.text.input.TextFieldValue
 import androidx.compose.ui.text.input.VisualTransformation
 import androidx.compose.ui.text.style.TextOverflow
 import androidx.compose.ui.unit.dp
+import androidx.hilt.navigation.compose.hiltViewModel
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
-import androidx.lifecycle.viewmodel.compose.viewModel
 import bg.zahov.app.data.model.SetType
 import bg.zahov.app.ui.theme.FitnessTheme
 import bg.zahov.app.ui.workout.add.AddTemplateWorkoutViewModel
@@ -83,7 +86,7 @@ private val weights = arrayOf(1f, 1f, 2f, 2f)
 
 @Composable
 fun AddTemplateWorkoutScreen(
-    addTemplateViewModel: AddTemplateWorkoutViewModel = viewModel(factory = AddTemplateWorkoutViewModel.Factory),
+    addTemplateViewModel: AddTemplateWorkoutViewModel = hiltViewModel(),
     onAddExercise: () -> Unit,
     onReplaceExercise: () -> Unit,
     onBackPressed: () -> Unit,
@@ -147,7 +150,7 @@ fun AddTemplateWorkoutScreen(
 
 @Composable
 fun WorkoutScreen(
-    workoutViewModel: WorkoutViewModel = viewModel(LocalContext.current as ComponentActivity),
+    workoutViewModel: WorkoutViewModel = hiltViewModel(LocalContext.current as ComponentActivity),
     onAddExercise: () -> Unit,
     onReplaceExercise: () -> Unit,
     onBackPressed: () -> Unit,
@@ -226,7 +229,8 @@ fun WorkoutTitleField(
     WorkoutScreenInputField(
         modifier = modifier
             .fillMaxWidth()
-            .padding(12.dp),
+            .padding(12.dp)
+            .semantics { testTag = "Add name" },
         value = name,
         label = {
             Text(
@@ -239,7 +243,6 @@ fun WorkoutTitleField(
     )
 }
 
-@OptIn(ExperimentalFoundationApi::class)
 @Composable
 fun ScreenContent(
     note: String,
@@ -264,7 +267,6 @@ fun ScreenContent(
                 .padding(top = 16.dp)
         ) {
             content()
-
 
             WorkoutScreenInputField(
                 modifier = Modifier
@@ -340,7 +342,10 @@ fun ScreenContent(
                     }
                 }
                 Column(modifier = Modifier.padding(bottom = 16.dp)) {
-                    WorkoutButton(onClick = onAddExercise) {
+                    WorkoutButton(
+                        modifier = Modifier.testTag("AddExercise"),
+                        onClick = onAddExercise
+                    ) {
                         Text(
                             text = stringResource(R.string.add_exercise),
                             maxLines = 1,
@@ -432,6 +437,7 @@ fun ItemBox(modifier: Modifier = Modifier, content: @Composable () -> Unit) {
     }
 }
 
+@OptIn(ExperimentalComposeUiApi::class)
 @Composable
 fun Exercise(
     modifier: Modifier = Modifier,
@@ -493,7 +499,9 @@ fun Exercise(
 
         Button(
             onClick = onAddSet,
-            modifier = Modifier.fillMaxWidth(),
+            modifier = Modifier
+                .fillMaxWidth()
+                .testTag("AddSet"),
             shape = RoundedCornerShape(4.dp),
             elevation = ButtonDefaults.buttonElevation(defaultElevation = 8.dp)
         ) {
@@ -547,19 +555,22 @@ fun Exercise(
  * allows for customization of the inner padding while still somewhat
  * behaving like the regular text field
  */
-@OptIn(ExperimentalMaterial3Api::class)
+@OptIn(ExperimentalMaterial3Api::class, ExperimentalComposeUiApi::class)
 @Composable
 fun SetInputField(
     modifier: Modifier = Modifier,
     value: String,
     onValueChanged: (String) -> Unit,
+    tag: String = "",
 ) {
     val customTextSelectionColors =
         TextSelectionColors(handleColor = Color.Transparent, backgroundColor = Color.Transparent)
     val interactionSource = remember { MutableInteractionSource() }
     CompositionLocalProvider(LocalTextSelectionColors provides customTextSelectionColors) {
         BasicTextField(
-            modifier = modifier.fillMaxHeight(),
+            modifier = modifier
+                .fillMaxHeight()
+                .testTag(tag),
             value = value,
             singleLine = true,
             enabled = true,
@@ -708,7 +719,8 @@ fun WorkoutSetRow(
                     .fillMaxHeight()
                     .width(width = 64.dp),
                 value = weight,
-                onValueChanged = { onInputFieldChanged(it, SetField.WEIGHT) }
+                onValueChanged = { onInputFieldChanged(it, SetField.WEIGHT) },
+                tag = "WeightInputField"
             )
         }
 
@@ -718,7 +730,8 @@ fun WorkoutSetRow(
                     .fillMaxHeight()
                     .width(width = 64.dp),
                 value = reps,
-                onValueChanged = { onInputFieldChanged(it, SetField.REPETITIONS) }
+                onValueChanged = { onInputFieldChanged(it, SetField.REPETITIONS) },
+                tag = "RepsInputField"
             )
         }
     }
@@ -778,14 +791,15 @@ fun DropDown(
             when (itemType) {
                 ItemType.EXERCISE -> {
                     ExerciseMenuItem.entries.toList().forEachIndexed { index, item ->
-                        DropdownMenuItem(text = {
-                            Text(
-                                text = stringResource(item.stringResource),
-                                maxLines = 1,
-                                overflow = TextOverflow.Ellipsis,
-                                style = MaterialTheme.typography.labelLarge
-                            )
-                        },
+                        DropdownMenuItem(
+                            text = {
+                                Text(
+                                    text = stringResource(item.stringResource),
+                                    maxLines = 1,
+                                    overflow = TextOverflow.Ellipsis,
+                                    style = MaterialTheme.typography.labelLarge
+                                )
+                            },
                             onClick = {
                                 when (item) {
                                     ExerciseMenuItem.ADD_NOTE -> onFirstOption()
@@ -799,14 +813,15 @@ fun DropDown(
 
                 ItemType.SET -> {
                     SetMenuItem.entries.toList().forEachIndexed { index, item ->
-                        DropdownMenuItem(text = {
-                            Text(
-                                text = stringResource(item.stringResource),
-                                maxLines = 1,
-                                overflow = TextOverflow.Ellipsis,
-                                style = MaterialTheme.typography.labelLarge
-                            )
-                        },
+                        DropdownMenuItem(
+                            text = {
+                                Text(
+                                    text = stringResource(item.stringResource),
+                                    maxLines = 1,
+                                    overflow = TextOverflow.Ellipsis,
+                                    style = MaterialTheme.typography.labelLarge
+                                )
+                            },
                             onClick = {
                                 when (item) {
                                     SetMenuItem.WARMUP -> onFirstOption()

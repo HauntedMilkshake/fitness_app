@@ -9,10 +9,13 @@ import androidx.compose.material3.NavigationBarItemDefaults
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.getValue
+import androidx.compose.ui.ExperimentalComposeUiApi
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.platform.testTag
 import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.res.stringResource
+import androidx.compose.ui.semantics.semantics
+import androidx.compose.ui.semantics.testTagsAsResourceId
 import androidx.navigation.NavDestination.Companion.hasRoute
 import androidx.navigation.NavDestination.Companion.hierarchy
 import androidx.navigation.NavGraph.Companion.findStartDestination
@@ -25,6 +28,7 @@ import bg.zahov.app.Measure
 import bg.zahov.app.StartWorkout
 import bg.zahov.fitness.app.R
 
+@OptIn(ExperimentalComposeUiApi::class)
 @SuppressLint("RestrictedApi")
 @Composable
 fun BottomBar(
@@ -71,12 +75,13 @@ fun BottomBar(
         ) {
             screens.forEach { screen ->
                 NavigationBarItem(
-                    modifier = Modifier.testTag(stringResource(screen.titleId)),
+                    modifier = Modifier
+                        .testTag(stringResource(screen.titleId)),
                     label = {
                         Text(text = stringResource(screen.titleId))
                     },
                     icon = {
-                        Icon(painter = painterResource(screen.iconId), contentDescription = null)
+                        Icon(painter = painterResource(screen.iconId), contentDescription = stringResource(screen.titleId))
                     },
                     selected = currentDestination?.hierarchy?.any {
                         it.hasRoute(route = screen.route::class)

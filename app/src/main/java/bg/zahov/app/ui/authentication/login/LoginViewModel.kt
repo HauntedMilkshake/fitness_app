@@ -2,16 +2,17 @@ package bg.zahov.app.ui.authentication.login
 
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
-import bg.zahov.app.Inject
 import bg.zahov.app.data.interfaces.ServiceErrorHandler
-import bg.zahov.app.data.interfaces.UserProvider
+import bg.zahov.app.data.provider.UserProviderImpl
+import bg.zahov.app.ui.authentication.login.LoginViewModel.LoginData
 import com.google.firebase.auth.FirebaseAuthInvalidCredentialsException
 import com.google.firebase.auth.FirebaseAuthInvalidUserException
-import kotlinx.coroutines.launch
+import dagger.hilt.android.lifecycle.HiltViewModel
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.StateFlow
 import kotlinx.coroutines.flow.update
-import java.lang.IllegalArgumentException
+import kotlinx.coroutines.launch
+import javax.inject.Inject
 
 /**
  * ViewModel for the Login screen that handles user input, validation, and interaction with the
@@ -24,9 +25,10 @@ import java.lang.IllegalArgumentException
  * @param auth Injected user authentication provider that handles login and password reset logic.
  * @param serviceError Injected error handler that manages errors and starts the error-handling countdown.
  */
-class LoginViewModel(
-    private val auth: UserProvider = Inject.userProvider,
-    private val serviceError: ServiceErrorHandler = Inject.serviceErrorHandler,
+@HiltViewModel
+class LoginViewModel @Inject constructor(
+    private val auth: UserProviderImpl,
+    private val serviceError: ServiceErrorHandler,
 ) : ViewModel() {
     /**
      * Data class that represents the UI state for the login screen.

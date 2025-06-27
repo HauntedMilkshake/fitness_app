@@ -2,16 +2,15 @@ package bg.zahov.app.ui.home
 
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
-import bg.zahov.app.Inject
 import bg.zahov.app.data.exception.CriticalDataNullException
 import bg.zahov.app.data.interfaces.RestProvider
 import bg.zahov.app.data.interfaces.ServiceErrorHandler
-import bg.zahov.app.data.interfaces.UserProvider
 import bg.zahov.app.data.interfaces.WorkoutActions
 import bg.zahov.app.data.interfaces.WorkoutProvider
 import bg.zahov.app.data.model.Workout
+import bg.zahov.app.data.provider.UserProviderImpl
 import com.github.mikephil.charting.data.BarEntry
-import kotlinx.coroutines.async
+import dagger.hilt.android.lifecycle.HiltViewModel
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.StateFlow
 import kotlinx.coroutines.flow.update
@@ -20,6 +19,7 @@ import java.time.DayOfWeek
 import java.time.LocalDate
 import java.time.format.DateTimeFormatter
 import java.time.temporal.TemporalAdjusters
+import javax.inject.Inject
 
 /**
  * Represents the UI state for the Home screen.
@@ -60,12 +60,13 @@ data class ChartData(
  * @param workoutStateManager - check local db(realm) if a workout is stored in it(whenever the user clears the app and reopens it) and starts it again
  * @param workoutRestManager - makes sure to resume previous rest if the app has been opened and it would still need to be running
  */
-class HomeViewModel(
-    private val userRepo: UserProvider = Inject.userProvider,
-    private val workoutRepo: WorkoutProvider = Inject.workoutProvider,
-    private val workoutStateManager: WorkoutActions = Inject.workoutState,
-    private val workoutRestManager: RestProvider = Inject.restTimerProvider,
-    private val serviceErrorHandler: ServiceErrorHandler = Inject.serviceErrorHandler,
+@HiltViewModel
+class HomeViewModel @Inject constructor(
+    private val userRepo: UserProviderImpl,
+    private val workoutRepo: WorkoutProvider,
+    private val workoutStateManager: WorkoutActions,
+    private val workoutRestManager: RestProvider,
+    private val serviceErrorHandler: ServiceErrorHandler,
 ) : ViewModel() {
 
     /**

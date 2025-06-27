@@ -1,6 +1,5 @@
 package bg.zahov.app.ui.workout.start
 
-import android.widget.Toast
 import androidx.compose.animation.AnimatedContent
 import androidx.compose.animation.AnimatedVisibilityScope
 import androidx.compose.animation.ExperimentalSharedTransitionApi
@@ -26,25 +25,27 @@ import androidx.compose.material3.IconButton
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
-import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.saveable.rememberSaveable
 import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
+import androidx.compose.ui.ExperimentalComposeUiApi
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.platform.LocalContext
+import androidx.compose.ui.platform.testTag
 import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.res.stringResource
+import androidx.compose.ui.semantics.contentDescription
+import androidx.compose.ui.semantics.semantics
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.style.TextOverflow
 import androidx.compose.ui.unit.dp
+import androidx.hilt.navigation.compose.hiltViewModel
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
-import androidx.lifecycle.viewmodel.compose.viewModel
 import bg.zahov.app.data.model.BodyPart
 import bg.zahov.app.data.model.Category
-import bg.zahov.app.data.model.ToastManager
 import bg.zahov.app.data.provider.toFormattedString
 import bg.zahov.app.ui.theme.FitnessTheme
 import bg.zahov.fitness.app.R
@@ -52,22 +53,15 @@ import bg.zahov.fitness.app.R
 
 @Composable
 fun StartWorkoutScreen(
-    startWorkoutViewModel: StartWorkoutViewModel = viewModel(),
+    startWorkoutViewModel: StartWorkoutViewModel = hiltViewModel(),
     onEditWorkout: (String) -> Unit,
     onAddTemplateWorkout: () -> Unit,
 ) {
     val uiState by startWorkoutViewModel.uiState.collectAsStateWithLifecycle()
-    val toast by ToastManager.messages.collectAsStateWithLifecycle()
     val context = LocalContext.current
 
-    LaunchedEffect(toast) {
-        toast?.let { message ->
-            Toast.makeText(context, context.getString(message.messageResId), Toast.LENGTH_SHORT)
-                .show()
-        }
-    }
-
-    StartWorkoutContent(workouts = uiState.workouts,
+    StartWorkoutContent(
+        workouts = uiState.workouts,
         onWorkoutStart = { startWorkoutViewModel.startWorkout(it) },
         onAddTemplateWorkout = onAddTemplateWorkout,
         onStartEmptyWorkout = { startWorkoutViewModel.startWorkout() },
@@ -82,6 +76,7 @@ fun StartWorkoutScreen(
     )
 }
 
+@OptIn(ExperimentalComposeUiApi::class)
 @Composable
 fun StartWorkoutContent(
     workouts: List<StartWorkout>,
@@ -104,7 +99,8 @@ fun StartWorkoutContent(
             Button(
                 modifier = Modifier
                     .fillMaxWidth()
-                    .padding(12.dp),
+                    .padding(12.dp)
+                    .testTag("StartEmptyWorkoutButton"),
                 onClick = onStartEmptyWorkout
             ) {
                 Text(
@@ -126,12 +122,15 @@ fun StartWorkoutContent(
                     style = MaterialTheme.typography.labelSmall,
                     color = MaterialTheme.colorScheme.onBackground
                 )
-
-                IconButton(onClick = onAddTemplateWorkout) {
+                val iconButtonString = stringResource(R.string.add_template)
+                IconButton(
+                    modifier = Modifier.semantics { contentDescription = iconButtonString },
+                    onClick = onAddTemplateWorkout
+                ) {
                     Icon(
                         painter = painterResource(R.drawable.ic_plus),
                         tint = Color.Unspecified,
-                        contentDescription = ""
+                        contentDescription = null
                     )
                 }
             }
@@ -385,9 +384,14 @@ fun Exercise(exerciseName: String, bodyPart: BodyPart, category: Category) {
                     BodyPart.Shoulders -> R.drawable.ic_shoulders
                     else -> R.drawable.ic_olympic
                 }
-            ), contentDescription = stringResource(R.string.muslce_part_description), tint = Color.Unspecified
+            ),
+            contentDescription = stringResource(R.string.muslce_part_description),
+            tint = Color.Unspecified
         )
-        Column(modifier = Modifier.padding(start = 8.dp), verticalArrangement = Arrangement.Center) {
+        Column(
+            modifier = Modifier.padding(start = 8.dp),
+            verticalArrangement = Arrangement.Center
+        ) {
             Text(
                 text = exerciseName,
                 fontWeight = FontWeight.Bold,
@@ -449,14 +453,15 @@ fun DropDown(
             onDismissRequest = onClose
         ) {
             MenuItem.entries.toList().forEachIndexed { index, item ->
-                DropdownMenuItem(text = {
-                    Text(
-                        text = stringResource(item.stringResource),
-                        maxLines = 1,
-                        overflow = TextOverflow.Ellipsis,
-                        style = MaterialTheme.typography.labelLarge
-                    )
-                },
+                DropdownMenuItem(
+                    text = {
+                        Text(
+                            text = stringResource(item.stringResource),
+                            maxLines = 1,
+                            overflow = TextOverflow.Ellipsis,
+                            style = MaterialTheme.typography.labelLarge
+                        )
+                    },
                     onClick = {
                         when (item) {
                             MenuItem.EDIT -> onEdit()

@@ -3,16 +3,9 @@ package bg.zahov.app.data.provider
 import bg.zahov.app.data.model.Exercise
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.StateFlow
+import javax.inject.Inject
 
-class ReplaceableExerciseProvider {
-    companion object {
-        @Volatile
-        private var instance: ReplaceableExerciseProvider? = null
-
-        fun getInstance() = instance ?: synchronized(this) {
-            instance ?: ReplaceableExerciseProvider().also { instance = it }
-        }
-    }
+class ReplaceableExerciseProvider @Inject constructor(){
     private val _exerciseToReplace = MutableStateFlow<Exercise?>(null)
 
     val exerciseToReplace: StateFlow<Exercise?>

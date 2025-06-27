@@ -11,6 +11,8 @@ import androidx.compose.ui.Modifier
 import androidx.compose.ui.platform.testTag
 import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.res.stringResource
+import androidx.compose.ui.semantics.semantics
+import androidx.compose.ui.semantics.testTag
 import androidx.compose.ui.text.style.TextOverflow
 import bg.zahov.fitness.app.R
 
@@ -18,7 +20,7 @@ import bg.zahov.fitness.app.R
 @Composable
 fun TopBarAction(
     topBarState: TopBarState.TitleWithAction,
-    modifier: Modifier = Modifier
+    modifier: Modifier = Modifier,
 ) {
     TopAppBar(
         modifier = modifier,
@@ -44,7 +46,10 @@ fun TopBarAction(
             }
         },
         actions = {
-            IconButton(onClick = topBarState.onActionClick) {
+            IconButton(
+                onClick = topBarState.onActionClick,
+                modifier = Modifier.semantics { testTag = "TopBarAction" }
+            ) {
                 Icon(
                     painter = painterResource(topBarState.actionButtonIconId),
                     contentDescription = stringResource(R.string.top_bar_action)

@@ -13,12 +13,15 @@ import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
 import androidx.compose.runtime.setValue
+import androidx.compose.ui.ExperimentalComposeUiApi
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.graphics.Shape
 import androidx.compose.ui.platform.testTag
 import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.res.stringResource
+import androidx.compose.ui.semantics.semantics
+import androidx.compose.ui.semantics.testTagsAsResourceId
 import androidx.compose.ui.text.input.PasswordVisualTransformation
 import androidx.compose.ui.text.input.VisualTransformation
 import androidx.compose.ui.unit.dp
@@ -26,11 +29,11 @@ import androidx.compose.ui.unit.sp
 import bg.zahov.fitness.app.R
 import kotlinx.coroutines.delay
 
+@OptIn(ExperimentalComposeUiApi::class)
 @Composable
 fun CommonPasswordField(
+    modifier: Modifier = Modifier,
     password: String,
-    onPasswordChange: (String) -> Unit,
-    onPasswordVisibilityChange: (Boolean) -> Unit,
     passwordVisible: Boolean = false,
     label: @Composable (() -> Unit)? = null,
     singleLine: Boolean = true,
@@ -46,12 +49,16 @@ fun CommonPasswordField(
         unfocusedIndicatorColor = Color.Transparent,
         errorIndicatorColor = Color.Transparent
     ),
-    enabled: Boolean = true
+    onPasswordChange: (String) -> Unit,
+    onPasswordVisibilityChange: (Boolean) -> Unit,
+    enabled: Boolean = true,
+    testTag: String = ""
 ) {
     var isError by remember { mutableStateOf(false) }
     var isActive by remember { mutableStateOf(false) }
 
     TextField(
+        modifier = modifier.semantics { testTagsAsResourceId = true }.testTag(testTag),
         value = password,
         onValueChange = {
             onPasswordChange(it)
@@ -73,7 +80,7 @@ fun CommonPasswordField(
             }) {
                 Icon(
                     painterResource(if (passwordVisible) R.drawable.ic_password_hidden else R.drawable.ic_password_visible),
-                    contentDescription = stringResource(R.string.show_password)
+                    ""
                 )
             }
         },

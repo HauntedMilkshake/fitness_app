@@ -24,17 +24,21 @@ import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.getValue
 import androidx.compose.ui.Alignment
+import androidx.compose.ui.ExperimentalComposeUiApi
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.graphics.painter.Painter
 import androidx.compose.ui.res.integerResource
 import androidx.compose.ui.res.stringResource
+import androidx.compose.ui.semantics.semantics
+import androidx.compose.ui.semantics.testTag
+import androidx.compose.ui.semantics.testTagsAsResourceId
 import androidx.compose.ui.text.TextStyle
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.style.TextOverflow
 import androidx.compose.ui.unit.dp
+import androidx.hilt.navigation.compose.hiltViewModel
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
-import androidx.lifecycle.viewmodel.compose.viewModel
 import bg.zahov.app.data.provider.model.HistoryWorkout
 import bg.zahov.app.ui.custom.ExerciseWithSets
 import bg.zahov.app.ui.custom.WorkoutStats
@@ -43,7 +47,7 @@ import bg.zahov.fitness.app.R
 
 
 @Composable
-fun HistoryScreen(historyViewModel: HistoryViewModel = viewModel(), onItemClick: () -> Unit) {
+fun HistoryScreen(historyViewModel: HistoryViewModel = hiltViewModel(), onItemClick: () -> Unit) {
     val uiState by historyViewModel.uiState.collectAsStateWithLifecycle()
     HistoryContent(uiState.workouts, onItemClick = {
         historyViewModel.setClickedWorkout(it)
@@ -51,10 +55,11 @@ fun HistoryScreen(historyViewModel: HistoryViewModel = viewModel(), onItemClick:
     })
 }
 
+@OptIn(ExperimentalComposeUiApi::class)
 @Composable
 fun HistoryContent(
     workouts: List<HistoryWorkout>,
-    onItemClick: (String) -> Unit
+    onItemClick: (String) -> Unit,
 ) {
     val animationDuration = integerResource(R.integer.animation_duration_medium)
     FitnessTheme {
@@ -80,7 +85,10 @@ fun HistoryContent(
                 }
 
                 else -> {
-                    LazyColumn(Modifier.fillMaxSize()) {
+                    LazyColumn(Modifier.fillMaxSize().semantics {
+                        testTag = "historyWorkouts"
+                        testTagsAsResourceId = true
+                    }) {
                         items(items = workouts, key = { it.id }) {
                             Workout(it) {
                                 onItemClick(it)
@@ -94,6 +102,7 @@ fun HistoryContent(
     }
 }
 
+@OptIn(ExperimentalComposeUiApi::class)
 @Composable
 fun Workout(item: HistoryWorkout, onItemClick: (String) -> Unit) {
     Column(
@@ -103,6 +112,10 @@ fun Workout(item: HistoryWorkout, onItemClick: (String) -> Unit) {
             .border(1.dp, MaterialTheme.colorScheme.secondary, RoundedCornerShape(4.dp))
             .padding(12.dp)
             .clickable { onItemClick(item.id) }
+            .semantics {
+                testTagsAsResourceId = true
+                testTag = "Workout"
+            }
     ) {
         Text(
             text = item.name,
@@ -190,7 +203,7 @@ fun TextWithLeadingIcon(
     textOverflow: TextOverflow = TextOverflow.Ellipsis,
     iconModifier: Modifier = Modifier,
     iconColor: Color? = null,
-    contentDescription: String? = null
+    contentDescription: String? = null,
 ) {
     Icon(
         modifier = iconModifier,

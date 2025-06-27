@@ -4,16 +4,43 @@ plugins {
     alias(libs.plugins.compose.compiler)
     alias(libs.plugins.androidApplication)
     alias(libs.plugins.kotlinAndroid)
-    alias(libs.plugins.kotlinKapt)
     alias(libs.plugins.hilt)
+    alias(libs.plugins.ksp)
+    alias(libs.plugins.baselineprofile)
+    alias(libs.plugins.screenshot)
+    alias(libs.plugins.roborazzi)
+    alias(libs.plugins.paparazzi)
 }
 
 android {
     namespace = "bg.zahov.fitness.app"
     compileSdk = 35
+    flavorDimensions += "default"
+    experimentalProperties["android.experimental.enableScreenshotTest"] = true
 
     buildFeatures {
         compose = true
+    }
+
+    productFlavors {
+        create("mock") {
+            dimension = "default"
+            applicationId = "bg.zahov.fitness.app"
+            applicationIdSuffix = ".mock"
+            versionName = "-mock"
+        }
+        create("production") {
+            dimension = "default"
+            applicationId = "bg.zahov.fitness.app"
+            applicationIdSuffix = ".production"
+            versionName = "-production"
+        }
+    }
+
+    sourceSets {
+        getByName("production") {
+            java.srcDirs("src/production")
+        }
     }
 
     compileOptions {
@@ -30,7 +57,7 @@ android {
     }
 
     defaultConfig {
-        applicationId = "bg.zahov.app"
+        applicationId = "bg.zahov.fitness.app"
         minSdk = 26
         targetSdk = 35
         versionCode = 1
@@ -45,7 +72,7 @@ android {
 
     buildTypes {
         release {
-            isMinifyEnabled = false
+            isMinifyEnabled = true
             proguardFiles(
                 getDefaultProguardFile("proguard-android-optimize.txt"),
                 "proguard-rules.pro"
@@ -57,11 +84,19 @@ android {
         resources {
             excludes += "/META-INF/{AL2.0,LGPL2.1}"
         }
+        packagingOptions.resources.excludes.add("META-INF/versions/9/OSGI-INF/MANIFEST.MF")
+    }
+
+    testOptions {
+        unitTests {
+            isIncludeAndroidResources = true
+        }
     }
 }
 
 dependencies {
-    implementation(libs.androidx.navigation.testing)
+    implementation(libs.androidx.profileinstaller)
+    "baselineProfile"(project(":app:baselineprofile"))
     val composeBom = platform(libs.composeBom)
     implementation(composeBom)
     androidTestImplementation(composeBom)
@@ -73,8 +108,6 @@ dependencies {
     androidTestImplementation(libs.composeUiTestJunit4)
     androidTestImplementation(libs.androidxTestExtJunit)
     androidTestImplementation(libs.androidxTestRunner)
-    debugImplementation(libs.androidx.manifest.testing)
-    debugImplementation(libs.androidx.navigation.testing)
     implementation(libs.navigationCompose)
     implementation(libs.material)
     implementation(libs.ui)
@@ -99,5 +132,10 @@ dependencies {
     implementation(libs.numberPicker)
     implementation(libs.hiltAndroid)
     implementation(libs.hiltNavigation)
-    kapt(libs.hiltCompiler)
+    ksp(libs.hiltCompiler)
+    implementation(libs.roboelectric)
+    screenshotTestImplementation(libs.uiTooling)
+    testImplementation(libs.roborazzi)
+    testImplementation(libs.roborazziCompose)
+    testImplementation(libs.paparazzi)
 }

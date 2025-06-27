@@ -4,16 +4,12 @@ import bg.zahov.app.data.interfaces.AuthResponse
 import bg.zahov.app.data.interfaces.Authentication
 import bg.zahov.app.data.remote.FirebaseAuthentication
 import com.google.firebase.auth.AuthResult
-import kotlinx.coroutines.CancellationException
+import javax.inject.Inject
 
-class AuthenticationImpl : Authentication {
-    companion object {
-        private var instance: AuthenticationImpl? = null
-        fun getInstance() = instance ?: AuthenticationImpl().also { instance = it }
-    }
-
-    private val auth = FirebaseAuthentication.getInstance()
-
+class AuthenticationImpl
+@Inject constructor(
+    private val auth: FirebaseAuthentication
+) : Authentication {
     /**
      * Authenticates a user with the given email and password.
      * Maps the result to a standardized AuthResponse format.
@@ -83,6 +79,7 @@ object AuthResponseMapper {
             }
 
         }
+
         else -> {
             AuthResponse.Failure(Exception("Unable to authenticate"))
         }

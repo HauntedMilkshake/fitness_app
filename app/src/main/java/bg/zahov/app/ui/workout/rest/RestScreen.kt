@@ -1,6 +1,5 @@
 package bg.zahov.app.ui.workout.rest
 
-import android.widget.Toast
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.BoxScope
@@ -25,30 +24,18 @@ import androidx.compose.runtime.getValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
-import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.dp
+import androidx.hilt.navigation.compose.hiltViewModel
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
-import androidx.lifecycle.viewmodel.compose.viewModel
-import bg.zahov.app.data.model.ToastManager
 import bg.zahov.app.ui.theme.FitnessTheme
 import bg.zahov.fitness.app.R
 import com.chargemap.compose.numberpicker.ListItemPicker
 
-
 @Composable
-fun RestScreen(restViewModel: RestTimerViewModel = viewModel(), navigate: () -> Unit) {
+fun RestScreen(restViewModel: RestTimerViewModel = hiltViewModel(), navigate: () -> Unit) {
     val state by restViewModel.uiState.collectAsStateWithLifecycle()
-    val toast by ToastManager.messages.collectAsStateWithLifecycle()
-    val context = LocalContext.current
-
-    LaunchedEffect(toast) {
-        toast?.let { message ->
-            Toast.makeText(context, context.getString(message.messageResId), Toast.LENGTH_SHORT)
-                .show()
-        }
-    }
 
     when (state) {
         is Rest.Default -> {

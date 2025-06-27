@@ -15,17 +15,21 @@ import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
-import androidx.lifecycle.viewmodel.compose.viewModel
 import androidx.compose.runtime.getValue
 import androidx.compose.ui.Alignment
+import androidx.compose.ui.ExperimentalComposeUiApi
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.res.colorResource
 import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.res.stringResource
+import androidx.compose.ui.semantics.semantics
+import androidx.compose.ui.semantics.testTag
+import androidx.compose.ui.semantics.testTagsAsResourceId
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.unit.dp
+import androidx.hilt.navigation.compose.hiltViewModel
 import com.kizitonwose.calendar.compose.HorizontalCalendar
 import com.kizitonwose.calendar.compose.rememberCalendarState
 import com.kizitonwose.calendar.core.CalendarDay
@@ -37,7 +41,7 @@ import java.time.LocalDate
 import java.time.Month
 
 @Composable
-fun CalendarScreen(calendarViewModel: CalendarViewModel = viewModel()) {
+fun CalendarScreen(calendarViewModel: CalendarViewModel = hiltViewModel()) {
     val uiState by calendarViewModel.uiState.collectAsStateWithLifecycle()
     val calendarState = rememberCalendarState(
         startMonth = uiState.startMonth,
@@ -53,6 +57,7 @@ fun CalendarScreen(calendarViewModel: CalendarViewModel = viewModel()) {
     )
 }
 
+@OptIn(ExperimentalComposeUiApi::class)
 @Composable
 fun CalendarContent(
     calendarState: CalendarState,
@@ -61,6 +66,10 @@ fun CalendarContent(
     numberOfWorkoutsPerMonth: Map<Month, String>
 ) {
     HorizontalCalendar(
+        modifier = Modifier.semantics {
+          testTagsAsResourceId = true
+          testTag = "Calendar"
+        },
         state = calendarState,
         dayContent = { Day(it, dayToHasUserWorkedOut[it.date] == true) },
         monthHeader = {

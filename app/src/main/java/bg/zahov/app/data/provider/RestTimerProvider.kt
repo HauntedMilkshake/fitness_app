@@ -11,18 +11,10 @@ import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.StateFlow
 import kotlinx.coroutines.launch
 import java.time.LocalDateTime
+import javax.inject.Inject
 import kotlin.math.abs
 
-class RestTimerProvider : RestProvider {
-    companion object {
-        @Volatile
-        private var instance: RestTimerProvider? = null
-
-        fun getInstance() = instance ?: synchronized(this) {
-            instance ?: RestTimerProvider().also { instance = it }
-        }
-    }
-
+class RestTimerProvider @Inject constructor() : RestProvider {
     private val _restTimer = MutableStateFlow(Rest())
     val restTimer: StateFlow<Rest>
         get() = _restTimer
@@ -49,16 +41,16 @@ class RestTimerProvider : RestProvider {
         remainingTime = duration - abs(elapsedTime)
         timer = object : CountDownTimer(duration, 1000) {
             override fun onTick(p0: Long) {
-                    remainingTime = p0
-                    _restTimer.value = Rest(
-                        elapsedTime = p0.timeToString(),
-                        fullRest = _restTimer.value.fullRest
-                    )
+                remainingTime = p0
+                _restTimer.value = Rest(
+                    elapsedTime = p0.timeToString(),
+                    fullRest = _restTimer.value.fullRest
+                )
             }
 
             override fun onFinish() {
                 CoroutineScope(Dispatchers.Main).launch {
-                     remainingTime = 0
+                    remainingTime = 0
                     _restState.emit(RestState.Finished)
                 }
             }

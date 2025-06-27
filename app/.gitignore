@@ -1,1 +1,7 @@
 /build
+
+/release
+
+app/src/release/generated/baselineProfiles/
+
+.kotlin/sessions/*.salive

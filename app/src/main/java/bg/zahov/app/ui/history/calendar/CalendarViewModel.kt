@@ -2,12 +2,12 @@ package bg.zahov.app.ui.history.calendar
 
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
-import bg.zahov.app.Inject
 import bg.zahov.app.data.exception.CriticalDataNullException
 import bg.zahov.app.data.interfaces.ServiceErrorHandler
 import bg.zahov.app.data.interfaces.WorkoutProvider
 import com.kizitonwose.calendar.core.daysOfWeek
 import com.kizitonwose.calendar.core.firstDayOfWeekFromLocale
+import dagger.hilt.android.lifecycle.HiltViewModel
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.StateFlow
 import kotlinx.coroutines.flow.update
@@ -17,6 +17,7 @@ import java.time.LocalDate
 import java.time.Month
 import java.time.Year
 import java.time.YearMonth
+import javax.inject.Inject
 
 
 /**
@@ -36,7 +37,7 @@ data class CalendarUiState(
     val firstDayOfWeek: DayOfWeek = firstDayOfWeekFromLocale(),
     val daysOfWeek: List<DayOfWeek> = daysOfWeek(firstDayOfWeek),
     val dayToHasUserWorkedOut: Map<LocalDate, Boolean> = mapOf(),
-    val numberOfWorkoutsPerMonth: Map<Month, String> = mapOf()
+    val numberOfWorkoutsPerMonth: Map<Month, String> = mapOf(),
 )
 
 /**
@@ -44,12 +45,14 @@ data class CalendarUiState(
  * @property workoutProvider A provider for fetching workout data. Defaults to the injected workout provider.
  * @property serviceError A handler for managing service errors. Defaults to the injected error handler.
  */
-class CalendarViewModel(
-    private val workoutProvider: WorkoutProvider = Inject.workoutProvider,
-    private val serviceError: ServiceErrorHandler = Inject.serviceErrorHandler
+@HiltViewModel
+class CalendarViewModel @Inject constructor(
+    private val workoutProvider: WorkoutProvider,
+    private val serviceError: ServiceErrorHandler,
 ) : ViewModel() {
 
     private val _uiState = MutableStateFlow<CalendarUiState>(CalendarUiState())
+
     /**
      * The current UI state of the calendar, exposed as a StateFlow for observing changes.
      */

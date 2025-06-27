@@ -3,7 +3,7 @@ package bg.zahov.app
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.ui.Modifier
-import androidx.lifecycle.viewmodel.compose.viewModel
+import androidx.hilt.navigation.compose.hiltViewModel
 import androidx.navigation.NavGraph.Companion.findStartDestination
 import androidx.navigation.NavHostController
 import androidx.navigation.compose.NavHost
@@ -24,8 +24,8 @@ import bg.zahov.app.ui.settings.profile.EditProfileScreen
 import bg.zahov.app.ui.welcome.WelcomeScreen
 import bg.zahov.app.ui.workout.AddTemplateWorkoutScreen
 import bg.zahov.app.ui.workout.WorkoutScreen
-import bg.zahov.app.ui.workout.rest.RestScreen
 import bg.zahov.app.ui.workout.finish.WorkoutFinishScreen
+import bg.zahov.app.ui.workout.rest.RestScreen
 import bg.zahov.app.ui.workout.start.StartWorkoutScreen
 
 @Composable
@@ -33,7 +33,7 @@ fun MainNavGraph(
     modifier: Modifier = Modifier,
     navController: NavHostController,
     onShowSnackBar: (String, String?) -> Unit,
-    loadingViewModel: LoadingViewModel = viewModel()
+    loadingViewModel: LoadingViewModel = hiltViewModel()
 ) {
     LaunchedEffect(Unit) {
         loadingViewModel.navigationTarget.collect {
@@ -126,7 +126,8 @@ fun MainNavGraph(
         composable<Exercises> {
             ExercisesScreen(
                 navigateInfo = { navController.navigate(ExerciseInfo) },
-                navigateBack = { navController.navigateUp() })
+                navigateBack = {
+                    navController.navigateUp() })
         }
         composable<ExerciseAdd> {
             AddExerciseScreen(

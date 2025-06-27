@@ -4,6 +4,7 @@ import bg.zahov.app.data.interfaces.SettingsProvider
 import bg.zahov.app.data.model.state.TypeSettings
 import kotlinx.coroutines.flow.Flow
 import kotlinx.coroutines.flow.flowOf
+import javax.inject.Inject
 
 /**
  * Implementation of [SettingsProvider] that manages access to user settings.
@@ -14,25 +15,7 @@ import kotlinx.coroutines.flow.flowOf
  * - Reset settings to their default values.
  *
  */
-class SettingsProviderImpl : SettingsProvider {
-
-    companion object {
-        @Volatile
-        private var instance: SettingsProviderImpl? = null
-
-        /**
-         * Retrieves the singleton instance of [SettingsProviderImpl],
-         * creating it if necessary.
-         *
-         * @return The singleton instance of [SettingsProviderImpl].
-         */
-        fun getInstance() = instance ?: synchronized(this) {
-            instance ?: SettingsProviderImpl().also { instance = it }
-        }
-    }
-
-//    private val settingsRepository = SettingsRepositoryImpl.getInstance()
-
+class SettingsProviderImpl @Inject constructor() : SettingsProvider {
     /**
      * Retrieves the current settings as a flow, observing changes in real-time.
      *

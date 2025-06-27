@@ -2,22 +2,21 @@ package bg.zahov.app.ui.workout.start
 
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
-import bg.zahov.app.Inject
+import bg.zahov.app.data.interfaces.WorkoutActions
 import bg.zahov.app.data.interfaces.WorkoutProvider
 import bg.zahov.app.data.model.BodyPart
 import bg.zahov.app.data.model.Category
 import bg.zahov.app.data.model.Exercise
-import bg.zahov.app.data.model.ToastManager
 import bg.zahov.app.data.model.Workout
 import bg.zahov.app.data.model.WorkoutState
-import bg.zahov.app.data.provider.WorkoutStateManager
 import bg.zahov.app.util.generateRandomId
-import bg.zahov.fitness.app.R
+import dagger.hilt.android.lifecycle.HiltViewModel
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.StateFlow
 import kotlinx.coroutines.flow.update
 import kotlinx.coroutines.launch
 import java.time.LocalDateTime
+import javax.inject.Inject
 
 /**
  * Represents the UI state for starting a workout.
@@ -68,12 +67,11 @@ data class StartWorkoutExercise(
  *
  * @param repo The provider responsible for fetching workout templates.
  * @param workoutState The state manager responsible for tracking the current workout state.
- * @param toastManager responsible for showing toasts to the user
  */
-class StartWorkoutViewModel(
-    private val repo: WorkoutProvider = Inject.workoutProvider,
-    private val toastManager: ToastManager = ToastManager,
-    private val workoutState: WorkoutStateManager = Inject.workoutState,
+@HiltViewModel
+class StartWorkoutViewModel @Inject constructor(
+    private val repo: WorkoutProvider,
+    private val workoutState: WorkoutActions,
 ) : ViewModel() {
 
     /**
@@ -85,7 +83,7 @@ class StartWorkoutViewModel(
     /**
      * The current state of the workout [WorkoutState.ACTIVE] or [WorkoutState.INACTIVE] or [WorkoutState.MINIMIZED] .
      */
-    private var currentWorkoutState: WorkoutState = WorkoutState.ACTIVE
+    private var currentWorkoutState: WorkoutState = WorkoutState.INACTIVE
 
     /**
      * collect template workouts, state and exercises which are to be used for mapping
@@ -116,7 +114,7 @@ class StartWorkoutViewModel(
             if (currentWorkoutState == WorkoutState.INACTIVE) {
                 workoutState.startWorkout(workout = workout?.toWorkout())
             } else {
-                toastManager.showToast(R.string.toast_couldnt_start_workout)
+                /* TODO( add snackbar with R.string.toast_couldnt_start_workout ) */
             }
         }
     }

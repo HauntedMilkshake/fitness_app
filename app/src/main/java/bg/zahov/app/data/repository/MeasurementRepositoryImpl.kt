@@ -4,6 +4,7 @@ import bg.zahov.app.data.interfaces.MeasurementRepository
 import bg.zahov.app.data.model.Measurement
 import bg.zahov.app.data.model.MeasurementType
 import bg.zahov.app.data.remote.FirestoreManager
+import javax.inject.Inject
 
 /**
  * Implementation of the [MeasurementRepository] interface, responsible for interacting with the Firestore
@@ -11,24 +12,8 @@ import bg.zahov.app.data.remote.FirestoreManager
  *
  * This class uses the [FirestoreManager] to retrieve and store measurement data in a Firestore-based database.
  */
-class MeasurementRepositoryImpl : MeasurementRepository {
-
-    companion object {
-        @Volatile
-        private var instance: MeasurementRepositoryImpl? = null
-
-        /**
-         * Returns the singleton instance of [MeasurementRepositoryImpl].
-         * This ensures that only one instance of the repository exists throughout the application.
-         */
-        fun getInstance() =
-            instance ?: synchronized(this) {
-                instance ?: MeasurementRepositoryImpl().also { instance = it }
-            }
-    }
-
-    private val firestore = FirestoreManager.getInstance()
-
+class MeasurementRepositoryImpl @Inject constructor(private val firestore: FirestoreManager) :
+    MeasurementRepository {
     /**
      * Retrieves a specific measurement for the given [MeasurementType] from the Firestore database.
      *
@@ -46,7 +31,7 @@ class MeasurementRepositoryImpl : MeasurementRepository {
      */
     override suspend fun updateMeasurement(
         measurementType: MeasurementType,
-        measurement: Measurement
+        measurement: Measurement,
     ) {
         firestore.upsertMeasurement(measurementType, measurement)
     }

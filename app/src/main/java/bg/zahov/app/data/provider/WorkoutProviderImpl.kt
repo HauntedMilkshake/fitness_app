@@ -1,6 +1,7 @@
 package bg.zahov.app.data.provider
 
 import bg.zahov.app.data.interfaces.WorkoutProvider
+import bg.zahov.app.data.interfaces.WorkoutRepository
 import bg.zahov.app.data.model.Exercise
 import bg.zahov.app.data.model.Workout
 import bg.zahov.app.data.model.state.ExerciseData
@@ -8,7 +9,6 @@ import bg.zahov.app.data.model.state.ExerciseHistoryInfo
 import bg.zahov.app.data.provider.model.ExerciseDetails
 import bg.zahov.app.data.provider.model.HistoryInfoWorkout
 import bg.zahov.app.data.provider.model.HistoryWorkout
-import bg.zahov.app.data.repository.WorkoutRepositoryImpl
 import bg.zahov.app.ui.workout.start.StartWorkout
 import bg.zahov.app.ui.workout.start.StartWorkoutExercise
 import bg.zahov.app.util.timeToString
@@ -24,15 +24,10 @@ import java.time.LocalDate
 import java.time.LocalDateTime
 import java.time.format.DateTimeFormatter
 import java.util.Locale
+import javax.inject.Inject
 
-class WorkoutProviderImpl : WorkoutProvider {
-
-    companion object {
-
-        private var instance: WorkoutProviderImpl? = null
-        fun getInstance() = instance ?: WorkoutProviderImpl().also { instance = it }
-    }
-
+class WorkoutProviderImpl @Inject constructor(private val workoutRepo: WorkoutRepository) :
+    WorkoutProvider {
     private var lastWorkoutPerformed: Workout? = null
 
     private val _clickedExercise = MutableStateFlow<Exercise?>(null)
@@ -42,6 +37,10 @@ class WorkoutProviderImpl : WorkoutProvider {
     private val _exerciseHistory = MutableStateFlow<List<ExerciseHistoryInfo>>(listOf())
     private val exerciseHistory: Flow<List<ExerciseHistoryInfo>>
         get() = _exerciseHistory
+
+    private val _shouldAddTemplate = MutableStateFlow<Boolean>(false)
+    override val shouldAddTemplate: Flow<Boolean>
+        get() = _shouldAddTemplate
 
     override var clickedPastWorkout: StateFlow<HistoryInfoWorkout> =
         MutableStateFlow(HistoryInfoWorkout())
@@ -63,9 +62,6 @@ class WorkoutProviderImpl : WorkoutProvider {
     override val shouldFinish: StateFlow<Boolean>
         get() = _shouldFinish
 
-    private val workoutRepo = WorkoutRepositoryImpl.getInstance()
-    private val errorHandler = ServiceErrorHandlerImpl.getInstance()
-
     /**
      * Returns the last performed workout of the user [lastWorkoutPerformed] if any that is
      * initialized in [addWorkoutToHistory]
@@ -81,6 +77,13 @@ class WorkoutProviderImpl : WorkoutProvider {
         _shouldFinish.value = true
     }
 
+    /**
+     * Sets [shouldAddTemplate] to true
+     */
+    override fun triggerAddTemplate() {
+        _shouldAddTemplate.value = true
+    }
+
     override suspend fun getTemplateWorkouts(): Flow<List<Workout>> =
         workoutRepo.getTemplateWorkouts()
 
@@ -88,6 +91,7 @@ class WorkoutProviderImpl : WorkoutProvider {
 
     override suspend fun addTemplateWorkout(newWorkout: Workout) {
         _shouldSaveAsTemplate.value = false
+        _shouldAddTemplate.value = false
         workoutRepo.addTemplateWorkout(newWorkout)
     }
 
@@ -175,7 +179,8 @@ class WorkoutProviderImpl : WorkoutProvider {
     override suspend fun getExerciseHistory(): Flow<List<ExerciseHistoryInfo>> = exerciseHistory
     override suspend fun <T> getPreviousWorkoutState(): T? = null
 
-    override suspend fun <T> addWorkoutState(realmWorkoutState: T) { /* TODO() */ }
+    override suspend fun <T> addWorkoutState(realmWorkoutState: T) { /* TODO() */
+    }
 
     override suspend fun updateTemplateWorkout(
         workoutId: String,

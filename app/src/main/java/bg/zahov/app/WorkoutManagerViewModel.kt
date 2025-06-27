@@ -2,13 +2,16 @@ package bg.zahov.app
 
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
+import bg.zahov.app.data.interfaces.WorkoutActions
 import bg.zahov.app.data.model.WorkoutState
 import bg.zahov.app.data.provider.WorkoutStateManager
 import bg.zahov.app.util.timeToString
+import dagger.hilt.android.lifecycle.HiltViewModel
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.StateFlow
 import kotlinx.coroutines.flow.update
 import kotlinx.coroutines.launch
+import javax.inject.Inject
 
 /**
  * Represents the UI state for the Workout screen.
@@ -34,8 +37,9 @@ data class WorkoutUiState(
  *
  * @property workoutStateManager Provides workout state and actions to modify it.
  */
-class WorkoutManagerViewModel(
-    private val workoutStateManager: WorkoutStateManager = Inject.workoutState,
+@HiltViewModel
+class WorkoutManagerViewModel @Inject constructor(
+    private val workoutStateManager: WorkoutActions,
 ) : ViewModel() {
 
     private val _state = MutableStateFlow(WorkoutUiState())

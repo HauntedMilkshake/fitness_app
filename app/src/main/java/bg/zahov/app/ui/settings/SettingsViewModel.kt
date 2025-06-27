@@ -2,22 +2,21 @@ package bg.zahov.app.ui.settings
 
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
-import bg.zahov.app.Inject
 import bg.zahov.app.data.interfaces.SettingsProvider
-import bg.zahov.app.data.interfaces.UserProvider
 import bg.zahov.app.data.interfaces.WorkoutActions
 import bg.zahov.app.data.model.state.TypeSettings
 import bg.zahov.app.data.provider.UserProviderImpl
+import dagger.hilt.android.lifecycle.HiltViewModel
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.StateFlow
-import kotlinx.coroutines.flow.update
 import kotlinx.coroutines.launch
+import javax.inject.Inject
 
 /**
  * ViewModel for managing app settings.
  *
- * @property repo Provides access to the user's settings via [SettingsProviderImpl].
- * @property auth Manages user authentication and provides user actions via [UserProviderImpl].
+ * @property repo Provides access to the user's settings.
+ * @property auth Manages user authentication and provides user actions.
  * @property workoutState Manages the current workout state, ensuring any ongoing workout is tracked and can be cancelled on user logout or account deletion.
  *
  * This ViewModel handles:
@@ -25,10 +24,11 @@ import kotlinx.coroutines.launch
  * - Logging out the user and resetting their settings.
  * - Deleting the user's account and associated data.
  */
-class SettingsViewModel(
-    private val repo: SettingsProvider = Inject.settingsProvider,
-    private val auth: UserProvider = Inject.userProvider,
-    private val workoutState: WorkoutActions = Inject.workoutState,
+@HiltViewModel
+class SettingsViewModel @Inject constructor(
+    private val repo: SettingsProvider,
+    private val auth: UserProviderImpl,
+    private val workoutState: WorkoutActions,
 ) : ViewModel() {
 
     /**

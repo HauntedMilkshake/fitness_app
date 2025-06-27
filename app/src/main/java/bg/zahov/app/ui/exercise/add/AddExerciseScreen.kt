@@ -27,8 +27,8 @@ import androidx.compose.ui.platform.testTag
 import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.unit.dp
+import androidx.hilt.navigation.compose.hiltViewModel
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
-import androidx.lifecycle.viewmodel.compose.viewModel
 import bg.zahov.app.data.model.BodyPart
 import bg.zahov.app.data.model.Category
 import bg.zahov.app.data.model.FilterItem
@@ -37,7 +37,7 @@ import bg.zahov.app.ui.theme.FitnessTheme
 import bg.zahov.fitness.app.R
 
 @Composable
-fun AddExerciseScreen(navigate: () -> Unit, viewModel: AddExerciseViewModel = viewModel()) {
+fun AddExerciseScreen(navigate: () -> Unit, viewModel: AddExerciseViewModel = hiltViewModel()) {
     val uiState by viewModel.addExerciseData.collectAsStateWithLifecycle()
     val uiDialogState by viewModel.addDialogExerciseData.collectAsStateWithLifecycle()
 
@@ -101,6 +101,7 @@ fun AddExerciseContent(
                     )
                 },
                 onTextChange = { onNameChange(it) },
+                testTagString = "Add Name"
             )
             Row(
                 modifier = Modifier
