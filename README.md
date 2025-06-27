@@ -31,19 +31,23 @@ This is considering the compose version as my concern for the xml version was a 
 This project follows the MVVM (Model-View-ViewModel) architecture to create a clear separation of concerns, which makes the codebase more modular, testable, and maintainable.
 
 > View (UI Layer): Built entirely with Jetpack Compose. The UI observes state changes from the ViewModel via Kotlin Flows and is responsible for rendering the app's visuals. It communicates user events to the ViewModel.
+
 > ViewModel: Contains the presentation logic and exposes UI state. It survives configuration changes and fetches data from the Model layer, ensuring the UI has the data it needs without being aware of the data source.
+
 > Model (Data Layer): Managed by a Repository pattern which acts as a single source of truth. The repository abstracts the data sources
     
 ## Dependency Injection: [Hilt](https://developer.android.com/training/dependency-injection/hilt-android)
 Hilt is used for dependency injection to reduce boilerplate, manage dependency lifecycles, and facilitate easier testing. It's integrated seamlessly with other Jetpack libraries.
 
-> Dependencies are provided to Android components like Activities and ViewModels using annotations like @AndroidEntryPoint and @HiltViewModel.
+> Dependencies are provided to Android components like Activities and ViewModels using annotations like @AndroidEntryPoint and @HiltViewModel
+
 > Custom Hilt Modules (@Module) are used to provide instances of dependencies like Retrofit or database handlers.
 
 
 ## Guiding Principles: [SOLID](https://www.baeldung.com/solid-principles)
 The design of this app strives to adhere to SOLID principles to create a robust and scalable architecture.
 > Single Responsibility Principle: Each class has a distinct responsibility. For instance, the UserRepository is solely responsible for managing user data
+
 > Dependency Inversion Principle: We depend on abstractions, not on concretions. ViewModels depend on repository interfaces rather than their concrete implementations. This, combined with Hilt, allows for easy swapping of implementations, especially for testing (e.g., providing a FakeUserRepository).
 
 # Roadmap
